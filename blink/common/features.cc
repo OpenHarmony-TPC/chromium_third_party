@@ -1202,5 +1202,9 @@ const base::Feature kCompositedCaret{"CompositedCaret",
 const base::Feature kDefaultStyleSheetsEarlyInit{
     "DefaultStyleSheetsEarlyInit", base::FEATURE_DISABLED_BY_DEFAULT};
 
+const base::Feature kDisableArrayBufferSizeLimitsForTesting{
+    "DisableArrayBufferSizeLimitsForTesting",
+    base::FEATURE_DISABLED_BY_DEFAULT};
+
 }  // namespace features
 }  // namespace blink

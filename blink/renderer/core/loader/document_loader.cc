@@ -327,6 +327,7 @@ ASSERT_SIZE(DocumentLoader, SameSizeAsDocumentLoader);
 }  // namespace
 
 DocumentLoader::DocumentLoader(
+    base::PassKey<WebDocumentLoaderImpl>,
     LocalFrame* frame,
     WebNavigationType navigation_type,
     std::unique_ptr<WebNavigationParams> navigation_params,

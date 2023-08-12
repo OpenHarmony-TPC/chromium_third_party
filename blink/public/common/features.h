@@ -593,6 +593,12 @@ BLINK_COMMON_EXPORT extern const base::Feature kCompositedCaret;
 
 BLINK_COMMON_EXPORT extern const base::Feature kDefaultStyleSheetsEarlyInit;
 
+// TODO(https://crbug.com/1201109): temporary flag to disable new ArrayBuffer
+// size limits, so that tests can be written against code receiving these
+// buffers. Remove when the bindings code instituting these limits is removed.
+BLINK_COMMON_EXPORT extern const base::Feature
+    kDisableArrayBufferSizeLimitsForTesting;
+
 }  // namespace features
 }  // namespace blink
 
