@@ -2626,6 +2626,7 @@ void PaintLayerScrollableArea::UpdateNeedsCompositedScrolling(
 }
 
 bool PaintLayerScrollableArea::VisualViewportSuppliesScrollbars() const {
+#if !BUILDFLAG(IS_OHOS)
   LocalFrame* frame = GetLayoutBox()->GetFrame();
   if (!frame || !frame->GetSettings())
     return false;
@@ -2637,6 +2638,9 @@ bool PaintLayerScrollableArea::VisualViewportSuppliesScrollbars() const {
   const TopDocumentRootScrollerController& controller =
       GetLayoutBox()->GetDocument().GetPage()->GlobalRootScrollerController();
   return controller.RootScrollerArea() == this;
+
+#endif
+  return false; 
 }
 
 bool PaintLayerScrollableArea::ScheduleAnimation() {

@@ -379,13 +379,9 @@ Frame* CreateNewWindow(LocalFrame& opener_frame,
 
   gfx::Rect rect = page->GetChromeClient().CalculateWindowRectWithAdjustment(
       window_rect, frame, opener_frame);
-#if BUILDFLAG(IS_OHOS)
-  (void)rect;
-#else
   page->GetChromeClient().Show(opener_frame.GetLocalFrameToken(),
                                request.GetNavigationPolicy(), rect,
                                consumed_user_gesture);
-#endif
   MaybeLogWindowOpen(opener_frame);
   return &frame;
 }

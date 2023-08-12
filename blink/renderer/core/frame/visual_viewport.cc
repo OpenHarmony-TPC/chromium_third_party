@@ -701,8 +701,10 @@ void VisualViewport::UpdateScrollbarLayer(ScrollbarOrientation orientation) {
         cc_orientation, thumb_thickness, scrollbar_margin,
         /*is_left_side_vertical_scrollbar*/ false);
     scrollbar_layer->SetElementId(GetScrollbarElementId(orientation));
+    #if !BUILDFLAG(IS_OHOS)
     scrollbar_layer->SetScrollElementId(scroll_layer_->element_id());
     scrollbar_layer->SetIsDrawable(true);
+    #endif
   }
 
   scrollbar_layer->SetBounds(

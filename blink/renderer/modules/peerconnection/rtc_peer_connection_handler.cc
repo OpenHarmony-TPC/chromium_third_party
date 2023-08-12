@@ -838,6 +838,8 @@ class RTCPeerConnectionHandler::WebRtcSetDescriptionObserverImpl
     if (handler_) {
       handler_->OnModifySctpTransport(std::move(states.sctp_transport_state));
     }
+    // Since OnSessionDescriptionsUpdated can fire events, it may cause
+    // garbage collection. Ensure that handler_ is still valid.
     if (handler_) {
       handler_->OnModifyTransceivers(
           states.signaling_state, std::move(states.transceiver_states),
@@ -1043,6 +1045,10 @@ class RTCPeerConnectionHandler::Observer
           std::move(current_local_description),
           std::move(pending_remote_description),
           std::move(current_remote_description));
+    }
+    // Since OnSessionDescriptionsUpdated can fire events, it may cause
+    // garbage collection. Ensure that handler_ is still valid.
+    if (handler_) {
       handler_->OnIceCandidate(sdp, sdp_mid, sdp_mline_index, component,
                                address_family);
     }
@@ -1156,6 +1162,8 @@ bool RTCPeerConnectionHandler::Initialize(
   CHECK(!initialize_called_);
   initialize_called_ = true;
 
+  // Prevent garbage collection of client_ during processing.
+  auto* client_on_stack = client_;
   peer_connection_tracker_ = PeerConnectionTracker::From(*frame);
 
   configuration_ = server_configuration;
@@ -1191,8 +1199,8 @@ bool RTCPeerConnectionHandler::Initialize(
     peer_connection_tracker_->RegisterPeerConnection(this, configuration_,
                                                      options, frame_);
   }
-
-  return true;
+  // Gratuitous usage of client_on_stack to prevent compiler errors.
+  return !!client_on_stack;
 }
 
 bool RTCPeerConnectionHandler::InitializeForTest(
@@ -2286,9 +2294,11 @@ void RTCPeerConnectionHandler::OnSessionDescriptionsUpdated(
         pending_remote_description,
     std::unique_ptr<webrtc::SessionDescriptionInterface>
         current_remote_description) {
+  // Prevent garbage collection of client_ during processing.
+  auto* client_on_stack = client_;
   if (!client_ || is_closed_)
     return;
-  client_->DidChangeSessionDescriptions(
+  client_on_stack->DidChangeSessionDescriptions(
       pending_local_description
           ? CreateWebKitSessionDescription(pending_local_description.get())
           : nullptr,
@@ -2606,8 +2616,12 @@ void RTCPeerConnectionHandler::OnIceCandidate(const String& sdp,
                                               int sdp_mline_index,
                                               int component,
                                               int address_family) {
+  // In order to ensure that the RTCPeerConnection is not garbage collected
+  // from under the function, we keep a pointer to it on the stack.
+  auto* client_on_stack = client_;
   DCHECK(task_runner_->RunsTasksInCurrentSequence());
   TRACE_EVENT0("webrtc", "RTCPeerConnectionHandler::OnIceCandidateImpl");
+  // This line can cause garbage collection.
   auto* platform_candidate = MakeGarbageCollected<RTCIceCandidatePlatform>(
       sdp, sdp_mid, sdp_mline_index);
   if (peer_connection_tracker_) {
@@ -2627,7 +2641,7 @@ void RTCPeerConnectionHandler::OnIceCandidate(const String& sdp,
     }
   }
   if (!is_closed_)
-    client_->DidGenerateICECandidate(platform_candidate);
+    client_on_stack->DidGenerateICECandidate(platform_candidate);
 }
 
 void RTCPeerConnectionHandler::OnIceCandidateError(
@@ -2639,7 +2653,6 @@ void RTCPeerConnectionHandler::OnIceCandidateError(
     const String& error_text) {
   DCHECK(task_runner_->RunsTasksInCurrentSequence());
   TRACE_EVENT0("webrtc", "RTCPeerConnectionHandler::OnIceCandidateError");
-
   if (peer_connection_tracker_) {
     peer_connection_tracker_->TrackIceCandidateError(
         this, address, port, host_candidate, url, error_code, error_text);

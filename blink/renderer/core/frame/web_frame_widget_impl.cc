@@ -1058,6 +1058,7 @@ void WebFrameWidgetImpl::CancelDrag() {
   if (!doing_drag_and_drop_)
     return;
   GetPage()->GetDragController().DragEnded();
+  current_drag_data_ = nullptr;
   doing_drag_and_drop_ = false;
 }
 
