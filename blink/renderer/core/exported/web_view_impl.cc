@@ -629,7 +629,6 @@ bool WebViewImpl::StartPageScaleAnimation(const gfx::Point& target_position,
   // compositing.
   DCHECK(MainFrameImpl());
   DCHECK(does_composite_);
-
   VisualViewport& visual_viewport = GetPage()->GetVisualViewport();
   gfx::Point clamped_point = target_position;
   if (!use_anchor) {
@@ -1483,6 +1482,11 @@ void WebView::ApplyWebPreferences(const web_pref::WebPreferences& prefs,
 
   settings->SetHideScrollbars(prefs.hide_scrollbars);
 
+#if BUILDFLAG(IS_OHOS)
+  settings->SetVerticalHideScrollbars(prefs.hide_vertical_scrollbars);
+  settings->SetHorizontalHideScrollbars(prefs.hide_horizontal_scrollbars);
+#endif
+
   // Enable gpu-accelerated 2d canvas if requested on the command line.
   RuntimeEnabledFeatures::SetAccelerated2dCanvasEnabled(
       prefs.accelerated_2d_canvas_enabled);
@@ -2075,6 +2079,34 @@ void WebViewImpl::SmoothScroll(int target_x,
   gfx::Point target_position(target_x, target_y);
   StartPageScaleAnimation(target_position, false, PageScaleFactor(), duration);
 }
+
+#if BUILDFLAG(IS_OHOS)
+gfx::PointF WebViewImpl::GetScrollOffset() {
+  DCHECK(MainFrameImpl());
+  DCHECK(MainFrameImpl()->GetFrameView());
+  LocalFrameView* view = MainFrameImpl()->GetFrameView();
+  DCHECK(view->GetScrollableArea());
+  ScrollOffset offset =  view->GetScrollableArea()->GetScrollOffset();
+  return view->GetScrollableArea()->ScrollOffsetToPosition(offset);
+}
+
+float WebViewImpl::GetScrollBottom() {
+  ScrollableArea* root_viewport =
+      MainFrameImpl()->GetFrame()->View()->GetScrollableArea();
+  if (!root_viewport) {
+    return -1.0;
+  }
+  return root_viewport->MaximumScrollOffset().y();
+}
+
+void WebViewImpl::SetScrollOffset(const gfx::PointF point) {
+  DCHECK(MainFrameImpl());
+  DCHECK(MainFrameImpl()->GetFrameView());
+  LocalFrameView* view = MainFrameImpl()->GetFrameView();
+  DCHECK(view->GetScrollableArea());
+  view->GetScrollableArea()->SetScrollOffset(gfx::Vector2dF(point.OffsetFromOrigin()), mojom::blink::ScrollType::kProgrammatic);
+}
+#endif
 
 void WebViewImpl::ComputeScaleAndScrollForEditableElementRects(
     const gfx::Rect& element_bounds_in_document,

@@ -1599,7 +1599,8 @@
     },
     {
       name: "OrientationEvent",
-      status: {"Android": "stable"},
+      // BUILDFLAG(IS_OHOS)
+      status: "stable",
     },
     {
       name: "OriginIsolationHeader",

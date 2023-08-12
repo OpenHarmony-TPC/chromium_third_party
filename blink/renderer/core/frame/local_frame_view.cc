@@ -230,47 +230,13 @@ constexpr int kCommitDelayDefaultInMs = 500;  // 30 frames @ 60hz
 // returning.
 static const unsigned kMaxUpdatePluginsIterations = 2;
 
-#if BUILDFLAG(IS_OHOS)
-void LocalFrameView::SetInitalLayoutRatio() {
-  static double ratio = 0;
-  if (!ratio) {
-    display_manager_adapter_ =
-        OHOS::NWeb::OhosAdapterHelper::GetInstance().CreateDisplayMgrAdapter();
-    if (display_manager_adapter_ == nullptr) {
-      LOG(ERROR) << "display_manager_adapter is nullptr.";
-      return;
-    }
-    std::shared_ptr<OHOS::NWeb::DisplayAdapter> display =
-        display_manager_adapter_->GetDefaultDisplay();
-    if (display == nullptr) {
-      LOG(ERROR) << "display is nullptr.";
-      return;
-    }
-    ratio = display->GetVirtualPixelRatio();
-    if (ratio <= 0) {
-      LOG(ERROR) << "invalid ratio.";
-      ratio = 0;
-      return;
-    }
-    LOG(INFO) << "SetInitalLayoutRatio ratio = " << ratio;
-  }
-  initial_layout_size_ratio_ = ratio;
-}
-#endif
-
 LocalFrameView::LocalFrameView(LocalFrame& frame)
     : LocalFrameView(frame, gfx::Rect()) {
-#if BUILDFLAG(IS_OHOS)
-  SetInitalLayoutRatio();
-#endif
   Show();
 }
 
 LocalFrameView::LocalFrameView(LocalFrame& frame, const gfx::Size& initial_size)
     : LocalFrameView(frame, gfx::Rect(gfx::Point(), initial_size)) {
-#if BUILDFLAG(IS_OHOS)
-  SetInitalLayoutRatio();
-#endif
   SetLayoutSizeInternal(initial_size);
   Show();
 }
@@ -331,9 +297,6 @@ LocalFrameView::LocalFrameView(LocalFrame& frame, gfx::Rect frame_rect)
       is_updating_layout_(false)
 #endif
 {
-#if BUILDFLAG(IS_OHOS)
-  SetInitalLayoutRatio();
-#endif
   // Propagate the marginwidth/height and scrolling modes to the view.
   if (frame_->Owner() && frame_->Owner()->ScrollbarMode() ==
                              mojom::blink::ScrollbarMode::kAlwaysOff)
@@ -1411,12 +1374,7 @@ void LocalFrameView::SetLayoutSize(const gfx::Size& size) {
       frame_->GetDocument()->Lifecycle().LifecyclePostponed())
     return;
 
-#if BUILDFLAG(IS_OHOS)
-  SetLayoutSizeInternal(gfx::Size(size.width() / initial_layout_size_ratio_,
-                                  size.height() / initial_layout_size_ratio_));
-#else
   SetLayoutSizeInternal(size);
-#endif
 }
 
 void LocalFrameView::SetLayoutSizeFixedToFrameSize(bool is_fixed) {

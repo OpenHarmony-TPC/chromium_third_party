@@ -80,6 +80,10 @@ WebPreferences::WebPreferences()
       privileged_webgl_extensions_enabled(false),
       webgl_errors_to_console_enabled(true),
       hide_scrollbars(false),
+#if BUILDFLAG(IS_OHOS)
+      hide_vertical_scrollbars(false),
+      hide_horizontal_scrollbars(false),
+#endif
       accelerated_2d_canvas_enabled(false),
       new_canvas_2d_api_enabled(false),
       antialiased_2d_canvas_disabled(false),
@@ -127,7 +131,11 @@ WebPreferences::WebPreferences()
 #if defined(OS_ANDROID) || BUILDFLAG(IS_OHOS)
       viewport_meta_enabled(true),
       shrinks_viewport_contents_to_fit(true),
+#if BUILDFLAG(IS_OHOS)
+      viewport_style(mojom::ViewportStyle::kDefault),
+#else
       viewport_style(mojom::ViewportStyle::kMobile),
+#endif
       always_show_context_menu_on_touch(false),
       smooth_scroll_for_find_enabled(true),
       main_frame_resizes_are_orientation_changes(true),
@@ -198,8 +206,8 @@ WebPreferences::WebPreferences()
       default_minimum_page_scale_factor(1.f),
       default_maximum_page_scale_factor(3.f),
 #elif BUILDFLAG(IS_OHOS)
-      default_minimum_page_scale_factor(2.f),
-      default_maximum_page_scale_factor(4.f),
+      default_minimum_page_scale_factor(0.25f),
+      default_maximum_page_scale_factor(2.f),
 #else
       default_minimum_page_scale_factor(1.f),
       default_maximum_page_scale_factor(4.f),
@@ -225,28 +233,6 @@ WebPreferences::WebPreferences()
   sans_serif_font_family_map[web_pref::kCommonScript] = u"Arial";
   cursive_font_family_map[web_pref::kCommonScript] = u"Script";
   fantasy_font_family_map[web_pref::kCommonScript] = u"Impact";
-
-#if BUILDFLAG(IS_OHOS)
-  std::unique_ptr<OHOS::NWeb::DisplayManagerAdapter> display_manager_adapter =
-      OHOS::NWeb::OhosAdapterHelper::GetInstance().CreateDisplayMgrAdapter();
-  if (display_manager_adapter == nullptr) {
-    LOG(ERROR) << "display_manager_adapter is nullptr.";
-    return;
-  }
-  std::shared_ptr<OHOS::NWeb::DisplayAdapter> display =
-      display_manager_adapter->GetDefaultDisplay();
-  if (display == nullptr) {
-    LOG(ERROR) << "display is nullptr.";
-    return;
-  }
-  float ratio = display->GetVirtualPixelRatio();
-  if (ratio <= 0.0f) {
-    LOG(ERROR) << "get virtual pixel ratio error.";
-    return;
-  }
-  default_minimum_page_scale_factor = ratio;
-  default_maximum_page_scale_factor = ratio * 2;
-#endif
 }
 
 WebPreferences::WebPreferences(const WebPreferences& other) = default;

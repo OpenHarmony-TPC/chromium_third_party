@@ -147,7 +147,8 @@ TEST_F(FrameLoaderTest, PolicyContainerIsStoredOnCommitNavigation) {
   EXPECT_EQ(*mojom::blink::PolicyContainerPolicies::New(
                 network::mojom::ReferrerPolicy::kAlways,
                 network::mojom::IPAddressSpace::kPublic,
-                Vector<network::mojom::blink::ContentSecurityPolicyPtr>()),
+                Vector<network::mojom::blink::ContentSecurityPolicyPtr>(),
+                /*can_navigate_top_without_user_gesture=*/true),
             local_frame->DomWindow()->GetPolicyContainer()->GetPolicies());
 }
 

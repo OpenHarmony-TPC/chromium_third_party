@@ -122,6 +122,10 @@ class CORE_EXPORT WebSettingsImpl final : public WebSettings {
   void SetMinimumFontSize(int) override;
   void SetMinimumLogicalFontSize(int) override;
   void SetHideScrollbars(bool) override;
+#if BUILDFLAG(IS_OHOS)
+  void SetVerticalHideScrollbars(bool) override;
+  void SetHorizontalHideScrollbars(bool) override;
+#endif
   void SetPasswordEchoDurationInSeconds(double) override;
   void SetPasswordEchoEnabled(bool) override;
   void SetPluginsEnabled(bool) override;

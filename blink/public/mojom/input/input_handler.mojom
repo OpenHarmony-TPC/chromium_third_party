@@ -425,7 +425,10 @@ interface WidgetInputHandler {
          TouchActionOptional? touch_action);
 
   [EnableIf=is_ohos]
-  StartFling();
+  TryStartFling();
+
+  [EnableIf=is_ohos]
+  TryFinishFling();
 
   // Sends a non-blocking input event to the render widget. The behaviour
   // of this API is the same as DispatchEvent just that there is no callback

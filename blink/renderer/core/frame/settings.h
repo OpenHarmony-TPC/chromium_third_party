@@ -67,6 +67,21 @@ class CORE_EXPORT Settings {
 
   SETTINGS_GETTERS_AND_SETTERS
 
+#if BUILDFLAG(IS_OHOS)
+  void SetVerticalHideScrollbars(bool hide_vertical_scrollbars) {
+    hide_vertical_scrollbars_ = hide_vertical_scrollbars;
+  }
+  void SetHorizontalHideScrollbars(bool hide_horizontal_scrollbars) {
+    hide_horizontal_scrollbars_ = hide_horizontal_scrollbars;
+  }
+  bool GetVerticalHideScrollbars() {
+    return hide_vertical_scrollbars_;
+  }
+  bool GetHorizontalHideScrollbars() {
+    return hide_horizontal_scrollbars_;
+  }
+#endif
+
   void SetDelegate(SettingsDelegate*);
 
  private:
@@ -77,6 +92,11 @@ class CORE_EXPORT Settings {
   GenericFontFamilySettings generic_font_family_settings_;
 
   SETTINGS_MEMBER_VARIABLES
+
+#if BUILDFLAG(IS_OHOS)
+  bool hide_vertical_scrollbars_ = true;
+  bool hide_horizontal_scrollbars_ = true;
+#endif
 };
 
 }  // namespace blink

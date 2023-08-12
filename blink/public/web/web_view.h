@@ -470,6 +470,12 @@ class WebView {
   // Returns whether this WebView represents a fenced frame root or not.
   virtual bool IsFencedFrameRoot() const = 0;
 
+#if BUILDFLAG(IS_OHOS)
+  virtual gfx::PointF GetScrollOffset() = 0;
+  virtual float GetScrollBottom() = 0;
+  virtual void SetScrollOffset(const gfx::PointF point) = 0;
+#endif
+
   // Misc -------------------------------------------------------------
 
   // Returns the number of live WebView instances in this process.

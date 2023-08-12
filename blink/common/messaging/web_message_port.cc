@@ -4,6 +4,7 @@
 
 #include "third_party/blink/public/common/messaging/web_message_port.h"
 
+#include "base/logging.h"
 #include "base/memory/ptr_util.h"
 #include "third_party/blink/public/common/messaging/message_port_channel.h"
 #include "third_party/blink/public/common/messaging/string_message_codec.h"
@@ -21,6 +22,11 @@ WebMessagePort::Message& WebMessagePort::Message::operator=(Message&&) =
 WebMessagePort::Message::~Message() = default;
 
 WebMessagePort::Message::Message(const std::u16string& data) : data(data) {}
+
+#if BUILDFLAG(IS_OHOS)
+WebMessagePort::Message::Message(std::vector<uint8_t> array_buffer)
+    : array_buffer(std::move(array_buffer)) {}
+#endif
 
 WebMessagePort::Message::Message(std::vector<WebMessagePort> ports)
     : ports(std::move(ports)) {}
@@ -152,11 +158,12 @@ bool WebMessagePort::PostMessage(Message&& message) {
   // Build the message.
   // TODO(chrisha): Finally kill off MessagePortChannel, once
   // MessagePortDescriptor more thoroughly plays that role.
-  blink::TransferableMessage transferable_message;
-  transferable_message.owned_encoded_message =
-      blink::EncodeStringMessage(message.data);
-  transferable_message.encoded_message =
-      transferable_message.owned_encoded_message;
+  blink::TransferableMessage transferable_message =
+    blink::EncodeWebMessagePayload(
+    message.array_buffer.size() != 0 ?
+    WebMessagePayload(std::move(message.array_buffer)) :
+    WebMessagePayload(std::move(message.data)));
+
   transferable_message.ports =
       blink::MessagePortChannel::CreateFromHandles(std::move(ports));
 
@@ -228,9 +235,20 @@ bool WebMessagePort::Accept(mojo::Message* mojo_message) {
 
   // Decode the string portion of the message.
   Message message;
-  if (!blink::DecodeStringMessage(transferable_message.encoded_message,
-                                  &message.data)) {
-    return false;
+  absl::optional<WebMessagePayload> optional_payload =
+      blink::DecodeToWebMessagePayload(transferable_message);
+  if (!optional_payload) {
+    LOG(ERROR) << "WebMessagePort::Accept DecodeToWebMessagePayload failed";
+    return true;
+  }
+  auto& payload = optional_payload.value();
+  if (auto* str = absl::get_if<std::u16string>(&payload)) {
+    message.data = std::move(*str);
+  } else if (auto* array_buffer = absl::get_if<std::vector<uint8_t>>(&payload)) {
+    message.array_buffer = std::move(*array_buffer);
+  } else {
+    LOG(INFO) << "WebMessagePort::Accept Get string or arraybuffer failed";
+    return true;
   }
 
   // Convert raw handles to MessagePorts.

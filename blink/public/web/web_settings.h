@@ -171,6 +171,10 @@ class WebSettings {
   virtual void SetMinimumFontSize(int) = 0;
   virtual void SetMinimumLogicalFontSize(int) = 0;
   virtual void SetHideScrollbars(bool) = 0;
+#if BUILDFLAG(IS_OHOS)
+  virtual void SetVerticalHideScrollbars(bool) = 0;
+  virtual void SetHorizontalHideScrollbars(bool) = 0;
+#endif
   virtual void SetPasswordEchoDurationInSeconds(double) = 0;
   virtual void SetPasswordEchoEnabled(bool) = 0;
   virtual void SetPluginsEnabled(bool) = 0;

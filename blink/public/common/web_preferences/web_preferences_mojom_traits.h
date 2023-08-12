@@ -771,6 +771,16 @@ struct BLINK_COMMON_EXPORT StructTraits<blink::mojom::WebPreferencesDataView,
     return r.pinch_smooth_mode;
   }
 
+#if BUILDFLAG(IS_OHOS)
+  static bool hide_vertical_scrollbars(const blink::web_pref::WebPreferences& r) {
+    return r.hide_vertical_scrollbars;
+  }
+
+  static bool hide_horizontal_scrollbars(const blink::web_pref::WebPreferences& r) {
+    return r.hide_horizontal_scrollbars;
+  }
+#endif
+
   static bool Read(blink::mojom::WebPreferencesDataView r,
                    blink::web_pref::WebPreferences* out);
 };

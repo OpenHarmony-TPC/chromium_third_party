@@ -463,6 +463,16 @@ void WebSettingsImpl::SetHideScrollbars(bool enabled) {
   dev_tools_emulator_->SetHideScrollbars(enabled);
 }
 
+#if BUILDFLAG(IS_OHOS)
+void WebSettingsImpl::SetVerticalHideScrollbars(bool enabled) {
+  settings_->SetVerticalHideScrollbars(enabled);
+}
+
+void WebSettingsImpl::SetHorizontalHideScrollbars(bool enabled) {
+  settings_->SetHorizontalHideScrollbars(enabled);
+}
+#endif
+
 void WebSettingsImpl::SetMockGestureTapHighlightsEnabled(bool enabled) {
   settings_->SetMockGestureTapHighlightsEnabled(enabled);
 }

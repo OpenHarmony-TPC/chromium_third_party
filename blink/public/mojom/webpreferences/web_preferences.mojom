@@ -150,6 +150,8 @@ struct WebPreferences {
   bool privileged_webgl_extensions_enabled;
   bool webgl_errors_to_console_enabled;
   bool hide_scrollbars;
+  bool hide_vertical_scrollbars;
+  bool hide_horizontal_scrollbars;
   bool accelerated_2d_canvas_enabled;
   bool canvas_context_lost_in_background_enabled;
   bool new_canvas_2d_api_enabled;

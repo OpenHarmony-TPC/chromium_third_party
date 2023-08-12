@@ -1305,6 +1305,7 @@ bool FocusController::SetFocusedElement(Element* element,
     SetFocusedFrame(nullptr);
     return false;
   }
+
   SetFocusedFrame(new_focused_frame);
 
   if (new_document) {

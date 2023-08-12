@@ -151,8 +151,12 @@ void WidgetInputHandlerImpl::DispatchEvent(
 }
 
 #if BUILDFLAG(IS_OHOS)
-void WidgetInputHandlerImpl::StartFling() {
-  soc_perf::SocPerUtil::ApplySocConfig();
+void WidgetInputHandlerImpl::TryStartFling() {
+  soc_perf::SocPerUtil::EnableFlingBoost();
+}
+
+void WidgetInputHandlerImpl::TryFinishFling() {
+  soc_perf::SocPerUtil::DisableFlingBoost();
 }
 #endif
 

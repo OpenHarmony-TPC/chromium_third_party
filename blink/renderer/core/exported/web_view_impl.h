@@ -591,6 +591,12 @@ class CORE_EXPORT WebViewImpl final : public WebView,
   // words, after the frame has painted something.
   void DidFirstVisuallyNonEmptyPaint();
 
+#if BUILDFLAG(IS_OHOS)
+  gfx::PointF GetScrollOffset() override;
+  float GetScrollBottom() override;
+  void SetScrollOffset(const gfx::PointF point) override;
+#endif
+
  private:
   FRIEND_TEST_ALL_PREFIXES(WebFrameTest, DivScrollIntoEditableTest);
   FRIEND_TEST_ALL_PREFIXES(WebFrameTest,

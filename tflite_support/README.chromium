@@ -35,6 +35,7 @@ is a no-op in chromium builds and upsets clang.
 only available on POSIX systems.
 11) Run clang-format.
 12) Remove an unneeded static initializer.
+13) Remove whitespace tokenizer since it uses the unsafe function `chartorune`.
 
 Update Process:
 1) Clone the tflite-support github repo at the desired commit into src/

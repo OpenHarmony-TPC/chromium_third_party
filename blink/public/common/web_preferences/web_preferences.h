@@ -94,6 +94,10 @@ struct BLINK_COMMON_EXPORT WebPreferences {
   bool privileged_webgl_extensions_enabled;
   bool webgl_errors_to_console_enabled;
   bool hide_scrollbars;
+#if BUILDFLAG(IS_OHOS)
+  bool hide_vertical_scrollbars;
+  bool hide_horizontal_scrollbars;
+#endif
   bool accelerated_2d_canvas_enabled;
   bool canvas_2d_layers_enabled = false;
   bool canvas_context_lost_in_background_enabled = false;

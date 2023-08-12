@@ -11,6 +11,8 @@
 #include "third_party/blink/renderer/platform/fonts/linux/font_unique_name_lookup_linux.h"
 #elif defined(OS_WIN)
 #include "third_party/blink/renderer/platform/fonts/win/font_unique_name_lookup_win.h"
+#elif BUILDFLAG(IS_OHOS)
+#include "third_party/blink/renderer/platform/fonts/ohos/font_unique_name_lookup_ohos.h"
 #endif
 
 namespace blink {
@@ -26,6 +28,8 @@ FontUniqueNameLookup::GetPlatformUniqueNameLookup() {
   return std::make_unique<FontUniqueNameLookupLinux>();
 #elif defined(OS_WIN)
   return std::make_unique<FontUniqueNameLookupWin>();
+#elif BUILDFLAG(IS_OHOS)
+  return std::make_unique<FontUniqueNameLookupOhos>();
 #else
   return nullptr;
 #endif

@@ -62,7 +62,8 @@ class WidgetInputHandlerImpl : public mojom::blink::WidgetInputHandler {
   void DispatchEvent(std::unique_ptr<WebCoalescedInputEvent>,
                      DispatchEventCallback callback) override;
 #if BUILDFLAG(IS_OHOS)
-  void StartFling() override;
+  void TryStartFling() override;
+  void TryFinishFling() override;
 #endif
   void DispatchNonBlockingEvent(
       std::unique_ptr<WebCoalescedInputEvent>) override;

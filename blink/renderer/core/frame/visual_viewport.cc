@@ -644,11 +644,23 @@ void VisualViewport::InitializeScrollbars() {
 
   scrollbar_layer_horizontal_ = nullptr;
   scrollbar_layer_vertical_ = nullptr;
+#if BUILDFLAG(IS_OHOS)
+  if (VisualViewportSuppliesScrollbars() &&
+      !GetPage().GetSettings().GetHideScrollbars()) {
+    if (!GetPage().GetSettings().GetVerticalHideScrollbars()) {
+      UpdateScrollbarLayer(kVerticalScrollbar);
+    }
+    if (!GetPage().GetSettings().GetHorizontalHideScrollbars()) {
+      UpdateScrollbarLayer(kHorizontalScrollbar);
+    }
+  }
+#else
   if (VisualViewportSuppliesScrollbars() &&
       !GetPage().GetSettings().GetHideScrollbars()) {
     UpdateScrollbarLayer(kHorizontalScrollbar);
     UpdateScrollbarLayer(kVerticalScrollbar);
   }
+#endif
 
   // Ensure existing LocalFrameView scrollbars are removed if the visual
   // viewport scrollbars are now supplied, or created if the visual viewport no
@@ -1134,7 +1146,32 @@ void VisualViewport::Paint(GraphicsContext& context) const {
                        DisplayItem::kForeignLayerViewportScroll, scroll_layer_,
                        gfx::Point(), &state);
   }
+#if BUILDFLAG(IS_OHOS)
+  if (scrollbar_layer_horizontal_ && !GetPage().GetSettings().GetHorizontalHideScrollbars()) {
+    auto state = parent_property_tree_state_;
+    state.SetEffect(*horizontal_scrollbar_effect_node_);
+    DEFINE_STATIC_LOCAL(Persistent<LiteralDebugNameClient>, debug_name_client,
+                        (MakeGarbageCollected<LiteralDebugNameClient>(
+                            "Inner Viewport Horizontal Scrollbar")));
+    RecordForeignLayer(context, *debug_name_client,
+                       DisplayItem::kForeignLayerViewportScrollbar,
+                       scrollbar_layer_horizontal_,
+                       gfx::Point(0, size_.height() - ScrollbarThickness()),
+                       &state);
+  }
 
+  if (scrollbar_layer_vertical_ && !GetPage().GetSettings().GetVerticalHideScrollbars()) {
+    auto state = parent_property_tree_state_;
+    state.SetEffect(*vertical_scrollbar_effect_node_);
+    DEFINE_STATIC_LOCAL(Persistent<LiteralDebugNameClient>, debug_name_client,
+                        (MakeGarbageCollected<LiteralDebugNameClient>(
+                            "Inner Viewport Vertical Scrollbar")));
+    RecordForeignLayer(
+        context, *debug_name_client,
+        DisplayItem::kForeignLayerViewportScrollbar, scrollbar_layer_vertical_,
+        gfx::Point(size_.width() - ScrollbarThickness(), 0), &state);
+  }
+#else
   if (scrollbar_layer_horizontal_) {
     auto state = parent_property_tree_state_;
     state.SetEffect(*horizontal_scrollbar_effect_node_);
@@ -1159,6 +1196,7 @@ void VisualViewport::Paint(GraphicsContext& context) const {
         DisplayItem::kForeignLayerViewportScrollbar, scrollbar_layer_vertical_,
         gfx::Point(size_.width() - ScrollbarThickness(), 0), &state);
   }
+#endif
 }
 
 }  // namespace blink

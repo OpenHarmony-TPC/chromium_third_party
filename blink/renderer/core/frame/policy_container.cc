@@ -37,7 +37,8 @@ std::unique_ptr<PolicyContainer> PolicyContainer::CreateFromWebPolicyContainer(
           container->policies.referrer_policy,
           container->policies.ip_address_space,
           ConvertToMojoBlink(
-              std::move(container->policies.content_security_policies)));
+              std::move(container->policies.content_security_policies)),
+          container->policies.can_navigate_top_without_user_gesture);
   return std::make_unique<PolicyContainer>(std::move(container->remote),
                                            std::move(policies));
 }

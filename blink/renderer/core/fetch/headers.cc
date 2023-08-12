@@ -96,7 +96,7 @@ void Headers::append(const String& name,
   }
   // "4. Otherwise, if guard is |request| and |name| is a forbidden header
   //     name, return."
-  if (guard_ == kRequestGuard && cors::IsForbiddenHeaderName(name))
+  if (guard_ == kRequestGuard && cors::IsForbiddenRequestHeader(name, value))
     return;
   // 5. Otherwise, if guard is |request-no-cors|:
   if (guard_ == kRequestNoCorsGuard) {
@@ -145,9 +145,9 @@ void Headers::remove(const String& name, ExceptionState& exception_state) {
     exception_state.ThrowTypeError("Headers are immutable");
     return;
   }
-  // "3. Otherwise, if guard is |request| and |name| is a forbidden header
-  //     name, return."
-  if (guard_ == kRequestGuard && cors::IsForbiddenHeaderName(name))
+  // "3. Otherwise, if guard is |request| and (|name|, '') is a forbidden
+  //     request header, return."
+  if (guard_ == kRequestGuard && cors::IsForbiddenRequestHeader(name, ""))
     return;
   // "4. Otherwise, if the context object’s guard is |request-no-cors|, |name|
   //     is not a no-CORS-safelisted request-header name, and |name| is not a
@@ -222,9 +222,9 @@ void Headers::set(const String& name,
     exception_state.ThrowTypeError("Headers are immutable");
     return;
   }
-  // "4. Otherwise, if guard is |request| and |name| is a forbidden header
-  //     name, return."
-  if (guard_ == kRequestGuard && cors::IsForbiddenHeaderName(name))
+  // "4. Otherwise, if guard is |request| and (|name|, |value|) is a forbidden
+  //     request header, return."
+  if (guard_ == kRequestGuard && cors::IsForbiddenRequestHeader(name, value))
     return;
   // "5. Otherwise, if guard is |request-no-CORS| and |name|/|value| is not a
   //     no-CORS-safelisted header, return."

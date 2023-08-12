@@ -242,6 +242,11 @@ bool IsFencedFramesMPArchBased() {
          blink::features::FencedFramesImplementationType::kMPArch;
 }
 
+bool IsFencedFramesShadowDOMBased() {
+  return blink::features::kFencedFramesImplementationTypeParam.Get() ==
+         blink::features::FencedFramesImplementationType::kShadowDOM;
+}
+
 const base::Feature kInitialNavigationEntry{"InitialNavigationEntry",
                                             base::FEATURE_DISABLED_BY_DEFAULT};
 
@@ -460,7 +465,13 @@ const base::Feature kWebFontsCacheAwareTimeoutAdaption {
 // Enabled to block programmatic focus in subframes when not triggered by user
 // activation (see htpps://crbug.com/954349).
 const base::Feature kBlockingFocusWithoutUserActivation{
-    "BlockingFocusWithoutUserActivation", base::FEATURE_DISABLED_BY_DEFAULT};
+    "BlockingFocusWithoutUserActivation",
+#if defined(OS_OHOS)
+        base::FEATURE_ENABLED_BY_DEFAULT
+#else
+        base::FEATURE_DISABLED_BY_DEFAULT
+#endif
+};
 
 // A server-side switch for the REALTIME_AUDIO thread priority of
 // RealtimeAudioWorkletThread object. This can be controlled by a field trial,

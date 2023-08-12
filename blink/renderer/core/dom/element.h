@@ -690,6 +690,11 @@ class CORE_EXPORT Element : public ContainerNode, public Animatable {
   // delegatesFocus flag.
   bool DelegatesFocus() const;
   Element* GetFocusableArea() const;
+  // Element focus function called through IDL (i.e. element.focus() in JS)
+  // Delegates to Focus() with focus type set to kScript
+  void focusForBindings(const FocusOptions*);
+  // Element focus function called from outside IDL (user focus,
+  // accessibility, etc...)
   virtual void focus(const FocusParams&);
   void focus();
   void focus(const FocusOptions*);

@@ -20,6 +20,7 @@ struct WebPolicyContainerPolicies {
   network::mojom::ReferrerPolicy referrer_policy;
   network::mojom::IPAddressSpace ip_address_space;
   WebVector<WebContentSecurityPolicy> content_security_policies;
+  bool can_navigate_top_without_user_gesture = true;
 };
 
 // TODO(antoniosartori): Remove this when CommitNavigation IPC will be handled

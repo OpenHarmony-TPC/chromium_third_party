@@ -143,9 +143,6 @@
 #include "third_party/blink/renderer/platform/wtf/cross_thread_functional.h"
 #include "ui/display/screen_info.h"
 #include "v8/include/v8.h"
-#if BUILDFLAG(IS_OHOS)
-#include "ohos_adapter_helper.h"
-#endif
 namespace blink {
 
 namespace {
@@ -1599,35 +1596,10 @@ ScriptPromise LocalDOMWindow::getComputedAccessibleNode(
 }
 
 double LocalDOMWindow::devicePixelRatio() const {
-#if BUILDFLAG(IS_OHOS)
-  static double ratio = 0;
-  if (!ratio) {
-    auto display_manager_adapter =
-        OHOS::NWeb::OhosAdapterHelper::GetInstance().CreateDisplayMgrAdapter();
-    if (display_manager_adapter == nullptr) {
-      LOG(ERROR) << "display_manager_adapter is nullptr.";
-      return 0.0;
-    }
-    auto display = display_manager_adapter->GetDefaultDisplay();
-    if (display == nullptr) {
-      LOG(ERROR) << "display is nullptr.";
-      return 0.0;
-    }
-    ratio = display->GetVirtualPixelRatio();
-    if (ratio <= 0) {
-      LOG(ERROR) << "invalid ratio, ratio = " << ratio;
-      ratio = 0;
-      return 0.0;
-    }
-  }
-
-  return ratio;
-#else
   if (!GetFrame())
     return 0.0;
 
   return GetFrame()->DevicePixelRatio();
-#endif
 }
 
 void LocalDOMWindow::scrollBy(double x, double y) const {

@@ -200,7 +200,6 @@ sk_sp<SkTypeface> FontCache::CreateTypeface(
     std::string& name) {
 #if !defined(OS_WIN) && !defined(OS_ANDROID) && !defined(OS_FUCHSIA)
   // TODO(fuchsia): Revisit this and other font code for Fuchsia.
-
   if (creation_params.CreationType() == kCreateFontByFciIdAndTtcIndex) {
     if (Platform::Current()->GetSandboxSupport()) {
       return SkTypeface_Factory::FromFontConfigInterfaceIdAndTtcIndex(
@@ -242,6 +241,7 @@ sk_sp<SkTypeface> FontCache::CreateTypeface(
   // the embedder provided font Manager rather than calling
   // SkTypeface::CreateFromName which may redirect the call to the default font
   // Manager.  On Windows the font manager is always present.
+  
   if (font_manager_) {
     auto tf = sk_sp<SkTypeface>(font_manager_->matchFamilyStyle(
         name.c_str(), font_description.SkiaFontStyle()));
@@ -264,7 +264,7 @@ std::unique_ptr<FontPlatformData> FontCache::CreateFontPlatformData(
   std::string name;
 
   sk_sp<SkTypeface> typeface;
-#if defined(OS_ANDROID) || defined(OS_LINUX) || defined(OS_CHROMEOS)
+#if defined(OS_ANDROID) || defined(OS_LINUX) || defined(OS_CHROMEOS) || defined(OS_OHOS)
   bool noto_color_emoji_from_gmscore = false;
 #if defined(OS_ANDROID)
   // Use the unique local matching pathway for fetching Noto Color Emoji Compat

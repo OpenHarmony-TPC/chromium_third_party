@@ -334,10 +334,12 @@ void Frame::RenderFallbackContentWithResourceTiming(
 }
 
 bool Frame::IsInFencedFrameTree() const {
-  if (!blink::features::IsFencedFramesEnabled())
+  DCHECK(!IsDetached());
+  const auto& ff_impl = GetPage()->FencedFramesImplementationType();
+  if (!ff_impl)
     return false;
 
-  switch (blink::features::kFencedFramesImplementationTypeParam.Get()) {
+  switch (ff_impl.value()) {
     case blink::features::FencedFramesImplementationType::kMPArch:
       return GetPage()->IsMainFrameFencedFrameRoot();
     case blink::features::FencedFramesImplementationType::kShadowDOM:
@@ -580,6 +582,38 @@ Frame* Frame::FirstChild(FrameTreeBoundary frame_tree_boundary) const {
     return nullptr;
   }
   return first_child_;
+}
+
+bool Frame::FocusCrossesFencedBoundary() {
+  DCHECK(blink::features::IsFencedFramesShadowDOMBased());
+
+  if (Frame* focused_frame = GetPage()->GetFocusController().FocusedFrame()) {
+    if (!focused_frame->IsInFencedFrameTree() && !IsInFencedFrameTree())
+      return false;
+
+    return Tree().Top(FrameTreeBoundary::kFenced) !=
+           focused_frame->Tree().Top(FrameTreeBoundary::kFenced);
+  }
+
+  return false;
+}
+
+bool Frame::AllowFocusWithoutUserActivation() {
+  const auto& ff_impl = GetPage()->FencedFramesImplementationType();
+  if (!ff_impl)
+    return true;
+
+  switch (ff_impl.value()) {
+    case blink::features::FencedFramesImplementationType::kMPArch:
+      // For a newly-loaded page, no page will have focus. We allow a non-fenced
+      // frame to get the first focus before enforcing if a page already has
+      // focus.
+      return (!GetPage()->GetFocusController().IsActive() &&
+              !IsInFencedFrameTree()) ||
+             GetPage()->GetFocusController().IsFocused();
+    case blink::features::FencedFramesImplementationType::kShadowDOM:
+      return !FocusCrossesFencedBoundary();
+  }
 }
 
 bool Frame::Swap(WebFrame* new_web_frame) {

@@ -64,6 +64,16 @@ UntrustworthyContextMenuParams ContextMenuParamsBuilder::Build(
   params.suggested_filename = base::UTF8ToUTF16(data.suggested_filename);
   params.input_field_type = data.input_field_type;
   params.opened_from_highlight = data.opened_from_highlight;
+#if BUILDFLAG(IS_OHOS)
+  params.source_type = static_cast<ui::MenuSourceType>(data.source_type);
+
+  LOG(DEBUG) << "ContextMenuParamsBuilder::Build [params] "
+    << "is_editable = " << params.is_editable
+    << ", edit_flags = " << params.edit_flags
+    << ", input_field_type = " << params.input_field_type
+    << ", source_type = " << params.source_type
+    << ", media_type = " << params.media_type;
+#endif
 
   for (const auto& suggestion : data.dictionary_suggestions)
     params.dictionary_suggestions.push_back(suggestion);

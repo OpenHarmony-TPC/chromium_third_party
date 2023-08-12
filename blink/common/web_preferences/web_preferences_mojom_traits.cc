@@ -94,6 +94,10 @@ bool StructTraits<blink::mojom::WebPreferencesDataView,
       data.privileged_webgl_extensions_enabled();
   out->webgl_errors_to_console_enabled = data.webgl_errors_to_console_enabled();
   out->hide_scrollbars = data.hide_scrollbars();
+#if BUILDFLAG(IS_OHOS)
+  out->hide_vertical_scrollbars = data.hide_vertical_scrollbars();
+  out->hide_horizontal_scrollbars = data.hide_horizontal_scrollbars();
+#endif
   out->accelerated_2d_canvas_enabled = data.accelerated_2d_canvas_enabled();
   out->new_canvas_2d_api_enabled = data.new_canvas_2d_api_enabled();
   out->canvas_2d_layers_enabled = data.canvas_2d_layers_enabled();
