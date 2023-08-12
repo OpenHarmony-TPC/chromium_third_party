@@ -266,7 +266,7 @@ WebFontRenderStyle FontPlatformData::QuerySystemRenderStyle(
     SkFontStyle font_style) {
   WebFontRenderStyle result;
 
-#if !defined(OS_ANDROID) && !defined(OS_FUCHSIA)
+#if !defined(OS_ANDROID) && !defined(OS_FUCHSIA) && !BUILDFLAG(IS_OHOS)
   // If the font name is missing (i.e. probably a web font) or the sandbox is
   // disabled, use the system defaults.
   if (family.length() && Platform::Current()->GetSandboxSupport()) {

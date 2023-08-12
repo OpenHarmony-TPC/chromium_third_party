@@ -1751,6 +1751,10 @@ component("platform") {
     ]
   }
 
+  if (is_ohos) {
+    sources += [ "fonts/android/font_cache_android.cc" ]
+  }
+
   if (is_android) {
     sources += [
       "fonts/android/font_cache_android.cc",
@@ -1827,6 +1831,12 @@ component("platform") {
 
   configs -= [ "//build/config/compiler:default_symbols" ]
   configs += blink_symbols_config
+
+  #ifdef OHOS_NWEB_EX
+  if (ohos_nweb_ex_config_name != "") {
+    configs -= [ "//build/config:ohos_nweb_ex_def_main" ]
+    configs += [ "//build/config:ohos_nweb_ex_def_blink" ]
+  }  #endif  // OHOS_NWEB_EX
 }
 
 static_library("test_support") {
@@ -1902,7 +1912,7 @@ static_library("test_support") {
   ]
 
   # fuzzed_data_provider may not work with a custom toolchain.
-  if (custom_toolchain == "" && is_clang) {
+  if (custom_toolchain == "" && is_clang && !is_ohos) {
     sources += [
       "testing/fuzzed_data_provider.cc",
       "testing/fuzzed_data_provider.h",

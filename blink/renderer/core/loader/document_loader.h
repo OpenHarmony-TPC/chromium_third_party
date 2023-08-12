@@ -371,6 +371,9 @@ class CORE_EXPORT DocumentLoader : public GarbageCollected<DocumentLoader>,
   const absl::optional<Vector<KURL>>& AdAuctionComponents() const {
     return ad_auction_components_;
   }
+#if BUILDFLAG(IS_OHOS)
+  scoped_refptr<const SharedBuffer> OnGetImageFromCache(const WTF::String& url);
+#endif
 
  protected:
   // Based on its MIME type, if the main document's response corresponds to an

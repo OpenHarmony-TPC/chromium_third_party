@@ -52,6 +52,10 @@
 #include "third_party/blink/renderer/core/html/html_image_element.h"
 #include "third_party/blink/renderer/platform/loader/fetch/resource_fetcher.h"
 
+#if BUILDFLAG(IS_OHOS)
+#include "base/trace_event/trace_event.h"
+#endif
+
 namespace blink {
 
 bool ClipboardCommands::CanReadClipboard(LocalFrame& frame,
@@ -473,6 +477,9 @@ bool ClipboardCommands::ExecutePaste(LocalFrame& frame,
                                      Event*,
                                      EditorCommandSource source,
                                      const String&) {
+#if BUILDFLAG(IS_OHOS)
+  TRACE_EVENT0("blink", "NWebPaste");
+#endif
   Paste(frame, source);
   return true;
 }

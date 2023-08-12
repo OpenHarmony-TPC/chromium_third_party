@@ -79,7 +79,7 @@ config("public_dav1d_config") {
     defines += [ "STACK_ALIGNMENT=$stack_alignment" ]
   }
 
-  if (!is_android && !is_win) {
+  if (!is_android && !is_win && !is_ohos) {
     defines += [ "HAVE_PTHREAD_GETAFFINITY_NP=1" ]
   }
 

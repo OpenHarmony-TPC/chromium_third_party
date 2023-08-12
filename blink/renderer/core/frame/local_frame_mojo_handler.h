@@ -220,6 +220,10 @@ class LocalFrameMojoHandler
   void UpdateBrowserControlsState(cc::BrowserControlsState constraints,
                                   cc::BrowserControlsState current,
                                   bool animate) override;
+#if BUILDFLAG(IS_OHOS)
+  void GetImageFromCache(const WTF::String& url,
+                         GetImageFromCacheCallback callback) final;
+#endif
 
   // mojom::blink::HighPriorityLocalFrame implementation:
   void DispatchBeforeUnload(

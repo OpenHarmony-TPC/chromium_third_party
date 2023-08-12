@@ -76,6 +76,9 @@ import "ui/gfx/range/mojom/range.mojom";
 [EnableIf=is_mac]
 import "ui/base/mojom/attributed_string.mojom";
 
+[EnableIf=is_ohos]
+import "mojo/public/mojom/base/shared_memory.mojom";
+
 // Information about a subframe being saved as "complete html".
 struct SavableSubframe {
   // Original url of the subframe (i.e. based the parent's html sources).
@@ -830,6 +833,11 @@ interface LocalFrame {
   // Requests the link-rel calnonical URL. The canonical url could be null if
   // the document of this frame doesn't have the HTMLLinkElement.
   GetCanonicalUrlForSharing() => (url.mojom.Url? canonical_url);
+
+  // This passes a url of a img down to the renderer, in order to get img cache of
+  // this url
+  [EnableIf=is_ohos]
+  GetImageFromCache(string url) => (uint32 buffer_size, mojo_base.mojom.ReadOnlySharedMemoryRegion? region);
 };
 
 // Also implemented in Blink, this interface defines frame-specific methods

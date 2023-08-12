@@ -41,7 +41,6 @@ if (crashpad_is_in_chromium || crashpad_is_in_fuchsia) {
       deps += [ "//build/config/sanitizers:suppress-lsan.DO-NOT-USE-THIS" ]
     }
     if (crashpad_is_android) {
-      use_raw_android_executable = true
 
       copy("crashpad_test_data") {
         testonly = true
@@ -56,11 +55,14 @@ if (crashpad_is_in_chromium || crashpad_is_in_fuchsia) {
 
       deps += [ ":crashpad_test_data" ]
 
+      if (!is_ohos) {
+      use_raw_android_executable = true
       extra_dist_files = [
         "$root_out_dir/crashpad_handler",
         "$root_out_dir/crashpad_test_test_multiprocess_exec_test_child",
         "$root_out_dir/crashpad_test_data",
       ]
+      }
     }
   }
 

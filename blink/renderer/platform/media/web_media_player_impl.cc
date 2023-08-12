@@ -821,7 +821,7 @@ void WebMediaPlayerImpl::DoLoad(LoadType load_type,
   learning::FeatureDictionary dict;
   will_play_helper_.BeginObservation(dict);
 
-#if defined(OS_ANDROID)
+#if defined(OS_ANDROID) || BUILDFLAG(IS_OHOS)
   // Only allow credentials if the crossorigin attribute is unspecified
   // (kCorsModeUnspecified) or "use-credentials" (kCorsModeUseCredentials).
   // This value is only used by the MediaPlayerRenderer.
@@ -2842,6 +2842,13 @@ std::unique_ptr<media::Renderer> WebMediaPlayerImpl::CreateRenderer(
 }
 
 void WebMediaPlayerImpl::StartPipeline() {
+#if BUILDFLAG(IS_OHOS) && !BUILDFLAG(ENABLE_FFMPEG)
+  DVLOG(1) << __func__ << "set kOHOSMediaPlayer for kLoadTypeURL";
+  if (load_type_ == kLoadTypeURL) {
+    renderer_factory_selector_->SetBaseRendererType(
+        media::RendererType::kOHOSMediaPlayer);
+  }
+#endif
   DCHECK(main_task_runner_->BelongsToCurrentThread());
 
   Demuxer::EncryptedMediaInitDataCB encrypted_media_init_data_cb =
@@ -2855,8 +2862,13 @@ void WebMediaPlayerImpl::StartPipeline() {
                      media::BindToCurrentLoop(base::BindOnce(
                          &WebMediaPlayerImpl::OnFirstFrame, weak_this_))));
 
+#if defined(OS_ANDROID) || BUILDFLAG(IS_OHOS)
 #if defined(OS_ANDROID)
-  if (demuxer_found_hls_ || renderer_factory_selector_->GetCurrentFactory()
+  if (demuxer_found_hls_ ||
+#else
+  if (
+#endif
+      renderer_factory_selector_->GetCurrentFactory()
                                     ->GetRequiredMediaResourceType() ==
                                 media::MediaResource::Type::URL) {
     // MediaPlayerRendererClientFactory is the only factory that a uses
@@ -2875,7 +2887,7 @@ void WebMediaPlayerImpl::StartPipeline() {
                                 demuxer_.get(), this, false, false);
     return;
   }
-#endif  // defined(OS_ANDROID)
+#endif  // defined(OS_ANDROID) || BUILDFLAG(IS_OHOS)
 
   // Figure out which demuxer to use.
   if (demuxer_override_) {

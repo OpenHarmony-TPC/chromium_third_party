@@ -90,6 +90,15 @@
 #include "third_party/blink/renderer/platform/text/unicode_utilities.h"
 #include "ui/gfx/geometry/quad_f.h"
 
+#if BUILDFLAG(IS_OHOS)
+#include "third_party/blink/renderer/core/html/html_image_element.h"
+#include "third_party/blink/renderer/core/html_names.h"
+#include "base/time/default_clock.h"
+#include "third_party/blink/renderer/platform/wtf/text/string_builder.h"
+#include "third_party/blink/renderer/core/dom/dom_string_map.h"
+#include "third_party/blink/renderer/platform/bindings/exception_state.h"
+#endif
+
 #define EDIT_DEBUG 0
 
 namespace blink {
@@ -1004,6 +1013,16 @@ static String ExtractSelectedText(const FrameSelection& selection,
 String FrameSelection::SelectedHTMLForClipboard() const {
   const EphemeralRangeInFlatTree& range =
       ComputeRangeForSerialization(GetSelectionInDOMTree());
+#if BUILDFLAG(IS_OHOS)
+  for (Node& node : range.Nodes()) {
+    if (node.nodeName() == "IMG") {
+      if (auto* element = DynamicTo<HTMLImageElement>(&node)) {
+        NonThrowableExceptionState exception_state;
+        element->dataset().SetItem("ohos", "clipboard", exception_state);
+      }
+    }
+  }
+#endif
   return CreateMarkup(range.StartPosition(), range.EndPosition(),
                       CreateMarkupOptions::Builder()
                           .SetShouldAnnotateForInterchange(true)

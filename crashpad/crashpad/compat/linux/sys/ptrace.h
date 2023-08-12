@@ -17,7 +17,9 @@
 
 #include_next <sys/ptrace.h>
 
+#if !defined(__MUSL__)
 #include <sys/cdefs.h>
+#endif
 
 // https://sourceware.org/bugzilla/show_bug.cgi?id=22433
 #if !defined(PTRACE_GET_THREAD_AREA) && !defined(PT_GET_THREAD_AREA) && \

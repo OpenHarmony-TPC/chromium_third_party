@@ -50,6 +50,10 @@
 #include "third_party/blink/renderer/platform/wtf/functional.h"
 #include "third_party/blink/renderer/platform/wtf/std_lib_extras.h"
 
+#if BUILDFLAG(IS_OHOS)
+#include <sys/stat.h>
+#endif
+
 namespace blink {
 
 static void DatabaseClosed(Database* database) {
@@ -78,9 +82,19 @@ bool DatabaseTracker::CanEstablishDatabase(DatabaseContext* database_context,
 String DatabaseTracker::FullPathForDatabase(const SecurityOrigin* origin,
                                             const String& name,
                                             bool) {
+#if BUILDFLAG(IS_OHOS)
+  String fileName = "/data/storage/el2/base/" +
+                    String(Platform::Current()->DatabaseCreateOriginIdentifier(
+                        WebSecurityOrigin(origin)));
+  if (mkdir(fileName.Utf8().c_str(), 0777) != 0) {
+    LOG(ERROR) << " database open directory failed;";
+  }
+  return fileName + "/" + name + ".db";
+#else
   return String(Platform::Current()->DatabaseCreateOriginIdentifier(
              WebSecurityOrigin(origin))) +
          "/" + name + "#";
+#endif
 }
 
 void DatabaseTracker::AddOpenDatabase(Database* database) {

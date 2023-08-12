@@ -72,6 +72,15 @@ import("//third_party/blink/renderer/core/xmlhttprequest/build.gni")
 import("//third_party/blink/renderer/platform/platform_generated.gni")
 import("//third_party/protobuf/proto_library.gni")
 
+if (is_ohos) {
+  import("//build/config/ohos/config.gni")
+  config("ohos_system_libs") {
+    libs = [ "nweb_ohos_adapter.z" ]
+    include_dirs = ohos_src_includes
+    lib_dirs = ohos_libs_dir
+  }
+}
+
 visibility = [
   "//third_party/blink/public/*",
   "//third_party/blink/renderer/*",
@@ -277,6 +286,9 @@ component("core") {
     "//tools/v8_context_snapshot:use_v8_context_snapshot",
     "//v8:external_startup_data",
   ]
+  if (is_ohos) {
+    configs += [ ":ohos_system_libs" ]
+  }
 
   public_deps = [
     ":core_generated",
@@ -1603,6 +1615,12 @@ source_set("unit_tests") {
       "//ui/gfx/geometry",
     ]
   }
+
+  #ifdef OHOS_NWEB_EX
+  if (ohos_nweb_ex_config_name != "") {
+    configs -= [ "//build/config:ohos_nweb_ex_def_main" ]
+    configs += [ "//build/config:ohos_nweb_ex_def_blink" ]
+  }  #endif  // OHOS_NWEB_EX
 }
 
 group("unit_tests_data") {

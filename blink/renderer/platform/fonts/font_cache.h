@@ -114,7 +114,7 @@ typedef HashMap<FallbackListCompositeKey,
 // in UTS #51: https://unicode.org/reports/tr51/#Emoji_Script
 extern const char kColorEmojiLocale[];
 
-#if defined(OS_ANDROID)
+#if defined(OS_ANDROID) || BUILDFLAG(IS_OHOS)
 extern const char kNotoColorEmojiCompat[];
 #endif
 
@@ -261,7 +261,7 @@ class PLATFORM_EXPORT FontCache {
 
   static void AcceptLanguagesChanged(const String&);
 
-#if defined(OS_ANDROID)
+#if BUILDFLAG(IS_ANDROID) || BUILDFLAG(IS_OHOS)
   static AtomicString GetGenericFamilyNameForScript(
       const AtomicString& family_name,
       const AtomicString& generic_family_name_fallback,
@@ -273,7 +273,7 @@ class PLATFORM_EXPORT FontCache {
   sk_sp<SkTypeface> CreateLocaleSpecificTypeface(
       const FontDescription& font_description,
       const char* locale_family_name);
-#endif  // defined(OS_ANDROID)
+#endif  // BUILDFLAG(IS_ANDROID) || BUILDFLAG(IS_OHOS)
 
 #if defined(OS_LINUX) || defined(OS_CHROMEOS)
   static bool GetFontForCharacter(UChar32,
@@ -355,7 +355,8 @@ class PLATFORM_EXPORT FontCache {
                                    const FontFaceCreationParams&,
                                    std::string& name);
 
-#if defined(OS_ANDROID) || defined(OS_LINUX) || defined(OS_CHROMEOS)
+#if defined(OS_ANDROID) || defined(OS_LINUX) || defined(OS_CHROMEOS) || \
+    BUILDFLAG(IS_OHOS)
   static AtomicString GetFamilyNameForCharacter(SkFontMgr*,
                                                 UChar32,
                                                 const FontDescription&,
@@ -402,7 +403,7 @@ class PLATFORM_EXPORT FontCache {
   std::unique_ptr<FallbackFamilyStyleCache> fallback_params_cache_;
 #endif  // defined(OS_WIN)
 
-#if defined(OS_LINUX) || defined(OS_CHROMEOS)
+#if defined(OS_LINUX) || defined(OS_CHROMEOS) || BUILDFLAG(IS_OHOS)
   static float device_scale_factor_;
 #endif
 

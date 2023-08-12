@@ -422,7 +422,7 @@ FileHandle LoggingOpenFileForWrite(const base::FilePath& path,
                                    FileWriteMode mode,
                                    FilePermissions permissions);
 
-#if BUILDFLAG(IS_LINUX) || BUILDFLAG(IS_CHROMEOS)
+#if BUILDFLAG(IS_LINUX) || BUILDFLAG(IS_CHROMEOS) || defined(__MUSL__)
 //! \brief Opens an in-memory file for input and output.
 //!
 //! This function first attempts to open the file with `memfd_create()`. If

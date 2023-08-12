@@ -23,7 +23,8 @@
 #include "client/simulate_crash_ios.h"
 #elif BUILDFLAG(IS_WIN)
 #include "client/simulate_crash_win.h"
-#elif BUILDFLAG(IS_LINUX) || BUILDFLAG(IS_CHROMEOS) || BUILDFLAG(IS_ANDROID)
+#elif BUILDFLAG(IS_LINUX) || BUILDFLAG(IS_CHROMEOS) || \
+    BUILDFLAG(IS_ANDROID) || BUILDFLAG(IS_OHOS)
 #include "client/simulate_crash_linux.h"
 #endif
 

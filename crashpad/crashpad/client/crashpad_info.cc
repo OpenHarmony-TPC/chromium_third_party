@@ -96,7 +96,7 @@ extern "C" int* CRASHPAD_NOTE_REFERENCE;
 // static
 CrashpadInfo* CrashpadInfo::GetCrashpadInfo() {
 #if BUILDFLAG(IS_LINUX) || BUILDFLAG(IS_CHROMEOS) || BUILDFLAG(IS_ANDROID) || \
-    BUILDFLAG(IS_FUCHSIA)
+    BUILDFLAG(IS_FUCHSIA) || BUILDFLAG(IS_OHOS)
   // This otherwise-unused reference is used so that any module that
   // references GetCrashpadInfo() will also include the note in the
   // .note.crashpad.info section. That note in turn contains the address of

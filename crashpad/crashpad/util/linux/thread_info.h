@@ -274,7 +274,7 @@ union FloatContext {
                 "Size mismatch");
 #elif defined(ARCH_CPU_ARMEL)
   static_assert(sizeof(f32_t::fpregs) == sizeof(user_fpregs), "Size mismatch");
-#if !defined(__GLIBC__)
+#if !defined(__GLIBC__) && !defined(__MUSL__)
   static_assert(sizeof(f32_t::vfp) == sizeof(user_vfp), "Size mismatch");
 #endif
 #elif defined(ARCH_CPU_ARM64)

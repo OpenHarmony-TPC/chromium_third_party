@@ -86,6 +86,14 @@
 #include "third_party/blink/renderer/core/paint/paint_layer.h"
 #include "third_party/blink/renderer/platform/exported/wrapped_resource_response.h"
 
+#if BUILDFLAG(IS_OHOS)
+#include "third_party/blink/renderer/core/css/css_image_value.h"
+#include "third_party/blink/renderer/core/css/css_uri_value.h"
+#include "third_party/blink/renderer/core/frame/settings.h"
+#include "third_party/blink/renderer/core/html/parser/html_parser_idioms.h"
+#include "third_party/blink/renderer/core/dom/node_computed_style.h"
+#endif
+
 namespace blink {
 
 namespace {
@@ -134,6 +142,15 @@ template <class enumType>
 uint32_t EnumToBitmask(enumType outcome) {
   return 1 << static_cast<uint8_t>(outcome);
 }
+
+#if BUILDFLAG(IS_OHOS)
+bool IsHitTestStopNode(const Node& node) {
+  return IsA<HTMLVideoElement>(node) || IsA<HTMLAudioElement>(node) ||
+         IsA<HTMLCanvasElement>(node) || IsA<HTMLObjectElement>(node) ||
+         IsA<HTMLEmbedElement>(node);
+}
+#endif
+
 }  // namespace
 
 ContextMenuController::ContextMenuController(Page* page) : page_(page) {}
@@ -430,6 +447,9 @@ bool ContextMenuController::ShowContextMenu(LocalFrame* frame,
           features::kEnablePenetratingImageSelection)) {
     type |= HitTestRequest::kPenetratingList | HitTestRequest::kListBased;
   }
+#if BUILDFLAG(IS_OHOS)
+  type |= HitTestRequest::kListBased | HitTestRequest::kPenetratingList;
+#endif
 
   HitTestLocation location(point);
   HitTestResult result(type, location);
@@ -480,6 +500,62 @@ bool ContextMenuController::ShowContextMenu(LocalFrame* frame,
     }
   }
   data.link_url = result.AbsoluteLinkURL();
+
+#if BUILDFLAG(IS_OHOS)
+  String background_url;
+  //  if InnerNode is not the image , find image from fallback.
+  Node* inner_node = result.InnerNode();
+  if (inner_node && inner_node->IsContainerNode() &&
+      result.AbsoluteImageURL().IsEmpty()) {
+    for (const auto& hit_test_result_node : result.ListBasedTestResult()) {
+      Node* node = hit_test_result_node.Get();
+      if (!node) {
+        continue;
+      }
+      if (IsHitTestStopNode(*node)) {
+        break;
+      }
+
+      // the node is <IMG> , try to get image url.
+      HTMLImageElement* img_element = nullptr;
+      if (IsA<HTMLImageElement>(node)) {
+        img_element = To<HTMLImageElement>(node);
+      } else if (node->firstChild() &&
+                 IsA<HTMLImageElement>(node->firstChild())) {
+        img_element = To<HTMLImageElement>(node->firstChild());
+      }
+
+      if (img_element) {
+        AtomicString img_src = img_element->getAttribute(html_names::kSrcAttr);
+        if (!img_src.IsEmpty()) {
+          data.src_url = inner_node->GetDocument().CompleteURL(
+              blink::StripLeadingAndTrailingHTMLSpaces(img_src));
+          data.media_type = mojom::ContextMenuDataMediaType::kImage;
+          data.media_flags |= ContextMenuData::kMediaCanPrint;
+          data.has_image_contents = true;
+          break;
+        }
+      }
+
+      // try to get background image url.
+      const ComputedStyle* style = node->GetComputedStyle();
+      if (!style || !style->HasBackgroundImage()) {
+        continue;
+      }
+
+      CSSValue* value =
+          style->BackgroundLayers().GetImage()->ComputedCSSValue(*style, false);
+      if (value && value->IsURIValue()) {
+        background_url =
+            DynamicTo<cssvalue::CSSURIValue>(*value)->ValueForSerialization();
+        break;
+      } else if (value && value->IsImageValue()) {
+        background_url = DynamicTo<CSSImageValue>(*value)->Url();
+        break;
+      }
+    }
+  }
+#endif
 
   auto* html_element = DynamicTo<HTMLElement>(result.InnerNode());
   if (html_element) {
@@ -535,6 +611,14 @@ bool ContextMenuController::ShowContextMenu(LocalFrame* frame,
       data.media_flags |= ContextMenuData::kMediaCanToggleControls;
     if (media_element->ShouldShowAllControls())
       data.media_flags |= ContextMenuData::kMediaControls;
+#if BUILDFLAG(IS_OHOS)
+  } else if (data.src_url.is_empty() && !background_url.IsEmpty()) {
+    data.src_url =
+        result.InnerNode()->GetDocument().CompleteURL(background_url);
+    data.media_type = mojom::blink::ContextMenuDataMediaType::kImage;
+    data.media_flags |= ContextMenuData::kMediaCanPrint;
+    data.has_image_contents = true;
+#endif
   } else if (IsA<HTMLObjectElement>(*result.InnerNode()) ||
              IsA<HTMLEmbedElement>(*result.InnerNode())) {
     if (auto* embedded = DynamicTo<LayoutEmbeddedContent>(

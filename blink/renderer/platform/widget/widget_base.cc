@@ -287,6 +287,10 @@ void WidgetBase::Shutdown() {
 }
 
 cc::LayerTreeHost* WidgetBase::LayerTreeHost() const {
+  if (!layer_tree_view_) {
+    LOG(ERROR) << "WidgetBase::LayerTreeHost layer_tree_view_ is nullptr";
+    return nullptr;
+  }
   return layer_tree_view_->layer_tree_host();
 }
 

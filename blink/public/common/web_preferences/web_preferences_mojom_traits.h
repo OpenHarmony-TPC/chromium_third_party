@@ -546,7 +546,7 @@ struct BLINK_COMMON_EXPORT StructTraits<blink::mojom::WebPreferencesDataView,
     return r.web_app_scope;
   }
 
-#if defined(OS_ANDROID)
+#if defined(OS_ANDROID) || BUILDFLAG(IS_OHOS)
   static float font_scale_factor(const blink::web_pref::WebPreferences& r) {
     return r.font_scale_factor;
   }
@@ -765,6 +765,10 @@ struct BLINK_COMMON_EXPORT StructTraits<blink::mojom::WebPreferencesDataView,
   static bool webxr_immersive_ar_allowed(
       const blink::web_pref::WebPreferences& r) {
     return r.webxr_immersive_ar_allowed;
+  }
+
+  static bool pinch_smooth_mode(const blink::web_pref::WebPreferences& r) {
+    return r.pinch_smooth_mode;
   }
 
   static bool Read(blink::mojom::WebPreferencesDataView r,

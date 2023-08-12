@@ -17,6 +17,9 @@
 #include "third_party/blink/renderer/platform/widget/input/frame_widget_input_handler_impl.h"
 #include "third_party/blink/renderer/platform/widget/input/widget_input_handler_manager.h"
 #include "third_party/blink/renderer/platform/widget/widget_base.h"
+#if BUILDFLAG(IS_OHOS)
+#include "cef/libcef/common/soc_perf_util.h"
+#endif
 
 namespace blink {
 
@@ -146,6 +149,12 @@ void WidgetInputHandlerImpl::DispatchEvent(
   TRACE_EVENT0("input", "WidgetInputHandlerImpl::DispatchEvent");
   input_handler_manager_->DispatchEvent(std::move(event), std::move(callback));
 }
+
+#if BUILDFLAG(IS_OHOS)
+void WidgetInputHandlerImpl::StartFling() {
+  soc_perf::SocPerUtil::ApplySocConfig();
+}
+#endif
 
 void WidgetInputHandlerImpl::DispatchNonBlockingEvent(
     std::unique_ptr<WebCoalescedInputEvent> event) {

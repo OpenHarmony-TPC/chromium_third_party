@@ -165,7 +165,7 @@ bool StructTraits<blink::mojom::WebPreferencesDataView,
   out->double_tap_to_zoom_enabled = data.double_tap_to_zoom_enabled();
   out->fullscreen_supported = data.fullscreen_supported();
   out->text_autosizing_enabled = data.text_autosizing_enabled();
-#if defined(OS_ANDROID)
+#if defined(OS_ANDROID) || BUILDFLAG(IS_OHOS)
   out->font_scale_factor = data.font_scale_factor();
   out->device_scale_adjustment = data.device_scale_adjustment();
   out->force_enable_zoom = data.force_enable_zoom();
@@ -221,6 +221,7 @@ bool StructTraits<blink::mojom::WebPreferencesDataView,
   out->always_show_focus = data.always_show_focus();
   out->touch_drag_drop_enabled = data.touch_drag_drop_enabled();
   out->webxr_immersive_ar_allowed = data.webxr_immersive_ar_allowed();
+  out->pinch_smooth_mode = data.pinch_smooth_mode();
   return true;
 }
 

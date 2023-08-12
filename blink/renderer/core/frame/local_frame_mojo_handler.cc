@@ -1288,6 +1288,78 @@ void LocalFrameMojoHandler::UpdateBrowserControlsState(
                                                               current, animate);
 }
 
+#if BUILDFLAG(IS_OHOS)
+void LocalFrameMojoHandler::GetImageFromCache(
+    const WTF::String& url,
+    LocalFrameMojoHandler::GetImageFromCacheCallback callback) {
+  // auto* local_frame = DynamicTo<LocalFrame>(frame_->GetPage()->MainFrame());
+  // if (!local_frame) {
+  //   LOG(INFO) << "getImageFromCache, local_frame nullptr";
+  //   std::move(callback).Run(0, base::ReadOnlySharedMemoryRegion());
+  //   return;
+  // }
+
+  blink::Document* document = frame_->GetDocument();
+  if (document == nullptr) {
+    LOG(ERROR) << "getImageFromCache: document nullptr";
+    // Client()->OnGetImageDataForUrl(url, 0, nullptr);
+    std::move(callback).Run(0, base::ReadOnlySharedMemoryRegion());
+    return;
+  }
+
+  DocumentLoader* loader = document->Loader();
+  if (loader == nullptr) {
+    LOG(ERROR) << "getImageFromCache: loader nullptr";
+    // Client()->OnGetImageDataForUrl(url, 0, nullptr);
+    std::move(callback).Run(0, base::ReadOnlySharedMemoryRegion());
+    return;
+  }
+
+  scoped_refptr<const SharedBuffer> resource_buffer =
+      loader->OnGetImageFromCache(url);
+  if (resource_buffer == nullptr) {
+    LOG(ERROR) << "getImageFromCache: Get resource buffer null";
+    // Client()->OnGetImageDataForUrl(url, 0, nullptr);
+    std::move(callback).Run(0, base::ReadOnlySharedMemoryRegion());
+    return;
+  }
+
+  base::WritableSharedMemoryRegion region =
+      base::WritableSharedMemoryRegion::Create(resource_buffer->size());
+  if (!region.IsValid()) {
+    LOG(ERROR) << "getImageFromCache: WritableSharedMemoryRegion create failed";
+    // Client()->OnGetImageDataForUrl(url, 0, nullptr);
+    std::move(callback).Run(0, base::ReadOnlySharedMemoryRegion());
+    return;
+  }
+
+  base::WritableSharedMemoryMapping mapping = region.Map();
+  if (!mapping.IsValid()) {
+    LOG(ERROR) << "getImageFromCache: WritableSharedMemoryRegion map failed";
+    // Client()->OnGetImageDataForUrl(url, 0, nullptr);
+    std::move(callback).Run(0, base::ReadOnlySharedMemoryRegion());
+    return;
+  }
+
+  bool finished = resource_buffer->GetBytes(const_cast<void*>(mapping.memory()),
+                                            resource_buffer->size());
+  if (!finished) {
+    LOG(ERROR)
+        << "getImageFromCache: Get resource bytes unfinished, buffer size "
+        << resource_buffer->size();
+    // Client()->OnGetImageDataForUrl(url, 0, nullptr);
+    std::move(callback).Run(0, base::ReadOnlySharedMemoryRegion());
+    return;
+  }
+
+  base::ReadOnlySharedMemoryRegion ro_region =
+      base::WritableSharedMemoryRegion::ConvertToReadOnly(std::move(region));
+  // Client()->OnGetImageDataForUrl(url, resource_buffer->size(), &ro_region);
+  std::move(callback).Run(static_cast<uint32_t>(resource_buffer->size()), std::move(ro_region));
+  return;
+}
+#endif
+
 void LocalFrameMojoHandler::DispatchBeforeUnload(
     bool is_reload,
     mojom::blink::LocalFrame::BeforeUnloadCallback callback) {

@@ -199,6 +199,12 @@ component("modules") {
 
   configs -= [ "//build/config/compiler:default_symbols" ]
   configs += blink_symbols_config
+
+  #ifdef ohos_nweb_ex
+  if (ohos_nweb_ex_config_name != "") {
+    configs -= [ "//build/config:ohos_nweb_ex_def_main" ]
+    configs += [ "//build/config:ohos_nweb_ex_def_blink" ]
+  }  #endif  // ohos_nweb_ex
 }
 
 source_set("modules_testing") {

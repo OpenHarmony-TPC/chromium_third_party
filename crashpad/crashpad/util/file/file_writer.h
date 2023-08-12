@@ -137,7 +137,7 @@ class FileWriter : public FileWriterInterface {
             FileWriteMode write_mode,
             FilePermissions permissions);
 
-#if BUILDFLAG(IS_LINUX) || BUILDFLAG(IS_CHROMEOS)
+#if BUILDFLAG(IS_LINUX) || BUILDFLAG(IS_CHROMEOS) || defined(__MUSL__)
   //! \brief Wraps LoggingOpenMemoryFileForWrite().
   //!
   //! \return `true` if the operation succeeded, `false` if it failed, with an

@@ -219,7 +219,7 @@ struct BLINK_COMMON_EXPORT WebPreferences {
   // Representation of the Web App Manifest scope if any.
   GURL web_app_scope;
 
-#if defined(OS_ANDROID)
+#if defined(OS_ANDROID) || BUILDFLAG(IS_OHOS)
   float font_scale_factor;
   float device_scale_adjustment;
   bool force_enable_zoom;
@@ -352,6 +352,7 @@ struct BLINK_COMMON_EXPORT WebPreferences {
   // By default, WebXR's immersive-ar session creation is allowed, but this can
   // change depending on the enterprise policy if the platform supports it.
   bool webxr_immersive_ar_allowed = true;
+  bool pinch_smooth_mode = false;
 
   // We try to keep the default values the same as the default values in
   // chrome, except for the cases where it would require lots of extra work for

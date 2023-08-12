@@ -424,6 +424,9 @@ interface WidgetInputHandler {
          DidOverscrollParams? overscroll,
          TouchActionOptional? touch_action);
 
+  [EnableIf=is_ohos]
+  StartFling();
+
   // Sends a non-blocking input event to the render widget. The behaviour
   // of this API is the same as DispatchEvent just that there is no callback
   // after the event is processed.

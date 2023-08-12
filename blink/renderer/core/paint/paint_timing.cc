@@ -106,6 +106,7 @@ void PaintTiming::MarkFirstPaint() {
   if (!first_paint_.is_null())
     return;
   DCHECK_EQ(IgnorePaintTimingScope::IgnoreDepth(), 0);
+  TRACE_EVENT0("blink", "FirstPaint");
   SetFirstPaint(clock_->NowTicks());
 }
 
@@ -118,6 +119,7 @@ void PaintTiming::MarkFirstContentfulPaint() {
     return;
   if (IgnorePaintTimingScope::IgnoreDepth() > 0)
     return;
+  TRACE_EVENT0("blink", "FirstContentfulPaint");
   SetFirstContentfulPaint(clock_->NowTicks());
 }
 
@@ -126,6 +128,7 @@ void PaintTiming::MarkFirstImagePaint() {
     return;
   DCHECK_EQ(IgnorePaintTimingScope::IgnoreDepth(), 0);
   first_image_paint_ = clock_->NowTicks();
+  TRACE_EVENT0("blink", "FirstImagePaint");
   SetFirstContentfulPaint(first_image_paint_);
   RegisterNotifyPresentationTime(PaintEvent::kFirstImagePaint);
 }

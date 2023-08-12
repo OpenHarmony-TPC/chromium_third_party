@@ -856,7 +856,7 @@ class BLINK_PLATFORM_EXPORT WebMediaPlayerImpl
   // MediaResource::Type::URL for now.
   bool using_media_player_renderer_ = false;
 
-#if defined(OS_ANDROID)
+#if defined(OS_ANDROID) || BUILDFLAG(IS_OHOS)
   // Set during the initial DoLoad() call. Used to determine whether to allow
   // credentials or not for MediaPlayerRenderer.
   bool allow_media_player_renderer_credentials_ = false;

@@ -359,6 +359,19 @@ void FrameWidgetInputHandlerImpl::ScrollFocusedEditableNodeIntoRect(
 }
 
 void FrameWidgetInputHandlerImpl::MoveCaret(const gfx::Point& point) {
+#if BUILDFLAG(IS_OHOS)
+  RunOnMainThread(base::BindOnce(
+      [](base::WeakPtr<WidgetBase> widget,
+         base::WeakPtr<mojom::blink::FrameWidgetInputHandler> handler,
+         const gfx::Point& point) {
+        DCHECK_EQ(!!widget, !!handler);
+        if (!widget)
+          return;
+        HandlingState handling_state(widget, UpdateState::kIsSelectingRange);
+        handler->MoveCaret(point);
+      },
+      widget_, main_thread_frame_widget_input_handler_, point));
+#else
   RunOnMainThread(base::BindOnce(
       [](base::WeakPtr<mojom::blink::FrameWidgetInputHandler> handler,
          const gfx::Point& point) {
@@ -366,6 +379,7 @@ void FrameWidgetInputHandlerImpl::MoveCaret(const gfx::Point& point) {
           handler->MoveCaret(point);
       },
       main_thread_frame_widget_input_handler_, point));
+#endif
 }
 
 void FrameWidgetInputHandlerImpl::ExecuteCommandOnMainThread(

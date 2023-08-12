@@ -546,6 +546,7 @@ class CORE_EXPORT WebFrameWidgetImpl
                                   bool is_pinch_gesture_active,
                                   float minimum,
                                   float maximum);
+  void SetPinchSmoothMode(bool isEnable);
   void UpdateViewportDescription(
       const ViewportDescription& viewport_description);
 

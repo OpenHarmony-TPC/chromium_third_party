@@ -99,6 +99,9 @@ static_library("unrar") {
     # Disables exceptions in unrar, replaces them with process termination.
     "UNRAR_NO_EXCEPTIONS",
   ]
+  if (is_ohos) {
+   defines += [ "UNIX_TIME_NS" ]
+  }
 
   deps = [ "//base" ]
 }

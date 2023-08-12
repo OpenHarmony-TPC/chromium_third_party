@@ -71,6 +71,10 @@ class BLINK_PLATFORM_EXPORT VideoFrameCompositor
 
   using OnNewFramePresentedCB = base::OnceClosure;
 
+#if BUILDFLAG(IS_OHOS)
+  using FinishPaintCallback = base::RepeatingClosure;
+#endif
+
   enum UpdateType {
     kNormal,
     kBypassClient,  // Disregards whether |client| is driving frame updates, and
@@ -122,6 +126,9 @@ class BLINK_PLATFORM_EXPORT VideoFrameCompositor
   void Stop() override;
   void PaintSingleFrame(scoped_refptr<media::VideoFrame> frame,
                         bool repaint_duplicate_frame = false) override;
+#if BUILDFLAG(IS_OHOS)
+  void SetFinishPaintCallback(FinishPaintCallback callback) override;
+#endif
 
   // If |client_| is not set, |callback_| is set, and |is_background_rendering_|
   // is true, it requests a new frame from |callback_|. Uses the elapsed time
@@ -256,6 +263,9 @@ class BLINK_PLATFORM_EXPORT VideoFrameCompositor
 
   base::TimeTicks last_background_render_;
   OnNewProcessedFrameCB new_processed_frame_cb_;
+#if BUILDFLAG(IS_OHOS)
+  FinishPaintCallback finish_paint_cb_;
+#endif
   cc::UpdateSubmissionStateCB update_submission_state_callback_;
 
   // Callback used to satisfy video.rVFC requests.

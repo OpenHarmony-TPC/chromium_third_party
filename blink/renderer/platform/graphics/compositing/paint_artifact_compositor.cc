@@ -918,9 +918,24 @@ void PaintArtifactCompositor::UpdateLayerSelection(
   // Foreign layers cannot contain selection.
   if (pending_layer.GetCompositingType() == PendingLayer::kForeignLayer)
     return;
+  bool any_selection_was_painted = false;
   PaintChunksToCcLayer::UpdateLayerSelection(
       layer, pending_layer.GetPropertyTreeState(), pending_layer.Chunks(),
-      layer_selection);
+      layer_selection, any_selection_was_painted);
+  if (any_selection_was_painted) {
+    // If any selection was painted, but we didn't see the start or end bound
+    // recorded, it could have been outside of the painting cull rect thus
+    // invisible. Mark the bound as such if this is the case.
+    if (layer_selection.start.type == gfx::SelectionBound::EMPTY) {
+      layer_selection.start.type = gfx::SelectionBound::LEFT;
+      layer_selection.start.hidden = true;
+    }
+
+    if (layer_selection.end.type == gfx::SelectionBound::EMPTY) {
+      layer_selection.end.type = gfx::SelectionBound::RIGHT;
+      layer_selection.end.hidden = true;
+    }
+  }
 }
 
 void PaintArtifactCompositor::UpdateRepaintedContentLayerClient(

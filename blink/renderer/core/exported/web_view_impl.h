@@ -633,6 +633,7 @@ class CORE_EXPORT WebViewImpl final : public WebView,
 
   float MaximumLegiblePageScale() const;
   void RefreshPageScaleFactor();
+  void SetPinchSmoothMode(bool isEnable);
   gfx::Size ContentsSize() const;
 
   void UpdateBrowserControlsConstraint(cc::BrowserControlsState constraint);
@@ -861,6 +862,8 @@ class CORE_EXPORT WebViewImpl final : public WebView,
   // Whether the preferred size may have changed and |UpdatePreferredSize| needs
   // to be called.
   bool needs_preferred_size_update_ = true;
+
+  bool pinch_smooth_mode = false;
 
   // Cache the preferred size of the page in order to prevent sending the IPC
   // when layout() recomputes but doesn't actually change sizes.

@@ -74,7 +74,8 @@ void CloseNowOrOnExec(int fd, bool ebadf_ok) {
 bool CloseMultipleNowOrOnExecUsingFDDir(int min_fd, int preserve_fd) {
 #if BUILDFLAG(IS_APPLE)
   static constexpr char kFDDir[] = "/dev/fd";
-#elif BUILDFLAG(IS_LINUX) || BUILDFLAG(IS_CHROMEOS) || BUILDFLAG(IS_ANDROID)
+#elif BUILDFLAG(IS_LINUX) || BUILDFLAG(IS_CHROMEOS) || \
+    BUILDFLAG(IS_ANDROID) || BUILDFLAG(IS_OHOS)
   static constexpr char kFDDir[] = "/proc/self/fd";
 #endif
 
@@ -134,7 +135,7 @@ void CloseMultipleNowOrOnExec(int fd, int preserve_fd) {
   // bionic/libc/bionic/ndk_cruft.cpp getdtablesize().
   int max_fd = implicit_cast<int>(sysconf(_SC_OPEN_MAX));
 
-#if !BUILDFLAG(IS_ANDROID)
+#if !BUILDFLAG(IS_ANDROID) && !BUILDFLAG(IS_OHOS)
   // getdtablesize() was removed effective Android 5.0.0 (API 21). Since it
   // returns the same thing as the sysconf() above, just skip it. See
   // https://android.googlesource.com/platform/bionic/+/462abab12b074c62c0999859e65d5a32ebb41951.
@@ -142,7 +143,7 @@ void CloseMultipleNowOrOnExec(int fd, int preserve_fd) {
 #endif
 
 #if !(BUILDFLAG(IS_LINUX) || BUILDFLAG(IS_CHROMEOS) || \
-      BUILDFLAG(IS_ANDROID)) ||                        \
+      BUILDFLAG(IS_ANDROID) || BUILDFLAG(IS_OHOS)) ||  \
     defined(OPEN_MAX)
   // Linux does not provide OPEN_MAX. See
   // https://git.kernel.org/cgit/linux/kernel/git/stable/linux-stable.git/commit/include/linux/limits.h?id=77293034696e3e0b6c8b8fc1f96be091104b3d2b.
@@ -170,7 +171,8 @@ void CloseMultipleNowOrOnExec(int fd, int preserve_fd) {
   } else {
     PLOG(WARNING) << "sysctl";
   }
-#elif BUILDFLAG(IS_LINUX) || BUILDFLAG(IS_CHROMEOS) || BUILDFLAG(IS_ANDROID)
+#elif BUILDFLAG(IS_LINUX) || BUILDFLAG(IS_CHROMEOS) || \
+    BUILDFLAG(IS_ANDROID) || BUILDFLAG(IS_OHOS)
   // See linux-4.4.27/fs/file.c sysctl_nr_open, referenced by kernel/sys.c
   // do_prlimit() and kernel/sysctl.c fs_table. Inability to open this file is
   // not considered an error, because /proc may not be available or usable.

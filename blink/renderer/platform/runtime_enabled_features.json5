@@ -1226,7 +1226,7 @@
     {
       name: "ImplicitRootScroller",
       settable_from_internals: true,
-      status: {"Android": "stable"},
+      status: {"Android": "stable", "default": "stable"},
     },
     {
       name: "InertAttribute",
@@ -1405,7 +1405,8 @@
     },
     {
       name: "MediaCapture",
-      status: {"Android": "stable"},
+      // BUILDFLAG(IS_OHOS)
+      status: "stable",
     },
     {
       name: "MediaCaptureDepthVideoKind",
@@ -1541,7 +1542,8 @@
     {
       name: "NetInfoDownlinkMax",
       // Only Android, ChromeOS support NetInfo downlinkMax, type and ontypechange now
-      status: {"Android": "stable", "ChromeOS": "stable", "default": "experimental"},
+      // BUILDFLAG(IS_OHOS)
+      status: "stable",
     },
     {
       name: "NeverSlowMode",

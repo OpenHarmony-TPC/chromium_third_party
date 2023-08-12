@@ -245,8 +245,19 @@ void VideoFrameCompositor::PaintSingleFrame(
                       repaint_duplicate_frame) &&
       IsClientSinkAvailable()) {
     client_->DidReceiveFrame();
+#if BUILDFLAG(IS_OHOS)
+    if (finish_paint_cb_) {
+      finish_paint_cb_.Run();
+    }
+#endif
   }
 }
+
+#if BUILDFLAG(IS_OHOS)
+void VideoFrameCompositor::SetFinishPaintCallback(FinishPaintCallback callback) {
+  finish_paint_cb_ = std::move(callback);
+}
+#endif
 
 void VideoFrameCompositor::UpdateCurrentFrameIfStale(UpdateType type) {
   TRACE_EVENT0("media", "VideoFrameCompositor::UpdateCurrentFrameIfStale");

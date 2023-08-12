@@ -59,6 +59,9 @@
 #include "third_party/blink/renderer/platform/loader/fetch/url_loader/cached_metadata_handler.h"
 #include "third_party/blink/renderer/platform/scheduler/public/event_loop.h"
 #include "third_party/blink/renderer/platform/wtf/text/text_encoding.h"
+#if defined(OS_OHOS)
+#include "cef/libcef/common/soc_perf_util.h"
+#endif
 
 namespace blink {
 
@@ -536,6 +539,9 @@ ScriptEvaluationResult V8ScriptRunner::CompileAndRunScript(
                                       compile_options, no_cache_reason,
                                       host_defined_options)
             .ToLocal(&script)) {
+#if defined(OS_OHOS)
+      soc_perf::SocPerUtil::StartBoost();
+#endif
       maybe_result = V8ScriptRunner::RunCompiledScript(
           isolate, script, host_defined_options, execution_context);
       probe::DidProduceCompilationCache(

@@ -59,7 +59,7 @@ if (crashpad_is_in_chromium) {
   crashpad_is_ios = is_ios
   crashpad_is_win = is_win
   crashpad_is_linux = is_linux || is_chromeos
-  crashpad_is_android = is_android
+  crashpad_is_android = is_android || is_ohos
   crashpad_is_fuchsia = is_fuchsia
 
   crashpad_is_posix = is_posix
@@ -79,6 +79,11 @@ if (crashpad_is_in_chromium) {
   crashpad_is_posix = mini_chromium_is_posix
 
   crashpad_is_clang = mini_chromium_is_clang
+}
+
+if (use_musl) {
+  crashpad_is_android = false
+  crashpad_is_linux = true
 }
 
 template("crashpad_executable") {

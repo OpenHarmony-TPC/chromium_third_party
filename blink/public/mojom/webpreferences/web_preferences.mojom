@@ -270,85 +270,85 @@ struct WebPreferences {
   // Representation of the Web App Manifest scope if any.
   url.mojom.Url web_app_scope;
 
-  [EnableIf=is_android]
+  // [EnableIf=is_android]
   float font_scale_factor;
 
-  [EnableIf=is_android]
+  // [EnableIf=is_android]
   float device_scale_adjustment;
 
-  [EnableIf=is_android]
+  // [EnableIf=is_android]
   bool force_enable_zoom;
 
-  [EnableIf=is_android]
+  // [EnableIf=is_android]
   url.mojom.Url default_video_poster_url;
 
-  [EnableIf=is_android]
+  // [EnableIf=is_android]
   bool support_deprecated_target_density_dpi;
 
-  [EnableIf=is_android]
+  // [EnableIf=is_android]
   bool use_legacy_background_size_shorthand_behavior;
 
-  [EnableIf=is_android]
+  // [EnableIf=is_android]
   bool wide_viewport_quirk;
 
-  [EnableIf=is_android]
+  // [EnableIf=is_android]
   bool use_wide_viewport;
 
-  [EnableIf=is_android]
+  // [EnableIf=is_android]
   bool force_zero_layout_height;
 
-  [EnableIf=is_android]
+  // [EnableIf=is_android]
   bool viewport_meta_merge_content_quirk;
 
-  [EnableIf=is_android]
+  // [EnableIf=is_android]
   bool viewport_meta_non_user_scalable_quirk;
 
-  [EnableIf=is_android]
+  // [EnableIf=is_android]
   bool viewport_meta_zero_values_quirk;
 
-  [EnableIf=is_android]
+  // [EnableIf=is_android]
   bool clobber_user_agent_initial_scale_quirk;
 
-  [EnableIf=is_android]
+  // [EnableIf=is_android]
   bool ignore_main_frame_overflow_hidden_quirk;
 
-  [EnableIf=is_android]
+  // [EnableIf=is_android]
   bool report_screen_size_in_physical_pixels_quirk;
 
   // Used by Android_WebView only to support legacy apps that inject script int32o
   // a top-level initial empty document and expect it to persist on navigation.
-  [EnableIf=is_android]
+  // [EnableIf=is_android]
   bool reuse_global_for_unowned_main_frame;
 
   // Specifies default setting for spellcheck when the spellcheck attribute is
   // not explicitly specified.
-  [EnableIf=is_android]
+  // [EnableIf=is_android]
   bool spellcheck_enabled_by_default;
 
   // If enabled, when a video goes fullscreen, the orientation should be locked.
-  [EnableIf=is_android]
+  // [EnableIf=is_android]
   bool video_fullscreen_orientation_lock_enabled;
 
   // If enabled, fullscreen should be entered/exited when the device is rotated
   // to/from the orientation of the video.
-  [EnableIf=is_android]
+  // [EnableIf=is_android]
   bool video_rotate_to_fullscreen_enabled;
 
-  [EnableIf=is_android]
+  // [EnableIf=is_android]
   bool embedded_media_experience_enabled;
 
   // Enable 8 (#RRGGBBAA) and 4 (#RGBA) value hex colors in CSS Android
   // WebView quirk (http://crbug.com/618472).
-  [EnableIf=is_android]
+  // [EnableIf=is_android]
   bool css_hex_alpha_color_enabled;
 
   // Enable support for document.scrollingElement
   // WebView sets this to false to retain old documentElement behaviour
   // (http://crbug.com/761016).
-  [EnableIf=is_android]
+  // [EnableIf=is_android]
   bool scroll_top_left_interop_enabled;
 
-  [EnableIf=is_android]
+  // [EnableIf=is_android]
   // Don't accelerate small canvases to avoid crashes TODO(crbug.com/1004304)
   bool disable_accelerated_small_canvases;
 
@@ -436,4 +436,5 @@ struct WebPreferences {
 
   // Controls whether WebXR's immersive-ar is allowed.
   bool webxr_immersive_ar_allowed;
+  bool pinch_smooth_mode;
 };

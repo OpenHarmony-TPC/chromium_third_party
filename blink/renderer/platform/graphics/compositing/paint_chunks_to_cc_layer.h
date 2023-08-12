@@ -71,7 +71,8 @@ class PLATFORM_EXPORT PaintChunksToCcLayer {
   static void UpdateLayerSelection(cc::Layer& layer,
                                    const PropertyTreeState& layer_state,
                                    const PaintChunkSubset&,
-                                   cc::LayerSelection& layer_selection);
+                                   cc::LayerSelection& layer_selection,
+                                   bool& any_selection_was_painted);
   static void UpdateLayerProperties(cc::Layer& layer,
                                     const PropertyTreeState& layer_state,
                                     const PaintChunkSubset&);

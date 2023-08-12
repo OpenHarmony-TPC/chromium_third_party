@@ -1471,8 +1471,12 @@ void WebFrameWidgetImpl::UpdateVisualProperties(
   // when the focused node is inside an OOPIF. This code path where
   // scroll_focused_node_into_view is set is used only for WebView, crbug
   // 939118 tracks fixing webviews to not use scroll_focused_node_into_view.
+#if BUILDFLAG(IS_OHOS)
+  ScrollFocusedEditableElementIntoView();
+#else
   if (visual_properties.scroll_focused_node_into_view)
     ScrollFocusedEditableElementIntoView();
+#endif
 }
 
 void WebFrameWidgetImpl::ApplyVisualPropertiesSizing(
@@ -2430,10 +2434,15 @@ WebInputEventResult WebFrameWidgetImpl::HandleInputEvent(
   DCHECK(!WebInputEvent::IsTouchEventType(input_event.GetType()));
   CHECK(LocalRootImpl());
 
+  // Clients shouldn't be dispatching events to a provisional frame but this
+  // can happen. Ensure that event handling can assume we're in a committed
+  // frame.
+  if (IsProvisional())
+    return WebInputEventResult::kHandledSuppressed;
+
   // Only record metrics for the main frame.
-  if (ForMainFrame()) {
+  if (ForMainFrame())
     GetPage()->GetVisualViewport().StartTrackingPinchStats();
-  }
 
   // If a drag-and-drop operation is in progress, ignore input events except
   // PointerCancel.
@@ -3880,13 +3889,18 @@ void WebFrameWidgetImpl::NotifyPageScaleFactorChanged(
       page_scale_factor, is_pinch_gesture_active));
 }
 
+void WebFrameWidgetImpl::SetPinchSmoothMode(bool isEnable) {
+  widget_base_->LayerTreeHost()->SetPinchSmoothMode(isEnable);
+}
+
 void WebFrameWidgetImpl::SetPageScaleStateAndLimits(
     float page_scale_factor,
     bool is_pinch_gesture_active,
     float minimum,
     float maximum) {
-  widget_base_->LayerTreeHost()->SetPageScaleFactorAndLimits(page_scale_factor,
-                                                             minimum, maximum);
+  if (widget_base_->LayerTreeHost()) {
+    widget_base_->LayerTreeHost()->SetPageScaleFactorAndLimits(page_scale_factor, minimum, maximum);
+  }
 
   // Only propagate page scale from the main frame.
   if (ForMainFrame()) {

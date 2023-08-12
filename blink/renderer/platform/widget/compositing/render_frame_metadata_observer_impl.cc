@@ -167,8 +167,11 @@ bool RenderFrameMetadataObserverImpl::ShouldSendRenderFrameMetadata(
       rfm1.top_controls_height != rfm2.top_controls_height ||
       rfm1.top_controls_shown_ratio != rfm2.top_controls_shown_ratio ||
       rfm1.local_surface_id != rfm2.local_surface_id ||
-      rfm2.new_vertical_scroll_direction !=
-          viz::VerticalScrollDirection::kNull) {
+      rfm2.new_vertical_scroll_direction != viz::VerticalScrollDirection::kNull
+#if BUILDFLAG(IS_OHOS)
+      || rfm1.root_layer_size != rfm2.root_layer_size
+#endif
+  ) {
     *needs_activation_notification = true;
     return true;
   }

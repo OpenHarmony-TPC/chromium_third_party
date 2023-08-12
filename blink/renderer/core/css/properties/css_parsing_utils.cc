@@ -3328,9 +3328,11 @@ bool ParseBackgroundOrMask(bool important,
 
   for (unsigned i = 0; i < longhand_count; ++i) {
     const CSSProperty& property = *shorthand.properties()[i];
+#if !BUILDFLAG(IS_OHOS)
     if (property.IDEquals(CSSPropertyID::kBackgroundSize) && longhands[i] &&
         context.UseLegacyBackgroundSizeShorthandBehavior())
       continue;
+#endif
     AddProperty(property.PropertyID(), shorthand.id(), *longhands[i], important,
                 implicit ? IsImplicitProperty::kImplicit
                          : IsImplicitProperty::kNotImplicit,

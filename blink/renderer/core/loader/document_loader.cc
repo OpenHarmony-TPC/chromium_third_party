@@ -131,6 +131,12 @@
 #include "third_party/blink/renderer/platform/wtf/text/wtf_string.h"
 #include "third_party/blink/renderer/platform/wtf/vector.h"
 
+#if BUILDFLAG(IS_OHOS)
+#include "base/logging.h"
+#include "third_party/blink/renderer/core/html/html_image_element.h"
+#include "third_party/blink/renderer/core/html/image_document.h"
+#endif
+
 namespace blink {
 
 namespace {
@@ -2827,6 +2833,72 @@ void DocumentLoader::SetCodeCacheHost(
 void DocumentLoader::DisableCodeCacheForTesting() {
   GetDisableCodeCacheForTesting() = true;
 }
+
+#if BUILDFLAG(IS_OHOS)
+scoped_refptr<const SharedBuffer> GetShareBufferForImageDocument(
+    Document* document) {
+  if (!document)
+    return nullptr;
+
+  HTMLImageElement* element = To<ImageDocument>(document)->ImageElement();
+  if (!element) {
+    LOG(ERROR) << "GetShareBufferForImageDocument, element is null";
+    return nullptr;
+  }
+
+  ImageResourceContent* content = element->CachedImage();
+  if (!content) {
+    LOG(ERROR) << "GetShareBufferForImageDocument, content is null";
+    return nullptr;
+  }
+
+  blink::Image* image = content->GetImage();
+  if (!image || image->IsNull()) {
+    LOG(ERROR) << "GetShareBufferForImageDocument, image is null";
+    return nullptr;
+  }
+
+  return image->Data();
+}
+
+scoped_refptr<const SharedBuffer> DocumentLoader::OnGetImageFromCache(
+    const WTF::String& url) {
+  KURL kurl(url);
+  Resource* resource = nullptr;
+  if (kurl.IsValid() && frame_ &&
+      GetFrameLoader().GetDocumentLoader() == this) {
+    resource = GetMemoryCache()->ResourceForURL(
+        kurl, frame_->GetDocument()->Fetcher()->GetCacheIdentifier(kurl));
+
+    if (!resource) {
+      HeapVector<Member<Resource>> resources =
+          GetMemoryCache()->ResourcesForURL(kurl);
+
+      if (resources.size() <= 0 &&
+          ((kurl.ProtocolIs("http") && kurl.SetProtocol("https")) ||
+           (kurl.ProtocolIs("https") && kurl.SetProtocol("http")))) {
+        resources = GetMemoryCache()->ResourcesForURL(kurl);
+      }
+
+      if (resources.size() > 0) {
+        resource = resources.at(0);
+      }
+
+      if (!resource && frame_ && frame_->GetDocument() &&
+          frame_->GetDocument()->IsImageDocument() &&
+          frame_->GetDocument()->Url() == url) {
+        return GetShareBufferForImageDocument(frame_->GetDocument());
+      }
+    }
+  }
+
+  if (!resource) {
+    return nullptr;
+  }
+
+  return resource->ResourceBuffer();
+}
+#endif
 
 DEFINE_WEAK_IDENTIFIER_MAP(DocumentLoader)
 

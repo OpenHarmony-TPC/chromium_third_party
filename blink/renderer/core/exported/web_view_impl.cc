@@ -1618,7 +1618,7 @@ void WebView::ApplyWebPreferences(const web_pref::WebPreferences& prefs,
       prefs.dont_send_key_events_to_javascript);
   settings->SetWebAppScope(WebString::FromASCII(prefs.web_app_scope.spec()));
 
-#if BUILDFLAG(IS_ANDROID)
+#if BUILDFLAG(IS_ANDROID) || BUILDFLAG(IS_OHOS)
   settings->SetAllowCustomScrollbarInMainFrame(false);
   settings->SetAccessibilityFontScaleFactor(prefs.font_scale_factor);
   settings->SetDeviceScaleAdjustment(prefs.device_scale_adjustment);
@@ -1811,6 +1811,8 @@ void WebView::ApplyWebPreferences(const web_pref::WebPreferences& prefs,
 
   RuntimeEnabledFeatures::SetTranslateServiceEnabled(
       prefs.translate_service_available);
+
+  web_view_impl->SetPinchSmoothMode(prefs.pinch_smooth_mode);
 }
 
 void WebViewImpl::ThemeChanged() {
@@ -2652,6 +2654,22 @@ gfx::Size WebViewImpl::MainFrameSize() {
 
 PageScaleConstraintsSet& WebViewImpl::GetPageScaleConstraintsSet() const {
   return GetPage()->GetPageScaleConstraintsSet();
+}
+
+void WebViewImpl::SetPinchSmoothMode(bool isEnable) {
+  if (!MainFrame() || !GetPage() || !GetPage()->MainFrame() ||
+      !GetPage()->MainFrame()->IsLocalFrame() ||
+      !GetPage()->DeprecatedLocalMainFrame()->View()) {
+    return;
+  }
+
+  if (pinch_smooth_mode == isEnable) {
+    return;
+  }
+  pinch_smooth_mode = isEnable;
+  if (does_composite_) {
+    MainFrameImpl()->FrameWidgetImpl()->SetPinchSmoothMode(isEnable);
+  }
 }
 
 void WebViewImpl::RefreshPageScaleFactor() {

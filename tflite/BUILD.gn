@@ -61,7 +61,7 @@ config("tflite_flags") {
     defines += [ "TFLITE_WITH_RUY" ]
   }
 
-  if (is_linux || is_chromeos_lacros) {
+  if (is_linux || is_chromeos_lacros || is_ohos) {
     defines += [ "GEMMLOWP_ALLOW_SLOW_SCALAR_FALLBACK" ]
   }
 

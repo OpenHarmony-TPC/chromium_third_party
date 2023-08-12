@@ -16,7 +16,7 @@ sk_sp<SkTypeface> SkTypeface_Factory::FromFontConfigInterfaceIdAndTtcIndex(
     int config_id,
     int ttc_index) {
 #if !defined(OS_MAC) && !defined(OS_ANDROID) && !defined(OS_WIN) && \
-    !defined(OS_FUCHSIA)
+    !defined(OS_FUCHSIA) && !BUILDFLAG(IS_OHOS)
   sk_sp<SkFontConfigInterface> fci(SkFontConfigInterface::RefGlobal());
   SkFontConfigInterface::FontIdentity font_identity;
   font_identity.fID = config_id;
@@ -33,7 +33,7 @@ sk_sp<SkTypeface> SkTypeface_Factory::FromFilenameAndTtcIndex(
     const std::string& filename,
     int ttc_index) {
 #if !defined(OS_WIN) && !defined(OS_ANDROID) && !defined(OS_FUCHSIA) && \
-    !defined(OS_MAC)
+    !defined(OS_MAC) && !BUILDFLAG(IS_OHOS)
   return SkTypeface::MakeFromFile(filename.c_str(), ttc_index);
 #else
   NOTREACHED();

@@ -33,7 +33,8 @@
 #elif BUILDFLAG(IS_WIN)
 #include <windows.h>
 #include "util/win/scoped_handle.h"
-#elif BUILDFLAG(IS_LINUX) || BUILDFLAG(IS_CHROMEOS) || BUILDFLAG(IS_ANDROID)
+#elif BUILDFLAG(IS_LINUX) || BUILDFLAG(IS_CHROMEOS) || \
+    BUILDFLAG(IS_ANDROID) || BUILDFLAG(IS_OHOS)
 #include <signal.h>
 #include <ucontext.h>
 #endif
@@ -126,7 +127,7 @@ class CrashpadClient {
                     const std::vector<base::FilePath>& attachments = {});
 
 #if BUILDFLAG(IS_ANDROID) || BUILDFLAG(IS_LINUX) || BUILDFLAG(IS_CHROMEOS) || \
-    DOXYGEN
+    DOXYGEN || BUILDFLAG(IS_OHOS)
   //! \brief Retrieve the socket and process ID for the handler.
   //!
   //! `StartHandler()` must have successfully been called before calling this
@@ -344,7 +345,7 @@ class CrashpadClient {
 #endif  // BUILDFLAG(IS_ANDROID) || DOXYGEN
 
 #if BUILDFLAG(IS_LINUX) || BUILDFLAG(IS_ANDROID) || BUILDFLAG(IS_CHROMEOS) || \
-    DOXYGEN
+    DOXYGEN || BUILDFLAG(IS_OHOS)
   //! \brief Installs a signal handler to launch a handler process in reponse to
   //!     a crash.
   //!
@@ -749,7 +750,8 @@ class CrashpadClient {
 #elif BUILDFLAG(IS_WIN)
   std::wstring ipc_pipe_;
   ScopedKernelHANDLE handler_start_thread_;
-#elif BUILDFLAG(IS_LINUX) || BUILDFLAG(IS_CHROMEOS) || BUILDFLAG(IS_ANDROID)
+#elif BUILDFLAG(IS_LINUX) || BUILDFLAG(IS_CHROMEOS) || \
+    BUILDFLAG(IS_ANDROID) || BUILDFLAG(IS_OHOS)
   std::set<int> unhandled_signals_;
 #endif  // BUILDFLAG(IS_APPLE)
 };

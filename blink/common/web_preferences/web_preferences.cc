@@ -13,6 +13,11 @@
 #include "third_party/blink/public/mojom/webpreferences/web_preferences.mojom.h"
 #include "ui/base/ui_base_switches_util.h"
 
+#if BUILDFLAG(IS_OHOS)
+#include "display_manager_adapter.h"
+#include "ohos_adapter_helper.h"
+#endif
+
 namespace {
 
 bool IsTouchDragDropEnabled() {
@@ -119,7 +124,7 @@ WebPreferences::WebPreferences()
 #endif
       supports_multiple_windows(true),
       viewport_enabled(false),
-#if defined(OS_ANDROID)
+#if defined(OS_ANDROID) || BUILDFLAG(IS_OHOS)
       viewport_meta_enabled(true),
       shrinks_viewport_contents_to_fit(true),
       viewport_style(mojom::ViewportStyle::kMobile),
@@ -153,13 +158,13 @@ WebPreferences::WebPreferences()
       text_tracks_enabled(false),
       text_track_margin_percentage(0.0f),
       immersive_mode_enabled(false),
-#if defined(OS_ANDROID) || defined(OS_MAC)
+#if defined(OS_ANDROID) || defined(OS_MAC) || BUILDFLAG(IS_OHOS)
       double_tap_to_zoom_enabled(true),
 #else
       double_tap_to_zoom_enabled(false),
 #endif
       fullscreen_supported(true),
-#if !defined(OS_ANDROID)
+#if !defined(OS_ANDROID) && !BUILDFLAG(IS_OHOS)
       text_autosizing_enabled(false),
 #else
       text_autosizing_enabled(true),
@@ -192,6 +197,9 @@ WebPreferences::WebPreferences()
 #elif defined(OS_MAC)
       default_minimum_page_scale_factor(1.f),
       default_maximum_page_scale_factor(3.f),
+#elif BUILDFLAG(IS_OHOS)
+      default_minimum_page_scale_factor(2.f),
+      default_maximum_page_scale_factor(4.f),
 #else
       default_minimum_page_scale_factor(1.f),
       default_maximum_page_scale_factor(4.f),
@@ -217,6 +225,28 @@ WebPreferences::WebPreferences()
   sans_serif_font_family_map[web_pref::kCommonScript] = u"Arial";
   cursive_font_family_map[web_pref::kCommonScript] = u"Script";
   fantasy_font_family_map[web_pref::kCommonScript] = u"Impact";
+
+#if BUILDFLAG(IS_OHOS)
+  std::unique_ptr<OHOS::NWeb::DisplayManagerAdapter> display_manager_adapter =
+      OHOS::NWeb::OhosAdapterHelper::GetInstance().CreateDisplayMgrAdapter();
+  if (display_manager_adapter == nullptr) {
+    LOG(ERROR) << "display_manager_adapter is nullptr.";
+    return;
+  }
+  std::shared_ptr<OHOS::NWeb::DisplayAdapter> display =
+      display_manager_adapter->GetDefaultDisplay();
+  if (display == nullptr) {
+    LOG(ERROR) << "display is nullptr.";
+    return;
+  }
+  float ratio = display->GetVirtualPixelRatio();
+  if (ratio <= 0.0f) {
+    LOG(ERROR) << "get virtual pixel ratio error.";
+    return;
+  }
+  default_minimum_page_scale_factor = ratio;
+  default_maximum_page_scale_factor = ratio * 2;
+#endif
 }
 
 WebPreferences::WebPreferences(const WebPreferences& other) = default;

@@ -28,6 +28,9 @@
 #include "third_party/blink/renderer/core/dom/document.h"
 #include "third_party/blink/renderer/core/html/media/html_video_element.h"
 #include "third_party/blink/renderer/core/paint/video_painter.h"
+#if BUILDFLAG(IS_OHOS)
+#include "cef/libcef/common/soc_perf_util.h"
+#endif
 
 namespace blink {
 
@@ -38,10 +41,17 @@ const float kInitEffectZoom = 1.0f;
 }  // namespace
 
 LayoutVideo::LayoutVideo(HTMLVideoElement* video) : LayoutMedia(video) {
+#if BUILDFLAG(IS_OHOS)
+  soc_perf::video_layout_num++;
+#endif
   SetIntrinsicSize(CalculateIntrinsicSize(kInitEffectZoom));
 }
 
-LayoutVideo::~LayoutVideo() = default;
+LayoutVideo::~LayoutVideo() {
+#if BUILDFLAG(IS_OHOS)
+  soc_perf::video_layout_num--;
+#endif
+}
 
 LayoutSize LayoutVideo::DefaultSize() {
   return LayoutSize(kDefaultWidth, kDefaultHeight);

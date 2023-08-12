@@ -22,7 +22,8 @@
 
 #if BUILDFLAG(IS_WIN)
 #include "util/win/traits.h"
-#elif BUILDFLAG(IS_LINUX) || BUILDFLAG(IS_CHROMEOS) || BUILDFLAG(IS_ANDROID)
+#elif BUILDFLAG(IS_LINUX) || BUILDFLAG(IS_CHROMEOS) || \
+    BUILDFLAG(IS_ANDROID) || BUILDFLAG(IS_OHOS)
 #include "util/linux/traits.h"
 #elif BUILDFLAG(IS_FUCHSIA)
 #include "util/fuchsia/traits.h"

@@ -171,7 +171,7 @@ bool FileWriter::Open(const base::FilePath& path,
   return true;
 }
 
-#if BUILDFLAG(IS_LINUX) || BUILDFLAG(IS_CHROMEOS)
+#if BUILDFLAG(IS_LINUX) || BUILDFLAG(IS_CHROMEOS) || defined(__MUSL__)
 bool FileWriter::OpenMemfd(const base::FilePath& path) {
   CHECK(!file_.is_valid());
   file_.reset(LoggingOpenMemoryFileForReadAndWrite(path));

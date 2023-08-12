@@ -70,7 +70,7 @@ void GetTimeOfDay(timeval* tv);
 #endif  // BUILDFLAG(IS_WIN)
 
 #if BUILDFLAG(IS_LINUX) || BUILDFLAG(IS_CHROMEOS) || BUILDFLAG(IS_ANDROID) || \
-    DOXYGEN
+    DOXYGEN || BUILDFLAG(IS_OHOS)
 //! \brief Get the kernel boot time. Subsequent calls to this function may
 //!     return different results due to the system clock being changed or
 //!     imprecision in measuring the boot time.

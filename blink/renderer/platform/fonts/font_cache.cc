@@ -81,13 +81,13 @@ const base::Feature kAsyncFontAccess{"AsyncFontAccess",
 
 const char kColorEmojiLocale[] = "und-Zsye";
 
-#if defined(OS_ANDROID)
+#if defined(OS_ANDROID) || BUILDFLAG(IS_OHOS)
 extern const char kNotoColorEmojiCompat[] = "Noto Color Emoji Compat";
 #endif
 
 SkFontMgr* FontCache::static_font_manager_ = nullptr;
 
-#if defined(OS_LINUX) || defined(OS_CHROMEOS)
+#if defined(OS_LINUX) || defined(OS_CHROMEOS) || BUILDFLAG(IS_OHOS)
 float FontCache::device_scale_factor_ = 1.0;
 #endif
 
@@ -127,7 +127,8 @@ FontCache::FontCache()
 FontPlatformData* FontCache::SystemFontPlatformData(
     const FontDescription& font_description) {
   const AtomicString& family = FontCache::SystemFontFamily();
-#if defined(OS_LINUX) || defined(OS_CHROMEOS) || defined(OS_FUCHSIA)
+#if defined(OS_LINUX) || defined(OS_CHROMEOS) || defined(OS_FUCHSIA) || \
+    BUILDFLAG(IS_OHOS)
   if (family.IsEmpty() || family == font_family_names::kSystemUi)
     return nullptr;
 #else

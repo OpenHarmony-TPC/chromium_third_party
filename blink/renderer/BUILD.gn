@@ -49,6 +49,10 @@ config("inside_blink") {
       "-Wno-implicit-float-conversion",
       "-Wno-implicit-int-conversion",
     ]
+
+    if (is_ohos) {
+      cflags += [ "-Wno-invalid-constexpr" ]
+    }
   }
 }
 
@@ -131,7 +135,7 @@ config("config") {
 config("non_test_config") {
   cflags = []
 
-  if (is_clang) {
+  if (is_clang && !is_ohos) {
     cflags += [ "-Wglobal-constructors" ]
   }
 }

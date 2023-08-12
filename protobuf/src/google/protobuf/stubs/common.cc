@@ -49,7 +49,7 @@
 #else
 #error "No suitable threading library available."
 #endif
-#if defined(__ANDROID__)
+#if defined(__ANDROID__) && !defined(OSOHOS)
 #include <android/log.h>
 #endif
 
@@ -125,7 +125,7 @@ string VersionString(int version) {
 
 namespace internal {
 
-#if defined(__ANDROID__)
+#if defined(__ANDROID__) && !defined(OSOHOS)
 inline void DefaultLogHandler(LogLevel level, const char* filename, int line,
                               const string& message) {
   if (level < GOOGLE_PROTOBUF_MIN_LOG_LEVEL) {

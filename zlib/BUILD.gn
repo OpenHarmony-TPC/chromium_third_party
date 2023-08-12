@@ -119,7 +119,7 @@ if (use_arm_neon_optimizations) {
       defines = [ "CRC32_ARMV8_CRC32" ]
       if (is_android) {
         defines += [ "ARMV8_OS_ANDROID" ]
-      } else if (is_linux || is_chromeos) {
+      } else if (is_linux || is_chromeos || is_ohos) {
         defines += [ "ARMV8_OS_LINUX" ]
       } else if (is_mac) {
         defines += [ "ARMV8_OS_MACOS" ]
@@ -346,10 +346,12 @@ component("zlib") {
 
   if (is_android) {
     import("//build/config/android/config.gni")
-    if (defined(android_ndk_root) && android_ndk_root != "") {
-      deps += [ "//third_party/android_ndk:cpu_features" ]
-    } else {
-      assert(false, "CPU detection requires the Android NDK")
+    if (!use_musl) {
+      if (defined(android_ndk_root) && android_ndk_root != "") {
+        deps += [ "//third_party/android_ndk:cpu_features" ]
+      } else {
+        assert(false, "CPU detection requires the Android NDK")
+      }
     }
   }
 

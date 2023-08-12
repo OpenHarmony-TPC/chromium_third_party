@@ -40,10 +40,11 @@ declare_args() {
   blink_symbol_level = -1
 
   # If true, defaults image interpolation to low quality.
-  use_low_quality_image_interpolation = is_android
+  use_low_quality_image_interpolation = is_android || is_ohos
 
   # If true, ffmpeg will be used for computing FFTs for WebAudio
-  use_webaudio_ffmpeg = !is_mac && !is_android && !use_webaudio_pffft
+  use_webaudio_ffmpeg =
+      !is_mac && !is_android && !use_webaudio_pffft && !is_ohos
 
   # If true, the experimental renderer extensions library will be used.
   use_blink_extensions_chromeos = is_chromeos

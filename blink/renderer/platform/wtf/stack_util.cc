@@ -30,7 +30,7 @@ size_t GetUnderestimatedStackSize() {
 // correctly for the main thread.
 
 #elif defined(__GLIBC__) || defined(OS_ANDROID) || defined(OS_FREEBSD) || \
-    defined(OS_FUCHSIA)
+    defined(OS_FUCHSIA) || BUILDFLAG(IS_OHOS)
   // pthread_getattr_np() can fail if the thread is not invoked by
   // pthread_create() (e.g., the main thread of blink_unittests).
   // If so, a conservative size estimate is returned.
@@ -98,7 +98,7 @@ return Threading::ThreadStackSize();
 
 void* GetStackStart() {
 #if defined(__GLIBC__) || defined(OS_ANDROID) || defined(OS_FREEBSD) || \
-    defined(OS_FUCHSIA)
+    defined(OS_FUCHSIA) || BUILDFLAG(IS_OHOS)
   pthread_attr_t attr;
   int error;
 #if defined(OS_FREEBSD)

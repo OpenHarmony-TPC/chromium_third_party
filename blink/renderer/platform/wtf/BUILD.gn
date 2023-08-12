@@ -33,6 +33,10 @@ config("wtf_config") {
       cflags += [ "/wd4291" ]
     }
   }
+
+  if (is_ohos) {
+    cflags = [ "-Wno-invalid-constexpr" ]
+  }
 }
 
 component("wtf") {

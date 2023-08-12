@@ -16,7 +16,7 @@ config("tools_config") {
     "breakpad/src",
     "breakpad/src/third_party",
   ]
-  if (is_android) {
+  if (is_android || is_ohos) {
     defines = [ "__ANDROID__" ]
   }
   if (is_clang) {
@@ -31,14 +31,14 @@ config("internal_config") {
     # This is needed for GTMLogger to work correctly.
     defines += [ "DEBUG" ]
   }
-  if (is_android) {
+  if (is_android || is_ohos) {
     defines += [ "__ANDROID__" ]
   }
 }
 
 config("client_config") {
   include_dirs = [ "breakpad/src" ]
-  if (is_android) {
+  if (is_android || (is_ohos && !use_musl)) {
     include_dirs += [ "breakpad/src/common/android/include" ]
   }
   if (is_chromeos_ash) {
@@ -486,7 +486,7 @@ if (is_mac) {
   }
 }
 
-if (is_linux || is_chromeos || is_android) {
+if (is_linux || is_chromeos || is_android || is_ohos) {
   if (current_toolchain == host_toolchain) {
     executable("symupload") {
       sources = [

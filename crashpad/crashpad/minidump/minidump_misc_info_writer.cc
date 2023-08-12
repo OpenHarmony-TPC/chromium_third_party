@@ -119,6 +119,8 @@ std::string MinidumpMiscInfoDebugBuildString() {
   static constexpr char kOS[] = "win";
 #elif BUILDFLAG(IS_FUCHSIA)
   static constexpr char kOS[] = "fuchsia";
+#elif BUILDFLAG(IS_OHOS)
+  static constexpr char kOS[] = "ohos";
 #else
 #error define kOS for this operating system
 #endif
