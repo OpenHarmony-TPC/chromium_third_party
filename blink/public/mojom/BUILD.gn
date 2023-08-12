@@ -311,6 +311,10 @@ mojom("mojom_platform") {
     enabled_features += [ "is_selection_clipboard_buffer_possible" ]
   }
 
+  if (is_ohos) {
+    enabled_features += ["OHOS_ENABLE_DRAG_DROP"]
+  }
+
   shared_cpp_typemaps = [
     {
       types = [

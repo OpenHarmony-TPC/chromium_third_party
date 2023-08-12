@@ -65,6 +65,11 @@
 #include "third_party/blink/renderer/platform/weborigin/security_policy.h"
 #include "ui/gfx/geometry/point_conversions.h"
 
+#if BUILDFLAG(IS_OHOS)
+#include "base/command_line.h"
+#include "content/public/common/content_switches.h"
+#endif
+
 namespace blink {
 
 namespace {
@@ -411,6 +416,34 @@ void HTMLAnchorElement::SendPings(const KURL& destination_url) const {
   }
 }
 
+#if BUILDFLAG(IS_OHOS)
+bool ShouldFixedTargetToTop(LocalFrame* frame) {
+  bool should_fixed_target_to_top = false;
+  if (!frame)
+    return should_fixed_target_to_top;
+
+  if (frame->GetSettings() &&
+      !frame->GetSettings()->IsBlankTargetPopupInterceptEnabled()) {
+    return false;
+  }
+
+  if (frame->IsMainFrame()) {
+    should_fixed_target_to_top = true;
+  } else if (!frame->DomWindow()->IsSandboxed(
+                 network::mojom::blink::WebSandboxFlags::kTopNavigation) ||
+             !frame->DomWindow()->IsSandboxed(
+                 network::mojom::blink::WebSandboxFlags::
+                     kTopNavigationByUserActivation)) {
+    LOG(INFO) << "ShouldFixedTargetToTop: the frame is not MainFrame. "
+                 "The flag of 'allow-top-navigation' or "
+                 "'allow-top-navigation-by-user-activation' is set.";
+    should_fixed_target_to_top = true;
+  }
+
+  return should_fixed_target_to_top;
+}
+#endif
+
 void HTMLAnchorElement::HandleClick(Event& event) {
   event.SetDefaultHandled();
 
@@ -516,6 +549,19 @@ void HTMLAnchorElement::HandleClick(Event& event) {
           : mojom::blink::TriggeringEventInfo::kFromUntrustedEvent);
   frame_request.SetInputStartTime(event.PlatformTimeStamp());
 
+#if BUILDFLAG(IS_OHOS)
+  AtomicString fixed_target;
+  if ((*base::CommandLine::ForCurrentProcess())
+          .HasSwitch(switches::kForBrowser)) {
+    if (!frame->Tree().FindFrameByName(target)) {
+      if (ShouldFixedTargetToTop(frame)) {
+        LOG(WARNING)
+            << "HTMLAnchorElement::HandleClick has fixed target frame to _top";
+        fixed_target = "_top";
+      }
+    } 
+  }
+#endif
   frame->MaybeLogAdClickNavigation();
 
   if (request.HasUserGesture() && HasImpression()) {
@@ -533,8 +579,17 @@ void HTMLAnchorElement::HandleClick(Event& event) {
       frame_request.SetImpression(*impression);
   }
 
+#if BUILDFLAG(IS_OHOS)
+  if ((*base::CommandLine::ForCurrentProcess())
+          .HasSwitch(switches::kForBrowser)) {
+    fixed_target = fixed_target.IsEmpty() ? target : fixed_target;
+  } else {
+    fixed_target = target;
+  }
+#endif
+
   Frame* target_frame =
-      frame->Tree().FindOrCreateFrameForNavigation(frame_request, target).frame;
+      frame->Tree().FindOrCreateFrameForNavigation(frame_request, fixed_target).frame;
 
   // If hrefTranslate is enabled and set restrict processing it
   // to same frame or navigations with noopener set.

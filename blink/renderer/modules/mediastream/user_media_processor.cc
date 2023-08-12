@@ -211,6 +211,10 @@ void InitializeVideoTrackControls(UserMediaRequest* user_media_request,
       constraints.Basic().media_stream_source.Exact().IsEmpty()
           ? String()
           : String(constraints.Basic().media_stream_source.Exact()[0]);
+#if BUILDFLAG(IS_OHOS)
+  LOG(INFO) << "InitializeVideoTrackControls source_constraint "
+            << source_constraint;
+#endif
   if (!source_constraint.IsEmpty()) {
     if (source_constraint == blink::kMediaStreamSourceTab) {
       *stream_type = MediaStreamType::GUM_TAB_VIDEO_CAPTURE;
@@ -589,6 +593,11 @@ void UserMediaProcessor::ProcessRequest(UserMediaRequest* request,
                          current_request_info_->request()->Audio(),
                          current_request_info_->request()->Video()));
   // TODO(guidou): Set up audio and video in parallel.
+  LOG(INFO) << base::StringPrintf("ProcessRequest({request_id=%d}, {audio=%d}, "
+                "{video=%d})",
+                current_request_info_->request_id(),
+                current_request_info_->request()->Audio(),
+                current_request_info_->request()->Video());
   if (current_request_info_->request()->Audio()) {
     SetupAudioInput();
     return;
@@ -768,7 +777,6 @@ UserMediaProcessor::DetermineExistingAudioSessionId() {
 void UserMediaProcessor::SetupVideoInput() {
   DCHECK_CALLED_ON_VALID_THREAD(thread_checker_);
   DCHECK(current_request_info_);
-
   if (!current_request_info_->request()->Video()) {
     absl::optional<base::UnguessableToken> audio_session_id =
         DetermineExistingAudioSessionId();
@@ -921,7 +929,6 @@ void UserMediaProcessor::SelectVideoContentSettings() {
     current_request_info_->stream_controls()->video.device_id =
         settings.device_id();
   }
-
   current_request_info_->SetVideoCaptureSettings(settings,
                                                  true /* is_content_capture */);
   GenerateStreamForCurrentRequestInfo();
@@ -1026,6 +1033,9 @@ void UserMediaProcessor::OnStreamGenerated(
           {media::VideoCaptureFormat(GetScreenSize(), format.frame_rate,
                                      format.pixel_format)});
     }
+#if BUILDFLAG(IS_OHOS)
+    SendLogMessage("OnStreamGenerated StartTracks");
+#endif
     StartTracks(label);
     return;
   }
@@ -1460,7 +1470,7 @@ UserMediaProcessor::CreateVideoSource(
   DCHECK_CALLED_ON_VALID_THREAD(thread_checker_);
   DCHECK(current_request_info_);
   DCHECK(current_request_info_->video_capture_settings().HasValue());
-
+  LOG(INFO) << "UserMediaProcessor::CreateVideoSource ";
   return std::make_unique<blink::MediaStreamVideoCapturerSource>(
       frame_, std::move(stop_callback), device,
       current_request_info_->video_capture_settings().capture_params(),

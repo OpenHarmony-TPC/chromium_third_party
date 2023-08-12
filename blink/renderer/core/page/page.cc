@@ -955,6 +955,15 @@ void Page::Trace(Visitor* visitor) const {
   Supplementable<Page>::Trace(visitor);
 }
 
+#if BUILDFLAG(IS_OHOS)
+bool Page::IsInTextDraging() {
+  if (drag_controller_) {
+    return drag_controller_->IsInTextDraging();
+  }
+  return false;
+}
+#endif
+
 void Page::AnimationHostInitialized(cc::AnimationHost& animation_host,
                                     LocalFrameView* view) {
   if (GetScrollingCoordinator()) {

@@ -519,6 +519,9 @@ class CORE_EXPORT WebLocalFrameImpl final
 
   void AddInspectorIssueImpl(mojom::blink::InspectorIssueCode code) override;
 
+#if BUILDFLAG(IS_OHOS)
+  void SelectClosetWordAndShowSelectionMenu() override;
+#endif
  private:
   friend LocalFrameClientImpl;
 

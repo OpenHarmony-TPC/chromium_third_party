@@ -19,7 +19,12 @@ enum WebMenuSourceType {
   kMenuSourceStylus,
   kMenuSourceAdjustSelection,
   kMenuSourceAdjustSelectionReset,
+#if defined(OHOS_NWEB_EX)
+  kMenuSourceSelectAndCopy,
+  kMenuSourceTypeLast = kMenuSourceSelectAndCopy
+#else
   kMenuSourceTypeLast = kMenuSourceAdjustSelectionReset
+#endif
 };
 
 }  // namespace blink

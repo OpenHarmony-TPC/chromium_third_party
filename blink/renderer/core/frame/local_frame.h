@@ -223,6 +223,9 @@ class CORE_EXPORT LocalFrame final
   void DidChangeThemeColor(bool update_theme_color_cache);
   void DidChangeBackgroundColor(SkColor background_color, bool color_adjust);
 
+#if BUILDFLAG(IS_OHOS)
+  void NotifyContextMenuWillShow();
+#endif
   // Returns false if detaching child frames reentrantly detached `this`.
   bool DetachChildren();
   // After Document is attached, resets state related to document, and sets

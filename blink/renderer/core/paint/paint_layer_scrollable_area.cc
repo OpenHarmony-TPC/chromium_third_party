@@ -668,7 +668,20 @@ PhysicalRect PaintLayerScrollableArea::LayoutContentRect(
   NGPhysicalBoxStrut scrollbars;
   if (scrollbar_inclusion == kExcludeScrollbars)
     scrollbars = GetLayoutBox()->ComputeScrollbars();
-
+#if BUILDFLAG(IS_OHOS)
+  if (is_pinch_gesture_active_) {
+    Page* page = GetLayoutBox()->GetFrame()->LocalFrameRoot().GetPage();
+    if (page) {
+      float scale_factor = page->PageScaleFactor();
+      if (scale_factor > 1.f && layer_->IsRootLayer()) {
+        layer_size.SetWidth(
+            blink::LayoutUnit(layer_size.Width() / scale_factor));
+        layer_size.SetHeight(
+            blink::LayoutUnit(layer_size.Height() / scale_factor));
+      }
+    }
+  }
+#endif
   PhysicalSize size(
       layer_size.Width() - border_width - scrollbars.HorizontalSum(),
       layer_size.Height() - border_height - scrollbars.VerticalSum());
@@ -762,6 +775,34 @@ void PaintLayerScrollableArea::ScrollbarVisibilityChanged() {
     view->ClearHitTestCache();
 }
 
+#if BUILDFLAG(IS_OHOS)
+void PaintLayerScrollableArea::UpdateScrollbarLengthOrCreateWidthScale() {
+  is_pinch_gesture_active_ = true;
+  if (HorizontalScrollbar() && VerticalScrollbar()) {
+    UpdateScrollbarProportions();
+  } else {
+    bool needs_horizontal_scrollbar;
+    bool needs_vertical_scrollbar;
+    bool needs_notify_location = false;
+    ComputeScrollbarExistence(needs_horizontal_scrollbar,
+                              needs_vertical_scrollbar);
+    if (needs_horizontal_scrollbar && !HasHorizontalScrollbar()) {
+      SetHasHorizontalScrollbar(true);
+      needs_notify_location = true;
+    }
+    if (needs_vertical_scrollbar && !HasVerticalScrollbar()) {
+      SetHasVerticalScrollbar(true);
+      needs_notify_location = true;
+    }
+    if (needs_notify_location) {
+      UpdateScrollbarProportions();
+      ClampScrollOffsetAfterOverflowChange();
+      PositionOverflowControls();
+    }
+  }
+}
+
+#endif
 void PaintLayerScrollableArea::ScrollbarFrameRectChanged() {
   // Size of non-overlay scrollbar affects overflow clip rect. size of overlay
   // scrollbar effects hit testing rect excluding overlay scrollbars.
@@ -1511,8 +1552,8 @@ void PaintLayerScrollableArea::ComputeScrollbarExistence(
       // LayoutView is special as there's various quirks and settings that
       // style doesn't account for.
       layout_view->CalculateScrollbarModes(h_mode, v_mode);
-      h_mode = is_vertical_scrollbars_hide ? mojom::blink::ScrollbarMode::kAlwaysOff : h_mode;
-      v_mode = is_horizontal_scrollbars_hide ? mojom::blink::ScrollbarMode::kAlwaysOff : v_mode;
+      h_mode = is_horizontal_scrollbars_hide ? mojom::blink::ScrollbarMode::kAlwaysOff : h_mode;
+      v_mode = is_vertical_scrollbars_hide ? mojom::blink::ScrollbarMode::kAlwaysOff : v_mode;
     } else {
       auto overflow_x = GetLayoutBox()->StyleRef().OverflowX();
       if (overflow_x == EOverflow::kScroll) {
@@ -2732,6 +2773,11 @@ Scrollbar* PaintLayerScrollableArea::ScrollbarManager::CreateScrollbar(
     scrollbar = MakeGarbageCollected<Scrollbar>(ScrollableArea(), orientation,
                                                 style_source_element);
   }
+#if BUILDFLAG(IS_OHOS)
+  uint32_t colorValue = ScrollableArea()->GetLayoutBox()->GetFrame()
+                            ->GetSettings()->GetScrollBarColor();
+  ScrollableArea()->SetScrollbarColor(colorValue);
+#endif  
   ScrollableArea()->GetLayoutBox()->GetDocument().View()->AddScrollbar(
       scrollbar);
   return scrollbar;

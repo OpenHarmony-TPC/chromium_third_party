@@ -167,7 +167,7 @@ void MediaStreamSource::SetReadyState(ReadyState ready_state) {
   SendLogMessage(String::Format("SetReadyState({id=%s}, {ready_state=%s})",
                                 Id().Utf8().c_str(),
                                 ReadyStateToString(ready_state))
-                     .Utf8());
+                .Utf8());
   if (ready_state_ != kReadyStateEnded && ready_state_ != ready_state) {
     ready_state_ = ready_state;
 

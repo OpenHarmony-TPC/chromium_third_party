@@ -31,6 +31,9 @@ enum : unsigned {
 
   // Used to paint SVG resource subtree for masks, filter images, etc.
   kPaintingResourceSubtree = 1 << 4,
+  #ifdef OHOS_ENABLE_DRAG_DROP
+  kGlobalPaintDragSelection = 1 << 5,
+#endif
 };
 }  // namespace PaintFlag
 

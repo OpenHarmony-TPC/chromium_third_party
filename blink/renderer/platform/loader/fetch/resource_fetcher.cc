@@ -2280,6 +2280,13 @@ void ResourceFetcher::PopulateAndAddResourceTimingInfo(
     Resource* resource,
     scoped_refptr<ResourceTimingInfo> info,
     base::TimeTicks response_end) {
+  // Resource timing entries that correspond to resources fetched by extensions
+  // are precluded.
+  if (resource->Options().world_for_csp.get() &&
+      resource->Options().world_for_csp->IsIsolatedWorld()) {
+    return;
+  }
+  
   const KURL& initial_url =
       resource->GetResourceRequest().GetRedirectInfo().has_value()
           ? resource->GetResourceRequest().GetRedirectInfo()->original_url

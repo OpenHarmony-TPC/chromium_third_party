@@ -1645,4 +1645,13 @@ gfx::RectF WidgetBase::BlinkSpaceToDIPs(const gfx::RectF& rect) {
   return gfx::ScaleRect(rect, reverse);
 }
 
+#if BUILDFLAG(IS_OHOS)
+void WidgetBase::SetZoomLevel(float magnify_delta, const gfx::Point& anchor) {
+  if (!widget_input_handler_manager_) {
+    return;
+  }
+  widget_input_handler_manager_->SetZoomLevel(magnify_delta, anchor);
+}
+#endif  // BUILDFLAG(IS_OHOS)
+
 }  // namespace blink

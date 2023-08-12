@@ -96,6 +96,12 @@ enum EventType {
   // Sent as soon as the long-press timeout fires, while the finger is still
   // down.
   kGestureLongPress,
+
+  // Sent as soon as the drag-long-press timeout fires, while the finger is
+  // still done. Directly drag image by touch long press.
+  [EnableIf=is_ohos]
+  kGestureDragLongPress,
+
   // Sent when the finger is lifted following a GestureLongPress.
   kGestureLongTap,
   // Sent on finger lift when two fingers tapped at the same time without

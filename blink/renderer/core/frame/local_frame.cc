@@ -1020,6 +1020,11 @@ void LocalFrame::DidFocus() {
   GetLocalFrameHostRemote().DidFocusFrame();
 }
 
+#if BUILDFLAG(IS_OHOS)
+void LocalFrame::NotifyContextMenuWillShow() {
+  GetLocalFrameHostRemote().NotifyContextMenuWillShow();
+}
+#endif
 void LocalFrame::DidChangeThemeColor(bool update_theme_color_cache) {
   if (Tree().Parent())
     return;

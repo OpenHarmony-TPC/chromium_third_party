@@ -523,7 +523,7 @@ MediaStreamVideoTrack::~MediaStreamVideoTrack() {
   DCHECK(sinks_.IsEmpty());
   DCHECK(encoded_sinks_.IsEmpty());
   Stop();
-  DVLOG(3) << "~MediaStreamVideoTrack()";
+  LOG(INFO) << "~MediaStreamVideoTrack()";
 }
 
 static void AddSinkInternal(Vector<WebMediaStreamSink*>* sinks,

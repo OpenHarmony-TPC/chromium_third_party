@@ -17,6 +17,9 @@ UntrustworthyContextMenuParams::UntrustworthyContextMenuParams()
       media_flags(0),
       spellcheck_enabled(false),
       is_editable(false),
+#if BUILDFLAG(IS_OHOS)
+      is_selectable(false),
+#endif
       writing_direction_default(
           blink::ContextMenuData::kCheckableMenuItemDisabled),
       writing_direction_left_to_right(
@@ -27,7 +30,8 @@ UntrustworthyContextMenuParams::UntrustworthyContextMenuParams()
       referrer_policy(network::mojom::ReferrerPolicy::kDefault),
       source_type(ui::MENU_SOURCE_NONE),
       input_field_type(blink::mojom::ContextMenuDataInputFieldType::kNone),
-      selection_start_offset(0) {}
+      selection_start_offset(0) {
+}
 
 UntrustworthyContextMenuParams::UntrustworthyContextMenuParams(
     const UntrustworthyContextMenuParams& other) {
@@ -76,6 +80,9 @@ void UntrustworthyContextMenuParams::Assign(
   selection_rect = other.selection_rect;
   selection_start_offset = other.selection_start_offset;
   opened_from_highlight = other.opened_from_highlight;
+#if BUILDFLAG(IS_OHOS)
+  is_selectable = other.is_selectable;
+#endif
 }
 
 UntrustworthyContextMenuParams::~UntrustworthyContextMenuParams() = default;

@@ -471,6 +471,18 @@ void WebSettingsImpl::SetVerticalHideScrollbars(bool enabled) {
 void WebSettingsImpl::SetHorizontalHideScrollbars(bool enabled) {
   settings_->SetHorizontalHideScrollbars(enabled);
 }
+
+void WebSettingsImpl::SetContextMenuCustomization(bool enabled) {
+  settings_->SetContextMenuCustomization(enabled);
+}
+
+void WebSettingsImpl::SetScrollBarColor(uint32_t value) {
+  settings_->SetScrollBarColor(value);
+}
+
+void WebSettingsImpl::EnableBlankTargetPopupIntercept(bool enabled) {
+  settings_->EnableBlankTargetPopupIntercept(enabled);
+}
 #endif
 
 void WebSettingsImpl::SetMockGestureTapHighlightsEnabled(bool enabled) {

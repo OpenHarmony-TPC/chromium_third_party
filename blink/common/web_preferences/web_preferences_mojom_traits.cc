@@ -97,6 +97,11 @@ bool StructTraits<blink::mojom::WebPreferencesDataView,
 #if BUILDFLAG(IS_OHOS)
   out->hide_vertical_scrollbars = data.hide_vertical_scrollbars();
   out->hide_horizontal_scrollbars = data.hide_horizontal_scrollbars();
+  out->contextmenu_customization_enabled =
+      data.contextmenu_customization_enabled();
+  out->scrollbar_color = data.scrollbar_color();
+  out->blank_target_popup_intercept_enabled =
+      data.blank_target_popup_intercept_enabled();
 #endif
   out->accelerated_2d_canvas_enabled = data.accelerated_2d_canvas_enabled();
   out->new_canvas_2d_api_enabled = data.new_canvas_2d_api_enabled();

@@ -99,6 +99,12 @@ struct BLINK_COMMON_EXPORT
     return r.is_editable;
   }
 
+#if BUILDFLAG(IS_OHOS)
+  static bool is_selectable(const blink::UntrustworthyContextMenuParams& r) {
+    return r.is_selectable;
+  }
+#endif
+
   static int writing_direction_default(
       const blink::UntrustworthyContextMenuParams& r) {
     return r.writing_direction_default;

@@ -77,6 +77,10 @@ ui::EventType WebInputEvent::GetTypeAsUiEventType() const {
       return ui::EventType::ET_GESTURE_TAP_CANCEL;
     case WebInputEvent::Type::kGestureLongPress:
       return ui::EventType::ET_GESTURE_LONG_PRESS;
+#ifdef OHOS_ENABLE_DRAG_DROP
+    case WebInputEvent::Type::kGestureDragLongPress:
+      return ui::EventType::ET_GESTURE_DRAG_LONG_PRESS;
+#endif
     case WebInputEvent::Type::kGestureLongTap:
       return ui::EventType::ET_GESTURE_LONG_TAP;
     case WebInputEvent::Type::kGestureTwoFingerTap:

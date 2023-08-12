@@ -83,6 +83,8 @@ WebPreferences::WebPreferences()
 #if BUILDFLAG(IS_OHOS)
       hide_vertical_scrollbars(false),
       hide_horizontal_scrollbars(false),
+      contextmenu_customization_enabled(false),
+      scrollbar_color(0),
 #endif
       accelerated_2d_canvas_enabled(false),
       new_canvas_2d_api_enabled(false),
@@ -131,11 +133,7 @@ WebPreferences::WebPreferences()
 #if defined(OS_ANDROID) || BUILDFLAG(IS_OHOS)
       viewport_meta_enabled(true),
       shrinks_viewport_contents_to_fit(true),
-#if BUILDFLAG(IS_OHOS)
-      viewport_style(mojom::ViewportStyle::kDefault),
-#else
       viewport_style(mojom::ViewportStyle::kMobile),
-#endif
       always_show_context_menu_on_touch(false),
       smooth_scroll_for_find_enabled(true),
       main_frame_resizes_are_orientation_changes(true),
@@ -175,7 +173,11 @@ WebPreferences::WebPreferences()
 #if !defined(OS_ANDROID) && !BUILDFLAG(IS_OHOS)
       text_autosizing_enabled(false),
 #else
+#if BUILDFLAG(IS_OHOS)
+      text_autosizing_enabled(false),
+#else
       text_autosizing_enabled(true),
+#endif
       font_scale_factor(1.0f),
       device_scale_adjustment(1.0f),
       force_enable_zoom(false),

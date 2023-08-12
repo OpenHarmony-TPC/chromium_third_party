@@ -78,6 +78,15 @@ AudioData* MakeAudioData(ScriptState* script_state,
 VideoEncoderEncodeOptions* MakeEncodeOptions(
     const wc_fuzzer::EncodeVideo_EncodeOptions& proto);
 
+String ToBitrateMode(
+    wc_fuzzer::ConfigureVideoEncoder_VideoEncoderBitrateMode mode);
+
+String ToScalabilityMode(wc_fuzzer::ConfigureVideoEncoder_ScalabilityMode mode);
+
+String ToLatencyMode(wc_fuzzer::ConfigureVideoEncoder_LatencyMode mode);
+
+String ToAlphaOption(wc_fuzzer::ConfigureVideoEncoder_AlphaOption option);
+
 String ToAccelerationType(
     wc_fuzzer::ConfigureVideoEncoder_EncoderAccelerationPreference type);
 

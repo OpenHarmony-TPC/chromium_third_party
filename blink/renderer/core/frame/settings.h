@@ -80,6 +80,30 @@ class CORE_EXPORT Settings {
   bool GetHorizontalHideScrollbars() {
     return hide_horizontal_scrollbars_;
   }
+
+  void SetContextMenuCustomization(bool contextmenu_customization_enabled) {
+    contextmenu_customization_enabled_ = contextmenu_customization_enabled;
+  }
+
+  bool IsContextMenuCustomizationEnabled() {
+    return contextmenu_customization_enabled_;
+  }
+
+  void SetScrollBarColor(uint32_t colorValue) {
+    scrollbar_color_ = colorValue;
+  }
+
+  uint32_t GetScrollBarColor() {
+    return scrollbar_color_;
+  }
+  
+  void EnableBlankTargetPopupIntercept(bool enabled) {
+    blank_target_popup_intercept_enabled_ = enabled;
+  }
+
+  bool IsBlankTargetPopupInterceptEnabled() const {
+    return blank_target_popup_intercept_enabled_;
+  }
 #endif
 
   void SetDelegate(SettingsDelegate*);
@@ -96,6 +120,9 @@ class CORE_EXPORT Settings {
 #if BUILDFLAG(IS_OHOS)
   bool hide_vertical_scrollbars_ = true;
   bool hide_horizontal_scrollbars_ = true;
+  bool contextmenu_customization_enabled_ = false;
+  uint32_t scrollbar_color_ = 0;
+  bool blank_target_popup_intercept_enabled_ = true;
 #endif
 };
 

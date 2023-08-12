@@ -269,6 +269,9 @@ class BLINK_COMMON_EXPORT WebGestureEvent : public WebInputEvent {
       case Type::kGestureTapCancel:
       case Type::kGestureTwoFingerTap:
       case Type::kGestureLongPress:
+#ifdef OHOS_ENABLE_DRAG_DROP
+      case Type::kGestureDragLongPress:
+#endif
       case Type::kGestureLongTap:
         return false;
       default:

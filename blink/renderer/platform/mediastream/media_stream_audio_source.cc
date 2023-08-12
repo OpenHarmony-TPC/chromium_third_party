@@ -230,6 +230,7 @@ void MediaStreamAudioSource::DeliverDataToTracks(
 void MediaStreamAudioSource::DoStopSource() {
   DCHECK(GetTaskRunner()->BelongsToCurrentThread());
   LogMessage(base::StringPrintf("%s()", __func__));
+  LOG(INFO)<< "MediaStreamAudioSource::DoStopSource()";
   EnsureSourceIsStopped();
   is_stopped_ = true;
 }

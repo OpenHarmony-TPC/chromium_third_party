@@ -48,7 +48,7 @@ void LocalVideoCapturerSource::StartCapture(
   DCHECK(params.requested_format.IsValid());
   DCHECK_CALLED_ON_VALID_THREAD(thread_checker_);
   running_callback_ = running_callback;
-
+  LOG(INFO) << "LocalVideoCapturerSource::StartCapture " << params.requested_format.pixel_format;
   stop_capture_cb_ = manager_->StartCapture(
       session_id_, params,
       base::BindPostTask(

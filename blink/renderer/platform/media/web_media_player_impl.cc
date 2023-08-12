@@ -95,6 +95,10 @@
 #include "media/base/android/media_codec_util.h"
 #endif
 
+#if BUILDFLAG(IS_OHOS)
+#include "third_party/blink/renderer/core/html/media/html_media_element.h"
+#include "third_party/blink/renderer/platform/weborigin/kurl.h"
+#endif
 
 namespace blink {
 namespace {
@@ -327,7 +331,7 @@ bool UsesAudioService(media::RendererType renderer_type) {
   return renderer_type != media::RendererType::kMediaFoundation;
 }
 
-#if defined(OS_ANDROID)
+#if defined(OS_ANDROID) || BUILDFLAG(IS_OHOS)
 
 // These values are persisted to logs. Entries should not be renumbered and
 // numeric values should never be reused.
@@ -1841,11 +1845,13 @@ void WebMediaPlayerImpl::OnError(media::PipelineStatus status) {
   if (suppress_destruction_errors_)
     return;
 
-#if defined(OS_ANDROID)
+#if defined(OS_ANDROID) || BUILDFLAG(IS_OHOS)
   // `mb_data_source_` may be nullptr if someone passes in a m3u8 as a data://
   // URL, since MediaPlayer doesn't support data:// URLs, fail playback now.
   const bool found_hls =
+#if !BUILDFLAG(IS_OHOS)
       base::FeatureList::IsEnabled(media::kHlsPlayer) &&
+#endif  // !BUILDFLAG(IS_OHOS)
       status == media::PipelineStatus::DEMUXER_ERROR_DETECTED_HLS;
   if (found_hls && mb_data_source_) {
     demuxer_found_hls_ = true;
@@ -1881,8 +1887,13 @@ void WebMediaPlayerImpl::OnError(media::PipelineStatus status) {
         "Media.WebMediaPlayerImpl.HLS.IsMixedContent",
         frame_url_is_cryptographic && !manifest_url_is_cryptographic);
 
+#if BUILDFLAG(IS_OHOS)
+    renderer_factory_selector_->SetBaseRendererType(
+        media::RendererType::kOHOSMediaPlayer);
+#else
     renderer_factory_selector_->SetBaseRendererType(
         media::RendererType::kMediaPlayer);
+#endif
 
     loaded_url_ = mb_data_source_->GetUrlAfterRedirects();
     DCHECK(data_source_);
@@ -2842,11 +2853,15 @@ std::unique_ptr<media::Renderer> WebMediaPlayerImpl::CreateRenderer(
 }
 
 void WebMediaPlayerImpl::StartPipeline() {
-#if BUILDFLAG(IS_OHOS) && !BUILDFLAG(ENABLE_FFMPEG)
-  DVLOG(1) << __func__ << "set kOHOSMediaPlayer for kLoadTypeURL";
-  if (load_type_ == kLoadTypeURL) {
-    renderer_factory_selector_->SetBaseRendererType(
-        media::RendererType::kOHOSMediaPlayer);
+#if BUILDFLAG(IS_OHOS)
+  KURL loaded_kurl(loaded_url_);
+  if (HTMLMediaElement::IsHLSURL(loaded_kurl) && !loaded_kurl.IsLocalFile()) {
+    DVLOG(1) << __func__ << "set kOHOSMediaPlayer for kLoadTypeURL";
+    if (load_type_ == kLoadTypeURL) {
+      demuxer_found_hls_ = true;
+      renderer_factory_selector_->SetBaseRendererType(
+          media::RendererType::kOHOSMediaPlayer);
+    }
   }
 #endif
   DCHECK(main_task_runner_->BelongsToCurrentThread());
@@ -2863,12 +2878,7 @@ void WebMediaPlayerImpl::StartPipeline() {
                          &WebMediaPlayerImpl::OnFirstFrame, weak_this_))));
 
 #if defined(OS_ANDROID) || BUILDFLAG(IS_OHOS)
-#if defined(OS_ANDROID)
-  if (demuxer_found_hls_ ||
-#else
-  if (
-#endif
-      renderer_factory_selector_->GetCurrentFactory()
+  if (demuxer_found_hls_ || renderer_factory_selector_->GetCurrentFactory()
                                     ->GetRequiredMediaResourceType() ==
                                 media::MediaResource::Type::URL) {
     // MediaPlayerRendererClientFactory is the only factory that a uses

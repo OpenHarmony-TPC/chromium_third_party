@@ -358,6 +358,10 @@ class PLATFORM_EXPORT WidgetBase : public mojom::blink::Widget,
     return local_surface_id_from_parent_;
   }
 
+#if BUILDFLAG(IS_OHOS)
+  void SetZoomLevel(float magnify_delta, const gfx::Point& anchor);
+#endif  // BUILDFLAG(IS_OHOS)
+
  private:
   bool CanComposeInline();
   void UpdateTextInputStateInternal(bool show_virtual_keyboard,

@@ -359,13 +359,8 @@ inline void EventDispatcher::DispatchEventPostProcess(
   // Call default event handlers. While the DOM does have a concept of
   // preventing default handling, the detail of which handlers are called is an
   // internal implementation detail and not part of the DOM.
-#if BUILDFLAG(IS_OHOS)
-  if ((event_->type() == event_type_names::kClick || !event_->defaultPrevented())
-      && !event_->DefaultHandled() && is_trusted_or_click) {
-#elif
   if (!event_->defaultPrevented() && !event_->DefaultHandled() &&
       is_trusted_or_click) {
-#endif
     // Non-bubbling events call only one default event handler, the one for the
     // target.
     node_->DefaultEventHandler(*event_);

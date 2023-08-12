@@ -31,6 +31,7 @@
 #include <memory>
 #include <utility>
 
+#include "base/logging.h"
 #include "build/build_config.h"
 #include "third_party/blink/public/common/input/web_input_event.h"
 #include "third_party/blink/public/common/input/web_mouse_wheel_event.h"
@@ -2019,6 +2020,9 @@ void EventHandler::ApplyTouchAdjustment(WebGestureEvent* gesture_event,
           location, *hit_test_result, adjusted_point, adjusted_node);
       break;
     case WebInputEvent::Type::kGestureLongPress:
+#ifdef OHOS_ENABLE_DRAG_DROP
+    case WebInputEvent::Type::kGestureDragLongPress:
+#endif
     case WebInputEvent::Type::kGestureLongTap:
     case WebInputEvent::Type::kGestureTwoFingerTap:
       adjusted = BestContextMenuNodeForHitTestResult(
@@ -2058,6 +2062,15 @@ WebInputEventResult EventHandler::SendContextMenuEvent(
   PhysicalOffset position_in_contents(v->ConvertFromRootFrame(
       gfx::ToFlooredPoint(event.PositionInRootFrame())));
   HitTestRequest request(HitTestRequest::kActive);
+#if defined(OHOS_NWEB_EX)
+  int hit_test_flag = 0;
+  if (event.menu_source_type == kMenuSourceSelectAndCopy) {
+    hit_test_flag |= HitTestRequest::kReadOnly;
+  } else {
+    hit_test_flag |= HitTestRequest::kActive;
+  }
+  request = hit_test_flag;
+#endif
   MouseEventWithHitTestResults mev =
       frame_->GetDocument()->PerformMouseEventHitTest(
           request, position_in_contents, event);
@@ -2181,6 +2194,15 @@ WebInputEventResult EventHandler::ShowNonLocatedContextMenu(
 
   // Use the focused node as the target for hover and active.
   HitTestRequest request(HitTestRequest::kActive);
+#if defined(OHOS_NWEB_EX)
+  HitTestRequest::HitTestRequestType hit_test_request_type = 0;
+  if (source_type == kMenuSourceSelectAndCopy) {
+    hit_test_request_type |= HitTestRequest::kReadOnly;
+  } else {
+    hit_test_request_type |= HitTestRequest::kActive;
+  }
+  request = hit_test_request_type;
+#endif
   HitTestLocation location(location_in_root_frame);
   HitTestResult result(request, location);
   result.SetInnerNode(focused_element ? static_cast<Node*>(focused_element)

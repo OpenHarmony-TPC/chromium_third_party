@@ -25,6 +25,7 @@ WebPlatformMediaStreamSource::~WebPlatformMediaStreamSource() {
 
 void WebPlatformMediaStreamSource::StopSource() {
   DCHECK(task_runner_->BelongsToCurrentThread());
+  LOG(INFO)<< "WebPlatformMediaStreamSource::StopSource()";
   DoStopSource();
   FinalizeStopSource();
 }

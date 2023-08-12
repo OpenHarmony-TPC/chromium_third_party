@@ -53,6 +53,12 @@
 #include "third_party/blink/renderer/platform/wtf/text/string_builder.h"
 #include "third_party/blink/renderer/platform/wtf/text/text_encoding.h"
 
+#if BUILDFLAG(IS_OHOS)
+#include "base/command_line.h"
+#include "content/public/common/content_switches.h"
+#include "third_party/blink/renderer/core/frame/settings.h"
+#endif
+
 namespace blink {
 
 static int64_t GenerateFormDataIdentifier() {
@@ -323,6 +329,23 @@ FormSubmission* FormSubmission::Create(HTMLFormElement* form,
   frame_request.SetClientRedirectReason(reason);
   frame_request.SetForm(form);
   frame_request.SetTriggeringEventInfo(triggering_event_info);
+#if BUILDFLAG(IS_OHOS)
+  if ((*base::CommandLine::ForCurrentProcess())
+          .HasSwitch(switches::kForBrowser)) {
+    bool blank_target_popup_intercept_enabled = true;
+    Settings* settings = form->GetDocument().GetFrame()->GetSettings();
+    if (settings) {
+      blank_target_popup_intercept_enabled =
+          settings->IsBlankTargetPopupInterceptEnabled();
+    }
+    if (blank_target_popup_intercept_enabled &&
+        !form->GetDocument().GetFrame()->Tree().FindFrameByName(
+            target_or_base_target)) {
+      LOG(WARNING) << "FormSubmission::Navigate has fixed target frame to _top";
+      target_or_base_target = "_top";
+    }
+  }
+#endif
   Frame* target_frame =
       form->GetDocument()
           .GetFrame()

@@ -420,4 +420,18 @@ FrameWidgetInputHandlerImpl::HandlingState::~HandlingState() {
   widget_->set_is_pasting(original_pasting_value_);
 }
 
+#if BUILDFLAG(IS_OHOS)
+void FrameWidgetInputHandlerImpl::SelectAndCopy() {
+  RunOnMainThread(base::BindOnce(
+      [](base::WeakPtr<WidgetBase> widget,
+         base::WeakPtr<mojom::blink::FrameWidgetInputHandler> handler) {
+        DCHECK_EQ(!!widget, !!handler);
+        if (!widget)
+          return;
+        handler->SelectAndCopy();
+      },
+      widget_, main_thread_frame_widget_input_handler_));
+}
+#endif
+
 }  // namespace blink

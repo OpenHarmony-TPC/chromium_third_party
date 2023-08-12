@@ -275,6 +275,9 @@ class BLINK_COMMON_EXPORT WebInputEvent {
       CASE_TYPE(GestureDoubleTap);
       CASE_TYPE(GestureTwoFingerTap);
       CASE_TYPE(GestureLongPress);
+#ifdef OHOS_ENABLE_DRAG_DROP
+      CASE_TYPE(GestureDragLongPress);
+#endif
       CASE_TYPE(GestureLongTap);
       CASE_TYPE(GesturePinchBegin);
       CASE_TYPE(GesturePinchEnd);

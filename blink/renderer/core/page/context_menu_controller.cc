@@ -478,7 +478,6 @@ bool ContextMenuController::ShowContextMenu(LocalFrame* frame,
   ContextMenuData data;
   data.mouse_position = selected_frame->View()->FrameToViewport(
       result.RoundedPointInInnerNodeFrame());
-
   data.edit_flags = ComputeEditFlags(
       *selected_frame->GetDocument(),
       To<LocalFrame>(page_->GetFocusController().FocusedOrMainFrame())
@@ -857,6 +856,23 @@ bool ContextMenuController::ShowContextMenu(LocalFrame* frame,
       WebLocalFrameImpl::FromFrame(selected_frame);
   if (!selected_web_frame || !selected_web_frame->Client())
     return false;
+
+#if defined(OHOS_NWEB_EX)
+  bool contextmenu_customization_enabled =
+      page_->GetSettings().IsContextMenuCustomizationEnabled();
+  if (contextmenu_customization_enabled &&
+      source_type == kMenuSourceSelectAndCopy && data.selected_text.empty() &&
+      !selected_frame->SelectedText().IsEmpty()) {
+    data.selected_text = selected_frame->SelectedText().Utf8();
+  }
+
+  data.is_selectable = false;
+  if (contextmenu_customization_enabled && result.InnerNode() &&
+      result.InnerNode()->GetLayoutObject() &&
+      result.InnerNode()->GetLayoutObject()->IsSelectable()) {
+    data.is_selectable = true;
+  }
+#endif
 
   selected_web_frame->ShowContextMenu(
       context_menu_client_receiver_.BindNewEndpointAndPassRemote(

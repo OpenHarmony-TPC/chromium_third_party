@@ -97,6 +97,8 @@ struct BLINK_COMMON_EXPORT WebPreferences {
 #if BUILDFLAG(IS_OHOS)
   bool hide_vertical_scrollbars;
   bool hide_horizontal_scrollbars;
+  bool contextmenu_customization_enabled;
+  uint32_t scrollbar_color;
 #endif
   bool accelerated_2d_canvas_enabled;
   bool canvas_2d_layers_enabled = false;
@@ -261,6 +263,8 @@ struct BLINK_COMMON_EXPORT WebPreferences {
 
   // Don't accelerate small canvases to avoid crashes TODO(crbug.com/1004304)
   bool disable_accelerated_small_canvases;
+
+  bool blank_target_popup_intercept_enabled = true;
 #endif  // defined(OS_ANDROID)
 
   // Enable forcibly modifying content rendering to result in a light on dark

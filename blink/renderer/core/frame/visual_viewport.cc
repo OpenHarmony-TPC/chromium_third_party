@@ -507,6 +507,14 @@ void VisualViewport::SetScaleAndLocation(float scale,
                                          const gfx::PointF& location) {
   if (DidSetScaleOrLocation(scale, is_pinch_gesture_active, location)) {
     NotifyRootFrameViewport();
+#if BUILDFLAG(IS_OHOS)
+    if (is_pinch_gesture_active) {
+      LocalFrameView* view = LocalMainFrame()->View();
+      if (view) {
+        view->LayoutViewport()->UpdateScrollbarLengthOrCreateWidthScale();
+      }
+    }
+#endif
     Document* document = LocalMainFrame()->GetDocument();
     if (AXObjectCache* cache = document->ExistingAXObjectCache()) {
       cache->HandleScaleAndLocationChanged(document);

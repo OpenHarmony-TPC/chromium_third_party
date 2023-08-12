@@ -60,6 +60,10 @@ class WebFrameWidget : public WebWidget {
   virtual void InitializeNonCompositing(
       WebNonCompositedWidgetClient* client) = 0;
 
+#if BUILDFLAG(IS_OHOS)
+  virtual void SetZoomLevel(float magnify_delta, const gfx::Point& anchor) {}
+#endif  // BUILDFLAG(IS_OHOS)
+
   // Returns the local root of this WebFrameWidget.
   virtual WebLocalFrame* LocalRoot() const = 0;
 

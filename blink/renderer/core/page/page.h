@@ -184,6 +184,9 @@ class CORE_EXPORT Page final : public GarbageCollected<Page>,
   }
   DragCaret& GetDragCaret() const { return *drag_caret_; }
   DragController& GetDragController() const { return *drag_controller_; }
+  #if BUILDFLAG(IS_OHOS)
+  bool IsInTextDraging();
+  #endif
   FocusController& GetFocusController() const { return *focus_controller_; }
   SpatialNavigationController& GetSpatialNavigationController();
   ContextMenuController& GetContextMenuController() const {

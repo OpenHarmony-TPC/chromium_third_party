@@ -41,6 +41,9 @@ bool StructTraits<blink::mojom::UntrustworthyContextMenuParamsDataView,
   out->media_flags = data.media_flags();
   out->spellcheck_enabled = data.spellcheck_enabled();
   out->is_editable = data.is_editable();
+#if BUILDFLAG(IS_OHOS)
+  out->is_selectable = data.is_selectable();
+#endif
   out->writing_direction_default = data.writing_direction_default();
   out->writing_direction_left_to_right = data.writing_direction_left_to_right();
   out->writing_direction_right_to_left = data.writing_direction_right_to_left();

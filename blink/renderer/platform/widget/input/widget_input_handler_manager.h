@@ -173,6 +173,10 @@ class PLATFORM_EXPORT WidgetInputHandlerManager final
 
   MainThreadEventQueue* input_event_queue() { return input_event_queue_.get(); }
 
+#if BUILDFLAG(IS_OHOS)
+  void SetZoomLevel(float magnify_delta, const gfx::Point& anchor);
+#endif  // BUILDFLAG(IS_OHOS)
+
  protected:
   friend class base::RefCountedThreadSafe<WidgetInputHandlerManager>;
   ~WidgetInputHandlerManager() override;

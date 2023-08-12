@@ -95,7 +95,9 @@ class PLATFORM_EXPORT FrameWidgetInputHandlerImpl
   void MoveRangeSelectionExtent(const gfx::Point& extent) override;
   void ScrollFocusedEditableNodeIntoRect(const gfx::Rect& rect) override;
   void MoveCaret(const gfx::Point& point) override;
-
+#if BUILDFLAG(IS_OHOS)
+  void SelectAndCopy() override;
+#endif
  private:
   enum class UpdateState { kNone, kIsPasting, kIsSelectingRange };
 

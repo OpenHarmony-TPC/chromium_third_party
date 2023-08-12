@@ -612,7 +612,9 @@ class CORE_EXPORT PaintLayerScrollableArea final
       return is_vertical_scrollbar_frozen_;
     return FreezeScrollbarsScope::ScrollbarsAreFrozen();
   }
-
+#if BUILDFLAG(IS_OHOS)
+  void UpdateScrollbarLengthOrCreateWidthScale();
+#endif
  private:
   // This also updates main thread scrolling reasons and the LayoutBox's
   // background paint location.
@@ -787,6 +789,9 @@ class CORE_EXPORT PaintLayerScrollableArea final
   gfx::Rect horizontal_scrollbar_visual_rect_;
   gfx::Rect vertical_scrollbar_visual_rect_;
   gfx::Rect scroll_corner_and_resizer_visual_rect_;
+#if BUILDFLAG(IS_OHOS)
+  bool is_pinch_gesture_active_ = false;
+#endif
 
   class ScrollingBackgroundDisplayItemClient final
       : public GarbageCollected<ScrollingBackgroundDisplayItemClient>,

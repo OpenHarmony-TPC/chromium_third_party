@@ -2,13 +2,32 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-assert(is_android)
+assert(is_android || is_ohos)
 
-source_set("ashmem") {
-  sources = [
-    "ashmem-dev.c",
-    "ashmem.h",
-  ]
+if (is_android) {
+  source_set("ashmem") {
+    sources = [
+      "ashmem-dev.c",
+      "ashmem.h",
+    ]
 
-  configs -= [ "//build/config/android:default_orderfile_instrumentation" ]
+    configs -= [ "//build/config/android:default_orderfile_instrumentation" ]
+  }
+} else if(is_ohos) {
+  import("//build/config/ohos/config.gni")
+  config("ohos_system_libs") {
+    libs = [ "nweb_ohos_adapter.z" ]
+
+    include_dirs = ohos_src_includes
+    lib_dirs = ohos_libs_dir
+  }
+
+  source_set("ashmem") {
+    sources = [
+      "ohos_ashmem.cc",
+      "ashmem.h",
+    ]
+
+    configs += [ ":ohos_system_libs" ]
+  }
 }

@@ -73,6 +73,7 @@ UntrustworthyContextMenuParams ContextMenuParamsBuilder::Build(
     << ", input_field_type = " << params.input_field_type
     << ", source_type = " << params.source_type
     << ", media_type = " << params.media_type;
+  params.is_selectable = data.is_selectable;
 #endif
 
   for (const auto& suggestion : data.dictionary_suggestions)

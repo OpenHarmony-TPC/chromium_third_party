@@ -154,6 +154,10 @@ struct UntrustworthyContextMenuParams {
   // Whether context is editable.
   bool is_editable;
 
+  // Whether inner node can selectable.
+  [EnableIf=is_ohos]
+  bool is_selectable;
+  
   // Writing direction menu items.
   int32 writing_direction_default;
   int32 writing_direction_left_to_right;

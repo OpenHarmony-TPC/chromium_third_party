@@ -173,6 +173,9 @@ class WebThemeEngine {
 
   // Extra parameters for scrollbar thumb. Used only for overlay scrollbars.
   struct ScrollbarThumbExtraParams {
+  #if BUILDFLAG(IS_OHOS)
+    SkColor scrollbar_color;
+  #endif  
     WebScrollbarOverlayColorTheme scrollbar_theme;
   };
 

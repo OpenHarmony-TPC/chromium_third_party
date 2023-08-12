@@ -15,6 +15,7 @@
 #include "third_party/blink/public/common/common_export.h"
 #if BUILDFLAG(IS_OHOS)
 #include "third_party/blink/public/common/messaging/transferable_message.h"
+#include "third_party/blink/public/common/messaging/web_message_port.h"
 #endif
 
 namespace blink {
@@ -37,12 +38,13 @@ BLINK_COMMON_EXPORT bool DecodeStringMessage(
     std::u16string* result);
 
 #if BUILDFLAG(IS_OHOS)
-using WebMessagePayload = absl::variant<std::u16string, std::vector<uint8_t>>;
-BLINK_COMMON_EXPORT TransferableMessage
-EncodeWebMessagePayload(const WebMessagePayload& payload);
 
-BLINK_COMMON_EXPORT absl::optional<WebMessagePayload> DecodeToWebMessagePayload(
-    const TransferableMessage& message);
+BLINK_COMMON_EXPORT TransferableMessage
+EncodeWebMessagePayload(struct WebMessagePort::Message& encoded_data);
+
+BLINK_COMMON_EXPORT bool DecodeToWebMessagePayload(
+    const TransferableMessage& encoded_data,
+    struct WebMessagePort::Message& decoded_data);
 #endif
 
 }  // namespace blink

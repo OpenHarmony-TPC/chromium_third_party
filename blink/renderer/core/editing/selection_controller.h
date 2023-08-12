@@ -82,6 +82,17 @@ class CORE_EXPORT SelectionController final
     return selection_state_ == SelectionState::kExtendedSelection;
   }
 
+#if BUILDFLAG(IS_OHOS)
+  void FocusDocumentView();
+  bool ShowSelectionByLastLongPressHitTestResult();
+  void SetLastLongPressHitTestResult(const HitTestResult&);
+  bool SelectClosestWordFromLiveLink(const HitTestResult& result);
+  const HitTestResult& GetHitTestResult() const {
+    return last_long_press_hit_test_result_;
+  }
+  void NotifyContextMenuWillShow();
+#endif
+
  private:
   friend class SelectionControllerTest;
 
@@ -147,6 +158,9 @@ class CORE_EXPORT SelectionController final
     kExtendedSelection
   };
   SelectionState selection_state_;
+#if BUILDFLAG(IS_OHOS)
+  HitTestResult last_long_press_hit_test_result_;
+#endif
 };
 
 bool IsSelectionOverLink(const MouseEventWithHitTestResults&);

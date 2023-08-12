@@ -1485,6 +1485,9 @@ void WebView::ApplyWebPreferences(const web_pref::WebPreferences& prefs,
 #if BUILDFLAG(IS_OHOS)
   settings->SetVerticalHideScrollbars(prefs.hide_vertical_scrollbars);
   settings->SetHorizontalHideScrollbars(prefs.hide_horizontal_scrollbars);
+  settings->SetContextMenuCustomization(
+      prefs.contextmenu_customization_enabled);
+  settings->SetScrollBarColor(prefs.scrollbar_color);
 #endif
 
   // Enable gpu-accelerated 2d canvas if requested on the command line.
@@ -1604,12 +1607,29 @@ void WebView::ApplyWebPreferences(const web_pref::WebPreferences& prefs,
 
   // Needs to happen before SetDefaultPageScaleLimits below since that'll
   // recalculate the final page scale limits and that depends on this setting.
+#if BUILDFLAG(IS_OHOS)
+  auto display_manager_adapter =
+        OHOS::NWeb::OhosAdapterHelper::GetInstance().CreateDisplayMgrAdapter();
+  bool is_pc_device =
+      display_manager_adapter && (!display_manager_adapter->IsDefaultPortrait());
+  if (is_pc_device) {
+    settings->SetShrinksViewportContentToFit(false);
+    // Needs to happen before SetIgnoreViewportTagScaleLimits below.
+    web_view->SetDefaultPageScaleLimits(1.f, 4.f);
+  } else {
+    settings->SetShrinksViewportContentToFit(
+        prefs.shrinks_viewport_contents_to_fit);
+    // Needs to happen before SetIgnoreViewportTagScaleLimits below.
+    web_view->SetDefaultPageScaleLimits(prefs.default_minimum_page_scale_factor,
+                                        prefs.default_maximum_page_scale_factor);
+  }
+#else
   settings->SetShrinksViewportContentToFit(
       prefs.shrinks_viewport_contents_to_fit);
-
   // Needs to happen before SetIgnoreViewportTagScaleLimits below.
   web_view->SetDefaultPageScaleLimits(prefs.default_minimum_page_scale_factor,
                                       prefs.default_maximum_page_scale_factor);
+#endif
 
   settings->SetFullscreenSupported(prefs.fullscreen_supported);
   settings->SetTextAutosizingEnabled(prefs.text_autosizing_enabled);
@@ -1651,8 +1671,12 @@ void WebView::ApplyWebPreferences(const web_pref::WebPreferences& prefs,
       prefs.report_screen_size_in_physical_pixels_quirk);
   settings->SetShouldReuseGlobalForUnownedMainFrame(
       prefs.reuse_global_for_unowned_main_frame);
+#if !BUILDFLAG(IS_OHOS)
   settings->SetPreferHiddenVolumeControls(true);
+#endif
   settings->SetSpellCheckEnabledByDefault(prefs.spellcheck_enabled_by_default);
+  settings->EnableBlankTargetPopupIntercept(
+      prefs.blank_target_popup_intercept_enabled);
 
   RuntimeEnabledFeatures::SetVideoFullscreenOrientationLockEnabled(
       prefs.video_fullscreen_orientation_lock_enabled);
@@ -1675,8 +1699,21 @@ void WebView::ApplyWebPreferences(const web_pref::WebPreferences& prefs,
   settings->SetAccessibilityAlwaysShowFocus(prefs.always_show_focus);
   settings->SetAutoplayPolicy(prefs.autoplay_policy);
   settings->SetViewportEnabled(prefs.viewport_enabled);
+
+#if BUILDFLAG(IS_OHOS)
+  if (is_pc_device) {
+    settings->SetViewportMetaEnabled(false);
+    settings->SetViewportStyle(mojom::ViewportStyle::kDefault);
+    settings->SetPreferHiddenVolumeControls(false);
+  } else {
+    settings->SetViewportMetaEnabled(prefs.viewport_meta_enabled);
+    settings->SetViewportStyle(prefs.viewport_style);
+    settings->SetPreferHiddenVolumeControls(true);
+  }
+#else
   settings->SetViewportMetaEnabled(prefs.viewport_meta_enabled);
   settings->SetViewportStyle(prefs.viewport_style);
+#endif
 
   settings->SetLoadWithOverviewMode(prefs.initialize_at_minimum_page_scale);
   settings->SetMainFrameResizesAreOrientationChanges(

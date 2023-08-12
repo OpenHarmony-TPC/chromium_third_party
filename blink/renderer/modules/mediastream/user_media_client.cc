@@ -166,7 +166,7 @@ void UserMediaClient::RequestUserMedia(UserMediaRequest* user_media_request) {
   if (auto* window = user_media_request->GetWindow()) {
     PeerConnectionTracker::From(*window).TrackGetUserMedia(user_media_request);
   }
-
+ 
   user_media_request->set_has_transient_user_activation(
       has_transient_user_activation);
   pending_request_infos_.push_back(

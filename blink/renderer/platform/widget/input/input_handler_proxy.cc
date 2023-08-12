@@ -1135,7 +1135,12 @@ InputHandlerProxy::EventDisposition InputHandlerProxy::HandleGestureScrollEnd(
   // started? https://crbug.com/1082601.
   input_handler_->RecordScrollEnd(
       GestureScrollInputType(gesture_event.SourceDevice()));
-
+      
+#if BUILDFLAG(IS_OHOS)
+  //After dragging the scrollbar by hand, 
+  //we need to call MouseLeave() to make the scrollbar FADE_OUT.
+  input_handler_->MouseLeave();
+#endif
   if (scroll_sequence_ignored_) {
     DCHECK(!currently_active_gesture_device_.has_value());
     return DROP_EVENT;
@@ -1156,7 +1161,6 @@ InputHandlerProxy::EventDisposition InputHandlerProxy::HandleGestureScrollEnd(
     HandleScrollElasticityOverscroll(gesture_event,
                                      cc::InputHandlerScrollResult());
   }
-
   return DID_HANDLE;
 }
 

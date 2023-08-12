@@ -143,6 +143,10 @@ static void GetNativeThemeExtraParams(
       native_theme_extra_params->scrollbar_thumb.scrollbar_theme =
           NativeThemeScrollbarOverlayColorTheme(
               extra_params->scrollbar_thumb.scrollbar_theme);
+#if BUILDFLAG(IS_OHOS)
+      native_theme_extra_params->scrollbar_thumb.scrollbar_color = 
+          extra_params->scrollbar_thumb.scrollbar_color;
+#endif
       break;
     case WebThemeEngine::kPartScrollbarDownArrow:
     case WebThemeEngine::kPartScrollbarLeftArrow:

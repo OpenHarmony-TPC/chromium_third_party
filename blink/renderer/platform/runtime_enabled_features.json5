@@ -1235,7 +1235,9 @@
     {
       name: "InputMultipleFieldsUI",
       // No plan to support complex UI for date/time INPUT types on Android.
-      status: {"Android": "test", "default": "stable"},
+      // status: {"Android": "test", "default": "stable"},
+      // IS_OHOS
+      // status: {"test"}
     },
     {
       name: "InstalledApp",

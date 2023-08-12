@@ -78,6 +78,9 @@ class CORE_EXPORT Scrollbar : public GarbageCollected<Scrollbar>,
   const gfx::Rect& FrameRect() const { return frame_rect_; }
 
   ScrollbarOverlayColorTheme GetScrollbarOverlayColorTheme() const;
+#if BUILDFLAG(IS_OHOS)
+  SkColor GetScrollBarColor() const;
+#endif
   bool HasTickmarks() const;
   Vector<gfx::Rect> GetTickmarks() const;
   bool IsScrollableAreaActive() const;

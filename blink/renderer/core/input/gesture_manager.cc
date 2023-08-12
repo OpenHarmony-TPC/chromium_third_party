@@ -43,6 +43,13 @@
 #include "third_party/blink/renderer/core/style/computed_style.h"
 #endif  // BUILDFLAG(ENABLE_UNHANDLED_TAP)
 
+#ifdef OHOS_ENABLE_DRAG_DROP
+#include "base/base_switches.h"
+#include "base/command_line.h"
+#include "third_party/blink/public/web/web_local_frame_client.h"
+#include "third_party/blink/renderer/core/frame/web_local_frame_impl.h"
+#endif //OHOS_ENABLE_DRAG_DROP
+
 namespace blink {
 
 namespace {
@@ -101,6 +108,9 @@ HitTestRequest::HitTestRequestType GestureManager::GetHitTypeForGestureType(
       return hit_type | HitTestRequest::kRelease;
     case WebInputEvent::Type::kGestureTapDown:
     case WebInputEvent::Type::kGestureLongPress:
+#ifdef OHOS_ENABLE_DRAG_DROP
+    case WebInputEvent::Type::kGestureDragLongPress:
+#endif
     case WebInputEvent::Type::kGestureLongTap:
     case WebInputEvent::Type::kGestureTwoFingerTap:
       // FIXME: Shouldn't LongTap and TwoFingerTap clear the Active state?
@@ -151,6 +161,10 @@ WebInputEventResult GestureManager::HandleGestureEventInFrame(
       return HandleGestureShowPress();
     case WebInputEvent::Type::kGestureLongPress:
       return HandleGestureLongPress(targeted_event);
+#ifdef OHOS_ENABLE_DRAG_DROP
+    case WebInputEvent::Type::kGestureDragLongPress:
+      return HandleGestureDragLongPress(targeted_event);
+#endif
     case WebInputEvent::Type::kGestureLongTap:
       return HandleGestureLongTap(targeted_event);
     case WebInputEvent::Type::kGestureTwoFingerTap:
@@ -400,10 +414,37 @@ WebInputEventResult GestureManager::HandleGestureLongPress(
   }
 
   Node* inner_node = hit_test_result.InnerNode();
+#if defined(OHOS_NWEB_EX)
+  bool is_contextmenu_customization_enabled = false;
+  if (frame_->GetSettings()) {
+    is_contextmenu_customization_enabled =
+        frame_->GetSettings()->IsContextMenuCustomizationEnabled();
+  }
+  if (is_contextmenu_customization_enabled) {
+    if (hit_test_result.IsContentEditable() ||
+        (inner_node && inner_node->IsTextNode() &&
+         !hit_test_result.IsLiveLink())) {
+      if (inner_node && inner_node->GetLayoutObject() &&
+          selection_controller_->HandleGestureLongPress(hit_test_result)) {
+        mouse_event_manager_->FocusDocumentView();
+      }
+    }
+    selection_controller_->SetLastLongPressHitTestResult(hit_test_result);
+    // notify webContentImpl reset showing_context_menu_ status, to make sure
+    // update contextMenu
+    selection_controller_->NotifyContextMenuWillShow();
+  } else {
+    if (inner_node && inner_node->GetLayoutObject() &&
+        selection_controller_->HandleGestureLongPress(hit_test_result)) {
+      mouse_event_manager_->FocusDocumentView();
+    }
+  }
+#else
   if (inner_node && inner_node->GetLayoutObject() &&
       selection_controller_->HandleGestureLongPress(hit_test_result)) {
     mouse_event_manager_->FocusDocumentView();
   }
+#endif
 
   if (frame_->GetSettings() &&
       frame_->GetSettings()->GetShowContextMenuOnMouseUp()) {
@@ -416,6 +457,37 @@ WebInputEventResult GestureManager::HandleGestureLongPress(
       mojom::blink::UserActivationNotificationType::kInteraction);
   return SendContextMenuEventForGesture(targeted_event);
 }
+
+#ifdef OHOS_ENABLE_DRAG_DROP
+WebInputEventResult GestureManager::HandleGestureDragLongPress(
+    const GestureEventWithHitTestResults& targeted_event) {
+  LOG(INFO) << "DragDrop HandleGestureDragLongPress";
+  const WebGestureEvent& gesture_event = targeted_event.Event();
+
+  // FIXME: Ideally we should try to remove the extra mouse-specific hit-tests
+  // here (re-using the supplied HitTestResult), but that will require some
+  // overhaul of the touch drag-and-drop code and LongPress is such a special
+  // scenario that it's unlikely to matter much in practice.
+
+  HitTestLocation location(frame_->View()->ConvertFromRootFrame(
+      gfx::ToFlooredPoint(gesture_event.PositionInRootFrame())));
+  HitTestResult hit_test_result =
+      frame_->GetEventHandler().HitTestResultAtLocation(location);
+
+  // only image support touch drag, currently do not support background image
+  // add support link
+  if ((hit_test_result.AbsoluteImageURL().IsEmpty() ||
+     !hit_test_result.GetImage()) && hit_test_result.AbsoluteLinkURL().IsEmpty()) {
+    return WebInputEventResult::kNotHandled;
+  }
+
+  if (mouse_event_manager_->HandleDragDropIfPossible(targeted_event)) {
+    return WebInputEventResult::kHandledSystem;
+  }
+
+  return WebInputEventResult::kNotHandled;
+}
+#endif
 
 WebInputEventResult GestureManager::HandleGestureLongTap(
     const GestureEventWithHitTestResults& targeted_event) {

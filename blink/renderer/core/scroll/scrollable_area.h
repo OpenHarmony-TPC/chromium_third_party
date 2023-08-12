@@ -223,12 +223,20 @@ class CORE_EXPORT ScrollableArea : public GarbageCollectedMixin {
   // overflow:overlay might be deprecated soon.
   bool HasOverlayScrollbars() const;
   void SetScrollbarOverlayColorTheme(ScrollbarOverlayColorTheme);
+  #if BUILDFLAG(IS_OHOS)
+  void SetScrollbarColor(SkColor);
+  #endif
   void RecalculateScrollbarOverlayColorTheme(const Color& background_color);
   ScrollbarOverlayColorTheme GetScrollbarOverlayColorTheme() const {
     return static_cast<ScrollbarOverlayColorTheme>(
         scrollbar_overlay_color_theme_);
   }
 
+  #if BUILDFLAG(IS_OHOS)
+  SkColor GetScrollBarColor() const {
+    return static_cast<SkColor>(scrollbar_color_);
+  }
+  #endif
   // This getter will create a MacScrollAnimator if it doesn't already exist,
   // only on MacOS.
   MacScrollbarAnimator* GetMacScrollbarAnimator() const;
@@ -660,7 +668,9 @@ class CORE_EXPORT ScrollableArea : public GarbageCollectedMixin {
   unsigned scrollbar_captured_ : 1;
   unsigned mouse_over_scrollbar_ : 1;
   unsigned has_been_disposed_ : 1;
-
+#if BUILDFLAG(IS_OHOS)
+  SkColor scrollbar_color_ = SK_ColorTRANSPARENT;
+#endif
   scoped_refptr<base::SingleThreadTaskRunner> compositor_task_runner_;
 };
 

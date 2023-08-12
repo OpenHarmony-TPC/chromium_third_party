@@ -268,6 +268,8 @@
 #include "third_party/blink/renderer/core/layout/layout_font_accessor_win.h"
 #endif
 
+#include "third_party/blink/renderer/core/editing/selection_controller.h"
+
 namespace blink {
 
 namespace {
@@ -2898,5 +2900,18 @@ void WebLocalFrameImpl::ScrollFocusedEditableElementIntoRect(
 void WebLocalFrameImpl::ResetHasScrolledFocusedEditableIntoView() {
   has_scrolled_focused_editable_node_into_rect_ = false;
 }
+
+#if BUILDFLAG(IS_OHOS)
+void WebLocalFrameImpl::SelectClosetWordAndShowSelectionMenu() {
+  if (!ViewImpl() || !ViewImpl()->GetPage())
+    return;
+
+  SelectionController& selection_controller =
+      GetFrame()->GetEventHandler().GetSelectionController();
+  if (selection_controller.ShowSelectionByLastLongPressHitTestResult()) {
+    selection_controller.FocusDocumentView();
+  }
+}
+#endif
 
 }  // namespace blink

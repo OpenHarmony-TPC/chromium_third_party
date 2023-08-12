@@ -94,6 +94,10 @@
 #include "ui/gfx/geometry/rect.h"
 #include "ui/gfx/geometry/size.h"
 #include "ui/gfx/geometry/vector2d_conversions.h"
+#ifdef OHOS_ENABLE_DRAG_DROP
+#include "third_party/blink/renderer/core/css/style_sheet_contents.h"
+#include "third_party/blink/renderer/core/css/parser/css_parser_context.h"
+#endif
 
 #if BUILDFLAG(IS_WIN)
 #include <windows.h>
@@ -105,7 +109,14 @@ using ui::mojom::blink::DragOperation;
 
 static const int kMaxOriginalImageArea = 1500 * 1500;
 static const int kLinkDragBorderInset = 2;
+#ifdef OHOS_ENABLE_DRAG_DROP
+static const float kDragTextAlpha = 0.7f;
+// drag image's alpha and scale will be processed in ImageDragShadowBuilder.java
+static const float kDragImageAlpha = 1.0f;
+static const float kUxDragImageScale = 1.0f;
+#else
 static const float kDragImageAlpha = 0.75f;
+#endif
 
 #if DCHECK_IS_ON()
 static bool DragTypeIsValid(DragSourceAction action) {
@@ -217,6 +228,11 @@ void DragController::DragEnded() {
   drag_initiator_ = nullptr;
   did_initiate_drag_ = false;
   page_->GetDragCaret().Clear();
+
+#ifdef OHOS_ENABLE_DRAG_DROP
+  RestoreDragTextEffects();
+  RestoreDragImageEffects();
+#endif
 }
 
 void DragController::DragExited(DragData* drag_data, LocalFrame& local_root) {
@@ -1104,6 +1120,18 @@ static std::unique_ptr<DragImage> DragImageForImage(
       DragImage::ClampedImageScale(image_size, image_element_size_in_pixels,
                                    MaxDragImageSize(device_scale_factor));
 
+#ifdef OHOS_ENABLE_DRAG_DROP
+      // UX : scale image
+    image_scale =
+      DragImage::HwClampedImageScale(image_size,
+          image_element_size_in_pixels, kUxDragImageScale);
+
+    if (image_size.Area64() > kMaxOriginalImageArea) {
+      LOG(WARNING) << "The image ("
+          << image_size.width() << "," << image_size.height()
+          << ") is too big to support drag";
+    }
+#endif
   return DragImage::Create(image.get(), respect_orientation,
                            device_scale_factor, interpolation_quality,
                            kDragImageAlpha, image_scale);
@@ -1174,6 +1202,9 @@ std::unique_ptr<DragImage> DragController::DragImageForSelection(
   PaintFlags paint_flags =
       PaintFlag::kSelectionDragImageOnly | PaintFlag::kOmitCompositingInfo;
 
+#ifdef OHOS_ENABLE_DRAG_DROP
+    paint_flags |= PaintFlag::kGlobalPaintDragSelection;
+#endif
   auto* builder = MakeGarbageCollected<PaintRecordBuilder>();
   frame.View()->PaintOutsideOfLifecycle(
       builder->Context(), paint_flags,
@@ -1237,7 +1268,9 @@ bool DragController::StartDrag(LocalFrame* src,
   Node* node = state.drag_src_.Get();
   if (state.drag_type_ == kDragSourceActionSelection) {
     if (!drag_image) {
-      drag_image = DragImageForSelection(*src, kDragImageAlpha);
+#ifdef OHOS_ENABLE_DRAG_DROP
+  drag_image = DragImageForSelection(*src, kDragTextAlpha);
+#endif
       drag_location = DragLocationForSelectionDrag(*src);
     }
     DoSystemDrag(drag_image.get(), drag_location, drag_origin, data_transfer,
@@ -1351,6 +1384,10 @@ void DragController::DoSystemDrag(DragImage* image,
     drag_image = image->Bitmap();
   }
 
+#ifdef OHOS_ENABLE_DRAG_DROP
+    StartDragTextEffects();
+    StartDragImageEffects();
+#endif
   page_->GetChromeClient().StartDragging(frame, drag_data, drag_operation_mask,
                                          std::move(drag_image), offset_point);
 }
@@ -1384,6 +1421,129 @@ DragState& DragController::GetDragState() {
 void DragController::ContextDestroyed() {
   drag_state_ = nullptr;
 }
+
+#ifdef OHOS_ENABLE_DRAG_DROP
+void DragController::StartDragTextEffects() {
+  if (!drag_state_)
+    return;
+
+  if (!drag_state_->drag_src_)
+    return;
+
+  Node* node = drag_state_->drag_src_.Get();
+  if (!node)
+    return;
+
+  //textEffect should not happend in ImageDrag
+  Element* element = static_cast<Element*>(node);
+  // 针对图文混拖的情况,增加对拖拽类型的判断
+  if (CanDragImage(*element) && drag_state_->drag_type_ == kDragSourceActionImage)
+    return;
+
+  InvalidateSelectionForDrag(node->ownerDocument());
+}
+
+void DragController::RestoreDragTextEffects() {
+    if (!drag_state_)
+    return;
+
+  if (!drag_state_->drag_src_)
+    return;
+
+  Node* node = drag_state_->drag_src_.Get();
+  if (!node)
+    return;
+
+  // ImageDrag should directly return
+  Element* element = static_cast<Element*>(node);
+
+  if (CanDragImage(*element) && drag_state_->drag_type_ == kDragSourceActionImage)
+    return;
+
+  InvalidateSelectionForDrag(node->ownerDocument());
+}
+
+void DragController::InvalidateSelectionForDrag(Document* document) {
+  if (!document)
+    return;
+  LocalFrame* frame = document->GetFrame();
+  if (!frame)
+    return;
+  frame->Selection().InvalidateSelectionForDrag();
+}
+
+bool DragController::IsInTextDraging() {
+  if (!drag_state_) {
+    return false;
+  }
+  return drag_state_->drag_type_ == kDragSourceActionSelection &&
+         did_initiate_drag_;
+}
+
+bool DragController::IsInImageDraging() {
+  if (!drag_state_) {
+    return false;
+  }
+  return drag_state_->drag_type_ == kDragSourceActionImage &&
+         did_initiate_drag_;
+}
+
+void DragController::StartDragImageEffects() {
+  if (!drag_state_)
+    return;
+
+  if (!drag_state_->drag_src_)
+    return;
+
+  Node* node = drag_state_->drag_src_.Get();
+  if (!node)
+    return;
+
+  // draggable or size should be checked before this call
+  Element* element = static_cast<Element*>(node);
+  if (!CanDragImage(*element))
+    return;
+
+  const ComputedStyle* style = node->GetComputedStyle();
+  // no effects if the image already have an opacity style
+  if (!style || style->HasOpacity())
+    return;
+
+  origin_style_.Clear();
+  origin_style_.Append(String(
+    AtomicString(element->getAttribute(html_names::kStyleAttr))));
+
+  StringBuilder image_drag_style;
+  image_drag_style.Append(origin_style_);
+  image_drag_style.Append("; filter: opacity(0.4);");
+  element->setAttribute(html_names::kStyleAttr,
+  image_drag_style.ToAtomicString());
+
+  InvalidateSelectionForDrag(node->ownerDocument());
+}
+
+void DragController::RestoreDragImageEffects() {
+  if (!drag_state_)
+    return;
+
+  if (!drag_state_->drag_src_)
+    return;
+
+  Node* node = drag_state_->drag_src_.Get();
+  if (!node)
+    return;
+  //
+  Element* element = static_cast<Element*>(node);
+  //Element* element = ToElement(node);
+  if (!CanDragImage(*element))
+    return;
+
+  const ComputedStyle* style = node->GetComputedStyle();
+  if (!style)
+    return;
+  element->setAttribute(html_names::kStyleAttr, origin_style_.ToAtomicString());
+}
+#endif
 
 void DragController::Trace(Visitor* visitor) const {
   visitor->Trace(page_);

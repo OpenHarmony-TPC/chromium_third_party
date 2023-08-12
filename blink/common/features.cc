@@ -716,9 +716,13 @@ const base::Feature kResamplingInputEvents{"ResamplingInputEvents",
 const base::Feature kInputTargetClientHighPriority{
     "InputTargetClientHighPriority", base::FEATURE_ENABLED_BY_DEFAULT};
 
+#if BUILDFLAG(IS_OHOS)
+const base::Feature kResamplingScrollEvents{"ResamplingScrollEvents",
+                                            base::FEATURE_DISABLED_BY_DEFAULT};
+#else
 const base::Feature kResamplingScrollEvents{"ResamplingScrollEvents",
                                             base::FEATURE_ENABLED_BY_DEFAULT};
-
+#endif
 // Enables the device-memory, resource-width, viewport-width and DPR client
 // hints to be sent to third-party origins if the first-party has opted in to
 // receiving client hints, regardless of Permissions Policy.

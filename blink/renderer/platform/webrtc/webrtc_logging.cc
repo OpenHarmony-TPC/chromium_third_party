@@ -29,7 +29,9 @@ void InitWebRtcLogging() {
 }
 
 void WebRtcLogMessage(const std::string& message) {
-  VLOG(1) << message;
+#if BUILDFLAG(IS_OHOS)
+  LOG(INFO) << message;
+#endif
   if (g_webrtc_logging_delegate)
     g_webrtc_logging_delegate->LogMessage(message);
 }

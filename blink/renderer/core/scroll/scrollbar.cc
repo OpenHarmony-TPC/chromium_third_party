@@ -102,6 +102,12 @@ ScrollbarOverlayColorTheme Scrollbar::GetScrollbarOverlayColorTheme() const {
                           : kScrollbarOverlayColorThemeDark;
 }
 
+#if BUILDFLAG(IS_OHOS)
+SkColor Scrollbar::GetScrollBarColor() const {
+  return scrollable_area_ ? scrollable_area_->GetScrollBarColor() : 0;
+}
+#endif
+
 bool Scrollbar::HasTickmarks() const {
   return orientation_ == kVerticalScrollbar && scrollable_area_ &&
          scrollable_area_->HasTickmarks();
@@ -410,6 +416,9 @@ bool Scrollbar::GestureEvent(const WebGestureEvent& evt,
       injected_gesture_scroll_begin_ = false;
       [[fallthrough]];
     case WebInputEvent::Type::kGestureLongPress:
+#ifdef OHOS_ENABLE_DRAG_DROP
+    case WebInputEvent::Type::kGestureDragLongPress:
+#endif
     case WebInputEvent::Type::kGestureFlingStart:
       scroll_pos_ = 0;
       pressed_pos_ = 0;

@@ -62,6 +62,10 @@
 #include "third_party/blink/renderer/core/paint/paint_layer.h"
 #include "ui/gfx/geometry/point_conversions.h"
 
+#if BUILDFLAG(IS_OHOS)
+#include "third_party/blink/renderer/core/input/context_menu_allowed_scope.h"
+#endif
+
 namespace blink {
 
 SelectionController::SelectionController(LocalFrame& frame)
@@ -75,6 +79,9 @@ SelectionController::SelectionController(LocalFrame& frame)
 void SelectionController::Trace(Visitor* visitor) const {
   visitor->Trace(frame_);
   visitor->Trace(original_base_in_flat_tree_);
+#if defined(OHOS_NWEB_EX)
+  visitor->Trace(last_long_press_hit_test_result_);
+#endif
   ExecutionContextLifecycleObserver::Trace(visitor);
 }
 
@@ -1350,4 +1357,96 @@ bool IsExtendingSelection(const MouseEventWithHitTestResults& event) {
 template void SelectionController::UpdateSelectionForContextMenuEvent<
     MouseEvent>(const MouseEvent*, const HitTestResult&, const PhysicalOffset&);
 
+#if BUILDFLAG(IS_OHOS)
+void SelectionController::SetLastLongPressHitTestResult(
+    const HitTestResult& other) {
+  last_long_press_hit_test_result_ = HitTestResult(other);
+}
+
+void SelectionController::NotifyContextMenuWillShow() {
+  if (frame_) {
+    frame_->NotifyContextMenuWillShow();
+  }
+}
+
+void SelectionController::FocusDocumentView() {
+  Page* page = frame_->GetPage();
+  if (!page)
+    return;
+  page->GetFocusController().FocusDocumentView(frame_);
+}
+
+bool SelectionController::ShowSelectionByLastLongPressHitTestResult() {
+#if defined(OHOS_NWEB_EX)
+  if (!Selection().IsAvailable())
+    return false;
+
+  if (last_long_press_hit_test_result_.IsLiveLink() &&
+      SelectClosestWordFromLiveLink(last_long_press_hit_test_result_)) {
+    ContextMenuAllowedScope scope;
+    frame_->GetEventHandler().ShowNonLocatedContextMenu(
+        last_long_press_hit_test_result_.InnerElement(),
+        kMenuSourceSelectAndCopy);
+    return true;
+  }
+  Node* inner_node = last_long_press_hit_test_result_.InnerNode();
+  if (!inner_node || !inner_node->GetLayoutObject()) {
+    return false;
+  }
+  inner_node->GetDocument().UpdateStyleAndLayoutTree();
+
+  const bool did_select = SelectClosestWordFromHitTestResult(
+      last_long_press_hit_test_result_, AppendTrailingWhitespace::kDontAppend,
+      SelectInputEventType::kTouch);
+  if (did_select) {
+    ContextMenuAllowedScope scope;
+    frame_->GetEventHandler().ShowNonLocatedContextMenu(
+        nullptr, kMenuSourceSelectAndCopy);
+    return true;
+  }
+
+  if (!inner_node->isConnected() || !inner_node->GetLayoutObject()) {
+    return false;
+  }
+  SetCaretAtHitTestResult(last_long_press_hit_test_result_);
+#endif
+  return true;
+}
+
+bool SelectionController::SelectClosestWordFromLiveLink(
+    const HitTestResult& result) {
+  Node* const inner_node = result.InnerNode();
+
+  if (!inner_node || !inner_node->GetLayoutObject())
+    return false;
+  inner_node->GetDocument().UpdateStyleAndLayoutTree();
+
+  Element* url_element = result.URLElement();
+  const PositionInFlatTreeWithAffinity pos =
+      CreateVisiblePosition(PositionWithAffinityOfHitTestResult(result))
+          .ToPositionWithAffinity();
+  bool isCreateFlatTreeByUrlElement =
+      pos.IsNotNull() && pos.AnchorNode()->IsDescendantOf(url_element);
+  bool isCreateFlatTreeByAnchorNode =
+      isCreateFlatTreeByUrlElement && pos.AnchorNode()->IsTextNode();
+
+  const SelectionInFlatTree& new_selection =
+      isCreateFlatTreeByAnchorNode
+          ? SelectionInFlatTree::Builder()
+                .SelectAllChildren(*pos.AnchorNode())
+                .Build()
+          : isCreateFlatTreeByUrlElement ? SelectionInFlatTree::Builder()
+                                               .SelectAllChildren(*url_element)
+                                               .Build()
+                                         : SelectionInFlatTree();
+
+  return UpdateSelectionForMouseDownDispatchingSelectStart(
+      inner_node,
+      ExpandSelectionToRespectUserSelectAll(inner_node, new_selection),
+      SetSelectionOptions::Builder()
+          .SetGranularity(TextGranularity::kWord)
+          .SetShouldShowHandle(true)
+          .Build());
+}
+#endif
 }  // namespace blink

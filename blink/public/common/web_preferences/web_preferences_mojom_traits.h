@@ -657,6 +657,11 @@ struct BLINK_COMMON_EXPORT StructTraits<blink::mojom::WebPreferencesDataView,
       const blink::web_pref::WebPreferences& r) {
     return r.disable_accelerated_small_canvases;
   }
+
+  static bool blank_target_popup_intercept_enabled(
+      const blink::web_pref::WebPreferences& r) {
+    return r.blank_target_popup_intercept_enabled;
+  }
 #endif
 
   static bool force_dark_mode_enabled(
@@ -778,6 +783,15 @@ struct BLINK_COMMON_EXPORT StructTraits<blink::mojom::WebPreferencesDataView,
 
   static bool hide_horizontal_scrollbars(const blink::web_pref::WebPreferences& r) {
     return r.hide_horizontal_scrollbars;
+  }
+
+  static bool contextmenu_customization_enabled(
+      const blink::web_pref::WebPreferences& r) {
+    return r.contextmenu_customization_enabled;
+  }
+
+  static uint32_t scrollbar_color(const blink::web_pref::WebPreferences& r) {
+    return r.scrollbar_color;
   }
 #endif
 

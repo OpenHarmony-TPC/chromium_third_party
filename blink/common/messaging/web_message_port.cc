@@ -141,6 +141,7 @@ bool WebMessagePort::CanPostMessage() const {
 }
 
 bool WebMessagePort::PostMessage(Message&& message) {
+  LOG(INFO) << "WebMessagePort::PostMessage start";
   if (!CanPostMessage())
     return false;
 
@@ -158,11 +159,9 @@ bool WebMessagePort::PostMessage(Message&& message) {
   // Build the message.
   // TODO(chrisha): Finally kill off MessagePortChannel, once
   // MessagePortDescriptor more thoroughly plays that role.
+
   blink::TransferableMessage transferable_message =
-    blink::EncodeWebMessagePayload(
-    message.array_buffer.size() != 0 ?
-    WebMessagePayload(std::move(message.array_buffer)) :
-    WebMessagePayload(std::move(message.data)));
+      blink::EncodeWebMessagePayload(message);
 
   transferable_message.ports =
       blink::MessagePortChannel::CreateFromHandles(std::move(ports));
@@ -235,19 +234,8 @@ bool WebMessagePort::Accept(mojo::Message* mojo_message) {
 
   // Decode the string portion of the message.
   Message message;
-  absl::optional<WebMessagePayload> optional_payload =
-      blink::DecodeToWebMessagePayload(transferable_message);
-  if (!optional_payload) {
+  if (!blink::DecodeToWebMessagePayload(transferable_message, message)) {
     LOG(ERROR) << "WebMessagePort::Accept DecodeToWebMessagePayload failed";
-    return true;
-  }
-  auto& payload = optional_payload.value();
-  if (auto* str = absl::get_if<std::u16string>(&payload)) {
-    message.data = std::move(*str);
-  } else if (auto* array_buffer = absl::get_if<std::vector<uint8_t>>(&payload)) {
-    message.array_buffer = std::move(*array_buffer);
-  } else {
-    LOG(INFO) << "WebMessagePort::Accept Get string or arraybuffer failed";
     return true;
   }
 

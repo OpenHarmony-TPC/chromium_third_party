@@ -189,13 +189,31 @@ struct BLINK_COMMON_EXPORT WebMessagePort::Message {
   Message& operator=(Message&&);
   ~Message();
 
+#if BUILDFLAG(IS_OHOS)
+  enum class MessageType : unsigned char {
+    NONE = 0,
+    BOOLEAN,
+    INTEGER,
+    DOUBLE,
+    STRING,
+    BINARY,
+    DICTIONARY,
+    LIST,
+    ERROR,
+    STRINGARRAY,
+    BOOLEANARRAY,
+    DOUBLEARRAY,
+    INT64ARRAY
+  };
+#endif
+
   // Creates a message with the given |data|.
   explicit Message(const std::u16string& data);
 
-  #if BUILDFLAG(IS_OHOS)
+#if BUILDFLAG(IS_OHOS)
   // Creates a message with the given |array_buffer|.
   explicit Message(std::vector<uint8_t> array_buffer);
-  #endif
+#endif
 
   // Creates a message with the given collection of |ports| to be transferred.
   explicit Message(std::vector<WebMessagePort> ports);
@@ -213,10 +231,20 @@ struct BLINK_COMMON_EXPORT WebMessagePort::Message {
   // A UTF-16 message.
   std::u16string data;
 
-  #if BUILDFLAG(IS_OHOS)
+#if BUILDFLAG(IS_OHOS)
   // std::vector<uint8_t>: the ArrayBuffer.
   std::vector<uint8_t> array_buffer;
-  #endif
+  MessageType type_ = MessageType::NONE;
+  bool bool_value_;
+  double double_value_;
+  int64_t int64_value_;
+  std::vector<std::u16string> string_arr_;
+  std::vector<bool> bool_arr_;
+  std::vector<double> double_arr_;
+  std::vector<int64_t> int64_arr_;
+  std::u16string err_name_;
+  std::u16string err_msg_;
+#endif
 
   // Other message ports that are to be transmitted as part of this message.
   std::vector<WebMessagePort> ports;

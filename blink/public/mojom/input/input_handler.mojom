@@ -354,6 +354,10 @@ interface FrameWidgetInputHandler {
   // editable divs).
   ScrollFocusedEditableNodeIntoRect(gfx.mojom.Rect rect);
 
+  // #if defined(OHOS_NWEB_EX)
+  [EnableIf=is_ohos]
+  SelectAndCopy();
+  // #endif
   // Requests the renderer to move the caret selection toward the point.
   MoveCaret(gfx.mojom.Point point);
 };

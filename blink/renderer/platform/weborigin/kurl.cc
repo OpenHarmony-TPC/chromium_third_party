@@ -162,7 +162,11 @@ bool KURL::IsLocalFile() const {
   // and including feed would allow feeds to potentially let someone's blog
   // read the contents of the clipboard on a drag, even without a drop.
   // Likewise with using the FrameLoader::shouldTreatURLAsLocal() function.
+#if BUILDFLAG(IS_OHOS)
+  return ProtocolIs(url::kFileScheme) || ProtocolIs(url::kResourcesScheme);
+#else
   return ProtocolIs(url::kFileScheme);
+#endif
 }
 
 bool ProtocolIsJavaScript(const String& url) {

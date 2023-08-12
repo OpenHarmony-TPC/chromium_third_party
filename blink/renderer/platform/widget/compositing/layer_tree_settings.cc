@@ -34,7 +34,7 @@ namespace {
 const base::Feature kUnpremultiplyAndDitherLowBitDepthTiles = {
     "UnpremultiplyAndDitherLowBitDepthTiles", base::FEATURE_ENABLED_BY_DEFAULT};
 
-#if defined(OS_ANDROID)
+#if defined(OS_ANDROID) || defined(OS_OHOS)
 // With 32 bit pixels, this would mean less than 400kb per buffer. Much less
 // than required for, say, nHD.
 static const int kSmallScreenPixelThreshold = 1e5;
@@ -69,14 +69,32 @@ cc::ManagedMemoryPolicy GetGpuMemoryPolicy(
     return actual;
   }
 
-#if defined(OS_ANDROID)
+  size_t physical_memory_mb = 0;
+#if !defined(OS_ANDROID) && !defined(OS_OHOS)
+  // Ignore what the system said and give all clients the same maximum
+  // allocation on desktop platforms.
+  actual.bytes_limit_when_visible = 512 * 1024 * 1024;
+  actual.priority_cutoff_when_visible =
+      gpu::MemoryAllocation::CUTOFF_ALLOW_NICE_TO_HAVE;
+
+  // For large monitors (4k), double the tile memory to avoid frequent out of
+  // memory problems. 4k could mean a screen width of anywhere from 3840 to 4096
+  // (see https://en.wikipedia.org/wiki/4K_resolution). We use 3500 as a proxy
+  // for "large enough".
+  static const int kLargeDisplayThreshold = 3500;
+  int display_width =
+      std::round(initial_screen_size.width() * initial_device_scale_factor);
+  if (display_width >= kLargeDisplayThreshold)
+    actual.bytes_limit_when_visible *= 2;
+
+  return actual;
+#elif defined(OS_ANDROID)
   // We can't query available GPU memory from the system on Android.
   // Physical memory is also mis-reported sometimes (eg. Nexus 10 reports
   // 1262MB when it actually has 2GB, while Razr M has 1GB but only reports
   // 128MB java heap size). First we estimate physical memory using both.
   size_t dalvik_mb = base::SysInfo::DalvikHeapSizeMB();
   size_t physical_mb = base::SysInfo::AmountOfPhysicalMemoryMB();
-  size_t physical_memory_mb = 0;
   if (base::SysInfo::IsLowEndDevice()) {
     // TODO(crbug.com/742534): The code below appears to no longer work.
     // |dalvik_mb| no longer follows the expected heuristic pattern, causing us
@@ -89,7 +107,9 @@ cc::ManagedMemoryPolicy GetGpuMemoryPolicy(
   } else {
     physical_memory_mb = std::max(dalvik_mb * 4, (physical_mb * 4) / 3);
   }
-
+#elif defined(OS_OHOS)
+  physical_memory_mb = base::SysInfo::AmountOfPhysicalMemoryMB();
+#endif
   // Now we take a default of 1/8th of memory on high-memory devices,
   // and gradually scale that back for low-memory devices (to be nicer
   // to other apps so they don't get killed). Examples:
@@ -120,7 +140,7 @@ cc::ManagedMemoryPolicy GetGpuMemoryPolicy(
 
     actual.bytes_limit_when_visible =
         actual.bytes_limit_when_visible * 1024 * 1024;
-    // Clamp the observed value to a specific range on Android.
+    // Clamp the observed value to a specific range on Android or OHOS.
     actual.bytes_limit_when_visible = std::max(
         actual.bytes_limit_when_visible, static_cast<size_t>(8 * 1024 * 1024));
     actual.bytes_limit_when_visible =
@@ -129,23 +149,7 @@ cc::ManagedMemoryPolicy GetGpuMemoryPolicy(
   }
   actual.priority_cutoff_when_visible =
       gpu::MemoryAllocation::CUTOFF_ALLOW_EVERYTHING;
-#else
-  // Ignore what the system said and give all clients the same maximum
-  // allocation on desktop platforms.
-  actual.bytes_limit_when_visible = 512 * 1024 * 1024;
-  actual.priority_cutoff_when_visible =
-      gpu::MemoryAllocation::CUTOFF_ALLOW_NICE_TO_HAVE;
 
-  // For large monitors (4k), double the tile memory to avoid frequent out of
-  // memory problems. 4k could mean a screen width of anywhere from 3840 to 4096
-  // (see https://en.wikipedia.org/wiki/4K_resolution). We use 3500 as a proxy
-  // for "large enough".
-  static const int kLargeDisplayThreshold = 3500;
-  int display_width =
-      std::round(initial_screen_size.width() * initial_device_scale_factor);
-  if (display_width >= kLargeDisplayThreshold)
-    actual.bytes_limit_when_visible *= 2;
-#endif
   return actual;
 }
 
@@ -187,13 +191,15 @@ cc::LayerTreeSettings GenerateLayerTreeSettings(
   // Synchronous compositing indicates WebView.
   if (!platform->IsSynchronousCompositingEnabledForAndroidWebView())
     settings.prefer_raster_in_srgb = ::features::IsDynamicColorGamutEnabled();
+#endif
 
-  // We can use a more aggressive limit on Android since decodes tend to take
-  // longer on these devices.
+#if defined(OS_ANDROID) || defined(OS_OHOS)
+  // We can use a more aggressive limit on Android or OHOS since decodes tend
+  // to take longer on these devices.
   settings.min_image_bytes_to_checker = 512 * 1024;  // 512kB
 
   // Re-rasterization of checker-imaged content with software raster can be too
-  // costly on Android.
+  // costly on Android or OHOS.
   settings.only_checker_images_with_gpu_raster = true;
 #endif
 
@@ -214,7 +220,7 @@ cc::LayerTreeSettings GenerateLayerTreeSettings(
   };
 
   int default_tile_size = 256;
-#if defined(OS_ANDROID)
+#if defined(OS_ANDROID) || defined(OS_OHOS)
   const gfx::Size screen_size =
       gfx::ScaleToFlooredSize(initial_screen_size, initial_device_scale_factor);
   int display_width = screen_size.width();
@@ -436,7 +442,32 @@ cc::LayerTreeSettings GenerateLayerTreeSettings(
 
   // TODO(danakj): Only do this on low end devices.
   settings.create_low_res_tiling = true;
+#elif defined(OS_OHOS)
+  bool using_low_memory_policy =
+      base::SysInfo::IsLowEndDevice() && !IsSmallScreen(screen_size);
+  if (using_low_memory_policy) {
+    // On low-end we want to be very careful about killing other
+    // apps. So initially we use 50% more memory to avoid flickering
+    // or raster-on-demand.
+    settings.max_memory_for_prepaint_percentage = 67;
+  } else {
+    // On other devices we have increased memory excessively to avoid
+    // raster-on-demand already, so now we reserve 50% _only_ to avoid
+    // raster-on-demand, and use 50% of the memory otherwise.
+    settings.max_memory_for_prepaint_percentage = 50;
+  }
 
+  if (ui::IsOverlayScrollbarEnabled()) {
+    settings.scrollbar_animator = cc::LayerTreeSettings::AURA_OVERLAY;
+    settings.scrollbar_fade_delay = ui::kOverlayScrollbarFadeDelay;
+    settings.scrollbar_fade_duration = ui::kOverlayScrollbarFadeDuration;
+    settings.scrollbar_thinning_duration =
+        ui::kOverlayScrollbarThinningDuration;
+    settings.scrollbar_flash_after_any_scroll_update = true;
+  }
+
+  // TODO(danakj): Only do this on low end devices.
+  settings.create_low_res_tiling = true;
 #else   // defined(OS_ANDROID)
   bool using_low_memory_policy = base::SysInfo::IsLowEndDevice();
 

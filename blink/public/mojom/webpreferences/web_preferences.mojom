@@ -152,6 +152,12 @@ struct WebPreferences {
   bool hide_scrollbars;
   bool hide_vertical_scrollbars;
   bool hide_horizontal_scrollbars;
+  uint32 scrollbar_color;
+  // #if defined(OHOS_NWEB_EX)
+  [EnableIf=is_ohos]
+  bool contextmenu_customization_enabled;
+  // #endif
+  
   bool accelerated_2d_canvas_enabled;
   bool canvas_context_lost_in_background_enabled;
   bool new_canvas_2d_api_enabled;
@@ -439,4 +445,9 @@ struct WebPreferences {
   // Controls whether WebXR's immersive-ar is allowed.
   bool webxr_immersive_ar_allowed;
   bool pinch_smooth_mode;
+
+  // #if defined(OHOS_NWEB_EX)
+  [EnableIf=is_ohos]
+  bool blank_target_popup_intercept_enabled = true;
+  // #endif
 };

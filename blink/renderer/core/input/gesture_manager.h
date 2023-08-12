@@ -75,6 +75,10 @@ class CORE_EXPORT GestureManager final
   WebInputEventResult HandleGestureTap(const GestureEventWithHitTestResults&);
   WebInputEventResult HandleGestureLongPress(
       const GestureEventWithHitTestResults&);
+#ifdef OHOS_ENABLE_DRAG_DROP
+  WebInputEventResult HandleGestureDragLongPress(
+      const GestureEventWithHitTestResults&);
+#endif
   WebInputEventResult HandleGestureLongTap(
       const GestureEventWithHitTestResults&);
   WebInputEventResult HandleGestureTwoFingerTap(

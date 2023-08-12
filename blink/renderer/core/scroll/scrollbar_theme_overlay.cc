@@ -199,7 +199,9 @@ void ScrollbarThemeOverlay::PaintThumb(GraphicsContext& context,
   params.scrollbar_thumb.scrollbar_theme =
       static_cast<WebScrollbarOverlayColorTheme>(
           scrollbar.GetScrollbarOverlayColorTheme());
-
+#if BUILDFLAG(IS_OHOS)
+  params.scrollbar_thumb.scrollbar_color = scrollbar.GetScrollBarColor();
+#endif  
   // Horizontally flip the canvas if it is left vertical scrollbar.
   if (scrollbar.IsLeftSideVerticalScrollbar()) {
     canvas->save();

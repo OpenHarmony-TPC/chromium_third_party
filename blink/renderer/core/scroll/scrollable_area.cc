@@ -596,6 +596,14 @@ bool ScrollableArea::HasOverlayScrollbars() const {
   return h_scrollbar && h_scrollbar->IsOverlayScrollbar();
 }
 
+#if BUILDFLAG(IS_OHOS)
+void ScrollableArea::SetScrollbarColor(SkColor colorValue) {
+  if (colorValue != scrollbar_color_) {
+    scrollbar_color_ = colorValue;
+  }
+}
+#endif
+
 void ScrollableArea::SetScrollbarOverlayColorTheme(
     ScrollbarOverlayColorTheme overlay_theme) {
   scrollbar_overlay_color_theme_ = overlay_theme;

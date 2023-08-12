@@ -125,6 +125,9 @@ class CORE_EXPORT WebSettingsImpl final : public WebSettings {
 #if BUILDFLAG(IS_OHOS)
   void SetVerticalHideScrollbars(bool) override;
   void SetHorizontalHideScrollbars(bool) override;
+  void SetContextMenuCustomization(bool) override;
+  void SetScrollBarColor(uint32_t) override;
+  void EnableBlankTargetPopupIntercept(bool) override;
 #endif
   void SetPasswordEchoDurationInSeconds(double) override;
   void SetPasswordEchoEnabled(bool) override;

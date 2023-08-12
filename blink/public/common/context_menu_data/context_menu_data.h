@@ -117,6 +117,10 @@ struct ContextMenuData {
   // Whether context is editable.
   bool is_editable;
 
+#if BUILDFLAG(IS_OHOS)
+  // Whether can be selectable.
+  bool is_selectable;
+#endif
   // If this node is an input field, the type of that field.
   blink::mojom::ContextMenuDataInputFieldType input_field_type;
 

@@ -120,6 +120,8 @@ int GetCaptureBufferSize(bool need_webrtc_processing,
   // TODO(henrika): Re-evaluate whether to use same logic as other platforms.
   // https://crbug.com/638081
   return 2 * input_device_params.sample_rate() / 100;
+#elif BUILDFLAG(IS_OHOS)
+  return 2 * input_device_params.sample_rate() / 100;
 #else
   // If audio processing is turned on, require 10ms buffers.
   if (need_webrtc_processing)

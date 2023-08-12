@@ -1392,6 +1392,14 @@ EphemeralRange FrameSelection::GetSelectionRangeAroundCaret(
   return EphemeralRange();
 }
 
+#ifdef OHOS_ENABLE_DRAG_DROP
+void FrameSelection::InvalidateSelectionForDrag() {
+  auto* view = GetDocument().GetLayoutView();
+  if (view) {
+    layout_selection_->InvalidatePaintForSelection();
+  }
+}
+#endif //OHOS_ENABLE_DRAG_DROP
 }  // namespace blink
 
 #if DCHECK_IS_ON()

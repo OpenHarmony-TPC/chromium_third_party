@@ -40,6 +40,10 @@ namespace gfx {
 class RectF;
 }
 
+#ifdef OHOS_ENABLE_DRAG_DROP
+#include "third_party/blink/renderer/platform/wtf/text/string_builder.h"
+#endif
+
 namespace blink {
 
 class DataTransfer;
@@ -98,6 +102,16 @@ class CORE_EXPORT DragController final
   void ContextDestroyed() final;
 
   void Trace(Visitor*) const final;
+#ifdef OHOS_ENABLE_DRAG_DROP
+  void StartDragImageEffects();
+  void RestoreDragImageEffects();
+  void StartDragTextEffects();
+  void RestoreDragTextEffects();
+  void InvalidateSelectionForDrag(Document* document);
+  bool IsInImageDraging();
+  bool IsInTextDraging();
+
+#endif
 
  private:
   DispatchEventResult DispatchTextInputEventFor(LocalFrame*, DragData*);
@@ -143,6 +157,9 @@ class CORE_EXPORT DragController final
 
   DragDestinationAction drag_destination_action_;
   bool did_initiate_drag_;
+#ifdef OHOS_ENABLE_DRAG_DROP
+  WTF::StringBuilder origin_style_;
+#endif
 };
 
 }  // namespace blink

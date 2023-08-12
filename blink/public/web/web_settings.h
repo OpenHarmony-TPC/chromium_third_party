@@ -174,6 +174,9 @@ class WebSettings {
 #if BUILDFLAG(IS_OHOS)
   virtual void SetVerticalHideScrollbars(bool) = 0;
   virtual void SetHorizontalHideScrollbars(bool) = 0;
+  virtual void SetContextMenuCustomization(bool) = 0;
+  virtual void SetScrollBarColor(uint32_t) = 0;
+  virtual void EnableBlankTargetPopupIntercept(bool) = 0;
 #endif
   virtual void SetPasswordEchoDurationInSeconds(double) = 0;
   virtual void SetPasswordEchoEnabled(bool) = 0;

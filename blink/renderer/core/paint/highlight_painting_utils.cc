@@ -7,6 +7,7 @@
 #include "components/shared_highlighting/core/common/fragment_directives_constants.h"
 #include "third_party/blink/renderer/core/css/style_engine.h"
 #include "third_party/blink/renderer/core/css/style_request.h"
+#include "third_party/blink/renderer/core/dom/document.h"
 #include "third_party/blink/renderer/core/dom/element.h"
 #include "third_party/blink/renderer/core/dom/element_traversal.h"
 #include "third_party/blink/renderer/core/dom/node.h"
@@ -23,9 +24,73 @@
 #include "third_party/blink/renderer/platform/graphics/color.h"
 #include "third_party/blink/renderer/platform/runtime_enabled_features.h"
 
+#ifdef OHOS_ENABLE_DRAG_DROP
+#include "third_party/blink/renderer/core/frame/settings.h"
+#include "base/command_line.h"
+#include "base/base_switches.h"
+#include "base/logging.h"
+#endif
 namespace blink {
 
 namespace {
+#ifdef HW_BUILD_DARK_MODE
+constexpr RGBA32 kTextDarkColorInDragging = 0xFFA9A9A9;
+constexpr RGBA32 kForegroundDarkColorInDragImage = 0xFFFFFFFF;
+#endif
+
+#ifdef OHOS_ENABLE_DRAG_DROP
+constexpr RGBA32 kTextColorInDragging = 0xFFC0C0C0; // gray
+constexpr RGBA32 kBackgroundColorInDragging = 0x00FFFFFF; // white, alpha channel set to zero
+constexpr RGBA32 kForegroundColorInDragImage = 0xFF000000; // black
+#endif
+
+#ifdef OHOS_ENABLE_DRAG_DROP
+Color DraggingTextColor(mojom::blink::ColorScheme color_scheme) {
+#ifdef HW_BUILD_DARK_MODE
+  if (color_scheme == mojom::blink::ColorScheme::kDark) {
+    return kTextDarkColorInDragging;
+  }
+#endif
+  return kTextColorInDragging;
+}
+
+#if BUILDFLAG(IS_OHOS)
+Color DraggingBackgroundColor() {
+  return kBackgroundColorInDragging;
+}
+
+bool InSelectionDragging(const Document& document) {
+  // Select range and dragging it
+  if (document.GetPage()) {
+    return document.GetPage()->IsInTextDraging() && document.GetSettings() && !document.Printing();
+  }
+  return false;
+}
+#endif
+
+bool InPaintingDragImage(
+    const Document& document, PaintFlags paint_flags) {
+  return document.GetSettings() &&
+      // document.GetSettings()->ImageDragEnabled() &&
+      (paint_flags & PaintFlag::kGlobalPaintDragSelection) &&
+      !document.Printing();
+}
+
+Color TextColorOnDragShadowImage(const Document& document, Color& fg_color) {
+  // This text color is for selection text painting on drag-shadow image.
+#if defined(HW_BUILD_THEME_MODE) || defined(HW_BUILD_DARK_MODE)
+  if (const auto* settings = document.GetSettings()) {
+    return (settings->GetThemeModeEnabled() ||
+            settings->GetHwForceDarkModeEnabled())
+               ? Color(kForegroundDarkColorInDragImage)
+               : fg_color;
+  }
+#endif
+
+  fg_color.SetRGB(kForegroundColorInDragImage);
+  return fg_color;
+}
+#endif
 
 bool NodeIsReplaced(Node* node) {
   return node && node->GetLayoutObject() &&
@@ -287,7 +352,14 @@ Color HighlightPaintingUtils::HighlightBackgroundColor(
 
   if (document.InForcedColorsMode())
     return ForcedSystemBackgroundColor(pseudo, color_scheme);
-  return HighlightThemeBackgroundColor(document, style, pseudo);
+
+  Color background_color = HighlightThemeBackgroundColor(document, style, pseudo);
+#ifdef OHOS_ENABLE_DRAG_DROP
+  if (InSelectionDragging(document)) { // kBackgroundColorInDragging
+    return DraggingBackgroundColor();
+  }
+#endif
+  return background_color;
 }
 
 absl::optional<AppliedTextDecoration>
@@ -324,9 +396,22 @@ Color HighlightPaintingUtils::HighlightForegroundColor(
     PseudoId pseudo,
     PaintFlags paint_flags,
     const AtomicString& pseudo_argument) {
-  return HighlightColor(document, style, node, pseudo,
+  Color fg_color = HighlightColor(document, style, node, pseudo,
                         GetCSSPropertyWebkitTextFillColor(), paint_flags,
                         pseudo_argument);
+
+#if BUILDFLAG(IS_OHOS)
+  if (InSelectionDragging(document)) { // kTextColorInDragging
+    return DraggingTextColor(style.UsedColorScheme());
+  }
+
+  if (InPaintingDragImage(document, paint_flags)) {
+    // DTS2019120603659 & DTS2019121806287
+    return TextColorOnDragShadowImage(document, fg_color);
+  }
+#endif
+
+  return fg_color;
 }
 
 Color HighlightPaintingUtils::HighlightEmphasisMarkColor(

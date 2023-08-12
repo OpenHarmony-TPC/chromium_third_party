@@ -286,4 +286,16 @@ void DragImage::Scale(float scale_x, float scale_y) {
                                           image_height);
 }
 
+#ifdef OHOS_ENABLE_DRAG_DROP
+gfx::Vector2dF  DragImage::HwClampedImageScale(const gfx::Size& image_size,
+                                         const gfx::Size& element_size,
+                                         const float target_scale) {
+ // Non-uniform scaling for size mapping.
+  gfx::Vector2dF image_scale(
+      static_cast<float>(element_size.width()) * target_scale/ image_size.width(),
+      static_cast<float>(element_size.height()) * target_scale / image_size.height());
+  return image_scale;
+}
+#endif //OHOS_ENABLE_DRAG_DROP
+
 }  // namespace blink

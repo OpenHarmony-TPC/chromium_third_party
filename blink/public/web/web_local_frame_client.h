@@ -498,6 +498,10 @@ class BLINK_EXPORT WebLocalFrameClient {
   virtual void UpdateContextMenuDataForTesting(
       const ContextMenuData&,
       const absl::optional<gfx::Point>&) {}
+#ifdef OHOS_ENABLE_DRAG_DROP
+  // Tell the UI to dismiss the contextmenu popup window
+  virtual void ClearContextMenu() {}
+#endif //OHOS_ENABLE_DRAG_DROP
 
   // Called when a new element gets focused. |from_element| is the previously
   // focused element, |to_element| is the newly focused one. Either can be null.

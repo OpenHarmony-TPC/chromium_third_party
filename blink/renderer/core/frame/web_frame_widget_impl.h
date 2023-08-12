@@ -786,6 +786,10 @@ class CORE_EXPORT WebFrameWidgetImpl
                          SelectAroundCaretCallback callback) override;
 #endif
 
+#if BUILDFLAG(IS_OHOS)
+  void SelectAndCopy() override;
+  void SetZoomLevel(float magnify_delta, const gfx::Point& anchor) override;
+#endif
   // PageWidgetEventHandler overrides:
   WebInputEventResult HandleKeyEvent(const WebKeyboardEvent&) override;
   void HandleMouseDown(LocalFrame&, const WebMouseEvent&) override;

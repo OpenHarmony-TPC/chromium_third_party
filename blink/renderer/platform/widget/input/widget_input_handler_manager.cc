@@ -1005,4 +1005,13 @@ void WidgetInputHandlerManager::ClearClient() {
   input_event_queue_->ClearClient();
 }
 
+#if BUILDFLAG(IS_OHOS)
+void WidgetInputHandlerManager::SetZoomLevel(float magnify_delta, const gfx::Point& anchor) {
+  if (!input_handler_proxy_) {
+    return;
+  }
+  input_handler_proxy_->SynchronouslyZoomBy(magnify_delta, anchor);
+}
+#endif  // BUILDFLAG(IS_OHOS)
+
 }  // namespace blink

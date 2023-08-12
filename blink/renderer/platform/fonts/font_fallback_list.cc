@@ -60,8 +60,7 @@ FontFallbackList::~FontFallbackList() {
 FontSelector* FontFallbackList::GetFontSelector() const {
   // FontFallbackList objects are managed in FontFallbackMap, and should not be
   // used after FontFallbackMap is destroyed.
-  DCHECK(font_fallback_map_);
-  return font_fallback_map_->GetFontSelector();
+  return font_fallback_map_ ? font_fallback_map_->GetFontSelector() : nullptr;
 }
 
 void FontFallbackList::ReleaseFontData() {
@@ -163,31 +162,45 @@ scoped_refptr<FontData> FontFallbackList::GetFontData(
     family_index_++;
     if (!curr_family->FamilyName().IsEmpty()) {
       scoped_refptr<FontData> result;
-      if (GetFontSelector()) {
-        result = GetFontSelector()->GetFontData(font_description, *curr_family);
+      if (!GetFontSelector()) {
+        result = FontCache::GetFontCache()->GetFontData(font_description, curr_family->FamilyName());
+        if (result) {
+          return result;
+        }
+        continue;
       }
 
+      result = GetFontSelector()->GetFontData(font_description, *curr_family);
+
       if (!result) {
+#if BUILDFLAG(IS_OHOS)
         result = FontCache::GetFontCache()->GetFontData(
-            font_description, curr_family->FamilyName());
-        if (GetFontSelector()) {
-          GetFontSelector()->ReportFontLookupByUniqueOrFamilyName(
-              curr_family->FamilyName(), font_description,
-              DynamicTo<SimpleFontData>(result.get()));
+          font_description, curr_family->FamilyName());
+        if (curr_family->Next() == nullptr && !result) {
+          AtomicString family_name;
+          std::string str = "";
+          family_name = AtomicString::FromUTF8(str.c_str(), str.size());
+          result = FontCache::GetFontCache()->GetFontData(
+            font_description, family_name);
         }
+#else
+        result = FontCache::GetFontCache()->GetFontData(
+          font_description, curr_family->FamilyName());
+#endif
+
+        GetFontSelector()->ReportFontLookupByUniqueOrFamilyName(
+            curr_family->FamilyName(), font_description,
+            DynamicTo<SimpleFontData>(result.get()));
       }
+
       if (result) {
-        if (GetFontSelector()) {
-          GetFontSelector()->ReportSuccessfulFontFamilyMatch(
-              curr_family->FamilyName());
-        }
+        GetFontSelector()->ReportSuccessfulFontFamilyMatch(
+            curr_family->FamilyName());
         return result;
       }
 
-      if (GetFontSelector()) {
-        GetFontSelector()->ReportFailedFontFamilyMatch(
-            curr_family->FamilyName());
-      }
+      GetFontSelector()->ReportFailedFontFamilyMatch(
+          curr_family->FamilyName());
     }
   }
   family_index_ = kCAllFamiliesScanned;

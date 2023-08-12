@@ -894,6 +894,10 @@ class WebLocalFrame : public WebFrame {
       CrossVariantMojoRemote<mojom::StorageAreaInterfaceBase>
           session_storage_area) = 0;
 
+#if BUILDFLAG(IS_OHOS)
+  virtual void SelectClosetWordAndShowSelectionMenu() = 0;
+#endif
+
  protected:
   explicit WebLocalFrame(mojom::TreeScopeType scope,
                          const LocalFrameToken& frame_token)
