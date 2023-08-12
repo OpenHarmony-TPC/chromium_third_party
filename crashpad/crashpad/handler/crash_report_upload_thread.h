@@ -15,6 +15,7 @@
 #ifndef CRASHPAD_HANDLER_CRASH_REPORT_UPLOAD_THREAD_H_
 #define CRASHPAD_HANDLER_CRASH_REPORT_UPLOAD_THREAD_H_
 
+#include <map>
 #include <memory>
 #include <string>
 #include <unordered_map>
@@ -108,7 +109,7 @@ class CrashReportUploadThread : public WorkerThread::Delegate,
   //! It is expected to only be called from the same thread that called Start().
   void Stop() override;
 
- private:
+ protected:
   //! \brief The result code from UploadReport().
   enum class UploadResult {
     //! \brief The crash report was uploaded successfully.
@@ -136,7 +137,7 @@ class CrashReportUploadThread : public WorkerThread::Delegate,
   //! object was constructed with \a watch_pending_reports, it will also scan
   //! the crash report database for other pending reports, and process those as
   //! well.
-  void ProcessPendingReports();
+  virtual void ProcessPendingReports();
 
   //! \brief Processes a single pending report from the database.
   //!
@@ -150,7 +151,7 @@ class CrashReportUploadThread : public WorkerThread::Delegate,
   //! remain in the “pending” state. If the upload fails and no more retries are
   //! desired, or report upload is disabled, it will be marked as “completed” in
   //! the database without ever having been uploaded.
-  void ProcessPendingReport(const CrashReportDatabase::Report& report);
+  virtual void ProcessPendingReport(const CrashReportDatabase::Report& report);
 
   //! \brief Attempts to upload a crash report.
   //!
@@ -166,6 +167,11 @@ class CrashReportUploadThread : public WorkerThread::Delegate,
   //!    attempt.
   UploadResult UploadReport(const CrashReportDatabase::UploadReport* report,
                             std::string* response_body);
+
+  using ParameterMap = std::map<std::string, std::string>;
+  virtual ParameterMap FilterParameters(const ParameterMap& parameters) {
+    return parameters;
+  }
 
   // WorkerThread::Delegate:
   //! \brief Calls ProcessPendingReports() in response to ReportPending() having
