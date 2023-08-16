@@ -1,0 +1,38 @@
+#!/bin/bash
+
+latest_version="ohos-sdk-4.0.7.5-Beta1.tar.gz"
+
+
+base_dir="$(dirname "$(realpath "${BASH_SOURCE[0]}")")"
+version_file="${base_dir}/.version"
+
+sdk_upgrade() {
+  installed_version=""
+  if [ -f "${version_file}" ]; then
+    installed_version=$(head -n 1 "${version_file}")
+  fi
+
+  if [ "-${latest_version}" == "-${installed_version}" ]; then
+    return 0
+  fi
+
+  cd "${base_dir}"
+  if [ ! -f "${latest_version}" ]; then
+    echo "ERROR: Could not find latest SDK tarball: ${base_dir}/${latest_version}"
+    return 1
+  fi
+
+  rm -rf ets js native toolchains licenses previewer [0-9]*
+  tar zxf "${latest_version}"
+  rc=$?
+
+  if [ ${rc} -eq 0 ]; then
+    echo -n "${latest_version}" > "${version_file}"
+  else
+    echo "ERROR: Failed to extract SDK tarball: ${base_dir}/${latest_version}, result: ${rc}"
+  fi
+  return ${rc}
+}
+
+
+sdk_upgrade

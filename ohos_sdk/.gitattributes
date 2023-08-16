@@ -1,0 +1,5 @@
+ohos-sdk-*.tar.gz filter=lfs diff=lfs merge=lfs -text
+ohos-sdk-3.2.2.5-Beta1.tar.gz filter=lfs diff=lfs merge=lfs -text
+ohos-sdk-3.2.10.6-Beta5.tar.gz filter=lfs diff=lfs merge=lfs -text
+ohos-sdk-3.2.10.7-Beta5.tar.gz filter=lfs diff=lfs merge=lfs -text
+ohos-sdk-4.0.7.5-Beta1.tar.gz filter=lfs diff=lfs merge=lfs -text
