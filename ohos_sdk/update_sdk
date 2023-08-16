@@ -1,0 +1,98 @@
+#!/bin/bash
+
+set -e
+if [ $# -ne 1 ]; then
+  echo "Usage: $0 /path/to/original/sdk/package"
+  exit 1
+fi
+
+original_sdk="$1"
+current_dir=`pwd`
+npm_bin=$(realpath "../third_party/node/linux/node-linux-x64/bin/npm")
+tmp_dir=$(realpath $(mktemp -d -p ./))
+new_sdk_dir=$(realpath $(mktemp -d -p ./))
+linux_sdk_dir="$tmp_dir/ohos-sdk/linux"
+sdk_modules="ets js native previewer toolchains"
+
+# Decompress original SDK package.
+tar zxf $original_sdk -C $tmp_dir
+
+new_sdk_level=""
+new_sdk_version_tag=""
+new_sdk_version=""
+new_sdk_type=""
+for module in $sdk_modules; do
+  unzip -q $linux_sdk_dir/$module*.zip -d $new_sdk_dir
+  _json=$new_sdk_dir/$module/oh-uni-package.json
+  new_sdk_level=$(cat $_json | grep '"apiVersion"' | awk -F: '{print $NF}' | sed 's/,//g' | sed 's/ //g' | sed 's/"//g')
+  new_sdk_version=$(cat $_json | grep '"version"' | awk -F: '{print $NF}' | sed 's/,//g' | sed 's/ //g' | sed 's/"//g')
+  new_sdk_type=$(cat $_json | grep '"releaseType"' | awk -F: '{print $NF}' | sed 's/,//g' | sed 's/ //g' | sed 's/"//g')
+  _sdk_tag="$new_sdk_version-$new_sdk_type"
+  if [ "-$new_sdk_version_tag" == "-" ]; then
+    new_sdk_version_tag=$_sdk_tag
+  elif [ "-$new_sdk_version_tag" != "-$_sdk_tag" ]; then
+    echo "ERROR: Invalid SDK module version: $module $new_sdk_version $new_sdk_type"
+    exit 3
+  fi
+done
+
+# Update npm modules.
+cd $new_sdk_dir/js/build-tools/ace-loader
+$npm_bin install --quiet
+
+cd $new_sdk_dir/ets/build-tools/ets-loader
+$npm_bin install --quiet
+
+# Update musl header files.
+patch --no-backup-if-mismatch $new_sdk_dir/native/sysroot/usr/include/dlfcn.h <<EOF
+@@ -31,6 +31,25 @@
+        char name[NS_NAME_MAX+1];
+ } Dl_namespace;
+ 
++void dlns_init(Dl_namespace *, const char *);
++
++/* open dso in given namespace which has own lib search paths
++ * when namespace is null, it's same to dlopen() 
++ * avoid using "default" as namespace, which is the default namespace */
++void *dlopen_ns(Dl_namespace *, const char *, int);
++
++/* create the namespace and set lib search paths of namespace,
++ * the paths should be splited by ':'. When namespace already exist, 
++ * return error */
++int dlns_create(Dl_namespace *, const char *);
++
++/* make one namespace inherit another, and so it can use shared libs by the inherited one. 
++ * param1: namespace, param2: inherited namespace, param3: shared libs.
++ * the shared libs should be splited by ':'. when it is null or empty, all libs can be shared.
++ * one namespace can inherit or be inherited by multiple ones.
++ * When namespaces do not exist, return error */
++int dlns_inherit(Dl_namespace *, Dl_namespace *, const char *);
++
+ #if defined(_GNU_SOURCE) || defined(_BSD_SOURCE)
+ typedef struct {
+        const char *dli_fname;
+EOF
+
+# Update SDK structure.
+cd $new_sdk_dir
+mkdir $new_sdk_level
+mv $sdk_modules $new_sdk_level
+
+for module in $sdk_modules; do
+  mkdir $module
+  cd $module
+  ln -s ../$new_sdk_level/$module ./$new_sdk_version
+  cd $new_sdk_dir
+done
+
+# Compress new SDK package.
+new_sdk_package="ohos-sdk-$new_sdk_version_tag.tar.gz"
+rm -rf ../$new_sdk_package
+tar cfz ../$new_sdk_package *
+
+# Update config files.
+cd $current_dir
+sed -i "s/\([[:space:]]*\)ohos_sdk_version[[:space:]]*=[[:space:]]*\"[^\"]*\(.*\)$/\1ohos_sdk_version = \"$new_sdk_version\2/g" "$current_dir/ohos_sdk.gni"
+sed -i "s/^latest_version=.*$/latest_version=\"$new_sdk_package\"/g" "$current_dir/.install"
+
+rm -rf $tmp_dir $new_sdk_dir
