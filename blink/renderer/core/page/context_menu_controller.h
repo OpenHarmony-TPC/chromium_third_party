@@ -34,6 +34,10 @@
 #include "third_party/blink/renderer/platform/heap/garbage_collected.h"
 #include "third_party/blink/renderer/platform/mojo/heap_mojo_associated_receiver.h"
 
+#if BUILDFLAG(IS_OHOS)
+#include "third_party/blink/public/web/web_element.h"
+#endif
+
 namespace blink {
 
 class ContextMenuProvider;
@@ -124,6 +128,13 @@ class CORE_EXPORT ContextMenuController final
                        const PhysicalOffset&,
                        WebMenuSourceType,
                        const MouseEvent* mouse_event = nullptr);
+
+#if BUILDFLAG(IS_OHOS)
+  GURL GetAbsoluteSrcUrl(const blink::WebElement& element);
+  blink::WebElement GetImgChild(const blink::WebNode& node, gfx::Point point);
+  GURL GetAbsoluteUrl(const blink::WebNode& node, const std::u16string& url_fragment);
+  GURL GetChildImageUrlFromElement(const blink::WebElement& element, gfx::Point point);
+#endif
 
   bool ShouldShowContextMenuFromTouch(const ContextMenuData&);
 

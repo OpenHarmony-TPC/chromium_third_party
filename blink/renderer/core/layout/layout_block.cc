@@ -2276,6 +2276,9 @@ LayoutBlock* LayoutBlock::CreateAnonymousWithParentAndDisplay(
     case EDisplay::kFlowRoot:
       new_display = EDisplay::kFlowRoot;
       break;
+    case EDisplay::kBlockMath:
+      new_display = EDisplay::kBlockMath;
+      break;
     default:
       new_display = EDisplay::kBlock;
       break;
@@ -2294,6 +2297,9 @@ LayoutBlock* LayoutBlock::CreateAnonymousWithParentAndDisplay(
                                                           *new_style, legacy);
   } else if (new_display == EDisplay::kGrid) {
     layout_block = LayoutObjectFactory::CreateGrid(parent->GetDocument(),
+                                                   *new_style, legacy);
+  } else if (new_display == EDisplay::kBlockMath) {
+    layout_block = LayoutObjectFactory::CreateMath(parent->GetDocument(),
                                                    *new_style, legacy);
   } else {
     DCHECK(new_display == EDisplay::kBlock ||

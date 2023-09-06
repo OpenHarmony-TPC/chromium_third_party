@@ -158,7 +158,7 @@ bool StructTraits<blink::mojom::EventDataView,
           gesture_event->data.tap.height = gesture_data->contact_size->height();
           break;
         case blink::WebInputEvent::Type::kGestureLongPress:
-      #ifdef OHOS_ENABLE_DRAG_DROP
+      #ifdef BUILDFLAG(IS_OHOS)
         case blink::WebInputEvent::Type::kGestureDragLongPress:
       #endif
         case blink::WebInputEvent::Type::kGestureLongTap:
@@ -465,7 +465,7 @@ StructTraits<blink::mojom::EventDataView,
                                      gesture_event->data.tap.needs_wheel_event);
       break;
     case blink::WebInputEvent::Type::kGestureLongPress:
-#ifdef OHOS_ENABLE_DRAG_DROP
+#ifdef BUILDFLAG(IS_OHOS)
     case blink::WebInputEvent::Type::kGestureDragLongPress:
 #endif
     case blink::WebInputEvent::Type::kGestureLongTap:
