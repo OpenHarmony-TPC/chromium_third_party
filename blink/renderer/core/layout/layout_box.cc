@@ -1130,20 +1130,27 @@ int LayoutBox::PixelSnappedScrollHeight() const {
 PhysicalRect LayoutBox::ScrollRectToVisibleRecursive(
     const PhysicalRect& absolute_rect,
     mojom::blink::ScrollIntoViewParamsPtr params) {
+  LOG(INFO) << "LayoutBox::ScrollRectToVisibleRecursive start";
+  LOG(INFO) << "LayoutBox::ScrollRectToVisibleRecursive absolute_rect:" << absolute_rect.ToString();
   NOT_DESTROYED();
   DCHECK(params->type == mojom::blink::ScrollType::kProgrammatic ||
          params->type == mojom::blink::ScrollType::kUser);
 
-  if (!GetFrameView())
+  if (!GetFrameView()) {
+    LOG(ERROR) << "LayoutBox::ScrollRectToVisibleRecursive GetFrameView failed";
     return absolute_rect;
+  }
+
 
   // If we've reached the main frame's layout viewport (which is always set to
   // the global root scroller, see ViewportScrollCallback::SetScroller), abort
   // if the stop_at_main_frame_layout_viewport option is set. We do this so
   // that we can allow a smooth "scroll and zoom" animation to do the final
   // scroll in cases like scrolling a focused editable box into view.
-  if (params->stop_at_main_frame_layout_viewport && IsGlobalRootScroller())
+  if (params->stop_at_main_frame_layout_viewport && IsGlobalRootScroller()) {
+    LOG(ERROR) << "LayoutBox::ScrollRectToVisibleRecursive IsGlobalRootScroller false";
     return absolute_rect;
+  }
 
   PhysicalRect absolute_rect_to_scroll = absolute_rect;
   if (absolute_rect_to_scroll.Width() <= 0)
@@ -1158,21 +1165,25 @@ PhysicalRect LayoutBox::ScrollRectToVisibleRecursive(
 
   PhysicalRect absolute_rect_for_parent;
   if (!IsA<LayoutView>(this) && IsScrollContainer()) {
+    LOG(INFO) << "LayoutBox::ScrollRectToVisibleRecursive for scrollabe area";
     absolute_rect_for_parent =
         GetScrollableArea()->ScrollIntoView(absolute_rect_to_scroll, params);
   } else if (!parent_box && CanBeProgramaticallyScrolled()) {
     ScrollableArea* area_to_scroll = params->make_visible_in_visual_viewport
                                          ? GetFrameView()->GetScrollableArea()
                                          : GetFrameView()->LayoutViewport();
+    LOG(INFO) << "LayoutBox::ScrollRectToVisibleRecursive for visual viewport";
     absolute_rect_for_parent =
         area_to_scroll->ScrollIntoView(absolute_rect_to_scroll, params);
 
+    LOG(INFO) << "LayoutBox::ScrollRectToVisibleRecursive point:" << absolute_rect_for_parent.ToString();
     // If the parent is a local iframe, convert to the absolute coordinate
     // space of its document. For remote frames, this will happen on the other
     // end of the IPC call.
     HTMLFrameOwnerElement* owner_element = GetDocument().LocalOwner();
     if (owner_element && owner_element->GetLayoutObject() &&
         AllowedToPropagateRecursiveScrollToParentFrame(params)) {
+      LOG(INFO) << "LayoutBox::ScrollRectToVisibleRecursive for local iframe";
       parent_box = owner_element->GetLayoutObject()->EnclosingBox();
       LayoutView* parent_view = owner_element->GetLayoutObject()->View();
       absolute_rect_for_parent = View()->LocalToAncestorRect(
@@ -1189,23 +1200,27 @@ PhysicalRect LayoutBox::ScrollRectToVisibleRecursive(
       params->make_visible_in_visual_viewport) {
     if (GetFrame()->IsMainFrame()) {
       // TODO(donnd): We should continue the recursion if we're in a subframe.
+      LOG(INFO) << "LayoutBox::ScrollRectToVisibleRecursive EPosition::kFixed";
       return GetFrame()->GetPage()->GetVisualViewport().ScrollIntoView(
           absolute_rect_for_parent, params);
     } else {
+      LOG(INFO) << "LayoutBox::ScrollRectToVisibleRecursive not auto-scroll";
       return absolute_rect_for_parent;
     }
   }
 
   if (parent_box) {
+    LOG(INFO) << "LayoutBox::ScrollRectToVisibleRecursive ScrollRectToVisibleRecursive parend_box";
     return parent_box->ScrollRectToVisibleRecursive(absolute_rect_for_parent,
                                                     std::move(params));
   } else if (GetFrame()->IsLocalRoot() && !GetFrame()->IsMainFrame()) {
     if (AllowedToPropagateRecursiveScrollToParentFrame(params)) {
+      LOG(INFO) << "LayoutBox::ScrollRectToVisibleRecursive ScrollRectToVisibleInRemoteParent";
       GetFrameView()->ScrollRectToVisibleInRemoteParent(
           absolute_rect_for_parent, std::move(params));
     }
   }
-
+  LOG(INFO) << "ScrollRectToVisibleRecursive end,absolute_rect_for_parent:" << absolute_rect_for_parent.ToString();
   return absolute_rect_for_parent;
 }
 
@@ -1770,40 +1785,59 @@ NGPhysicalBoxStrut LayoutBox::ComputeScrollbarsInternal(
 
 bool LayoutBox::CanBeScrolledAndHasScrollableArea() const {
   NOT_DESTROYED();
-  return CanBeProgramaticallyScrolled() &&
+  bool can_auto_scroll = CanBeProgramaticallyScrolled() &&
          (PixelSnappedScrollHeight() != PixelSnappedClientHeight() ||
           PixelSnappedScrollWidth() != PixelSnappedClientWidth());
+  LOG(INFO) << "LayoutBox::CanBeScrolledAndHasScrollableArea:" << can_auto_scroll;
+  return can_auto_scroll;
 }
 
 bool LayoutBox::CanBeProgramaticallyScrolled() const {
   NOT_DESTROYED();
   Node* node = GetNode();
-  if (node && node->IsDocumentNode())
+  if (node && node->IsDocumentNode()) {
+    LOG(INFO) << "LayoutBox::CanBeProgramaticallyScrolled return =======true";
     return true;
+  }
 
-  if (!IsScrollContainer())
+  if (!IsScrollContainer()) {
+    LOG(INFO) << "LayoutBox::CanBeProgramaticallyScrolled return ======false";
     return false;
+  }
 
   bool has_scrollable_overflow =
       HasScrollableOverflowX() || HasScrollableOverflowY();
-  if (ScrollsOverflow() && has_scrollable_overflow)
+  if (ScrollsOverflow() && has_scrollable_overflow) {
+    LOG(INFO) << "LayoutBox::CanBeProgramaticallyScrolled return =======true";
     return true;
+  }
 
-  return node && HasEditableStyle(*node);
+  if (node) {
+    bool ret = HasEditableStyle(*node);
+    LOG(INFO) << "LayoutBox::CanBeProgramaticallyScrolled return ======= ret:" << ret;
+    return ret;
+  } else {
+    return false;
+  }
 }
 
 void LayoutBox::Autoscroll(const PhysicalOffset& position_in_root_frame) {
   NOT_DESTROYED();
   LocalFrame* frame = GetFrame();
-  if (!frame)
+  if (!frame) {
+    LOG(ERROR) << "LayoutBox::Autoscroll frame null";
     return;
+  }
 
   LocalFrameView* frame_view = frame->View();
-  if (!frame_view)
+  if (!frame_view) {
+    LOG(ERROR) << "LayoutBox::Autoscroll frame_view null";
     return;
+  }
 
   PhysicalOffset absolute_position =
       frame_view->ConvertFromRootFrame(position_in_root_frame);
+  LOG(INFO) << "LayoutBox::Autoscroll reference_position_ absolute_position:" << absolute_position.ToString();
   ScrollRectToVisibleRecursive(
       PhysicalRect(absolute_position,
                    PhysicalSize(LayoutUnit(1), LayoutUnit(1))),
@@ -1859,12 +1893,13 @@ PhysicalOffset LayoutBox::CalculateAutoscrollDirection(
 LayoutBox* LayoutBox::FindAutoscrollable(LayoutObject* layout_object,
                                          bool is_middle_click_autoscroll) {
   while (layout_object && !(layout_object->IsBox() &&
-                            To<LayoutBox>(layout_object)->CanAutoscroll())) {
+    To<LayoutBox>(layout_object)->CanAutoscroll())) {
     // Do not start selection-based autoscroll when the node is inside a
     // fixed-position element.
     if (!is_middle_click_autoscroll && layout_object->IsBox() &&
         To<LayoutBox>(layout_object)->HasLayer() &&
         To<LayoutBox>(layout_object)->Layer()->FixedToViewport()) {
+      LOG(ERROR) << "LayoutBox::FindAutoscrollable failed nullptr";
       return nullptr;
     }
 
@@ -1877,7 +1912,6 @@ LayoutBox* LayoutBox::FindAutoscrollable(LayoutObject* layout_object,
       layout_object = layout_object->Parent();
     }
   }
-
   return DynamicTo<LayoutBox>(layout_object);
 }
 
@@ -1907,6 +1941,7 @@ bool LayoutBox::HasHorizontallyScrollableAncestor(LayoutObject* layout_object) {
 
 void LayoutBox::ScrollByRecursively(const ScrollOffset& delta) {
   NOT_DESTROYED();
+  LOG(INFO) << "LayoutBox::ScrollByRecursively Autoscroll start";
   if (delta.IsZero() || !IsScrollContainer())
     return;
 

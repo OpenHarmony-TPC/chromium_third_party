@@ -24,7 +24,7 @@
 #include "third_party/blink/renderer/platform/graphics/color.h"
 #include "third_party/blink/renderer/platform/runtime_enabled_features.h"
 
-#ifdef OHOS_ENABLE_DRAG_DROP
+#ifdef BUILDFLAG(IS_OHOS)
 #include "third_party/blink/renderer/core/frame/settings.h"
 #include "base/command_line.h"
 #include "base/base_switches.h"
@@ -38,13 +38,13 @@ constexpr RGBA32 kTextDarkColorInDragging = 0xFFA9A9A9;
 constexpr RGBA32 kForegroundDarkColorInDragImage = 0xFFFFFFFF;
 #endif
 
-#ifdef OHOS_ENABLE_DRAG_DROP
+#ifdef BUILDFLAG(IS_OHOS)
 constexpr RGBA32 kTextColorInDragging = 0xFFC0C0C0; // gray
 constexpr RGBA32 kBackgroundColorInDragging = 0x00FFFFFF; // white, alpha channel set to zero
 constexpr RGBA32 kForegroundColorInDragImage = 0xFF000000; // black
 #endif
 
-#ifdef OHOS_ENABLE_DRAG_DROP
+#ifdef BUILDFLAG(IS_OHOS)
 Color DraggingTextColor(mojom::blink::ColorScheme color_scheme) {
 #ifdef HW_BUILD_DARK_MODE
   if (color_scheme == mojom::blink::ColorScheme::kDark) {
@@ -354,7 +354,7 @@ Color HighlightPaintingUtils::HighlightBackgroundColor(
     return ForcedSystemBackgroundColor(pseudo, color_scheme);
 
   Color background_color = HighlightThemeBackgroundColor(document, style, pseudo);
-#ifdef OHOS_ENABLE_DRAG_DROP
+#ifdef BUILDFLAG(IS_OHOS)
   if (InSelectionDragging(document)) { // kBackgroundColorInDragging
     return DraggingBackgroundColor();
   }

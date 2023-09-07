@@ -87,6 +87,7 @@
 #include "third_party/blink/renderer/platform/exported/wrapped_resource_response.h"
 
 #if BUILDFLAG(IS_OHOS)
+#include "third_party/blink/public/web/web_element_collection.h"
 #include "third_party/blink/renderer/core/css/css_image_value.h"
 #include "third_party/blink/renderer/core/css/css_uri_value.h"
 #include "third_party/blink/renderer/core/frame/settings.h"
@@ -874,6 +875,17 @@ bool ContextMenuController::ShowContextMenu(LocalFrame* frame,
   }
 #endif
 
+#if BUILDFLAG(IS_OHOS)
+  if (data.src_url.is_empty() && result.URLElement()) {
+    // try to find image url
+    data.src_url = GetChildImageUrlFromElement(blink::WebElement(result.URLElement()),
+      gfx::Point(point.ToLayoutPoint().X().ToInt(), point.ToLayoutPoint().Y().ToInt()));
+    if (!data.src_url.is_empty()) {
+      data.has_image_contents = true;
+    }
+  }
+#endif
+
   selected_web_frame->ShowContextMenu(
       context_menu_client_receiver_.BindNewEndpointAndPassRemote(
           selected_web_frame->GetTaskRunner(TaskType::kInternalDefault)),
@@ -881,6 +893,69 @@ bool ContextMenuController::ShowContextMenu(LocalFrame* frame,
 
   return true;
 }
+
+#if BUILDFLAG(IS_OHOS)
+GURL ContextMenuController::GetChildImageUrlFromElement(
+    const blink::WebElement& element, gfx::Point point) {
+  if (element.IsNull()) {
+    return GURL();
+  }
+  const blink::WebElement child_img = GetImgChild(element, point);
+  if (child_img.IsNull())
+    return GURL();
+  return GetAbsoluteSrcUrl(child_img);
+}
+
+GURL ContextMenuController::GetAbsoluteSrcUrl(
+  const blink::WebElement& element) {
+  if (element.IsNull())
+    return GURL();
+  return GetAbsoluteUrl(element, element.GetAttribute("src").Utf16());
+}
+
+blink::WebElement ContextMenuController::GetImgChild(
+  const blink::WebNode& node, gfx::Point point) {
+  blink::WebElementCollection collection = node.GetElementsByHTMLTagName("img");
+  if (collection.IsNull()) {
+    return blink::WebElement();
+  }
+  blink::WebElement cur_img = collection.FirstItem();
+  if (cur_img.IsNull()) {
+    return blink::WebElement();
+  }
+  gfx::Rect location_rect = cur_img.BoundsInViewport();
+  if (location_rect.Contains(point)) {
+    return cur_img;
+  }
+
+  // Find the rest of the img
+  for (unsigned i = 0; i < collection.length() - 1; i++) {
+    cur_img = collection.NextItem();
+    if (!cur_img.IsNull()) {
+      location_rect = cur_img.BoundsInViewport();
+      if (location_rect.Contains(point)) {
+        return cur_img;
+      }
+    }
+  }
+  return blink::WebElement();
+}
+
+GURL ContextMenuController::GetAbsoluteUrl(const blink::WebNode& node,
+                                  const std::u16string& url_fragment) {
+  if (node.IsNull() || url_fragment.empty()) {
+    return GURL();
+  }
+
+  if (node.GetDocument().IsNull()) {
+    return GURL();
+  }
+
+  KURL img_url = node.GetDocument().CompleteURL(
+    blink::WebString::FromUTF16(url_fragment));
+  return GURL(img_url);
+}
+#endif
 
 void ContextMenuController::UpdateTextFragmentHandler(
     LocalFrame* selected_frame) {

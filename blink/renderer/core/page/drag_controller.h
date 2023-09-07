@@ -40,7 +40,7 @@ namespace gfx {
 class RectF;
 }
 
-#ifdef OHOS_ENABLE_DRAG_DROP
+#ifdef BUILDFLAG(IS_OHOS)
 #include "third_party/blink/renderer/platform/wtf/text/string_builder.h"
 #endif
 
@@ -102,7 +102,7 @@ class CORE_EXPORT DragController final
   void ContextDestroyed() final;
 
   void Trace(Visitor*) const final;
-#ifdef OHOS_ENABLE_DRAG_DROP
+#ifdef BUILDFLAG(IS_OHOS)
   void StartDragImageEffects();
   void RestoreDragImageEffects();
   void StartDragTextEffects();
@@ -157,7 +157,7 @@ class CORE_EXPORT DragController final
 
   DragDestinationAction drag_destination_action_;
   bool did_initiate_drag_;
-#ifdef OHOS_ENABLE_DRAG_DROP
+#ifdef BUILDFLAG(IS_OHOS)
   WTF::StringBuilder origin_style_;
 #endif
 };

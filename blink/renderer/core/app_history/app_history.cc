@@ -225,7 +225,9 @@ void AppHistory::InitializeForNewWindow(
   if (commit_reason != CommitReason::kRegular ||
       (current.Url() == BlankURL() && !IsBackForwardLoadType(load_type)) ||
       (current.Url().IsAboutSrcdocURL() && !IsBackForwardLoadType(load_type))) {
-    if (previous && !previous->entries_.IsEmpty()) {
+    if (previous && !previous->entries_.IsEmpty() &&
+        GetSupplementable()->GetSecurityOrigin()->IsSameOriginWith(
+            previous->GetSupplementable()->GetSecurityOrigin())) {
       CloneFromPrevious(*previous);
       UpdateForNavigation(current, load_type);
       return;

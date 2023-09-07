@@ -57,7 +57,7 @@
 #include "ui/gfx/geometry/point_conversions.h"
 #include "ui/gfx/geometry/quad_f.h"
 
-#ifdef OHOS_ENABLE_DRAG_DROP
+#ifdef BUILDFLAG(IS_OHOS)
 #include "third_party/blink/public/web/web_local_frame_client.h"
 #include "third_party/blink/renderer/core/frame/web_local_frame_impl.h"
 #endif
@@ -951,13 +951,13 @@ bool MouseEventManager::HandleDrag(const MouseEventWithHitTestResults& event,
 
   //DTS2021090714050
   //Notify to UI, dismissed the contextmenu popup window.
-  #ifdef OHOS_ENABLE_DRAG_DROP
+  #ifdef BUILDFLAG(IS_OHOS)
     WebLocalFrameImpl* selected_web_frame = WebLocalFrameImpl::FromFrame(frame_);
     if (selected_web_frame && selected_web_frame->Client()){
       LOG(INFO) << "clear context menu popup for drag";
       selected_web_frame->Client()->ClearContextMenu();
     }
-  #endif //OHOS_ENABLE_DRAG_DROP
+  #endif //BUILDFLAG(IS_OHOS)
   if (!TryStartDrag(event)) {
     // Something failed to start the drag, clean up.
     ClearDragDataTransfer();
@@ -1142,7 +1142,7 @@ void MouseEventManager::ResetDragSource() {
   if (!frame_->GetPage())
     return;
 
-#ifdef OHOS_ENABLE_DRAG_DROP
+#ifdef BUILDFLAG(IS_OHOS)
   frame_->GetPage()->GetDragController().RestoreDragTextEffects();
   frame_->GetPage()->GetDragController().RestoreDragImageEffects();
 #endif

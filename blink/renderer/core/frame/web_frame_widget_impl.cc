@@ -912,7 +912,7 @@ WebInputEventResult WebFrameWidgetImpl::HandleGestureEvent(
       case WebInputEvent::Type::kGestureTapCancel:
       case WebInputEvent::Type::kGestureTap:
       case WebInputEvent::Type::kGestureLongPress:
-  #ifdef OHOS_ENABLE_DRAG_DROP
+  #ifdef BUILDFLAG(IS_OHOS)
       case WebInputEvent::Type::kGestureDragLongPress:
   #endif
         GetPage()->GetLinkHighlight().StartHighlightAnimationIfNeeded();
@@ -944,7 +944,7 @@ WebInputEventResult WebFrameWidgetImpl::HandleGestureEvent(
     }
     case WebInputEvent::Type::kGestureTwoFingerTap:
     case WebInputEvent::Type::kGestureLongPress:
-  #ifdef OHOS_ENABLE_DRAG_DROP
+  #ifdef BUILDFLAG(IS_OHOS)
       case WebInputEvent::Type::kGestureDragLongPress:
   #endif
     case WebInputEvent::Type::kGestureLongTap:

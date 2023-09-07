@@ -1610,9 +1610,9 @@ void WebView::ApplyWebPreferences(const web_pref::WebPreferences& prefs,
 #if BUILDFLAG(IS_OHOS)
   auto display_manager_adapter =
         OHOS::NWeb::OhosAdapterHelper::GetInstance().CreateDisplayMgrAdapter();
-  bool is_pc_device =
+  bool is_landscape_device =
       display_manager_adapter && (!display_manager_adapter->IsDefaultPortrait());
-  if (is_pc_device) {
+  if (is_landscape_device) {
     settings->SetShrinksViewportContentToFit(false);
     // Needs to happen before SetIgnoreViewportTagScaleLimits below.
     web_view->SetDefaultPageScaleLimits(1.f, 4.f);
@@ -1701,7 +1701,7 @@ void WebView::ApplyWebPreferences(const web_pref::WebPreferences& prefs,
   settings->SetViewportEnabled(prefs.viewport_enabled);
 
 #if BUILDFLAG(IS_OHOS)
-  if (is_pc_device) {
+  if (is_landscape_device) {
     settings->SetViewportMetaEnabled(false);
     settings->SetViewportStyle(mojom::ViewportStyle::kDefault);
     settings->SetPreferHiddenVolumeControls(false);

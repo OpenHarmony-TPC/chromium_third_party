@@ -75,7 +75,7 @@ class CORE_EXPORT GestureManager final
   WebInputEventResult HandleGestureTap(const GestureEventWithHitTestResults&);
   WebInputEventResult HandleGestureLongPress(
       const GestureEventWithHitTestResults&);
-#ifdef OHOS_ENABLE_DRAG_DROP
+#ifdef BUILDFLAG(IS_OHOS)
   WebInputEventResult HandleGestureDragLongPress(
       const GestureEventWithHitTestResults&);
 #endif

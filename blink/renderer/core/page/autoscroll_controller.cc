@@ -193,7 +193,10 @@ void AutoscrollController::UpdateDragAndDrop(Node* drop_target_node,
   if (autoscroll_layout_object_ &&
       autoscroll_layout_object_->GetFrame() !=
           drop_target_node->GetLayoutObject()->GetFrame())
+  {
+    LOG(INFO) << "AutoscrollController::UpdateDragAndDrop autoscroll_layout_object_ null";
     return;
+  }
 
   drop_target_node->GetLayoutObject()
       ->GetFrameView()
@@ -204,6 +207,7 @@ void AutoscrollController::UpdateDragAndDrop(Node* drop_target_node,
                                     /*is_middle_click_autoscroll*/ false);
   if (!scrollable) {
     StopAutoscroll();
+    LOG(ERROR) << "AutoscrollController::UpdateDragAndDrop FindAutoscrollable false just return";
     return;
   }
 
@@ -211,6 +215,7 @@ void AutoscrollController::UpdateDragAndDrop(Node* drop_target_node,
       scrollable->GetFrame() ? scrollable->GetFrame()->GetPage() : nullptr;
   if (!page) {
     StopAutoscroll();
+    LOG(ERROR) << "AutoscrollController::UpdateDragAndDrop just return";
     return;
   }
 
@@ -218,6 +223,7 @@ void AutoscrollController::UpdateDragAndDrop(Node* drop_target_node,
       scrollable->CalculateAutoscrollDirection(event_position);
   if (offset.IsZero()) {
     StopAutoscroll();
+    LOG(INFO) << "AutoscrollController::UpdateDragAndDrop IsZero just return";
     return;
   }
 
@@ -225,6 +231,12 @@ void AutoscrollController::UpdateDragAndDrop(Node* drop_target_node,
       PhysicalOffset::FromPointFRound(event_position) + offset;
 
   if (autoscroll_type_ == kNoAutoscroll) {
+    LOG(INFO) << "AutoscrollController::UpdateDragAndDrop start ======ScheduleMainThreadAnimation======";
+    LOG(INFO) << "AutoscrollController::UpdateDragAndDrop autoscroll_type_:"
+      << autoscroll_type_ << ", event_position:" << event_position.ToString();
+    LOG(INFO) << "AutoscrollController::UpdateDragAndDrop PhysicalOffset:" << offset.ToString();
+    LOG(INFO) << "AutoscrollController::UpdateDragAndDrop position:"
+      << drag_and_drop_autoscroll_reference_position_.ToString();
     autoscroll_type_ = kAutoscrollForDragAndDrop;
     autoscroll_layout_object_ = scrollable;
     drag_and_drop_autoscroll_start_time_ = event_time;
@@ -232,8 +244,12 @@ void AutoscrollController::UpdateDragAndDrop(Node* drop_target_node,
                       WebFeature::kDragAndDropScrollStart);
     ScheduleMainThreadAnimation();
   } else if (autoscroll_layout_object_ != scrollable) {
+    LOG(ERROR) << "AutoscrollController::UpdateDragAndDrop ======not scrollable======";
     drag_and_drop_autoscroll_start_time_ = event_time;
     autoscroll_layout_object_ = scrollable;
+  } else {
+    LOG(INFO) << "AutoscrollController::UpdateDragAndDrop autoscroll_type_:"
+      << autoscroll_type_ << ", event_position:" << event_position.ToString();
   }
 }
 
@@ -257,7 +273,7 @@ bool CanScrollDirection(LayoutBox* layout_box,
                            ? maximum_scroll_offset.x() > 0
                            : maximum_scroll_offset.y() > 0);
   }
-
+  LOG(INFO) << "AutoscrollController::CanScrollDirection can_scroll:" << can_scroll;
   return can_scroll;
 }
 
@@ -448,10 +464,13 @@ void AutoscrollController::StartMiddleClickAutoscroll(
 
 void AutoscrollController::Animate() {
   // Middle-click autoscroll isn't handled on the main thread.
-  if (MiddleClickAutoscrollInProgress())
+  if (MiddleClickAutoscrollInProgress()) {
+    LOG(INFO) << "AutoscrollController::Animate MiddleClickAutoscrollInProgress false";
     return;
+  }
 
   if (!autoscroll_layout_object_ || !autoscroll_layout_object_->GetFrame()) {
+    LOG(DEBUG) << "AutoscrollController::Animate StopAutoscroll";
     StopAutoscroll();
     return;
   }
@@ -468,10 +487,13 @@ void AutoscrollController::Animate() {
   switch (autoscroll_type_) {
     case kAutoscrollForDragAndDrop:
       ScheduleMainThreadAnimation();
-      if ((base::TimeTicks::Now() - drag_and_drop_autoscroll_start_time_) >
-          kAutoscrollDelay)
+      if ((base::TimeTicks::Now() - drag_and_drop_autoscroll_start_time_) > kAutoscrollDelay) {
+        LOG(INFO) << "AutoscrollController kAutoscrollForDragAndDrop Autoscroll start, position:"
+          << drag_and_drop_autoscroll_reference_position_.ToString();
         autoscroll_layout_object_->Autoscroll(
             drag_and_drop_autoscroll_reference_position_);
+        LOG(INFO) << "AutoscrollController kAutoscrollForDragAndDrop Autoscroll end";
+      }
       break;
     case kAutoscrollForSelection:
       if (!event_handler.MousePressed()) {

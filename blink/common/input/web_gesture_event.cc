@@ -198,7 +198,7 @@ gfx::SizeF WebGestureEvent::TapAreaInRootFrame() const {
     return gfx::SizeF(data.two_finger_tap.first_finger_width / frame_scale_,
                       data.two_finger_tap.first_finger_height / frame_scale_);
   } else if (type_ == WebInputEvent::Type::kGestureLongPress ||
-#ifdef OHOS_ENABLE_DRAG_DROP
+#ifdef BUILDFLAG(IS_OHOS)
              type_ == WebInputEvent::Type::kGestureDragLongPress ||
 #endif
              type_ == WebInputEvent::Type::kGestureLongTap) {
@@ -264,7 +264,7 @@ void WebGestureEvent::FlattenTransform() {
         data.two_finger_tap.first_finger_height /= frame_scale_;
         break;
       case WebInputEvent::Type::kGestureLongPress:
-#ifdef OHOS_ENABLE_DRAG_DROP
+#ifdef BUILDFLAG(IS_OHOS)
       case WebInputEvent::Type::kGestureDragLongPress:
 #endif
       case WebInputEvent::Type::kGestureLongTap:
