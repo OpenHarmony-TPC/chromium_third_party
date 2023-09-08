@@ -286,7 +286,7 @@ void DragImage::Scale(float scale_x, float scale_y) {
                                           image_height);
 }
 
-#ifdef OHOS_ENABLE_DRAG_DROP
+#ifdef BUILDFLAG(IS_OHOS)
 gfx::Vector2dF  DragImage::HwClampedImageScale(const gfx::Size& image_size,
                                          const gfx::Size& element_size,
                                          const float target_scale) {
@@ -296,6 +296,6 @@ gfx::Vector2dF  DragImage::HwClampedImageScale(const gfx::Size& image_size,
       static_cast<float>(element_size.height()) * target_scale / image_size.height());
   return image_scale;
 }
-#endif //OHOS_ENABLE_DRAG_DROP
+#endif //BUILDFLAG(IS_OHOS)
 
 }  // namespace blink

@@ -94,7 +94,7 @@
 #include "ui/gfx/geometry/rect.h"
 #include "ui/gfx/geometry/size.h"
 #include "ui/gfx/geometry/vector2d_conversions.h"
-#ifdef OHOS_ENABLE_DRAG_DROP
+#ifdef BUILDFLAG(IS_OHOS)
 #include "third_party/blink/renderer/core/css/style_sheet_contents.h"
 #include "third_party/blink/renderer/core/css/parser/css_parser_context.h"
 #endif
@@ -109,7 +109,7 @@ using ui::mojom::blink::DragOperation;
 
 static const int kMaxOriginalImageArea = 1500 * 1500;
 static const int kLinkDragBorderInset = 2;
-#ifdef OHOS_ENABLE_DRAG_DROP
+#ifdef BUILDFLAG(IS_OHOS)
 static const float kDragTextAlpha = 0.7f;
 // drag image's alpha and scale will be processed in ImageDragShadowBuilder.java
 static const float kDragImageAlpha = 1.0f;
@@ -229,7 +229,7 @@ void DragController::DragEnded() {
   did_initiate_drag_ = false;
   page_->GetDragCaret().Clear();
 
-#ifdef OHOS_ENABLE_DRAG_DROP
+#ifdef BUILDFLAG(IS_OHOS)
   RestoreDragTextEffects();
   RestoreDragImageEffects();
 #endif
@@ -1109,8 +1109,9 @@ static std::unique_ptr<DragImage> DragImageForImage(
       image_resource.ImageOrientation();
 
   gfx::Size image_size = image->Size(respect_orientation);
-  if (image_size.Area64() > kMaxOriginalImageArea)
-    return nullptr;
+  if (image_size.Area64() > kMaxOriginalImageArea) {
+    LOG(WARNING) << "drag origin image is too big, need to scale";
+  }
 
   InterpolationQuality interpolation_quality = kInterpolationDefault;
   if (layout_image->StyleRef().ImageRendering() == EImageRendering::kPixelated)
@@ -1120,7 +1121,7 @@ static std::unique_ptr<DragImage> DragImageForImage(
       DragImage::ClampedImageScale(image_size, image_element_size_in_pixels,
                                    MaxDragImageSize(device_scale_factor));
 
-#ifdef OHOS_ENABLE_DRAG_DROP
+#ifdef BUILDFLAG(IS_OHOS)
       // UX : scale image
     image_scale =
       DragImage::HwClampedImageScale(image_size,
@@ -1202,7 +1203,7 @@ std::unique_ptr<DragImage> DragController::DragImageForSelection(
   PaintFlags paint_flags =
       PaintFlag::kSelectionDragImageOnly | PaintFlag::kOmitCompositingInfo;
 
-#ifdef OHOS_ENABLE_DRAG_DROP
+#ifdef BUILDFLAG(IS_OHOS)
     paint_flags |= PaintFlag::kGlobalPaintDragSelection;
 #endif
   auto* builder = MakeGarbageCollected<PaintRecordBuilder>();
@@ -1268,7 +1269,7 @@ bool DragController::StartDrag(LocalFrame* src,
   Node* node = state.drag_src_.Get();
   if (state.drag_type_ == kDragSourceActionSelection) {
     if (!drag_image) {
-#ifdef OHOS_ENABLE_DRAG_DROP
+#ifdef BUILDFLAG(IS_OHOS)
   drag_image = DragImageForSelection(*src, kDragTextAlpha);
 #endif
       drag_location = DragLocationForSelectionDrag(*src);
@@ -1384,7 +1385,7 @@ void DragController::DoSystemDrag(DragImage* image,
     drag_image = image->Bitmap();
   }
 
-#ifdef OHOS_ENABLE_DRAG_DROP
+#ifdef BUILDFLAG(IS_OHOS)
     StartDragTextEffects();
     StartDragImageEffects();
 #endif
@@ -1422,7 +1423,7 @@ void DragController::ContextDestroyed() {
   drag_state_ = nullptr;
 }
 
-#ifdef OHOS_ENABLE_DRAG_DROP
+#ifdef BUILDFLAG(IS_OHOS)
 void DragController::StartDragTextEffects() {
   if (!drag_state_)
     return;

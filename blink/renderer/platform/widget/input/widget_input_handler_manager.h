@@ -175,6 +175,8 @@ class PLATFORM_EXPORT WidgetInputHandlerManager final
 
 #if BUILDFLAG(IS_OHOS)
   void SetZoomLevel(float magnify_delta, const gfx::Point& anchor);
+
+  void AsyncSetZoomLevel(float magnify_delta, const gfx::Point& anchor);
 #endif  // BUILDFLAG(IS_OHOS)
 
  protected:

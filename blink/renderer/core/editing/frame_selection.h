@@ -318,9 +318,9 @@ class CORE_EXPORT FrameSelection final
       const InlineTextBox& text_box) const;
 
   void Trace(Visitor*) const override;
-#ifdef OHOS_ENABLE_DRAG_DROP
+#ifdef BUILDFLAG(IS_OHOS)
   void InvalidateSelectionForDrag();
-#endif //OHOS_ENABLE_DRAG_DROP
+#endif //BUILDFLAG(IS_OHOS)
 
  private:
   friend class CaretDisplayItemClientTest;

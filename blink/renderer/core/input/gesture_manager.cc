@@ -43,12 +43,12 @@
 #include "third_party/blink/renderer/core/style/computed_style.h"
 #endif  // BUILDFLAG(ENABLE_UNHANDLED_TAP)
 
-#ifdef OHOS_ENABLE_DRAG_DROP
+#ifdef BUILDFLAG(IS_OHOS)
 #include "base/base_switches.h"
 #include "base/command_line.h"
 #include "third_party/blink/public/web/web_local_frame_client.h"
 #include "third_party/blink/renderer/core/frame/web_local_frame_impl.h"
-#endif //OHOS_ENABLE_DRAG_DROP
+#endif //BUILDFLAG(IS_OHOS)
 
 namespace blink {
 
@@ -108,7 +108,7 @@ HitTestRequest::HitTestRequestType GestureManager::GetHitTypeForGestureType(
       return hit_type | HitTestRequest::kRelease;
     case WebInputEvent::Type::kGestureTapDown:
     case WebInputEvent::Type::kGestureLongPress:
-#ifdef OHOS_ENABLE_DRAG_DROP
+#ifdef BUILDFLAG(IS_OHOS)
     case WebInputEvent::Type::kGestureDragLongPress:
 #endif
     case WebInputEvent::Type::kGestureLongTap:
@@ -161,7 +161,7 @@ WebInputEventResult GestureManager::HandleGestureEventInFrame(
       return HandleGestureShowPress();
     case WebInputEvent::Type::kGestureLongPress:
       return HandleGestureLongPress(targeted_event);
-#ifdef OHOS_ENABLE_DRAG_DROP
+#ifdef BUILDFLAG(IS_OHOS)
     case WebInputEvent::Type::kGestureDragLongPress:
       return HandleGestureDragLongPress(targeted_event);
 #endif
@@ -458,7 +458,7 @@ WebInputEventResult GestureManager::HandleGestureLongPress(
   return SendContextMenuEventForGesture(targeted_event);
 }
 
-#ifdef OHOS_ENABLE_DRAG_DROP
+#ifdef BUILDFLAG(IS_OHOS)
 WebInputEventResult GestureManager::HandleGestureDragLongPress(
     const GestureEventWithHitTestResults& targeted_event) {
   LOG(INFO) << "DragDrop HandleGestureDragLongPress";

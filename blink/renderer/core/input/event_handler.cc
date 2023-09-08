@@ -2020,7 +2020,7 @@ void EventHandler::ApplyTouchAdjustment(WebGestureEvent* gesture_event,
           location, *hit_test_result, adjusted_point, adjusted_node);
       break;
     case WebInputEvent::Type::kGestureLongPress:
-#ifdef OHOS_ENABLE_DRAG_DROP
+#ifdef BUILDFLAG(IS_OHOS)
     case WebInputEvent::Type::kGestureDragLongPress:
 #endif
     case WebInputEvent::Type::kGestureLongTap:

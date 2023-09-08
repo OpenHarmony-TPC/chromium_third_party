@@ -78,7 +78,7 @@ class CORE_EXPORT DragImage {
 
   void Scale(float scale_x, float scale_y);
 
-#ifdef OHOS_ENABLE_DRAG_DROP
+#ifdef BUILDFLAG(IS_OHOS)
   static gfx::Vector2dF HwClampedImageScale(const gfx::Size&,
                                             const gfx::Size&,
                                             const float target_scale);

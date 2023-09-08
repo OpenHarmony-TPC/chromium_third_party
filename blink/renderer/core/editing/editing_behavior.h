@@ -42,8 +42,12 @@ class CORE_EXPORT EditingBehavior {
   // area, maintain the horizontal position on Windows and Android but extend it
   // to the boundary of the editable content on Mac and Linux.
   bool ShouldMoveCaretToHorizontalBoundaryWhenPastTopOrBottom() const {
+#if BUILDFLAG(IS_OHOS)
+    return false;
+#else
     return type_ != mojom::blink::EditingBehavior::kEditingWindowsBehavior &&
            type_ != mojom::blink::EditingBehavior::kEditingAndroidBehavior;
+#endif
   }
 
   bool ShouldSelectReplacement() const {

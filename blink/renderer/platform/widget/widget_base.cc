@@ -1650,7 +1650,7 @@ void WidgetBase::SetZoomLevel(float magnify_delta, const gfx::Point& anchor) {
   if (!widget_input_handler_manager_) {
     return;
   }
-  widget_input_handler_manager_->SetZoomLevel(magnify_delta, anchor);
+  widget_input_handler_manager_->AsyncSetZoomLevel(magnify_delta, anchor);
 }
 #endif  // BUILDFLAG(IS_OHOS)
 

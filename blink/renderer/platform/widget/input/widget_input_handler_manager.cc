@@ -1012,6 +1012,15 @@ void WidgetInputHandlerManager::SetZoomLevel(float magnify_delta, const gfx::Poi
   }
   input_handler_proxy_->SynchronouslyZoomBy(magnify_delta, anchor);
 }
+
+void WidgetInputHandlerManager::AsyncSetZoomLevel(
+    float magnify_delta,
+    const gfx::Point& anchor) {
+  InputThreadTaskRunner()->PostTask(
+      FROM_HERE, base::BindOnce(&WidgetInputHandlerManager::SetZoomLevel, AsWeakPtr(),
+                                magnify_delta, anchor));
+}
+
 #endif  // BUILDFLAG(IS_OHOS)
 
 }  // namespace blink
