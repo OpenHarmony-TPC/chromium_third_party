@@ -1,0 +1,1166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- Copyright (c) 2021 Huawei Device Co., Ltd.
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+
+    This is the configuration file template for OpenHarmony OSS Audit Tool, please copy it to your
+project root dir and modify it refer to OpenHarmony/tools_oat/README.
+    All configurations in this file will be merged to OAT-Default.xml, if you have any questions or
+concerns, please create issue in OpenHarmony/tools_oat and @jalenchen or chenyaxun.
+
+    licensefile:
+    1.If the project don't have "LICENSE" in root dir, please define all the license files in this
+project in , OAT will check license files according to this rule.
+
+    policylist:
+    1. policy: If the OAT-Default.xml policies do not meet your requirements, please add policies here.
+    2. policyitem: The fields type, name, path, desc is required, and the fields rule, group,
+filefilter is optional,the default value is:
+    <policyitem type="" name="" path="" desc="" rule="may" group="defaultGroup"
+filefilter="defaultPolicyFilter"/>
+    3. policyitem type:
+        "compatibility" is used to check license compatibility in the specified path;
+        "license" is used to check source license header in the specified path;
+        "copyright" is used to check source copyright header in the specified path;
+        "import" is used to check source dependency in the specified path, such as import ... ,include ...
+        "filetype" is used to check file type in the specified path, supported file types: archive, binary
+        "filename" is used to check whether the specified file exists in the specified path(projectroot
+means the root dir of the project), supported file names: LICENSE, README, README.OpenSource
+    4. policyitem name: This field is used for define the license, copyright, "*" means match all, the
+"!" prefix means could not match this value. For example, "!GPL" means can not use GPL license.
+    5. policyitem path: This field is used for define the source file scope to apply this policyitem,
+the "!" prefix means exclude the files. For example, "!.*/lib/.*" means files in lib dir will be
+exclude while process this policyitem.
+    6. policyitem rule and group: These two fields are used together to merge policy results. "may"
+policyitems in the same group means any one in this group passed, the result will be passed.
+    7. policyitem filefilter: Used to bind filefilter which define filter rules.
+    7. policyitem desc: Used to describe the reason of this policy item, committers will check this
+while merging the code.
+    8. filefilter: Filter rules, the type filename is used to filter file name, the type filepath is
+used to filter file path.
+
+    Note:If the text contains special characters, please escape them according to the following rules:
+    " == &quot;
+    & == &amp;
+    ' == &apos;
+    < == &lt;
+    > == &gt;
+-->
+
+<configuration>
+    <oatconfig>
+        <policylist>
+            <policy name="projectPolicy" desc="">
+
+                <policyitem type="compatibility" name="APSL-2.0" path=".*" desc="" />
+                <policyitem type="compatibility" name="LGPL-2.0+" path=".*" desc="" />
+                <policyitem type="compatibility" name="APSL-1.0+" path=".*" desc="" />
+                <policyitem type="compatibility" name="MPL-1.1" path=".*" desc="" />
+                <policyitem type="compatibility" name="Libpng" path=".*" desc="" />
+                <policyitem type="compatibility" name="LGPLStyleLicense" path=".*" desc="" />
+                <policyitem type="compatibility" name="BSD-3-Clause" path=".*" desc="" />
+                <policyitem type="compatibility" name="LGPL-2.1+" path=".*" desc="" />
+                <policyitem type="compatibility" name="OpenSSL" path=".*" desc="" />
+                <policyitem type="compatibility" name="GPLStyleLicense" path=".*" desc="" />
+                <policyitem type="compatibility" name="GPL-2.0-or-later" path=".*" desc="" />
+                <policyitem type="compatibility" name="BSL-1.0" path=".*" desc="" />
+                <policyitem type="compatibility" name="Unicode-TOU" path=".*" desc="" />
+                <policyitem type="compatibility" name="GPLStyleLicense-with-mif-exception" path=".*" desc="" />
+                <policyitem type="compatibility" name="GPL-2.0+" path=".*" desc="" />
+                <policyitem type="compatibility" name="SPDX:Unicode-DFS-2016" path=".*" desc="" />
+                <policyitem type="compatibility" name="FSFULLR" path=".*" desc="" />
+                <policyitem type="compatibility" name="MPL-2.0" path=".*" desc="" />
+                <policyitem type="compatibility" name="MIT" path=".*" desc="" />
+                <policyitem type="compatibility" name="zlib-acknowledgement" path=".*" desc="" />
+                <policyitem type="compatibility" name="BSDStyleLicense" path=".*" desc="" />
+                <policyitem type="compatibility" name="CDDL-1.0" path=".*" desc="" />
+                <policyitem type="compatibility" name="OFL-1.1-no-RFN" path=".*" desc="" />
+                <policyitem type="compatibility" name="LGPL-3.0+" path=".*" desc="" />
+                <policyitem type="compatibility" name="GPL-3.0+" path=".*" desc="" />
+                <policyitem type="compatibility" name="EPL-1.0" path=".*" desc="" />
+                <policyitem type="compatibility" name="Artistic-2.0" path=".*" desc="" />
+                <policyitem type="compatibility" name="CDDL-1.1" path=".*" desc="" />
+                <policyitem type="compatibility" name="CDDL-1.0" path=".*" desc="" />
+                <policyitem type="compatibility" name="SGI-B-2.0" path=".*" desc="" />
+                <policyitem type="compatibility" name="Zlib" path=".*" desc="" />
+                <policyitem type="compatibility" name="Public Domain Disclaimer" path=".*" desc="" />
+                <policyitem type="compatibility" name="NiH libzip License" path=".*" desc="" />
+                <policyitem type="compatibility" name="HPND-sell-variant" path=".*" desc="" />
+                <policyitem type="compatibility" name="CPL-1.0" path=".*" desc="" />
+                <policyitem type="compatibility" name="FTL" path=".*" desc="" />
+                <policyitem type="compatibility" name="FFTPACK License 2004" path=".*" desc="" />
+                <policyitem type="compatibility" name="XFree86 License 1.0" path=".*" desc="" />
+                <policyitem type="compatibility" name="SunPro Attribution License" path=".*" desc="" />
+                <policyitem type="compatibility" name="Red Hat Attribution License" path=".*" desc="" />
+                <policyitem type="compatibility" name="IJG" path=".*" desc="" />
+                <policyitem type="compatibility" name="Public Domain" path=".*" desc="" />
+                <policyitem type="compatibility" name="CC0-1.0" path=".*" desc="" />
+              
+            </policy>
+        </policylist>
+        <filefilterlist>
+            <filefilter name="defaultPolicyFilter"
+                desc="Filters for compatibility,license header policies">
+                <filteritem type="filepath" name="README.OpenSource" desc="" />
+                <filteritem type="filepath" name="unrar/src/suballoc.cpp" desc="" />
+                <filteritem type="filepath" name="utf/src/utf/utflen.c" desc="" />
+                <filteritem type="filepath" name="wtl/include/atlscrl.h" desc="" />
+                <filteritem type="filepath" name=".*chromium" desc="" />
+                <filteritem type="filepath" name=".*py" desc="" />
+                <filteritem type="filepath" name=".*BUILD" desc="" />
+                <filteritem type="filepath" name=".*hpp" desc="" />
+                <filteritem type="filepath" name=".*sh" desc="" />
+                <filteritem type="filepath" name=".*js" desc="" />
+                <filteritem type="filepath" name=".*bzl" desc="" />
+                <filteritem type="filepath" name=".*android" desc="" />
+                <filteritem type="filepath" name=".*COPYING" desc="" />
+                <filteritem type="filepath" name=".*NOTICE" desc="" />
+                <filteritem type="filepath" name=".*LICENSE" desc="" />
+                <filteritem type="filepath" name=".*INSTALL" desc="" />
+                <filteritem type="filepath" name=".*README" desc="" />
+                <filteritem type="filepath" name=".*txt" desc="" />
+                <filteritem type="filepath" name=".*md" desc="" />
+                <filteritem type="filepath" name=".*LICENSES" desc="" />
+                <filteritem type="filepath" name=".*crashpad" desc="" />
+                <filteritem type="filepath" name=".*experiments" desc="" />
+                <filteritem type="filepath" name=".*rs" desc="" />
+                <filteritem type="filepath" name="protobuf/csharp/src/Google.Protobuf/Google.Protobuf.csproj" desc="" />
+                <filteritem type="filepath" name="zlib/contrib/minizip/crypt.h" desc="" />
+                <filteritem type="filepath" name="android_rust_toolchain/toolchain/lib/rustlib/src/rust/library/alloc/tests/slice.rs" desc="" />
+                <filteritem type="filepath" name="utf/src/test/kosme.c" desc="" />
+                <filteritem type="filepath" name="utf/src/runetype/isprintrune.c" desc="" />
+                <filteritem type="filepath" name="utf/src/runestr/runestrchr.c" desc="" />
+                <filteritem type="filepath" name="protobuf/Protobuf.podspec" desc="" />
+                <filteritem type="filepath" name="android_rust_toolchain/toolchain/lib/rustlib/src/rust/library/alloc/benches/slice.rs" desc="" />
+                <filteritem type="filepath" name="libxml/fuzz/seed_corpus/c91088fb387ecb298053a47627cee65b70acfe69" desc="" />
+                <filteritem type="filepath" name="node/linux/node-linux-x64/lib/node_modules/npm/node_modules/node-gyp/lib/Find-VisualStudio.cs" desc="" />
+                <filteritem type="filepath" name="private-join-and-compute/patches/dependencies.diff" desc="" />
+                <filteritem type="filepath" name="utf/src/bin/mkrunetype.awk" desc="" />
+                <filteritem type="filepath" name="utf/src.*c" desc="" />
+                <filteritem type="filepath" name=".*xml" desc="" />
+                <filteritem type="filepath" name=".*bazel" desc="" />
+                <filteritem type="filepath" name=".*json5" desc="" />
+                <filteritem type="filepath" name=".*METADATA" desc="" />
+                <filteritem type="filepath" name=".*gemspec" desc="" />
+                <filteritem type="filepath" name=".*spec" desc="" />
+                <filteritem type="filepath" name=".*TODO" desc="" />
+                <filteritem type="filepath" name=".*defs" desc="" />
+                <filteritem type="filepath" name=".*tpl" desc="" />
+                <filteritem type="filepath" name=".*gni" desc="" />
+                <filteritem type="filepath" name=".*am" desc="" />
+                <filteritem type="filepath" name=".*cc" desc="" />
+                <filteritem type="filepath" name=".*ac" desc="" />
+                <filteritem type="filepath" name="mako/README.rst" desc="" />
+                <filteritem type="filepath" name="utf/src/test/tap.h" desc="" />
+                <filteritem type="filepath" name="abseil-cpp/absl/random/gaussian_distribution.cc" desc="" />
+                <filteritem type="filepath" name="android_rust_toolchain/toolchain/lib/rustlib/src/rust/vendor/hashbrown/benches/bench.rs" desc="" />
+                <filteritem type="filepath" name="crashpad/crashpad/third_party/cpp-httplib/cpp-httplib/httplib.h" desc="" />
+                <filteritem type="filepath" name="hunspell/README.myspell" desc="" />
+                <filteritem type="filepath" name="hyphenation-patterns/src/METADATA" desc="" />
+                <filteritem type="filepath" name="lcov/rpm/lcov.spec" desc="" />
+                <filteritem type="filepath" name="android_rust_toolchain/toolchain/lib/rustlib/src/rust/vendor/compiler_builtins/build.rs.orig" desc="" />
+                <filteritem type="filepath" name="rust/termcolor/v1/crate/Cargo.toml.orig" desc="" />
+                <filteritem type="filepath" name="markupsafe/_speedups.c" desc="" />
+                <filteritem type="filepath" name="blink/renderer/platform/wtf/CONTRIBUTORS.pthreads-win32" desc="" />
+                <filteritem type="filepath" name="checkstyle/RIGHTS.antlr" desc="" />
+                <filteritem type="filepath" name="protobuf/protoc-artifacts/Dockerfile" desc="" />
+                <filteritem type="filepath" name="google-closure-library/CONTRIBUTING" desc="" />
+                <filteritem type="filepath" name="libxml/fuzz/seed_corpus/40c82af59b9824a310ef8b7666f7878db41d8a86" desc="" />
+                <filteritem type="filepath" name="libxml/fuzz/seed_corpus/c26d0a6661eac07a37052737917a1a2b7d4d1681" desc="" />
+                <filteritem type="filepath" name="abseil-cpp/absl/time/internal/cctz/testdata/README.zoneinfo" desc="" />
+                <filteritem type="filepath" name="libxml/src/xmlwriter.c" desc="" />
+                <filteritem type="filepath" name="node/linux/node-linux-x64/lib/node_modules/npm/man/man1/npm-dist-tag.1" desc="" />
+                <filteritem type="filepath" name="node/node_modules/cssbeautify/cssbeautify.sublime-workspace" desc="" />
+                <filteritem type="filepath" name="wpt_tools/wpt/tools/third_party/webencodings/PKG-INFO" desc="" />
+                <filteritem type="filepath" name="zlib/contrib/minizip/unzip.c" desc="" />
+                <filteritem type="filepath" name="libusb/src/msvc/stdint.h" desc="" />
+                <filteritem type="filepath" name="libxml/fuzz/seed_corpus/b64c4b370a571587ada55f2cdb4bf029190643ce" desc="" />
+                <filteritem type="filepath" name="pycoverage/PKG-INFO" desc="" />
+                <filteritem type="filepath" name="rust/codespan_reporting/v0_11/crate/Cargo.toml.orig" desc="" />
+                <filteritem type="filepath" name="wpt_tools/wpt/tools/third_party/webencodings/README.rst" desc="" />
+                <filteritem type="filepath" name="utf/src/runetype/runetype.h" desc="" />
+                <filteritem type="filepath" name="modp_b64/modp_b64.h" desc="" />
+                <filteritem type="filepath" name="wpt_tools/wpt/tools/third_party/webencodings/webencodings.egg-info/PKG-INFO" desc="" />
+                <filteritem type="filepath" name="libxml/fuzz/seed_corpus/2bf06d0674a90839c365de7cd703f2cf371cb39c" desc="" />
+                <filteritem type="filepath" name="libxml/fuzz/seed_corpus/4ce8dbe5d8fe97177d838802c7f0abd770c49453" desc="" />
+                <filteritem type="filepath" name="opus/src/update_version" desc="" />
+                <filteritem type="filepath" name="hyphenation-patterns/src/en-US/ushyphex.tex" desc="" />
+                <filteritem type="filepath" name="protobuf/kokoro/linux/64-bit/Dockerfile" desc="" />
+                <filteritem type="filepath" name="android_rust_toolchain/toolchain/lib/rustlib/src/rust/library/stdarch/crates/stdarch-gen/Cargo.toml" desc="" />
+                <filteritem type="filepath" name="rust/ryu/v1/crate/Cargo.toml.orig" desc="" />
+                <filteritem type="filepath" name="utf/src/include/utf.h" desc="" />
+                <filteritem type="filepath" name="node/node_modules/ajv/scripts/travis-gh-pages" desc="" />
+            </filefilter>
+
+            <filefilter name="defaultFilter">
+                <filteritem type="filepath" name="README.OpenSource"
+                    desc="" />
+                    <filteritem type="filepath" name=".*zip" desc="" />
+                <filteritem type="filepath" name=".*tlb" desc="" />
+                <filteritem type="filepath" name=".*bin" desc="" />
+                <filteritem type="filepath" name=".*png" desc="" />
+            </filefilter>
+        </filefilterlist>
+        <licensematcherlist>
+
+            
+
+            <licensematcher name="BSD-2-Clause" desc="">
+                <licensetext name="
+                * Redistribution and use in source and binary forms, with or without
+                * modification, are permitted provided that the following conditions
+                * are met:
+                * 1. Redistributions of source code must retain the above copyright
+                *    notice, this list of conditions and the following disclaimer.
+                * 2. Redistributions in binary form must reproduce the above copyright
+                *    notice, this list of conditions and the following disclaimer in the
+                *    documentation and/or other materials provided with the distribution.
+                *
+                * THIS SOFTWARE IS PROVIDED BY APPLE COMPUTER, INC. ``AS IS'' AND ANY
+                * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+                * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+                * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE COMPUTER, INC. OR
+                * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+                * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+                * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+                * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+                * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+                * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+                * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+            " desc="" />
+            </licensematcher> 
+            <licensematcher name="BSD-2-Clause" desc="">
+                <licensetext name="
+                * Redistribution and use in source and binary forms, with or without
+                * modification, are permitted provided that the following conditions
+                * are met:
+                * 1. Redistributions of source code must retain the above copyright
+                *    notice, this list of conditions and the following disclaimer.
+                *    notice, this list of conditions and the following disclaimer in the
+                *    documentation and/or other materials provided with the distribution.
+                * 2. Redistributions in binary form must reproduce the above copyright
+                *
+                * THIS SOFTWARE IS PROVIDED BY APPLE COMPUTER, INC. ``AS IS'' AND ANY
+                * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+                * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+                * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE COMPUTER, INC. OR
+                * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+                * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+                * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+                * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+                * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+                * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+                * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+            " desc="" />
+            </licensematcher> 
+            <licensematcher name="BSD-2-Clause" desc="">
+                <licensetext name="
+                * Redistribution and use in source and binary forms, with or without
+                * modification, are permitted providing that the following conditions
+                * are met:
+                * 1. Redistributions of source code must retain the above copyright
+                *    notice, this list of conditions and the following disclaimer.
+                * 2. Redistributions in binary form must reproduce the above copyright
+                *    notice, this list of conditions and the following disclaimer in the
+                *    documentation and/or other materials provided with the distribution.
+                *
+                * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
+                * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+                * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+                * ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
+                * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+                * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+                * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+                * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+                * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
+                * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+                * POSSIBILITY OF SUCH DAMAGE.
+            " desc="" />
+            </licensematcher> 
+            <licensematcher name="BSD-3-Clause" desc="">
+                    <licensetext name="
+                    Use of this source code is governed by a BST-style license that can be
+                    found in the LICENSE file.
+                " desc="" />
+            </licensematcher> 
+            <licensematcher name="MIT Xfig Variant" desc="">
+                    <licensetext name="
+                    * NEUQUANT Neural-Net quantization algorithm by Anthony Dekker, 1994. See
+                    * &quot;Kohonen neural networks for optimal colour quantization&quot; in &quot;Network:
+                    * Computation in Neural Systems&quot; Vol. 5 (1994) pp 351-367. for a discussion of
+                    * the algorithm.
+                    *
+                    * Any party obtaining a copy of these files from the author, directly or
+                    * indirectly, is granted, free of charge, a full and unrestricted irrevocable,
+                    * world-wide, paid up, royalty-free, nonexclusive right and license to deal in
+                    * this software and documentation files (the &quot;Software&quot;), including without
+                    * limitation the rights to use, copy, modify, merge, publish, distribute,
+                    * sublicense, and/or sell copies of the Software, and to permit persons who
+                    * receive copies from any such party to do so, with the only requirement being
+                    * that this copyright notice remain intact.
+                " desc="" />
+            </licensematcher> 
+            <licensematcher name="MIT Veillard Variant" desc="">
+                    <licensetext name="
+                    * Permission to use, copy, modify, and distribute this software for any
+                    * purpose with or without fee is hereby granted, provided that the above
+                    * copyright notice and this permission notice appear in all copies.
+                    *
+                    * THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR IMPLIED
+                    * WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF
+                    * MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE AUTHORS AND
+                    * CONTRIBUTORS ACCEPT NO RESPONSIBILITY IN ANY CONCEIVABLE MANNER.
+                " desc="" />
+            </licensematcher> 
+            <licensematcher name="IJG" desc="">
+                    <licensetext name="
+                    * This file is part of the Independent JPEG Group's software.
+                    * For conditions of distribution and use, see the accompanying README file.
+                    *
+                    * This file provides code to read and write International Color Consortium
+                    * (ICC) device profiles embedded in JFIF JPEG image files.  The ICC has
+                    * defined a standard format for including such data in JPEG &quot;APP2&quot; markers.
+                    * The code given here does not know anything about the internal structure
+                    * of the ICC profile data; it just knows how to put the profile data into
+                    * a JPEG file being written, or get it back out when reading.
+                    *
+                    * This code depends on new features added to the IJG JPEG library as of
+                    * IJG release 6b; it will not compile or work with older IJG versions.
+                    *
+                    * NOTE: this code would need surgery to work on 16-bit-int machines
+                    * with ICC profiles exceeding 64K bytes in size.  See iccprofile.c
+                    * for details.
+                " desc="" />
+            </licensematcher> 
+                
+            <licensematcher name="Public Domain" desc="">
+                        <licensetext name="
+                        *  This file is part of PPMd project                                       *
+                        *  Written and distributed to public domain by Dmitry Shkarin 1997,        *
+                        *  1999-2000                                                               *
+                        *  Contents: model description and encoding/decoding routines              *
+                    " desc="" />
+            </licensematcher> 
+            <licensematcher name="BSD-3-Clause" desc="">
+                        <licensetext name="
+                        * Redistribution and use in source and binary forms, with or without
+                        * modification, are permitted provided that the following conditions are met:
+                        *
+                        * A. Redistributions of source code must retain the above copyright notice,
+                        *    this list of conditions and the following disclaimer.
+                        * B. Redistributions in binary form must reproduce the above copyright notice,
+                        *    this list of conditions and the following disclaimer in the documentation
+                        *    and/or other materials provided with the distribution.
+                        * C. Neither the names of the copyright holders nor the names of its
+                        *    contributors may be used to endorse or promote products derived from this
+                        *    software without specific prior written permission.
+                        *
+                        * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ``AS
+                        * IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+                        * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+                        * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE
+                        * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+                        * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+                        * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+                        * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+                        * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+                        * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+                        * POSSIBILITY OF SUCH DAMAGE.
+                    " desc="" />
+            </licensematcher> 
+            
+            <licensematcher name="ISC" desc="">
+                <licensetext name="
+                * Permission to use, copy, modify, and distribute this software for any
+                * purpose with or without fee is hereby granted, provided that the above
+                * copyright notice and this permission notice appear in all copies.
+                *
+                * THE SOFTWARE IS PROVIDED &quot;AS IS&quot; AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+                * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+                * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+                * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+                * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+                * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+                * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+            " desc="" />
+        </licensematcher> 
+                <licensematcher name="BSD-3-Clause" desc="">
+                    <licensetext name="
+                    This software program is licensed subject to the BSD License, 
+                    available at http://www.opensource.org/licenses/bsd-license.html
+                " desc="" />
+                </licensematcher> 
+                <licensematcher name="MIT Veillard Variant" desc="">
+                    <licensetext name="
+                    * Permission to use, copy, modify, and distribute this software for any
+                    * purpose with or without fee is hereby granted, provided that the above
+                    * copyright notice and this permission notice appear in all copies.
+                    *
+                    * THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR IMPLIED
+                    * WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF
+                    * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE AUTHORS AND
+                    * CONTRIBUTORS ACCEPT NO RESPONSIBILITY IN ANY CONCEIVABLE MANNER.
+                " desc="" />
+                </licensematcher> 
+                <licensematcher name="IJG" desc="">
+                    <licensetext name="
+                    * This file is part of the Independent JPEG Group's software.
+                    * For conditions of distribution and use, see the accompanying README file.
+                    *
+                    * This file provides code to read and write International Color Consortium
+                    * (ICC) device profiles embedded in JFIF JPEG image files.  The ICC has
+                    * defined a standard format for including such data in JPEG &quot;APP2&quot; markers.
+                    * The code given here does not know anything about the internal structure
+                    * of the ICC profile data; it just knows how to put the profile data into
+                    * a JPEG file being written, or get it back out when reading.
+                    *
+                    * This code depends on new features added to the IJG JPEG library as of
+                    * IJG release 6b; it will not compile or work with older IJG versions.
+                    *
+                    * NOTE: this code would need surgery to work on 16-bit-int machines
+                    * with ICC profiles exceeding 64K bytes in size.  If you need to do that,
+                    * change all the &quot;unsigned int&quot; variables to &quot;INT32&quot;.  You'll also need
+                    * to find a malloc() replacement that can allocate more than 64K.
+                " desc="" />
+                </licensematcher> 
+            <licensematcher name="BSD-3-Clause" desc="">
+                <licensetext name="
+                Third party copyrights are property of their respective owners.
+
+                Redistribution and use in source and binary forms, with or without modification,
+                are permitted provided that the following conditions are met:
+                
+                  * Redistribution's of source code must retain the above copyright notice,
+                    this list of conditions and the following disclaimer.
+                
+                  * Redistribution's in binary form must reproduce the above copyright notice,
+                    this list of conditions and the following disclaimer in the documentation
+                    and/or other materials provided with the distribution.
+                
+                  * The name of Intel Corporation may not be used to endorse or promote products
+                    derived from this software without specific prior written permission.
+                
+                This software is provided by the copyright holders and contributors &quot;as is&quot; and
+                any express or implied warranties, including, but not limited to, the implied
+                warranties of merchantability and fitness for a particular purpose are disclaimed.
+                In no event shall the Intel Corporation or contributors be liable for any direct,
+                indirect, incidental, special, exemplary, or consequential damages
+                (including, but not limited to, procurement of substitute goods or services;
+                loss of use, data, or profits; or business interruption) however caused
+                and on any theory of liability, whether in contract, strict liability,
+                or tort (including negligence or otherwise) arising in any way out of
+                the use of this software, even if advised of the possibility of such damage.
+                
+            " desc="" />
+            </licensematcher> 
+            <licensematcher name="BSD-3-Clause" desc="">
+                <licensetext name="
+                *     * Redistributions of source code must retain the above copyright
+                * notice, this list of conditions and the following disclaimer.
+                *     * Redistributions in binary form must reproduce the above
+                * copyright notice, this list of conditions and the following disclaimer
+                * in the documentation and/or other materials provided with the
+                * distribution.
+                *     * Neither the name of Google Inc. nor the names of its
+                * contributors may be used to endorse or promote products derived from
+                * this software without specific prior written permission.
+                *
+                * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+                * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+                * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+                * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+                * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+                * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+                * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+                * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+                * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+                * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+                * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+            " desc="" />
+            </licensematcher> 
+            <licensematcher name="MIT Veillard Variant" desc="">
+                <licensetext name="
+                * Permission to use, copy, modify, and distribute this software for any
+                * purpose with or without fee is hereby granted, provided that the above
+                * copyright notice and this permission notice appear in all copies.
+                *
+                * THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR IMPLIED
+                * WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF
+                * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE AUTHORS AND
+                * CONTRIBUTORS ACCEPT NO RESPONSIBILITY IN ANY CONCEIVABLE MANNER.
+                *
+                ************************************************************************
+                *
+                * Functions to handle special quantities in floating-point numbers
+                * (that is, NaNs and infinity). They provide the capability to detect
+                * and fabricate special quantities.
+                *
+                * Although written to be as portable as possible, it can never be
+                * guaranteed to work on all platforms, as not all hardware supports
+                * special quantities.
+                *
+                * The approach used here (approximately) is to:
+                *
+                *   1. Use C99 functionality when available.
+                *   2. Use IEEE 754 bit-patterns if possible.
+                *   3. Use platform-specific techniques.
+                *
+            " desc="" />
+            </licensematcher> 
+            <licensematcher name="BSD-2-Clause" desc="">
+                <licensetext name="
+                * Redistribution and use in source and binary forms, with or without
+                * modification, are permitted provided that the following conditions
+                * are met:
+                * 1. Redistributions of source code must retain the above copyright
+                *    notice, this list of conditions and the following disclaimer.
+                * 2. Redistributions in binary form must reproduce the above copyright
+                *    notice, this list of conditions and the following disclaimer in the
+                *    documentation and/or other materials provided with the distribution.
+                *
+                * THIS SOFTWARE IS PROVIDED BY APPLE COMPUTER, INC. ``AS IS'' AND ANY
+                * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+                * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+                * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE COMPUTER, INC. OR
+                * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+                * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+                * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+                * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+                * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+                * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+                * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+            " desc="" />
+            </licensematcher> 
+            <licensematcher name="BSD-2-Clause" desc="">
+                <licensetext name="
+                * Redistribution and use in source and binary forms, with or without
+                * modification, are permitted provided that the following conditions
+                * are met:
+                * 1. Redistributions of source code must retain the above copyright
+                *    notice, this list of conditions and the following disclaimer.
+                * 2. Redistributions in binary form must reproduce the above copyright
+                *    notice, this list of conditions and the following disclaimer in the
+                *    documentation and/or other materials provided with the distribution.
+                *
+                * THIS SOFTWARE IS PROVIDED BY GOOGLE INC. ``AS IS'' AND ANY
+                * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+                * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+                * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL GOOGLE INC. OR
+                * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+                * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+                * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+                * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+                * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+                * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+                * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+            " desc="" />
+            </licensematcher> 
+            <licensematcher name="BSD-3-Clause" desc="">
+                <licensetext name="
+                * Redistribution and use in source and binary forms, with or without
+                * modification, are permitted provided that the following condition
+                * are met:
+                *
+                * 1.  Redistributions of source code must retain the above copyright
+                *     notice, this list of conditions and the following disclaimer.
+                * 2.  Redistributions in binary form must reproduce the above copyright
+                *     notice, this list of conditions and the following disclaimer in the
+                *     documentation and/or other materials provided with the distribution.
+                * 3.  Neither the name of Apple Computer, Inc. (&quot;Apple&quot;) nor the names of
+                *     its contributors may be used to endorse or promote products derived
+                *     from this software without specific prior written permission.
+                *
+                * THIS SOFTWARE IS PROVIDED BY APPLE AND ITS CONTRIBUTORS &quot;AS IS&quot; AND ANY
+                * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+                * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+                * DISCLAIMED. IN NO EVENT SHALL APPLE OR ITS CONTRIBUTORS BE LIABLE FOR ANY
+                * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+                * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+                * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+                * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+                * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+                * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+            " desc="" />
+            </licensematcher> 
+
+            <licensematcher name="SGI-B-2.0" desc="">
+                <licensetext name="
+                * This document is licensed under the SGI Free Software B License Version
+                * 2.0. For details, see http://oss.sgi.com/projects/FreeB/ .
+            " desc="" />
+            </licensematcher> 
+      
+            <licensematcher name="BSD-2-Clause" desc="">
+                <licensetext name="
+                * Redistribution and use in source and binary forms, with or without
+                * modification, are permitted provided that the following conditions
+                * are met:
+                * 1.  Redistributions of source code must retain the above copyright
+                *    notice, this list of conditions and the following disclaimer.
+                * 2.  Redistributions in binary form must reproduce the above copyright
+                *    notice, this list of conditions and the following disclaimer in the
+                *    documentation and/or other materials provided with the distribution.
+            " desc="" />
+            </licensematcher> 
+            <licensematcher name="BSD-2-Clause" desc="">
+                <licensetext name="
+                * Redistribution and use in source and binary forms, with or without
+                * modification, are permitted provided that the following conditions
+                * are met:
+                * 1. Redistributions of source code must retain the above copyright
+                *    notice, this list of conditions and the following disclaimer.
+                * 2. Redistributions in binary form must reproduce the above copyright
+                *    notice, this list of conditions and the following disclaimer in the
+                *    documentation and/or other materials provided with the distribution.
+                *
+                * THIS SOFTWARE IS PROVIDED BY GOOGLE INC. ``AS IS'' AND ANY
+                * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+                * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+                * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE COMPUTER, INC. OR
+                * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+                * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+                * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+                * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+                * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+                * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+                * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+            " desc="" />
+            </licensematcher> 
+            <licensematcher name="BSD-2-Clause" desc="">
+                <licensetext name="
+                * Redistribution and use in source and binary forms, with or without
+                * modification, are permitted provided that the following conditions
+                * are met:
+                * 1. Redistributions of source code must retain the above copyright
+                *    notice, this list of conditions and the following disclaimer.
+                * 2. Redistributions in binary form must reproduce the above copyright
+                *    notice, this list of conditions and the following disclaimer in the
+                *    documentation and/or other materials provided with the distribution.
+                *
+                * THIS SOFTWARE IS PROVIDED BY APPLE INC. AND ITS CONTRIBUTORS &quot;AS IS&quot; AND
+                * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+                * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+                * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE COMPUTER, INC. OR
+                * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+                * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+                * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+                * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+                * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+                * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+                * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+            " desc="" />
+            </licensematcher> 
+
+            <licensematcher name="BSD-2-Clause" desc="">
+                <licensetext name="
+                * Redistribution and use in source and binary forms, with or without
+                * modification, are permitted provided that the following conditions
+                * are met:
+                * 1. Redistributions of source code must retain the above copyright
+                *    notice, this list of conditions and the following disclaimer.
+                * 2. Redistributions in binary form must reproduce the above copyright
+                *    notice, this list of conditions and the following disclaimer in the
+                *    documentation and/or other materials provided with the distribution.
+                *
+                * THIS SOFTWARE IS PROVIDED BY APPLE INC. ``AS IS'' AND ANY
+                * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+                * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+                * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE INC. OR
+                * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+                * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+                * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+                * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+                * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+                * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+                * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+            " desc="" />
+            </licensematcher> 
+            <licensematcher name="BSD-Source-Code" desc="">
+                <licensetext name="
+                * Redistribution and use in source and binary forms, with or without
+                * modification, are permitted provided that the following conditions are
+                * met:
+                *
+                *     * Redistributions of source code must retain the above copyright
+                * notice, this list of conditions and the following disclaimer.
+                *     * Neither the name of Google Inc. nor the names of its
+                * contributors may be used to endorse or promote products derived from
+                * this software without specific prior written permission.
+                *
+                * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+                * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+                * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+                * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+                * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+                * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+                * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+                * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+                * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+                * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+                * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+            " desc="" />
+            </licensematcher> 
+            <licensematcher name="MIT-open-group" desc="">
+                <licensetext name="
+                Permission to use, copy, modify, distribute, and sell this software and its
+                documentation for any purpose is hereby granted without fee, provided that
+                the above copyright notice appear in all copies and that both that
+                copyright notice and this permission notice appear in supporting
+                documentation.
+
+                The above copyright notice and this permission notice shall be included in
+                all copies or substantial portions of the Software.
+
+                THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+                IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+                FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
+                OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+                AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+                CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+                Except as contained in this notice, the name of The Open Group shall not be
+                used in advertising or otherwise to promote the sale, use or other dealings
+                in this Software without prior written authorization from The Open Group.
+            " desc="" />
+            </licensematcher> 
+            <licensematcher name="Public Domain Disclaimer" desc="">
+                <licensetext name="
+                *  THIS SOFTWARE IS NOT COPYRIGHTED
+                *
+                *  Modified for libusb/MSVC: Pete Batard &lt;pbatard@gmail.com&gt;
+                *
+                *  This source code is offered for use in the public domain. You may
+                *  use, modify or distribute it freely.
+                *
+                *  This code is distributed in the hope that it will be useful but
+                *  WITHOUT ANY WARRANTY. ALL WARRANTIES, EXPRESS OR IMPLIED ARE HEREBY
+                *  DISCLAIMED. This includes but is not limited to warranties of
+                *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+            " desc="" />
+            </licensematcher> 
+            <licensematcher name="Zlib" desc="">
+                <licensetext name="
+                * For conditions of distribution and use, see copyright notice in zlib.h
+            " desc="" />
+            </licensematcher> 
+            <licensematcher name="BSD-2-Clause" desc="">
+                <licensetext name="
+                * Redistribution and use in source and binary forms, with or without
+                * modification, are permitted provided that the following conditions
+                * are met:
+                * 1. Redistributions of source code must retain the above copyright
+                *    notice, this list of conditions and the following disclaimer.
+                * 2. Redistributions in binary form must reproduce the above copyright
+                *    notice, this list of conditions and the following disclaimer in the
+                *    documentation and/or other materials provided with the distribution.
+                *
+                * THIS SOFTWARE IS PROVIDED BY APPLE INC. ``AS IS'' AND ANY
+                * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+                * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+                * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE COMPUTER, INC. OR
+                * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+                * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+                * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+                * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+                * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+                * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+                * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+            " desc="" />
+            </licensematcher> 
+            <licensematcher name="BSD-2-Clause" desc="">
+                <licensetext name="
+                * Redistribution and use in source and binary forms, with or without
+                * modification, are permitted provided that the following conditions are
+                * met:
+                *
+                * 1. Redistributions of source code must retain the above copyright
+                * notice, this list of conditions and the following disclaimer.
+                *
+                * 2. Redistributions in binary form must reproduce the above
+                * copyright notice, this list of conditions and the following disclaimer
+                * in the documentation and/or other materials provided with the
+                * distribution.
+                *
+                * THIS SOFTWARE IS PROVIDED BY GOOGLE INC. AND ITS CONTRIBUTORS
+                * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+                * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+                * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL GOOGLE INC.
+                * OR ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+                * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+                * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+                * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+                * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+                * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+                * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+            " desc="" />
+            </licensematcher> 
+            <licensematcher name="BSD-2-Clause" desc="">
+                <licensetext name="
+                * Redistribution and use in source and binary forms, with or without
+                * modification, are permitted provided that the following conditions
+                * are met:
+                * 1. Redistributions of source code must retain the above copyright
+                *    notice, this list of conditions and the following disclaimer.
+                * 2. Redistributions in binary form must reproduce the above copyright
+                *    notice, this list of conditions and the following disclaimer in the
+                *    documentation and/or other materials provided with the distribution.
+                *
+                * THIS SOFTWARE IS PROVIDED BY APPLE COMPUTER, INC. ``AS IS'' AND ANY
+                * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+                * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+                * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE COMPUTER, INC. OR
+                * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+                * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+                * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+                * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+                * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+                * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+            " desc="" />
+            </licensematcher> 
+                <licensematcher name="BSD-2-Clause" desc="">
+                    <licensetext name="
+                    * Redistribution and use in source and binary forms, with or without
+                    * modification, are permitted provided that the following conditions
+                    * are met:
+                    *
+                    * 1.  Redistributions of source code must retain the above copyright
+                    *     notice, this list of conditions and the following disclaimer.
+                    * 2.  Redistributions in binary form must reproduce the above copyright
+                    *     notice, this list of conditions and the following disclaimer in the
+                    *     documentation and/or other materials provided with the distribution.
+                    *
+                    * THIS SOFTWARE IS PROVIDED BY APPLE AND ITS CONTRIBUTORS &quot;AS IS&quot; AND ANY
+                    * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+                    * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+                    * DISCLAIMED. IN NO EVENT SHALL APPLE OR ITS CONTRIBUTORS BE LIABLE FOR ANY
+                    * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+                    * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+                    * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+                    * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+                    * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+                    * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+                " desc="" />
+                </licensematcher> 
+                <licensematcher name="BSD-2-Clause" desc="">
+                    <licensetext name="
+                    * Redistribution and use in source and binary forms, with or without
+                    * modification, are permitted provided that the following conditions
+                    * are met:
+                    * 1. Redistributions of source code must retain the above copyright
+                    *    notice, this list of conditions and the following disclaimer.
+                    * 2. Redistributions in binary form must reproduce the above copyright
+                    *    notice, this list of conditions and the following disclaimer in the
+                    *    documentation and/or other materials provided with the distribution.
+                    *
+                    * THIS SOFTWARE IS PROVIDED BY UNIVERSITY OF SZEGED ``AS IS'' AND ANY
+                    * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+                    * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+                    * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL UNIVERSITY OF SZEGED OR
+                    * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+                    * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+                    * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+                    * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+                    * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+                    * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+                    * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+                " desc="" />
+                </licensematcher> 
+            <licensematcher name="MIT" desc="">
+                <licensetext name="
+                Use of this source code is governed by an MIT-style license that can be
+                found in the LICENSE file or at https://opensource.org/licenses/MIT.
+            " desc="" />
+            </licensematcher> 
+            <licensematcher name="FFTPACK License 2004" desc="">
+                <licensetext name="
+                Redistribution and use of the Software in source and binary forms,
+                with or without modification, is permitted provided that the
+                following conditions are met:
+
+                - Neither the names of NCAR's Computational and Information Systems
+                Laboratory, the University Corporation for Atmospheric Research,
+                nor the names of its sponsors or contributors may be used to
+                endorse or promote products derived from this Software without
+                specific prior written permission.  
+
+                - Redistributions of source code must retain the above copyright
+                notices, this list of conditions, and the disclaimer below.
+
+                - Redistributions in binary form must reproduce the above copyright
+                notice, this list of conditions, and the disclaimer below in the
+                documentation and/or other materials provided with the
+                distribution.
+
+                THIS SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND,
+                EXPRESS OR IMPLIED, INCLUDING, BUT NOT LIMITED TO THE WARRANTIES OF
+                MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+                NONINFRINGEMENT. IN NO EVENT SHALL THE CONTRIBUTORS OR COPYRIGHT
+                HOLDERS BE LIABLE FOR ANY CLAIM, INDIRECT, INCIDENTAL, SPECIAL,
+                EXEMPLARY, OR CONSEQUENTIAL DAMAGES OR OTHER LIABILITY, WHETHER IN AN
+                ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+                CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE
+                SOFTWARE.
+            " desc="" />
+            </licensematcher> 
+            <licensematcher name="MIT Veillard Variant" desc="">
+                <licensetext name="
+                * Permission to use, copy, modify, and distribute this software for any
+                * purpose with or without fee is hereby granted, provided that the above
+                * copyright notice and this permission notice appear in all copies.
+                *
+                * THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR IMPLIED
+                * WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF
+                * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE AUTHORS AND
+                * CONTRIBUTORS ACCEPT NO RESPONSIBILITY IN ANY CONCEIVABLE MANNER.
+                *
+                * Author: breese@users.sourceforge.net
+            " desc="" />
+            </licensematcher> 
+            <licensematcher name="NiH libzip License" desc="">
+                <licensetext name="
+                Redistribution and use in source and binary forms, with or without
+                modification, are permitted provided that the following conditions
+                are met:
+                1. Redistributions of source code must retain the above copyright
+                   notice, this list of conditions and the following disclaimer.
+                2. Redistributions in binary form must reproduce the above copyright
+                   notice, this list of conditions and the following disclaimer in
+                   the documentation and/or other materials provided with the
+                   distribution.
+                3. The names of the authors may not be used to endorse or promote
+                   products derived from this software without specific prior
+                   written permission.
+              
+                THIS SOFTWARE IS PROVIDED BY THE AUTHORS ``AS IS'' AND ANY EXPRESS
+                OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+                WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+                ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY
+                DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+                DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
+                GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+                INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+                IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+                OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
+                IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+            " desc="" />
+            </licensematcher> 
+            <licensematcher name="CPL-1.0" desc="">
+                <licensetext name="
+                This file is a part of the Windows Template Library.
+                The use and distribution terms for this software are covered by the
+                Microsoft Public License (http://opensource.org/licenses/MS-PL)
+                which can be found in the file MS-PL.txt at the root folder.
+            " desc="" />
+            </licensematcher> 
+            <licensematcher name="HPND-sell-variant" desc="">
+                <licensetext name="
+                * Permission to use, copy, modify, distribute, and sell this software and its
+                * documentation for any purpose is hereby granted without fee, provided that
+                * the above copyright notice appear in all copies and that both that
+                * copyright notice and this permission notice appear in supporting
+                * documentation, and that the name of the author(s) not be used in
+                * advertising or publicity pertaining to distribution of the software without
+                * specific, written prior permission.  The authors make no
+                * representations about the suitability of this software for any purpose.  It
+                * is provided &quot;as is&quot; without express or implied warranty.
+                *
+                * THE AUTHOR(S) DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE,
+                * INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO
+                * EVENT SHALL THE AUTHOR(S) BE LIABLE FOR ANY SPECIAL, INDIRECT OR
+                * CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE,
+                * DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
+                * TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+                * PERFORMANCE OF THIS SOFTWARE.
+            " desc="" />
+            </licensematcher> 
+            <licensematcher name="BSL-1.0" desc="">
+                <licensetext name="
+                ** Permission is hereby granted, free of charge, to any person or organization
+                ** obtaining a copy of the software and accompanying documentation covered by
+                ** this license (the &quot;Software&quot;) to use, reproduce, display, distribute,
+                ** execute, and transmit the Software, and to prepare derivative works of the
+                ** Software, and to permit third-parties to whom the Software is furnished to
+                ** do so, all subject to the following:
+                ** 
+                ** The copyright notices in the Software and this entire statement, including
+                ** the above license grant, this restriction and the following disclaimer,
+                ** must be included in all copies of the Software, in whole or in part, and
+                ** all derivative works of the Software, unless such copies or derivative
+                ** works are solely in the form of machine-executable object code generated by
+                ** a source language processor.
+                ** 
+                ** THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+                ** IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+                ** FITNESS FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT
+                ** SHALL THE COPYRIGHT HOLDERS OR ANYONE DISTRIBUTING THE SOFTWARE BE LIABLE
+                ** FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
+                ** ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+                ** DEALINGS IN THE SOFTWARE.
+            " desc="" />
+            </licensematcher> 
+            <licensematcher name="XFree86 License 1.0" desc="">
+                <licensetext name="
+                Permission is hereby granted, free of charge, to any person ob/Sintaining a copy
+                of this software and associated documentation files (the &quot;Software&quot;), to deal
+                in the Software without restriction, including without limitation the rights
+                to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+                copies of the Software, and to permit persons to whom the Software is
+                furnished to do so, subject to the following conditions:
+                
+                The above copyright notice and this permission notice shall be included in all
+                copies or substantial portions of the Software.
+                
+                THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+                IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+                FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+                AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
+                ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+                WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+                
+                Except as contained in this notice, the names of the authors or their
+                institutions shall not be used in advertising or otherwise to promote the
+                sale, use or other dealings in this Software without prior written
+                authorization from the authors.  
+            " desc="" />
+            </licensematcher> 
+            <licensematcher name="XFree86 License 1.0" desc="">
+                <licensetext name="
+                ** Permission is hereby granted, free of charge, to any person obtaining a
+                ** copy of this software and/or associated documentation files (the
+                ** &quot;Materials&quot;), to deal in the Materials without restriction, including
+                ** without limitation the rights to use, copy, modify, merge, publish,
+                ** distribute, sublicense, and/or sell copies of the Materials, and to
+                ** permit persons to whom the Materials are furnished to do so, subject to
+                ** the following conditions:
+                ** 
+                ** The above copyright notice and this permission notice shall be included
+                ** in all copies or substantial portions of the Materials.
+                ** 
+                ** THE MATERIALS ARE PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND,
+                ** EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+                ** MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+                ** IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+                ** CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+                ** TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+                ** MATERIALS OR THE USE OR OTHER DEALINGS IN THE MATERIALS.
+            " desc="" />
+            </licensematcher> 
+       
+            <licensematcher name="SunPro Attribution License" desc="">
+                <licensetext name="
+                Developed at SunSoft, a Sun Microsystems, Inc. business.
+                Permission to use, copy, modify, and distribute this
+                software is freely granted, provided that this notice
+                is preserved.
+            " desc="" />
+            </licensematcher> 
+            <licensematcher name="SunPro Attribution License" desc="">
+                <licensetext name="
+                * Developed at SunPro, a Sun Microsystems, Inc. business.
+                * Permission to use, copy, modify, and distribute this
+                * software is freely granted, provided that this notice
+                * is preserved.
+            " desc="" />
+            </licensematcher> 
+            <licensematcher name="BSD-3-Clause" desc="">
+                <licensetext name="
+                Redistribution and use in source and binary forms, with or without
+                modification, are permitted provided that the following conditions are met:
+                
+                  1. Redistributions of source code must retain the above copyright notice,
+                     this list of conditions and the following disclaimer.
+                
+                  2. Redistributions in binary form must reproduce the above copyright
+                     notice, this list of conditions and the following disclaimer in the
+                     documentation and/or other materials provided with the distribution.
+                
+                  3. The name of the author may be used to endorse or promote products
+                     derived from this software without specific prior written permission.
+                
+                THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR IMPLIED
+                WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+                MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
+                EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+                SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+                PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+                OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
+                WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+                OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+                ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+            " desc="" />
+            </licensematcher> 
+            <licensematcher name="Unicode Inc License Agreement" desc="">
+                <licensetext name="
+                Permission is hereby granted, free of charge, to any person obtaining
+                a copy of the Unicode data files and any associated documentation
+                (the &quot;Data Files&quot;) or Unicode software and any associated documentation
+                (the &quot;Software&quot;) to deal in the Data Files or Software
+                without restriction, including without limitation the rights to use,
+                copy, modify, merge, publish, distribute, and/or sell copies of
+                the Data Files or Software, and to permit persons to whom the Data Files
+                or Software are furnished to do so, provided that either
+                (a) this copyright and permission notice appear with all copies
+                of the Data Files or Software, or
+                (b) this copyright and permission notice appear in associated
+                Documentation.
+
+                THE DATA FILES AND SOFTWARE ARE PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF
+                ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+                WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+                NONINFRINGEMENT OF THIRD PARTY RIGHTS.
+                IN NO EVENT SHALL THE COPYRIGHT HOLDER OR HOLDERS INCLUDED IN THIS
+                NOTICE BE LIABLE FOR ANY CLAIM, OR ANY SPECIAL INDIRECT OR CONSEQUENTIAL
+                DAMAGES, OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE,
+                DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
+                TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+                PERFORMANCE OF THE DATA FILES OR SOFTWARE.
+
+                Except as contained in this notice, the name of a copyright holder
+                shall not be used in advertising or otherwise to promote the sale,
+                use or other dealings in these Data Files or Software without prior
+                written authorization of the copyright holder.
+            " desc="" />
+            </licensematcher> 
+            <licensematcher name="Red Hat Attribution License" desc="">
+                <licensetext name="
+                * Permission to use, copy, modify, and distribute this
+                * software is freely granted, provided that this notice
+                * is preserved.
+            " desc="" />
+            </licensematcher> 
+            <licensematcher name="MIT Veillard Variant" desc="">
+                <licensetext name="
+                * Permission to use, copy, modify, and distribute this software for any
+                * purpose with or without fee is hereby granted, provided that the above
+                * copyright notice and this permission notice appear in all copies.
+                *
+                * THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR IMPLIED
+                * WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF
+                * MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE AUTHORS AND
+                * CONTRIBUTORS ACCEPT NO RESPONSIBILITY IN ANY CONCEIVABLE MANNER.
+            " desc="" />
+            </licensematcher> 
+            <licensematcher name="CC0-1.0" desc="">
+                <licensetext name="
+                To the extent possible under law, the author(s) have dedicated all copyright
+                and related and neighboring rights to this software to the public domain
+                worldwide. This software is distributed without any warranty.
+             
+                You should have received a copy of the CC0 Public Domain Dedication along with
+                this software. If not, see &lt;http://creativecommons.org/publicdomain/zero/1.0/&gt;.
+            " desc="" />
+            </licensematcher> 
+        </licensematcherlist>
+    </oatconfig>
+</configuration>
