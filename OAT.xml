@@ -60,6 +60,7 @@ used to filter file path.
 
 <configuration>
     <oatconfig>
+        <licensefile>LICENSE</licensefile>
         <policylist>
             <policy name="projectPolicy" desc="">
 
@@ -210,6 +211,93 @@ used to filter file path.
                 <filteritem type="filepath" name=".*tlb" desc="" />
                 <filteritem type="filepath" name=".*bin" desc="" />
                 <filteritem type="filepath" name=".*png" desc="" />
+                <filteritem type="filepath" name=".*png" desc="" />
+                <filteritem type="filepath" name=".*xtb" desc="" />
+                <filteritem type="filepath" name=".*ico" desc="" />
+                <filteritem type="filepath" name=".*wav" desc="" />
+                <filteritem type="filepath" name=".*ogg" desc="" />
+                <filteritem type="filepath" name=".*pdf" desc="" />
+                <filteritem type="filepath" name=".*bin" desc="" />
+                <filteritem type="filepath" name=".*gz" desc="" />
+                <filteritem type="filepath" name=".*pem" desc="" />
+                <filteritem type="filepath" name=".*crx" desc="" />
+                <filteritem type="filepath" name=".*emf" desc="" />
+                <filteritem type="filepath" name=".*lib" desc="" />
+                <filteritem type="filepath" name=".*jpg" desc="" />
+                <filteritem type="filepath" name=".*zip" desc="" />
+                <filteritem type="filepath" name=".*gif" desc="" />
+                <filteritem type="filepath" name=".*rar" desc="" />
+                <filteritem type="filepath" name=".*apk" desc="" />
+                <filteritem type="filepath" name=".*sha1" desc="" />
+                <filteritem type="filepath" name=".*xz" desc="" />
+                <filteritem type="filepath" name=".*mp4" desc="" />
+                <filteritem type="filepath" name=".*lnk" desc="" />
+                <filteritem type="filepath" name=".*mp3" desc="" />
+                <filteritem type="filepath" name=".*exe" desc="" />
+                <filteritem type="filepath" name=".*pol" desc="" />
+                <filteritem type="filepath" name=".*pb" desc="" />
+                <filteritem type="filepath" name=".*pfx" desc="" />
+                <filteritem type="filepath" name=".*doc" desc="" />
+                <filteritem type="filepath" name=".*webp" desc="" />
+                <filteritem type="filepath" name=".*ogv" desc="" />
+                <filteritem type="filepath" name=".*ai" desc="" />
+                <filteritem type="filepath" name=".*plist" desc="" />
+                <filteritem type="filepath" name=".*der" desc="" />
+                <filteritem type="filepath" name=".*ppt" desc="" />
+                <filteritem type="filepath" name=".*dmg" desc="" />
+                <filteritem type="filepath" name=".*bmp" desc="" />
+                <filteritem type="filepath" name=".*webm" desc="" />
+                <filteritem type="filepath" name=".*7z" desc="" />
+                <filteritem type="filepath" name=".*swf" desc="" />
+                <filteritem type="filepath" name=".*diff" desc="" />
+                <filteritem type="filepath" name=".*sqlite" desc="" />
+                <filteritem type="filepath" name=".*icns" desc="" />
+                <filteritem type="filepath" name=".*pwg" desc="" />
+                <filteritem type="filepath" name=".*dll" desc="" />
+                <filteritem type="filepath" name=".*pvk" desc="" />
+                <filteritem type="filepath" name=".*nib" desc="" />
+                <filteritem type="filepath" name=".*tsv" desc="" />
+                <filteritem type="filepath" name=".*mc" desc="" />
+                <filteritem type="filepath" name=".*pvk" desc="" />
+                <filteritem type="filepath" name=".*pk8" desc="" />
+                <filteritem type="filepath" name=".*com" desc="" />
+                <filteritem type="filepath" name=".*tar" desc="" />
+                <filteritem type="filepath" name=".*wasm" desc="" />
+                <filteritem type="filepath" name=".*ttf" desc="" />
+                <filteritem type="filepath" name=".*deb" desc="" />
+                <filteritem type="filepath" name=".*crx3" desc="" />
+                <filteritem type="filepath" name=".*jar" desc="" />
+                <filteritem type="filepath" name=".*jpeg" desc="" />
+                <filteritem type="filepath" name=".*har" desc="" />
+                <filteritem type="filepath" name=".*wbn" desc="" />
+                <filteritem type="filepath" name=".*nef" desc="" />
+                <filteritem type="filepath" name=".*orf" desc="" />
+                <filteritem type="filepath" name=".*EX_" desc="" />
+                <filteritem type="filepath" name=".*dat" desc="" />
+                <filteritem type="filepath" name=".*tiff" desc="" />
+                <filteritem type="filepath" name=".*docx" desc="" />
+                <filteritem type="filepath" name=".*db" desc="" />
+                <filteritem type="filepath" name=".*gpg" desc="" />
+                <filteritem type="filepath" name=".*ldb" desc="" />
+                <filteritem type="filepath" name=".*xls" desc="" />
+                <filteritem type="filepath" name=".*spc" desc="" />
+                <filteritem type="filepath" name=".*db" desc="" />
+                <filteritem type="filepath" name=".*so" desc="" />
+                <filteritem type="filepath" name=".*otf" desc="" />
+                <filteritem type="filepath" name=".*test" desc="" />
+                <filteritem type="filepath" name=".*bz2" desc="" />
+                <filteritem type="filepath" name=".*pcap" desc="" />
+                <filteritem type="filepath" name=".*hyb" desc="" />
+                <filteritem type="filepath" name="abseil-cpp/absl/time/internal/cctz/testdata/zoneinfo.*" desc="" />
+                <filteritem type="filepath" name="blink/renderer/bindings/core/v8/serialization/fuzz_corpus.*" desc="" />
+                <filteritem type="filepath" name="blink/renderer/platform/text_codec_fuzzer_seed_corpus.*" desc="" />
+                <filteritem type="filepath" name="libaom/fuzz/av1_dec_fuzzer_corpus.*" desc="" />
+                <filteritem type="filepath" name="ots/src/tests/fonts/bad.*" desc="" />
+                <filteritem type="filepath" name="ots/src/tests/fonts/fuzzing.*" desc="" />
+                <filteritem type="filepath" name="blink/renderer/bindings/core/v8/serialization/fuzz_corpus.*" desc="" />
+                <filteritem type="filepath" name="hyphenation-patterns/hyb.*" desc="" />
+                <filteritem type="filepath" name="libaom/fuzz/av1_dec_fuzzer_corpus.*" desc="" />
+                <filteritem type="filepath" name="libaom/fuzz/av1_dec_fuzzer_corpus.*" desc="" />
             </filefilter>
         </filefilterlist>
         <licensematcherlist>
