@@ -288,7 +288,53 @@ used to filter file path.
                 <filteritem type="filepath" name=".*bz2" desc="" />
                 <filteritem type="filepath" name=".*pcap" desc="" />
                 <filteritem type="filepath" name=".*hyb" desc="" />
+                <filteritem type="filepath" name=".*cs" desc="" />
+                <filteritem type="filepath" name=".*class" desc="" />
+                <filteritem type="filepath" name=".*woff" desc="" />
+                <filteritem type="filepath" name=".*cc" desc="" />
+                <filteritem type="filepath" name=".*good" desc="" />
+                <filteritem type="filepath" name=".*zh" desc="" />
+                <filteritem type="filepath" name=".*tracetemplate" desc="" />
+                <filteritem type="filepath" name=".*wrong" desc="" />
+                <filteritem type="filepath" name=".*csproj" desc="" />
+                <filteritem type="filepath" name=".*chromium" desc="" />
+                <filteritem type="filepath" name=".*webarchive" desc="" />
+                <filteritem type="filepath" name=".*rs" desc="" />
+                <filteritem type="filepath" name=".*snap" desc="" />
+                <filteritem type="filepath" name=".*toml" desc="" />
+                <filteritem type="filepath" name=".*obj" desc="" />
+                <filteritem type="filepath" name=".*fb" desc="" />
+                <filteritem type="filepath" name=".*tflite" desc="" />
+                <filteritem type="filepath" name=".*index" desc="" />
+                <filteritem type="filepath" name=".*model" desc="" />
+                <filteritem type="filepath" name=".*cur" desc="" />
+                <filteritem type="filepath" name=".*jp2" desc="" />
+                <filteritem type="filepath" name=".*woff2" desc="" />
+                <filteritem type="filepath" name=".*snk" desc="" />
+                <filteritem type="filepath" name=".*avif" desc="" />
+                <filteritem type="filepath" name=".*sug" desc="" />
+                <filteritem type="filepath" name=".*flac" desc="" />
+                <filteritem type="filepath" name="node/linux/node-linux-x64/lib/node_modules/npm/node_modules/clean-stack/index.d.ts" desc="" />
+                <filteritem type="filepath" name="node/node_modules/q/LICENSE" desc="" />
+                <filteritem type="filepath" name="libzip/src/regress/large-uncompressable" desc="" />
+                <filteritem type="filepath" name="protobuf/python/compatibility_tests/v2.5.0/tests/google/protobuf/internal/golden_message" desc="" />
+                <filteritem type="filepath" name="protobuf/python/compatibility_tests/v2.5.0/tests/google/protobuf/internal/golden_packed_fields_message" desc="" />
+                <filteritem type="filepath" name="tensorflow-text/src/tensorflow_text/python/ops/test_data/segmenter_hub_module/variables/variables.data-00000-of-00001" desc="" />
+                <filteritem type="filepath" name="node/linux/node-linux-x64/bin/node" desc="" />
+                <filteritem type="filepath" name="node/node_modules/svgo/LICENSE" desc="" />
+                <filteritem type="filepath" name="blink/perf_tests/webcodecs/resources/720p.h264" desc="" />
+                <filteritem type="filepath" name="protobuf/objectivec/Tests/golden_message" desc="" />
+                <filteritem type="filepath" name="afl/src/testcases/images/jxr/not_kitty.jxr" desc="" />
+                <filteritem type="filepath" name="blink/manual_tests/resources/orange.mov" desc="" />
+                <filteritem type="filepath" name="google-closure-library/doc/LICENSE" desc="" />
+                <filteritem type="filepath" name="protobuf/objectivec/Tests/golden_packed_fields_message" desc="" />
                 <filteritem type="filepath" name="abseil-cpp/absl/time/internal/cctz/testdata/zoneinfo.*" desc="" />
+                <filteritem type="filepath" name="sqlite/fuzz/lpm_fuzzer_seed_corpus.*" desc="" />
+                <filteritem type="filepath" name="crashpad/crashpad/snapshot.*" desc="" />
+                <filteritem type="filepath" name="hunspell/fuzz/bdict_corpus.*" desc="" />
+                <filteritem type="filepath" name="tflite_support/src/tensorflow_lite_support/cc/test/testdata/task.*" desc="" />
+                <filteritem type="filepath" name="libxml/fuzz/seed_corpus.*" desc="" />
+                <filteritem type="filepath" name="protobuf/src/google/protobuf/testdata.*" desc="" />
                 <filteritem type="filepath" name="blink/renderer/bindings/core/v8/serialization/fuzz_corpus.*" desc="" />
                 <filteritem type="filepath" name="blink/renderer/platform/text_codec_fuzzer_seed_corpus.*" desc="" />
                 <filteritem type="filepath" name="libaom/fuzz/av1_dec_fuzzer_corpus.*" desc="" />
@@ -297,7 +343,9 @@ used to filter file path.
                 <filteritem type="filepath" name="blink/renderer/bindings/core/v8/serialization/fuzz_corpus.*" desc="" />
                 <filteritem type="filepath" name="hyphenation-patterns/hyb.*" desc="" />
                 <filteritem type="filepath" name="libaom/fuzz/av1_dec_fuzzer_corpus.*" desc="" />
-                <filteritem type="filepath" name="libaom/fuzz/av1_dec_fuzzer_corpus.*" desc="" />
+                <filteritem type="filepath" name="android_rust_toolchain/toolchain.*" desc="" />
+                <filteritem type="filepath" name="afl/src/testcases/archives/common.*" desc="" />
+                <filteritem type="filepath" name="afl/src/testcases/archives/exotic.*" desc="" />
             </filefilter>
         </filefilterlist>
         <licensematcherlist>
