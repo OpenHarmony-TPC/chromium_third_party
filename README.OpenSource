@@ -1,6 +1,6 @@
 [
     {
-        "Name": "chromium_third_party",                   # 上游开源软件名全称
+        "Name": "third_party",                   # 上游开源软件名全称
         "License": "APSL-2.0",         # 上游开源软件中包含的许可证信息
         "License File": "LICENSE"     # 许可证所在文件路径
         "Version Number": "99.0.4844.84",
@@ -8,7 +8,7 @@
         "Description": "三方库"           # 开源软件功能描述
     },
     {
-        "Name": "chromium_third_party",                   # 上游开源软件名全称
+        "Name": "third_party",                   # 上游开源软件名全称
         "License": "LGPL-2.0+",         # 上游开源软件中包含的许可证信息
         "License File": "LICENSE"     # 许可证所在文件路径
         "Version Number": "99.0.4844.84",
@@ -16,7 +16,7 @@
         "Description": "三方库"           # 开源软件功能描述
     },
     {
-        "Name": "chromium_third_party",                   # 上游开源软件名全称
+        "Name": "third_party",                   # 上游开源软件名全称
         "License": "APSL-1.0+",         # 上游开源软件中包含的许可证信息
         "License File": "LICENSE"     # 许可证所在文件路径
         "Version Number": "99.0.4844.84",
@@ -24,7 +24,7 @@
         "Description": "三方库"           # 开源软件功能描述
     },
     {
-        "Name": "chromium_third_party",                   # 上游开源软件名全称
+        "Name": "third_party",                   # 上游开源软件名全称
         "License": "MPL-1.1",         # 上游开源软件中包含的许可证信息
         "License File": "LICENSE"     # 许可证所在文件路径
         "Version Number": "99.0.4844.84",
@@ -32,7 +32,7 @@
         "Description": "三方库"           # 开源软件功能描述
     },
     {
-        "Name": "chromium_third_party",                   # 上游开源软件名全称
+        "Name": "third_party",                   # 上游开源软件名全称
         "License": "Libpng",         # 上游开源软件中包含的许可证信息
         "License File": "LICENSE"     # 许可证所在文件路径
         "Version Number": "99.0.4844.84",
@@ -40,7 +40,7 @@
         "Description": "三方库"           # 开源软件功能描述
     },
     {
-        "Name": "chromium_third_party",                   # 上游开源软件名全称
+        "Name": "third_party",                   # 上游开源软件名全称
         "License": "LGPLStyleLicense",         # 上游开源软件中包含的许可证信息
         "License File": "LICENSE"     # 许可证所在文件路径
         "Version Number": "99.0.4844.84",
@@ -48,7 +48,7 @@
         "Description": "三方库"           # 开源软件功能描述
     },
     {
-        "Name": "chromium_third_party",                   # 上游开源软件名全称
+        "Name": "third_party",                   # 上游开源软件名全称
         "License": "BSD-3-Clause",         # 上游开源软件中包含的许可证信息
         "License File": "LICENSE"     # 许可证所在文件路径
         "Version Number": "99.0.4844.84",
@@ -56,7 +56,7 @@
         "Description": "三方库"           # 开源软件功能描述
     },
     {
-        "Name": "chromium_third_party",                   # 上游开源软件名全称
+        "Name": "third_party",                   # 上游开源软件名全称
         "License": "LGPL-2.1+",         # 上游开源软件中包含的许可证信息
         "License File": "LICENSE"     # 许可证所在文件路径
         "Version Number": "99.0.4844.84",
@@ -64,7 +64,7 @@
         "Description": "三方库"           # 开源软件功能描述
     },
     {
-        "Name": "chromium_third_party",                   # 上游开源软件名全称
+        "Name": "third_party",                   # 上游开源软件名全称
         "License": "OpenSSL",         # 上游开源软件中包含的许可证信息
         "License File": "LICENSE"     # 许可证所在文件路径
         "Version Number": "99.0.4844.84",
@@ -72,7 +72,7 @@
         "Description": "三方库"           # 开源软件功能描述
     },
     {
-        "Name": "chromium_third_party",                   # 上游开源软件名全称
+        "Name": "third_party",                   # 上游开源软件名全称
         "License": "GPLStyleLicense",         # 上游开源软件中包含的许可证信息
         "License File": "LICENSE"     # 许可证所在文件路径
         "Version Number": "99.0.4844.84",
@@ -80,7 +80,7 @@
         "Description": "三方库"           # 开源软件功能描述
     },
     {
-        "Name": "chromium_third_party",                   # 上游开源软件名全称
+        "Name": "third_party",                   # 上游开源软件名全称
         "License": "GPL-2.0-or-later",         # 上游开源软件中包含的许可证信息
         "License File": "LICENSE"     # 许可证所在文件路径
         "Version Number": "99.0.4844.84",
@@ -88,7 +88,7 @@
         "Description": "三方库"           # 开源软件功能描述
     },
     {
-        "Name": "chromium_third_party",                   # 上游开源软件名全称
+        "Name": "third_party",                   # 上游开源软件名全称
         "License": "BSL-1.0",         # 上游开源软件中包含的许可证信息
         "License File": "LICENSE"     # 许可证所在文件路径
         "Version Number": "99.0.4844.84",
@@ -96,7 +96,7 @@
         "Description": "三方库"           # 开源软件功能描述
     },
     {
-        "Name": "chromium_third_party",                   # 上游开源软件名全称
+        "Name": "third_party",                   # 上游开源软件名全称
         "License": "Unicode-TOU",         # 上游开源软件中包含的许可证信息
         "License File": "LICENSE"     # 许可证所在文件路径
         "Version Number": "99.0.4844.84",
@@ -104,7 +104,7 @@
         "Description": "三方库"           # 开源软件功能描述
     },
     {
-        "Name": "chromium_third_party",                   # 上游开源软件名全称
+        "Name": "third_party",                   # 上游开源软件名全称
         "License": "GPLStyleLicense-with-mif-exception",         # 上游开源软件中包含的许可证信息
         "License File": "LICENSE"     # 许可证所在文件路径
         "Version Number": "99.0.4844.84",
@@ -112,7 +112,7 @@
         "Description": "三方库"           # 开源软件功能描述
     },
     {
-        "Name": "chromium_third_party",                   # 上游开源软件名全称
+        "Name": "third_party",                   # 上游开源软件名全称
         "License": "GPL-2.0+",         # 上游开源软件中包含的许可证信息
         "License File": "LICENSE"     # 许可证所在文件路径
         "Version Number": "99.0.4844.84",
@@ -120,7 +120,7 @@
         "Description": "三方库"           # 开源软件功能描述
     },
     {
-        "Name": "chromium_third_party",                   # 上游开源软件名全称
+        "Name": "third_party",                   # 上游开源软件名全称
         "License": "SPDX:Unicode-DFS-2016",         # 上游开源软件中包含的许可证信息
         "License File": "LICENSE"     # 许可证所在文件路径
         "Version Number": "99.0.4844.84",
@@ -128,7 +128,7 @@
         "Description": "三方库"           # 开源软件功能描述
     },
     {
-        "Name": "chromium_third_party",                   # 上游开源软件名全称
+        "Name": "third_party",                   # 上游开源软件名全称
         "License": "FSFULLR",         # 上游开源软件中包含的许可证信息
         "License File": "LICENSE"     # 许可证所在文件路径
         "Version Number": "99.0.4844.84",
@@ -136,7 +136,7 @@
         "Description": "三方库"           # 开源软件功能描述
     },
     {
-        "Name": "chromium_third_party",                   # 上游开源软件名全称
+        "Name": "third_party",                   # 上游开源软件名全称
         "License": "MPL-2.0",         # 上游开源软件中包含的许可证信息
         "License File": "LICENSE"     # 许可证所在文件路径
         "Version Number": "99.0.4844.84",
@@ -144,7 +144,7 @@
         "Description": "三方库"           # 开源软件功能描述
     },
     {
-        "Name": "chromium_third_party",                   # 上游开源软件名全称
+        "Name": "third_party",                   # 上游开源软件名全称
         "License": "MIT",         # 上游开源软件中包含的许可证信息
         "License File": "LICENSE"     # 许可证所在文件路径
         "Version Number": "99.0.4844.84",
@@ -152,7 +152,7 @@
         "Description": "三方库"           # 开源软件功能描述
     },
     {
-        "Name": "chromium_third_party",                   # 上游开源软件名全称
+        "Name": "third_party",                   # 上游开源软件名全称
         "License": "zlib-acknowledgement",         # 上游开源软件中包含的许可证信息
         "License File": "LICENSE"     # 许可证所在文件路径
         "Version Number": "99.0.4844.84",
@@ -160,7 +160,7 @@
         "Description": "三方库"           # 开源软件功能描述
     },
     {
-        "Name": "chromium_third_party",                   # 上游开源软件名全称
+        "Name": "third_party",                   # 上游开源软件名全称
         "License": "BSDStyleLicense",         # 上游开源软件中包含的许可证信息
         "License File": "LICENSE"     # 许可证所在文件路径
         "Version Number": "99.0.4844.84",
@@ -168,7 +168,7 @@
         "Description": "三方库"           # 开源软件功能描述
     },
     {
-        "Name": "chromium_third_party",                   # 上游开源软件名全称
+        "Name": "third_party",                   # 上游开源软件名全称
         "License": "CDDL-1.0",         # 上游开源软件中包含的许可证信息
         "License File": "LICENSE"     # 许可证所在文件路径
         "Version Number": "99.0.4844.84",
@@ -176,7 +176,7 @@
         "Description": "三方库"           # 开源软件功能描述
     },
     {
-        "Name": "chromium_third_party",                   # 上游开源软件名全称
+        "Name": "third_party",                   # 上游开源软件名全称
         "License": "OFL-1.1-no-RFN",         # 上游开源软件中包含的许可证信息
         "License File": "LICENSE"     # 许可证所在文件路径
         "Version Number": "99.0.4844.84",
@@ -184,7 +184,7 @@
         "Description": "三方库"           # 开源软件功能描述
     },
     {
-        "Name": "chromium_third_party",                   # 上游开源软件名全称
+        "Name": "third_party",                   # 上游开源软件名全称
         "License": "LGPL-3.0+",         # 上游开源软件中包含的许可证信息
         "License File": "LICENSE"     # 许可证所在文件路径
         "Version Number": "99.0.4844.84",
@@ -192,7 +192,7 @@
         "Description": "三方库"           # 开源软件功能描述
     },
     {
-        "Name": "chromium_third_party",                   # 上游开源软件名全称
+        "Name": "third_party",                   # 上游开源软件名全称
         "License": "GPL-3.0+",         # 上游开源软件中包含的许可证信息
         "License File": "LICENSE"     # 许可证所在文件路径
         "Version Number": "99.0.4844.84",
@@ -200,7 +200,7 @@
         "Description": "三方库"           # 开源软件功能描述
     },
     {
-        "Name": "chromium_third_party",                   # 上游开源软件名全称
+        "Name": "third_party",                   # 上游开源软件名全称
         "License": "EPL-1.0",         # 上游开源软件中包含的许可证信息
         "License File": "LICENSE"     # 许可证所在文件路径
         "Version Number": "99.0.4844.84",
@@ -208,7 +208,7 @@
         "Description": "三方库"           # 开源软件功能描述
     },
     {
-        "Name": "chromium_third_party",                   # 上游开源软件名全称
+        "Name": "third_party",                   # 上游开源软件名全称
         "License": "Artistic-2.0",         # 上游开源软件中包含的许可证信息
         "License File": "LICENSE"     # 许可证所在文件路径
         "Version Number": "99.0.4844.84",
@@ -216,7 +216,7 @@
         "Description": "三方库"           # 开源软件功能描述
     },
     {
-        "Name": "chromium_third_party",                   # 上游开源软件名全称
+        "Name": "third_party",                   # 上游开源软件名全称
         "License": "CDDL-1.1",         # 上游开源软件中包含的许可证信息
         "License File": "LICENSE"     # 许可证所在文件路径
         "Version Number": "99.0.4844.84",
@@ -224,7 +224,7 @@
         "Description": "三方库"           # 开源软件功能描述
     },
     {
-        "Name": "chromium_third_party",                   # 上游开源软件名全称
+        "Name": "third_party",                   # 上游开源软件名全称
         "License": "SGI-B-2.0",         # 上游开源软件中包含的许可证信息
         "License File": "LICENSE"     # 许可证所在文件路径
         "Version Number": "99.0.4844.84",
@@ -232,7 +232,7 @@
         "Description": "三方库"           # 开源软件功能描述
     },
     {
-        "Name": "chromium_third_party",                   # 上游开源软件名全称
+        "Name": "third_party",                   # 上游开源软件名全称
         "License": "Zlib",         # 上游开源软件中包含的许可证信息
         "License File": "LICENSE"     # 许可证所在文件路径
         "Version Number": "99.0.4844.84",
@@ -240,7 +240,7 @@
         "Description": "三方库"           # 开源软件功能描述
     },
     {
-        "Name": "chromium_third_party",                   # 上游开源软件名全称
+        "Name": "third_party",                   # 上游开源软件名全称
         "License": "Public Domain Disclaimer",         # 上游开源软件中包含的许可证信息
         "License File": "LICENSE"     # 许可证所在文件路径
         "Version Number": "99.0.4844.84",
@@ -248,7 +248,7 @@
         "Description": "三方库"           # 开源软件功能描述
     },
     {
-        "Name": "chromium_third_party",                   # 上游开源软件名全称
+        "Name": "third_party",                   # 上游开源软件名全称
         "License": "NiH libzip License",         # 上游开源软件中包含的许可证信息
         "License File": "LICENSE"     # 许可证所在文件路径
         "Version Number": "99.0.4844.84",
@@ -256,7 +256,7 @@
         "Description": "三方库"           # 开源软件功能描述
     },
     {
-        "Name": "chromium_third_party",                   # 上游开源软件名全称
+        "Name": "third_party",                   # 上游开源软件名全称
         "License": "HPND-sell-variant",         # 上游开源软件中包含的许可证信息
         "License File": "LICENSE"     # 许可证所在文件路径
         "Version Number": "99.0.4844.84",
@@ -264,7 +264,7 @@
         "Description": "三方库"           # 开源软件功能描述
     },
     {
-        "Name": "chromium_third_party",                   # 上游开源软件名全称
+        "Name": "third_party",                   # 上游开源软件名全称
         "License": "CPL-1.0",         # 上游开源软件中包含的许可证信息
         "License File": "LICENSE"     # 许可证所在文件路径
         "Version Number": "99.0.4844.84",
@@ -272,7 +272,7 @@
         "Description": "三方库"           # 开源软件功能描述
     },
     {
-        "Name": "chromium_third_party",                   # 上游开源软件名全称
+        "Name": "third_party",                   # 上游开源软件名全称
         "License": "FTL",         # 上游开源软件中包含的许可证信息
         "License File": "LICENSE"     # 许可证所在文件路径
         "Version Number": "99.0.4844.84",
@@ -280,7 +280,7 @@
         "Description": "三方库"           # 开源软件功能描述
     },
     {
-        "Name": "chromium_third_party",                   # 上游开源软件名全称
+        "Name": "third_party",                   # 上游开源软件名全称
         "License": "FFTPACK License 2004",         # 上游开源软件中包含的许可证信息
         "License File": "LICENSE"     # 许可证所在文件路径
         "Version Number": "99.0.4844.84",
@@ -288,7 +288,7 @@
         "Description": "三方库"           # 开源软件功能描述
     },
     {
-        "Name": "chromium_third_party",                   # 上游开源软件名全称
+        "Name": "third_party",                   # 上游开源软件名全称
         "License": "XFree86 License 1.0",         # 上游开源软件中包含的许可证信息
         "License File": "LICENSE"     # 许可证所在文件路径
         "Version Number": "99.0.4844.84",
@@ -296,7 +296,7 @@
         "Description": "三方库"           # 开源软件功能描述
     },
     {
-        "Name": "chromium_third_party",                   # 上游开源软件名全称
+        "Name": "third_party",                   # 上游开源软件名全称
         "License": "SunPro Attribution License",         # 上游开源软件中包含的许可证信息
         "License File": "LICENSE"     # 许可证所在文件路径
         "Version Number": "99.0.4844.84",
@@ -304,7 +304,7 @@
         "Description": "三方库"           # 开源软件功能描述
     },
     {
-        "Name": "chromium_third_party",                   # 上游开源软件名全称
+        "Name": "third_party",                   # 上游开源软件名全称
         "License": "Red Hat Attribution License",         # 上游开源软件中包含的许可证信息
         "License File": "LICENSE"     # 许可证所在文件路径
         "Version Number": "99.0.4844.84",
@@ -312,7 +312,7 @@
         "Description": "三方库"           # 开源软件功能描述
     },
     {
-        "Name": "chromium_third_party",                   # 上游开源软件名全称
+        "Name": "third_party",                   # 上游开源软件名全称
         "License": "IJG",         # 上游开源软件中包含的许可证信息
         "License File": "LICENSE"     # 许可证所在文件路径
         "Version Number": "99.0.4844.84",
@@ -320,7 +320,7 @@
         "Description": "三方库"           # 开源软件功能描述
     },
     {
-        "Name": "chromium_third_party",                   # 上游开源软件名全称
+        "Name": "third_party",                   # 上游开源软件名全称
         "License": "Public Domain",         # 上游开源软件中包含的许可证信息
         "License File": "LICENSE"     # 许可证所在文件路径
         "Version Number": "99.0.4844.84",
@@ -328,7 +328,7 @@
         "Description": "三方库"           # 开源软件功能描述
     },
     {
-        "Name": "chromium_third_party",                   # 上游开源软件名全称
+        "Name": "third_party",                   # 上游开源软件名全称
         "License": "CC0-1.0",         # 上游开源软件中包含的许可证信息
         "License File": "LICENSE"     # 许可证所在文件路径
         "Version Number": "99.0.4844.84",
@@ -336,7 +336,7 @@
         "Description": "三方库"           # 开源软件功能描述
     },
     {
-        "Name": "chromium_third_party",                   # 上游开源软件名全称
+        "Name": "third_party",                   # 上游开源软件名全称
         "License": "BSD-2-Clause",         # 上游开源软件中包含的许可证信息
         "License File": "LICENSE"     # 许可证所在文件路径
         "Version Number": "99.0.4844.84",
@@ -344,7 +344,7 @@
         "Description": "三方库"           # 开源软件功能描述
     },
     {
-        "Name": "chromium_third_party",                   # 上游开源软件名全称
+        "Name": "third_party",                   # 上游开源软件名全称
         "License": "MIT Xfig Variant",         # 上游开源软件中包含的许可证信息
         "License File": "LICENSE"     # 许可证所在文件路径
         "Version Number": "99.0.4844.84",
@@ -352,7 +352,7 @@
         "Description": "三方库"           # 开源软件功能描述
     },
     {
-        "Name": "chromium_third_party",                   # 上游开源软件名全称
+        "Name": "third_party",                   # 上游开源软件名全称
         "License": "MIT Veillard Variant",         # 上游开源软件中包含的许可证信息
         "License File": "LICENSE"     # 许可证所在文件路径
         "Version Number": "99.0.4844.84",
@@ -360,7 +360,7 @@
         "Description": "三方库"           # 开源软件功能描述
     },
     {
-        "Name": "chromium_third_party",                   # 上游开源软件名全称
+        "Name": "third_party",                   # 上游开源软件名全称
         "License": "ISC",         # 上游开源软件中包含的许可证信息
         "License File": "LICENSE"     # 许可证所在文件路径
         "Version Number": "99.0.4844.84",
@@ -368,7 +368,7 @@
         "Description": "三方库"           # 开源软件功能描述
     },
     {
-        "Name": "chromium_third_party",                   # 上游开源软件名全称
+        "Name": "third_party",                   # 上游开源软件名全称
         "License": "BSD-Source-Code",         # 上游开源软件中包含的许可证信息
         "License File": "LICENSE"     # 许可证所在文件路径
         "Version Number": "99.0.4844.84",
@@ -376,7 +376,7 @@
         "Description": "三方库"           # 开源软件功能描述
     },
     {
-        "Name": "chromium_third_party",                   # 上游开源软件名全称
+        "Name": "third_party",                   # 上游开源软件名全称
         "License": "MIT-open-group",         # 上游开源软件中包含的许可证信息
         "License File": "LICENSE"     # 许可证所在文件路径
         "Version Number": "99.0.4844.84",
@@ -384,7 +384,7 @@
         "Description": "三方库"           # 开源软件功能描述
     },
     {
-        "Name": "chromium_third_party",                   # 上游开源软件名全称
+        "Name": "third_party",                   # 上游开源软件名全称
         "License": "Zlib",         # 上游开源软件中包含的许可证信息
         "License File": "LICENSE"     # 许可证所在文件路径
         "Version Number": "99.0.4844.84",
@@ -392,7 +392,7 @@
         "Description": "三方库"           # 开源软件功能描述
     },
     {
-        "Name": "chromium_third_party",                   # 上游开源软件名全称
+        "Name": "third_party",                   # 上游开源软件名全称
         "License": "BSL-1.0",         # 上游开源软件中包含的许可证信息
         "License File": "LICENSE"     # 许可证所在文件路径
         "Version Number": "99.0.4844.84",
@@ -400,7 +400,7 @@
         "Description": "三方库"           # 开源软件功能描述
     },
     {
-        "Name": "chromium_third_party",                   # 上游开源软件名全称
+        "Name": "third_party",                   # 上游开源软件名全称
         "License": "XFree86 License 1.0",         # 上游开源软件中包含的许可证信息
         "License File": "LICENSE"     # 许可证所在文件路径
         "Version Number": "99.0.4844.84",
