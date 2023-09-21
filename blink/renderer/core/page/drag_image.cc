@@ -160,6 +160,9 @@ std::unique_ptr<DragImage> DragImage::Create(const KURL& url,
 
   String url_string = url.GetString();
   String label = in_label.StripWhiteSpace();
+#ifdef BUIDFLAG(IS_OHOS)
+  label = DragImage::filterNonPrintable(label);
+#endif
   if (label.IsEmpty()) {
     draw_url_string = false;
     label = url_string;
@@ -296,6 +299,17 @@ gfx::Vector2dF  DragImage::HwClampedImageScale(const gfx::Size& image_size,
       static_cast<float>(element_size.height()) * target_scale / image_size.height());
   return image_scale;
 }
+
+WTF::String DragImage::filterNonPrintable(const WTF::String& input) {
+    WTF::StringBuilder result;
+    for (unsigned  i = 0; i < input.length(); ++i) {
+        if (WTF::unicode::IsPrintableChar(input[i])) {
+            result.Append(input[i]);
+        }
+    }
+    return result.ToString();
+}
+
 #endif //BUILDFLAG(IS_OHOS)
 
 }  // namespace blink

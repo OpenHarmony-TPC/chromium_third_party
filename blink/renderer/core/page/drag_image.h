@@ -86,7 +86,9 @@ class CORE_EXPORT DragImage {
 
  private:
   DragImage(const SkBitmap&, float resolution_scale, InterpolationQuality);
-
+#ifdef BUIDFLAG(IS_OHOS)
+  static WTF::String DragImage::filterNonPrintable(const WTF::String& input);
+#endif
   SkBitmap bitmap_;
   float resolution_scale_;
   InterpolationQuality interpolation_quality_;
