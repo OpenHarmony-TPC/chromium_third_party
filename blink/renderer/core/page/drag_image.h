@@ -36,6 +36,7 @@
 #include "third_party/blink/renderer/platform/wtf/allocator/allocator.h"
 #include "third_party/blink/renderer/platform/wtf/forward.h"
 #include "third_party/skia/include/core/SkBitmap.h"
+
 #include "ui/gfx/geometry/size.h"
 #include "ui/gfx/geometry/size_f.h"
 
@@ -86,7 +87,9 @@ class CORE_EXPORT DragImage {
 
  private:
   DragImage(const SkBitmap&, float resolution_scale, InterpolationQuality);
-
+#ifdef BUILDFLAG(IS_OHOS)
+  static WTF::String filterNonPrintable(const WTF::String& input);
+#endif
   SkBitmap bitmap_;
   float resolution_scale_;
   InterpolationQuality interpolation_quality_;
