@@ -1145,8 +1145,13 @@ void ChromeClientImpl::DidChangeValueInTextField(
                                ? WebFeature::kFieldEditInSecureContext
                                : WebFeature::kFieldEditInNonSecureContext);
     // The resource coordinator is not available in some tests.
-    if (auto* rc = doc.GetResourceCoordinator())
+    if (auto* rc = doc.GetResourceCoordinator()) {
       rc->SetHadFormInteraction();
+#if BUILDFLAG(IS_OHOS)
+      uint64_t form_id = element.Form()->UniqueRendererFormId();
+      rc->OnFormEditingStateChanged(form_id, false);
+#endif
+    }
   }
 }
 
@@ -1178,6 +1183,13 @@ void ChromeClientImpl::DidChangeSelectionInSelectControl(
   Document& doc = element.GetDocument();
   if (auto* fill_client = AutofillClientFromFrame(doc.GetFrame()))
     fill_client->SelectControlDidChange(WebFormControlElement(&element));
+#if BUILDFLAG(IS_OHOS)
+  if (auto* rc = doc.GetResourceCoordinator()) {
+      rc->SetHadFormInteraction();
+      uint64_t form_id = element.Form()->UniqueRendererFormId();
+      rc->OnFormEditingStateChanged(form_id, false);
+  }
+#endif
 }
 
 void ChromeClientImpl::SelectFieldOptionsChanged(

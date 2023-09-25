@@ -61,6 +61,12 @@ void DocumentResourceCoordinator::SetHadFormInteraction() {
   had_form_interaction_ = true;
 }
 
+#if BUILDFLAG(IS_OHOS)
+void DocumentResourceCoordinator::OnFormEditingStateChanged(uint64_t form_id, bool did_submit) {
+  service_->OnFormEditingStateChanged(form_id, did_submit);
+}
+#endif
+
 void DocumentResourceCoordinator::OnFirstContentfulPaint(
     base::TimeDelta time_since_navigation_start) {
   service_->OnFirstContentfulPaint(time_since_navigation_start);

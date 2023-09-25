@@ -46,6 +46,8 @@
 #include "third_party/blink/renderer/core/editing/set_selection_options.h"
 #include "third_party/blink/renderer/core/editing/spellcheck/spell_checker.h"
 #include "third_party/blink/renderer/core/editing/text_affinity.h"
+#include "third_party/blink/renderer/core/html/forms/form_associated.h"
+#include "third_party/blink/renderer/core/html/forms/html_form_element.h"
 #include "third_party/blink/renderer/core/editing/visible_position.h"
 #include "third_party/blink/renderer/core/frame/local_frame.h"
 #include "third_party/blink/renderer/core/html/forms/text_control_inner_elements.h"
@@ -64,6 +66,7 @@
 #include "third_party/blink/renderer/platform/bindings/exception_state.h"
 #include "third_party/blink/renderer/platform/heap/garbage_collected.h"
 #include "third_party/blink/renderer/platform/instrumentation/use_counter.h"
+#include "third_party/blink/renderer/platform/instrumentation/resource_coordinator/document_resource_coordinator.h"
 #include "third_party/blink/renderer/platform/wtf/text/string_builder.h"
 
 namespace blink {
@@ -286,6 +289,12 @@ void TextControlElement::DispatchFormControlChangeEvent() {
       !EqualIgnoringNullity(value_before_first_user_edit_, value())) {
     ClearValueBeforeFirstUserEdit();
     DispatchChangeEvent();
+#if BUILDFLAG(IS_OHOS)
+    if (auto* rc = GetDocument().GetResourceCoordinator()) {
+      uint64_t form_id = Form()->UniqueRendererFormId();
+      rc->OnFormEditingStateChanged(form_id, false);
+    }
+#endif
   } else {
     ClearValueBeforeFirstUserEdit();
   }

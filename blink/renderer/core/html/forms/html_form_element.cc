@@ -65,6 +65,7 @@
 #include "third_party/blink/renderer/core/loader/mixed_content_checker.h"
 #include "third_party/blink/renderer/core/page/chrome_client.h"
 #include "third_party/blink/renderer/core/page/page.h"
+#include "third_party/blink/renderer/platform/instrumentation/resource_coordinator/document_resource_coordinator.h"
 #include "third_party/blink/renderer/platform/bindings/exception_state.h"
 #include "third_party/blink/renderer/platform/heap/garbage_collected.h"
 #include "third_party/blink/renderer/platform/instrumentation/use_counter.h"
@@ -554,6 +555,11 @@ void HTMLFormElement::ScheduleFormSubmission(
   }
 
   target_frame->ScheduleFormSubmission(scheduler, form_submission);
+#if BUILDFLAG(IS_OHOS)
+  if (auto* rc = GetDocument().GetResourceCoordinator()) {
+    rc->OnFormEditingStateChanged(UniqueRendererFormId(), true);
+  }
+#endif
 }
 
 FormData* HTMLFormElement::ConstructEntryList(
