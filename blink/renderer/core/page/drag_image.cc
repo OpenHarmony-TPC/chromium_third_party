@@ -219,7 +219,9 @@ std::unique_ptr<DragImage> DragImage::Create(const KURL& url,
 
   gfx::Rect rect(image_size);
   cc::PaintFlags background_paint;
-  background_paint.setColor(SkColorSetRGB(140, 140, 140));
+  background_paint.setStyle(cc::PaintFlags::Style::kFill_Style);
+  background_paint.setColor(0x00FFFFFF); // transparent
+  background_paint.setBlendMode(SkBlendMode::kSrcOver);
   background_paint.setAntiAlias(true);
   SkRRect rrect;
   rrect.setRectXY(SkRect::MakeWH(image_size.width(), image_size.height()),
