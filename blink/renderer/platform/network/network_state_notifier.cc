@@ -345,6 +345,8 @@ void NetworkStateNotifier::RemoveObserver(
     scoped_refptr<base::SingleThreadTaskRunner> task_runner) {
   DCHECK(task_runner->RunsTasksInCurrentSequence());
   DCHECK(observer);
+
+  MutexLocker locker(mutex_);
   ObserverListMap& map = GetObserverMapFor(type);
   DCHECK_NE(map.end(), map.find(observer));
   map.erase(observer);
