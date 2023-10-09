@@ -124,8 +124,12 @@ class CORE_EXPORT EditingBehavior {
   // Support for global selections, used on platforms like the X Window
   // System that treat selection as a type of clipboard.
   bool SupportsGlobalSelection() const {
+#if BUILDFLAG(IS_OHOS)
+    return false;
+#else
     return type_ != mojom::blink::EditingBehavior::kEditingWindowsBehavior &&
            type_ != mojom::blink::EditingBehavior::kEditingMacBehavior;
+#endif
   }
 
   // Convert a KeyboardEvent to a command name like "Copy", "Undo" and so on.
