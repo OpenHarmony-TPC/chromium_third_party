@@ -43,6 +43,9 @@ class PLATFORM_EXPORT DocumentResourceCoordinator final {
   void OnWebMemoryMeasurementRequested(
       WebMemoryMeasurementMode mode,
       OnWebMemoryMeasurementRequestedCallback callback);
+#if BUILDFLAG(IS_OHOS)
+  void OnFormEditingStateChanged(uint64_t form_id, bool did_submit);
+#endif
 
  private:
   explicit DocumentResourceCoordinator(const BrowserInterfaceBrokerProxy&);
