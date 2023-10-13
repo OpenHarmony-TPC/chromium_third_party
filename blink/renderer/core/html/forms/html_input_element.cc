@@ -83,6 +83,7 @@
 #include "third_party/blink/renderer/platform/bindings/to_v8.h"
 #include "third_party/blink/renderer/platform/heap/garbage_collected.h"
 #include "third_party/blink/renderer/platform/instrumentation/use_counter.h"
+#include "third_party/blink/renderer/platform/instrumentation/resource_coordinator/document_resource_coordinator.h"
 #include "third_party/blink/renderer/platform/language.h"
 #include "third_party/blink/renderer/platform/runtime_enabled_features.h"
 #include "third_party/blink/renderer/platform/text/platform_locale.h"
@@ -1034,6 +1035,12 @@ void HTMLInputElement::DispatchInputAndChangeEventIfNeeded() {
       input_type_->ShouldSendChangeEventAfterCheckedChanged()) {
     DispatchInputEvent();
     DispatchChangeEvent();
+#if BUILDFLAG(IS_OHOS)
+    if (auto* rc = GetDocument().GetResourceCoordinator()) {
+      uint64_t form_id = Form()->UniqueRendererFormId();
+      rc->OnFormEditingStateChanged(form_id, false);
+    }
+#endif
   }
 }
 

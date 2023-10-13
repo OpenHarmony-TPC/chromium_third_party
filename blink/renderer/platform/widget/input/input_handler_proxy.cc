@@ -365,7 +365,7 @@ void InputHandlerProxy::HandleInputEventWithLatencyInfo(
     compositor_event_queue_->Queue(std::move(event_with_callback),
                                    tick_clock_->NowTicks());
 #if BUILDFLAG(IS_OHOS)
-    if (need_flush_scroll_update_gesture_ &&  gesture_event.GetType() == WebGestureEvent::Type::kGestureScrollUpdate) {
+    if (need_flush_scroll_update_gesture_ && gesture_event.GetType() == WebGestureEvent::Type::kGestureScrollUpdate) {
       DeliverInputForBeginFrame(current_internal_begin_frame_args_);
     }
 #endif
