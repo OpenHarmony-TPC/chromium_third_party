@@ -1,410 +1,461 @@
 [
     {
-        "Name": "third_party",                   # 上游开源软件名全称
-        "License": "APSL-2.0",         # 上游开源软件中包含的许可证信息
-        "License File": "LICENSE"     # 许可证所在文件路径
+        "Name": "third_party",
+        "License": "APSL-2.0",
+        "License File": "LICENSE",
         "Version Number": "99.0.4844.84",
-        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",   # 上游软件包发布地址
-        "Description": "三方库"           # 开源软件功能描述
+        "Owner": "jinchanggang@huawei.com",
+        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",
+        "Description": "三方库"
     },
     {
-        "Name": "third_party",                   # 上游开源软件名全称
-        "License": "LGPL-2.0+",         # 上游开源软件中包含的许可证信息
-        "License File": "LICENSE"     # 许可证所在文件路径
+        "Name": "third_party",
+        "License": "LGPL-2.0+", 
+        "License File": "LICENSE",
         "Version Number": "99.0.4844.84",
-        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",   # 上游软件包发布地址
-        "Description": "三方库"           # 开源软件功能描述
+        "Owner": "jinchanggang@huawei.com",
+        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",
+        "Description": "三方库"
     },
     {
-        "Name": "third_party",                   # 上游开源软件名全称
-        "License": "APSL-1.0+",         # 上游开源软件中包含的许可证信息
-        "License File": "LICENSE"     # 许可证所在文件路径
+        "Name": "third_party",
+        "License": "APSL-1.0+", 
+        "License File": "LICENSE",
         "Version Number": "99.0.4844.84",
-        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",   # 上游软件包发布地址
-        "Description": "三方库"           # 开源软件功能描述
+        "Owner": "jinchanggang@huawei.com",
+        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",
+        "Description": "三方库"
     },
     {
-        "Name": "third_party",                   # 上游开源软件名全称
-        "License": "MPL-1.1",         # 上游开源软件中包含的许可证信息
-        "License File": "LICENSE"     # 许可证所在文件路径
+        "Name": "third_party",
+        "License": "MPL-1.1", 
+        "License File": "LICENSE",
         "Version Number": "99.0.4844.84",
-        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",   # 上游软件包发布地址
-        "Description": "三方库"           # 开源软件功能描述
+        "Owner": "jinchanggang@huawei.com",
+        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",
+        "Description": "三方库"
     },
     {
-        "Name": "third_party",                   # 上游开源软件名全称
-        "License": "Libpng",         # 上游开源软件中包含的许可证信息
-        "License File": "LICENSE"     # 许可证所在文件路径
+        "Name": "third_party",
+        "License": "Libpng", 
+        "License File": "LICENSE",
         "Version Number": "99.0.4844.84",
-        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",   # 上游软件包发布地址
-        "Description": "三方库"           # 开源软件功能描述
+        "Owner": "jinchanggang@huawei.com",
+        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",
+        "Description": "三方库"
     },
     {
-        "Name": "third_party",                   # 上游开源软件名全称
-        "License": "LGPLStyleLicense",         # 上游开源软件中包含的许可证信息
-        "License File": "LICENSE"     # 许可证所在文件路径
+        "Name": "third_party",
+        "License": "LGPLStyleLicense", 
+        "License File": "LICENSE",
         "Version Number": "99.0.4844.84",
-        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",   # 上游软件包发布地址
-        "Description": "三方库"           # 开源软件功能描述
+        "Owner": "jinchanggang@huawei.com",
+        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",
+        "Description": "三方库"
     },
     {
-        "Name": "third_party",                   # 上游开源软件名全称
-        "License": "BSD-3-Clause",         # 上游开源软件中包含的许可证信息
-        "License File": "LICENSE"     # 许可证所在文件路径
+        "Name": "third_party",
+        "License": "BSD-3-Clause", 
+        "License File": "LICENSE",
         "Version Number": "99.0.4844.84",
-        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",   # 上游软件包发布地址
-        "Description": "三方库"           # 开源软件功能描述
+        "Owner": "jinchanggang@huawei.com",
+        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",
+        "Description": "三方库"
     },
     {
-        "Name": "third_party",                   # 上游开源软件名全称
-        "License": "LGPL-2.1+",         # 上游开源软件中包含的许可证信息
-        "License File": "LICENSE"     # 许可证所在文件路径
+        "Name": "third_party",
+        "License": "LGPL-2.1+", 
+        "License File": "LICENSE",
         "Version Number": "99.0.4844.84",
-        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",   # 上游软件包发布地址
-        "Description": "三方库"           # 开源软件功能描述
+        "Owner": "jinchanggang@huawei.com",
+        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",
+        "Description": "三方库"
     },
     {
-        "Name": "third_party",                   # 上游开源软件名全称
-        "License": "OpenSSL",         # 上游开源软件中包含的许可证信息
-        "License File": "LICENSE"     # 许可证所在文件路径
+        "Name": "third_party",
+        "License": "OpenSSL", 
+        "License File": "LICENSE",
         "Version Number": "99.0.4844.84",
-        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",   # 上游软件包发布地址
-        "Description": "三方库"           # 开源软件功能描述
+        "Owner": "jinchanggang@huawei.com",
+        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",
+        "Description": "三方库"
     },
     {
-        "Name": "third_party",                   # 上游开源软件名全称
-        "License": "GPLStyleLicense",         # 上游开源软件中包含的许可证信息
-        "License File": "LICENSE"     # 许可证所在文件路径
+        "Name": "third_party",
+        "License": "GPLStyleLicense", 
+        "License File": "LICENSE",
         "Version Number": "99.0.4844.84",
-        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",   # 上游软件包发布地址
-        "Description": "三方库"           # 开源软件功能描述
+        "Owner": "jinchanggang@huawei.com",
+        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",
+        "Description": "三方库"
     },
     {
-        "Name": "third_party",                   # 上游开源软件名全称
-        "License": "GPL-2.0-or-later",         # 上游开源软件中包含的许可证信息
-        "License File": "LICENSE"     # 许可证所在文件路径
+        "Name": "third_party",
+        "License": "GPL-2.0-or-later", 
+        "License File": "LICENSE",
         "Version Number": "99.0.4844.84",
-        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",   # 上游软件包发布地址
-        "Description": "三方库"           # 开源软件功能描述
+        "Owner": "jinchanggang@huawei.com",
+        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",
+        "Description": "三方库"
     },
     {
-        "Name": "third_party",                   # 上游开源软件名全称
-        "License": "BSL-1.0",         # 上游开源软件中包含的许可证信息
-        "License File": "LICENSE"     # 许可证所在文件路径
+        "Name": "third_party",
+        "License": "BSL-1.0", 
+        "License File": "LICENSE",
         "Version Number": "99.0.4844.84",
-        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",   # 上游软件包发布地址
-        "Description": "三方库"           # 开源软件功能描述
+        "Owner": "jinchanggang@huawei.com",
+        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",
+        "Description": "三方库"
     },
     {
-        "Name": "third_party",                   # 上游开源软件名全称
-        "License": "Unicode-TOU",         # 上游开源软件中包含的许可证信息
-        "License File": "LICENSE"     # 许可证所在文件路径
+        "Name": "third_party",
+        "License": "Unicode-TOU", 
+        "License File": "LICENSE",
         "Version Number": "99.0.4844.84",
-        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",   # 上游软件包发布地址
-        "Description": "三方库"           # 开源软件功能描述
+        "Owner": "jinchanggang@huawei.com",
+        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",
+        "Description": "三方库"
     },
     {
-        "Name": "third_party",                   # 上游开源软件名全称
-        "License": "GPLStyleLicense-with-mif-exception",         # 上游开源软件中包含的许可证信息
-        "License File": "LICENSE"     # 许可证所在文件路径
+        "Name": "third_party",
+        "License": "GPLStyleLicense-with-mif-exception", 
+        "License File": "LICENSE",
         "Version Number": "99.0.4844.84",
-        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",   # 上游软件包发布地址
-        "Description": "三方库"           # 开源软件功能描述
+        "Owner": "jinchanggang@huawei.com",
+        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",
+        "Description": "三方库"
     },
     {
-        "Name": "third_party",                   # 上游开源软件名全称
-        "License": "GPL-2.0+",         # 上游开源软件中包含的许可证信息
-        "License File": "LICENSE"     # 许可证所在文件路径
+        "Name": "third_party",
+        "License": "GPL-2.0+", 
+        "License File": "LICENSE",
         "Version Number": "99.0.4844.84",
-        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",   # 上游软件包发布地址
-        "Description": "三方库"           # 开源软件功能描述
+        "Owner": "jinchanggang@huawei.com",
+        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",
+        "Description": "三方库"
     },
     {
-        "Name": "third_party",                   # 上游开源软件名全称
-        "License": "SPDX:Unicode-DFS-2016",         # 上游开源软件中包含的许可证信息
-        "License File": "LICENSE"     # 许可证所在文件路径
+        "Name": "third_party",
+        "License": "SPDX:Unicode-DFS-2016", 
+        "License File": "LICENSE",
         "Version Number": "99.0.4844.84",
-        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",   # 上游软件包发布地址
-        "Description": "三方库"           # 开源软件功能描述
+        "Owner": "jinchanggang@huawei.com",
+        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",
+        "Description": "三方库"
     },
     {
-        "Name": "third_party",                   # 上游开源软件名全称
-        "License": "FSFULLR",         # 上游开源软件中包含的许可证信息
-        "License File": "LICENSE"     # 许可证所在文件路径
+        "Name": "third_party",
+        "License": "FSFULLR", 
+        "License File": "LICENSE",
         "Version Number": "99.0.4844.84",
-        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",   # 上游软件包发布地址
-        "Description": "三方库"           # 开源软件功能描述
+        "Owner": "jinchanggang@huawei.com",
+        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",
+        "Description": "三方库"
     },
     {
-        "Name": "third_party",                   # 上游开源软件名全称
-        "License": "MPL-2.0",         # 上游开源软件中包含的许可证信息
-        "License File": "LICENSE"     # 许可证所在文件路径
+        "Name": "third_party",
+        "License": "MPL-2.0", 
+        "License File": "LICENSE",
         "Version Number": "99.0.4844.84",
-        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",   # 上游软件包发布地址
-        "Description": "三方库"           # 开源软件功能描述
+        "Owner": "jinchanggang@huawei.com",
+        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",
+        "Description": "三方库"
     },
     {
-        "Name": "third_party",                   # 上游开源软件名全称
-        "License": "MIT",         # 上游开源软件中包含的许可证信息
-        "License File": "LICENSE"     # 许可证所在文件路径
+        "Name": "third_party",
+        "License": "MIT", 
+        "License File": "LICENSE",
         "Version Number": "99.0.4844.84",
-        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",   # 上游软件包发布地址
-        "Description": "三方库"           # 开源软件功能描述
+        "Owner": "jinchanggang@huawei.com",
+        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",
+        "Description": "三方库"
     },
     {
-        "Name": "third_party",                   # 上游开源软件名全称
-        "License": "zlib-acknowledgement",         # 上游开源软件中包含的许可证信息
-        "License File": "LICENSE"     # 许可证所在文件路径
+        "Name": "third_party",
+        "License": "zlib-acknowledgement", 
+        "License File": "LICENSE",
         "Version Number": "99.0.4844.84",
-        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",   # 上游软件包发布地址
-        "Description": "三方库"           # 开源软件功能描述
+        "Owner": "jinchanggang@huawei.com",
+        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",
+        "Description": "三方库"
     },
     {
-        "Name": "third_party",                   # 上游开源软件名全称
-        "License": "BSDStyleLicense",         # 上游开源软件中包含的许可证信息
-        "License File": "LICENSE"     # 许可证所在文件路径
+        "Name": "third_party",
+        "License": "BSDStyleLicense", 
+        "License File": "LICENSE",
         "Version Number": "99.0.4844.84",
-        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",   # 上游软件包发布地址
-        "Description": "三方库"           # 开源软件功能描述
+        "Owner": "jinchanggang@huawei.com",
+        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",
+        "Description": "三方库"
     },
     {
-        "Name": "third_party",                   # 上游开源软件名全称
-        "License": "CDDL-1.0",         # 上游开源软件中包含的许可证信息
-        "License File": "LICENSE"     # 许可证所在文件路径
+        "Name": "third_party",
+        "License": "CDDL-1.0", 
+        "License File": "LICENSE",
         "Version Number": "99.0.4844.84",
-        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",   # 上游软件包发布地址
-        "Description": "三方库"           # 开源软件功能描述
+        "Owner": "jinchanggang@huawei.com",
+        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",
+        "Description": "三方库"
     },
     {
-        "Name": "third_party",                   # 上游开源软件名全称
-        "License": "OFL-1.1-no-RFN",         # 上游开源软件中包含的许可证信息
-        "License File": "LICENSE"     # 许可证所在文件路径
+        "Name": "third_party",
+        "License": "OFL-1.1-no-RFN", 
+        "License File": "LICENSE",
         "Version Number": "99.0.4844.84",
-        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",   # 上游软件包发布地址
-        "Description": "三方库"           # 开源软件功能描述
+        "Owner": "jinchanggang@huawei.com",
+        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",
+        "Description": "三方库"
     },
     {
-        "Name": "third_party",                   # 上游开源软件名全称
-        "License": "LGPL-3.0+",         # 上游开源软件中包含的许可证信息
-        "License File": "LICENSE"     # 许可证所在文件路径
+        "Name": "third_party",
+        "License": "LGPL-3.0+", 
+        "License File": "LICENSE",
         "Version Number": "99.0.4844.84",
-        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",   # 上游软件包发布地址
-        "Description": "三方库"           # 开源软件功能描述
+        "Owner": "jinchanggang@huawei.com",
+        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",
+        "Description": "三方库"
     },
     {
-        "Name": "third_party",                   # 上游开源软件名全称
-        "License": "GPL-3.0+",         # 上游开源软件中包含的许可证信息
-        "License File": "LICENSE"     # 许可证所在文件路径
+        "Name": "third_party",
+        "License": "GPL-3.0+", 
+        "License File": "LICENSE",
         "Version Number": "99.0.4844.84",
-        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",   # 上游软件包发布地址
-        "Description": "三方库"           # 开源软件功能描述
+        "Owner": "jinchanggang@huawei.com",
+        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",
+        "Description": "三方库"
     },
     {
-        "Name": "third_party",                   # 上游开源软件名全称
-        "License": "EPL-1.0",         # 上游开源软件中包含的许可证信息
-        "License File": "LICENSE"     # 许可证所在文件路径
+        "Name": "third_party",
+        "License": "EPL-1.0", 
+        "License File": "LICENSE",
         "Version Number": "99.0.4844.84",
-        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",   # 上游软件包发布地址
-        "Description": "三方库"           # 开源软件功能描述
+        "Owner": "jinchanggang@huawei.com",
+        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",
+        "Description": "三方库"
     },
     {
-        "Name": "third_party",                   # 上游开源软件名全称
-        "License": "Artistic-2.0",         # 上游开源软件中包含的许可证信息
-        "License File": "LICENSE"     # 许可证所在文件路径
+        "Name": "third_party",
+        "License": "Artistic-2.0", 
+        "License File": "LICENSE",
         "Version Number": "99.0.4844.84",
-        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",   # 上游软件包发布地址
-        "Description": "三方库"           # 开源软件功能描述
+        "Owner": "jinchanggang@huawei.com",
+        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",
+        "Description": "三方库"
     },
     {
-        "Name": "third_party",                   # 上游开源软件名全称
-        "License": "CDDL-1.1",         # 上游开源软件中包含的许可证信息
-        "License File": "LICENSE"     # 许可证所在文件路径
+        "Name": "third_party",
+        "License": "CDDL-1.1", 
+        "License File": "LICENSE",
         "Version Number": "99.0.4844.84",
-        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",   # 上游软件包发布地址
-        "Description": "三方库"           # 开源软件功能描述
+        "Owner": "jinchanggang@huawei.com",
+        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",
+        "Description": "三方库"
     },
     {
-        "Name": "third_party",                   # 上游开源软件名全称
-        "License": "SGI-B-2.0",         # 上游开源软件中包含的许可证信息
-        "License File": "LICENSE"     # 许可证所在文件路径
+        "Name": "third_party",
+        "License": "SGI-B-2.0", 
+        "License File": "LICENSE",
         "Version Number": "99.0.4844.84",
-        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",   # 上游软件包发布地址
-        "Description": "三方库"           # 开源软件功能描述
+        "Owner": "jinchanggang@huawei.com",
+        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",
+        "Description": "三方库"
     },
     {
-        "Name": "third_party",                   # 上游开源软件名全称
-        "License": "Zlib",         # 上游开源软件中包含的许可证信息
-        "License File": "LICENSE"     # 许可证所在文件路径
+        "Name": "third_party",
+        "License": "Zlib", 
+        "License File": "LICENSE",
         "Version Number": "99.0.4844.84",
-        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",   # 上游软件包发布地址
-        "Description": "三方库"           # 开源软件功能描述
+        "Owner": "jinchanggang@huawei.com",
+        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",
+        "Description": "三方库"
     },
     {
-        "Name": "third_party",                   # 上游开源软件名全称
-        "License": "Public Domain Disclaimer",         # 上游开源软件中包含的许可证信息
-        "License File": "LICENSE"     # 许可证所在文件路径
+        "Name": "third_party",
+        "License": "Public Domain Disclaimer", 
+        "License File": "LICENSE",
         "Version Number": "99.0.4844.84",
-        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",   # 上游软件包发布地址
-        "Description": "三方库"           # 开源软件功能描述
+        "Owner": "jinchanggang@huawei.com",
+        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",
+        "Description": "三方库"
     },
     {
-        "Name": "third_party",                   # 上游开源软件名全称
-        "License": "NiH libzip License",         # 上游开源软件中包含的许可证信息
-        "License File": "LICENSE"     # 许可证所在文件路径
+        "Name": "third_party",
+        "License": "NiH libzip License", 
+        "License File": "LICENSE",
         "Version Number": "99.0.4844.84",
-        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",   # 上游软件包发布地址
-        "Description": "三方库"           # 开源软件功能描述
+        "Owner": "jinchanggang@huawei.com",
+        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",
+        "Description": "三方库"
     },
     {
-        "Name": "third_party",                   # 上游开源软件名全称
-        "License": "HPND-sell-variant",         # 上游开源软件中包含的许可证信息
-        "License File": "LICENSE"     # 许可证所在文件路径
+        "Name": "third_party",
+        "License": "HPND-sell-variant", 
+        "License File": "LICENSE",
         "Version Number": "99.0.4844.84",
-        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",   # 上游软件包发布地址
-        "Description": "三方库"           # 开源软件功能描述
+        "Owner": "jinchanggang@huawei.com",
+        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",
+        "Description": "三方库"
     },
     {
-        "Name": "third_party",                   # 上游开源软件名全称
-        "License": "CPL-1.0",         # 上游开源软件中包含的许可证信息
-        "License File": "LICENSE"     # 许可证所在文件路径
+        "Name": "third_party",
+        "License": "CPL-1.0", 
+        "License File": "LICENSE",
         "Version Number": "99.0.4844.84",
-        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",   # 上游软件包发布地址
-        "Description": "三方库"           # 开源软件功能描述
+        "Owner": "jinchanggang@huawei.com",
+        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",
+        "Description": "三方库"
     },
     {
-        "Name": "third_party",                   # 上游开源软件名全称
-        "License": "FTL",         # 上游开源软件中包含的许可证信息
-        "License File": "LICENSE"     # 许可证所在文件路径
+        "Name": "third_party",
+        "License": "FTL", 
+        "License File": "LICENSE",
         "Version Number": "99.0.4844.84",
-        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",   # 上游软件包发布地址
-        "Description": "三方库"           # 开源软件功能描述
+        "Owner": "jinchanggang@huawei.com",
+        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",
+        "Description": "三方库"
     },
     {
-        "Name": "third_party",                   # 上游开源软件名全称
-        "License": "FFTPACK License 2004",         # 上游开源软件中包含的许可证信息
-        "License File": "LICENSE"     # 许可证所在文件路径
+        "Name": "third_party",
+        "License": "FFTPACK License 2004", 
+        "License File": "LICENSE",
         "Version Number": "99.0.4844.84",
-        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",   # 上游软件包发布地址
-        "Description": "三方库"           # 开源软件功能描述
+        "Owner": "jinchanggang@huawei.com",
+        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",
+        "Description": "三方库"
     },
     {
-        "Name": "third_party",                   # 上游开源软件名全称
-        "License": "XFree86 License 1.0",         # 上游开源软件中包含的许可证信息
-        "License File": "LICENSE"     # 许可证所在文件路径
+        "Name": "third_party",
+        "License": "XFree86 License 1.0", 
+        "License File": "LICENSE",
         "Version Number": "99.0.4844.84",
-        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",   # 上游软件包发布地址
-        "Description": "三方库"           # 开源软件功能描述
+        "Owner": "jinchanggang@huawei.com",
+        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",
+        "Description": "三方库"
     },
     {
-        "Name": "third_party",                   # 上游开源软件名全称
-        "License": "SunPro Attribution License",         # 上游开源软件中包含的许可证信息
-        "License File": "LICENSE"     # 许可证所在文件路径
+        "Name": "third_party",
+        "License": "SunPro Attribution License", 
+        "License File": "LICENSE",
         "Version Number": "99.0.4844.84",
-        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",   # 上游软件包发布地址
-        "Description": "三方库"           # 开源软件功能描述
+        "Owner": "jinchanggang@huawei.com",
+        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",
+        "Description": "三方库"
     },
     {
-        "Name": "third_party",                   # 上游开源软件名全称
-        "License": "Red Hat Attribution License",         # 上游开源软件中包含的许可证信息
-        "License File": "LICENSE"     # 许可证所在文件路径
+        "Name": "third_party",
+        "License": "Red Hat Attribution License", 
+        "License File": "LICENSE",
         "Version Number": "99.0.4844.84",
-        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",   # 上游软件包发布地址
-        "Description": "三方库"           # 开源软件功能描述
+        "Owner": "jinchanggang@huawei.com",
+        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",
+        "Description": "三方库"
     },
     {
-        "Name": "third_party",                   # 上游开源软件名全称
-        "License": "IJG",         # 上游开源软件中包含的许可证信息
-        "License File": "LICENSE"     # 许可证所在文件路径
+        "Name": "third_party",
+        "License": "IJG", 
+        "License File": "LICENSE",
         "Version Number": "99.0.4844.84",
-        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",   # 上游软件包发布地址
-        "Description": "三方库"           # 开源软件功能描述
+        "Owner": "jinchanggang@huawei.com",
+        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",
+        "Description": "三方库"
     },
     {
-        "Name": "third_party",                   # 上游开源软件名全称
-        "License": "Public Domain",         # 上游开源软件中包含的许可证信息
-        "License File": "LICENSE"     # 许可证所在文件路径
+        "Name": "third_party",
+        "License": "Public Domain", 
+        "License File": "LICENSE",
         "Version Number": "99.0.4844.84",
-        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",   # 上游软件包发布地址
-        "Description": "三方库"           # 开源软件功能描述
+        "Owner": "jinchanggang@huawei.com",
+        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",
+        "Description": "三方库"
     },
     {
-        "Name": "third_party",                   # 上游开源软件名全称
-        "License": "CC0-1.0",         # 上游开源软件中包含的许可证信息
-        "License File": "LICENSE"     # 许可证所在文件路径
+        "Name": "third_party",
+        "License": "CC0-1.0", 
+        "License File": "LICENSE",
         "Version Number": "99.0.4844.84",
-        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",   # 上游软件包发布地址
-        "Description": "三方库"           # 开源软件功能描述
+        "Owner": "jinchanggang@huawei.com",
+        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",
+        "Description": "三方库"
     },
     {
-        "Name": "third_party",                   # 上游开源软件名全称
-        "License": "BSD-2-Clause",         # 上游开源软件中包含的许可证信息
-        "License File": "LICENSE"     # 许可证所在文件路径
+        "Name": "third_party",
+        "License": "BSD-2-Clause", 
+        "License File": "LICENSE",
         "Version Number": "99.0.4844.84",
-        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",   # 上游软件包发布地址
-        "Description": "三方库"           # 开源软件功能描述
+        "Owner": "jinchanggang@huawei.com",
+        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",
+        "Description": "三方库"
     },
     {
-        "Name": "third_party",                   # 上游开源软件名全称
-        "License": "MIT Xfig Variant",         # 上游开源软件中包含的许可证信息
-        "License File": "LICENSE"     # 许可证所在文件路径
+        "Name": "third_party",
+        "License": "MIT Xfig Variant", 
+        "License File": "LICENSE",
         "Version Number": "99.0.4844.84",
-        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",   # 上游软件包发布地址
-        "Description": "三方库"           # 开源软件功能描述
+        "Owner": "jinchanggang@huawei.com",
+        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",
+        "Description": "三方库"
     },
     {
-        "Name": "third_party",                   # 上游开源软件名全称
-        "License": "MIT Veillard Variant",         # 上游开源软件中包含的许可证信息
-        "License File": "LICENSE"     # 许可证所在文件路径
+        "Name": "third_party",
+        "License": "MIT Veillard Variant", 
+        "License File": "LICENSE",
         "Version Number": "99.0.4844.84",
-        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",   # 上游软件包发布地址
-        "Description": "三方库"           # 开源软件功能描述
+        "Owner": "jinchanggang@huawei.com",
+        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",
+        "Description": "三方库"
     },
     {
-        "Name": "third_party",                   # 上游开源软件名全称
-        "License": "ISC",         # 上游开源软件中包含的许可证信息
-        "License File": "LICENSE"     # 许可证所在文件路径
+        "Name": "third_party",
+        "License": "ISC", 
+        "License File": "LICENSE",
         "Version Number": "99.0.4844.84",
-        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",   # 上游软件包发布地址
-        "Description": "三方库"           # 开源软件功能描述
+        "Owner": "jinchanggang@huawei.com",
+        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",
+        "Description": "三方库"
     },
     {
-        "Name": "third_party",                   # 上游开源软件名全称
-        "License": "BSD-Source-Code",         # 上游开源软件中包含的许可证信息
-        "License File": "LICENSE"     # 许可证所在文件路径
+        "Name": "third_party",
+        "License": "BSD-Source-Code", 
+        "License File": "LICENSE",
         "Version Number": "99.0.4844.84",
-        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",   # 上游软件包发布地址
-        "Description": "三方库"           # 开源软件功能描述
+        "Owner": "jinchanggang@huawei.com",
+        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",
+        "Description": "三方库"
     },
     {
-        "Name": "third_party",                   # 上游开源软件名全称
-        "License": "MIT-open-group",         # 上游开源软件中包含的许可证信息
-        "License File": "LICENSE"     # 许可证所在文件路径
+        "Name": "third_party",
+        "License": "MIT-open-group", 
+        "License File": "LICENSE",
         "Version Number": "99.0.4844.84",
-        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",   # 上游软件包发布地址
-        "Description": "三方库"           # 开源软件功能描述
+        "Owner": "jinchanggang@huawei.com",
+        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",
+        "Description": "三方库"
     },
     {
-        "Name": "third_party",                   # 上游开源软件名全称
-        "License": "Zlib",         # 上游开源软件中包含的许可证信息
-        "License File": "LICENSE"     # 许可证所在文件路径
+        "Name": "third_party",
+        "License": "Zlib", 
+        "License File": "LICENSE",
         "Version Number": "99.0.4844.84",
-        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",   # 上游软件包发布地址
-        "Description": "三方库"           # 开源软件功能描述
+        "Owner": "jinchanggang@huawei.com",
+        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",
+        "Description": "三方库"
     },
     {
-        "Name": "third_party",                   # 上游开源软件名全称
-        "License": "BSL-1.0",         # 上游开源软件中包含的许可证信息
-        "License File": "LICENSE"     # 许可证所在文件路径
+        "Name": "third_party",
+        "License": "BSL-1.0", 
+        "License File": "LICENSE",
         "Version Number": "99.0.4844.84",
-        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",   # 上游软件包发布地址
-        "Description": "三方库"           # 开源软件功能描述
+        "Owner": "jinchanggang@huawei.com",
+        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",
+        "Description": "三方库"
     },
     {
-        "Name": "third_party",                   # 上游开源软件名全称
-        "License": "XFree86 License 1.0",         # 上游开源软件中包含的许可证信息
-        "License File": "LICENSE"     # 许可证所在文件路径
+        "Name": "third_party",
+        "License": "XFree86 License 1.0", 
+        "License File": "LICENSE",
         "Version Number": "99.0.4844.84",
-        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",   # 上游软件包发布地址
-        "Description": "三方库"           # 开源软件功能描述
+        "Owner": "jinchanggang@huawei.com",
+        "Upstream URL": "https://chromium.googlesource.com/chromium@99.0.4844.84",
+        "Description": "三方库"
     }
 ]
