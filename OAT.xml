@@ -87,7 +87,14 @@ used to filter file path.
                 <policyitem type="compatibility" name="BSL-1.0" path="decklink/mac/include/.*" desc="经法务确认为宽松型许可证" />
                 <policyitem type="compatibility" name="BSL-1.0" path="rust/ryu/v1/crate/.*" desc="经法务确认为宽松型许可证" />
                 <policyitem type="compatibility" name="BSL-1.0" path="decklink/LICENSE" desc="经法务确认为宽松型许可证" />
-                <policyitem type="compatibility" name="GPL-2.0+" path=".*" desc="经法务确认,涉及文件在render进程进行了隔离" />
+                <policyitem type="compatibility" name="GPL-2.0+" path="lcov/.*" desc="经法务确认,涉及文件在render进程进行了隔离" />
+                <policyitem type="compatibility" name="GPL-2.0+" path="devscripts/.*" desc="经法务确认,涉及文件在render进程进行了隔离" />
+                <policyitem type="compatibility" name="GPL-2.0+" path="dpkg-shlibdeps/dpkg-shlibdeps.pl" desc="经法务确认,涉及文件在render进程进行了隔离" />
+                <policyitem type="compatibility" name="GPL-2.0+" path="proguard/LICENSE" desc="经法务确认,涉及文件在render进程进行了隔离" />
+                <policyitem type="compatibility" name="GPL-2.0+" path="test_fonts/LICENSE" desc="经法务确认,涉及文件在render进程进行了隔离" />
+                <policyitem type="compatibility" name="GPL-2.0+" path="freetype-testing/LICENSE" desc="经法务确认,涉及文件在render进程进行了隔离" />
+                <policyitem type="compatibility" name="GPL-2.0+" path="dpkg-shlibdeps/LICENSE" desc="经法务确认,涉及文件在render进程进行了隔离" />
+                <policyitem type="compatibility" name="GPL-2.0+" path="speech-dispatcher/COPYING" desc="经法务确认,涉及文件在render进程进行了隔离" />
                 <policyitem type="compatibility" name="CPL-1.0" path="wtl/include/.*" desc="经法务确认,涉及文件在render进程进行了隔离" />
                 <policyitem type="compatibility" name="CPL-1.0" path="junit/LICENSE" desc="经法务确认,涉及文件在render进程进行了隔离" />
                 <policyitem type="compatibility" name="Libpng" path="libpng/.*" desc="经法务确认为宽松型许可证" />
