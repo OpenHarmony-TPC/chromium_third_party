@@ -1148,8 +1148,10 @@ void ChromeClientImpl::DidChangeValueInTextField(
     if (auto* rc = doc.GetResourceCoordinator()) {
       rc->SetHadFormInteraction();
 #if BUILDFLAG(IS_OHOS)
-      uint64_t form_id = element.Form()->UniqueRendererFormId();
-      rc->OnFormEditingStateChanged(form_id, false);
+      if (element.Form()) {
+        uint64_t form_id = element.Form()->UniqueRendererFormId();
+        rc->OnFormEditingStateChanged(form_id, false);
+      }
 #endif
     }
   }
@@ -1186,8 +1188,10 @@ void ChromeClientImpl::DidChangeSelectionInSelectControl(
 #if BUILDFLAG(IS_OHOS)
   if (auto* rc = doc.GetResourceCoordinator()) {
       rc->SetHadFormInteraction();
-      uint64_t form_id = element.Form()->UniqueRendererFormId();
-      rc->OnFormEditingStateChanged(form_id, false);
+      if (element.Form()) {
+        uint64_t form_id = element.Form()->UniqueRendererFormId();
+        rc->OnFormEditingStateChanged(form_id, false);
+      }
   }
 #endif
 }
