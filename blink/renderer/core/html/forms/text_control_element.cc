@@ -291,8 +291,10 @@ void TextControlElement::DispatchFormControlChangeEvent() {
     DispatchChangeEvent();
 #if BUILDFLAG(IS_OHOS)
     if (auto* rc = GetDocument().GetResourceCoordinator()) {
-      uint64_t form_id = Form()->UniqueRendererFormId();
-      rc->OnFormEditingStateChanged(form_id, false);
+      if (Form()) {
+        uint64_t form_id = Form()->UniqueRendererFormId();
+        rc->OnFormEditingStateChanged(form_id, false);
+      }
     }
 #endif
   } else {
