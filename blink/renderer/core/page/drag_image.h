@@ -40,6 +40,10 @@
 #include "ui/gfx/geometry/size.h"
 #include "ui/gfx/geometry/size_f.h"
 
+#if BUILDFLAG(IS_OHOS)
+#include "ui/gfx/geometry/point_f.h"
+#endif
+
 namespace blink {
 
 class FontDescription;
@@ -83,6 +87,28 @@ class CORE_EXPORT DragImage {
   static gfx::Vector2dF HwClampedImageScale(const gfx::Size&,
                                             const gfx::Size&,
                                             const float target_scale);
+
+  static std::unique_ptr<DragImage> CreateClippedByVisualViewport(
+      Image* img,
+      const gfx::Rect& clip_rect,
+      RespectImageOrientationEnum = kRespectImageOrientation,
+      float device_scale_factor = 1,
+      InterpolationQuality = kInterpolationDefault,
+      float opacity = 1,
+      gfx::Vector2dF image_scale = gfx::Vector2dF(1, 1));
+
+  bool IsFromClippedMethod() const { return is_from_clipped_method_; }
+  void SetFromClippedMethod(bool from_clipped_method) {
+    is_from_clipped_method_ = from_clipped_method;
+  }
+  gfx::PointF GetDragImageOriginPosition() const {
+    return image_origin_position_;
+  }
+  void SetDragImageOriginPosition(const gfx::PointF& position) {
+    image_origin_position_ = position;
+  }
+  bool is_from_clipped_method_ = false;
+  gfx::PointF image_origin_position_;
 #endif
 
  private:

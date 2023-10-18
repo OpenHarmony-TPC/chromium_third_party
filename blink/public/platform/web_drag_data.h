@@ -41,6 +41,10 @@
 #include "third_party/blink/public/platform/web_url.h"
 #include "third_party/blink/public/platform/web_vector.h"
 
+#if BUILDFLAG(IS_OHOS)
+#include "ui/gfx/geometry/point_f.h"
+#endif
+
 namespace blink {
 template <typename T>
 class WebVector;
@@ -122,6 +126,23 @@ class WebDragData {
     // The ID is an opaque string, given by and validated by chromium port.
     filesystem_id_ = filesystem_id;
   }
+
+#if BUILDFLAG(IS_OHOS)
+  bool IsSupportClippedDragImage() const { return support_clipped_drag_image_; }
+
+  void SetSupportClippedDragImage(bool support) {
+    support_clipped_drag_image_ = support;
+  }
+
+  gfx::PointF GetDragImageOrigin() const { return drag_image_origin_; }
+
+  void SetDragImageOrigin(const gfx::PointF& point) {
+    drag_image_origin_ = point;
+  }
+
+  bool support_clipped_drag_image_ = false;
+  gfx::PointF drag_image_origin_;
+#endif
 
   network::mojom::ReferrerPolicy ReferrerPolicy() const {
     return referrer_policy_;

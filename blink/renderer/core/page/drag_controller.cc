@@ -97,6 +97,9 @@
 #ifdef BUILDFLAG(IS_OHOS)
 #include "third_party/blink/renderer/core/css/style_sheet_contents.h"
 #include "third_party/blink/renderer/core/css/parser/css_parser_context.h"
+#include "third_party/blink/renderer/platform/graphics/compositing/paint_artifact_compositor.h"
+#include "third_party/blink/renderer/platform/runtime_enabled_features.h"
+#include "ui/gfx/geometry/point_f.h"
 #endif
 
 #if BUILDFLAG(IS_WIN)
@@ -1097,6 +1100,104 @@ static bool CanDragImage(const Element& element) {
   return true;
 }
 
+#if BUILDFLAG(IS_OHOS)
+static std::unique_ptr<DragImage> ClippedDragImageForImage(
+    const Element& element,
+    const gfx::Rect& image_rect,
+    const gfx::Rect& clipped_image_rect,
+    float device_scale_factor,
+    const gfx::Size& image_element_size_in_pixels) {
+  auto* layout_image = To<LayoutImage>(element.GetLayoutObject());
+  const LayoutImageResource& image_resource = *layout_image->ImageResource();
+  scoped_refptr<Image> image =
+      image_resource.GetImage(image_element_size_in_pixels);
+  RespectImageOrientationEnum respect_orientation =
+      image_resource.ImageOrientation();
+
+  gfx::Size image_size = image->Size(respect_orientation);
+  if (image_size.IsEmpty()) {
+    LOG(INFO) << "DragDrop Try to get clipped drag image failed, the size is empty";
+    return nullptr;
+  }
+
+  InterpolationQuality interpolation_quality = kInterpolationDefault;
+  if (layout_image->StyleRef().ImageRendering() == EImageRendering::kPixelated)
+    interpolation_quality = kInterpolationNone;
+
+  gfx::Vector2dF image_scale = DragImage::ClampedImageScale(
+      image_size, image_element_size_in_pixels, image_element_size_in_pixels);
+
+  gfx::SizeF image_scale_from_view(
+      (float)image_rect.width() / image_size.width(),
+      (float)image_rect.height() / image_size.height());
+
+  gfx::Vector2d clip_origin_offset =
+      clipped_image_rect.origin() - image_rect.origin();
+  gfx::Rect clip_rect =
+      gfx::Rect(clip_origin_offset.x() / image_scale_from_view.width(),
+                clip_origin_offset.y() / image_scale_from_view.height(),
+                clipped_image_rect.width() / image_scale_from_view.width(),
+                clipped_image_rect.height() / image_scale_from_view.height());
+
+  return DragImage::CreateClippedByVisualViewport(
+      image.get(), clip_rect, respect_orientation, device_scale_factor,
+      interpolation_quality, kDragImageAlpha, image_scale);
+}
+
+static std::unique_ptr<DragImage> CreateClippedDragImageForImage(
+    LocalFrame* src,
+    const Element& element,
+    const gfx::Rect& image_rect) {
+  if (!src || !src->View() || !src->GetPage()) {
+    return nullptr;
+  }
+
+  gfx::RectF image_rect_in_root_frame(
+      src->View()->ConvertToRootFrame(image_rect));
+  gfx::RectF viewport_in_root_frame =
+      src->GetPage()->GetVisualViewport().VisibleRect();
+  gfx::RectF clipped_image_rect_in_root_frame =
+      IntersectRects(viewport_in_root_frame, image_rect_in_root_frame);
+  gfx::Rect clipped_image_rect = src->View()->ConvertFromRootFrame(
+      ToEnclosedRect(clipped_image_rect_in_root_frame));
+
+  gfx::Size image_size_in_pixels = image_rect.size();
+  image_size_in_pixels = ScaleToFlooredSize(
+      image_size_in_pixels, src->GetPage()->DeviceScaleFactorDeprecated() *
+                                src->GetPage()->GetVisualViewport().Scale());
+
+  float screen_device_scale_factor =
+      src->GetChromeClient().GetScreenInfo(*src).device_scale_factor;
+
+  std::unique_ptr<DragImage> drag_image = ClippedDragImageForImage(
+      element, image_rect, clipped_image_rect, screen_device_scale_factor,
+      image_size_in_pixels);
+  if (drag_image) {
+    // When previewing a drag image with position information,
+    // the drag image want to overlap with the original image in web page,
+    // except the drag image customized by H5.
+    clipped_image_rect_in_root_frame.Offset(
+        -src->GetPage()->GetVisualViewport().GetScrollOffset());
+    clipped_image_rect_in_root_frame.Scale(
+        src->GetPage()->GetVisualViewport().Scale());
+    if (auto* paint_artifact_compositor =
+            src->View()->GetPaintArtifactCompositor()) {
+      if (auto* root_cclayer = paint_artifact_compositor->RootLayer()) {
+        gfx::RectF clipped_image_rectf =
+            gfx::RectF(clipped_image_rect_in_root_frame);
+        root_cclayer->ScreenSpaceTransform().TransformRect(
+            &clipped_image_rectf);
+        drag_image->SetFromClippedMethod(true);
+        drag_image->SetDragImageOriginPosition(
+            gfx::PointF(clipped_image_rectf.x(), clipped_image_rectf.y()));
+      }
+    }
+  }
+
+  return drag_image;
+}
+#endif
+
 static std::unique_ptr<DragImage> DragImageForImage(
     const Element& element,
     float device_scale_factor,
@@ -1110,7 +1211,7 @@ static std::unique_ptr<DragImage> DragImageForImage(
 
   gfx::Size image_size = image->Size(respect_orientation);
   if (image_size.Area64() > kMaxOriginalImageArea) {
-    LOG(WARNING) << "drag origin image is too big, need to scale";
+    LOG(WARNING) << "DragDrop drag origin image is too big, need to scale";
   }
 
   InterpolationQuality interpolation_quality = kInterpolationDefault;
@@ -1290,6 +1391,24 @@ bool DragController::StartDrag(LocalFrame* src,
 
       float screen_device_scale_factor =
           src->GetChromeClient().GetScreenInfo(*src).device_scale_factor;
+
+
+#if BUILDFLAG(IS_OHOS)
+      if (src->GetSettings()) {
+        // create clipped drag image
+        LOG(INFO) << "DragDrop image drag create clipped drag image";
+        drag_image = CreateClippedDragImageForImage(src, *element, image_rect);
+      } else {
+        // Pass the selected image size in DIP becasue dragImageForImage clips
+        // the image in DIP.  The coordinates of the locations are in Viewport
+        // coordinates, and they're converted in the Blink client.
+        // TODO(oshima): Currently, the dragged image on high DPI is scaled and
+        // can be blurry because of this.  Consider to clip in the screen
+        // coordinates to use high resolution image on high DPI screens.
+        drag_image = DragImageForImage(*element, screen_device_scale_factor,
+                                       image_size_in_pixels);
+      }
+#else
       // Pass the selected image size in DIP becasue dragImageForImage clips the
       // image in DIP.  The coordinates of the locations are in Viewport
       // coordinates, and they're converted in the Blink client.
@@ -1298,6 +1417,8 @@ bool DragController::StartDrag(LocalFrame* src,
       // coordinates to use high resolution image on high DPI screens.
       drag_image = DragImageForImage(*element, screen_device_scale_factor,
                                      image_size_in_pixels);
+#endif
+
       drag_location =
           DragLocationForImage(drag_image.get(), drag_origin,
                                image_rect.origin(), image_size_in_pixels);
@@ -1370,6 +1491,16 @@ void DragController::DoSystemDrag(DragImage* image,
       adjusted_event_pos - adjusted_drag_location.OffsetFromOrigin();
   WebDragData drag_data = data_transfer->GetDataObject()->ToWebDragData();
   drag_data.SetReferrerPolicy(drag_initiator_->GetReferrerPolicy());
+
+
+#if BUILDFLAG(IS_OHOS)
+  if (image && image->IsFromClippedMethod()) {
+    drag_data.SetSupportClippedDragImage(true);
+    drag_data.SetDragImageOrigin(image->GetDragImageOriginPosition());
+  }
+#endif
+
+
   DragOperationsMask drag_operation_mask = data_transfer->SourceOperation();
   SkBitmap drag_image;
 

@@ -134,6 +134,46 @@ static Font DeriveDragLabelFont(int size,
   return result;
 }
 
+#if BUILDFLAG(IS_OHOS)
+std::unique_ptr<DragImage> DragImage::CreateClippedByVisualViewport(
+    Image* image,
+    const gfx::Rect& clip_rect,
+    RespectImageOrientationEnum should_respect_image_orientation,
+    float device_scale_factor,
+    InterpolationQuality interpolation_quality,
+    float opacity,
+    gfx::Vector2dF image_scale) {
+  if (!image) {
+    LOG(WARNING) << "DragDrop Invalid image input";
+    return nullptr;
+  }
+
+  PaintImage paint_image = image->PaintImageForCurrentFrame();
+  if (!paint_image) {
+    LOG(WARNING) << "DragDrop Invalid paint image";
+    return nullptr;
+  }
+
+  ImageOrientation orientation;
+  auto* bitmap_image = DynamicTo<BitmapImage>(image);
+  if (should_respect_image_orientation == kRespectImageOrientation &&
+      bitmap_image)
+    orientation = bitmap_image->CurrentFrameOrientation();
+
+  SkBitmap bm;
+  paint_image = Image::ClipResizeAndOrientImage(paint_image, orientation,
+                                                clip_rect, image_scale, opacity,
+                                                interpolation_quality);
+  if (!paint_image || !paint_image.GetSwSkImage()->asLegacyBitmap(&bm)) {
+    LOG(WARNING) << "DragDrop Invalid paint image or bitmap after clip";
+    return nullptr;
+  }
+
+  return base::WrapUnique(
+      new DragImage(bm, device_scale_factor, interpolation_quality));
+}
+#endif
+
 std::unique_ptr<DragImage> DragImage::Create(const KURL& url,
                                              const String& in_label,
                                              const FontDescription& system_font,

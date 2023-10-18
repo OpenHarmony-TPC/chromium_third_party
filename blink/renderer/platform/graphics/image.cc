@@ -162,6 +162,81 @@ PaintImage Image::ResizeAndOrientImage(
       .TakePaintImage();
 }
 
+
+
+#if BUILDFLAG(IS_OHOS)
+PaintImage Image::ClipResizeAndOrientImage(
+    const PaintImage& image,
+    ImageOrientation orientation,
+    const gfx::Rect& clip_rect,
+    gfx::Vector2dF image_scale,
+    float opacity,
+    InterpolationQuality interpolation_quality) {
+  gfx::Size size(image.width(), image.height());
+  size = gfx::ScaleToFlooredSize(size, image_scale.x(), image_scale.y());
+
+  gfx::Size clip_size(clip_rect.width(), clip_rect.height());
+  clip_size =
+      gfx::ScaleToFlooredSize(clip_size, image_scale.x(), image_scale.y());
+
+  AffineTransform transform;
+  if (orientation != ImageOrientationEnum::kDefault) {
+    if (orientation.UsesWidthAsHeight())
+      size.Transpose();
+    transform *= orientation.TransformFromDefault(gfx::SizeF(size));
+  }
+  transform.ScaleNonUniform(image_scale.x(), image_scale.y());
+
+  if (size.IsEmpty()) {
+    LOG(INFO) << "DragDrop Clip resize and orient image but the size is empty.";
+    return PaintImage();
+  }
+
+  if (transform.IsIdentity() && opacity == 1 &&
+      clip_rect.width() == image.width() &&
+      clip_rect.height() == image.height()) {
+    LOG(INFO) << "DragDrop Nothing to adjust drag image, just use the original";
+    DCHECK_EQ(image.width(), size.width());
+    DCHECK_EQ(image.height(), size.height());
+    return image;
+  }
+
+  const SkImageInfo info =
+      SkImageInfo::MakeN32(clip_size.width(), clip_size.height(),
+                           kPremul_SkAlphaType, SkColorSpace::MakeSRGB());
+  sk_sp<SkSurface> surface = SkSurface::MakeRaster(info);
+  if (!surface) {
+    LOG(WARNING) << "DragDrop Make a SkImageInfo with w=" << clip_size.width()
+                 << ", h=" << clip_size.height() << " failed.";
+    return PaintImage();
+  }
+
+  SkPaint paint;
+  DCHECK_GE(opacity, 0);
+  DCHECK_LE(opacity, 1);
+  paint.setAlpha(opacity * 255);
+  SkSamplingOptions sampling;
+  if (interpolation_quality != kInterpolationNone)
+    sampling = SkSamplingOptions(SkCubicResampler::CatmullRom());
+
+  SkCanvas* canvas = surface->getCanvas();
+  canvas->concat(AffineTransformToSkMatrix(transform));
+
+  SkRect dst_rect = SkRect::MakeIWH(clip_rect.width(), clip_rect.height());
+  canvas->drawImageRect(image.GetSwSkImage(), gfx::RectToSkRect(clip_rect),
+                        dst_rect, sampling, &paint,
+                        SkCanvas::kFast_SrcRectConstraint);
+
+  LOG(INFO) << "DragDrop Create a clipped drag image(" << clip_rect.ToString()
+            << ") from intrinsic(" << image.width() << "*" << image.height()
+            << ") to visual size(" << clip_size.width() << "*"
+            << clip_size.height() << "), opacity=" << opacity;
+  return PaintImageBuilder::WithProperties(std::move(image))
+      .set_image(surface->makeImageSnapshot(), PaintImage::GetNextContentId())
+      .TakePaintImage();
+}
+#endif
+
 Image::SizeAvailability Image::SetData(scoped_refptr<SharedBuffer> data,
                                        bool all_data_received) {
   encoded_image_data_ = std::move(data);
