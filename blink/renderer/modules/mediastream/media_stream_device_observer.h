@@ -106,6 +106,7 @@ class MODULES_EXPORT MediaStreamDeviceObserver
 
   using LabelStreamMap = HashMap<String, Stream>;
   LabelStreamMap label_stream_map_;
+  base::WeakPtrFactory<MediaStreamDeviceObserver> weak_factory_{this};
 };
 
 }  // namespace blink

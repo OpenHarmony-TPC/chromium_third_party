@@ -182,6 +182,12 @@ class PLATFORM_EXPORT InputHandlerProxy : public cc::InputHandlerClient,
       float max_page_scale_factor) override;
   void DeliverInputForBeginFrame(const viz::BeginFrameArgs& args) override;
   void DeliverInputForHighLatencyMode() override;
+#if BUILDFLAG(IS_OHOS)
+  void WillHandleScrollUpdateForInternalBeginFrame(const viz::BeginFrameArgs& args) override {
+    current_internal_begin_frame_args_ = args;
+    need_flush_scroll_update_gesture_ = true;
+  };
+#endif
 
   // SynchronousInputHandlerProxy implementation.
   void SetSynchronousInputHandler(
@@ -373,6 +379,12 @@ class PLATFORM_EXPORT InputHandlerProxy : public cc::InputHandlerClient,
 
   // Swipe to move cursor feature.
   std::unique_ptr<CursorControlHandler> cursor_control_handler_;
+
+#if BUILDFLAG(IS_OHOS)
+  // scrollupdate doing
+  bool need_flush_scroll_update_gesture_ = false;
+  viz::BeginFrameArgs current_internal_begin_frame_args_;
+#endif
 };
 
 }  // namespace blink

@@ -364,6 +364,11 @@ void InputHandlerProxy::HandleInputEventWithLatencyInfo(
     bool needs_animate_input = compositor_event_queue_->empty();
     compositor_event_queue_->Queue(std::move(event_with_callback),
                                    tick_clock_->NowTicks());
+#if BUILDFLAG(IS_OHOS)
+    if (need_flush_scroll_update_gesture_ && gesture_event.GetType() == WebGestureEvent::Type::kGestureScrollUpdate) {
+      DeliverInputForBeginFrame(current_internal_begin_frame_args_);
+    }
+#endif
     if (needs_animate_input)
       input_handler_->SetNeedsAnimateInput();
     return;
@@ -1063,7 +1068,12 @@ InputHandlerProxy::HandleGestureScrollUpdate(
   TRACE_EVENT2("input", "InputHandlerProxy::HandleGestureScrollUpdate", "dx",
                -gesture_event.data.scroll_update.delta_x, "dy",
                -gesture_event.data.scroll_update.delta_y);
-
+#if BUILDFLAG(IS_OHOS)
+  if (need_flush_scroll_update_gesture_) {
+    LOG(INFO)<<"InputHandlerProxy::HandleGestureScrollUpdate internalbeginframe scrollupdate";
+    need_flush_scroll_update_gesture_ = false;
+  }
+#endif
   if (scroll_sequence_ignored_) {
     TRACE_EVENT_INSTANT0("input", "Scroll Sequence Ignored",
                          TRACE_EVENT_SCOPE_THREAD);
