@@ -89,6 +89,16 @@ class PLATFORM_EXPORT Image : public ThreadSafeRefCounted<Image> {
       float opacity = 1.0,
       InterpolationQuality = kInterpolationNone);
 
+#if BUILDFLAG(IS_OHOS)
+  static PaintImage ClipResizeAndOrientImage(
+      const PaintImage&,
+      ImageOrientation,
+      const gfx::Rect&,
+      gfx::Vector2dF image_scale = gfx::Vector2dF(1, 1),
+      float opacity = 1.0,
+      InterpolationQuality interpolation_quality = kInterpolationNone);
+#endif
+
   virtual bool IsSVGImage() const { return false; }
   virtual bool IsSVGImageForContainer() const { return false; }
   virtual bool IsBitmapImage() const { return false; }
