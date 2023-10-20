@@ -63,289 +63,343 @@ used to filter file path.
         <licensefile>LICENSE</licensefile>
         <policylist>
             <policy name="projectPolicy" desc="">
-
-                <policyitem type="compatibility" name="APSL-2.0" path=".*" desc="" />
-                <policyitem type="compatibility" name="LGPL-2.0+" path=".*" desc="" />
-                <policyitem type="compatibility" name="APSL-1.0+" path=".*" desc="" />
-                <policyitem type="compatibility" name="MPL-1.1" path=".*" desc="" />
-                <policyitem type="compatibility" name="Libpng" path=".*" desc="" />
-                <policyitem type="compatibility" name="LGPLStyleLicense" path=".*" desc="" />
-                <policyitem type="compatibility" name="BSD-3-Clause" path=".*" desc="" />
-                <policyitem type="compatibility" name="LGPL-2.1+" path=".*" desc="" />
-                <policyitem type="compatibility" name="OpenSSL" path=".*" desc="" />
-                <policyitem type="compatibility" name="GPLStyleLicense" path=".*" desc="" />
-                <policyitem type="compatibility" name="GPL-2.0-or-later" path=".*" desc="" />
-                <policyitem type="compatibility" name="BSL-1.0" path=".*" desc="" />
-                <policyitem type="compatibility" name="Unicode-TOU" path=".*" desc="" />
-                <policyitem type="compatibility" name="GPLStyleLicense-with-mif-exception" path=".*" desc="" />
-                <policyitem type="compatibility" name="GPL-2.0+" path=".*" desc="" />
-                <policyitem type="compatibility" name="SPDX:Unicode-DFS-2016" path=".*" desc="" />
-                <policyitem type="compatibility" name="FSFULLR" path=".*" desc="" />
-                <policyitem type="compatibility" name="MPL-2.0" path=".*" desc="" />
-                <policyitem type="compatibility" name="MIT" path=".*" desc="" />
-                <policyitem type="compatibility" name="zlib-acknowledgement" path=".*" desc="" />
-                <policyitem type="compatibility" name="BSDStyleLicense" path=".*" desc="" />
-                <policyitem type="compatibility" name="CDDL-1.0" path=".*" desc="" />
-                <policyitem type="compatibility" name="OFL-1.1-no-RFN" path=".*" desc="" />
-                <policyitem type="compatibility" name="LGPL-3.0+" path=".*" desc="" />
-                <policyitem type="compatibility" name="GPL-3.0+" path=".*" desc="" />
-                <policyitem type="compatibility" name="EPL-1.0" path=".*" desc="" />
-                <policyitem type="compatibility" name="Artistic-2.0" path=".*" desc="" />
-                <policyitem type="compatibility" name="CDDL-1.1" path=".*" desc="" />
-                <policyitem type="compatibility" name="CDDL-1.0" path=".*" desc="" />
-                <policyitem type="compatibility" name="SGI-B-2.0" path=".*" desc="" />
-                <policyitem type="compatibility" name="Zlib" path=".*" desc="" />
-                <policyitem type="compatibility" name="Public Domain Disclaimer" path=".*" desc="" />
-                <policyitem type="compatibility" name="NiH libzip License" path=".*" desc="" />
-                <policyitem type="compatibility" name="HPND-sell-variant" path=".*" desc="" />
-                <policyitem type="compatibility" name="CPL-1.0" path=".*" desc="" />
-                <policyitem type="compatibility" name="FTL" path=".*" desc="" />
-                <policyitem type="compatibility" name="FFTPACK License 2004" path=".*" desc="" />
-                <policyitem type="compatibility" name="XFree86 License 1.0" path=".*" desc="" />
-                <policyitem type="compatibility" name="SunPro Attribution License" path=".*" desc="" />
-                <policyitem type="compatibility" name="Red Hat Attribution License" path=".*" desc="" />
-                <policyitem type="compatibility" name="IJG" path=".*" desc="" />
-                <policyitem type="compatibility" name="Public Domain" path=".*" desc="" />
-                <policyitem type="compatibility" name="CC0-1.0" path=".*" desc="" />
+                
+                <policyitem type="compatibility" name="LGPL-2.0+" path="blink/renderer/.*" desc="经法务确认,涉及文件在render进程进行了隔离" />
+                <policyitem type="compatibility" name="Red Hat Attribution License" path="android_rust_toolchain/toolchain/lib/rustlib/src/rust/vendor/compiler_builtins/libm/src/math/.*" desc="经法务确认为宽松型许可证" />
+                <policyitem type="compatibility" name="Red Hat Attribution License" path="fdlibm/.*" desc="经法务确认为宽松型许可证" />
+                <policyitem type="compatibility" name="GPLStyleLicense" path=".*" desc="经法务确认,涉及文件在render进程进行了隔离" />
+                <policyitem type="compatibility" name="LGPLStyleLicense" path=".*" desc="经法务确认,涉及文件在render进程进行了隔离" />
+                <policyitem type="compatibility" name="OpenSSL" path="node/linux/node-linux-x64/include/node/openssl/.*" desc="" />
+                <policyitem type="compatibility" name="OpenSSL" path="apache-win32/LICENSE.txt" desc="经法务确认为宽松型许可证" />
+                <policyitem type="compatibility" name="MPL-1.1" path="mozilla/.*" desc="经法务确认,涉及文件在render进程进行了隔离" />
+                <policyitem type="compatibility" name="MPL-1.1" path="hunspell/.*" desc="经法务确认,涉及文件在render进程进行了隔离" />
+                <policyitem type="compatibility" name="MPL-1.1" path="isimpledom/.*" desc="经法务确认,涉及文件在render进程进行了隔离" />
+                <policyitem type="compatibility" name="MPL-1.1" path="blink/.*" desc="经法务确认,涉及文件在render进程进行了隔离" />
+                <policyitem type="compatibility" name="MPL-1.1" path="hyphenation-patterns/src/hu/NOTICE" desc="经法务确认,涉及文件在render进程进行了隔离" />
+                <policyitem type="compatibility" name="MPL-2.0" path=".*" desc="经法务确认,涉及文件在render进程进行了隔离" />
+                <policyitem type="compatibility" name="LGPL-2.1+" path="blink/.*" desc="经法务确认,涉及文件在render进程进行了隔离" />
+                <policyitem type="compatibility" name="LGPL-2.1+" path="libusb/.*" desc="经法务确认,涉及文件在render进程进行了隔离" />
+                <policyitem type="compatibility" name="LGPL-2.1+" path="hyphenation-patterns/.*" desc="经法务确认为宽松型许可证" />
+                <policyitem type="compatibility" name="LGPL-2.1+" path="android_rust_toolchain/toolchain/share/doc/rust/LICENSE-THIRD-PARTY" desc="经法务确认,涉及文件在render进程进行了隔离" />
+                <policyitem type="compatibility" name="LGPL-2.1+" path="libudev/.*" desc="经法务确认,涉及文件在render进程进行了隔离" />
+                <policyitem type="compatibility" name="LGPL-2.1+" path="libsecret/LICENSE" desc="经法务确认,涉及文件在render进程进行了隔离" />
+                <policyitem type="compatibility" name="LGPL-2.1-only" path="protobuf/Protobuf.podspec" desc="经法务确认,涉及文件在render进程进行了隔离" />
+                <policyitem type="compatibility" name="BSL-1.0" path="decklink/mac/include/.*" desc="经法务确认为宽松型许可证" />
+                <policyitem type="compatibility" name="BSL-1.0" path="rust/ryu/v1/crate/.*" desc="经法务确认为宽松型许可证" />
+                <policyitem type="compatibility" name="BSL-1.0" path="decklink/LICENSE" desc="经法务确认为宽松型许可证" />
+                <policyitem type="compatibility" name="GPL-2.0+" path="lcov/.*" desc="经法务确认,涉及文件在render进程进行了隔离" />
+                <policyitem type="compatibility" name="GPL-2.0+" path="devscripts/.*" desc="经法务确认,涉及文件在render进程进行了隔离" />
+                <policyitem type="compatibility" name="GPL-2.0+" path="dpkg-shlibdeps/dpkg-shlibdeps.pl" desc="经法务确认,涉及文件在render进程进行了隔离" />
+                <policyitem type="compatibility" name="GPL-2.0+" path="proguard/LICENSE" desc="经法务确认,涉及文件在render进程进行了隔离" />
+                <policyitem type="compatibility" name="GPL-2.0+" path="test_fonts/LICENSE" desc="经法务确认,涉及文件在render进程进行了隔离" />
+                <policyitem type="compatibility" name="GPL-2.0+" path="freetype-testing/LICENSE" desc="经法务确认,涉及文件在render进程进行了隔离" />
+                <policyitem type="compatibility" name="GPL-2.0+" path="dpkg-shlibdeps/LICENSE" desc="经法务确认,涉及文件在render进程进行了隔离" />
+                <policyitem type="compatibility" name="GPL-2.0+" path="speech-dispatcher/COPYING" desc="经法务确认,涉及文件在render进程进行了隔离" />
+                <policyitem type="compatibility" name="CPL-1.0" path="wtl/include/.*" desc="经法务确认,涉及文件在render进程进行了隔离" />
+                <policyitem type="compatibility" name="CPL-1.0" path="junit/LICENSE" desc="经法务确认,涉及文件在render进程进行了隔离" />
+                <policyitem type="compatibility" name="Libpng" path="libpng/.*" desc="经法务确认为宽松型许可证" />
+                <policyitem type="compatibility" name="Libpng" path="libpng/LICENSE" desc="经法务确认为宽松型许可证" />
+                <policyitem type="compatibility" name="APSL-2.0" path="crashpad/crashpad/third_party/xnu/osfmk/mach/.*" desc="经法务确认为宽松型许可证" />
+                <policyitem type="compatibility" name="APSL-2.0" path="apple_apsl/.*" desc="经法务确认为宽松型许可证" />
+                <policyitem type="compatibility" name="APSL-2.0" path="crashpad/crashpad/third_party/xnu/EXTERNAL_HEADERS/mach-o/loader.h" desc="经法务确认为宽松型许可证" />
+                <policyitem type="compatibility" name="APSL-2.0" path="mig/LICENSE" desc="经法务确认为宽松型许可证" />
+                <policyitem type="compatibility" name="APSL-2.0" path="crashpad/crashpad/third_party/xnu/README.crashpad" desc="经法务确认为宽松型许可证" />
+                <policyitem type="compatibility" name="Zlib" path="zlib/.*" desc="经法务确认为宽松型许可证" />
+                <policyitem type="compatibility" name="Zlib" path="node/linux/node-linux-x64/include/node/zconf.h" desc="经法务确认为宽松型许可证" />
+                <policyitem type="compatibility" name="Zlib" path="node/linux/node-linux-x64/include/node/zconf.h" desc="经法务确认为宽松型许可证" />
+                <policyitem type="compatibility" name="Zlib" path="zlib/contrib/minizip/mztools.c" desc="经法务确认为宽松型许可证" />
+                <policyitem type="compatibility" name="Zlib" path="crashpad/crashpad/third_party/zlib/README.crashpad" desc="经法务确认为宽松型许可证" />
+                <policyitem type="compatibility" name="FTL" path="zlib/LICENSE" desc="经法务确认为宽松型许可证" />
+                <policyitem type="compatibility" name="Artistic-2.0" path="node/.*" desc="经法务确认为宽松型许可证" />
+                <policyitem type="compatibility" name="FFTPACK License 2004" path="pffft/.*" desc="经法务确认为宽松型许可证" />
+                <policyitem type="compatibility" name="FTL" path="freetype/include/freetype-custom/freetype/config/ftmodule.h" desc="经法务确认为宽松型许可证" />
+                <policyitem type="compatibility" name="FTL" path="freetype/include/freetype-custom/freetype/config/ftmodule.h" desc="经法务确认为宽松型许可证" />
+                <policyitem type="compatibility" name="FTL" path="freetype/include/freetype-custom/freetype/config/ftoption.h" desc="经法务确认为宽松型许可证" />
+                <policyitem type="compatibility" name="FTL" path="freetype/include/freetype-custom/freetype/config/public-macros.h" desc="经法务确认为宽松型许可证" />
+                <policyitem type="compatibility" name="zlib-acknowledgement" path="zlib/.*h" desc="经法务确认为宽松型许可证" />
+                <policyitem type="compatibility" name="zlib-acknowledgement" path="node/linux/node-linux-x64/include/node/zlib.h" desc="经法务确认为宽松型许可证" />
+                <policyitem type="compatibility" name="zlib-acknowledgement" path="zlib/LICENSE" desc="经法务确认为宽松型许可证" />
+                <policyitem type="compatibility" name="zlib-acknowledgement" path="zlib/contrib/minizip/mztools.c" desc="经法务确认为宽松型许可证" />
+                <policyitem type="compatibility" name="SGI-B-2.0" path="mesa_headers/LICENSE" desc="经法务确认为宽松型许可证" />
+                <policyitem type="compatibility" name="SGI-B-2.0" path="khronos/LICENSE" desc="经法务确认为宽松型许可证" />
+                <policyitem type="compatibility" name="SGI-B-2.0" path="mesa_headers/GLES/gl.h" desc="经法务确认为宽松型许可证" />
+                <policyitem type="compatibility" name="SGI-B-2.0" path="mesa_headers/GLES/glext.h" desc="经法务确认为宽松型许可证" />
+                <policyitem type="compatibility" name="SGI-B-2.0" path="mesa_headers/GLES/glplatform.h" desc="经法务确认为宽松型许可证" />
+                <policyitem type="compatibility" name="HPND-sell-variant" path="fontconfig/.*" desc="经法务确认为宽松型许可证" />
+                <policyitem type="compatibility" name="CC0-1.0" path="unrar/src/blake2sp.cpp" desc="经法务确认为宽松型许可证" />
+                <policyitem type="compatibility" name="CDDL-1.0" path="android_deps/libs/javax_annotation_jsr250_api/LICENSE" desc="经法务确认为宽松型许可证" />
+                <policyitem type="compatibility" name="IJG" path="iccjpeg/iccjpeg.h" desc="经法务确认为宽松型许可证" />
+                <policyitem type="compatibility" name="IJG" path="iccjpeg/iccjpeg.c" desc="经法务确认为宽松型许可证" />
+                <policyitem type="compatibility" name="XFree86 License 1.0" path="mesa_headers/GL/glext.h" desc="经法务确认为宽松型许可证" />
+                <policyitem type="compatibility" name="XFree86 License 1.0" path="khronos/KHR/khrplatform.h" desc="经法务确认为宽松型许可证" />
+                <policyitem type="compatibility" name="XFree86 License 1.0" path="mesa_headers/GL/glxext.h" desc="经法务确认为宽松型许可证" />
+                <policyitem type="compatibility" name="XFree86 License 1.0" path="mesa_headers/GL/wglext.h" desc="经法务确认为宽松型许可证" />
+                <policyitem type="compatibility" name="XFree86 License 1.0" path="khronos/noninclude/GL/glxext.h" desc="经法务确认为宽松型许可证" />
+                <policyitem type="compatibility" name="XFree86 License 1.0" path="khronos/EGL/eglplatform.h" desc="经法务确认为宽松型许可证" />
+                <policyitem type="compatibility" name="Unicode-TOU" path="utf/LICENSE" desc="经法务确认为宽松型许可证" />
+                <policyitem type="compatibility" name="Unicode-TOU" path="icu4j/LICENSE" desc="经法务确认为宽松型许可证" />
+                <policyitem type="compatibility" name="Unicode-TOU" path="utf/src/LICENSE" desc="经法务确认为宽松型许可证" />
+                <policyitem type="compatibility" name="Public Domain" path="unrar/src/model.cpp" desc="经法务确认为宽松型许可证" />
+                <policyitem type="compatibility" name="CC-BY-4.0" path="doc/LICENSE" desc="经法务确认为宽松型许可证" />
+                <policyitem type="compatibility" name="CC-BY-4.0" path="google-closure-library/doc/LICENSE" desc="经法务确认为宽松型许可证" />
+                <policyitem type="compatibility" name="CDDL-1.1" path="android_deps/libs/javax_annotation_javax_annotation_api/LICENSE" desc="经法务确认为宽松型许可证" />
+                <policyitem type="compatibility" name="EPL-1.0" path="jacoco/LICENSE" desc="经法务确认,涉及文件在render进程进行了隔离" />
+                <policyitem type="compatibility" name="Public Domain Disclaimer" path="libusb/src/msvc/inttypes.h" desc="经法务确认为宽松型许可证" />
+                <policyitem type="compatibility" name="NiH libzip License" path="libzip/src/.*" desc="经法务确认为宽松型许可证" />
+                <policyitem type="compatibility" name="NiH libzip License" path="libzip/LICENSE" desc="经法务确认为宽松型许可证" />
+                <policyitem type="compatibility" name="Unicode-TOU" path="android_deps/libs/.*" desc="经法务确认为宽松型许可证" />
+                <policyitem type="compatibility" name="GPLStyleLicense-with-mif-exception" path="android_deps/libs/.*" desc="经法务确认,涉及文件在render进程进行了隔离" />
+                <policyitem type="compatibility" name="Unicode Inc License Agreement" path="cldr/LICENSE" desc="经法务确认为宽松型许可证" />
+                <policyitem type="compatibility" name="LicenseRef-scancode-x11-lucent" path="blink/renderer/platform/wtf/dtoa.cc" desc="经法务确认为宽松型许可证" />
+                <policyitem type="compatibility" name="LicenseRef-scancode-other-permissive" path="hyphenation-patterns/src/en-US/ushyphex.tex" desc="经法务确认为宽松型许可证" />
+                <policyitem type="compatibility" name="LicenseRef-scancode-other-permissive" path="sudden_motion_sensor/LICENSE" desc="经法务确认为宽松型许可证" />
+                <policyitem type="compatibility" name="LicenseRef-scancode-android-sdk-2012" path="widevine/LICENSE" desc="经法务确认为宽松型许可证" />
+                <policyitem type="compatibility" name="LicenseRef-scancode-public-domain" path="unrar/src/suballoc.cpp" desc="经法务确认为宽松型许可证" />
+                <policyitem type="compatibility" name="ANTLR-PD" path="checkstyle/RIGHTS.antlr" desc="经法务确认为宽松型许可证" />
+                <policyitem type="compatibility" name="LicenseRef-scancode-mit-synopsys" path="node/linux/node-linux-x64/lib/node_modules/npm/node_modules/wcwidth/LICENSE" desc="经法务确认为宽松型许可证" />
               
+                <policyitem type="compatibility" name="ANTLR-PD" path="fft2d/LICENSE" desc="经法务确认为宽松型许可证" />
+                <policyitem type="compatibility" name="IJG" path="iccjpeg/LICENSE" desc="经法务确认为宽松型许可证" />
+                <policyitem type="compatibility" name="LicenseRef-scancode-public-domain" path="iccjpeg/LICENSE" desc="经法务确认为宽松型许可证" />
+                <policyitem type="compatibility" name="LicenseRef-scancode-generic-cla" path="crashpad/crashpad/third_party/getopt/README.crashpad" desc="经法务确认为宽松型许可证" />
+                
+                <policyitem type="compatibility" name="LicenseRef-scancode-generic-cla" path="google-closure-library/CONTRIBUTING" desc="经法务确认为宽松型许可证" />
+                <policyitem type="compatibility" name="LicenseRef-scancode-public-domain" path="crashpad/crashpad/third_party/getopt/README.crashpad" desc="经法务确认为宽松型许可证" />
+                <policyitem type="compatibility" name="LicenseRef-scancode-proprietary-license" path="tflite_support/src/third_party/fft2d/LICENSE" desc="经法务确认为宽松型许可证" />
+                <policyitem type="compatibility" name="LicenseRef-scancode-proprietary-license" path="fft2d/LICENSE" desc="经法务确认为宽松型许可证" />
+                <policyitem type="compatibility" name="LicenseRef-scancode-public-domain-disclaimer" path="libusb/src/msvc/stdint.h" desc="经法务确认为宽松型许可证" />
+                <policyitem type="compatibility" name="LicenseRef-scancode-unrar" path="unrar/LICENSE" desc="经法务确认为宽松型许可证" />
             </policy>
         </policylist>
         <filefilterlist>
             <filefilter name="defaultPolicyFilter"
                 desc="Filters for compatibility,license header policies">
-                <filteritem type="filepath" name="README.OpenSource" desc="" />
-                <filteritem type="filepath" name="unrar/src/suballoc.cpp" desc="" />
-                <filteritem type="filepath" name="utf/src/utf/utflen.c" desc="" />
-                <filteritem type="filepath" name="wtl/include/atlscrl.h" desc="" />
-                <filteritem type="filepath" name=".*chromium" desc="" />
-                <filteritem type="filepath" name=".*py" desc="" />
-                <filteritem type="filepath" name=".*BUILD" desc="" />
-                <filteritem type="filepath" name=".*hpp" desc="" />
-                <filteritem type="filepath" name=".*sh" desc="" />
-                <filteritem type="filepath" name=".*js" desc="" />
-                <filteritem type="filepath" name=".*bzl" desc="" />
-                <filteritem type="filepath" name=".*android" desc="" />
-                <filteritem type="filepath" name=".*COPYING" desc="" />
-                <filteritem type="filepath" name=".*NOTICE" desc="" />
-                <filteritem type="filepath" name=".*LICENSE" desc="" />
-                <filteritem type="filepath" name=".*INSTALL" desc="" />
-                <filteritem type="filepath" name=".*README" desc="" />
-                <filteritem type="filepath" name=".*txt" desc="" />
-                <filteritem type="filepath" name=".*md" desc="" />
-                <filteritem type="filepath" name=".*LICENSES" desc="" />
-                <filteritem type="filepath" name=".*crashpad" desc="" />
-                <filteritem type="filepath" name=".*experiments" desc="" />
-                <filteritem type="filepath" name=".*rs" desc="" />
-                <filteritem type="filepath" name="protobuf/csharp/src/Google.Protobuf/Google.Protobuf.csproj" desc="" />
-                <filteritem type="filepath" name="zlib/contrib/minizip/crypt.h" desc="" />
-                <filteritem type="filepath" name="android_rust_toolchain/toolchain/lib/rustlib/src/rust/library/alloc/tests/slice.rs" desc="" />
-                <filteritem type="filepath" name="utf/src/test/kosme.c" desc="" />
-                <filteritem type="filepath" name="utf/src/runetype/isprintrune.c" desc="" />
-                <filteritem type="filepath" name="utf/src/runestr/runestrchr.c" desc="" />
-                <filteritem type="filepath" name="protobuf/Protobuf.podspec" desc="" />
-                <filteritem type="filepath" name="android_rust_toolchain/toolchain/lib/rustlib/src/rust/library/alloc/benches/slice.rs" desc="" />
-                <filteritem type="filepath" name="libxml/fuzz/seed_corpus/c91088fb387ecb298053a47627cee65b70acfe69" desc="" />
-                <filteritem type="filepath" name="node/linux/node-linux-x64/lib/node_modules/npm/node_modules/node-gyp/lib/Find-VisualStudio.cs" desc="" />
-                <filteritem type="filepath" name="private-join-and-compute/patches/dependencies.diff" desc="" />
-                <filteritem type="filepath" name="utf/src/bin/mkrunetype.awk" desc="" />
-                <filteritem type="filepath" name="utf/src.*c" desc="" />
-                <filteritem type="filepath" name=".*xml" desc="" />
-                <filteritem type="filepath" name=".*bazel" desc="" />
-                <filteritem type="filepath" name=".*json5" desc="" />
-                <filteritem type="filepath" name=".*METADATA" desc="" />
-                <filteritem type="filepath" name=".*gemspec" desc="" />
-                <filteritem type="filepath" name=".*spec" desc="" />
-                <filteritem type="filepath" name=".*TODO" desc="" />
-                <filteritem type="filepath" name=".*defs" desc="" />
-                <filteritem type="filepath" name=".*tpl" desc="" />
-                <filteritem type="filepath" name=".*gni" desc="" />
-                <filteritem type="filepath" name=".*am" desc="" />
-                <filteritem type="filepath" name=".*cc" desc="" />
-                <filteritem type="filepath" name=".*ac" desc="" />
-                <filteritem type="filepath" name="mako/README.rst" desc="" />
-                <filteritem type="filepath" name="utf/src/test/tap.h" desc="" />
-                <filteritem type="filepath" name="abseil-cpp/absl/random/gaussian_distribution.cc" desc="" />
-                <filteritem type="filepath" name="android_rust_toolchain/toolchain/lib/rustlib/src/rust/vendor/hashbrown/benches/bench.rs" desc="" />
-                <filteritem type="filepath" name="crashpad/crashpad/third_party/cpp-httplib/cpp-httplib/httplib.h" desc="" />
-                <filteritem type="filepath" name="hunspell/README.myspell" desc="" />
-                <filteritem type="filepath" name="hyphenation-patterns/src/METADATA" desc="" />
-                <filteritem type="filepath" name="lcov/rpm/lcov.spec" desc="" />
-                <filteritem type="filepath" name="android_rust_toolchain/toolchain/lib/rustlib/src/rust/vendor/compiler_builtins/build.rs.orig" desc="" />
-                <filteritem type="filepath" name="rust/termcolor/v1/crate/Cargo.toml.orig" desc="" />
-                <filteritem type="filepath" name="markupsafe/_speedups.c" desc="" />
-                <filteritem type="filepath" name="blink/renderer/platform/wtf/CONTRIBUTORS.pthreads-win32" desc="" />
-                <filteritem type="filepath" name="checkstyle/RIGHTS.antlr" desc="" />
-                <filteritem type="filepath" name="protobuf/protoc-artifacts/Dockerfile" desc="" />
-                <filteritem type="filepath" name="google-closure-library/CONTRIBUTING" desc="" />
-                <filteritem type="filepath" name="libxml/fuzz/seed_corpus/40c82af59b9824a310ef8b7666f7878db41d8a86" desc="" />
-                <filteritem type="filepath" name="libxml/fuzz/seed_corpus/c26d0a6661eac07a37052737917a1a2b7d4d1681" desc="" />
-                <filteritem type="filepath" name="abseil-cpp/absl/time/internal/cctz/testdata/README.zoneinfo" desc="" />
-                <filteritem type="filepath" name="libxml/src/xmlwriter.c" desc="" />
-                <filteritem type="filepath" name="node/linux/node-linux-x64/lib/node_modules/npm/man/man1/npm-dist-tag.1" desc="" />
-                <filteritem type="filepath" name="node/node_modules/cssbeautify/cssbeautify.sublime-workspace" desc="" />
-                <filteritem type="filepath" name="wpt_tools/wpt/tools/third_party/webencodings/PKG-INFO" desc="" />
-                <filteritem type="filepath" name="zlib/contrib/minizip/unzip.c" desc="" />
-                <filteritem type="filepath" name="libusb/src/msvc/stdint.h" desc="" />
-                <filteritem type="filepath" name="libxml/fuzz/seed_corpus/b64c4b370a571587ada55f2cdb4bf029190643ce" desc="" />
-                <filteritem type="filepath" name="pycoverage/PKG-INFO" desc="" />
-                <filteritem type="filepath" name="rust/codespan_reporting/v0_11/crate/Cargo.toml.orig" desc="" />
-                <filteritem type="filepath" name="wpt_tools/wpt/tools/third_party/webencodings/README.rst" desc="" />
-                <filteritem type="filepath" name="utf/src/runetype/runetype.h" desc="" />
-                <filteritem type="filepath" name="modp_b64/modp_b64.h" desc="" />
-                <filteritem type="filepath" name="wpt_tools/wpt/tools/third_party/webencodings/webencodings.egg-info/PKG-INFO" desc="" />
-                <filteritem type="filepath" name="libxml/fuzz/seed_corpus/2bf06d0674a90839c365de7cd703f2cf371cb39c" desc="" />
-                <filteritem type="filepath" name="libxml/fuzz/seed_corpus/4ce8dbe5d8fe97177d838802c7f0abd770c49453" desc="" />
-                <filteritem type="filepath" name="opus/src/update_version" desc="" />
-                <filteritem type="filepath" name="hyphenation-patterns/src/en-US/ushyphex.tex" desc="" />
-                <filteritem type="filepath" name="protobuf/kokoro/linux/64-bit/Dockerfile" desc="" />
-                <filteritem type="filepath" name="android_rust_toolchain/toolchain/lib/rustlib/src/rust/library/stdarch/crates/stdarch-gen/Cargo.toml" desc="" />
-                <filteritem type="filepath" name="rust/ryu/v1/crate/Cargo.toml.orig" desc="" />
-                <filteritem type="filepath" name="utf/src/include/utf.h" desc="" />
-                <filteritem type="filepath" name="node/node_modules/ajv/scripts/travis-gh-pages" desc="" />
+                
+                <filteritem type="filename" name="*.py" desc="chromium原生文件无license" />
+                <filteritem type="filename" name="*.BUILD" desc="chromium原生文件无license" />
+                <filteritem type="filename" name="*.android" desc="chromium原生文件无license" />
+                <filteritem type="filename" name="*.txt" desc="chromium原生文件无license" />
+                <filteritem type="filename" name="*.md" desc="chromium原生文件无license" />
+                <filteritem type="filename" name="*.hpp" desc="chromium原生文件无license" />
+                <filteritem type="filename" name="*.sh" desc="chromium原生文件无license" />
+                <filteritem type="filename" name="*.js" desc="chromium原生文件无license" />
+                <filteritem type="filename" name="*.xml" desc="chromium原生文件无license" />
+                <filteritem type="filename" name="*.rs" desc="chromium原生文件无license" />
+                <filteritem type="filename" name="*.orig" desc="chromium原生文件无license" />
+                <filteritem type="filename" name="*.rst" desc="chromium原生文件无license" />
+
+                <filteritem type="filepath" name=".*BUILD" desc="chromium原生文件无license" />
+                <filteritem type="filepath" name=".*chromium" desc="chromium原生文件无license" />
+                <filteritem type="filepath" name=".*LICENSES" desc="chromium原生文件无license" />
+                <filteritem type="filepath" name=".*NOTICE" desc="chromium原生文件无license" />
+                <filteritem type="filepath" name="android_deps/.*" desc="chromium原生文件无license" />
+                <filteritem type="filepath" name="utf/src/.*" desc="chromium原生文件无license" />
+                <filteritem type="filepath" name="libxml/fuzz/seed_corpus/.*" desc="chromium原生文件无license" />
+
+
+                <filteritem type="filepath" name="node/linux/node-linux-x64/lib/node_modules/npm/node_modules/node-gyp/lib/Find-VisualStudio.cs" desc="chromium原生文件无license" />
+                <filteritem type="filepath" name="ohos_sdk/.install" desc="chromium原生文件无license" />
+                <filteritem type="filepath" name="afl/src/experimental/README.experiments" desc="chromium原生文件无license" />
+                <filteritem type="filepath" name="libxml/src/xmlwriter.c" desc="chromium原生文件无license" />
+                <filteritem type="filepath" name="opus/src/update_version" desc="chromium原生文件无license" />
+                <filteritem type="filepath" name="private-join-and-compute/patches/dependencies.diff" desc="chromium原生文件无license" />
+                <filteritem type="filepath" name="tflite_support/src/third_party/py/BUILD.tpl" desc="chromium原生文件无license" />
+                <filteritem type="filepath" name="blink/perf_tests/sun_spider/TODO" desc="chromium原生文件无license" />
+                <filteritem type="filepath" name="protobuf/ruby/google-protobuf.gemspec" desc="chromium原生文件无license" />
+                <filteritem type="filepath" name="lottie/METADATA" desc="chromium原生文件无license" />
+                <filteritem type="filepath" name="node/node_modules/ajv/scripts/travis-gh-pages" desc="chromium原生文件无license" />
+                <filteritem type="filepath" name="protobuf/Makefile.am" desc="chromium原生文件无license" />
+                <filteritem type="filepath" name="dpkg-shlibdeps/METADATA" desc="chromium原生文件无license" />
+                <filteritem type="filepath" name="protobuf/csharp/Google.Protobuf.Tools.nuspec" desc="chromium原生文件无license" />
+                <filteritem type="filepath" name="protobuf/csharp/src/Google.Protobuf/Google.Protobuf.csproj" desc="chromium原生文件无license" />
+                <filteritem type="filepath" name="hyphenation-patterns/src/METADATA" desc="chromium原生文件无license" />
+                <filteritem type="filepath" name="libxslt/src/INSTALL" desc="chromium原生文件无license" />
+                <filteritem type="filepath" name="node/linux/node-linux-x64/lib/node_modules/npm/man/man1/npm-dist-tag.1" desc="chromium原生文件无license" />
+                <filteritem type="filepath" name="protobuf/Protobuf-C++.podspec" desc="chromium原生文件无license" />
+                <filteritem type="filepath" name="tcmalloc/vendor/benchmark/binary_trees.cc" desc="chromium原生文件无license" />
+                <filteritem type="filepath" name="tensorflow-text/src/third_party/darts_clone/BUILD.bzl" desc="chromium原生文件无license" />
+                <filteritem type="filepath" name="sqlite/sqlite_common_configuration_flags.gni" desc="chromium原生文件无license" />
+                <filteritem type="filepath" name="google_trust_services/METADATA" desc="chromium原生文件无license" />
+                <filteritem type="filepath" name="node/node_modules/cssbeautify/cssbeautify.sublime-workspace" desc="chromium原生文件无license" />
+                <filteritem type="filepath" name="abseil-cpp/absl/time/internal/cctz/testdata/README.zoneinfo" desc="chromium原生文件无license" />
+                <filteritem type="filepath" name="tensorflow-text/src/third_party/icu/BUILD.bzl" desc="chromium原生文件无license" />
+                <filteritem type="filepath" name="blink/renderer/core/css/css_group_config.json5" desc="chromium原生文件无license" />
+                <filteritem type="filepath" name="tflite_support/src/third_party/flatbuffers/BUILD.bazel" desc="chromium原生文件无license" />
+                <filteritem type="filepath" name="android_rust_toolchain/toolchain/lib/rustlib/src/rust/library/stdarch/crates/stdarch-gen/Cargo.toml" desc="chromium原生文件无license" />
+                <filteritem type="filepath" name="grpc/METADATA" desc="chromium原生文件无license" />
+                <filteritem type="filepath" name="tcmalloc/vendor/packages/rpm/rpm.spec" desc="chromium原生文件无license" />
+                <filteritem type="filepath" name="protobuf/protoc-artifacts/Dockerfile" desc="chromium原生文件无license" />
+                <filteritem type="filepath" name="modp_b64/modp_b64.h" desc="chromium原生文件无license" />
+                <filteritem type="filepath" name="abseil-cpp/absl/random/gaussian_distribution.cc" desc="chromium原生文件无license" />
+                <filteritem type="filepath" name="blink/renderer/platform/wtf/CONTRIBUTORS.pthreads-win32" desc="chromium原生文件无license" />
+                <filteritem type="filepath" name="protobuf/configure.ac" desc="chromium原生文件无license" />
+                <filteritem type="filepath" name="zlib/contrib/minizip/unzip.c" desc="chromium原生文件无license" />
+                <filteritem type="filepath" name="chromevox/third_party/sre/METADATA" desc="chromium原生文件无license" />
+                <filteritem type="filepath" name="protobuf/kokoro/linux/64-bit/Dockerfile" desc="chromium原生文件无license" />
+                <filteritem type="filepath" name="lcov/rpm/lcov.spec" desc="chromium原生文件无license" />
+                <filteritem type="filepath" name="zlib/contrib/minizip/crypt.h" desc="chromium原生文件无license" />
+
+                
+                <filteritem type="filepath" name="crashpad/crashpad/third_party/xnu/APPLE_LICENSE" desc="经确认不使用该类文件" />
+                <filteritem type="filepath" name="crashpad/crashpad/third_party/xnu/osfmk/mach/.*" desc="经确认不使用该类文件" />
+                
+                <filteritem type="filepath" name="blink/renderer/core/xml/xpath_grammar_generated.cc" desc="chromium原生文件无license" />
+                <filteritem type="filepath" name="blink/renderer/core/xml/xpath_grammar_generated.h" desc="chromium原生文件无license" />
+                <filteritem type="filepath" name="protobuf/m4/ax_pthread.m4" desc="chromium原生文件无license" />
+                <filteritem type="filepath" name="hunspell/COPYING" desc="chromium原生文件无license" />
+                <filteritem type="filepath" name="gvr-android-sdk/LICENSE" desc="chromium原生文件无license" />
+                <filteritem type="filepath" name="hunspell/COPYING.LESSER" desc="chromium原生文件无license" />
+                
             </filefilter>
 
             <filefilter name="defaultFilter">
                 <filteritem type="filepath" name="README.OpenSource"
-                    desc="" />
-                    <filteritem type="filepath" name=".*zip" desc="" />
-                <filteritem type="filepath" name=".*tlb" desc="" />
-                <filteritem type="filepath" name=".*bin" desc="" />
-                <filteritem type="filepath" name=".*png" desc="" />
-                <filteritem type="filepath" name=".*png" desc="" />
-                <filteritem type="filepath" name=".*xtb" desc="" />
-                <filteritem type="filepath" name=".*ico" desc="" />
-                <filteritem type="filepath" name=".*wav" desc="" />
-                <filteritem type="filepath" name=".*ogg" desc="" />
-                <filteritem type="filepath" name=".*pdf" desc="" />
-                <filteritem type="filepath" name=".*bin" desc="" />
-                <filteritem type="filepath" name=".*gz" desc="" />
-                <filteritem type="filepath" name=".*pem" desc="" />
-                <filteritem type="filepath" name=".*crx" desc="" />
-                <filteritem type="filepath" name=".*emf" desc="" />
-                <filteritem type="filepath" name=".*lib" desc="" />
-                <filteritem type="filepath" name=".*jpg" desc="" />
-                <filteritem type="filepath" name=".*zip" desc="" />
-                <filteritem type="filepath" name=".*gif" desc="" />
-                <filteritem type="filepath" name=".*rar" desc="" />
-                <filteritem type="filepath" name=".*apk" desc="" />
-                <filteritem type="filepath" name=".*sha1" desc="" />
-                <filteritem type="filepath" name=".*xz" desc="" />
-                <filteritem type="filepath" name=".*mp4" desc="" />
-                <filteritem type="filepath" name=".*lnk" desc="" />
-                <filteritem type="filepath" name=".*mp3" desc="" />
-                <filteritem type="filepath" name=".*exe" desc="" />
-                <filteritem type="filepath" name=".*pol" desc="" />
-                <filteritem type="filepath" name=".*pb" desc="" />
-                <filteritem type="filepath" name=".*pfx" desc="" />
-                <filteritem type="filepath" name=".*doc" desc="" />
-                <filteritem type="filepath" name=".*webp" desc="" />
-                <filteritem type="filepath" name=".*ogv" desc="" />
-                <filteritem type="filepath" name=".*ai" desc="" />
-                <filteritem type="filepath" name=".*plist" desc="" />
-                <filteritem type="filepath" name=".*der" desc="" />
-                <filteritem type="filepath" name=".*ppt" desc="" />
-                <filteritem type="filepath" name=".*dmg" desc="" />
-                <filteritem type="filepath" name=".*bmp" desc="" />
-                <filteritem type="filepath" name=".*webm" desc="" />
-                <filteritem type="filepath" name=".*7z" desc="" />
-                <filteritem type="filepath" name=".*swf" desc="" />
-                <filteritem type="filepath" name=".*diff" desc="" />
-                <filteritem type="filepath" name=".*sqlite" desc="" />
-                <filteritem type="filepath" name=".*icns" desc="" />
-                <filteritem type="filepath" name=".*pwg" desc="" />
-                <filteritem type="filepath" name=".*dll" desc="" />
-                <filteritem type="filepath" name=".*pvk" desc="" />
-                <filteritem type="filepath" name=".*nib" desc="" />
-                <filteritem type="filepath" name=".*tsv" desc="" />
-                <filteritem type="filepath" name=".*mc" desc="" />
-                <filteritem type="filepath" name=".*pvk" desc="" />
-                <filteritem type="filepath" name=".*pk8" desc="" />
-                <filteritem type="filepath" name=".*com" desc="" />
-                <filteritem type="filepath" name=".*tar" desc="" />
-                <filteritem type="filepath" name=".*wasm" desc="" />
-                <filteritem type="filepath" name=".*ttf" desc="" />
-                <filteritem type="filepath" name=".*deb" desc="" />
-                <filteritem type="filepath" name=".*crx3" desc="" />
-                <filteritem type="filepath" name=".*jar" desc="" />
-                <filteritem type="filepath" name=".*jpeg" desc="" />
-                <filteritem type="filepath" name=".*har" desc="" />
-                <filteritem type="filepath" name=".*wbn" desc="" />
-                <filteritem type="filepath" name=".*nef" desc="" />
-                <filteritem type="filepath" name=".*orf" desc="" />
-                <filteritem type="filepath" name=".*EX_" desc="" />
-                <filteritem type="filepath" name=".*dat" desc="" />
-                <filteritem type="filepath" name=".*tiff" desc="" />
-                <filteritem type="filepath" name=".*docx" desc="" />
-                <filteritem type="filepath" name=".*db" desc="" />
-                <filteritem type="filepath" name=".*gpg" desc="" />
-                <filteritem type="filepath" name=".*ldb" desc="" />
-                <filteritem type="filepath" name=".*xls" desc="" />
-                <filteritem type="filepath" name=".*spc" desc="" />
-                <filteritem type="filepath" name=".*db" desc="" />
-                <filteritem type="filepath" name=".*so" desc="" />
-                <filteritem type="filepath" name=".*otf" desc="" />
-                <filteritem type="filepath" name=".*test" desc="" />
-                <filteritem type="filepath" name=".*bz2" desc="" />
-                <filteritem type="filepath" name=".*pcap" desc="" />
-                <filteritem type="filepath" name=".*hyb" desc="" />
-                <filteritem type="filepath" name=".*cs" desc="" />
-                <filteritem type="filepath" name=".*class" desc="" />
-                <filteritem type="filepath" name=".*woff" desc="" />
-                <filteritem type="filepath" name=".*cc" desc="" />
-                <filteritem type="filepath" name=".*good" desc="" />
-                <filteritem type="filepath" name=".*zh" desc="" />
-                <filteritem type="filepath" name=".*tracetemplate" desc="" />
-                <filteritem type="filepath" name=".*wrong" desc="" />
-                <filteritem type="filepath" name=".*csproj" desc="" />
-                <filteritem type="filepath" name=".*chromium" desc="" />
-                <filteritem type="filepath" name=".*webarchive" desc="" />
-                <filteritem type="filepath" name=".*rs" desc="" />
-                <filteritem type="filepath" name=".*snap" desc="" />
-                <filteritem type="filepath" name=".*toml" desc="" />
-                <filteritem type="filepath" name=".*obj" desc="" />
-                <filteritem type="filepath" name=".*fb" desc="" />
-                <filteritem type="filepath" name=".*tflite" desc="" />
-                <filteritem type="filepath" name=".*index" desc="" />
-                <filteritem type="filepath" name=".*model" desc="" />
-                <filteritem type="filepath" name=".*cur" desc="" />
-                <filteritem type="filepath" name=".*jp2" desc="" />
-                <filteritem type="filepath" name=".*woff2" desc="" />
-                <filteritem type="filepath" name=".*snk" desc="" />
-                <filteritem type="filepath" name=".*avif" desc="" />
-                <filteritem type="filepath" name=".*sug" desc="" />
-                <filteritem type="filepath" name=".*flac" desc="" />
-                <filteritem type="filepath" name="node/linux/node-linux-x64/lib/node_modules/npm/node_modules/clean-stack/index.d.ts" desc="" />
-                <filteritem type="filepath" name="node/node_modules/q/LICENSE" desc="" />
-                <filteritem type="filepath" name="libzip/src/regress/large-uncompressable" desc="" />
-                <filteritem type="filepath" name="protobuf/python/compatibility_tests/v2.5.0/tests/google/protobuf/internal/golden_message" desc="" />
-                <filteritem type="filepath" name="protobuf/python/compatibility_tests/v2.5.0/tests/google/protobuf/internal/golden_packed_fields_message" desc="" />
-                <filteritem type="filepath" name="tensorflow-text/src/tensorflow_text/python/ops/test_data/segmenter_hub_module/variables/variables.data-00000-of-00001" desc="" />
-                <filteritem type="filepath" name="node/linux/node-linux-x64/bin/node" desc="" />
-                <filteritem type="filepath" name="node/node_modules/svgo/LICENSE" desc="" />
-                <filteritem type="filepath" name="blink/perf_tests/webcodecs/resources/720p.h264" desc="" />
-                <filteritem type="filepath" name="protobuf/objectivec/Tests/golden_message" desc="" />
-                <filteritem type="filepath" name="afl/src/testcases/images/jxr/not_kitty.jxr" desc="" />
-                <filteritem type="filepath" name="blink/manual_tests/resources/orange.mov" desc="" />
-                <filteritem type="filepath" name="google-closure-library/doc/LICENSE" desc="" />
-                <filteritem type="filepath" name="protobuf/objectivec/Tests/golden_packed_fields_message" desc="" />
-                <filteritem type="filepath" name="abseil-cpp/absl/time/internal/cctz/testdata/zoneinfo.*" desc="" />
-                <filteritem type="filepath" name="sqlite/fuzz/lpm_fuzzer_seed_corpus.*" desc="" />
-                <filteritem type="filepath" name="crashpad/crashpad/snapshot.*" desc="" />
-                <filteritem type="filepath" name="hunspell/fuzz/bdict_corpus.*" desc="" />
-                <filteritem type="filepath" name="tflite_support/src/tensorflow_lite_support/cc/test/testdata/task.*" desc="" />
-                <filteritem type="filepath" name="libxml/fuzz/seed_corpus.*" desc="" />
-                <filteritem type="filepath" name="protobuf/src/google/protobuf/testdata.*" desc="" />
-                <filteritem type="filepath" name="blink/renderer/bindings/core/v8/serialization/fuzz_corpus.*" desc="" />
-                <filteritem type="filepath" name="blink/renderer/platform/text_codec_fuzzer_seed_corpus.*" desc="" />
-                <filteritem type="filepath" name="libaom/fuzz/av1_dec_fuzzer_corpus.*" desc="" />
-                <filteritem type="filepath" name="ots/src/tests/fonts/bad.*" desc="" />
-                <filteritem type="filepath" name="ots/src/tests/fonts/fuzzing.*" desc="" />
-                <filteritem type="filepath" name="blink/renderer/bindings/core/v8/serialization/fuzz_corpus.*" desc="" />
-                <filteritem type="filepath" name="hyphenation-patterns/hyb.*" desc="" />
-                <filteritem type="filepath" name="libaom/fuzz/av1_dec_fuzzer_corpus.*" desc="" />
-                <filteritem type="filepath" name="android_rust_toolchain/toolchain.*" desc="" />
-                <filteritem type="filepath" name="afl/src/testcases/archives/common.*" desc="" />
-                <filteritem type="filepath" name="afl/src/testcases/archives/exotic.*" desc="" />
+                    desc="Filter Readme.opensource files" />
+                    <filteritem type="filepath" name="protobuf/Protobuf-C++.podspec"
+                    desc="chromium原生文件无license" />
+                
+            </filefilter>
+            <filefilter name="binaryFileTypePolicyFilter">
+                <filteritem type="filepath" name=".*zip" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*tlb" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*bin" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*png" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*png" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*xtb" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*ico" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*wav" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*ogg" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*pdf" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*bin" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*gz" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*pem" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*crx" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*emf" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*lib" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*jpg" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*zip" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*gif" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*rar" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*apk" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*sha1" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*xz" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*mp4" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*lnk" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*mp3" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*exe" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*pol" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*pb" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*pfx" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*doc" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*webp" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*ogv" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*ai" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*plist" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*der" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*ppt" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*dmg" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*bmp" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*webm" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*7z" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*swf" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*diff" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*sqlite" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*icns" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*pwg" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*dll" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*pvk" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*nib" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*tsv" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*mc" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*pvk" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*pk8" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*com" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*tar" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*wasm" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*ttf" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*deb" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*crx3" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*jar" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*jpeg" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*har" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*wbn" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*nef" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*orf" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*EX_" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*dat" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*tiff" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*docx" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*db" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*gpg" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*ldb" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*xls" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*spc" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*db" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*so" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*otf" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*test" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*bz2" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*pcap" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*hyb" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*cs" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*class" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*woff" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*cc" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*good" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*zh" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*tracetemplate" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*wrong" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*csproj" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*chromium" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*webarchive" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*rs" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*snap" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*toml" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*obj" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*fb" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*tflite" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*index" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*model" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*cur" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*jp2" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*woff2" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*snk" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*avif" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*sug" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name=".*flac" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name="node/linux/node-linux-x64/lib/node_modules/npm/node_modules/clean-stack/index.d.ts" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name="node/node_modules/q/LICENSE" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name="libzip/src/regress/large-uncompressable" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name="protobuf/python/compatibility_tests/v2.5.0/tests/google/protobuf/internal/golden_message" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name="protobuf/python/compatibility_tests/v2.5.0/tests/google/protobuf/internal/golden_packed_fields_message" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name="tensorflow-text/src/tensorflow_text/python/ops/test_data/segmenter_hub_module/variables/variables.data-00000-of-00001" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name="node/linux/node-linux-x64/bin/node" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name="node/node_modules/svgo/LICENSE" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name="blink/perf_tests/webcodecs/resources/720p.h264" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name="protobuf/objectivec/Tests/golden_message" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name="afl/src/testcases/images/jxr/not_kitty.jxr" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name="blink/manual_tests/resources/orange.mov" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name="google-closure-library/doc/LICENSE" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name="protobuf/objectivec/Tests/golden_packed_fields_message" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name="abseil-cpp/absl/time/internal/cctz/testdata/zoneinfo.*" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name="sqlite/fuzz/lpm_fuzzer_seed_corpus.*" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name="crashpad/crashpad/snapshot.*" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name="hunspell/fuzz/bdict_corpus.*" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name="tflite_support/src/tensorflow_lite_support/cc/test/testdata/task.*" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name="libxml/fuzz/seed_corpus.*" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name="protobuf/src/google/protobuf/testdata.*" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name="blink/renderer/bindings/core/v8/serialization/fuzz_corpus.*" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name="blink/renderer/platform/text_codec_fuzzer_seed_corpus.*" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name="libaom/fuzz/av1_dec_fuzzer_corpus.*" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name="ots/src/tests/fonts/bad.*" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name="ots/src/tests/fonts/fuzzing.*" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name="blink/renderer/bindings/core/v8/serialization/fuzz_corpus.*" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name="hyphenation-patterns/hyb.*" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name="libaom/fuzz/av1_dec_fuzzer_corpus.*" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name="android_rust_toolchain/toolchain.*" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name="afl/src/testcases/archives/common.*" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name="afl/src/testcases/archives/exotic.*" desc="chromium原生二进制文件，不会使用" />
+                <filteritem type="filepath" name="mako/test/templates/gettext_cp1251.mako" desc="chromium原生二进制文件，不会使用" />
             </filefilter>
         </filefilterlist>
         <licensematcherlist>
@@ -354,80 +408,457 @@ used to filter file path.
 
             <licensematcher name="BSD-2-Clause" desc="">
                 <licensetext name="
-                * Redistribution and use in source and binary forms, with or without
-                * modification, are permitted provided that the following conditions
-                * are met:
-                * 1. Redistributions of source code must retain the above copyright
-                *    notice, this list of conditions and the following disclaimer.
-                * 2. Redistributions in binary form must reproduce the above copyright
-                *    notice, this list of conditions and the following disclaimer in the
-                *    documentation and/or other materials provided with the distribution.
-                *
-                * THIS SOFTWARE IS PROVIDED BY APPLE COMPUTER, INC. ``AS IS'' AND ANY
-                * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-                * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
-                * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE COMPUTER, INC. OR
-                * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
-                * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
-                * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
-                * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
-                * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-                * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-                * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-            " desc="" />
-            </licensematcher> 
-            <licensematcher name="BSD-2-Clause" desc="">
+                    * Redistribution and use in source and binary forms, with or without
+                    * modification, are permitted provided that the following conditions
+                    * are met:
+                    * 1. Redistributions of source code must retain the above copyright
+                    *    notice, this list of conditions and the following disclaimer.
+                    * 2. Redistributions in binary form must reproduce the above copyright
+                    *    notice, this list of conditions and the following disclaimer in the
+                    *    documentation and/or other materials provided with the distribution.
+                    *
+                    * THIS SOFTWARE IS PROVIDED BY APPLE COMPUTER, INC. ``AS IS'' AND ANY
+                    * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+                    * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+                    * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE COMPUTER, INC. OR
+                    * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+                    * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+                    * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+                    * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+                    * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+                    * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+                    * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+                " desc="" />
                 <licensetext name="
-                * Redistribution and use in source and binary forms, with or without
-                * modification, are permitted provided that the following conditions
-                * are met:
-                * 1. Redistributions of source code must retain the above copyright
-                *    notice, this list of conditions and the following disclaimer.
-                *    notice, this list of conditions and the following disclaimer in the
-                *    documentation and/or other materials provided with the distribution.
-                * 2. Redistributions in binary form must reproduce the above copyright
-                *
-                * THIS SOFTWARE IS PROVIDED BY APPLE COMPUTER, INC. ``AS IS'' AND ANY
-                * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-                * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
-                * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE COMPUTER, INC. OR
-                * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
-                * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
-                * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
-                * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
-                * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-                * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-                * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-            " desc="" />
-            </licensematcher> 
-            <licensematcher name="BSD-2-Clause" desc="">
+                    * Redistribution and use in source and binary forms, with or without
+                    * modification, are permitted provided that the following conditions
+                    * are met:
+                    * 1. Redistributions of source code must retain the above copyright
+                    *    notice, this list of conditions and the following disclaimer.
+                    *    notice, this list of conditions and the following disclaimer in the
+                    *    documentation and/or other materials provided with the distribution.
+                    * 2. Redistributions in binary form must reproduce the above copyright
+                    *
+                    * THIS SOFTWARE IS PROVIDED BY APPLE COMPUTER, INC. ``AS IS'' AND ANY
+                    * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+                    * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+                    * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE COMPUTER, INC. OR
+                    * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+                    * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+                    * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+                    * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+                    * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+                    * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+                    * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+                " desc="" />
                 <licensetext name="
-                * Redistribution and use in source and binary forms, with or without
-                * modification, are permitted providing that the following conditions
-                * are met:
-                * 1. Redistributions of source code must retain the above copyright
-                *    notice, this list of conditions and the following disclaimer.
-                * 2. Redistributions in binary form must reproduce the above copyright
-                *    notice, this list of conditions and the following disclaimer in the
-                *    documentation and/or other materials provided with the distribution.
-                *
-                * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
-                * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-                * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-                * ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
-                * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-                * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
-                * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
-                * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
-                * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
-                * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-                * POSSIBILITY OF SUCH DAMAGE.
+                    * Redistribution and use in source and binary forms, with or without
+                    * modification, are permitted providing that the following conditions
+                    * are met:
+                    * 1. Redistributions of source code must retain the above copyright
+                    *    notice, this list of conditions and the following disclaimer.
+                    * 2. Redistributions in binary form must reproduce the above copyright
+                    *    notice, this list of conditions and the following disclaimer in the
+                    *    documentation and/or other materials provided with the distribution.
+                    *
+                    * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
+                    * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+                    * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+                    * ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
+                    * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+                    * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+                    * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+                    * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+                    * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
+                    * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+                    * POSSIBILITY OF SUCH DAMAGE.
             " desc="" />
             </licensematcher> 
             <licensematcher name="BSD-3-Clause" desc="">
-                    <licensetext name="
+                <licensetext name="
                     Use of this source code is governed by a BST-style license that can be
                     found in the LICENSE file.
+                " desc="" />
+                <licensetext name="
+                    IMPORTANT: READ BEFORE DOWNLOADING, COPYING, INSTALLING OR USING.
+
+                    By downloading, copying, installing or using the software you agree to this license.
+                    If you do not agree to this license, do not download, install, copy or use the software.
+
+                                                License Agreement
+                    Redistribution and use in source and binary forms, with or without modification,
+                    are permitted provided that the following conditions are met:
+
+                    * Redistributions of source code must retain the above copyright notice,
+                    this list of conditions and the following disclaimer.
+
+                    * The name of the copyright holders may not be used to endorse or promote products
+                    derived from this software without specific prior written permission.
+
+                    This software is provided by the copyright holders and contributors &quot;as is&quot; and
+                    any express or implied warranties, including, but not limited to, the implied
+                    warranties of merchantability and fitness for a particular purpose are disclaimed.
+                    In no event shall the Intel Corporation or contributors be liable for any direct,
+                    indirect, incidental, special, exemplary, or consequential damages
+                    (including, but not limited to, procurement of substitute goods or services;
+                    loss of use, data, or profits; or business interruption) however caused
+                    and on any theory of liability, whether in contract, strict liability,
+                    or tort (including negligence or otherwise) arising in any way out of
+                    the use of this software, even if advised of the possibility of such damage.
+
+                " desc="" />
+                <licensetext name="
+                    Third party copyrights are property of their respective owners.
+
+                    Redistribution and use in source and binary forms, with or without modification,
+                    are permitted provided that the following conditions are met:
+
+                    * Redistributions of source code must retain the above copyright notice,
+                        this list of conditions and the following disclaimer.
+
+                    * Redistributions in binary form must reproduce the above copyright notice,
+                        this list of conditions and the following disclaimer in the documentation
+                        and/or other materials provided with the distribution.
+
+                    * Neither the names of the copyright holders nor the names of the contributors
+                        may be used to endorse or promote products derived from this software
+                        without specific prior written permission.
+
+                    This software is provided by the copyright holders and contributors &quot;as is&quot; and
+                    any express or implied warranties, including, but not limited to, the implied
+                    warranties of merchantability and fitness for a particular purpose are disclaimed.
+                    In no event shall copyright holders or contributors be liable for any direct,
+                    indirect, incidental, special, exemplary, or consequential damages
+                    (including, but not limited to, procurement of substitute goods or services;
+                    loss of use, data, or profits; or business interruption) however caused
+                    and on any theory of liability, whether in contract, strict liability,
+                    or tort (including negligence or otherwise) arising in any way out of
+                    the use of this software, even if advised of the possibility of such damage.
+
+                " desc="" />
+                <licensetext name="
+                    All rights reserved.
+
+                    Redistribution and use of this software in source and binary forms, with or without modification,
+                    are permitted provided that the following conditions are met:
+
+                    * Redistributions of source code must retain the above
+                    copyright notice, this list of conditions and the
+                    following disclaimer.
+
+                    * Redistributions in binary form must reproduce the above
+                    copyright notice, this list of conditions and the
+                    following disclaimer in the documentation and/or other
+                    materials provided with the distribution.
+
+                    * Neither the name of Kevin Decker nor the names of its
+                    contributors may be used to endorse or promote products
+                    derived from this software without specific prior
+                    written permission.
+
+                    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS &quot;AS IS&quot; AND ANY EXPRESS OR
+                    IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
+                    FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+                    CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+                    DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+                    DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+                    IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
+                    OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+                " desc="" />
+                <licensetext name="
+                    Name: linux-syscall-support
+                    Short Name: lss
+                    URL: https://chromium.googlesource.com/linux-syscall-support/
+                    Revision: See DEPS
+                    License: BSD 3-clause
+                    License File: lss/linux_syscall_support.h
+                    Security Critical: yes
+
+                    Description:
+                    Every so often, projects need to directly embed Linux system calls instead of
+                    calling the implementations in the system runtime library. This project
+                    provides a header file that can be included into your application whenever you
+                    need to make direct system calls.
+
+                    Local Modifications:
+                    None.
+
+                " desc="" />
+                <licensetext name="
+                    MySpell is a simple spell checker that uses affix 
+                    compression and is modelled after the spell checker
+                    ispell.  
+
+                    MySpell was written to explore how affix compression 
+                    can be implemented. 
+
+                    The Main features of MySpell are:
+
+                    1. written in C++ to make it easier to interface with 
+                    Pspell, OpenOffice, AbiWord, etc
+
+                    2. it is stateless, uses no static variables and
+                    should be completely reentrant with almost no 
+                    ifdefs  
+
+                    3. it tries to be as compatible with ispell to
+                    the extent it can.  It can read slightly modified 
+                    versions of munched ispell dictionaries (and it 
+                    comes with a munched english wordlist borrowed from 
+                    Kevin Atkinson's excellent Aspell.
+
+                    4. it uses a heavily modified aff file format that
+                    can be derived from ispell aff files but uses
+                    the iso-8859-X character sets only
+                    
+                    5. it is simple with *lots* of comments that 
+                    describes how the affixes are stored
+                    and tested for (based on the approach used by 
+                    ispell).
+
+                    6. it supports improved suggestions with replacement
+                    tables and ngram-scoring based mechanisms in addition
+                    to the main suggestion mechanisms
+
+                    7. like ispell it has a BSD license (and  no 
+                    advertising clause)
+
+                    But ... it has *no* support for adding words
+                    to a personal dictionary, *no* support for converting
+                    between various text encodings, and *no* command line
+                    interface (it is purely meant to be a library).
+
+                    It can not (in any way) replace all of the functionality
+                    of ispell or aspell/pspell.  It is meant as a learning
+                    tool for understanding affix compression and for 
+                    being used by front ends like OpenOffice, Abiword, etc.
+
+                    MySpell has been tested under Linux and Solaris
+                    and has the world's simplest Makefile and no 
+                    configure support.
+
+                    It does come with a simple example program that 
+                    spell checks some words and returns suggestions.
+
+                    To build a static library and an example
+                    program under Linux simply type:
+
+                    tar -zxvf myspell.tar.gz
+                    cd myspell2
+                    make
+
+                    To run the example program:
+                    ./example ./en_US.aff ./en_US.dic checkme.lst
+
+                    Please play around with it and let me know
+                    what you think.
+
+                    Please see the file CONTRIBUTORS for more info.
+
+                " desc="" />
+                <licensetext name="
+                    Name: mini_chromium
+                    Short Name: mini_chromium
+                    URL: https://chromium.googlesource.com/chromium/mini_chromium/
+                    Revision: See DEPS
+                    License: BSD 3-clause
+                    License File: mini_chromium/LICENSE
+                    Security Critical: yes
+
+                    Description:
+                    mini_chromium is a small collection of useful low-level (“base”) routines from
+                    the Chromium open-source project at https://www.chromium.org/Home. Chromium is
+                    large, sprawling, full of dependencies, and a web browser. mini_chromium is
+                    small, self-contained, and a library. mini_chromium is especially useful as a
+                    dependency of other code that wishes to use Chromium’s base routines.
+
+                    Local Modifications:
+                    None
+
+                " desc="" />
+                <licensetext name="
+                    All rights reserved.
+
+                    Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+
+                    o Redistributions of source code must retain the above copyright notice,
+                    this list of conditions and the following disclaimer.
+
+                    o Redistributions in binary form must reproduce the above copyright
+                    notice, this list of conditions and the following disclaimer in the
+                    documentation and/or other materials provided with the distribution.
+
+                    o Neither the name of the Linux USB Project nor the names of its
+                    contributors may be used to endorse or promote products derived from
+                    this software without specific prior written permission.
+
+                    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+                " desc="" />
+                <licensetext name="
+                    All rights reserved.
+
+                    Redistribution and use in source and binary forms, with or without
+                    modification, are permitted provided that the following conditions
+                    are met:
+
+                        Redistributions of source code must retain the above
+                        copyright notice, this list of conditions and the
+                        following disclaimer.
+
+                        Redistributions in binary form must reproduce the above
+                        copyright notice, this list of conditions and the following
+                        disclaimer in the documentation and/or other materials
+                        provided with the distribution.
+
+                        Neither the name Ethan Furman nor the names of any
+                        contributors may be used to endorse or promote products
+                        derived from this software without specific prior written
+                        permission.
+
+                    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS &quot;AS IS&quot;
+                    AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+                    IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+                    ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+                    LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+                    CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+                    SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+                    INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+                    CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+                    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+                    POSSIBILITY OF SUCH DAMAGE.
+
+                " desc="" />
+                <licensetext name="
+                    All rights reserved.
+
+                    Redistribution and use in source and binary forms, with or without modification,
+                    are permitted provided that the following conditions are met:
+
+                    * Redistributions of source code must retain the above copyright notice, this
+                    list of conditions and the following disclaimer.
+
+                    * Redistributions in binary form must reproduce the above copyright notice,
+                    this list of conditions and the following disclaimer in the documentation
+                    and/or other materials provided with the distribution.
+
+                    * Neither the name Facebook nor the names of its contributors may be used to
+                    endorse or promote products derived from this software without specific
+                    prior written permission.
+
+                    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS &quot;AS IS&quot; AND
+                    ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+                    WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+                    DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+                    ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+                    (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+                    LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+                    ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+                    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+                    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+                " desc="" />
+                <licensetext name="
+                    // Redistribution and use in source and binary forms, with or without
+                    // modification, are permitted provided that the following conditions are
+                    // met:
+                    //
+                    //    * Redistributions of source code must retain the above copyright
+                    // notice, this list of conditions and the following disclaimer.
+                    //    * Redistributions in binary form must reproduce the above
+                    // copyright notice, this list of conditions and the following disclaimer
+                    // in the documentation and/or other materials provided with the
+                    // distribution.
+                    //    * Neither the name of Google Inc. nor the names of its
+                    // contributors may be used to endorse or promote products derived from
+                    // this software without specific prior written permission.
+                    //
+                    // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+                    // &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+                    // LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+                    // A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+                    // OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+                    // SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+                    // LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+                    // DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+                    // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+                    // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+                    // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+                " desc="" />
+                <licensetext name=" 
+                    All rights reserved.
+
+                    Redistribution and use in source and binary forms, with or without
+                    modification, are permitted provided that the following conditions are met:
+
+                    * Redistributions of source code must retain the above copyright notice, this
+                    list of conditions and the following disclaimer.
+
+                    * Redistributions in binary form must reproduce the above copyright notice,
+                    this list of conditions and the following disclaimer in the documentation
+                    and/or other materials provided with the distribution.
+
+                    * Neither the names of the Mozilla Foundation nor the names of project
+                    contributors may be used to endorse or promote products derived from this
+                    software without specific prior written permission.
+
+                    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS &quot;AS IS&quot; AND
+                    ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+                    WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+                    DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+                    FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+                    DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+                    SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+                    CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+                    OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+                    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+                " desc="" />
+                <licensetext name="
+                    /**
+                    * markupsafe._speedups
+                    * ~~~~~~~~~~~~~~~~~~~~
+                    *
+                    * This module implements functions for automatic escaping in C for better
+                    * performance.
+                    *
+                    * :copyright: (c) 2010 by Armin Ronacher.
+                    * :license: BSD.
+                    */
+                " desc="" />
+                <licensetext name="
+                    Name: GYP (Generate Your Projects)
+                    Short Name: gyp
+                    URL: https://gyp.gsrc.io/
+                    Revision: See DEPS
+                    License: BSD 3-clause
+                    License File: gyp/LICENSE
+                    Security Critical: no
+
+                    Description:
+                    GYP is used to generate build files.
+
+                    Local Modifications:
+                    None
+
+                " desc="" />
+                <licensetext name="
+                    Name: Google Test
+                    Short Name: googletest
+                    URL: https://github.com/google/googletest/
+                    Revision: See DEPS
+                    License: BSD 3-clause
+                    License File: googletest/googletest/LICENSE
+                    Security Critical: no
+
+                    Description:
+                    Google Test (Google C++ Testing Framework) is Google’s framework for writing C++
+                    tests on a variety of platforms. It includes Google Mock, an extension for
+                    writing and using C++ mock classes.
+
+                    Local Modifications:
+                    None
                 " desc="" />
             </licensematcher> 
             <licensematcher name="MIT Xfig Variant" desc="">
@@ -447,6 +878,40 @@ used to filter file path.
                     * that this copyright notice remain intact.
                 " desc="" />
             </licensematcher> 
+            <licensematcher name="LicenseRef-scancode-public-domain-disclaimer" desc="">
+                    <licensetext name="
+                    /**
+                    * This file has no copyright assigned and is placed in the Public Domain.
+                    * This file was originally part of the w64 mingw-runtime package.
+                    */
+                " desc="" />
+            </licensematcher> 
+            <licensematcher name="LicenseRef-scancode-boost-original" desc="">
+                    <licensetext name="
+                    Google LLC and its affiliates (&quot;Google&quot;) own all legal right, title and
+                    interest in and to the content decryption module software (&quot;Software&quot;) and
+                    related documentation, including any intellectual property rights in the
+                    Software. You may not use, modify, sell, or otherwise distribute the Software
+                    without a separate license agreement with Google.  The Software is not open
+                    source software.
+
+                    If you are interested in licensing the Software, please contact www.widevine.com
+
+                " desc="" />
+            </licensematcher> 
+            <licensematcher name="LicenseRef-scancode-android-sdk-2012" desc="">
+                    <licensetext name="
+                    Google LLC and its affiliates (&quot;Google&quot;) own all legal right, title and
+                    interest in and to the content decryption module software (&quot;Software&quot;) and
+                    related documentation, including any intellectual property rights in the
+                    Software. You may not use, modify, sell, or otherwise distribute the Software
+                    without a separate license agreement with Google.  The Software is not open
+                    source software.
+
+                    If you are interested in licensing the Software, please contact www.widevine.com
+
+                " desc="" />
+            </licensematcher> 
             <licensematcher name="MIT Veillard Variant" desc="">
                     <licensetext name="
                     * Permission to use, copy, modify, and distribute this software for any
@@ -457,6 +922,265 @@ used to filter file path.
                     * WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF
                     * MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE AUTHORS AND
                     * CONTRIBUTORS ACCEPT NO RESPONSIBILITY IN ANY CONCEIVABLE MANNER.
+                " desc="" />
+            </licensematcher> 
+            <licensematcher name="LicenseRef-scancode-x11-lucent" desc="">
+                    <licensetext name="
+                    /****************************************************************
+                    *
+                    * The author of this software is David M. Gay.
+                    *
+                    * Copyright (c) 1991, 2000, 2001 by Lucent Technologies.
+                    * Copyright (C) 2002, 2005, 2006, 2007, 2008, 2010, 2012 Apple Inc.
+                    * All rights reserved.
+                    *
+                    * Permission to use, copy, modify, and distribute this software for any
+                    * purpose without fee is hereby granted, provided that this entire notice
+                    * is included in all copies of any software which is or includes a copy
+                    * or modification of this software and in all copies of the supporting
+                    * documentation for such software.
+                    *
+                    * THIS SOFTWARE IS BEING PROVIDED &quot;AS IS&quot;, WITHOUT ANY EXPRESS OR IMPLIED
+                    * WARRANTY.  IN PARTICULAR, NEITHER THE AUTHOR NOR LUCENT MAKES ANY
+                    * REPRESENTATION OR WARRANTY OF ANY KIND CONCERNING THE MERCHANTABILITY
+                    * OF THIS SOFTWARE OR ITS FITNESS FOR ANY PARTICULAR PURPOSE.
+                    *
+                    ***************************************************************/
+                " desc="" />
+            </licensematcher> 
+            <licensematcher name="LicenseRef-scancode-other-permissive" desc="">
+                    <licensetext name="
+                    % Hyphenation exceptions for US English,
+                    % based on hyphenation exception log articles in TUGboat.
+                    %
+                    % Copyright 2008 TeX Users Group.
+                    % You may freely use, modify and/or distribute this file.
+                    %
+                    % This is an automatically generated file.  Do not edit!
+                    %
+                    % Please contact the TUGboat editorial staff &lt;tugboat@tug.org&gt;
+                    % for corrections and omissions.
+                " desc="" />
+            </licensematcher> 
+            <licensematcher name="LicenseRef-scancode-other-permissive" desc="">
+                    <licensetext name="
+                   SMSLib Sudden Motion Sensor Access Library
+                    Copyright (c) 2010 Suitable Systems
+                    All rights reserved.
+
+                    Developed by: Daniel Griscom
+                                Suitable Systems
+                                http://www.suitable.com
+
+                    Permission is hereby granted, free of charge, to any person obtaining a
+                    copy of this software and associated documentation files (the
+                    &quot;Software&quot;), to deal with the Software without restriction, including
+                    without limitation the rights to use, copy, modify, merge, publish,
+                    distribute, sublicense, and/or sell copies of the Software, and to
+                    permit persons to whom the Software is furnished to do so, subject to
+                    the following conditions:
+
+                    - Redistributions of source code must retain the above copyright notice,
+                    this list of conditions and the following disclaimers.
+
+                    - Redistributions in binary form must reproduce the above copyright
+                    notice, this list of conditions and the following disclaimers in the
+                    documentation and/or other materials provided with the distribution.
+
+                    - Neither the names of Suitable Systems nor the names of its
+                    contributors may be used to endorse or promote products derived from
+                    this Software without specific prior written permission.
+
+                    THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS
+                    OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+                    MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+                    IN NO EVENT SHALL THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR
+                    ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+                    TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+                    SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
+
+                    For more information about SMSLib, see
+                    &lt;http://www.suitable.com/tools/smslib.html&gt;
+                    or contact
+                    Daniel Griscom
+                    Suitable Systems
+                    1 Centre Street, Suite 204
+                    Wakefield, MA 01880
+                    (781) 665-0053
+
+                " desc="" />
+            </licensematcher> 
+            <licensematcher name="APSL-2.0" desc="">
+                <licensetext name="
+                    /*
+                    * Copyright (c) 2000 Apple Computer, Inc. All rights reserved.
+                    *
+                    * @APPLE_OSREFERENCE_LICENSE_HEADER_START@
+                    * 
+                    * This file contains Original Code and/or Modifications of Original Code
+                    * as defined in and that are subject to the Apple Public Source License
+                    * Version 2.0 (the 'License'). You may not use this file except in
+                    * compliance with the License. The rights granted to you under the License
+                    * may not be used to create, or enable the creation or redistribution of,
+                    * unlawful or unlicensed copies of an Apple operating system, or to
+                    * circumvent, violate, or enable the circumvention or violation of, any
+                    * terms of an Apple operating system software license agreement.
+                    * 
+                    * Please obtain a copy of the License at
+                    * http://www.opensource.apple.com/apsl/ and read it before using this file.
+                    * 
+                    * The Original Code and all software distributed under the License are
+                    * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
+                    * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
+                    * INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY,
+                    * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
+                    * Please see the License for the specific language governing rights and
+                    * limitations under the License.
+                    * 
+                    * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
+                    */
+                " desc="" />
+                <licensetext name="
+                    * @APPLE_OSREFERENCE_LICENSE_HEADER_START@
+                    * 
+                    * This file contains Original Code and/or Modifications of Original Code
+                    * as defined in and that are subject to the Apple Public Source License
+                    * Version 2.0 (the 'License'). You may not use this file except in
+                    * compliance with the License. The rights granted to you under the License
+                    * may not be used to create, or enable the creation or redistribution of,
+                    * unlawful or unlicensed copies of an Apple operating system, or to
+                    * circumvent, violate, or enable the circumvention or violation of, any
+                    * terms of an Apple operating system software license agreement.
+                    * 
+                    * Please obtain a copy of the License at
+                    * http://www.opensource.apple.com/apsl/ and read it before using this file.
+                    * 
+                    * The Original Code and all software distributed under the License are
+                    * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
+                    * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
+                    * INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY,
+                    * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
+                    * Please see the License for the specific language governing rights and
+                    * limitations under the License.
+                    * 
+                    * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
+                " desc="" />
+                <licensetext name="
+                    * This file contains Original Code and/or Modifications of Original Code
+                    * as defined in and that are subject to the Apple Public Source License
+                    * Version 2.0 (the 'License'). You may not use this file except in
+                    * compliance with the License. The rights granted to you under the License
+                    * may not be used to create, or enable the creation or redistribution of,
+                    * unlawful or unlicensed copies of an Apple operating system, or to
+                    * circumvent, violate, or enable the circumvention or violation of, any
+                    * terms of an Apple operating system software license agreement.
+                    * 
+                    * Please obtain a copy of the License at
+                    * http://www.opensource.apple.com/apsl/ and read it before using this file.
+                    * 
+                    * The Original Code and all software distributed under the License are
+                    * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
+                    * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
+                    * INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY,
+                    * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
+                    * Please see the License for the specific language governing rights and
+                    * limitations under the License.
+                " desc="" />
+                <licensetext name="
+                    Name: XNU
+                    Short Name: xnu
+                    URL: https://opensource.apple.com/source/xnu/
+                    URL: https://opensource.apple.com/tarballs/xnu/
+                    Version: 6153.11.26 (from macOS 10.15.0)
+                    License: APSL 2.0
+                    License File: APPLE_LICENSE
+                    Security Critical: no
+                " desc="" />
+            </licensematcher> 
+            <licensematcher name="APSL-1.0+" desc="">
+                <licensetext name="
+                    /*
+                    * Copyright (c) 2000 Apple Computer, Inc. All rights reserved.
+                    *
+                    * @APPLE_OSREFERENCE_LICENSE_HEADER_START@
+                    * 
+                    * This file contains Original Code and/or Modifications of Original Code
+                    * as defined in and that are subject to the Apple Public Source License
+                    * Version 2.0 (the 'License'). You may not use this file except in
+                    * compliance with the License. The rights granted to you under the License
+                    * may not be used to create, or enable the creation or redistribution of,
+                    * unlawful or unlicensed copies of an Apple operating system, or to
+                    * circumvent, violate, or enable the circumvention or violation of, any
+                    * terms of an Apple operating system software license agreement.
+                    * 
+                    * Please obtain a copy of the License at
+                    * http://www.opensource.apple.com/apsl/ and read it before using this file.
+                    * 
+                    * The Original Code and all software distributed under the License are
+                    * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
+                    * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
+                    * INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY,
+                    * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
+                    * Please see the License for the specific language governing rights and
+                    * limitations under the License.
+                    * 
+                    * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
+                    */
+                " desc="" />
+                <licensetext name="
+                    * This file contains Original Code and/or Modifications of Original Code
+                    * as defined in and that are subject to the Apple Public Source License
+                    * Version 2.0 (the 'License'). You may not use this file except in
+                    * compliance with the License. The rights granted to you under the License
+                    * may not be used to create, or enable the creation or redistribution of,
+                    * unlawful or unlicensed copies of an Apple operating system, or to
+                    * circumvent, violate, or enable the circumvention or violation of, any
+                    * terms of an Apple operating system software license agreement.
+                    * 
+                    * Please obtain a copy of the License at
+                    * http://www.opensource.apple.com/apsl/ and read it before using this file.
+                    * 
+                    * The Original Code and all software distributed under the License are
+                    * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
+                    * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
+                    * INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY,
+                    * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
+                    * Please see the License for the specific language governing rights and
+                    * limitations under the License.
+                " desc="" />
+                <licensetext name="
+                    * @APPLE_OSREFERENCE_LICENSE_HEADER_START@
+                    * This file contains Original Code and/or Modifications of Original Code
+                    * as defined in and that are subject to the Apple Public Source License
+                    * Version 2.0 (the 'License'). You may not use this file except in
+                    * compliance with the License. The rights granted to you under the License
+                    * may not be used to create, or enable the creation or redistribution of,
+                    * unlawful or unlicensed copies of an Apple operating system, or to
+                    * circumvent, violate, or enable the circumvention or violation of, any
+                    * terms of an Apple operating system software license agreement.
+                    * 
+                    * Please obtain a copy of the License at
+                    * http://www.opensource.apple.com/apsl/ and read it before using this file.
+                    * 
+                    * The Original Code and all software distributed under the License are
+                    * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
+                    * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
+                    * INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY,
+                    * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
+                    * Please see the License for the specific language governing rights and
+                    * limitations under the License.
+                    * 
+                    * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
+                " desc="" />
+                <licensetext name="
+                    APPLE PUBLIC SOURCE LICENSE
+                    Version 2.0 - August 6, 2003
+
+                    Please read this License carefully before downloading this software.
+                    By downloading or using this software, you are agreeing to be bound by
+                    the terms of this License. If you do not or cannot agree to the terms
+                    of this License, please do not download or use the software.
+
                 " desc="" />
             </licensematcher> 
             <licensematcher name="IJG" desc="">
@@ -481,39 +1205,115 @@ used to filter file path.
             </licensematcher> 
                 
             <licensematcher name="Public Domain" desc="">
-                        <licensetext name="
-                        *  This file is part of PPMd project                                       *
-                        *  Written and distributed to public domain by Dmitry Shkarin 1997,        *
-                        *  1999-2000                                                               *
-                        *  Contents: model description and encoding/decoding routines              *
-                    " desc="" />
+                <licensetext name="
+                    *  This file is part of PPMd project                                       *
+                    *  Written and distributed to public domain by Dmitry Shkarin 1997,        *
+                    *  1999-2000                                                               *
+                    *  Contents: model description and encoding/decoding routines              *
+                " desc="" />
             </licensematcher> 
+
+            <licensematcher name="FSFUL" desc="">
+                <licensetext name="
+                    This file is free documentation; the Free Software Foundation gives
+                    unlimited permission to copy, distribute and modify it.
+
+                    Basic Installation
+                " desc="" />
+                <licensetext name="
+                    This file is free documentation; the Free Software Foundation gives
+                    unlimited permission to copy, distribute and modify it.
+
+
+                    Perftools-Specific Install Notes
+                " desc="" />
+            </licensematcher>
             <licensematcher name="BSD-3-Clause" desc="">
-                        <licensetext name="
-                        * Redistribution and use in source and binary forms, with or without
-                        * modification, are permitted provided that the following conditions are met:
-                        *
-                        * A. Redistributions of source code must retain the above copyright notice,
-                        *    this list of conditions and the following disclaimer.
-                        * B. Redistributions in binary form must reproduce the above copyright notice,
-                        *    this list of conditions and the following disclaimer in the documentation
-                        *    and/or other materials provided with the distribution.
-                        * C. Neither the names of the copyright holders nor the names of its
-                        *    contributors may be used to endorse or promote products derived from this
-                        *    software without specific prior written permission.
-                        *
-                        * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ``AS
-                        * IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
-                        * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
-                        * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE
-                        * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-                        * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-                        * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-                        * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-                        * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-                        * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-                        * POSSIBILITY OF SUCH DAMAGE.
-                    " desc="" />
+                <licensetext name="
+                    * Redistribution and use in source and binary forms, with or without
+                    * modification, are permitted provided that the following conditions are met:
+                    *
+                    * A. Redistributions of source code must retain the above copyright notice,
+                    *    this list of conditions and the following disclaimer.
+                    * B. Redistributions in binary form must reproduce the above copyright notice,
+                    *    this list of conditions and the following disclaimer in the documentation
+                    *    and/or other materials provided with the distribution.
+                    * C. Neither the names of the copyright holders nor the names of its
+                    *    contributors may be used to endorse or promote products derived from this
+                    *    software without specific prior written permission.
+                    *
+                    * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ``AS
+                    * IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+                    * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+                    * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE
+                    * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+                    * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+                    * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+                    * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+                    * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+                    * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+                    * POSSIBILITY OF SUCH DAMAGE.
+                " desc="" />
+                <licensetext name="
+                    // Redistribution and use in source and binary forms, with or without
+                    // modification, are permitted provided that the following conditions are
+                    // met:
+                    //
+                    //    * Redistributions of source code must retain the above copyright
+                    // notice, this list of conditions and the following disclaimer.
+                    //    * Redistributions in binary form must reproduce the above
+                    // copyright notice, this list of conditions and the following disclaimer
+                    // in the documentation and/or other materials provided with the
+                    // distribution.
+                    //    * The name of Google Inc, Microsoft Corporation, or the names of its
+                    // contributors may not be used to endorse or promote products derived from
+                    // this software without specific prior written permission.
+                    //
+                    // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+                    // &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+                    // LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+                    // A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+                    // OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+                    // SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+                    // LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+                    // DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+                    // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+                    // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+                    // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+                " desc="" />
+                <licensetext name="
+                    Some rights reserved.
+
+                    Redistribution and use in source and binary forms of the software as well
+                    as documentation, with or without modification, are permitted provided
+                    that the following conditions are met:
+
+                    * Redistributions of source code must retain the above copyright
+                    notice, this list of conditions and the following disclaimer.
+
+                    * Redistributions in binary form must reproduce the above
+                    copyright notice, this list of conditions and the following
+                    disclaimer in the documentation and/or other materials provided
+                    with the distribution.
+
+                    * The names of the contributors may not be used to endorse or
+                    promote products derived from this software without specific
+                    prior written permission.
+
+                    THIS SOFTWARE AND DOCUMENTATION IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+                    CONTRIBUTORS &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT
+                    NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+                    A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER
+                    OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+                    EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+                    PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+                    PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+                    LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+                    NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+                    SOFTWARE AND DOCUMENTATION, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
+                    DAMAGE.
+
+                " desc="" />
             </licensematcher> 
             
             <licensematcher name="ISC" desc="">
@@ -530,15 +1330,106 @@ used to filter file path.
                 * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
                 * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
             " desc="" />
-        </licensematcher> 
-                <licensematcher name="BSD-3-Clause" desc="">
+            <licensetext name="
+                Permission to use, copy, modify, and/or distribute this
+                software for any purpose with or without fee is hereby
+                granted, provided that the above copyright notice and this
+                permission notice appear in all copies.
+
+                THE SOFTWARE IS PROVIDED &quot;AS IS&quot; AND NPM DISCLAIMS ALL
+                WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL
+                IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO
+                EVENT SHALL NPM BE LIABLE FOR ANY SPECIAL, DIRECT,
+                INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+                WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS,
+                WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
+                TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE
+                USE OR PERFORMANCE OF THIS SOFTWARE.
+
+            " desc="" />
+            <licensetext name="
+                Permission to use, copy, modify, and/or distribute this software for
+                any purpose with or without fee is hereby granted, provided that the
+                above copyright notice and this permission notice appear in all copies.
+
+                THE SOFTWARE IS PROVIDED &quot;AS IS&quot; AND THE COPYRIGHT HOLDER DISCLAIMS
+                ALL WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED
+                WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE
+                COPYRIGHT HOLDER BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR
+                CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS
+                OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE
+                OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE
+                USE OR PERFORMANCE OF THIS SOFTWARE.
+
+            " desc="" />
+            <licensetext name="
+               Permission to use, copy, modify, and/or distribute this software for any
+                purpose with or without fee is hereby granted, provided that the above
+                copyright notice and this permission notice appear in all copies.
+
+                THE SOFTWARE IS PROVIDED &quot;AS IS&quot; AND THE NPM DISCLAIMS ALL WARRANTIES WITH
+                REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
+                FITNESS. IN NO EVENT SHALL THE NPM BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT,
+                OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE,
+                DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS
+                ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
+                SOFTWARE.
+            " desc="" />
+            <licensetext name="
+               Permission to use, copy, modify, and/or distribute this software for any
+                purpose with or without fee is hereby granted, provided that the above
+                copyright notice and this permission notice appear in all copies.
+
+                THE SOFTWARE IS PROVIDED &quot;AS IS&quot; AND NPM DISCLAIMS ALL WARRANTIES WITH REGARD
+                TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
+                FITNESS. IN NO EVENT SHALL NPM BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR
+                CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE,
+                DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS
+                ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
+                SOFTWARE.
+            " desc="" />
+            <licensetext name="
+               The ISC License
+
+                Copyright npm, Inc.
+
+                Permission to use, copy, modify, and/or distribute this software for any
+                purpose with or without fee is hereby granted, provided that the above
+                copyright notice and this permission notice appear in all copies.
+
+                THE SOFTWARE IS PROVIDED &quot;AS IS&quot; AND NPM DISCLAIMS ALL WARRANTIES WITH
+                REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+                AND FITNESS. IN NO EVENT SHALL NPM BE LIABLE FOR ANY SPECIAL, DIRECT,
+                INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+                LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE
+                OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+                PERFORMANCE OF THIS SOFTWARE.
+
+                ---
+
+                Files and metadata contained in `test/fixtures/registry-mocks/content` are
+                downloaded from the public npm registry.  These are the property of their
+                respective owners.  The use and distribution of said artifacts are covered by
+                their associated licenses.
+
+            " desc="" />
+            </licensematcher> 
+            <licensematcher name="BSD-3-Clause" desc="">
                     <licensetext name="
                     This software program is licensed subject to the BSD License, 
                     available at http://www.opensource.org/licenses/bsd-license.html
                 " desc="" />
-                </licensematcher> 
-                <licensematcher name="MIT Veillard Variant" desc="">
-                    <licensetext name="
+            </licensematcher> 
+            <licensematcher name="LicenseRef-scancode-proprietary-license" desc="">
+                <licensetext name="
+                    Copyright(C) 1997,2001 Takuya OOURA (email: ooura@kurims.kyoto-u.ac.jp).
+                    You may use, copy, modify this code for any purpose and 
+                    without fee. You may distribute this ORIGINAL package.
+
+                " desc="" />
+            </licensematcher> 
+            <licensematcher name="MIT Veillard Variant" desc="">
+                <licensetext name="
                     * Permission to use, copy, modify, and distribute this software for any
                     * purpose with or without fee is hereby granted, provided that the above
                     * copyright notice and this permission notice appear in all copies.
@@ -548,9 +1439,9 @@ used to filter file path.
                     * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE AUTHORS AND
                     * CONTRIBUTORS ACCEPT NO RESPONSIBILITY IN ANY CONCEIVABLE MANNER.
                 " desc="" />
-                </licensematcher> 
-                <licensematcher name="IJG" desc="">
-                    <licensetext name="
+            </licensematcher> 
+            <licensematcher name="IJG" desc="">
+                <licensetext name="
                     * This file is part of the Independent JPEG Group's software.
                     * For conditions of distribution and use, see the accompanying README file.
                     *
@@ -569,9 +1460,201 @@ used to filter file path.
                     * change all the &quot;unsigned int&quot; variables to &quot;INT32&quot;.  You'll also need
                     * to find a malloc() replacement that can allocate more than 64K.
                 " desc="" />
-                </licensematcher> 
+                <licensetext name="
+                    LICENSE extracted from IJG's jpeg distribution:
+                    -----------------------------------------------
+
+                    In plain English:
+
+                    1. We don't promise that this software works.  (But if you find any bugs,
+                    please let us know!)
+                    2. You can use this software for whatever you want.  You don't have to pay us.
+                    3. You may not pretend that you wrote this software.  If you use it in a
+                    program, you must acknowledge somewhere in your documentation that
+                    you've used the IJG code.
+
+                    In legalese:
+
+                    The authors make NO WARRANTY or representation, either express or implied,
+                    with respect to this software, its quality, accuracy, merchantability, or
+                    fitness for a particular purpose.  This software is provided &quot;AS IS&quot;, and you,
+                    its user, assume the entire risk as to its quality and accuracy.
+
+                    This software is copyright (C) 1991-1998, Thomas G. Lane.
+                    All Rights Reserved except as specified below.
+
+                    Permission is hereby granted to use, copy, modify, and distribute this
+                    software (or portions thereof) for any purpose, without fee, subject to these
+                    conditions:
+                    (1) If any part of the source code for this software is distributed, then this
+                    README file must be included, with this copyright and no-warranty notice
+                    unaltered; and any additions, deletions, or changes to the original files
+                    must be clearly indicated in accompanying documentation.
+                    (2) If only executable code is distributed, then the accompanying
+                    documentation must state that &quot;this software is based in part on the work of
+                    the Independent JPEG Group&quot;.
+                    (3) Permission for use of this software is granted only if the user accepts
+                    full responsibility for any undesirable consequences; the authors accept
+                    NO LIABILITY for damages of any kind.
+
+                    These conditions apply to any software derived from or based on the IJG code,
+                    not just to the unmodified library.  If you use our work, you ought to
+                    acknowledge us.
+
+                    Permission is NOT granted for the use of any IJG author's name or company name
+                    in advertising or publicity relating to this software or products derived from
+                    it.  This software may be referred to only as &quot;the Independent JPEG Group's
+                    software&quot;.
+
+                    We specifically permit and encourage the use of this software as the basis of
+                    commercial products, provided that all warranty or liability claims are
+                    assumed by the product vendor.
+                " desc="" />
+            </licensematcher> 
             <licensematcher name="BSD-3-Clause" desc="">
                 <licensetext name="
+                Third party copyrights are property of their respective owners.
+
+                Redistribution and use in source and binary forms, with or without modification,
+                are permitted provided that the following conditions are met:
+                
+                  * Redistribution's of source code must retain the above copyright notice,
+                    this list of conditions and the following disclaimer.
+                
+                  * Redistribution's in binary form must reproduce the above copyright notice,
+                    this list of conditions and the following disclaimer in the documentation
+                    and/or other materials provided with the distribution.
+                
+                  * The name of Intel Corporation may not be used to endorse or promote products
+                    derived from this software without specific prior written permission.
+                
+                This software is provided by the copyright holders and contributors &quot;as is&quot; and
+                any express or implied warranties, including, but not limited to, the implied
+                warranties of merchantability and fitness for a particular purpose are disclaimed.
+                In no event shall the Intel Corporation or contributors be liable for any direct,
+                indirect, incidental, special, exemplary, or consequential damages
+                (including, but not limited to, procurement of substitute goods or services;
+                loss of use, data, or profits; or business interruption) however caused
+                and on any theory of liability, whether in contract, strict liability,
+                or tort (including negligence or otherwise) arising in any way out of
+                the use of this software, even if advised of the possibility of such damage.
+                
+            " desc="" />
+            <licensetext name="
+                Metadata-Version: 1.1
+                Name: webencodings
+                Version: 0.5.1
+                Summary: Character encoding aliases for legacy web content
+                Home-page: https://github.com/SimonSapin/python-webencodings
+                Author: Geoffrey Sneddon
+                Author-email: me@gsnedders.com
+                License: BSD
+                Description: python-webencodings
+                        ===================
+                        
+                        This is a Python implementation of the `WHATWG Encoding standard
+                        &lt;http://encoding.spec.whatwg.org/&gt;`_.
+                        
+                        * Latest documentation: http://packages.python.org/webencodings/
+                        * Source code and issue tracker:
+                        https://github.com/gsnedders/python-webencodings
+                        * PyPI releases: http://pypi.python.org/pypi/webencodings
+                        * License: BSD
+                        * Python 2.6+ and 3.3+
+                        
+                        In order to be compatible with legacy web content
+                        when interpreting something like ``Content-Type: text/html; charset=latin1``,
+                        tools need to use a particular set of aliases for encoding labels
+                        as well as some overriding rules.
+                        For example, ``US-ASCII`` and ``iso-8859-1`` on the web are actually
+                        aliases for ``windows-1252``, and an UTF-8 or UTF-16 BOM takes precedence
+                        over any other encoding declaration.
+                        The Encoding standard defines all such details so that implementations do
+                        not have to reverse-engineer each other.
+                        
+                        This module has encoding labels and BOM detection,
+                        but the actual implementation for encoders and decoders is Python’s.
+                        
+                Platform: UNKNOWN
+                Classifier: Development Status :: 4 - Beta
+                Classifier: Intended Audience :: Developers
+                Classifier: License :: OSI Approved :: BSD License
+                Classifier: Programming Language :: Python
+                Classifier: Programming Language :: Python :: 2
+                Classifier: Programming Language :: Python :: 2.6
+                Classifier: Programming Language :: Python :: 2.7
+                Classifier: Programming Language :: Python :: 3
+                Classifier: Programming Language :: Python :: 3.3
+                Classifier: Programming Language :: Python :: 3.4
+                Classifier: Programming Language :: Python :: 3.5
+                Classifier: Programming Language :: Python :: 3.6
+                Classifier: Programming Language :: Python :: Implementation :: CPython
+                Classifier: Programming Language :: Python :: Implementation :: PyPy
+                Classifier: Topic :: Internet :: WWW/HTTP
+
+            " desc="" />
+            <licensetext name="
+                Metadata-Version: 1.0
+                Name: coverage
+                Version: 3.7.1
+                Summary: Code coverage measurement for Python
+                Home-page: http://nedbatchelder.com/code/coverage
+                Author: Ned Batchelder and others
+                Author-email: ned@nedbatchelder.com
+                License: BSD
+                Description: Coverage.py measures code coverage, typically during test execution. It uses
+                        the code analysis tools and tracing hooks provided in the Python standard
+                        library to determine which lines are executable, and which have been executed.
+                        
+                        Coverage.py runs on Pythons 2.3 through 3.3, and PyPy 1.9.
+                        
+                        Documentation is at `nedbatchelder.com &lt;http://nedbatchelder.com/code/coverage&gt;`_.  Code repository and issue
+                        tracker are on `Bitbucket &lt;http://bitbucket.org/ned/coveragepy&gt;`_, with a
+                        mirrored repo on `Github &lt;https://github.com/nedbat/coveragepy&gt;`_.
+                        
+                        New in 3.7: ``--debug``, and 12 bugs closed.
+                        
+                        New in 3.6: ``--fail-under``, and &gt;20 bugs closed.
+                        
+                        New in 3.5: Branch coverage exclusions, keyboard shortcuts in HTML report.
+                        
+                        New in 3.4: Better control over source to measure, and unexecuted files
+                        can be reported.
+                        
+                        New in 3.3: .coveragerc files.
+                        
+                        New in 3.2: Branch coverage!
+                Keywords: code coverage testing
+                Platform: UNKNOWN
+                Classifier: Environment :: Console
+                Classifier: Intended Audience :: Developers
+                Classifier: License :: OSI Approved :: BSD License
+                Classifier: Operating System :: OS Independent
+                Classifier: Programming Language :: Python :: 2
+                Classifier: Programming Language :: Python :: 3
+                Classifier: Topic :: Software Development :: Quality Assurance
+                Classifier: Topic :: Software Development :: Testing
+                Classifier: Development Status :: 5 - Production/Stable
+            " desc="" />
+            <licensetext name="
+                By downloading, copying, installing or using the software you agree to this license.
+                If you do not agree to this license, do not download, install,
+                copy or use the software.
+
+
+                                        License Agreement
+                            For Open Source Computer Vision Library
+                                    (3-clause BSD License)
+
+                Copyright (C) 2000-2020, Intel Corporation, all rights reserved.
+                Copyright (C) 2009-2011, Willow Garage Inc., all rights reserved.
+                Copyright (C) 2009-2016, NVIDIA Corporation, all rights reserved.
+                Copyright (C) 2010-2013, Advanced Micro Devices, Inc., all rights reserved.
+                Copyright (C) 2015-2016, OpenCV Foundation, all rights reserved.
+                Copyright (C) 2015-2016, Itseez Inc., all rights reserved.
+                Copyright (C) 2019-2020, Xperience AI, all rights reserved.
+                Third party copyrights are property of their respective owners.
+
                 Third party copyrights are property of their respective owners.
 
                 Redistribution and use in source and binary forms, with or without modification,
@@ -677,8 +1760,6 @@ used to filter file path.
                 * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
                 * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             " desc="" />
-            </licensematcher> 
-            <licensematcher name="BSD-2-Clause" desc="">
                 <licensetext name="
                 * Redistribution and use in source and binary forms, with or without
                 * modification, are permitted provided that the following conditions
@@ -738,6 +1819,28 @@ used to filter file path.
             </licensematcher> 
       
             <licensematcher name="BSD-2-Clause" desc="">
+            <licensetext name="
+                * Redistribution and use in source and binary forms, with or without
+                * modification, are permitted provided that the following conditions
+                * are met:
+                * 1. Redistributions of source code must retain the above copyright
+                *    notice, this list of conditions and the following disclaimer.
+                * 2. Redistributions in binary form must reproduce the above copyright
+                *    notice, this list of conditions and the following disclaimer in the
+                *    documentation and/or other materials provided with the distribution.
+                *
+                * THIS SOFTWARE IS PROVIDED BY APPLE INC. ``AS IS'' AND ANY
+                * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+                * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+                * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE COMPUTER, INC. OR
+                * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+                * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+                * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+                * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+                * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+                * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+                * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+            " desc="" />
                 <licensetext name="
                 * Redistribution and use in source and binary forms, with or without
                 * modification, are permitted provided that the following conditions
@@ -748,8 +1851,6 @@ used to filter file path.
                 *    notice, this list of conditions and the following disclaimer in the
                 *    documentation and/or other materials provided with the distribution.
             " desc="" />
-            </licensematcher> 
-            <licensematcher name="BSD-2-Clause" desc="">
                 <licensetext name="
                 * Redistribution and use in source and binary forms, with or without
                 * modification, are permitted provided that the following conditions
@@ -772,8 +1873,6 @@ used to filter file path.
                 * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
                 * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             " desc="" />
-            </licensematcher> 
-            <licensematcher name="BSD-2-Clause" desc="">
                 <licensetext name="
                 * Redistribution and use in source and binary forms, with or without
                 * modification, are permitted provided that the following conditions
@@ -796,9 +1895,6 @@ used to filter file path.
                 * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
                 * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             " desc="" />
-            </licensematcher> 
-
-            <licensematcher name="BSD-2-Clause" desc="">
                 <licensetext name="
                 * Redistribution and use in source and binary forms, with or without
                 * modification, are permitted provided that the following conditions
@@ -820,6 +1916,20 @@ used to filter file path.
                 * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
                 * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
                 * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+            " desc="" />
+            <licensetext name="
+                Copyright (c) Felix Böhm
+                All rights reserved.
+
+                Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+
+                Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+
+                Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+
+                THIS IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS,
+                EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
             " desc="" />
             </licensematcher> 
             <licensematcher name="BSD-Source-Code" desc="">
@@ -845,6 +1955,15 @@ used to filter file path.
                 * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
                 * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
                 * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+            " desc="" />
+            </licensematcher> 
+            <licensematcher name="LGPL-2.1-only" desc="">
+                <licensetext name="
+                    # This file describes to Cocoapods how to integrate the Objective-C runtime into a dependent
+                    # project.
+                    # Despite this file being specific to Objective-C, it needs to be on the root of the repository.
+                    # Otherwise, Cocoapods gives trouble like not picking up the license file correctly, or not letting
+                    # dependent projects use the :git notation to refer to the library.
             " desc="" />
             </licensematcher> 
             <licensematcher name="MIT-open-group" desc="">
@@ -885,33 +2004,49 @@ used to filter file path.
                 *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
             " desc="" />
             </licensematcher> 
-            <licensematcher name="Zlib" desc="">
+            <licensematcher name="MIT-0" desc="">
                 <licensetext name="
-                * For conditions of distribution and use, see copyright notice in zlib.h
+                Permission is hereby granted, free of charge, to any person obtaining a copy
+                of this software and associated documentation files (the &quot;Software&quot;), to deal
+                in the Software without restriction, including without limitation the rights
+                to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+                copies of the Software, and to permit persons to whom the Software is
+                furnished to do so, subject to the following conditions:
+
+                THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+                IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+                FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+                AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+                LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+                OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+                SOFTWARE.
+
             " desc="" />
             </licensematcher> 
-            <licensematcher name="BSD-2-Clause" desc="">
+            <licensematcher name="Zlib" desc="">
                 <licensetext name="
-                * Redistribution and use in source and binary forms, with or without
-                * modification, are permitted provided that the following conditions
-                * are met:
-                * 1. Redistributions of source code must retain the above copyright
-                *    notice, this list of conditions and the following disclaimer.
-                * 2. Redistributions in binary form must reproduce the above copyright
-                *    notice, this list of conditions and the following disclaimer in the
-                *    documentation and/or other materials provided with the distribution.
-                *
-                * THIS SOFTWARE IS PROVIDED BY APPLE INC. ``AS IS'' AND ANY
-                * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-                * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
-                * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE COMPUTER, INC. OR
-                * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
-                * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
-                * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
-                * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
-                * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-                * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-                * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+                    * For conditions of distribution and use, see copyright notice in zlib.h
+                " desc="" />
+                <licensetext name="
+                Name: zlib
+                Short Name: zlib
+                URL: https://zlib.net/
+                Revision: See zlib/README.chromium
+                License: zlib
+                License File: zlib/LICENSE
+                Security Critical: yes
+
+                Description:
+                “A massively spiffy yet delicately unobtrusive compression library.”
+
+                zlib is a free, general-purpose, legally unencumbered lossless data-compression
+                library. zlib implements the “deflate” compression algorithm described by RFC
+                1951, which combines the LZ77 (Lempel-Ziv) algorithm with Huffman coding. zlib
+                also implements the zlib (RFC 1950) and gzip (RFC 1952) wrapper formats.
+
+                Local Modifications:
+                See zlib/README.chromium.
+
             " desc="" />
             </licensematcher> 
             <licensematcher name="BSD-2-Clause" desc="">
@@ -940,8 +2075,6 @@ used to filter file path.
                 * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
                 * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             " desc="" />
-            </licensematcher> 
-            <licensematcher name="BSD-2-Clause" desc="">
                 <licensetext name="
                 * Redistribution and use in source and binary forms, with or without
                 * modification, are permitted provided that the following conditions
@@ -963,8 +2096,6 @@ used to filter file path.
                 * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
                 * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             " desc="" />
-            </licensematcher> 
-                <licensematcher name="BSD-2-Clause" desc="">
                     <licensetext name="
                     * Redistribution and use in source and binary forms, with or without
                     * modification, are permitted provided that the following conditions
@@ -987,8 +2118,6 @@ used to filter file path.
                     * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
                     * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                 " desc="" />
-                </licensematcher> 
-                <licensematcher name="BSD-2-Clause" desc="">
                     <licensetext name="
                     * Redistribution and use in source and binary forms, with or without
                     * modification, are permitted provided that the following conditions
@@ -1011,12 +2140,24 @@ used to filter file path.
                     * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
                     * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                 " desc="" />
-                </licensematcher> 
+            </licensematcher> 
             <licensematcher name="MIT" desc="">
                 <licensetext name="
-                Use of this source code is governed by an MIT-style license that can be
-                found in the LICENSE file or at https://opensource.org/licenses/MIT.
-            " desc="" />
+                    Use of this source code is governed by an MIT-style license that can be
+                    found in the LICENSE file or at https://opensource.org/licenses/MIT.
+                " desc="" />
+                <licensetext name="
+                    // Use of this source code is governed by an MIT-style license that can be
+                    // found in the LICENSE file.
+                " desc="" />
+                <licensetext name="
+                    This project is dual-licensed under the Unlicense and MIT licenses.
+
+                    You may use this code under the terms of either license.
+                " desc="" />
+                    <licensetext name="
+                    //  MIT License
+                " desc="" />
             </licensematcher> 
             <licensematcher name="FFTPACK License 2004" desc="">
                 <licensetext name="
@@ -1063,6 +2204,37 @@ used to filter file path.
                 * Author: breese@users.sourceforge.net
             " desc="" />
             </licensematcher> 
+            <licensematcher name="Libpng" desc="">
+                <licensetext name="
+                The software is supplied &quot;as is&quot;, without warranty of any kind,
+                express or implied, including, without limitation, the warranties
+                of merchantability, fitness for a particular purpose, title, and
+                non-infringement.  In no event shall the Copyright owners, or
+                anyone distributing the software, be liable for any damages or
+                other liability, whether in contract, tort or otherwise, arising
+                from, out of, or in connection with the software, or the use or
+                other dealings in the software, even if advised of the possibility
+                of such damage.
+
+                Permission is hereby granted to use, copy, modify, and distribute
+                this software, or portions hereof, for any purpose, without fee,
+                subject to the following restrictions:
+
+                1. The origin of this software must not be misrepresented; you
+                    must not claim that you wrote the original software.  If you
+                    use this software in a product, an acknowledgment in the product
+                    documentation would be appreciated, but is not required.
+
+                2. Altered source versions must be plainly marked as such, and must
+                    not be misrepresented as being the original software.
+
+                3. This Copyright notice may not be removed or altered from any
+                    source or altered source distribution.
+
+
+                PNG Reference Library License version 1 (for libpng 0.5 through 1.6.35)
+            " desc="" />
+            </licensematcher> 
             <licensematcher name="NiH libzip License" desc="">
                 <licensetext name="
                 Redistribution and use in source and binary forms, with or without
@@ -1097,6 +2269,227 @@ used to filter file path.
                 The use and distribution terms for this software are covered by the
                 Microsoft Public License (http://opensource.org/licenses/MS-PL)
                 which can be found in the file MS-PL.txt at the root folder.
+            " desc="" />
+            <licensetext name="
+                JUnit
+
+                Common Public License - v 1.0
+
+                THE ACCOMPANYING PROGRAM IS PROVIDED UNDER THE TERMS OF THIS COMMON PUBLIC
+                LICENSE (&quot;AGREEMENT&quot;). ANY USE, REPRODUCTION OR DISTRIBUTION OF THE PROGRAM
+                CONSTITUTES RECIPIENT'S ACCEPTANCE OF THIS AGREEMENT.
+
+                1. DEFINITIONS
+
+                &quot;Contribution&quot; means:
+
+                    a) in the case of the initial Contributor, the initial code and
+                        documentation distributed under this Agreement, and
+                    b) in the case of each subsequent Contributor:
+
+                    i) changes to the Program, and
+
+                    ii) additions to the Program;
+
+                    where such changes and/or additions to the Program originate from and are
+                distributed by that particular Contributor. A Contribution 'originates' from a
+                Contributor if it was added to the Program by such Contributor itself or anyone
+                acting on such Contributor's behalf. Contributions do not include additions to
+                the Program which: (i) are separate modules of software distributed in
+                conjunction with the Program under their own license agreement, and (ii) are
+                not derivative works of the Program. 
+
+                &quot;Contributor&quot; means any person or entity that distributes the Program.
+
+                &quot;Licensed Patents &quot; mean patent claims licensable by a Contributor which are
+                necessarily infringed by the use or sale of its Contribution alone or when
+                combined with the Program.
+
+                &quot;Program&quot; means the Contributions distributed in accordance with this Agreement.
+
+                &quot;Recipient&quot; means anyone who receives the Program under this Agreement,
+                including all Contributors.
+
+                2. GRANT OF RIGHTS
+
+                    a) Subject to the terms of this Agreement, each Contributor hereby grants
+                Recipient a non-exclusive, worldwide, royalty-free copyright license to
+                reproduce, prepare derivative works of, publicly display, publicly perform,
+                distribute and sublicense the Contribution of such Contributor, if any, and
+                such derivative works, in source code and object code form.
+
+                    b) Subject to the terms of this Agreement, each Contributor hereby grants
+                Recipient a non-exclusive, worldwide, royalty-free patent license under
+                Licensed Patents to make, use, sell, offer to sell, import and otherwise
+                transfer the Contribution of such Contributor, if any, in source code and
+                object code form. This patent license shall apply to the combination of the
+                Contribution and the Program if, at the time the Contribution is added by the
+                Contributor, such addition of the Contribution causes such combination to be
+                covered by the Licensed Patents. The patent license shall not apply to any
+                other combinations which include the Contribution. No hardware per se is
+                licensed hereunder. 
+
+                    c) Recipient understands that although each Contributor grants the
+                licenses to its Contributions set forth herein, no assurances are provided by
+                any Contributor that the Program does not infringe the patent or other
+                intellectual property rights of any other entity. Each Contributor disclaims
+                any liability to Recipient for claims brought by any other entity based on
+                infringement of intellectual property rights or otherwise. As a condition to
+                exercising the rights and licenses granted hereunder, each Recipient hereby
+                assumes sole responsibility to secure any other intellectual property rights
+                needed, if any. For example, if a third party patent license is required to
+                allow Recipient to distribute the Program, it is Recipient's responsibility to
+                acquire that license before distributing the Program.
+
+                    d) Each Contributor represents that to its knowledge it has sufficient
+                copyright rights in its Contribution, if any, to grant the copyright license
+                set forth in this Agreement. 
+
+                3. REQUIREMENTS
+
+                A Contributor may choose to distribute the Program in object code form under
+                its own license agreement, provided that:
+
+                    a) it complies with the terms and conditions of this Agreement; and
+
+                    b) its license agreement:
+
+                    i) effectively disclaims on behalf of all Contributors all warranties and
+                conditions, express and implied, including warranties or conditions of title
+                and non-infringement, and implied warranties or conditions of merchantability
+                and fitness for a particular purpose; 
+
+                    ii) effectively excludes on behalf of all Contributors all liability for
+                damages, including direct, indirect, special, incidental and consequential
+                damages, such as lost profits; 
+
+                    iii) states that any provisions which differ from this Agreement are
+                offered by that Contributor alone and not by any other party; and
+
+                    iv) states that source code for the Program is available from such
+                Contributor, and informs licensees how to obtain it in a reasonable manner on
+                or through a medium customarily used for software exchange. 
+
+                When the Program is made available in source code form:
+
+                    a) it must be made available under this Agreement; and 
+
+                    b) a copy of this Agreement must be included with each copy of the
+                Program. 
+
+                Contributors may not remove or alter any copyright notices contained within the
+                Program.
+
+                Each Contributor must identify itself as the originator of its Contribution, if
+                any, in a manner that reasonably allows subsequent Recipients to identify the
+                originator of the Contribution.
+
+                4. COMMERCIAL DISTRIBUTION
+
+                Commercial distributors of software may accept certain responsibilities with
+                respect to end users, business partners and the like. While this license is
+                intended to facilitate the commercial use of the Program, the Contributor who
+                includes the Program in a commercial product offering should do so in a manner
+                which does not create potential liability for other Contributors. Therefore, if
+                a Contributor includes the Program in a commercial product offering, such
+                Contributor (&quot;Commercial Contributor&quot;) hereby agrees to defend and indemnify
+                every other Contributor (&quot;Indemnified Contributor&quot;) against any losses, damages
+                and costs (collectively &quot;Losses&quot;) arising from claims, lawsuits and other legal
+                actions brought by a third party against the Indemnified Contributor to the
+                extent caused by the acts or omissions of such Commercial Contributor in
+                connection with its distribution of the Program in a commercial product
+                offering. The obligations in this section do not apply to any claims or Losses
+                relating to any actual or alleged intellectual property infringement. In order
+                to qualify, an Indemnified Contributor must: a) promptly notify the Commercial
+                Contributor in writing of such claim, and b) allow the Commercial Contributor
+                to control, and cooperate with the Commercial Contributor in, the defense and
+                any related settlement negotiations. The Indemnified Contributor may
+                participate in any such claim at its own expense.
+
+                For example, a Contributor might include the Program in a commercial product
+                offering, Product X. That Contributor is then a Commercial Contributor. If that
+                Commercial Contributor then makes performance claims, or offers warranties
+                related to Product X, those performance claims and warranties are such
+                Commercial Contributor's responsibility alone. Under this section, the
+                Commercial Contributor would have to defend claims against the other
+                Contributors related to those performance claims and warranties, and if a court
+                requires any other Contributor to pay any damages as a result, the Commercial
+                Contributor must pay those damages.
+
+                5. NO WARRANTY
+
+                EXCEPT AS EXPRESSLY SET FORTH IN THIS AGREEMENT, THE PROGRAM IS PROVIDED ON AN
+                &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, EITHER EXPRESS OR
+                IMPLIED INCLUDING, WITHOUT LIMITATION, ANY WARRANTIES OR CONDITIONS OF TITLE,
+                NON-INFRINGEMENT, MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE. Each
+                Recipient is solely responsible for determining the appropriateness of using
+                and distributing the Program and assumes all risks associated with its exercise
+                of rights under this Agreement, including but not limited to the risks and
+                costs of program errors, compliance with applicable laws, damage to or loss of
+                data, programs or equipment, and unavailability or interruption of operations.
+
+                6. DISCLAIMER OF LIABILITY
+
+                EXCEPT AS EXPRESSLY SET FORTH IN THIS AGREEMENT, NEITHER RECIPIENT NOR ANY
+                CONTRIBUTORS SHALL HAVE ANY LIABILITY FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+                SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING WITHOUT LIMITATION LOST
+                PROFITS), HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+                STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY
+                WAY OUT OF THE USE OR DISTRIBUTION OF THE PROGRAM OR THE EXERCISE OF ANY RIGHTS
+                GRANTED HEREUNDER, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+
+                7. GENERAL
+
+                If any provision of this Agreement is invalid or unenforceable under applicable
+                law, it shall not affect the validity or enforceability of the remainder of the
+                terms of this Agreement, and without further action by the parties hereto, such
+                provision shall be reformed to the minimum extent necessary to make such
+                provision valid and enforceable.
+
+                If Recipient institutes patent litigation against a Contributor with respect to
+                a patent applicable to software (including a cross-claim or counterclaim in a
+                lawsuit), then any patent licenses granted by that Contributor to such
+                Recipient under this Agreement shall terminate as of the date such litigation
+                is filed. In addition, if Recipient institutes patent litigation against any
+                entity (including a cross-claim or counterclaim in a lawsuit) alleging that the
+                Program itself (excluding combinations of the Program with other software or
+                hardware) infringes such Recipient's patent(s), then such Recipient's rights
+                granted under Section 2(b) shall terminate as of the date such litigation is
+                filed.
+
+                All Recipient's rights under this Agreement shall terminate if it fails to
+                comply with any of the material terms or conditions of this Agreement and does
+                not cure such failure in a reasonable period of time after becoming aware of
+                such noncompliance. If all Recipient's rights under this Agreement terminate,
+                Recipient agrees to cease use and distribution of the Program as soon as
+                reasonably practicable. However, Recipient's obligations under this Agreement
+                and any licenses granted by Recipient relating to the Program shall continue
+                and survive.
+
+                Everyone is permitted to copy and distribute copies of this Agreement, but in
+                order to avoid inconsistency the Agreement is copyrighted and may only be
+                modified in the following manner. The Agreement Steward reserves the right to
+                publish new versions (including revisions) of this Agreement from time to time.
+                No one other than the Agreement Steward has the right to modify this Agreement.
+                IBM is the initial Agreement Steward. IBM may assign the responsibility to
+                serve as the Agreement Steward to a suitable separate entity. Each new version
+                of the Agreement will be given a distinguishing version number. The Program
+                (including Contributions) may always be distributed subject to the version of
+                the Agreement under which it was received. In addition, after a new version of
+                the Agreement is published, Contributor may elect to distribute the Program
+                (including its Contributions) under the new version. Except as expressly stated
+                in Sections 2(a) and 2(b) above, Recipient receives no rights or licenses to
+                the intellectual property of any Contributor under this Agreement, whether
+                expressly, by implication, estoppel or otherwise. All rights in the Program not
+                expressly granted under this Agreement are reserved.
+
+                This Agreement is governed by the laws of the State of New York and the
+                intellectual property laws of the United States of America. No party to this
+                Agreement will bring a legal action under this Agreement more than one year
+                after the cause of action arose. Each party waives its rights to a jury trial
+                in any resulting litigation. 
+
+
             " desc="" />
             </licensematcher> 
             <licensematcher name="HPND-sell-variant" desc="">
@@ -1296,7 +2689,295 @@ used to filter file path.
                 You should have received a copy of the CC0 Public Domain Dedication along with
                 this software. If not, see &lt;http://creativecommons.org/publicdomain/zero/1.0/&gt;.
             " desc="" />
+            <licensetext name="
+                CC0 1.0 Universal (CC0 1.0)
+                No Copyright
+                The person who associated a work with this deed has dedicated the work to the public domain by waiving all of his or her rights to the work worldwide under copyright law, including all related and neighboring rights, to the extent allowed by law.
+
+                You can copy, modify, distribute and perform the work, even for commercial purposes, all without asking permission. See Other Information below.
+
+                This license is acceptable for Free Cultural Works.
+                Other Information
+                In no way are the patent or trademark rights of any person affected by CC0, nor are the rights that other persons may have in the work or in how the work is used, such as publicity or privacy rights.
+                Unless expressly stated otherwise, the person who associated a work with this deed makes no warranties about the work, and disclaims liability for all uses of the work, to the fullest extent permitted by applicable law.
+                When using or citing the work, you should not imply endorsement by the author or the affirmer.
+
+            " desc="" />
             </licensematcher> 
+            <licensematcher name="Apache-2.0" desc="">
+                <licensetext name="
+                /**
+                * @license
+                * Copyright The Closure Library Authors.
+                * SPDX-License-Identifier: Apache-2.0
+                */
+            " desc="" />
+            <licensetext name="
+                Name: eDistantObject
+                Short Name: EDO
+                URL: https://github.com/google/eDistantObject
+                Revision: See DEPS
+                License: Apache 2.0
+                License File: edo/LICENSE
+                Security Critical: no
+
+                Description:
+                iOS remote method invocations (distant object) over Inter-process communication layer.
+
+            " desc="" />
+            </licensematcher> 
+            <licensematcher name="LicenseRef-scancode-mit-synopsys" desc="">
+                <licensetext name="
+                wcwidth.js: JavaScript Portng of Markus Kuhn's wcwidth() Implementation
+                =======================================================================
+
+                Copyright (C) 2012 by Jun Woong.
+
+                This package is a JavaScript porting of `wcwidth()` implementation
+                [by Markus Kuhn](http://www.cl.cam.ac.uk/~mgk25/ucs/wcwidth.c).
+
+                Permission is hereby granted, free of charge, to any person obtaining a copy of
+                this software and associated documentation files (the &quot;Software&quot;), to deal in
+                the Software without restriction, including without limitation the rights to
+                use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+                of the Software, and to permit persons to whom the Software is furnished to do
+                so, subject to the following conditions:
+
+                The above copyright notice and this permission notice shall be included in all
+                copies or substantial portions of the Software.
+
+
+                THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES,
+                INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
+                FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR
+                OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+                EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+                PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+                BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+                IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+                ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+                POSSIBILITY OF SUCH DAMAGE.
+
+
+            " desc="" />
+            </licensematcher> 
+            <licensematcher name="LicenseRef-scancode-generic-cla" desc="">
+                <licensetext name="
+                    Closure Library welcomes patches/pulls for features and bugfixes.
+
+                    For contributors external to Google, follow the instructions given here:
+
+                    Notes on Contributions to Closure Library
+
+                    Google Individual Contributor License
+
+                    In all cases, contributors must sign a contributor license agreement,
+                    either for an individual or corporation, before a patch can be
+                    accepted. Please fill out the agreement for an individual or a
+                    corporation, as appropriate.
+
+                    https://developers.google.com/open-source/cla/individual
+                    https://developers.google.com/open-source/cla/corporate
+
+                    If you or your organization is not listed there already, you should
+                    add an entry to the AUTHORS file as part of your patch.
+
+                    If you plan to add a significant component or large chunk of code, it
+                    is recommended to bring it up on the discussion list for a design
+                    discussion before writing code.
+
+                    If appropriate, write a unit test that demonstrates your patch. Tests are the
+                    best way to ensure that future contributors do not break your code
+                    accidentally.
+
+                    To change the Closure Library source, you must submit a pull request
+                    in GitHub. See the GitHub documentation here:
+
+                    https://help.github.com/categories/63/articles
+
+                    Closure Library developers monitor outstanding pull requests. They may
+                    request changes on the pull request before accepting. They will also
+                    verify that the CLA has been signed.
+
+                    Oftentimes, the pull request will not be directly merged, but patched to
+                    the internal Google codebase to verify that unit and integration tests
+                    will pass before submitting (and optionally make changes to the patch to
+                    match style, fix text, or to make the code or comments clearer). In this
+                    case, the issue associated with the pull request will be closed when the
+                    patch is pushed to the repository via the MOE (Make Open Easy) system.
+
+                    https://github.com/google/MOE/
+
+                " desc="" />
+                <licensetext name="
+                    Closure Library welcomes patches/pulls for features and bugfixes.
+
+                    For contributors external to Google, follow the instructions given here:
+
+                    Notes on Contributions to Closure Library
+
+                    Google Individual Contributor License
+
+                    In all cases, contributors must sign a contributor license agreement,
+                    either for an individual or corporation, before a patch can be
+                    accepted. Please fill out the agreement for an individual or a
+                    corporation, as appropriate.
+
+                    https://developers.google.com/open-source/cla/individual
+                    https://developers.google.com/open-source/cla/corporate
+
+                    If you or your organization is not listed there already, you should
+                    add an entry to the AUTHORS file as part of your patch.
+
+                    If you plan to add a significant component or large chunk of code, it
+                    is recommended to bring it up on the discussion list for a design
+                    discussion before writing code.
+
+                    If appropriate, write a unit test that demonstrates your patch. Tests are the
+                    best way to ensure that future contributors do not break your code
+                    accidentally.
+
+                    To change the Closure Library source, you must submit a pull request
+                    in GitHub. See the GitHub documentation here:
+
+                    https://help.github.com/categories/63/articles
+
+                    Closure Library developers monitor outstanding pull requests. They may
+                    request changes on the pull request before accepting. They will also
+                    verify that the CLA has been signed.
+
+                    Oftentimes, the pull request will not be directly merged, but patched to
+                    the internal Google codebase to verify that unit and integration tests
+                    will pass before submitting (and optionally make changes to the patch to
+                    match style, fix text, or to make the code or comments clearer). In this
+                    case, the issue associated with the pull request will be closed when the
+                    patch is pushed to the repository via the MOE (Make Open Easy) system.
+
+                    https://github.com/google/MOE/
+
+            " desc="" />
+            </licensematcher> 
+            <licensematcher name="LicenseRef-scancode-public-domain" desc="">
+                <licensetext name="
+                /****************************************************************************
+                *  This file is part of PPMd project                                       *
+                *  Written and distributed to public domain by Dmitry Shkarin 1997,        *
+                *  1999-2000                                                               *
+                *  Contents: memory allocation routines                                    *
+                ****************************************************************************/
+            " desc="" />
+            <licensetext name="
+                Name: Gregory Pietsch getopt
+                Short Name: getopt
+                URL: https://sourceware.org/ml/newlib/2005/msg00758.html
+                License: Public domain
+                License File: LICENSE
+                Security Critical: no
+
+                Description:
+                A public domain implementation of getopt.
+
+                Local Modifications:
+                - Minor compilation fixes applied for Windows.
+                - NO_ARG, REQUIRED_ARG, and OPTIONAL_ARG were renamed to the more traditional
+                no_argument, required_argument, and optional_argument for source
+                compatibility with BSD and glibc getopt_long().
+                - Add copy of copyright (Public domain) to the top of both files for Chromium's
+                checklicenses step.
+                - Compiled as .cc, and wrapped in namespace crashpad.
+                - memcmp() -> strncmp() in getopt.cc to make ASan happier about some string
+                manipulation.
+
+            " desc="" />
+            </licensematcher> 
+            <licensematcher name="ANTLR-PD" desc="">
+                <licensetext name="
+                
+                SOFTWARE RIGHTS
+                $Id: RIGHTS.antlr,v 1.1 2001-06-22 13:11:01 oburn Exp $
+
+                ANTLR 1989-2000 Developed by jGuru.com (MageLang Institute), 
+                http://www.ANTLR.org  and http://www.jGuru.com
+
+                We reserve no legal rights to the ANTLR--it is fully in the
+                public domain. An individual or company may do whatever
+                they wish with source code distributed with ANTLR or the
+                code generated by ANTLR, including the incorporation of
+                ANTLR, or its output, into commerical software.
+
+                We encourage users to develop software with ANTLR. However,
+                we do ask that credit is given to us for developing
+                ANTLR. By &quot;credit&quot;, we mean that if you use ANTLR or
+                incorporate any source code into one of your programs
+                (commercial product, research project, or otherwise) that
+                you acknowledge this fact somewhere in the documentation,
+                research report, etc... If you like ANTLR and have
+                developed a nice tool with the output, please mention that
+                you developed it using ANTLR. In addition, we ask that the
+                headers remain intact in our source code. As long as these
+                guidelines are kept, we expect to continue enhancing this
+                system and expect to make other tools available as they are
+                completed.
+
+                The primary ANTLR guy:
+
+                Terence Parr
+                http://www.jGuru.com
+                parrt@jguru.com
+
+            " desc="" />
+            </licensematcher> 
+            <licensematcher name="LicenseRef-scancode-unrar" desc="">
+                <licensetext name="
+                                (Copied from src/license.txt)
+                    -----------------------------
+
+                    ******    *****   ******   UnRAR - free utility for RAR archives
+                    **   **  **   **  **   **  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                    ******   *******  ******    License for use and distribution of
+                    **   **  **   **  **   **   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                    **   **  **   **  **   **         FREE portable version
+                                                    ~~~~~~~~~~~~~~~~~~~~~
+
+                        The source code of UnRAR utility is freeware. This means:
+
+                    1. All copyrights to RAR and the utility UnRAR are exclusively
+                        owned by the author - Alexander Roshal.
+
+                    2. UnRAR source code may be used in any software to handle
+                        RAR archives without limitations free of charge, but cannot be
+                        used to develop RAR (WinRAR) compatible archiver and to
+                        re-create RAR compression algorithm, which is proprietary.
+                        Distribution of modified UnRAR source code in separate form
+                        or as a part of other software is permitted, provided that
+                        full text of this paragraph, starting from &quot;UnRAR source code&quot;
+                        words, is included in license, or in documentation if license
+                        is not available, and in source code comments of resulting package.
+
+                    3. The UnRAR utility may be freely distributed. It is allowed
+                        to distribute UnRAR inside of other software packages.
+
+                    4. THE RAR ARCHIVER AND THE UnRAR UTILITY ARE DISTRIBUTED &quot;AS IS&quot;.
+                        NO WARRANTY OF ANY KIND IS EXPRESSED OR IMPLIED.  YOU USE AT 
+                        YOUR OWN RISK. THE AUTHOR WILL NOT BE LIABLE FOR DATA LOSS, 
+                        DAMAGES, LOSS OF PROFITS OR ANY OTHER KIND OF LOSS WHILE USING
+                        OR MISUSING THIS SOFTWARE.
+
+                    5. Installing and using the UnRAR utility signifies acceptance of
+                        these terms and conditions of the license.
+
+                    6. If you don't agree with terms of the license you must remove
+                        UnRAR files from your storage devices and cease to use the
+                        utility.
+
+                        Thank you for your interest in RAR and UnRAR.
+
+
+                                                                Alexander L. Roshal
+
+            " desc="" />
+            </licensematcher> 
+            
         </licensematcherlist>
     </oatconfig>
 </configuration>
