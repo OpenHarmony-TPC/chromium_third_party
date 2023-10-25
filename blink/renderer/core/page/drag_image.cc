@@ -200,7 +200,7 @@ std::unique_ptr<DragImage> DragImage::Create(const KURL& url,
 
   String url_string = url.GetString();
   String label = in_label.StripWhiteSpace();
-#ifdef BUIDFLAG(IS_OHOS)
+#ifdef BUILDFLAG(IS_OHOS)
   label = DragImage::filterNonPrintable(label);
 #endif
   if (label.IsEmpty()) {
