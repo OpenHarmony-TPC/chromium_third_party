@@ -4420,6 +4420,13 @@ void WebFrameWidgetImpl::SetZoomLevel(float magnify_delta, const gfx::Point& anc
   }
   widget_base_->SetZoomLevel(magnify_delta, anchor);
 }
+
+void WebFrameWidgetImpl::SetOverscrollMode(int mode) {
+  if (!widget_base_) {
+    return;
+  }
+  widget_base_->SetOverscrollMode(mode);
+}
 #endif
 
 }  // namespace blink

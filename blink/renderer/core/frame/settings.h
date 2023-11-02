@@ -96,13 +96,21 @@ class CORE_EXPORT Settings {
   uint32_t GetScrollBarColor() {
     return scrollbar_color_;
   }
-  
+
   void EnableBlankTargetPopupIntercept(bool enabled) {
     blank_target_popup_intercept_enabled_ = enabled;
   }
 
   bool IsBlankTargetPopupInterceptEnabled() const {
     return blank_target_popup_intercept_enabled_;
+  }
+
+  void SetOverscrollMode(int overscrollMode) {
+    overscroll_mode_ = overscrollMode;
+  }
+
+  int GetOverscrollMode() {
+    return overscroll_mode_;
   }
 #endif
 
@@ -122,6 +130,7 @@ class CORE_EXPORT Settings {
   bool hide_horizontal_scrollbars_ = true;
   bool contextmenu_customization_enabled_ = false;
   uint32_t scrollbar_color_ = 0;
+  int overscroll_mode_ = 0;
   bool blank_target_popup_intercept_enabled_ = true;
 #endif
 };

@@ -303,7 +303,11 @@ cc::LayerTreeSettings GenerateLayerTreeSettings(
   settings.use_partial_raster = !cmd.HasSwitch(switches::kDisablePartialRaster);
   // Partial raster is not supported with RawDraw
   settings.use_partial_raster &= !::features::IsUsingRawDraw();
+#if defined(OS_OHOS)
+  settings.enable_elastic_overscroll = true;
+#else
   settings.enable_elastic_overscroll = platform->IsElasticOverscrollEnabled();
+#endif
   settings.resource_settings.use_gpu_memory_buffer_resources =
       cmd.HasSwitch(switches::kEnableGpuMemoryBufferCompositorResources);
   settings.use_painted_device_scale_factor = settings.use_zoom_for_dsf;

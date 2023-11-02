@@ -1021,6 +1021,13 @@ void WidgetInputHandlerManager::AsyncSetZoomLevel(
                                 magnify_delta, anchor));
 }
 
+void WidgetInputHandlerManager::SetOverscrollMode(int mode) {
+  if (!input_handler_proxy_) {
+    return;
+  }
+  input_handler_proxy_->SetOverscrollMode(mode);
+}
+
 #endif  // BUILDFLAG(IS_OHOS)
 
 }  // namespace blink

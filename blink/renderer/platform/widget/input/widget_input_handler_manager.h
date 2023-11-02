@@ -177,6 +177,7 @@ class PLATFORM_EXPORT WidgetInputHandlerManager final
   void SetZoomLevel(float magnify_delta, const gfx::Point& anchor);
 
   void AsyncSetZoomLevel(float magnify_delta, const gfx::Point& anchor);
+  void SetOverscrollMode(int mode);
 #endif  // BUILDFLAG(IS_OHOS)
 
  protected:
