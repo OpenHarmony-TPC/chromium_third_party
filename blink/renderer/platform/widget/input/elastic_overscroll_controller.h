@@ -75,6 +75,7 @@ class PLATFORM_EXPORT ElasticOverscrollController {
   void ReconcileStretchAndScroll();
   static std::unique_ptr<ElasticOverscrollController> Create(
       cc::ScrollElasticityHelper* helper);
+  void SetOverscrollMode(int mode);
 
  protected:
   virtual void DidEnterMomentumAnimatedState() = 0;
@@ -183,6 +184,9 @@ class PLATFORM_EXPORT ElasticOverscrollController {
 
   bool received_overscroll_update_;
   cc::OverscrollBehavior overscroll_behavior_;
+#if BUILDFLAG(IS_OHOS)
+  int overscroll_mode_ = 0;
+#endif
 };
 
 }  // namespace blink

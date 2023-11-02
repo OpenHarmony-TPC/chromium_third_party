@@ -789,6 +789,7 @@ class CORE_EXPORT WebFrameWidgetImpl
 #if BUILDFLAG(IS_OHOS)
   void SelectAndCopy() override;
   void SetZoomLevel(float magnify_delta, const gfx::Point& anchor) override;
+  void SetOverscrollMode(int mode) override;
 #endif
   // PageWidgetEventHandler overrides:
   WebInputEventResult HandleKeyEvent(const WebKeyboardEvent&) override;

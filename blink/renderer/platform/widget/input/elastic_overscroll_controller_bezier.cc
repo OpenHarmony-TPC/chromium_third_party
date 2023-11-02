@@ -9,13 +9,20 @@ namespace blink {
 
 namespace {
 // The following constants are determined experimentally.
+#if BUILDFLAG(IS_OHOS)
+// Used to determine how far the scroller is allowed to stretch.
+constexpr double kOverscrollBoundaryMultiplier = 0.3f;
 
+// Maximum duration for the bounce back animation.
+constexpr double kBounceBackMaxDurationMilliseconds = 500.0;
+#else
 // Used to determine how far the scroller is allowed to stretch.
 constexpr double kOverscrollBoundaryMultiplier = 0.1f;
 
 // Maximum duration for the bounce back animation.
 constexpr double kBounceBackMaxDurationMilliseconds = 300.0;
 
+#endif 
 // Time taken by the bounce back animation (in milliseconds) to scroll 1 px.
 constexpr double kBounceBackMillisecondsPerPixel = 15.0;
 
@@ -27,7 +34,11 @@ constexpr double kIgnoreForwardBounceVelocityThreshold = 200;
 
 constexpr double kOverbounceMaxDurationMilliseconds = 150.0;
 constexpr double kOverbounceMillisecondsPerPixel = 2.5;
+#if BUILDFLAG(IS_OHOS)
+constexpr double kOverbounceDistanceMultiplier = 55.f;
+#else
 constexpr double kOverbounceDistanceMultiplier = 35.f;
+#endif
 
 // Control points for the bounce forward Cubic Bezier curve.
 constexpr double kBounceForwardsX1 = 0.25;

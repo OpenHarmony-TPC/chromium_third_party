@@ -52,6 +52,10 @@ constexpr double kRubberbandMinimumRequiredDeltaBeforeStretch = 10;
 // On android, overscroll should not occur if the scroller is not scrollable in
 // the overscrolled direction.
 constexpr bool kOverscrollNonScrollableDirection = false;
+#elif BUILDFLAG(IS_OHOS)
+// On OHOS, overscroll should not occur if the scroller is not scrollable in
+// the overscrolled direction.
+constexpr bool kOverscrollNonScrollableDirection = false;
 #else   // defined(OS_ANDROID)
 // On other platforms, overscroll can occur even if the scroller is not
 // scrollable.
@@ -72,6 +76,8 @@ ElasticOverscrollController::Create(cc::ScrollElasticityHelper* helper) {
   return base::FeatureList::IsEnabled(features::kElasticOverscroll)
              ? std::make_unique<ElasticOverscrollControllerBezier>(helper)
              : nullptr;
+#elif BUILDFLAG(IS_OHOS)
+  return std::make_unique<ElasticOverscrollControllerBezier>(helper);
 #else
   return std::make_unique<ElasticOverscrollControllerExponential>(helper);
 #endif
@@ -179,17 +185,42 @@ void ElasticOverscrollController::UpdateVelocity(
   last_scroll_event_timestamp_ = event_timestamp;
 }
 
+#if BUILDFLAG(IS_OHOS)
+
+void ElasticOverscrollController::SetOverscrollMode(int mode) {
+  //mode value NEVER is 0 and ALWAYS is 1.
+  overscroll_mode_ = mode;
+}
+
+#endif
 void ElasticOverscrollController::Overscroll(
     const gfx::Vector2dF& overscroll_delta) {
   // The effect can be dynamically disabled by setting disallowing user
   // scrolling. When disabled, disallow active or momentum overscrolling, but
   // allow any current overscroll to animate back.
+#if !BUILDFLAG(IS_OHOS)
   if (!helper_->IsUserScrollable())
     return;
 
   gfx::Vector2dF adjusted_overscroll_delta =
       pending_overscroll_delta_ + overscroll_delta;
   pending_overscroll_delta_ = gfx::Vector2dF();
+#else 
+  if (overscroll_mode_) {
+    return;
+  }
+  gfx::Vector2dF adjusted_overscroll_delta =
+      pending_overscroll_delta_ + overscroll_delta;
+  pending_overscroll_delta_ = gfx::Vector2dF();
+
+  if (!helper_->IsUserScrollableHorizontal())
+    adjusted_overscroll_delta.set_x(0);
+  if (!helper_->IsUserScrollableVertical())
+    adjusted_overscroll_delta.set_y(0);
+
+  if (adjusted_overscroll_delta.IsZero())
+    return;
+#endif
 
   // TODO (arakeri): Make this prefer the writing mode direction instead.
   // Only allow one direction to overscroll at a time, and slightly prefer
@@ -204,7 +235,11 @@ void ElasticOverscrollController::Overscroll(
     // is not.
     if (!CanScrollHorizontally())
       adjusted_overscroll_delta.set_x(0);
+#if BUILDFLAG(IS_OHOS)
+    if (!CanScrollVertically() && CanScrollHorizontally())
+#else
     if (!CanScrollVertically())
+#endif
       adjusted_overscroll_delta.set_y(0);
   }
 
@@ -216,6 +251,7 @@ void ElasticOverscrollController::Overscroll(
 
   // Don't allow overscrolling in a direction that has
   // OverscrollBehaviorTypeNone.
+
   if (overscroll_behavior_.x == cc::OverscrollBehavior::Type::kNone)
     adjusted_overscroll_delta.set_x(0);
   if (overscroll_behavior_.y == cc::OverscrollBehavior::Type::kNone)
@@ -298,14 +334,28 @@ void ElasticOverscrollController::Animate(base::TimeTicks time) {
 
   // If the new stretch amount is near zero, set it directly to zero and enter
   // the inactive state.
+#if BUILDFLAG(IS_OHOS)
+  gfx::Vector2dF new_stretch_amount = StretchAmountForTimeDelta(
+    std::max(time - momentum_animation_start_time_, base::TimeDelta()));
+#else
   const gfx::Vector2dF new_stretch_amount = StretchAmountForTimeDelta(
       std::max(time - momentum_animation_start_time_, base::TimeDelta()));
+#endif
   if (fabs(new_stretch_amount.x()) < 1 && fabs(new_stretch_amount.y()) < 1) {
     helper_->SetStretchAmount(gfx::Vector2dF());
     EnterStateInactive();
     return;
   }
 
+#if BUILDFLAG(IS_OHOS)
+  if(!CanScrollHorizontally()){
+    new_stretch_amount.set_x(0);
+  }
+
+  if(!CanScrollVertically()){
+    new_stretch_amount.set_y(0);
+  }
+#endif
   stretch_scroll_force_ =
       AccumulatedOverscrollForStretchAmount(new_stretch_amount);
   helper_->SetStretchAmount(new_stretch_amount);

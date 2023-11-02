@@ -187,6 +187,7 @@ class PLATFORM_EXPORT InputHandlerProxy : public cc::InputHandlerClient,
     current_internal_begin_frame_args_ = args;
     need_flush_scroll_update_gesture_ = true;
   };
+  void SetOverscrollMode(int mode);
 #endif
 
   // SynchronousInputHandlerProxy implementation.

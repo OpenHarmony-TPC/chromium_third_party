@@ -360,6 +360,7 @@ class PLATFORM_EXPORT WidgetBase : public mojom::blink::Widget,
 
 #if BUILDFLAG(IS_OHOS)
   void SetZoomLevel(float magnify_delta, const gfx::Point& anchor);
+  void SetOverscrollMode(int mode);
 #endif  // BUILDFLAG(IS_OHOS)
 
  private:

@@ -558,6 +558,16 @@ void InputHandlerProxy::UpdateElasticOverscroll() {
   }
 }
 
+#if BUILDFLAG(IS_OHOS)
+void InputHandlerProxy::SetOverscrollMode(int mode) {
+  if (!elastic_overscroll_controller_) {
+    LOG(ERROR) << "Error:Overscroll controller is not initialized";
+    return;
+  }
+  elastic_overscroll_controller_->SetOverscrollMode(mode);
+}
+
+#endif
 void InputHandlerProxy::InjectScrollbarGestureScroll(
     const WebInputEvent::Type type,
     const gfx::PointF& position_in_widget,
