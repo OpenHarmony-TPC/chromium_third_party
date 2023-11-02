@@ -87,7 +87,6 @@ used to filter file path.
                 <policyitem type="compatibility" name="GPLStyleLicense" path="libxml/src/py-compile" desc="经法务确认,涉及文件在render进程进行了隔离" />
                 <policyitem type="compatibility" name="GPLStyleLicense" path="tcmalloc/vendor/src/third_party/valgrind.h" desc="经法务确认,涉及文件在render进程进行了隔离" />
                 <policyitem type="compatibility" name="GPLStyleLicense" path="speech-dispatcher/libspeechd.h" desc="经法务确认,涉及文件在render进程进行了隔离" />
-                <policyitem type="compatibility" name="GPLStyleLicense" path="subresource-filter-ruleset/LICENSE" desc="经法务确认,涉及文件在render进程进行了隔离" />
                 <policyitem type="compatibility" name="GPLStyleLicense" path="jsoncpp/LICENSE" desc="经法务确认,涉及文件在render进程进行了隔离" />
                 <policyitem type="compatibility" name="MPL-1.1" path="mozilla/.*" desc="经法务确认,涉及文件在render进程进行了隔离" />
                 <policyitem type="compatibility" name="MPL-1.1" path="hunspell/.*" desc="经法务确认,涉及文件在render进程进行了隔离" />
@@ -95,27 +94,20 @@ used to filter file path.
                 <policyitem type="compatibility" name="MPL-1.1" path="blink/.*" desc="经法务确认,涉及文件在render进程进行了隔离" />
                 <policyitem type="compatibility" name="MPL-1.1" path="hyphenation-patterns/src/hu/NOTICE" desc="经法务确认,涉及文件在render进程进行了隔离" />
                 <policyitem type="compatibility" name="MPL-2.0" path="blink/renderer/platform/fonts/opentype/open_type_caps_support_mpl.cc" desc="经法务确认,涉及文件在render进程进行了隔离" />
-                <policyitem type="compatibility" name="MPL-2.0" path="node/node_modules/mdn-data/LICENSE" desc="经法务确认,涉及文件在render进程进行了隔离" />
-                <policyitem type="compatibility" name="MPL-2.0" path="axe-core/LICENSE" desc="经法务确认,涉及文件在render进程进行了隔离" />
                 <policyitem type="compatibility" name="LGPL-2.1+" path="blink/.*" desc="经法务确认,涉及文件在render进程进行了隔离" />
                 <policyitem type="compatibility" name="LGPL-2.1+" path="libusb/.*" desc="经法务确认,涉及文件在render进程进行了隔离" />
                 <policyitem type="compatibility" name="LGPL-2.1+" path="hyphenation-patterns/.*" desc="经法务确认为宽松型许可证" />
                 <policyitem type="compatibility" name="LGPL-2.1+" path="libudev/.*" desc="经法务确认,涉及文件在render进程进行了隔离" />
-                <policyitem type="compatibility" name="LGPL-2.1+" path="libsecret/LICENSE" desc="经法务确认,涉及文件在render进程进行了隔离" />
                 <policyitem type="compatibility" name="LGPL-2.1-only" path="protobuf/Protobuf.podspec" desc="经法务确认,涉及文件在render进程进行了隔离" />
                 <policyitem type="compatibility" name="GPL-2.0+" path="lcov/.*" desc="经法务确认,涉及文件在render进程进行了隔离" />
                 <policyitem type="compatibility" name="GPL-2.0+" path="devscripts/.*" desc="经法务确认,涉及文件在render进程进行了隔离" />
                 <policyitem type="compatibility" name="GPL-2.0+" path="dpkg-shlibdeps/dpkg-shlibdeps.pl" desc="经法务确认,涉及文件在render进程进行了隔离" />
-                <policyitem type="compatibility" name="GPL-2.0+" path="proguard/LICENSE" desc="经法务确认,涉及文件在render进程进行了隔离" />
-                <policyitem type="compatibility" name="GPL-2.0+" path="test_fonts/LICENSE" desc="经法务确认,涉及文件在render进程进行了隔离" />
-                <policyitem type="compatibility" name="GPL-2.0+" path="freetype-testing/LICENSE" desc="经法务确认,涉及文件在render进程进行了隔离" />
-                <policyitem type="compatibility" name="GPL-2.0+" path="dpkg-shlibdeps/LICENSE" desc="经法务确认,涉及文件在render进程进行了隔离" />
                 <policyitem type="compatibility" name="GPL-2.0+" path="speech-dispatcher/COPYING" desc="经法务确认,涉及文件在render进程进行了隔离" />
                 <policyitem type="compatibility" name="CPL-1.0" path="wtl/include/.*" desc="经法务确认,涉及文件在render进程进行了隔离" />
-                <policyitem type="compatibility" name="CPL-1.0" path="junit/LICENSE" desc="经法务确认,涉及文件在render进程进行了隔离" />
 
                 <policyitem type="compatibility" name="OpenSSL" path="node/linux/node-linux-x64/include/node/openssl/.*" desc="" />
                 <policyitem type="compatibility" name="OpenSSL" path="apache-win32/LICENSE.txt" desc="经法务确认为宽松型许可证" />
+                <policyitem type="compatibility" name="Red Hat Attribution License" path="android_rust_toolchain/toolchain/lib/rustlib/src/rust/vendor/compiler_builtins/libm/src/math/.*" desc="经法务确认为宽松型许可证" />
                 <policyitem type="compatibility" name="BSL-1.0" path="rust/ryu/v1/crate/.*" desc="经法务确认为宽松型许可证" />
                 <policyitem type="compatibility" name="BSL-1.0" path="decklink/LICENSE" desc="经法务确认为宽松型许可证" />
                 <policyitem type="compatibility" name="Libpng" path="libpng/.*" desc="经法务确认为宽松型许可证" />
@@ -152,6 +144,8 @@ used to filter file path.
                 <policyitem type="compatibility" name="CDDL-1.0" path="android_deps/libs/javax_annotation_jsr250_api/LICENSE" desc="经法务确认为宽松型许可证" />
                 <policyitem type="compatibility" name="IJG" path="iccjpeg/iccjpeg.h" desc="经法务确认为宽松型许可证" />
                 <policyitem type="compatibility" name="IJG" path="iccjpeg/iccjpeg.c" desc="经法务确认为宽松型许可证" />
+                <policyitem type="compatibility" name="CC-BY-4.0" path="doc/LICENSE" desc="经法务确认为宽松型许可证" />
+                <policyitem type="compatibility" name="CC-BY-4.0" path="google-closure-library/doc/LICENSE" desc="经法务确认为宽松型许可证" />
                 <policyitem type="compatibility" name="XFree86 License 1.0" path="mesa_headers/GL/glext.h" desc="经法务确认为宽松型许可证" />
                 <policyitem type="compatibility" name="XFree86 License 1.0" path="khronos/KHR/khrplatform.h" desc="经法务确认为宽松型许可证" />
                 <policyitem type="compatibility" name="XFree86 License 1.0" path="mesa_headers/GL/glxext.h" desc="经法务确认为宽松型许可证" />
@@ -277,10 +271,6 @@ used to filter file path.
                     desc="Filter Readme.opensource files" />
                     <filteritem type="filepath" name="protobuf/Protobuf-C++.podspec"
                     desc="chromium原生文件无license" />
-                    <!-- <filteritem type="filepath" name="axe-core/LICENSE"
-                    desc="经确认，该文件不会使用" />
-                    <filteritem type="filepath" name="node/node_modules/mdn-data/LICENSE"
-                    desc="经确认，该文件不会使用" /> -->
                     <filteritem type="filepath" name="lcov/CHANGES"
                     desc="经确认，该文件不会使用" />
                     <filteritem type="filepath" name="decklink/mac/include/.*"
@@ -296,11 +286,24 @@ used to filter file path.
                     desc="经确认，该文件不会使用" />
                     <filteritem type="filepath" name="android_rust_toolchain/toolchain/lib/rustlib/src/rust/vendor/compiler_builtins/libm/src/math/.*"
                     desc="经确认，该文件不会使用" />
-                
-                    <!-- <filteritem type="filepath" name="subresource-filter-ruleset/LICENSE"
+                    <filteritem type="filepath" name="subresource-filter-ruleset/LICENSE"
                     desc="经确认，该文件不会使用" />
-                    <filteritem type="filepath" name="jsoncpp/LICENSE"
-                    desc="经确认，该文件不会使用" /> -->
+                    <filteritem type="filepath" name="proguard/LICENSE"
+                    desc="经确认，该文件不会使用" />
+                    <filteritem type="filepath" name="test_fonts/LICENSE"
+                    desc="经确认，该文件不会使用" />
+                    <filteritem type="filepath" name="freetype-testing/LICENSE"
+                    desc="经确认，该文件不会使用" />
+                    <filteritem type="filepath" name="dpkg-shlibdeps/LICENSE"
+                    desc="经确认，该文件不会使用" />
+                    <filteritem type="filepath" name="node/node_modules/mdn-data/LICENSE"
+                    desc="经确认，该文件不会使用" />
+                    <filteritem type="filepath" name="axe-core/LICENSE"
+                    desc="经确认，该文件不会使用" />
+                    <filteritem type="filepath" name="libsecret/LICENSE"
+                    desc="经确认，该文件不会使用" />
+                    <filteritem type="filepath" name="junit/LICENSE"
+                    desc="经确认，该文件不会使用" />
                 
             </filefilter>
             <filefilter name="binaryFileTypePolicyFilter">
