@@ -66,7 +66,6 @@ used to filter file path.
                 
                 <policyitem type="compatibility" name="LGPL-2.0+" path="blink/renderer/.*" desc="经法务确认,涉及文件在render进程进行了隔离" />
                 <policyitem type="compatibility" name="LGPLStyleLicense" path="blink/renderer/.*" desc="经法务确认,涉及文件在render进程进行了隔离" />
-                <policyitem type="compatibility" name="GPLStyleLicense" path="jsoncpp/LICENSE" desc="经法务确认,涉及文件在render进程进行了隔离" />
                 <policyitem type="compatibility" name="MPL-1.1" path="blink/.*" desc="经法务确认,涉及文件在render进程进行了隔离" />
                 <policyitem type="compatibility" name="LGPL-2.1+" path="blink/.*" desc="经法务确认,涉及文件在render进程进行了隔离" />
 
@@ -331,8 +330,8 @@ used to filter file path.
                     desc="经确认，该文件不会使用" />
                     <filteritem type="filepath" name="blink/renderer/platform/fonts/opentype/open_type_caps_support_mpl.cc"
                     desc="经确认，该文件不会使用" />
-
-                
+                    <filteritem type="filepath" name="jsoncpp/LICENSE"
+                    desc="经确认，该文件不会使用" />
             </filefilter>
             <filefilter name="binaryFileTypePolicyFilter">
                 <filteritem type="filepath" name=".*zip" desc="chromium原生二进制文件，不会使用" />
