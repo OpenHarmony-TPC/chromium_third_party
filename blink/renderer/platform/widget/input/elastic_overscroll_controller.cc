@@ -206,7 +206,7 @@ void ElasticOverscrollController::Overscroll(
       pending_overscroll_delta_ + overscroll_delta;
   pending_overscroll_delta_ = gfx::Vector2dF();
 #else 
-  if (overscroll_mode_) {
+  if (!overscroll_mode_) {
     return;
   }
   gfx::Vector2dF adjusted_overscroll_delta =
