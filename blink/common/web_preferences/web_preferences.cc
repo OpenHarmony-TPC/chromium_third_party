@@ -201,15 +201,12 @@ WebPreferences::WebPreferences()
       scroll_top_left_interop_enabled(true),
       disable_accelerated_small_canvases(false),
 #endif  // defined(OS_ANDROID)
-#if defined(OS_ANDROID)
+#if defined(OS_ANDROID) || BUILDFLAG(IS_OHOS)
       default_minimum_page_scale_factor(0.25f),
       default_maximum_page_scale_factor(5.f),
 #elif defined(OS_MAC)
       default_minimum_page_scale_factor(1.f),
       default_maximum_page_scale_factor(3.f),
-#elif BUILDFLAG(IS_OHOS)
-      default_minimum_page_scale_factor(0.25f),
-      default_maximum_page_scale_factor(2.f),
 #else
       default_minimum_page_scale_factor(1.f),
       default_maximum_page_scale_factor(4.f),
