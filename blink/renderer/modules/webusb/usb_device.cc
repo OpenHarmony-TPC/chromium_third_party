@@ -4,9 +4,11 @@
 
 #include "third_party/blink/renderer/modules/webusb/usb_device.h"
 
+#include <limits>
 #include <utility>
 
 #include "base/containers/span.h"
+#include "third_party/abseil-cpp/absl/types/optional.h"
 #include "third_party/blink/public/platform/platform.h"
 #include "third_party/blink/renderer/bindings/core/v8/script_promise.h"
 #include "third_party/blink/renderer/bindings/core/v8/script_promise_resolver.h"
@@ -42,6 +44,10 @@ namespace blink {
 namespace {
 
 const char kBufferTooBig[] = "The data buffer exceeded its maximum size.";
+const char kPacketLengthsTooBig[] =
+    "The total packet length exceeded the maximum size.";
+const char kBufferSizeMismatch[] =
+    "The data buffer size must match the total packet length.";
 const char kDetachedBuffer[] = "The data buffer has been detached.";
 const char kDeviceStateChangeInProgress[] =
     "An operation that changes the device state is in progress.";
@@ -94,6 +100,21 @@ String ConvertTransferStatus(const UsbTransferStatus& status) {
       NOTREACHED();
       return "";
   }
+}
+
+// Returns the sum of `packet_lengths`, or nullopt if the sum would overflow.
+absl::optional<uint32_t> TotalPacketLength(
+    const Vector<unsigned>& packet_lengths) {
+  uint32_t total_bytes = 0;
+  for (const auto packet_length : packet_lengths) {
+    // Check for overflow.
+    if (std::numeric_limits<uint32_t>::max() - total_bytes < packet_length) {
+      return absl::nullopt;
+    }
+
+    total_bytes += packet_length;
+  }
+  return total_bytes;
 }
 
 }  // namespace
@@ -475,7 +496,14 @@ ScriptPromise USBDevice::isochronousTransferIn(
     uint8_t endpoint_number,
     Vector<unsigned> packet_lengths) {
   auto* resolver = MakeGarbageCollected<ScriptPromiseResolver>(script_state);
+  absl::optional<uint32_t> total_bytes = TotalPacketLength(packet_lengths);
   ScriptPromise promise = resolver->Promise();
+  if (!total_bytes.has_value()) {
+    resolver->Reject(MakeGarbageCollected<DOMException>(
+             DOMExceptionCode::kInvalidStateError, kDetachedBuffer));
+    return promise;
+  }
+
   if (EnsureEndpointAvailable(true /* in */, endpoint_number, resolver)) {
     device_requests_.insert(resolver);
     device_->IsochronousTransferIn(
@@ -501,6 +529,16 @@ ScriptPromise USBDevice::isochronousTransferOut(
   if (data.IsDetached()) {
     resolver->Reject(MakeGarbageCollected<DOMException>(
         DOMExceptionCode::kInvalidStateError, kDetachedBuffer));
+    return promise;
+  }
+
+  absl::optional<uint32_t> total_bytes = TotalPacketLength(packet_lengths);
+  if (!total_bytes.has_value()) {
+    resolver->Reject(MakeGarbageCollected<DOMException>(DOMExceptionCode::kDataError,kPacketLengthsTooBig));
+    return promise;
+  }
+  if (total_bytes.value() != data.ByteLength()) {
+    resolver->Reject(MakeGarbageCollected<DOMException>(DOMExceptionCode::kDataError,kBufferSizeMismatch));
     return promise;
   }
 
