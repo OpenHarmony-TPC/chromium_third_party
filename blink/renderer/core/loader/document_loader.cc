@@ -1984,12 +1984,7 @@ scoped_refptr<SecurityOrigin> DocumentLoader::CalculateOrigin(
     // web sites.
     origin->GrantUniversalAccess();
   } else if (origin->IsLocal()) {
-#if BUILDFLAG(IS_OHOS)
-    if (frame_->GetSettings()->GetAllowUniversalAccessFromFileURLs() ||
-        origin->ToString().StartsWith(url::kResourcesScheme)) {
-#else
     if (frame_->GetSettings()->GetAllowUniversalAccessFromFileURLs()) {
-#endif
       // Some clients want local URLs to have universal access, but that
       // setting is dangerous for other clients.
       origin->GrantUniversalAccess();
