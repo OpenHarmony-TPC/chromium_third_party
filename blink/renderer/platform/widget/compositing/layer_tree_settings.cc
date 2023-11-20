@@ -467,7 +467,7 @@ cc::LayerTreeSettings GenerateLayerTreeSettings(
     settings.scrollbar_fade_duration = ui::kOverlayScrollbarFadeDuration;
     settings.scrollbar_thinning_duration =
         ui::kOverlayScrollbarThinningDuration;
-    settings.scrollbar_flash_after_any_scroll_update = true;
+    settings.scrollbar_flash_after_any_scroll_update = false;
   }
 
   // TODO(danakj): Only do this on low end devices.
