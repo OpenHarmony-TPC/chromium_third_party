@@ -91,6 +91,7 @@ class CORE_EXPORT SelectionController final
     return last_long_press_hit_test_result_;
   }
   void NotifyContextMenuWillShow();
+  bool Contains(const gfx::PointF& point) const;
 #endif
 
  private:
