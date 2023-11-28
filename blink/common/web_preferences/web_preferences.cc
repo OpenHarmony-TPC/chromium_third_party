@@ -170,14 +170,14 @@ WebPreferences::WebPreferences()
       double_tap_to_zoom_enabled(false),
 #endif
       fullscreen_supported(true),
-#if !defined(OS_ANDROID) && !BUILDFLAG(IS_OHOS)
-      text_autosizing_enabled(false),
-#else
+#if !defined(OS_ANDROID)
 #if BUILDFLAG(IS_OHOS)
+      text_autosizing_enabled(true),
+#else
       text_autosizing_enabled(false),
+#endif
 #else
       text_autosizing_enabled(true),
-#endif
       font_scale_factor(1.0f),
       device_scale_adjustment(1.0f),
       force_enable_zoom(false),
