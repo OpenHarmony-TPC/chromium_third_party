@@ -717,8 +717,13 @@ const base::Feature kInputTargetClientHighPriority{
     "InputTargetClientHighPriority", base::FEATURE_ENABLED_BY_DEFAULT};
 
 #if BUILDFLAG(IS_OHOS)
+#if defined(__arch64__) || defined(_LP64)
+const base::Feature kResamplingScrollEvents{"ResamplingScrollEvents",
+                                            base::FEATURE_ENABLED_BY_DEFAULT};
+#else
 const base::Feature kResamplingScrollEvents{"ResamplingScrollEvents",
                                             base::FEATURE_DISABLED_BY_DEFAULT};
+#endif /* __arch64__ */
 #else
 const base::Feature kResamplingScrollEvents{"ResamplingScrollEvents",
                                             base::FEATURE_ENABLED_BY_DEFAULT};
