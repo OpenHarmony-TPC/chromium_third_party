@@ -483,9 +483,9 @@ cc::LayerTreeSettings GenerateLayerTreeSettings(
     std::string device_type =
         base::CommandLine::ForCurrentProcess()->GetSwitchValueASCII(
             ::switches::kOhosDeviceType);
-    bool is_pc_device = (device_type == ::switch::kOhosTabletDevice ||
-                         device_type == ::switch::kOhos2IN1Device);
-    settings.enable_delete_unused_resource_delay = !is_pc_device;
+    bool is_pc_device = (device_type == ::switches::kOhosTabletDevice ||
+                         device_type == ::switches::kOhos2IN1Device);
+    settings.enable_delete_unused_resources_delay = !is_pc_device;
   }
 
 #endif
