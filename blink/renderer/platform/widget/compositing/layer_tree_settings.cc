@@ -26,6 +26,10 @@
 #include "ui/base/ui_base_switches.h"
 #include "ui/native_theme/native_theme_features.h"
 #include "ui/native_theme/overlay_scrollbar_constants_aura.h"
+#ifdef OHOS_NWEB_EX
+#include "base/command_line.h"
+#include "content/public/common/content_switches.h"
+#endif
 
 namespace blink {
 
@@ -472,6 +476,20 @@ cc::LayerTreeSettings GenerateLayerTreeSettings(
 
   // TODO(danakj): Only do this on low end devices.
   settings.create_low_res_tiling = true;
+#ifdef OHOS_NWEB_EX
+  if (base::CommandLine::ForCurrentProcess()->HasSwitch(
+          ::switches::kForBrowser) &&
+      !base::SysInfo::IsLowEndDevice()){
+    std::string device_type =
+        base::CommandLine::ForCurrentProcess()->GetSwitchValueASCII(
+            ::switches::kOhosDeviceType);
+    bool is_pc_device = (device_type == ::switches::kOhosTabletDevice ||
+                         device_type == ::switches::kOhos2IN1Device);
+    settings.enable_delete_unused_resources_delay = !is_pc_device;
+  }
+
+#endif
+
 #else   // defined(OS_ANDROID)
   bool using_low_memory_policy = base::SysInfo::IsLowEndDevice();
 
