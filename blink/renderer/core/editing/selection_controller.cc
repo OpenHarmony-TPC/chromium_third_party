@@ -63,6 +63,10 @@
 #include "ui/gfx/geometry/point_conversions.h"
 
 #if BUILDFLAG(IS_OHOS)
+#include <cmath>
+#endif
+
+#if BUILDFLAG(IS_OHOS)
 #include "third_party/blink/renderer/core/input/context_menu_allowed_scope.h"
 #endif
 
@@ -85,6 +89,34 @@ void SelectionController::Trace(Visitor* visitor) const {
   ExecutionContextLifecycleObserver::Trace(visitor);
 }
 
+#ifdef BUILDFLAG(IS_OHOS)
+bool SelectionController::Contains(const gfx::PointF& point) const{
+  //gets the current selection
+  const blink::VisibleSelection selection = this->Selection().ComputeVisibleSelectionInDOMTreeDeprecated();
+  //check if the selection is valid
+  if (selection.IsNone()) {
+    return false;
+  }
+  //gets the range of selections
+  blink::EphemeralRange range = selection.ToNormalizedEphemeralRange();
+  if (range.IsNull()) {
+    return false;
+  }
+  //iterate through all nodes is the selection
+  for (blink::Node& node : range.Nodes()) {
+    blink::LayoutObject* layout_object = node.GetLayoutObject();
+    if (!layout_object) {
+      continue;
+    }
+    gfx::Rect rect = layout_object->AbsoluteBoundingBoxRect();
+    gfx::RectF rectF(rect.x(), rect.y(), rect.width(), rect.height());
+    if (rectF.Contains(point)) {
+      return true;
+    }
+  }
+  return false;
+}
+#endif //BUILDFLAG(IS_OHOS)
 namespace {
 
 DispatchEventResult DispatchSelectStart(Node* node) {

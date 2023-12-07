@@ -917,8 +917,31 @@ bool MouseEventManager::HandleDrag(const MouseEventWithHitTestResults& event,
     HitTestResult result(request, location);
     frame_->ContentLayoutObject()->HitTest(location, result);
     Node* node = result.InnerNode();
+#ifdef BUILDFLAG(IS_OHOS)
+    bool is_inside_selection = false;
     if (node) {
-      DragController::SelectionDragPolicy selection_drag_policy =
+      if (GetDragState().drag_type_ == kDragSourceActionSelection) {
+      WTF::String wtf_string = location.Point().ToString();
+      std::string point_str = wtf_string.Utf8().data();
+      std::replace(point_str.begin(), point_str.end(),',',' ');
+      std::stringstream ss(point_str);
+      float x, y;
+      ss >> x >> y;
+      gfx::PointF point(x, y);
+      is_inside_selection = frame_->GetEventHandler().GetSelectionController().Contains(point);
+        if (is_inside_selection) {
+          DragController::SelectionDragPolicy selection_drag_policy =
+            event.Event().TimeStamp() - mouse_down_timestamp_ < kTextDragDelay
+                ? DragController::kDelayedSelectionDragResolution
+                : DragController::kImmediateSelectionDragResolution;
+        GetDragState().drag_src_ =
+            frame_->GetPage()->GetDragController().DraggableNode(
+                frame_, node, mouse_down_pos_, selection_drag_policy,
+                GetDragState().drag_type_);
+        }
+        GetDragState().drag_type_ = kDragSourceActionNone;
+      } else {
+        DragController::SelectionDragPolicy selection_drag_policy =
           event.Event().TimeStamp() - mouse_down_timestamp_ < kTextDragDelay
               ? DragController::kDelayedSelectionDragResolution
               : DragController::kImmediateSelectionDragResolution;
@@ -926,6 +949,8 @@ bool MouseEventManager::HandleDrag(const MouseEventWithHitTestResults& event,
           frame_->GetPage()->GetDragController().DraggableNode(
               frame_, node, mouse_down_pos_, selection_drag_policy,
               GetDragState().drag_type_);
+      }
+#endif //BUILDFLAG(IS_OHOS)
     } else {
       ResetDragSource();
     }
