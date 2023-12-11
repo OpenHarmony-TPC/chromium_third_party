@@ -52,6 +52,10 @@ constexpr double kRubberbandMinimumRequiredDeltaBeforeStretch = 10;
 // On android, overscroll should not occur if the scroller is not scrollable in
 // the overscrolled direction.
 constexpr bool kOverscrollNonScrollableDirection = false;
+#elif defined(OHOS_INPUT_EVENTS)
+// On OHOS, overscroll should not occur if the scroller is not scrollable in
+// the overscrolled direction.
+constexpr bool kOverscrollNonScrollableDirection = false;
 #else   // BUILDFLAG(IS_ANDROID)
 // On other platforms, overscroll can occur even if the scroller is not
 // scrollable.
@@ -72,6 +76,8 @@ ElasticOverscrollController::Create(cc::ScrollElasticityHelper* helper) {
   return base::FeatureList::IsEnabled(features::kElasticOverscroll)
              ? std::make_unique<ElasticOverscrollControllerBezier>(helper)
              : nullptr;
+#elif defined(OHOS_INPUT_EVENTS)
+  return std::make_unique<ElasticOverscrollControllerBezier>(helper);
 #else
   return std::make_unique<ElasticOverscrollControllerExponential>(helper);
 #endif
@@ -179,8 +185,20 @@ void ElasticOverscrollController::UpdateVelocity(
   last_scroll_event_timestamp_ = event_timestamp;
 }
 
+#if defined(OHOS_INPUT_EVENTS)
+void ElasticOverscrollController::SetOverscrollMode(int mode) {
+  //The mode value NEVER is 0 and ALWAYS is 1.
+  overscroll_mode_ = mode;
+}
+
+#endif 
 void ElasticOverscrollController::Overscroll(
     const gfx::Vector2dF& overscroll_delta) {
+#if defined(OHOS_INPUT_EVENTS)
+  if (!overscroll_mode_) {
+    return;
+  }
+#endif
   gfx::Vector2dF adjusted_overscroll_delta = overscroll_delta;
 
   // The effect can be dynamically disabled by setting styles to disallow user
@@ -210,8 +228,13 @@ void ElasticOverscrollController::Overscroll(
     // is not.
     if (!CanScrollHorizontally())
       adjusted_overscroll_delta.set_x(0);
+#if defined(OHOS_INPUT_EVENTS)
+    if (!CanScrollVertically() && CanScrollHorizontally())
+#else    
     if (!CanScrollVertically())
+#endif
       adjusted_overscroll_delta.set_y(0);
+
   }
 
   // Don't allow overscrolling in a direction where scrolling is possible.
@@ -304,14 +327,27 @@ void ElasticOverscrollController::Animate(base::TimeTicks time) {
 
   // If the new stretch amount is near zero, set it directly to zero and enter
   // the inactive state.
-  const gfx::Vector2dF new_stretch_amount = StretchAmountForTimeDelta(
+#if defined(OHOS_INPUT_EVENTS)
+  gfx::Vector2dF new_stretch_amount = StretchAmountForTimeDelta(
       std::max(time - momentum_animation_start_time_, base::TimeDelta()));
+#else
+  const gfx::Vector2dF new_stretch_amount = StretchAmountForTimeDelta(
+  std::max(time - momentum_animation_start_time_, base::TimeDelta()));   
+#endif
   if (fabs(new_stretch_amount.x()) < 1 && fabs(new_stretch_amount.y()) < 1) {
     helper_->SetStretchAmount(gfx::Vector2dF());
     EnterStateInactive();
     return;
   }
-
+#if defined(OHOS_INPUT_EVENTS)
+  if (!CanScrollHorizontally()) {
+    new_stretch_amount.set_x(0);
+  }
+ 
+  if (!CanScrollVertically()) {
+    new_stretch_amount.set_y(0);
+  }
+#endif
   stretch_scroll_force_ =
       AccumulatedOverscrollForStretchAmount(new_stretch_amount);
   helper_->SetStretchAmount(new_stretch_amount);

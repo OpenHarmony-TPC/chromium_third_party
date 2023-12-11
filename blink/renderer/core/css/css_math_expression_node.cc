@@ -607,6 +607,15 @@ static double ResolveAtan2(const CSSMathExpressionNode* y_node,
   }
   CSSPrimitiveValue::UnitType y_type = y_node->ResolvedUnitType();
   CSSPrimitiveValue::UnitType x_type = x_node->ResolvedUnitType();
+
+  // TODO(crbug.com/1392594): We ignore parameters in complex relative units
+  // (e.g., 1rem + 1px) until they can be supported.
+  if (y_type == CSSPrimitiveValue::UnitType::kUnknown ||
+      x_type == CSSPrimitiveValue::UnitType::kUnknown) {
+    error = true;
+    return 0;
+  }
+
   if (IsRelativeLength(y_type) || IsRelativeLength(x_type)) {
     // TODO(crbug.com/1392594): Relative length units are currently hard
     // to resolve. We ignore the units for now, so that
@@ -1338,6 +1347,11 @@ String CSSMathExpressionOperation::CustomCSSText() const {
     case CSSMathOperator::kRoundToZero: {
       StringBuilder result;
       result.Append(ToString(operator_));
+#if BUILDFLAG(IS_OHOS)
+      if (operands_.empty() || operands_.size() < 2) {
+        return result.ReleaseString();
+      }
+#endif
       result.Append(operands_.front()->CustomCSSText());
       for (const CSSMathExpressionNode* operand : SecondToLastOperands()) {
         result.Append(", ");

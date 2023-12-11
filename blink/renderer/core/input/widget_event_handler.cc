@@ -103,6 +103,9 @@ WebInputEventResult WidgetEventHandler::HandleInputEvent(
     case WebInputEvent::Type::kGestureShortPress:
     case WebInputEvent::Type::kGestureLongPress:
     case WebInputEvent::Type::kGestureLongTap:
+#if BUILDFLAG(IS_OHOS)
+    case WebInputEvent::Type::kGestureDragLongPress:
+#endif
       return HandleGestureEvent(static_cast<const WebGestureEvent&>(event));
 
     case WebInputEvent::Type::kPointerDown:

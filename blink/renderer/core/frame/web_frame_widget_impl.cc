@@ -1683,12 +1683,8 @@ void WebFrameWidgetImpl::UpdateVisualProperties(
   // TODO(crbug.com/939118): This code path where scroll_focused_node_into_view
   // is set is used only for WebView, crbug 939118 tracks fixing webviews to
   // not use scroll_focused_node_into_view.
-#if BUILDFLAG(IS_OHOS)
-  ScrollFocusedEditableElementIntoView();
-#else
   if (visual_properties.scroll_focused_node_into_view)
     ScrollFocusedEditableElementIntoView();
-#endif
 }
 
 void WebFrameWidgetImpl::ApplyVisualPropertiesSizing(
@@ -4689,6 +4685,13 @@ void WebFrameWidgetImpl::SetZoomLevel(float magnify_delta,
     return;
   }
   widget_base_->SetZoomLevel(magnify_delta, anchor);
+}
+
+void WebFrameWidgetImpl::SetOverscrollMode(int mode) {
+  if (!widget_base_) {
+    return;
+  }
+  widget_base_->SetOverscrollMode(mode);
 }
 #endif  // defined(OHOS_INPUT_EVENTS)
 

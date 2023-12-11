@@ -70,7 +70,7 @@ bool GetThreadArea32(pid_t tid,
   size_t index = (context.t32.xgs & 0xffff) >> 3;
   user_desc desc;
   if (ptrace(
-          PTRACE_GET_THREAD_AREA, tid, reinterpret_cast<void*>(index), &desc) !=
+          tid, reinterpret_cast<void*>(index), &desc) !=
       0) {
     PLOG_IF(ERROR, can_log) << "ptrace";
     return false;

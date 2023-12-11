@@ -818,9 +818,15 @@ BASE_FEATURE(kInputTargetClientHighPriority,
              base::FEATURE_ENABLED_BY_DEFAULT);
 
 #if BUILDFLAG(IS_OHOS) && defined(OHOS_PERFORMANCE_JITTER)
+#if defined(__arch64__) || defined(_LP64)
+BASE_FEATURE(kResamplingScrollEvents,
+             "ResamplingScrollEvents",
+             base::FEATURE_ENABLED_BY_DEFAULT);
+#else
 BASE_FEATURE(kResamplingScrollEvents,
              "ResamplingScrollEvents",
              base::FEATURE_DISABLED_BY_DEFAULT);
+#endif /* __arch64__ */
 #else
 BASE_FEATURE(kResamplingScrollEvents,
              "ResamplingScrollEvents",

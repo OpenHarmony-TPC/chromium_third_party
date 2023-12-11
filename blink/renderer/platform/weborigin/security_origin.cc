@@ -410,7 +410,13 @@ bool SecurityOrigin::CanDisplay(const KURL& url) const {
 
   if (SchemeRegistry::ShouldTreatURLSchemeAsDisplayIsolated(protocol)) {
     return protocol_ == protocol ||
-           SecurityPolicy::IsOriginAccessToURLAllowed(this, url);
+           SecurityPolicy::IsOriginAccessToURLAllowed(this, url)
+#if defined(OHOS_ARKWEB_EXTENSIONS)
+           ||
+           // TODO: If chrome:// -> arkweb:// replaced completely, remove it
+           base::Contains(url::GetCorsEnabledSchemes(), url.Protocol().Ascii())
+#endif
+        ;
   }
 
   if (base::Contains(url::GetLocalSchemes(), protocol.Ascii())) {

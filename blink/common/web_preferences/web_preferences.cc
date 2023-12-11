@@ -176,11 +176,7 @@ WebPreferences::WebPreferences()
 #if !BUILDFLAG(IS_ANDROID) && !BUILDFLAG(IS_OHOS)
       text_autosizing_enabled(false),
 #else
-#if BUILDFLAG(IS_OHOS)
-      text_autosizing_enabled(false),
-#else
       text_autosizing_enabled(true),
-#endif
       font_scale_factor(1.0f),
       device_scale_adjustment(1.0f),
       force_enable_zoom(false),

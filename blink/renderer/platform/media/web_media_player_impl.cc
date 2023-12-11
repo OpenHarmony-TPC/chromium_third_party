@@ -1839,6 +1839,9 @@ void WebMediaPlayerImpl::RestartForHls() {
 #elif BUILDFLAG(IS_ANDROID)
   renderer_factory_selector_->SetBaseRendererType(
       media::RendererType::kMediaPlayer);
+#elif BUILDFLAG(IS_OHOS)
+  renderer_factory_selector_->SetBaseRendererType(
+      media::RendererType::kOHOSMediaPlayer);
 #else
   // Shouldn't be reachable from desktop where hls is not enabled.
   NOTREACHED();
@@ -2860,16 +2863,6 @@ media::PipelineStatus WebMediaPlayerImpl::OnDemuxerCreated(
 }
 
 void WebMediaPlayerImpl::StartPipeline() {
-#if BUILDFLAG(IS_OHOS)
-  KURL loaded_kurl(loaded_url_);
-  if (HTMLMediaElement::IsHLSURL(loaded_kurl) && !loaded_kurl.IsLocalFile()) {
-    DVLOG(1) << __func__ << "set kOHOSMediaPlayer for kLoadTypeURL";
-    if (load_type_ == kLoadTypeURL) {
-      renderer_factory_selector_->SetBaseRendererType(
-          media::RendererType::kOHOSMediaPlayer);
-    }
-  }
-#endif
   DCHECK(main_task_runner_->BelongsToCurrentThread());
 
   vfc_task_runner_->PostTask(
