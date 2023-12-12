@@ -82,6 +82,12 @@ class CORE_EXPORT Settings {
   }
   bool GetVerticalHideScrollbars() { return hide_vertical_scrollbars_; }
   bool GetHorizontalHideScrollbars() { return hide_horizontal_scrollbars_; }
+  void SetOverscrollMode(int overscrollMode) {
+    overscroll_mode_ = overscrollMode;
+  }
+  int GetOverscrollMode() {
+    return overscroll_mode_;
+  }
 #endif  // defined(OHOS_INPUT_EVENTS)
 
 #ifdef OHOS_SCROLLBAR
@@ -124,6 +130,7 @@ class CORE_EXPORT Settings {
 #if defined(OHOS_INPUT_EVENTS)
   bool hide_vertical_scrollbars_ = true;
   bool hide_horizontal_scrollbars_ = true;
+  int overscroll_mode_ = 0;
 #endif  // defined(OHOS_INPUT_EVENTS)
 
 #ifdef OHOS_SCROLLBAR

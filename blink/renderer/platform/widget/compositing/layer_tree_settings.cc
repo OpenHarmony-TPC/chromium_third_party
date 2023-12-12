@@ -337,7 +337,11 @@ cc::LayerTreeSettings GenerateLayerTreeSettings(
   settings.use_partial_raster = !cmd.HasSwitch(switches::kDisablePartialRaster);
   // Partial raster is not supported with RawDraw
   settings.use_partial_raster &= !::features::IsUsingRawDraw();
+#if defined(OHOS_INPUT_EVENTS)
+  settings.enable_elastic_overscroll = true;
+#else
   settings.enable_elastic_overscroll = platform->IsElasticOverscrollEnabled();
+#endif
   settings.resource_settings.use_gpu_memory_buffer_resources =
       cmd.HasSwitch(switches::kEnableGpuMemoryBufferCompositorResources);
   settings.use_painted_device_scale_factor = true;
@@ -508,7 +512,7 @@ cc::LayerTreeSettings GenerateLayerTreeSettings(
     settings.scrollbar_fade_duration = ui::kOverlayScrollbarFadeDuration;
     settings.scrollbar_thinning_duration =
         ui::kOverlayScrollbarThinningDuration;
-    settings.scrollbar_flash_after_any_scroll_update = true;
+    settings.scrollbar_flash_after_any_scroll_update = false;
   }
 
   // TODO(danakj): Only do this on low end devices.

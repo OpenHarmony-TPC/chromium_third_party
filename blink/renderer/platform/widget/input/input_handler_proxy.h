@@ -228,7 +228,10 @@ class PLATFORM_EXPORT InputHandlerProxy : public cc::InputHandlerClient,
   void WillHandleScrollUpdateForInternalBeginFrame(const viz::BeginFrameArgs& args) override {
     current_internal_begin_frame_args_ = args;
     need_flush_scroll_update_gesture_ = true;
-  };
+  }
+#endif
+#if defined(OHOS_INPUT_EVENTS)
+  void SetOverscrollMode(int mode);
 #endif
 
   // SnapFlingClient implementation.
