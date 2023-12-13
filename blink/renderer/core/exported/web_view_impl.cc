@@ -1690,6 +1690,10 @@ void WebView::ApplyWebPreferences(const web_pref::WebPreferences& prefs,
   settings->SetTextTrackWindowRadius(
       WebString::FromASCII(prefs.text_track_window_radius));
 
+#if defined(OHOS_CLIPBOARD)
+  settings->SetCopyOption(prefs.copy_option);
+#endif // defined(OHOS_CLIPBOARD)
+
 #if defined(OHOS_VIEWPORT) || defined(OHOS_MEDIA)
   auto display_manager_adapter =
       OHOS::NWeb::OhosAdapterHelper::GetInstance().CreateDisplayMgrAdapter();

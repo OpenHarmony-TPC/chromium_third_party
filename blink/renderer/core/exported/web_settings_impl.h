@@ -243,6 +243,10 @@ class CORE_EXPORT WebSettingsImpl final : public WebSettings {
   void SetWebXRImmersiveArAllowed(bool webxr_immersive_ar_allowed) override;
   void SetModalContextMenu(bool) override;
 
+#if defined(OHOS_CLIPBOARD)
+  void SetCopyOption(mojom::blink::CopyOptionMode value) override;
+#endif // defined(OHOS_CLIPBOARD)
+
   bool RenderVSyncNotificationEnabled() const {
     return render_v_sync_notification_enabled_;
   }

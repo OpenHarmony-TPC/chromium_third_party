@@ -7,6 +7,7 @@ module blink.mojom;
 import "third_party/blink/public/mojom/css/preferred_color_scheme.mojom";
 import "third_party/blink/public/mojom/css/preferred_contrast.mojom";
 import "third_party/blink/public/mojom/v8_cache_options.mojom";
+import "third_party/blink/public/mojom/copy_options.mojom";
 import "url/mojom/url.mojom";
 import "mojo/public/mojom/base/string16.mojom";
 
@@ -153,6 +154,11 @@ struct WebPreferences {
   bool hide_scrollbars;
   bool enable_webkit_scrollbar_styling;
   uint32 scrollbar_color;
+
+  // #if defined(OHOS_CLIPBOARD)
+  [EnableIf=is_ohos_clipboard]
+  CopyOptionMode copy_option;
+  // #endif
 
   // #if defined(OHOS_INPUT_EVENTS)
   [EnableIf=ohos_input_events]

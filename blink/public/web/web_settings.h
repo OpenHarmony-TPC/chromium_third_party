@@ -296,6 +296,9 @@ class WebSettings {
   virtual void SetAccessibilityIncludeSvgGElement(bool) = 0;
   virtual void SetWebXRImmersiveArAllowed(bool) = 0;
   virtual void SetModalContextMenu(bool) = 0;
+#if defined(OHOS_CLIPBOARD)
+  virtual void SetCopyOption(mojom::CopyOptionMode) = 0;
+#endif // defined(OHOS_CLIPBOARD)
 
  protected:
   ~WebSettings() = default;

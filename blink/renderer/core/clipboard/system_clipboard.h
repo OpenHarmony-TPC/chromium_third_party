@@ -211,6 +211,12 @@ class CORE_EXPORT SystemClipboard final
   // made.
   std::unique_ptr<Snapshot> snapshot_;
   size_t snapshot_count_ = 0;
+
+#if defined(OHOS_CLIPBOARD)
+  bool IsCopyAllowed();
+ 
+  LocalFrame* frame_;
+#endif // defined(OHOS_CLIPBOARD)
 };
 
 // When in scope, forces the specified system clipboard to take a snapshot

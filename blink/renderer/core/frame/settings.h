@@ -118,6 +118,16 @@ class CORE_EXPORT Settings {
 
   void SetDelegate(SettingsDelegate*);
 
+#if defined(OHOS_CLIPBOARD)
+  void SetCopyOption(blink::mojom::CopyOptionMode copyOption) {
+    copy_option_ = copyOption;
+  }
+
+  mojom::CopyOptionMode GetCopyOption() {
+    return copy_option_;
+  }
+#endif // defined(OHOS_CLIPBOARD)
+
  private:
   void Invalidate(SettingsDelegate::ChangeType);
 
@@ -144,6 +154,10 @@ class CORE_EXPORT Settings {
 #ifdef OHOS_EX_BLANK_TARGET_POPUP_INTERCEPT
   bool blank_target_popup_intercept_enabled_ = true;
 #endif
+
+#if defined(OHOS_CLIPBOARD)
+  mojom::CopyOptionMode copy_option_ = mojom::CopyOptionMode::CROSS_DEVICE;
+#endif // defined(OHOS_CLIPBOARD)
 };
 
 }  // namespace blink

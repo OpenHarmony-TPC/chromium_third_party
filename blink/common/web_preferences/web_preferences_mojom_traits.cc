@@ -249,6 +249,9 @@ bool StructTraits<blink::mojom::WebPreferencesDataView,
   out->contextmenu_customization_enabled =
       data.contextmenu_customization_enabled();
 #endif
+#if defined(OHOS_CLIPBOARD)
+  out->copy_option = data.copy_option();
+#endif // defined(OHOS_CLIPBOARD)
   return true;
 }
 

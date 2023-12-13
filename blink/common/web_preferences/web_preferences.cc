@@ -82,6 +82,9 @@ WebPreferences::WebPreferences()
 #ifdef OHOS_SCROLLBAR
       scrollbar_color(0),
 #endif // OHOS_SCROLLBAR
+#if defined(OHOS_CLIPBOARD)
+      copy_option(mojom::CopyOptionMode::CROSS_DEVICE),
+#endif // defined(OHOS_CLIPBOARD)
 #if defined(OHOS_EX_FREE_COPY)
       contextmenu_customization_enabled(false),
 #endif  // OHOS_EX_FREE_COPY

@@ -63,6 +63,9 @@ CloneFsaToken(
 
 SystemClipboard::SystemClipboard(LocalFrame* frame)
     : clipboard_(frame->DomWindow()) {
+#if defined(OHOS_CLIPBOARD)
+  frame_ = frame;
+#endif // defined(OHOS_CLIPBOARD)
   frame->GetBrowserInterfaceBroker().GetInterface(
       clipboard_.BindNewPipeAndPassReceiver(
           frame->GetTaskRunner(TaskType::kUserInteraction)));
@@ -126,6 +129,15 @@ String SystemClipboard::ReadPlainText(mojom::blink::ClipboardBuffer buffer) {
   return text;
 }
 
+#if defined(OHOS_CLIPBOARD)
+bool SystemClipboard::IsCopyAllowed() {
+  if (frame_->GetSettings()->GetCopyOption() == blink::mojom::CopyOptionMode::NONE) {
+    return false;
+  }
+  return true;
+}
+#endif // defined(OHOS_CLIPBOARD)
+
 void SystemClipboard::ReadPlainText(
     mojom::blink::ClipboardBuffer buffer,
     mojom::blink::ClipboardHost::ReadTextCallback callback) {
@@ -148,7 +160,20 @@ void SystemClipboard::WritePlainText(const String& plain_text,
 #if BUILDFLAG(IS_WIN)
   ReplaceNewlinesWithWindowsStyleNewlines(text);
 #endif
-  clipboard_->WriteText(NonNullString(text));
+#if defined(OHOS_CLIPBOARD)
+  if (!IsCopyAllowed()) {
+    LOG(ERROR) << "WritePlainText failed, copy option mode is 'NONE'";
+    return;
+  }
+  blink::mojom::CopyOptionMode copy_option = frame_->GetSettings()->GetCopyOption();
+#endif // defined(OHOS_CLIPBOARD)
+  clipboard_->WriteText(
+    NonNullString(text)
+#if defined(OHOS_CLIPBOARD)
+    ,
+    copy_option
+#endif // defined(OHOS_CLIPBOARD)
+  );
 }
 
 String SystemClipboard::ReadHTML(KURL& url,
@@ -207,9 +232,28 @@ void SystemClipboard::WriteHTML(const String& markup,
 
   if (!clipboard_.is_bound())
     return;
-  clipboard_->WriteHtml(NonNullString(markup), document_url);
+
+#if defined(OHOS_CLIPBOARD)
+  if (!IsCopyAllowed()) {
+    LOG(ERROR) << "WritePlainText failed, copy option mode is 'NONE'";
+    return;
+  }
+  blink::mojom::CopyOptionMode copy_option = frame_->GetSettings()->GetCopyOption();
+#endif // defined(OHOS_CLIPBOARD)
+
+  clipboard_->WriteHtml(
+    NonNullString(markup), document_url
+#if defined(OHOS_CLIPBOARD)
+    ,
+    copy_option
+#endif // defined(OHOS_CLIPBOARD)
+  );
   if (smart_replace_option == kCanSmartReplace)
-    clipboard_->WriteSmartPasteMarker();
+    clipboard_->WriteSmartPasteMarker(
+#if defined(OHOS_CLIPBOARD)
+      copy_option
+#endif // defined(OHOS_CLIPBOARD)
+    );
 }
 
 void SystemClipboard::ReadSvg(
@@ -279,6 +323,14 @@ void SystemClipboard::WriteImageWithTag(Image* image,
   if (!clipboard_.is_bound())
     return;
 
+#if defined(OHOS_CLIPBOARD)
+  if (!IsCopyAllowed()) {
+    LOG(ERROR) << "WritePlainText failed, copy option mode is 'NONE'";
+    return;
+  }
+  blink::mojom::CopyOptionMode copy_option = frame_->GetSettings()->GetCopyOption();
+#endif // defined(OHOS_CLIPBOARD)
+
   PaintImage paint_image = image->PaintImageForCurrentFrame();
   // Orient the data.
   if (!image->HasDefaultOrientation()) {
@@ -297,7 +349,13 @@ void SystemClipboard::WriteImageWithTag(Image* image,
   SkBitmap n32_bitmap;
   if (skia::SkBitmapToN32OpaqueOrPremul(bitmap, &n32_bitmap) &&
       !n32_bitmap.isNull()) {
-    clipboard_->WriteImage(n32_bitmap);
+    clipboard_->WriteImage(
+      n32_bitmap
+#if defined(OHOS_CLIPBOARD)
+      ,
+      copy_option
+#endif // defined(OHOS_CLIPBOARD)
+    );
   }
 
   if (url.IsValid() && !url.IsEmpty()) {
@@ -306,14 +364,28 @@ void SystemClipboard::WriteImageWithTag(Image* image,
     // consistency between platforms, and to help fix errors in applications
     // which prefer text/plain content over image content for compatibility with
     // Microsoft Word.
-    clipboard_->WriteBookmark(url.GetString(), NonNullString(title));
+    clipboard_->WriteBookmark(
+      url.GetString(),
+      NonNullString(title)
+#if defined(OHOS_CLIPBOARD)
+      ,
+      copy_option
+#endif // defined(OHOS_CLIPBOARD)
+    );
 #endif
 
     // When writing the image, we also write the image markup so that pasting
     // into rich text editors, such as Gmail, reveals the image. We also don't
     // want to call writeText(), since some applications (WordPad) don't pick
     // the image if there is also a text format on the clipboard.
-    clipboard_->WriteHtml(URLToImageMarkup(url, title), KURL());
+    clipboard_->WriteHtml(
+      URLToImageMarkup(url, title),
+      KURL()
+#if defined(OHOS_CLIPBOARD)
+      ,
+      copy_option
+#endif // defined(OHOS_CLIPBOARD)
+    );
   }
 }
 
@@ -322,7 +394,22 @@ void SystemClipboard::WriteImage(const SkBitmap& bitmap) {
 
   if (!clipboard_.is_bound())
     return;
-  clipboard_->WriteImage(bitmap);
+
+#if defined(OHOS_CLIPBOARD)
+  if (!IsCopyAllowed()) {
+    LOG(ERROR) << "WritePlainText failed, copy option mode is 'NONE'";
+    return;
+  }
+  blink::mojom::CopyOptionMode copy_option = frame_->GetSettings()->GetCopyOption();
+#endif // defined(OHOS_CLIPBOARD)
+
+  clipboard_->WriteImage(
+    bitmap
+#if defined(OHOS_CLIPBOARD)
+    ,
+    copy_option
+#endif // defined(OHOS_CLIPBOARD)
+  );
 }
 
 mojom::blink::ClipboardFilesPtr SystemClipboard::ReadFiles() {
@@ -376,13 +463,30 @@ void SystemClipboard::WriteDataObject(DataObject* data_object) {
   // TODO(dcheng): Properly support text/uri-list here.
   HashMap<String, String> custom_data;
   WebDragData data = data_object->ToWebDragData();
+#if defined(OHOS_CLIPBOARD)
+  if (!IsCopyAllowed()) {
+    LOG(ERROR) << "WritePlainText failed, copy option mode is 'NONE'";
+    return;
+  }
+  blink::mojom::CopyOptionMode copy_option = frame_->GetSettings()->GetCopyOption();
+#endif // defined(OHOS_CLIPBOARD)
   for (const WebDragData::Item& item : data.Items()) {
     if (const auto* string_item =
             absl::get_if<WebDragData::StringItem>(&item)) {
       if (string_item->type == kMimeTypeTextPlain) {
-        clipboard_->WriteText(NonNullString(string_item->data));
+        clipboard_->WriteText(NonNullString(string_item->data)
+#if defined(OHOS_CLIPBOARD)
+                              ,
+                              copy_option
+#endif // defined(OHOS_CLIPBOARD)
+        );
       } else if (string_item->type == kMimeTypeTextHTML) {
-        clipboard_->WriteHtml(NonNullString(string_item->data), KURL());
+        clipboard_->WriteHtml(NonNullString(string_item->data), KURL()
+#if defined(OHOS_CLIPBOARD)
+                              ,
+                              copy_option
+#endif // defined(OHOS_CLIPBOARD)
+        );
       } else if (string_item->type != kMimeTypeDownloadURL) {
         custom_data.insert(string_item->type, NonNullString(string_item->data));
       }

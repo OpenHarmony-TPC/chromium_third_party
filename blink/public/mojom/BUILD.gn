@@ -217,6 +217,7 @@ mojom("mojom_platform") {
     "use_counter/use_counter_feature.mojom",
     "user_agent/user_agent_metadata.mojom",
     "v8_cache_options.mojom",
+    "copy_options.mojom",
     "wake_lock/wake_lock.mojom",
     "web_launch/web_launch.mojom",
     "webaudio/audio_context_manager.mojom",
@@ -350,6 +351,9 @@ mojom("mojom_platform") {
   }
   if (is_android || is_mac) {
     enabled_features += [ "is_using_open_color_chooser" ]
+  }
+  if (defined(ohos_clipboard) && ohos_clipboard) {
+    enabled_features += ["is_ohos_clipboard"]
   }
 #ifdef OHOS_DRAG_DROP
   if (defined(ohos_drag_drop) && ohos_drag_drop) {
