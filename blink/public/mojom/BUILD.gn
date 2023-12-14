@@ -217,7 +217,6 @@ mojom("mojom_platform") {
     "use_counter/use_counter_feature.mojom",
     "user_agent/user_agent_metadata.mojom",
     "v8_cache_options.mojom",
-    "copy_options.mojom",
     "wake_lock/wake_lock.mojom",
     "web_launch/web_launch.mojom",
     "webaudio/audio_context_manager.mojom",
@@ -324,6 +323,9 @@ mojom("mojom_platform") {
       "direct_sockets/direct_sockets.mojom",
       "serial/serial.mojom",
     ]
+  }
+  if (defined(ohos_clipboard) && ohos_clipboard) {
+    sources += ["copy_options.mojom"]
   }
 
   if (is_mac) {
@@ -1859,3 +1861,4 @@ mojom("color_scheme_mojo_bindings") {
   export_define = "BLINK_COMMON_IMPLEMENTATION=1"
   export_header = "third_party/blink/public/common/common_export.h"
 }
+

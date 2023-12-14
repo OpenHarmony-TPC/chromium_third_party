@@ -7,9 +7,12 @@ module blink.mojom;
 import "third_party/blink/public/mojom/css/preferred_color_scheme.mojom";
 import "third_party/blink/public/mojom/css/preferred_contrast.mojom";
 import "third_party/blink/public/mojom/v8_cache_options.mojom";
-import "third_party/blink/public/mojom/copy_options.mojom";
 import "url/mojom/url.mojom";
 import "mojo/public/mojom/base/string16.mojom";
+// #if defined(OHOS_CLIPBOARD)
+[EnableIf=is_ohos_clipboard]
+import "third_party/blink/public/mojom/copy_options.mojom";
+// #endif
 
 enum PointerType {
   kPointerNone                              = 1,             // 1 << 0
@@ -498,3 +501,4 @@ struct WebPreferences {
   bool blank_target_popup_intercept_enabled = true;
   // #endif
 };
+
