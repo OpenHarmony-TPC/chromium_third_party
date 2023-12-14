@@ -163,6 +163,12 @@ class VideoFrameSubmitter::FrameSinkBundleProxy
   }
 #endif
 
+#if BUILDFLAG(IS_OHOS)
+  void ReportKeyThreadIds(const WTF::Vector<int32_t>& thread_ids,
+                          int32_t process_id,
+                          bool is_created) override {}
+#endif
+
  private:
   const base::WeakPtr<VideoFrameSinkBundle> bundle_;
   const viz::FrameSinkBundleId bundle_id_;
