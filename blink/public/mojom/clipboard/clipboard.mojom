@@ -10,6 +10,7 @@ import "mojo/public/mojom/base/string16.mojom";
 import "skia/public/mojom/bitmap.mojom";
 import "third_party/blink/public/mojom/data_transfer/data_transfer.mojom";
 import "third_party/blink/public/mojom/tokens/tokens.mojom";
+import "third_party/blink/public/mojom/copy_options.mojom";
 import "url/mojom/url.mojom";
 
 enum ClipboardFormat {
@@ -143,15 +144,24 @@ interface ClipboardHost {
   // sender sends the different types of data it'd like to write to the
   // receiver. Then, it sends a commit message to commit the data to the system
   // clipboard.
+  [EnableIfNot=is_ohos_clipboard]
   WriteText(mojo_base.mojom.BigString16 text);
+  [EnableIf=is_ohos_clipboard]
+  WriteText(mojo_base.mojom.BigString16 text, CopyOptionMode copy_option);
 
+  [EnableIfNot=is_ohos_clipboard]
   WriteHtml(mojo_base.mojom.BigString16 markup, url.mojom.Url url);
+  [EnableIf=is_ohos_clipboard]
+  WriteHtml(mojo_base.mojom.BigString16 markup, url.mojom.Url url, CopyOptionMode copy_option);
 
   // Takes sanitized SVG in a UTF16 string format and writes it to the
   // OS clipboard.
   WriteSvg(mojo_base.mojom.BigString16 markup);
 
+  [EnableIfNot=is_ohos_clipboard]
   WriteSmartPasteMarker();
+  [EnableIf=is_ohos_clipboard]
+  WriteSmartPasteMarker(CopyOptionMode copy_option);
 
   // Chrome-specific pickled data.
   WriteCustomData(map<mojo_base.mojom.String16, mojo_base.mojom.BigString16> data);
@@ -160,10 +170,18 @@ interface ClipboardHost {
   // copy as image tries to set very long data: URLs on the clipboard. Using
   // GURL causes the browser to kill the renderer for sending a bad IPC (GURLs
   // bigger than 2 megabytes are considered to be bad). https://crbug.com/459822
+  [EnableIfNot=is_ohos_clipboard]
   WriteBookmark(string url,
                 mojo_base.mojom.String16 title);
+  [EnableIf=is_ohos_clipboard]
+  WriteBookmark(string url,
+                mojo_base.mojom.String16 title,
+                CopyOptionMode copy_option);
 
+  [EnableIfNot=is_ohos_clipboard]
   WriteImage(skia.mojom.BitmapN32 image);
+  [EnableIf=is_ohos_clipboard]
+  WriteImage(skia.mojom.BitmapN32 image, CopyOptionMode copy_option);
 
   // Writes an unsanitized custom format to the clipboard.
   // `format` contains the name of the custom format and `data` contains the

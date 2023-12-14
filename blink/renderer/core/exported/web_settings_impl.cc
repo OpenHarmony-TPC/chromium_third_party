@@ -497,6 +497,12 @@ void WebSettingsImpl::SetScrollBarColor(uint32_t value) {
 }
 #endif // OHOS_SCROLLBAR
 
+#if defined(OHOS_CLIPBOARD)
+void WebSettingsImpl::SetCopyOption(mojom::blink::CopyOptionMode value) {
+  settings_->SetCopyOption(value);
+}
+#endif // defined(OHOS_CLIPBOARD)
+
 #if defined(OHOS_EX_FREE_COPY)
 void WebSettingsImpl::SetContextMenuCustomization(bool enabled) {
   settings_->SetContextMenuCustomization(enabled);

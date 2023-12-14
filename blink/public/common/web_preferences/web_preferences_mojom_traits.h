@@ -822,6 +822,13 @@ struct BLINK_COMMON_EXPORT StructTraits<blink::mojom::WebPreferencesDataView,
 #endif
   static bool Read(blink::mojom::WebPreferencesDataView r,
                    blink::web_pref::WebPreferences* out);
+
+#if defined(OHOS_CLIPBOARD)
+  static blink::mojom::CopyOptionMode copy_option(const blink::web_pref::WebPreferences& r) {
+    return r.copy_option;
+  }
+#endif // defined(OHOS_CLIPBOARD)
+
 };
 
 }  // namespace mojo

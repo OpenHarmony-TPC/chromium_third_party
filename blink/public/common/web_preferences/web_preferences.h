@@ -96,6 +96,9 @@ struct BLINK_COMMON_EXPORT WebPreferences {
 #ifdef OHOS_SCROLLBAR
   uint32_t scrollbar_color;
 #endif // OHOS_SCROLLBAR
+#if defined(OHOS_CLIPBOARD)
+  mojom::CopyOptionMode copy_option;
+#endif // defined(OHOS_CLIPBOARD)
 #ifdef OHOS_EX_FREE_COPY
   bool contextmenu_customization_enabled;
 #endif
