@@ -12,7 +12,11 @@ namespace blink {
 class LayoutThemeAndroid final : public LayoutThemeMobile {
  public:
   static scoped_refptr<LayoutTheme> Create();
+#ifdef OHOS_HTML_SELECT
+  bool DelegatesMenuListRendering() const override { return false; }
+#else
   bool DelegatesMenuListRendering() const override { return true; }
+#endif
   Color PlatformActiveSelectionBackgroundColor(
       mojom::blink::ColorScheme color_scheme) const override;
   Color PlatformActiveSelectionForegroundColor(
