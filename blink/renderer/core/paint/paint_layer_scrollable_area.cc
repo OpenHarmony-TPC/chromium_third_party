@@ -1686,7 +1686,16 @@ void PaintLayerScrollableArea::ComputeScrollbarExistence(
     else if (v_mode == mojom::blink::ScrollbarMode::kAlwaysOff)
       needs_vertical_scrollbar = false;
   }
+#if defined(OHOS_INPUT_EVENTS)
+  // Force needs_horizontal_scrollbar/needs_vertical_scrollbar value is false ,if scrollbarAccess(false)
+  if (is_horizontal_scrollbars_hide) {
+    needs_horizontal_scrollbar = false;
+  }
 
+  if (is_vertical_scrollbars_hide) {
+    needs_vertical_scrollbar = false;
+  }
+#endif // OH_INPUT_EVENT
   // If this is being performed before layout, we want to only update scrollbar
   // existence if its based on purely style based reasons.
   if (option == kOverflowIndependent) {
