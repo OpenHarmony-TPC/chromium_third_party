@@ -117,6 +117,11 @@ class ResourceLoadInfoNotifierWrapper;
 enum class SyncCondition;
 struct Impression;
 struct MobileFriendliness;
+#if BUILDFLAG(IS_OHOS)
+class HTMLNativeElement;
+class WebNativeBridge;
+class WebNativeClient;
+#endif
 
 namespace scheduler {
 class TaskAttributionId;
@@ -303,6 +308,13 @@ class CORE_EXPORT LocalFrameClient : public FrameClient {
       WebMediaPlayerClient*) = 0;
   virtual WebRemotePlaybackClient* CreateWebRemotePlaybackClient(
       HTMLMediaElement&) = 0;
+#if BUILDFLAG(IS_OHOS)
+  virtual std::unique_ptr<WebNativeBridge> CreateWebNativeBridge(
+      HTMLNativeElement&,
+      WebNativeClient*) {
+    return nullptr;
+  }
+#endif
 
   virtual void DidCommitDocumentReplacementNavigation(DocumentLoader*) = 0;
   virtual void DispatchDidClearWindowObjectInMainWorld(

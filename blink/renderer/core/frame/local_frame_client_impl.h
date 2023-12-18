@@ -199,6 +199,11 @@ class CORE_EXPORT LocalFrameClientImpl final : public LocalFrameClient {
       HTMLMediaElement&,
       const WebMediaPlayerSource&,
       WebMediaPlayerClient*) override;
+#if BUILDFLAG(IS_OHOS)
+  std::unique_ptr<WebNativeBridge> CreateWebNativeBridge(
+      HTMLNativeElement&,
+      WebNativeClient*) override;
+#endif
   WebRemotePlaybackClient* CreateWebRemotePlaybackClient(
       HTMLMediaElement&) override;
   void DidChangeScrollOffset() override;

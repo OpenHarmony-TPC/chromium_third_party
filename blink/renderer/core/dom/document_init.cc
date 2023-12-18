@@ -54,6 +54,9 @@
 #include "third_party/blink/renderer/platform/network/mime/content_type.h"
 #include "third_party/blink/renderer/platform/network/mime/mime_type_registry.h"
 #include "third_party/blink/renderer/platform/network/network_utils.h"
+#if BUILDFLAG(IS_OHOS)
+#include "third_party/blink/renderer/core/html/media/native_document.h"
+#endif
 
 namespace blink {
 
@@ -159,6 +162,11 @@ DocumentInit::Type DocumentInit::ComputeDocumentType(
   if (frame && frame->InViewSourceMode())
     return Type::kViewSource;
 
+#if BUILDFLAG(IS_OHOS)
+  if (frame && frame->IsNativeType()) {
+    return Type::kNative;
+  }
+#endif
   // Plugins cannot take HTML and XHTML from us, and we don't even need to
   // initialize the plugin database for those.
   if (mime_type == "text/html")
@@ -313,6 +321,10 @@ Document* DocumentInit::CreateDocument() const {
     }
     case Type::kMedia:
       return MakeGarbageCollected<MediaDocument>(*this);
+#if BUILDFLAG(IS_OHOS)
+    case Type::kNative:
+      return MakeGarbageCollected<NativeDocument>(*this);
+#endif
     case Type::kSVG:
       return XMLDocument::CreateSVG(*this);
     case Type::kXML:

@@ -421,6 +421,12 @@ source_set("blink_headers") {
     ]
   }
 
+  if (is_ohos) {
+    sources += [
+      "platform/web_native_client.h",
+    ]
+  }
+
   public_configs = [
     ":blink_headers_config",
 

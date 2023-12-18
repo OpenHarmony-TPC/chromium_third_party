@@ -120,12 +120,12 @@ hr {
 map {
     display: inline
 }
-
-video {
+/* The native tag is used in OHOS. */
+video, native {
     object-fit: contain;
 }
 
-video:-webkit-full-page-media {
+video, native:-webkit-full-page-media {
     margin: auto;
     position: absolute;
     top: 0;

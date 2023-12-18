@@ -93,6 +93,9 @@
 #include "ui/accessibility/ax_event.h"
 #include "ui/events/types/scroll_types.h"
 #include "v8/include/v8.h"
+#if BUILDFLAG(IS_OHOS)
+#include "third_party/blink/renderer/platform/web_native_bridge.h"
+#endif
 
 namespace cc {
 class LayerTreeSettings;
@@ -143,6 +146,9 @@ struct ContextMenuData;
 struct WebPictureInPictureWindowOptions;
 struct WebPluginParams;
 struct WebWindowFeatures;
+#if BUILDFLAG(IS_OHOS)
+class WebNativeClient;
+#endif
 
 enum class SyncCondition {
   kNotForced,  // Sync only if the value has changed since the last call.
@@ -178,6 +184,14 @@ class BLINK_EXPORT WebLocalFrameClient {
       scoped_refptr<base::TaskRunner> compositor_worker_task_runner) {
     return nullptr;
   }
+
+#if BUILDFLAG(IS_OHOS)
+  virtual WebNativeBridge* CreateWebNativeBridge(
+      WebNativeClient* client,
+      const cc::LayerTreeSettings* settings) {
+    return nullptr;
+  }
+#endif
 
   // May return null.
   virtual std::unique_ptr<WebServiceWorkerProvider>
