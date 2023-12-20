@@ -690,7 +690,10 @@ bool HTMLFrameOwnerElement::IsCurrentlyWithinFrameLimit() const {
 bool HTMLFrameOwnerElement::LoadOrRedirectSubframe(
     const KURL& url,
     const AtomicString& frame_name,
-    bool replace_current_item) {
+    bool replace_current_item
+#if BUILDFLAG(IS_OHOS)
+    , bool load_for_native) {
+#endif
   TRACE_EVENT0("navigation", "HTMLFrameOwnerElement::LoadOrRedirectSubframe");
 
   // If the subframe navigation is aborted or TAO fails, we report a "fallback"
@@ -790,6 +793,9 @@ bool HTMLFrameOwnerElement::LoadOrRedirectSubframe(
 
   FrameLoadRequest frame_load_request(GetDocument().domWindow(), request);
   frame_load_request.SetIsContainerInitiated(true);
+#if BUILDFLAG(IS_OHOS)
+  child_frame->SetIsNativeType(load_for_native);
+#endif
   child_frame->Loader().StartNavigation(frame_load_request, child_load_type);
 
   return true;

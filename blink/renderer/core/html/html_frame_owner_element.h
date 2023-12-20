@@ -79,6 +79,16 @@ class CORE_EXPORT HTMLFrameOwnerElement : public HTMLElement,
 
   void SetColorScheme(mojom::blink::ColorScheme);
 
+#if BUILDFLAG(IS_OHOS)
+  virtual const String NativeType() { return String(); }
+
+  virtual const String NativeSource() { return String(); }
+
+  virtual const String IdAttribute() { return String(); }
+
+  virtual bool IsNativeType() const { return false; }
+#endif
+
   class PluginDisposeSuspendScope {
     STACK_ALLOCATED();
 
@@ -147,7 +157,10 @@ class CORE_EXPORT HTMLFrameOwnerElement : public HTMLElement,
 
   bool LoadOrRedirectSubframe(const KURL&,
                               const AtomicString& frame_name,
-                              bool replace_current_item);
+                              bool replace_current_item
+#if BUILDFLAG(IS_OHOS)
+                              , bool load_for_native = false);
+#endif
   bool IsKeyboardFocusable() const override;
   void FrameOwnerPropertiesChanged() override;
 

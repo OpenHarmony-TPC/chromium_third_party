@@ -1568,6 +1568,14 @@ component("platform") {
 
   sources -= blink_platform_avx_files
 
+  if (is_ohos) {
+    sources += [
+      "web_native_bridge.h",
+      "web_native_bridge_impl.cc",
+      "web_native_bridge_impl.h",
+    ]
+  }
+
   # Add in the generated files.
   sources += get_target_outputs(":character_data") +
              get_target_outputs(":color_data") +

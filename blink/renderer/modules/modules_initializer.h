@@ -38,6 +38,12 @@ class MODULES_EXPORT ModulesInitializer : public CoreInitializer {
       WebMediaPlayerClient*) const override;
   WebRemotePlaybackClient* CreateWebRemotePlaybackClient(
       HTMLMediaElement&) const override;
+#if BUILDFLAG(IS_OHOS)
+  std::unique_ptr<WebNativeBridge> CreateWebNativeBridge(
+      WebLocalFrameClient*,
+      HTMLNativeElement&,
+      WebNativeClient*) const override;
+#endif
 
   void ProvideModulesToPage(Page&,
                             const SessionStorageNamespaceId&) const override;

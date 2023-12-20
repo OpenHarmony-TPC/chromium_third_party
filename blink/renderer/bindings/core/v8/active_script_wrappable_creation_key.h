@@ -5,6 +5,8 @@
 #ifndef THIRD_PARTY_BLINK_RENDERER_BINDINGS_CORE_V8_ACTIVE_SCRIPT_WRAPPABLE_CREATION_KEY_H_
 #define THIRD_PARTY_BLINK_RENDERER_BINDINGS_CORE_V8_ACTIVE_SCRIPT_WRAPPABLE_CREATION_KEY_H_
 
+#include "build/build_config.h"
+
 namespace blink {
 
 // Creation key needed to instantiate ActiveScriptWrappable objects.
@@ -52,6 +54,9 @@ class ActiveScriptWrappableCreationKey final {
   friend class HTMLImageElement;
   friend class HTMLInputElement;
   friend class HTMLMediaElement;
+#if BUILDFLAG(IS_OHOS)
+  friend class HTMLNativeElement;
+#endif
   friend class HTMLPlugInElement;
   friend class IDBDatabase;
   friend class IDBRequest;

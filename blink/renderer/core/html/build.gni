@@ -566,6 +566,15 @@ blink_core_sources_html = [
   "window_name_collection.h",
 ]
 
+if (is_ohos) {
+  blink_core_sources_html += [
+    "media/html_native_element.cc",
+    "media/html_native_element.h",
+    "media/native_document.cc",
+    "media/native_document.h",
+  ]
+}
+
 # Optimizing the HTML parser for speed yields significant gains in performance
 # in parser-heavy scenarios. See https://crbug.com/787512.
 blink_core_hot_sources_html = [

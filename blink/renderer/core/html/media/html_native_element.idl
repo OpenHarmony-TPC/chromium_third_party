@@ -1,0 +1,11 @@
+
+[
+    Exposed=Window,
+    HTMLConstructor,
+    ActiveScriptWrappable
+] interface HTMLNativeElement : HTMLElement {
+    [CEReactions, Reflect] attribute unsigned long width;
+    [CEReactions, Reflect] attribute unsigned long height;
+    readonly attribute unsigned long videoWidth;
+    readonly attribute unsigned long videoHeight;
+};

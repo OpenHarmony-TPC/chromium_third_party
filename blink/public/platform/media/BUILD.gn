@@ -19,6 +19,11 @@ source_set("media") {
     "web_encrypted_media_client_impl.h",
     "web_media_player_builder.h",
   ]
+  if (is_ohos) {
+    sources += [
+      "web_native_delegate.h",
+    ]
+  }
   public_deps = [
     "//base",
     "//cc",

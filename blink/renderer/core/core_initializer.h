@@ -68,6 +68,11 @@ class WebMediaPlayer;
 class WebMediaPlayerClient;
 class WebMediaPlayerSource;
 class WebRemotePlaybackClient;
+#if BUILDFLAG(IS_OHOS)
+class WebNativeBridge;
+class WebNativeClient;
+class HTMLNativeElement;
+#endif
 
 class CORE_EXPORT CoreInitializer {
   USING_FAST_MALLOC(CoreInitializer);
@@ -120,6 +125,13 @@ class CORE_EXPORT CoreInitializer {
       HTMLMediaElement&,
       const WebMediaPlayerSource&,
       WebMediaPlayerClient*) const = 0;
+
+#if BUILDFLAG(IS_OHOS)
+  virtual std::unique_ptr<WebNativeBridge> CreateWebNativeBridge(
+      WebLocalFrameClient* web_frame_client,
+      HTMLNativeElement& html_native_element,
+      WebNativeClient*) const = 0;
+#endif
 
   virtual WebRemotePlaybackClient* CreateWebRemotePlaybackClient(
       HTMLMediaElement&) const = 0;

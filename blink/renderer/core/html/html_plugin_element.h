@@ -98,6 +98,19 @@ class CORE_EXPORT HTMLPlugInElement
   HTMLImageLoader* ImageLoader() const { return image_loader_.Get(); }
   virtual bool UseFallbackContent() const;
 
+#if BUILDFLAG(IS_OHOS)
+  const String NativeSource() override { return Url(); }
+
+  const String NativeType() override { return service_type_; }
+
+  const String IdAttribute() override { return GetIdAttribute().GetString(); }
+
+  bool IsNativeType() const override {
+    return service_type_ == "native/video" || service_type_ == "native/map" ||
+           service_type_ == "native/canvas" || service_type_ == "native/camera";
+  }
+#endif
+
  protected:
   HTMLPlugInElement(const QualifiedName& tag_name,
                     Document&,

@@ -567,6 +567,11 @@ HTMLPlugInElement::ObjectContentType HTMLPlugInElement::GetObjectContentType()
     return ObjectContentType::kPlugin;
   if (MIMETypeRegistry::IsSupportedNonImageMIMEType(mime_type))
     return ObjectContentType::kFrame;
+#if BUILDFLAG(IS_OHOS)
+  if (IsNativeType()) {
+    return ObjectContentType::kFrame;
+  }
+#endif
   return ObjectContentType::kNone;
 }
 
@@ -640,7 +645,12 @@ bool HTMLPlugInElement::RequestObject(const PluginParameters& plugin_params) {
     // loadOrRedirectSubframe will re-use it. Otherwise, it will create a
     // new frame and set it as the LayoutEmbeddedContent's EmbeddedContentView,
     // causing what was previously in the EmbeddedContentView to be torn down.
+#if BUILDFLAG(IS_OHOS)
+    LOG(INFO) << "[NativeEmbed] RequestObject service type " << service_type_;
+    return LoadOrRedirectSubframe(completed_url, GetNameAttribute(), true, IsNativeType());
+#else
     return LoadOrRedirectSubframe(completed_url, GetNameAttribute(), true);
+#endif
   }
 
   // If an object's content can't be handled and it has no fallback, let

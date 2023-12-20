@@ -265,3 +265,10 @@ blink_core_tests_paint = [
   "video_painter_test.cc",
   "view_painter_test.cc",
 ]
+
+if (is_ohos) {
+  blink_core_sources_paint += [
+    "native_painter.cc",
+    "native_painter.h",
+  ]
+}
