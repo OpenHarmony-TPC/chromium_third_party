@@ -40,6 +40,7 @@ class MODULES_EXPORT RTCEncodedVideoUnderlyingSource
   const Member<ScriptState> script_state_;
   base::OnceClosure disconnect_callback_;
   THREAD_CHECKER(thread_checker_);
+  scoped_refptr<base::SingleThreadTaskRunner> task_runner_;
 };
 
 }  // namespace blink

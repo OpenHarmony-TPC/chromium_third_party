@@ -26,6 +26,9 @@ RTCEncodedVideoUnderlyingSource::RTCEncodedVideoUnderlyingSource(
       script_state_(script_state),
       disconnect_callback_(std::move(disconnect_callback)) {
   DCHECK(disconnect_callback_);
+
+  ExecutionContext* context = ExecutionContext::From(script_state);
+  task_runner_ = context->GetTaskRunner(TaskType::kInternalMediaRealTime);
 }
 
 ScriptPromise RTCEncodedVideoUnderlyingSource::pull(ScriptState* script_state) {
@@ -50,7 +53,15 @@ void RTCEncodedVideoUnderlyingSource::Trace(Visitor* visitor) const {
 
 void RTCEncodedVideoUnderlyingSource::OnFrameFromSource(
     std::unique_ptr<webrtc::TransformableVideoFrameInterface> webrtc_frame) {
-  DCHECK_CALLED_ON_VALID_THREAD(thread_checker_);
+  // It can happen that a frame is posted to the task runner of the old
+  // execution context during a stream transfer to a new context.
+  // TODO(https://crbug.com/1506631): Make the state updates related to the
+  // transfer atomic and turn this into a DCHECK.
+  if (!task_runner_->BelongsToCurrentThread()) {
+    DVLOG(1) << "Dropped frame posted to incorrect task runner. This can "
+                "happen during transfer.";
+    return;
+  }
   // If the source is canceled or there are too many queued frames,
   // drop the new frame.
   if (!disconnect_callback_ || !Controller() ||
