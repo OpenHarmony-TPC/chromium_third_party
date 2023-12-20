@@ -285,7 +285,9 @@ class CORE_EXPORT LocalFrameClientImpl final : public LocalFrameClient {
       override;
 
   void SetMouseCapture(bool capture) override;
-
+#ifdef BUILDFLAG(IS_OHOS)
+  void DidNativeEmbedEvent(const WebPointerEvent& web_pointer_event, std::string embedId) override;
+#endif
   bool UsePrintingLayout() const override;
 
   std::unique_ptr<blink::ResourceLoadInfoNotifierWrapper>

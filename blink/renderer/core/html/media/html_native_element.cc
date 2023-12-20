@@ -453,6 +453,7 @@ void HTMLNativeElement::OnCreateNativeSurface(int native_embed_id) {
   if (auto* layout_view = GetDocument().GetLayoutView()) {
     bounding_size = layout_view->GetLayoutSize();
   }
+  native_embed_id_ = native_embed_id;
   for (auto& observer : native_bridge_observer_remote_set_->Value()) {
     observer->UpdateElementId(embed_element_id_);
     observer->UpdateElementSource(native_source_);
@@ -658,6 +659,10 @@ void HTMLNativeElement::OpenerContextObserver::Trace(Visitor* visitor) const {
 
 void HTMLNativeElement::OpenerContextObserver::ContextDestroyed() {
   element_->AttachToNewFrame();
+}
+
+int HTMLNativeElement::GetNativeEmbedId() {
+  return native_embed_id_;
 }
 
 }  // namespace blink

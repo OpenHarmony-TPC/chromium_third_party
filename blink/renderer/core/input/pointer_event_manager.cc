@@ -14,6 +14,7 @@
 #include "third_party/blink/renderer/core/events/mouse_event.h"
 #include "third_party/blink/renderer/core/frame/event_handler_registry.h"
 #include "third_party/blink/renderer/core/frame/local_frame.h"
+#include "third_party/blink/renderer/core/frame/local_frame_client.h"
 #include "third_party/blink/renderer/core/frame/local_frame_view.h"
 #include "third_party/blink/renderer/core/html/canvas/html_canvas_element.h"
 #include "third_party/blink/renderer/core/input/event_handler.h"
@@ -32,6 +33,7 @@
 #include "third_party/blink/renderer/platform/heap/garbage_collected.h"
 #include "third_party/blink/renderer/platform/instrumentation/use_counter.h"
 #include "third_party/blink/renderer/platform/runtime_enabled_features.h"
+#include "third_party/blink/renderer/core/html/media/html_native_element.h"
 #include "ui/display/screen_info.h"
 
 namespace blink {
@@ -482,6 +484,26 @@ bool PointerEventManager::ShouldFilterEvent(PointerEvent* pointer_event) {
   // enabled.
   return true;
 }
+#if defined(OHOS_INPUT_EVENTS)
+void PointerEventManager::SetNativeEmbedModeEnabled(bool mode) {
+    enable_embed_mode_ = mode;
+    LOG(DEBUG)<<"NativeEmbedModeEnabled is "<<enable_embed_mode_;
+}
+
+void PointerEventManager::DidNativeEmbedEvent(HitTestResult hit_test_result,
+    const WebPointerEvent& web_pointer_event) {
+
+    LocalFrame* frame =  hit_test_result.InnerNodeFrame();
+    hit_embed_tag_ = frame->IsNativeType();
+    if(hit_embed_tag_){
+      Element* element = hit_test_result.InnerElement();
+      auto* htmlNativeElement = DynamicTo<HTMLNativeElement>(element);
+      std::string embedId = std::to_string(htmlNativeElement->GetNativeEmbedId());
+      LOG(DEBUG)<<"hit NativeEmbed gusture event";
+      frame_->Client()->DidNativeEmbedEvent(web_pointer_event, embedId);
+    }
+}
+#endif
 
 event_handling_util::PointerEventTarget
 PointerEventManager::ComputePointerEventTarget(
@@ -510,6 +532,9 @@ PointerEventManager::ComputePointerEventTarget(
       pointer_event_target.target_element = target;
       pointer_event_target.scrollbar = hit_test_result.GetScrollbar();
     }
+  #if defined(OHOS_INPUT_EVENTS)
+    DidNativeEmbedEvent(hit_test_result, web_pointer_event);
+  #endif
   } else {
     // Set the target of pointer event to the captured element as this
     // pointer is captured otherwise it would have gone to the |if| block
@@ -660,6 +685,11 @@ WebInputEventResult PointerEventManager::HandlePointerEvent(
       return WebInputEventResult::kHandledSuppressed;
 
     if (pointer_event) {
+      #if defined(OHOS_INPUT_EVENTS)
+      if(enable_embed_mode_ && hit_embed_tag_){
+        return WebInputEventResult::kHandledSystem;
+      }
+      #endif
       // TODO(crbug.com/1141595): We should handle this case further upstream.
       DispatchPointerEvent(target, pointer_event);
     }
