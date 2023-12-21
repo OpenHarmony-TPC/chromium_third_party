@@ -48,6 +48,7 @@
 #include "third_party/blink/public/common/tokens/tokens.h"
 #include "third_party/blink/public/common/use_counter/use_counter_feature.h"
 #include "third_party/blink/public/common/user_agent/user_agent_metadata.h"
+#include "third_party/blink/public/common/input/web_pointer_event.h"
 #include "third_party/blink/public/mojom/devtools/devtools_agent.mojom-blink-forward.h"
 #include "third_party/blink/public/mojom/fenced_frame/fenced_frame.mojom-blink-forward.h"
 #include "third_party/blink/public/mojom/frame/triggering_event_info.mojom-blink-forward.h"
@@ -444,6 +445,9 @@ class CORE_EXPORT LocalFrameClient : public FrameClient {
 
   virtual void SetMouseCapture(bool) {}
 
+#ifdef BUILDFLAG(IS_OHOS)
+  virtual void DidNativeEmbedEvent(const WebPointerEvent& web_pointer_event, std::string embedId) {}
+#endif
   // Returns whether we are associated with a print context who suggests to use
   // printing layout.
   virtual bool UsePrintingLayout() const { return false; }

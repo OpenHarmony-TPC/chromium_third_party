@@ -100,6 +100,10 @@ class CORE_EXPORT PointerEventManager final
 
   void RemoveLastMousePosition();
 
+#if defined(OHOS_INPUT_EVENTS)
+  void SetNativeEmbedModeEnabled(bool mode);
+#endif
+
   Element* GetMouseCaptureTarget();
 
   // Sends any outstanding events. For example it notifies TouchEventManager
@@ -250,7 +254,10 @@ class CORE_EXPORT PointerEventManager final
   // Check if the SkipTouchEventFilter experiment is configured to skip
   // filtering on the given event.
   bool ShouldFilterEvent(PointerEvent* pointer_event);
-
+#if defined(OHOS_INPUT_EVENTS)
+  void DidNativeEmbedEvent(HitTestResult hit_test_tesult,
+                     const WebPointerEvent& web_pointer_event);
+#endif
   bool HandleScrollbarTouchDrag(const WebPointerEvent&, Scrollbar*);
 
   bool HandleResizerDrag(const WebPointerEvent&,
@@ -299,7 +306,10 @@ class CORE_EXPORT PointerEventManager final
   // main thread, or all events (touch start/end/move).
   bool skip_touch_filter_discrete_ = false;
   bool skip_touch_filter_all_ = false;
-
+#if defined(OHOS_INPUT_EVENTS)
+  bool enable_embed_mode_ = false;
+  bool hit_embed_tag_ = false;
+#endif
   WeakMember<Scrollbar> captured_scrollbar_;
 };
 

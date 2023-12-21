@@ -422,7 +422,9 @@ class CORE_EXPORT WebFrameWidgetImpl
   bool IsHidden() const override;
   WebString GetLastToolTipTextForTesting() const override;
   float GetEmulatorScale() override;
-
+#if BUILDFLAG(IS_OHOS)
+  void DidNativeEmbedEvent(const WebPointerEvent& web_pointer_event, std::string embedId);
+#endif
   // WidgetBaseClient overrides:
   void OnCommitRequested() override;
   void BeginMainFrame(base::TimeTicks last_frame_time) override;
@@ -836,6 +838,7 @@ class CORE_EXPORT WebFrameWidgetImpl
 #if defined(OHOS_INPUT_EVENTS)
   void SetZoomLevel(float magnify_delta, const gfx::Point& anchor) override;
   void SetOverscrollMode(int mode) override;
+  void SetNativeEmbedModeEnabled(bool mode) override;
 #endif  // defined(OHOS_INPUT_EVENTS)
 
   // PageWidgetEventHandler overrides:

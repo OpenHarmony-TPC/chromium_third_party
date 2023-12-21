@@ -4693,6 +4693,43 @@ void WebFrameWidgetImpl::SetOverscrollMode(int mode) {
   }
   widget_base_->SetOverscrollMode(mode);
 }
+
+void WebFrameWidgetImpl::DidNativeEmbedEvent(const WebPointerEvent& web_pointer_event, std::string embedId) {
+  if (mojom::blink::WidgetInputHandlerHost* host =
+          widget_base_->widget_input_handler_manager()
+              ->GetWidgetInputHandlerHost()) {
+    auto x = web_pointer_event.PositionInWidget().x();
+    auto y = web_pointer_event.PositionInWidget().y();
+    auto screenX = web_pointer_event.PositionInScreen().x();
+    auto screenY = web_pointer_event.PositionInScreen().y();
+    float force = web_pointer_event.force;
+    double size = static_cast<double>(web_pointer_event.tangential_pressure);
+    auto time = web_pointer_event.TimeStamp().ToInternalValue();
+    PointerId id = web_pointer_event.id;
+    mojom::blink::TouchType type;
+    switch(web_pointer_event.GetType()){
+      case WebInputEvent::Type::kPointerDown:
+          type = mojom::blink::TouchType::DOWN;
+          break;
+      case WebInputEvent::Type::kPointerUp:
+          type = mojom::blink::TouchType::UP;
+          break;
+      case WebInputEvent::Type::kPointerMove:
+          type = mojom::blink::TouchType::MOVE;
+          break;
+      default:
+          type = mojom::blink::TouchType::CANCEL;
+    }
+    host->DidNativeEmbedEvent(mojom::blink::EmbedTouchEvent::New(
+      static_cast<String>(embedId), id, x, y, screenX, screenY, type,time,size,force));
+  }
+}
+
+void WebFrameWidgetImpl::SetNativeEmbedModeEnabled(bool mode) {
+  LocalFrame* root_frame = LocalRootImpl()->GetFrame();
+  DCHECK(root_frame);
+  root_frame->GetEventHandler().SetNativeEmbedModeEnabled(mode);
+}
 #endif  // defined(OHOS_INPUT_EVENTS)
 
 #ifdef OHOS_EX_FREE_COPY

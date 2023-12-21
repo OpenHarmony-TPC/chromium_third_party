@@ -81,6 +81,7 @@ class WebFrameWidget : public WebWidget {
 #if BUILDFLAG(IS_OHOS)
   virtual void SetZoomLevel(float magnify_delta, const gfx::Point& anchor) {}
   virtual void SetOverscrollMode(int mode) {}
+  virtual void SetNativeEmbedModeEnabled(bool mode) {}
 #endif  // BUILDFLAG(IS_OHOS)
 
   // Returns the local root of this WebFrameWidget.

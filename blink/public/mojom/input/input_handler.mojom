@@ -198,6 +198,50 @@ struct EditCommand {
   string value;
 };
 
+[EnableIf=is_ohos]
+// Touch types
+enum TouchType{
+    DOWN,
+    UP,
+    MOVE,
+    CANCEL,
+    PULL_DOWN,
+    PULL_UP,
+    PULL_MOVE,
+    PULL_IN_WINDOW,
+    PULL_OUT_WINDOW,
+    UNKNOWN,
+};
+[EnableIf=is_ohos]
+//Touch point data
+struct EmbedTouchPoint {
+    int32 id = 0;
+    float x;
+    float y;
+    float screenX;
+    float screenY;
+    uint64 downTime;
+    double size = 0.0;
+    float force;
+};
+[EnableIf=is_ohos]
+// Touch event data
+struct EmbedTouchEvent {
+    string embedId;
+    int32 id = 0;
+    float x;
+    float y;
+    float screenX;
+    float screenY;
+    TouchType type;
+    uint64 time;
+    double size = 0.0;
+    float force;
+
+    // all points on the touch screen.
+    //array<EmbedTouchPoint> pointers;
+};
+
 // A structure that indicates selection offsets if the selection could be
 // established.
 struct SelectAroundCaretResult {
@@ -247,6 +291,10 @@ interface WidgetInputHandlerHost {
   // Sent by the compositor when input scroll events are dropped due to bounds
   // restrictions on the root scroll offset.
   DidOverscroll(DidOverscrollParams params);
+
+  [EnableIf=is_ohos]
+  // Sent by the touch embed tag/
+  DidNativeEmbedEvent(EmbedTouchEvent event);
 
   // Sent by the compositor when a GSB has started scrolling the viewport.
   DidStartScrollingViewport();

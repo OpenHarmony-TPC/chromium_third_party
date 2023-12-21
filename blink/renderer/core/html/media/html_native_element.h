@@ -108,6 +108,7 @@ class CORE_EXPORT HTMLNativeElement
   void Repaint() final;
   void SizeChanged(const gfx::Size& size) final;
   void SetCcLayer(cc::Layer*) final;
+  int GetNativeEmbedId();
  protected:
   // Assert the correct order of the children in shadow dom when DCHECK is on.
   static void AssertShadowRootChildren(ShadowRoot&);
@@ -247,6 +248,7 @@ class CORE_EXPORT HTMLNativeElement
   String native_source_;
   String embed_element_id_;
   std::unique_ptr<WebNativeBridge> web_native_bridge_;
+  int native_embed_id_;
 
   friend class Internals;
 

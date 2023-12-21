@@ -1163,6 +1163,14 @@ void LocalFrameClientImpl::SetMouseCapture(bool capture) {
   web_frame_->LocalRoot()->FrameWidgetImpl()->SetMouseCapture(capture);
 }
 
+#ifdef BUILDFLAG(IS_OHOS)
+void LocalFrameClientImpl::DidNativeEmbedEvent(
+    const WebPointerEvent& web_pointer_event, std::string embedId) {
+  web_frame_->LocalRoot()->FrameWidgetImpl()->DidNativeEmbedEvent(
+    web_pointer_event, embedId);
+}
+#endif
+
 bool LocalFrameClientImpl::UsePrintingLayout() const {
   return web_frame_->UsePrintingLayout();
 }
