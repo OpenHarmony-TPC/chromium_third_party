@@ -321,11 +321,8 @@ void FrameQueueUnderlyingSource<
       realm_task_runner_->PostTask(
           FROM_HERE,
           WTF::Bind(
-              [](ReadableStreamDefaultControllerWithScriptScope* controller,
-                 ScriptWrappable* blink_frame) {
-                controller->Enqueue(blink_frame);
-              },
-              WrapPersistent(Controller()),
+              &FrameQueueUnderlyingSource::EnqueueBlinkFrame,
+              WrapPersistent(this),
               WrapPersistent(MakeBlinkFrame(std::move(media_frame.value())))));
     } else {
       Controller()->Enqueue(MakeBlinkFrame(std::move(media_frame.value())));
@@ -338,6 +335,15 @@ void FrameQueueUnderlyingSource<
       if (--num_pending_pulls_ == 0)
         return;
     }
+  }
+}
+
+template <typename NativeFrameType>
+void FrameQueueUnderlyingSource<NativeFrameType>::EnqueueBlinkFrame(
+    ScriptWrappable* blink_frame) const {
+  DCHECK(realm_task_runner_->RunsTasksInCurrentSequence());
+  if (GetExecutionContext() && !GetExecutionContext()->IsContextDestroyed()) {
+    Controller()->Enqueue(blink_frame);
   }
 }
 

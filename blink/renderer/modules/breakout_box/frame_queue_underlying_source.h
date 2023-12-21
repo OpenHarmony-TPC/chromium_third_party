@@ -118,6 +118,8 @@ class FrameQueueUnderlyingSource
   // Must be called on |realm_task_runner_|.
   ScriptWrappable* MakeBlinkFrame(NativeFrameType media_frame);
 
+  void EnqueueBlinkFrame(ScriptWrappable* blink_frame) const;
+
   bool is_closed_ = false;
 
   // Main task runner for the window or worker context this source runs on.
