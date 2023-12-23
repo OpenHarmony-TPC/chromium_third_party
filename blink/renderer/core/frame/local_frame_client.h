@@ -446,7 +446,8 @@ class CORE_EXPORT LocalFrameClient : public FrameClient {
   virtual void SetMouseCapture(bool) {}
 
 #ifdef BUILDFLAG(IS_OHOS)
-  virtual void DidNativeEmbedEvent(const WebPointerEvent& web_pointer_event, std::string embedId) {}
+  virtual void DidNativeEmbedEvent(const WebPointerEvent& web_pointer_event, std::string embedId,
+                                  gfx::Rect& rect, bool isCancel) {}
 #endif
   // Returns whether we are associated with a print context who suggests to use
   // printing layout.

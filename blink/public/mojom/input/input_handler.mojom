@@ -212,18 +212,7 @@ enum TouchType{
     PULL_OUT_WINDOW,
     UNKNOWN,
 };
-[EnableIf=is_ohos]
-//Touch point data
-struct EmbedTouchPoint {
-    int32 id = 0;
-    float x;
-    float y;
-    float screenX;
-    float screenY;
-    uint64 downTime;
-    double size = 0.0;
-    float force;
-};
+
 [EnableIf=is_ohos]
 // Touch event data
 struct EmbedTouchEvent {
@@ -234,12 +223,8 @@ struct EmbedTouchEvent {
     float screenX;
     float screenY;
     TouchType type;
-    uint64 time;
-    double size = 0.0;
-    float force;
-
-    // all points on the touch screen.
-    //array<EmbedTouchPoint> pointers;
+    float offsetX = 0.0;
+    float offsetY = 0.0;
 };
 
 // A structure that indicates selection offsets if the selection could be
