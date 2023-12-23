@@ -108,6 +108,7 @@ HTMLNativeElement::HTMLNativeElement(Document& document)
   ResetMojoState();
 
   if (document.LocalOwner()) {
+    localOwner_ = document.LocalOwner();
     native_type_ = document.LocalOwner()->NativeType();
     native_source_ = document.LocalOwner()->NativeSource();
     embed_element_id_ = document.LocalOwner()->IdAttribute();
@@ -122,6 +123,10 @@ HTMLNativeElement::HTMLNativeElement(Document& document)
 
 HTMLNativeElement::~HTMLNativeElement() {
   DVLOG(1) << "~HTMLNativeElement(" << *this << ")";
+}
+
+HTMLFrameOwnerElement* HTMLNativeElement::GetLocalOwner() {
+  return localOwner_;
 }
 
 void HTMLNativeElement::Dispose() {

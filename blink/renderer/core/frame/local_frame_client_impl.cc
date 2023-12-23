@@ -1165,9 +1165,9 @@ void LocalFrameClientImpl::SetMouseCapture(bool capture) {
 
 #ifdef BUILDFLAG(IS_OHOS)
 void LocalFrameClientImpl::DidNativeEmbedEvent(
-    const WebPointerEvent& web_pointer_event, std::string embedId) {
+    const WebPointerEvent& web_pointer_event, std::string embedId, gfx::Rect& rect, bool isCancel) {
   web_frame_->LocalRoot()->FrameWidgetImpl()->DidNativeEmbedEvent(
-    web_pointer_event, embedId);
+    web_pointer_event, embedId, rect, isCancel);
 }
 #endif
 

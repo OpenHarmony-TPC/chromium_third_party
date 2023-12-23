@@ -423,7 +423,8 @@ class CORE_EXPORT WebFrameWidgetImpl
   WebString GetLastToolTipTextForTesting() const override;
   float GetEmulatorScale() override;
 #if BUILDFLAG(IS_OHOS)
-  void DidNativeEmbedEvent(const WebPointerEvent& web_pointer_event, std::string embedId);
+  void DidNativeEmbedEvent(const WebPointerEvent& web_pointer_event, std::string embedId,
+                        gfx::Rect& rect, bool isCancel);
 #endif
   // WidgetBaseClient overrides:
   void OnCommitRequested() override;

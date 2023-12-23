@@ -18,6 +18,7 @@ namespace blink {
 class LocalFrame;
 class MouseEventManager;
 class WebPointerProperties;
+class DOMRect;
 
 // This class takes care of dispatching all pointer events and keeps track of
 // properties of active pointer events.
@@ -309,6 +310,10 @@ class CORE_EXPORT PointerEventManager final
 #if defined(OHOS_INPUT_EVENTS)
   bool enable_embed_mode_ = false;
   bool hit_embed_tag_ = false;
+  WebInputEvent::Type lastPointType_ = WebInputEvent::Type::kUndefined;
+  bool isLastNativeType_ = false;
+  gfx::Rect embedRect_ {};
+  std::string embedId_;
 #endif
   WeakMember<Scrollbar> captured_scrollbar_;
 };

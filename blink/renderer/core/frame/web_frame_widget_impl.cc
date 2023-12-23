@@ -4694,17 +4694,17 @@ void WebFrameWidgetImpl::SetOverscrollMode(int mode) {
   widget_base_->SetOverscrollMode(mode);
 }
 
-void WebFrameWidgetImpl::DidNativeEmbedEvent(const WebPointerEvent& web_pointer_event, std::string embedId) {
+void WebFrameWidgetImpl::DidNativeEmbedEvent(const WebPointerEvent& web_pointer_event, std::string embedId,
+                                            gfx::Rect& rect, bool isCancel) {
   if (mojom::blink::WidgetInputHandlerHost* host =
           widget_base_->widget_input_handler_manager()
               ->GetWidgetInputHandlerHost()) {
-    auto x = web_pointer_event.PositionInWidget().x();
-    auto y = web_pointer_event.PositionInWidget().y();
+    auto x = web_pointer_event.PositionInWidget().x() - rect.x();
+    auto y = web_pointer_event.PositionInWidget().y() - rect.y();
     auto screenX = web_pointer_event.PositionInScreen().x();
     auto screenY = web_pointer_event.PositionInScreen().y();
-    float force = web_pointer_event.force;
-    double size = static_cast<double>(web_pointer_event.tangential_pressure);
-    auto time = web_pointer_event.TimeStamp().ToInternalValue();
+    float offsetX = rect.x();
+    float offsetY = rect.y();
     PointerId id = web_pointer_event.id;
     mojom::blink::TouchType type;
     switch(web_pointer_event.GetType()){
@@ -4720,8 +4720,12 @@ void WebFrameWidgetImpl::DidNativeEmbedEvent(const WebPointerEvent& web_pointer_
       default:
           type = mojom::blink::TouchType::CANCEL;
     }
+    if (isCancel) {
+      type = mojom::blink::TouchType::CANCEL;
+    }
+    LOG(DEBUG) << "NativeEmbed type = " << type << ",x = " << x << ",y = " << y;
     host->DidNativeEmbedEvent(mojom::blink::EmbedTouchEvent::New(
-      static_cast<String>(embedId), id, x, y, screenX, screenY, type,time,size,force));
+      static_cast<String>(embedId), id, x, y, screenX, screenY, type, offsetX, offsetY));
   }
 }
 

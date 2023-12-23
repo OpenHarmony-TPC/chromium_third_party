@@ -16,7 +16,10 @@
 #include "third_party/blink/renderer/core/frame/local_frame.h"
 #include "third_party/blink/renderer/core/frame/local_frame_client.h"
 #include "third_party/blink/renderer/core/frame/local_frame_view.h"
+#include "third_party/blink/renderer/core/geometry/dom_rect.h"
 #include "third_party/blink/renderer/core/html/canvas/html_canvas_element.h"
+#include "third_party/blink/renderer/core/html/html_frame_owner_element.h"
+#include "third_party/blink/renderer/core/html/media/html_native_element.h"
 #include "third_party/blink/renderer/core/input/event_handler.h"
 #include "third_party/blink/renderer/core/input/event_handling_util.h"
 #include "third_party/blink/renderer/core/input/mouse_event_manager.h"
@@ -492,15 +495,27 @@ void PointerEventManager::SetNativeEmbedModeEnabled(bool mode) {
 
 void PointerEventManager::DidNativeEmbedEvent(HitTestResult hit_test_result,
     const WebPointerEvent& web_pointer_event) {
-
     LocalFrame* frame =  hit_test_result.InnerNodeFrame();
     hit_embed_tag_ = frame->IsNativeType();
     if(hit_embed_tag_){
-      Element* element = hit_test_result.InnerElement();
-      auto* htmlNativeElement = DynamicTo<HTMLNativeElement>(element);
-      std::string embedId = std::to_string(htmlNativeElement->GetNativeEmbedId());
-      LOG(DEBUG)<<"hit NativeEmbed gusture event";
-      frame_->Client()->DidNativeEmbedEvent(web_pointer_event, embedId);
+      Element* target = hit_test_result.InnerElement();
+      auto* htmlNativeElement = DynamicTo<HTMLNativeElement>(target);
+      if (htmlNativeElement) {
+        embedId_ = std::to_string(htmlNativeElement->GetNativeEmbedId());
+        auto* element = htmlNativeElement->GetLocalOwner();
+        if (element) {
+          embedRect_ = element->getBoundingClientRect()->ToEnclosingRect();
+          isLastNativeType_ = true;
+          lastPointType_ = web_pointer_event.GetType();
+          frame_->Client()->DidNativeEmbedEvent(web_pointer_event, embedId_, embedRect_, false);
+        }
+      }
+      return;
+    }
+    if (!hit_embed_tag_ && (lastPointType_ == WebInputEvent::Type::kPointerMove) && isLastNativeType_) {
+      isLastNativeType_ = false;
+      lastPointType_ = web_pointer_event.GetType();
+      frame_->Client()->DidNativeEmbedEvent(web_pointer_event, embedId_, embedRect_, true);
     }
 }
 #endif
@@ -518,6 +533,7 @@ PointerEventManager::ComputePointerEventTarget(
   // have this target yet since the processing of that will be done right
   // before firing the event.
   if (web_pointer_event.GetType() == WebInputEvent::Type::kPointerDown ||
+    (enable_embed_mode_ && (web_pointer_event.GetType() == WebInputEvent::Type::kPointerUp)) ||
       !pending_pointer_capture_target_.Contains(pointer_id)) {
     HitTestRequest::HitTestRequestType hit_type = HitTestRequest::kTouchEvent |
                                                   HitTestRequest::kReadOnly |
