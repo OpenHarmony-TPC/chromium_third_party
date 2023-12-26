@@ -48,16 +48,15 @@ FileChooserClient::~FileChooserClient() = default;
 
 FileChooser* FileChooserClient::NewFileChooser(
     const mojom::blink::FileChooserParams& params) {
-  if (chooser_)
-    chooser_->DisconnectClient();
-
-  chooser_ = FileChooser::Create(this, params);
+  if (!chooser_)
+    chooser_ = FileChooser::Create(this, params);
   return chooser_.get();
 }
 
 void FileChooserClient::DisconnectFileChooser() {
   DCHECK(HasConnectedFileChooser());
   chooser_->DisconnectClient();
+  chooser_ = nullptr;
 }
 
 inline FileChooser::FileChooser(FileChooserClient* client,
