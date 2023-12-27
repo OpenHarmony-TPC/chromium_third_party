@@ -489,34 +489,37 @@ bool PointerEventManager::ShouldFilterEvent(PointerEvent* pointer_event) {
 }
 #if defined(OHOS_INPUT_EVENTS)
 void PointerEventManager::SetNativeEmbedModeEnabled(bool mode) {
-    enable_embed_mode_ = mode;
-    LOG(DEBUG)<<"NativeEmbedModeEnabled is "<<enable_embed_mode_;
+  enable_embed_mode_ = mode;
+  LOG(DEBUG)<<"NativeEmbedModeEnabled is "<<enable_embed_mode_;
 }
 
 void PointerEventManager::DidNativeEmbedEvent(HitTestResult hit_test_result,
-    const WebPointerEvent& web_pointer_event) {
-    LocalFrame* frame =  hit_test_result.InnerNodeFrame();
-    hit_embed_tag_ = frame->IsNativeType();
-    if(hit_embed_tag_){
-      Element* target = hit_test_result.InnerElement();
-      auto* htmlNativeElement = DynamicTo<HTMLNativeElement>(target);
-      if (htmlNativeElement) {
-        embedId_ = std::to_string(htmlNativeElement->GetNativeEmbedId());
-        auto* element = htmlNativeElement->GetLocalOwner();
-        if (element) {
-          embedRect_ = element->getBoundingClientRect()->ToEnclosingRect();
-          isLastNativeType_ = true;
-          lastPointType_ = web_pointer_event.GetType();
-          frame_->Client()->DidNativeEmbedEvent(web_pointer_event, embedId_, embedRect_, false);
-        }
+  const WebPointerEvent& web_pointer_event) {
+  LocalFrame* frame =  hit_test_result.InnerNodeFrame();
+  if (!frame) {
+    return;
+  }
+  hit_embed_tag_ = frame->IsNativeType();
+  if(hit_embed_tag_){
+    Element* target = hit_test_result.InnerElement();
+    auto* htmlNativeElement = DynamicTo<HTMLNativeElement>(target);
+    if (htmlNativeElement) {
+      embedId_ = std::to_string(htmlNativeElement->GetNativeEmbedId());
+      auto* element = htmlNativeElement->GetLocalOwner();
+      if (element) {
+        embedRect_ = element->getBoundingClientRect()->ToEnclosingRect();
+        isLastNativeType_ = true;
+        lastPointType_ = web_pointer_event.GetType();
+        frame_->Client()->DidNativeEmbedEvent(web_pointer_event, embedId_, embedRect_, false);
       }
-      return;
     }
-    if (!hit_embed_tag_ && (lastPointType_ == WebInputEvent::Type::kPointerMove) && isLastNativeType_) {
-      isLastNativeType_ = false;
-      lastPointType_ = web_pointer_event.GetType();
-      frame_->Client()->DidNativeEmbedEvent(web_pointer_event, embedId_, embedRect_, true);
-    }
+    return;
+  }
+  if (!hit_embed_tag_ && (lastPointType_ == WebInputEvent::Type::kPointerMove) && isLastNativeType_) {
+    isLastNativeType_ = false;
+    lastPointType_ = web_pointer_event.GetType();
+    frame_->Client()->DidNativeEmbedEvent(web_pointer_event, embedId_, embedRect_, true);
+  }
 }
 #endif
 
@@ -548,9 +551,11 @@ PointerEventManager::ComputePointerEventTarget(
       pointer_event_target.target_element = target;
       pointer_event_target.scrollbar = hit_test_result.GetScrollbar();
     }
-  #if defined(OHOS_INPUT_EVENTS)
-    DidNativeEmbedEvent(hit_test_result, web_pointer_event);
-  #endif
+    if (enable_embed_mode_) {
+      #if defined(OHOS_INPUT_EVENTS)
+        DidNativeEmbedEvent(hit_test_result, web_pointer_event);
+      #endif
+    }
   } else {
     // Set the target of pointer event to the captured element as this
     // pointer is captured otherwise it would have gone to the |if| block
