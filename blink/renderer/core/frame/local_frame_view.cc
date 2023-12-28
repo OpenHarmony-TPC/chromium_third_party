@@ -3764,7 +3764,7 @@ AXObjectCache* LocalFrameView::ExistingAXObjectCache() const {
 
 void LocalFrameView::SetCursor(const ui::Cursor& cursor) {
   Page* page = GetFrame().GetPage();
-  if (!page || frame_->GetEventHandler().IsMousePositionUnknown())
+  if (!page)
     return;
   LogCursorSizeCounter(&GetFrame(), cursor);
   page->GetChromeClient().SetCursor(cursor, frame_);
