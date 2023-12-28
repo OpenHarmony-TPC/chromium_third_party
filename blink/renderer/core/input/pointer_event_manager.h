@@ -307,8 +307,8 @@ class CORE_EXPORT PointerEventManager final
   // main thread, or all events (touch start/end/move).
   bool skip_touch_filter_discrete_ = false;
   bool skip_touch_filter_all_ = false;
-#if defined(OHOS_INPUT_EVENTS)
   bool enable_embed_mode_ = false;
+#if defined(OHOS_INPUT_EVENTS)
   bool hit_embed_tag_ = false;
   WebInputEvent::Type lastPointType_ = WebInputEvent::Type::kUndefined;
   bool isLastNativeType_ = false;

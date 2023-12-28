@@ -106,8 +106,13 @@ class CORE_EXPORT HTMLPlugInElement
   const String IdAttribute() override { return GetIdAttribute().GetString(); }
 
   bool IsNativeType() const override {
-    return service_type_ == "native/video" || service_type_ == "native/map" ||
-           service_type_ == "native/canvas" || service_type_ == "native/camera";
+    std::string nativeType = "native/";
+    for (int32_t i = 0; i < static_cast<int32_t>(nativeType.size()); i++) {
+      if (service_type_[i] == nativeType[i]) {
+        return false;
+      }
+    }
+    return true;
   }
 #endif
 
