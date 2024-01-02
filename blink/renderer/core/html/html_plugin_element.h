@@ -107,12 +107,7 @@ class CORE_EXPORT HTMLPlugInElement
 
   bool IsNativeType() const override {
     std::string nativeType = "native/";
-    for (int32_t i = 0; i < static_cast<int32_t>(nativeType.size()); i++) {
-      if (service_type_[i] == nativeType[i]) {
-        return false;
-      }
-    }
-    return true;
+    return service_type_.Substring(0, static_cast<int32_t>(nativeType.size())) == String(nativeType);
   }
 #endif
 
