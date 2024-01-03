@@ -100,6 +100,11 @@ void HTMLEmbedElement::ParseAttribute(
       SetNeedsPluginUpdate(true);
       GetLayoutObject()->SetNeedsLayoutAndFullPaintInvalidation(
           "Embed type changed");
+#if BUILDFLAG(IS_OHOS)
+      if (IsNativeType()) {
+        ReattachOnPluginChangeIfNeeded();
+      }
+#endif
     }
   } else if (params.name == html_names::kCodeAttr) {
     // TODO(rendering-core): Remove this branch? It's not in the spec and we're

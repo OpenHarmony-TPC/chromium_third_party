@@ -1095,5 +1095,11 @@
       initial: 2,
       type: "float",
     },
+    {
+      // Used for OHOS Native Embed feature.
+      name: "nativeEmbedModeEnabled",
+      initial: false,
+      type: "bool",
+    },
   ],
 }

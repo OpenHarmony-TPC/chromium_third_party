@@ -105,10 +105,7 @@ class CORE_EXPORT HTMLPlugInElement
 
   const String IdAttribute() override { return GetIdAttribute().GetString(); }
 
-  bool IsNativeType() const override {
-    std::string nativeType = "native/";
-    return service_type_.Substring(0, static_cast<int32_t>(nativeType.size())) == String(nativeType);
-  }
+  bool IsNativeType() const override;
 #endif
 
  protected:

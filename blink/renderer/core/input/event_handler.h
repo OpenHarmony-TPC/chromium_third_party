@@ -146,9 +146,6 @@ class CORE_EXPORT EventHandler final : public GarbageCollected<EventHandler> {
       const Vector<WebPointerEvent>& predicted_events);
 
   WebInputEventResult DispatchBufferedTouchEvents();
-#ifdef BUILDFLAG(IS_OHOS)
-  void SetNativeEmbedModeEnabled(bool mode);
-#endif
   WebInputEventResult HandleMousePressEvent(const WebMouseEvent&);
   WebInputEventResult HandleMouseReleaseEvent(const WebMouseEvent&);
   WebInputEventResult HandleWheelEvent(const WebMouseWheelEvent&);

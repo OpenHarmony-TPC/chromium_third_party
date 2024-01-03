@@ -4728,12 +4728,6 @@ void WebFrameWidgetImpl::DidNativeEmbedEvent(const WebPointerEvent& web_pointer_
       static_cast<String>(embedId), id, x, y, screenX, screenY, type, offsetX, offsetY));
   }
 }
-
-void WebFrameWidgetImpl::SetNativeEmbedModeEnabled(bool mode) {
-  LocalFrame* root_frame = LocalRootImpl()->GetFrame();
-  DCHECK(root_frame);
-  root_frame->GetEventHandler().SetNativeEmbedModeEnabled(mode);
-}
 #endif  // defined(OHOS_INPUT_EVENTS)
 
 #ifdef OHOS_EX_FREE_COPY

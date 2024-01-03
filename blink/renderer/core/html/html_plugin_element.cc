@@ -646,7 +646,7 @@ bool HTMLPlugInElement::RequestObject(const PluginParameters& plugin_params) {
     // new frame and set it as the LayoutEmbeddedContent's EmbeddedContentView,
     // causing what was previously in the EmbeddedContentView to be torn down.
 #if BUILDFLAG(IS_OHOS)
-    LOG(INFO) << "[NativeEmbed] RequestObject service type " << service_type_;
+    LOG(INFO) << "[NativeEmbed] RequestObject is native type: " << IsNativeType() << ", service type: " << service_type_;
     return LoadOrRedirectSubframe(completed_url, GetNameAttribute(), true, IsNativeType());
 #else
     return LoadOrRedirectSubframe(completed_url, GetNameAttribute(), true);
@@ -848,5 +848,15 @@ HTMLPlugInElement::CustomStyleForLayoutObject(
   }
   return style;
 }
+
+#if BUILDFLAG(IS_OHOS)
+bool HTMLPlugInElement::IsNativeType() const {
+  if (!GetDocument().GetSettings()->GetNativeEmbedModeEnabled()) {
+    return false;
+  }
+
+  return service_type_.StartsWith("native/");
+}
+#endif
 
 }  // namespace blink

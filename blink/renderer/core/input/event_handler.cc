@@ -742,11 +742,6 @@ WebInputEventResult EventHandler::DispatchBufferedTouchEvents() {
   return pointer_event_manager_->FlushEvents();
 }
 
-#ifdef BUILDFLAG(IS_OHOS)
-void EventHandler::SetNativeEmbedModeEnabled(bool mode) {
-   pointer_event_manager_->SetNativeEmbedModeEnabled(mode);
-}
-#endif
 WebInputEventResult EventHandler::HandlePointerEvent(
     const WebPointerEvent& web_pointer_event,
     const Vector<WebPointerEvent>& coalesced_events,

@@ -459,6 +459,7 @@ void HTMLNativeElement::OnCreateNativeSurface(int native_embed_id) {
     bounding_size = layout_view->GetLayoutSize();
   }
   native_embed_id_ = native_embed_id;
+  bounding_size = gfx::ScaleToCeiledSize(bounding_size, 1 / GetDocument().DevicePixelRatio());
   for (auto& observer : native_bridge_observer_remote_set_->Value()) {
     observer->UpdateElementId(embed_element_id_);
     observer->UpdateElementSource(native_source_);
@@ -500,10 +501,11 @@ void HTMLNativeElement::SizeChanged(const gfx::Size& size) {
   LOG(INFO) << "[NativeEmbed] HTMLNativeElement::SizeChanged size " << size.ToString();
   UpdateLayoutObject();
   if (web_native_bridge_) {
-    web_native_bridge_->OnTextureSizeChange(size);
+    auto bounding_size = gfx::ScaleToCeiledSize(size, 1 / GetDocument().DevicePixelRatio());
+    web_native_bridge_->OnTextureSizeChange(bounding_size);
 
     for (auto& observer : native_bridge_observer_remote_set_->Value()) {
-      observer->OnEmbedSizeChange(size);
+      observer->OnEmbedSizeChange(bounding_size);
     }
   }
 }
