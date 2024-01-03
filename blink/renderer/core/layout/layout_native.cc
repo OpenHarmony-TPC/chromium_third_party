@@ -70,7 +70,9 @@ LayoutSize LayoutNative::CalculateIntrinsicSize(float scale) {
   if (const auto* content = NativeElement()->GetWebNativeBridge()) {
     auto size = content->NaturalSize();
     if (!size.IsEmpty()) {
-      return LayoutSize(size);
+      LayoutSize layout_size = LayoutSize(size);
+      layout_size.Scale(scale);
+      return layout_size;
     }
   }
 

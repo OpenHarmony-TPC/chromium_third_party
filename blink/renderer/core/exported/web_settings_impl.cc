@@ -515,6 +515,12 @@ void WebSettingsImpl::EnableBlankTargetPopupIntercept(bool enabled) {
 }
 #endif
 
+#if BUILDFLAG(IS_OHOS)
+void WebSettingsImpl::SetNativeEmbedModeEnabled(bool enabled) {
+  settings_->SetNativeEmbedModeEnabled(enabled);
+}
+#endif
+
 void WebSettingsImpl::SetMockGestureTapHighlightsEnabled(bool enabled) {
   settings_->SetMockGestureTapHighlightsEnabled(enabled);
 }

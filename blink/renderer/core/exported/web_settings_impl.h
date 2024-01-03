@@ -247,6 +247,10 @@ class CORE_EXPORT WebSettingsImpl final : public WebSettings {
   void SetCopyOption(mojom::blink::CopyOptionMode value) override;
 #endif // defined(OHOS_CLIPBOARD)
 
+#if BUILDFLAG(IS_OHOS)
+  void SetNativeEmbedModeEnabled(bool) override;
+#endif
+
   bool RenderVSyncNotificationEnabled() const {
     return render_v_sync_notification_enabled_;
   }

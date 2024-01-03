@@ -18,7 +18,6 @@ namespace blink {
 class LocalFrame;
 class MouseEventManager;
 class WebPointerProperties;
-class DOMRect;
 
 // This class takes care of dispatching all pointer events and keeps track of
 // properties of active pointer events.
@@ -100,10 +99,6 @@ class CORE_EXPORT PointerEventManager final
   bool PrimaryPointerdownCanceled(uint32_t unique_touch_event_id);
 
   void RemoveLastMousePosition();
-
-#if defined(OHOS_INPUT_EVENTS)
-  void SetNativeEmbedModeEnabled(bool mode);
-#endif
 
   Element* GetMouseCaptureTarget();
 
@@ -255,7 +250,7 @@ class CORE_EXPORT PointerEventManager final
   // Check if the SkipTouchEventFilter experiment is configured to skip
   // filtering on the given event.
   bool ShouldFilterEvent(PointerEvent* pointer_event);
-#if defined(OHOS_INPUT_EVENTS)
+#if BUILDFLAG(IS_OHOS)
   void DidNativeEmbedEvent(HitTestResult hit_test_tesult,
                      const WebPointerEvent& web_pointer_event);
 #endif
@@ -307,13 +302,12 @@ class CORE_EXPORT PointerEventManager final
   // main thread, or all events (touch start/end/move).
   bool skip_touch_filter_discrete_ = false;
   bool skip_touch_filter_all_ = false;
-  bool enable_embed_mode_ = false;
-#if defined(OHOS_INPUT_EVENTS)
+#if BUILDFLAG(IS_OHOS)
   bool hit_embed_tag_ = false;
-  WebInputEvent::Type lastPointType_ = WebInputEvent::Type::kUndefined;
-  bool isLastNativeType_ = false;
-  gfx::Rect embedRect_ {};
-  std::string embedId_;
+  WebInputEvent::Type last_point_type_ = WebInputEvent::Type::kUndefined;
+  bool is_last_native_type_ = false;
+  gfx::Rect embed_rect_ {};
+  std::string embed_id_;
 #endif
   WeakMember<Scrollbar> captured_scrollbar_;
 };

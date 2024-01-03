@@ -300,6 +300,10 @@ class WebSettings {
   virtual void SetCopyOption(mojom::CopyOptionMode) = 0;
 #endif // defined(OHOS_CLIPBOARD)
 
+#if BUILDFLAG(IS_OHOS)
+  virtual void SetNativeEmbedModeEnabled(bool) = 0;
+#endif
+
  protected:
   ~WebSettings() = default;
 };

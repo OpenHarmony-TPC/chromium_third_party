@@ -14,11 +14,8 @@
 #include "third_party/blink/renderer/core/events/mouse_event.h"
 #include "third_party/blink/renderer/core/frame/event_handler_registry.h"
 #include "third_party/blink/renderer/core/frame/local_frame.h"
-#include "third_party/blink/renderer/core/frame/local_frame_client.h"
 #include "third_party/blink/renderer/core/frame/local_frame_view.h"
-#include "third_party/blink/renderer/core/geometry/dom_rect.h"
 #include "third_party/blink/renderer/core/html/canvas/html_canvas_element.h"
-#include "third_party/blink/renderer/core/html/html_frame_owner_element.h"
 #include "third_party/blink/renderer/core/html/media/html_native_element.h"
 #include "third_party/blink/renderer/core/input/event_handler.h"
 #include "third_party/blink/renderer/core/input/event_handling_util.h"
@@ -36,8 +33,14 @@
 #include "third_party/blink/renderer/platform/heap/garbage_collected.h"
 #include "third_party/blink/renderer/platform/instrumentation/use_counter.h"
 #include "third_party/blink/renderer/platform/runtime_enabled_features.h"
-#include "third_party/blink/renderer/core/html/media/html_native_element.h"
 #include "ui/display/screen_info.h"
+#if BUILDFLAG(IS_OHOS)
+#include "third_party/blink/renderer/core/frame/local_frame_client.h"
+#include "third_party/blink/renderer/core/frame/settings.h"
+#include "third_party/blink/renderer/core/geometry/dom_rect.h"
+#include "third_party/blink/renderer/core/html/html_frame_owner_element.h"
+#include "third_party/blink/renderer/core/html/media/html_native_element.h"
+#endif
 
 namespace blink {
 
@@ -78,6 +81,15 @@ const AtomicString& MouseEventNameForPointerEventInputType(
       return g_empty_atom;
   }
 }
+
+#if BUILDFLAG(IS_OHOS)
+bool NativeEmbedModeEnabed(Document* document) {
+  if (auto* settings = document->GetSettings()) {
+    return settings->GetNativeEmbedModeEnabled();
+  }
+  return false;
+}
+#endif
 
 }  // namespace
 
@@ -487,38 +499,37 @@ bool PointerEventManager::ShouldFilterEvent(PointerEvent* pointer_event) {
   // enabled.
   return true;
 }
-#if defined(OHOS_INPUT_EVENTS)
-void PointerEventManager::SetNativeEmbedModeEnabled(bool mode) {
-  enable_embed_mode_ = mode;
-  LOG(DEBUG)<<"NativeEmbedModeEnabled is "<<enable_embed_mode_;
-}
 
-void PointerEventManager::DidNativeEmbedEvent(HitTestResult hit_test_result,
-  const WebPointerEvent& web_pointer_event) {
-  LocalFrame* frame =  hit_test_result.InnerNodeFrame();
+#if BUILDFLAG(IS_OHOS)
+void PointerEventManager::DidNativeEmbedEvent(
+    HitTestResult hit_test_result,
+    const WebPointerEvent& web_pointer_event) {
+  LocalFrame* frame = hit_test_result.InnerNodeFrame();
   if (!frame) {
     return;
   }
   hit_embed_tag_ = frame->IsNativeType();
-  if(hit_embed_tag_){
+  if (hit_embed_tag_) {
     Element* target = hit_test_result.InnerElement();
-    auto* htmlNativeElement = DynamicTo<HTMLNativeElement>(target);
-    if (htmlNativeElement) {
-      embedId_ = std::to_string(htmlNativeElement->GetNativeEmbedId());
-      auto* element = htmlNativeElement->GetLocalOwner();
-      if (element) {
-        embedRect_ = element->getBoundingClientRect()->ToEnclosingRect();
-        isLastNativeType_ = true;
-        lastPointType_ = web_pointer_event.GetType();
-        frame_->Client()->DidNativeEmbedEvent(web_pointer_event, embedId_, embedRect_, false);
+    if (auto* htmlNativeElement = DynamicTo<HTMLNativeElement>(target)) {
+      embed_id_ = std::to_string(htmlNativeElement->GetNativeEmbedId());
+      if (auto* element = htmlNativeElement->GetLocalOwner()) {
+        embed_rect_ = element->getBoundingClientRect()->ToEnclosingRect();
+        is_last_native_type_ = true;
+        last_point_type_ = web_pointer_event.GetType();
+        frame_->Client()->DidNativeEmbedEvent(web_pointer_event, embed_id_,
+                                              embed_rect_, false);
       }
     }
     return;
   }
-  if (!hit_embed_tag_ && (lastPointType_ == WebInputEvent::Type::kPointerMove) && isLastNativeType_) {
-    isLastNativeType_ = false;
-    lastPointType_ = web_pointer_event.GetType();
-    frame_->Client()->DidNativeEmbedEvent(web_pointer_event, embedId_, embedRect_, true);
+  if (!hit_embed_tag_ &&
+      (last_point_type_ == WebInputEvent::Type::kPointerMove) &&
+      is_last_native_type_) {
+    is_last_native_type_ = false;
+    last_point_type_ = web_pointer_event.GetType();
+    frame_->Client()->DidNativeEmbedEvent(web_pointer_event, embed_id_,
+                                          embed_rect_, true);
   }
 }
 #endif
@@ -536,7 +547,10 @@ PointerEventManager::ComputePointerEventTarget(
   // have this target yet since the processing of that will be done right
   // before firing the event.
   if (web_pointer_event.GetType() == WebInputEvent::Type::kPointerDown ||
-    (enable_embed_mode_ && (web_pointer_event.GetType() == WebInputEvent::Type::kPointerUp)) ||
+#if BUILDFLAG(IS_OHOS)
+      (NativeEmbedModeEnabed(frame_->GetDocument()) &&
+       (web_pointer_event.GetType() == WebInputEvent::Type::kPointerUp)) ||
+#endif
       !pending_pointer_capture_target_.Contains(pointer_id)) {
     HitTestRequest::HitTestRequestType hit_type = HitTestRequest::kTouchEvent |
                                                   HitTestRequest::kReadOnly |
@@ -551,11 +565,11 @@ PointerEventManager::ComputePointerEventTarget(
       pointer_event_target.target_element = target;
       pointer_event_target.scrollbar = hit_test_result.GetScrollbar();
     }
-    if (enable_embed_mode_) {
-      #if defined(OHOS_INPUT_EVENTS)
-        DidNativeEmbedEvent(hit_test_result, web_pointer_event);
-      #endif
+#if BUILDFLAG(IS_OHOS)
+    if (NativeEmbedModeEnabed(frame_->GetDocument())) {
+      DidNativeEmbedEvent(hit_test_result, web_pointer_event);
     }
+#endif
   } else {
     // Set the target of pointer event to the captured element as this
     // pointer is captured otherwise it would have gone to the |if| block
@@ -706,11 +720,11 @@ WebInputEventResult PointerEventManager::HandlePointerEvent(
       return WebInputEventResult::kHandledSuppressed;
 
     if (pointer_event) {
-      #if defined(OHOS_INPUT_EVENTS)
-      if(enable_embed_mode_ && hit_embed_tag_){
+#if BUILDFLAG(IS_OHOS)
+      if (NativeEmbedModeEnabed(frame_->GetDocument()) && hit_embed_tag_) {
         return WebInputEventResult::kHandledSystem;
       }
-      #endif
+#endif
       // TODO(crbug.com/1141595): We should handle this case further upstream.
       DispatchPointerEvent(target, pointer_event);
     }
