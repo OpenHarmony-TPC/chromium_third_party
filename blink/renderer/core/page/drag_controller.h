@@ -117,6 +117,7 @@ class CORE_EXPORT DragController final
   void InvalidateSelectionForDrag(Document* document);
   bool IsInImageDraging();
   bool IsInTextDraging();
+  void SetDragInitState(bool did_initiate_drag);
 
 #endif
 
