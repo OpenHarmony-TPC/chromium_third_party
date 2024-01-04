@@ -171,6 +171,10 @@ struct WebPreferences {
   bool hide_horizontal_scrollbars;
   // #endif  // defined(OHOS_INPUT_EVENTS)
 
+  [EnableIf=ohos_input_events]
+  bool native_embed_mode_enabled;
+  // #endif  // defined(OHOS_INPUT_EVENTS)
+
   // #if defined(OHOS_EX_FREE_COPY)
   [EnableIf=ohos_ex_free_copy]
   bool contextmenu_customization_enabled;
