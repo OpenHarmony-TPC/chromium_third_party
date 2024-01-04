@@ -1547,6 +1547,13 @@ void DragController::DoSystemDrag(DragImage* image,
                                          drag_obj_rect);
 }
 
+#ifdef OHOS_DRAG_DROP
+void DragController::SetDragInitState(bool did_initiate_drag)
+{
+  did_initiate_drag_ = did_initiate_drag;
+}
+#endif
+
 DragOperation DragController::GetDragOperation(DragData* drag_data) {
   // FIXME: To match the MacOS behaviour we should return DragOperation::kNone
   // if we are a modal window, we are the drag source, or the window is an
