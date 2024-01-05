@@ -812,6 +812,10 @@ struct BLINK_COMMON_EXPORT StructTraits<blink::mojom::WebPreferencesDataView,
       const blink::web_pref::WebPreferences& r) {
     return r.hide_horizontal_scrollbars;
   }
+  static bool native_embed_mode_enabled(
+      const blink::web_pref::WebPreferences& r) {
+    return r.native_embed_mode_enabled;
+  }
 #endif  // defined(OHOS_INPUT_EVENTS)
 
 #ifdef OHOS_EX_FREE_COPY

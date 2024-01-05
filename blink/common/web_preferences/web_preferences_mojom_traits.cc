@@ -93,6 +93,7 @@ bool StructTraits<blink::mojom::WebPreferencesDataView,
 #if defined(OHOS_INPUT_EVENTS)
   out->hide_vertical_scrollbars = data.hide_vertical_scrollbars();
   out->hide_horizontal_scrollbars = data.hide_horizontal_scrollbars();
+  out->native_embed_mode_enabled = data.native_embed_mode_enabled();
 #endif  // defined(OHOS_INPUT_EVENTS)
 #ifdef OHOS_SCROLLBAR
   out->scrollbar_color = data.scrollbar_color();

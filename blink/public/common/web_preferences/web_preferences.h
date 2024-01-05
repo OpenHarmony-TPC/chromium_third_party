@@ -92,6 +92,7 @@ struct BLINK_COMMON_EXPORT WebPreferences {
 #if defined(OHOS_INPUT_EVENTS)
   bool hide_vertical_scrollbars;
   bool hide_horizontal_scrollbars;
+  bool native_embed_mode_enabled;
 #endif  // defined(OHOS_INPUT_EVENTS)
 #ifdef OHOS_SCROLLBAR
   uint32_t scrollbar_color;
