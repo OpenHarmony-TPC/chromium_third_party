@@ -93,7 +93,6 @@ bool StructTraits<blink::mojom::WebPreferencesDataView,
 #if defined(OHOS_INPUT_EVENTS)
   out->hide_vertical_scrollbars = data.hide_vertical_scrollbars();
   out->hide_horizontal_scrollbars = data.hide_horizontal_scrollbars();
-  out->native_embed_mode_enabled = data.native_embed_mode_enabled();
 #endif  // defined(OHOS_INPUT_EVENTS)
 #ifdef OHOS_SCROLLBAR
   out->scrollbar_color = data.scrollbar_color();
@@ -245,6 +244,7 @@ bool StructTraits<blink::mojom::WebPreferencesDataView,
   out->modal_context_menu = data.modal_context_menu();
 #if BUILDFLAG(IS_OHOS)
   out->pinch_smooth_mode = data.pinch_smooth_mode();
+  out->native_embed_mode_enabled = data.native_embed_mode_enabled();
 #endif // BUILDFLAG(IS_OHOS)
 #if defined(OHOS_EX_FREE_COPY)
   out->contextmenu_customization_enabled =

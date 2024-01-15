@@ -1568,8 +1568,11 @@ void WebView::ApplyWebPreferences(const web_pref::WebPreferences& prefs,
 #if defined(OHOS_INPUT_EVENTS)
   settings->SetVerticalHideScrollbars(prefs.hide_vertical_scrollbars);
   settings->SetHorizontalHideScrollbars(prefs.hide_horizontal_scrollbars);
-  settings->SetNativeEmbedModeEnabled(prefs.native_embed_mode_enabled);
 #endif  // defined(OHOS_INPUT_EVENTS)
+
+#if BUILDFLAG(IS_OHOS)
+  settings->SetNativeEmbedModeEnabled(prefs.native_embed_mode_enabled);
+#endif // BUILDFLAG(IS_OHOS)
 
 #ifdef OHOS_SCROLLBAR
   settings->SetScrollBarColor(prefs.scrollbar_color);

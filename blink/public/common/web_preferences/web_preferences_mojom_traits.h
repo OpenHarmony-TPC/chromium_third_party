@@ -800,6 +800,10 @@ struct BLINK_COMMON_EXPORT StructTraits<blink::mojom::WebPreferencesDataView,
   static uint32_t scrollbar_color(const blink::web_pref::WebPreferences& r) {
     return r.scrollbar_color;
   }
+  static bool native_embed_mode_enabled(
+      const blink::web_pref::WebPreferences& r) {
+    return r.native_embed_mode_enabled;
+  }
 #endif  // BUILDFLAG(IS_OHOS)
 
 #if defined(OHOS_INPUT_EVENTS)
@@ -811,10 +815,6 @@ struct BLINK_COMMON_EXPORT StructTraits<blink::mojom::WebPreferencesDataView,
   static bool hide_horizontal_scrollbars(
       const blink::web_pref::WebPreferences& r) {
     return r.hide_horizontal_scrollbars;
-  }
-  static bool native_embed_mode_enabled(
-      const blink::web_pref::WebPreferences& r) {
-    return r.native_embed_mode_enabled;
   }
 #endif  // defined(OHOS_INPUT_EVENTS)
 
