@@ -82,7 +82,14 @@ class FileChooser : public RefCounted<FileChooser> {
   LocalFrame* FrameOrNull() const {
     return client_ ? client_->FrameOrNull() : nullptr;
   }
+#ifdef OHOS_FILE_UPLOAD
+  void DisconnectClient() {
+    client_ = nullptr;
+    DidCloseChooser();
+  }
+#else
   void DisconnectClient() { client_ = nullptr; }
+#endif
 
   const mojom::blink::FileChooserParams& Params() const { return *params_; }
 
