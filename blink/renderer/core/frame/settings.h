@@ -88,6 +88,12 @@ class CORE_EXPORT Settings {
   int GetOverscrollMode() {
     return overscroll_mode_;
   }
+  void SetScrollable(bool enabled) {
+    scroll_enabled_ = enabled;
+  }
+  bool GetScrollable() {
+    return scroll_enabled_;
+  }
 #endif  // defined(OHOS_INPUT_EVENTS)
 
 #ifdef OHOS_SCROLLBAR
@@ -141,6 +147,7 @@ class CORE_EXPORT Settings {
   bool hide_vertical_scrollbars_ = true;
   bool hide_horizontal_scrollbars_ = true;
   int overscroll_mode_ = 0;
+  bool scroll_enabled_ = true;
 #endif  // defined(OHOS_INPUT_EVENTS)
 
 #ifdef OHOS_SCROLLBAR

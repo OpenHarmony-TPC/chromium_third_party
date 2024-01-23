@@ -78,6 +78,7 @@ WebPreferences::WebPreferences()
 #if defined(OHOS_INPUT_EVENTS)
       hide_vertical_scrollbars(false),
       hide_horizontal_scrollbars(false),
+      scroll_enabled(true),
 #endif  // defined(OHOS_INPUT_EVENTS)
 #if BUILDFLAG(IS_OHOS)
       native_embed_mode_enabled(false),

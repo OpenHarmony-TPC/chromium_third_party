@@ -816,6 +816,11 @@ struct BLINK_COMMON_EXPORT StructTraits<blink::mojom::WebPreferencesDataView,
       const blink::web_pref::WebPreferences& r) {
     return r.hide_horizontal_scrollbars;
   }
+
+  static bool scroll_enabled(
+      const blink::web_pref::WebPreferences& r) {
+    return r.scroll_enabled;
+  }
 #endif  // defined(OHOS_INPUT_EVENTS)
 
 #ifdef OHOS_EX_FREE_COPY

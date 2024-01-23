@@ -489,6 +489,10 @@ void WebSettingsImpl::SetVerticalHideScrollbars(bool enabled) {
 void WebSettingsImpl::SetHorizontalHideScrollbars(bool enabled) {
   settings_->SetHorizontalHideScrollbars(enabled);
 }
+
+void WebSettingsImpl::SetScrollable(bool enabled) {
+  settings_->SetScrollable(enabled);
+}
 #endif  // defined(OHOS_INPUT_EVENTS)
 
 #ifdef OHOS_SCROLLBAR
