@@ -195,6 +195,10 @@
 #include "third_party/blink/public/web/win/web_font_rendering.h"
 #endif
 
+#if defined(OHOS_VIEWPORT)
+#include "content/public/common/content_switches.h"
+#endif
+
 // Get rid of WTF's pow define so we can use std::pow.
 #undef pow
 #include <cmath>  // for std::pow
@@ -1699,16 +1703,15 @@ void WebView::ApplyWebPreferences(const web_pref::WebPreferences& prefs,
 #endif // defined(OHOS_CLIPBOARD)
 
 #if defined(OHOS_VIEWPORT) || defined(OHOS_MEDIA)
-  auto display_manager_adapter =
-      OHOS::NWeb::OhosAdapterHelper::GetInstance().CreateDisplayMgrAdapter();
-  bool is_landscape_device = display_manager_adapter &&
-                      (!display_manager_adapter->IsDefaultPortrait());
+  bool is_2in1_device = 
+      base::CommandLine::ForCurrentProcess()->GetSwitchValueASCII(
+          ::switches::kOhosDeviceType) == ::switches::kOhos2IN1Device;
 #endif  // defined(OHOS_VIEWPORT) || defined(OHOS_MEDIA)
 
   // Needs to happen before SetDefaultPageScaleLimits below since that'll
   // recalculate the final page scale limits and that depends on this setting.
 #if defined(OHOS_VIEWPORT)
-  if (is_landscape_device) {
+  if (is_2in1_device) {
     settings->SetShrinksViewportContentToFit(false);
     // Needs to happen before SetIgnoreViewportTagScaleLimits below.
     web_view->SetDefaultPageScaleLimits(1.f, 4.f);
@@ -1768,7 +1771,7 @@ void WebView::ApplyWebPreferences(const web_pref::WebPreferences& prefs,
   settings->SetShouldReuseGlobalForUnownedMainFrame(
       prefs.reuse_global_for_unowned_main_frame);
 #if defined(OHOS_MEDIA)
-  if (is_landscape_device) {
+  if (is_2in1_device) {
     settings->SetPreferHiddenVolumeControls(false);
   } else {
     settings->SetPreferHiddenVolumeControls(true);
@@ -1814,7 +1817,7 @@ void WebView::ApplyWebPreferences(const web_pref::WebPreferences& prefs,
   settings->SetViewportEnabled(prefs.viewport_enabled);
 
 #ifdef OHOS_VIEWPORT
-  if (is_landscape_device) {
+  if (is_2in1_device) {
     settings->SetViewportMetaEnabled(false);
     settings->SetViewportStyle(mojom::ViewportStyle::kDefault);
   } else {
