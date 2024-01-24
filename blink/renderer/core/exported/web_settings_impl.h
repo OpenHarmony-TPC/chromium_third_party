@@ -128,6 +128,7 @@ class CORE_EXPORT WebSettingsImpl final : public WebSettings {
 #if defined(OHOS_INPUT_EVENTS)
   void SetVerticalHideScrollbars(bool) override;
   void SetHorizontalHideScrollbars(bool) override;
+  void SetScrollable(bool) override;
 #endif  // defined(OHOS_INPUT_EVENTS)
 #ifdef OHOS_SCROLLBAR
   void SetScrollBarColor(uint32_t) override;

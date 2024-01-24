@@ -179,6 +179,7 @@ class WebSettings {
 #if defined(OHOS_INPUT_EVENTS)
   virtual void SetVerticalHideScrollbars(bool) = 0;
   virtual void SetHorizontalHideScrollbars(bool) = 0;
+  virtual void SetScrollable(bool) = 0;
 #endif  // defined(OHOS_INPUT_EVENTS)
 #ifdef OHOS_SCROLLBAR
   virtual void SetScrollBarColor(uint32_t) = 0;

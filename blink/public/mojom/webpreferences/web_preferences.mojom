@@ -169,6 +169,9 @@ struct WebPreferences {
 
   [EnableIf=ohos_input_events]
   bool hide_horizontal_scrollbars;
+
+  [EnableIf=ohos_input_events]
+  bool scroll_enabled;
   // #endif  // defined(OHOS_INPUT_EVENTS)
 
   [EnableIf=is_ohos]
