@@ -713,11 +713,7 @@ void LayoutView::CalculateScrollbarModes(
         frame->IsMainFrame())
       should_ignore_overflow_hidden = true;
   }
-#ifdef OHOS_SCROLLBAR
-  if (Layer()->IsRootLayer()) {
-    should_ignore_overflow_hidden = true;
-  }
-#endif// OHOS_SCROLLBAR
+
   if (!should_ignore_overflow_hidden) {
     if (overflow_x == EOverflow::kHidden || overflow_x == EOverflow::kClip)
       h_mode = mojom::blink::ScrollbarMode::kAlwaysOff;
