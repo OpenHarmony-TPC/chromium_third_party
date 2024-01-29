@@ -720,11 +720,6 @@ WebInputEventResult PointerEventManager::HandlePointerEvent(
       return WebInputEventResult::kHandledSuppressed;
 
     if (pointer_event) {
-#if BUILDFLAG(IS_OHOS)
-      if (NativeEmbedModeEnabed(frame_->GetDocument()) && hit_embed_tag_) {
-        return WebInputEventResult::kHandledSystem;
-      }
-#endif
       // TODO(crbug.com/1141595): We should handle this case further upstream.
       DispatchPointerEvent(target, pointer_event);
     }
@@ -743,7 +738,11 @@ WebInputEventResult PointerEventManager::HandlePointerEvent(
     AdjustPointerEvent(pointer_event);
   event_handling_util::PointerEventTarget pointer_event_target =
       ComputePointerEventTarget(pointer_event);
-
+#if BUILDFLAG(IS_OHOS)
+  if (NativeEmbedModeEnabed(frame_->GetDocument()) && hit_embed_tag_) {
+    return WebInputEventResult::kHandledSuppressed;
+  }
+#endif
   bool discard = pointer_event_target.target_frame &&
                  event_handling_util::ShouldDiscardEventTargetingFrame(
                      event, *pointer_event_target.target_frame);
