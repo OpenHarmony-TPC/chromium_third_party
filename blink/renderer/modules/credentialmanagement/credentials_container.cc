@@ -1826,6 +1826,14 @@ ScriptPromise CredentialsContainer::create(
 
     auto* authenticator =
         CredentialManagerProxy::From(script_state)->Authenticator();
+#if BUILDFLAG(IS_OHOS)
+    if (mojo_options) {
+      resolver->Reject(MakeGarbageCollected<DOMException>(
+          DOMExceptionCode::kNotSupportedError,
+          "WebAuthn is not supported."));
+      return promise;
+    }
+#endif
     if (mojo_options->is_payment_credential_creation) {
       String rp_id_for_payment_extension = mojo_options->relying_party->id;
       WTF::Vector<uint8_t> user_id_for_payment_extension =
