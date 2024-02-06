@@ -193,6 +193,10 @@ class PLATFORM_EXPORT FrameWidget {
   // This message inserts the ongoing composition.
   virtual void FinishComposingText(bool keep_selection) = 0;
 
+#ifdef OHOS_CLIPBOARD
+  virtual void RegisterClippedVisualViewportSelectionBounds(
+    gfx::Rect clipped_selection_bounds) = 0;
+#endif
   virtual bool IsProvisional() = 0;
   virtual cc::ElementId GetScrollableContainerIdAt(
       const gfx::PointF& point) = 0;

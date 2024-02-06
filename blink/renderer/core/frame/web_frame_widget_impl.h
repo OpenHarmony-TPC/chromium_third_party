@@ -278,6 +278,10 @@ class CORE_EXPORT WebFrameWidgetImpl
                   const gfx::Range& replacement_range,
                   int relative_cursor_pos) override;
   void FinishComposingText(bool keep_selection) override;
+#ifdef OHOS_CLIPBOARD
+  void RegisterClippedVisualViewportSelectionBounds(
+    gfx::Rect clipped_selection_bounds) override;
+#endif
   bool IsProvisional() override;
   cc::ElementId GetScrollableContainerIdAt(const gfx::PointF& point) override;
   bool ShouldHandleImeEvents() override;
