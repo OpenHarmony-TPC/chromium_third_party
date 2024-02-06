@@ -22,18 +22,15 @@
 #include <string>
 #include <utility>
 
-#include "base/base_switches.h"
+#include "base/check.h"
 #include "base/functional/bind.h"
 #include "base/functional/callback.h"
 #include "base/functional/callback_helpers.h"
-#include "base/check.h"
 #include "base/location.h"
 #include "base/memory/weak_ptr.h"
 #include "base/task/bind_post_task.h"
 #include "base/task/single_thread_task_runner.h"
 #include "base/task/thread_pool.h"
-#include "base/task/bind_post_task.h"
-#include "base/trace_event/trace_event.h"
 #include "cc/layers/video_layer.h"
 #include "media/base/native_pipeline_impl.h"
 #include "media/base/video_frame.h"
@@ -70,16 +67,15 @@ WebNativeBridgeImpl::WebNativeBridgeImpl(
     WebNativeDelegate* delegate,
     std::unique_ptr<media::RendererFactorySelector> renderer_factory_selector,
     std::unique_ptr<VideoFrameCompositor> compositor,
-    scoped_refptr<ThreadSafeBrowserInterfaceBrokerProxy> remote_interfaces,
-    const scoped_refptr<base::SequencedTaskRunner> media_task_runner,
-    const scoped_refptr<base::SingleThreadTaskRunner>&
+    scoped_refptr<base::SequencedTaskRunner> media_task_runner,
+    scoped_refptr<base::SingleThreadTaskRunner>
         video_frame_compositor_task_runner)
     : frame_(frame),
       main_task_runner_(frame->GetTaskRunner(TaskType::kMediaElementEvent)),
-      media_task_runner_(media_task_runner),
+      media_task_runner_(std::move(media_task_runner)),
       client_(client),
       delegate_(delegate),
-      vfc_task_runner_(video_frame_compositor_task_runner),
+      vfc_task_runner_(std::move(video_frame_compositor_task_runner)),
       compositor_(std::move(compositor)),
       renderer_factory_selector_(std::move(renderer_factory_selector)) {
   DCHECK(renderer_factory_selector_);
@@ -106,8 +102,7 @@ WebNativeBridgeImpl::WebNativeBridgeImpl(
 WebNativeBridgeImpl::~WebNativeBridgeImpl() {
   DVLOG(1) << __func__;
   DCHECK(main_task_runner_->BelongsToCurrentThread());
-
-  OnSurfaceDestroyed();
+  texture_size_changed_cb_.Reset();
 
   // delegate_->PlayerGone(delegate_id_);
   delegate_->RemoveObserver(delegate_id_);
@@ -160,8 +155,9 @@ void WebNativeBridgeImpl::StartPipeline() {
 
   media::CreateTextureCB create_texture_cb = base::BindPostTaskToCurrentDefault(
       base::BindOnce(&WebNativeBridgeImpl::OnSurfaceCreated, weak_this_));
-  media::DestroyTextureCB destroy_texture_cb = base::BindPostTaskToCurrentDefault(
-      base::BindOnce(&WebNativeBridgeImpl::OnSurfaceDestroyed, weak_this_));
+  media::DestroyTextureCB destroy_texture_cb =
+      base::BindPostTaskToCurrentDefault(
+          base::BindOnce(&WebNativeBridgeImpl::OnSurfaceDestroyed, weak_this_));
 
   native_pipeline_controller_->Start(this, std::move(create_texture_cb),
                                      std::move(destroy_texture_cb));
@@ -177,24 +173,19 @@ void WebNativeBridgeImpl::OnSurfaceCreated(
     media::TextureSizeChangedCB texture_size_changed_cb,
     int native_embed_id) {
   DCHECK(main_task_runner_->BelongsToCurrentThread());
-
-  LOG(INFO) << "[NativeEmbed] WebNativeBridgeImpl::OnSurfaceCreated.";
-  // A null callback indicates that the decoder is going away.
-  if (texture_size_changed_cb.is_null()) {
-    texture_size_changed_cb_.Reset();
-    return;
-  }
-
+  LOG(INFO) << "[NativeEmbed] WebNativeBridgeImpl::OnSurfaceCreated";
   texture_size_changed_cb_ = std::move(texture_size_changed_cb);
   client_->OnCreateNativeSurface(native_embed_id);
 }
 
 void WebNativeBridgeImpl::OnSurfaceDestroyed() {
+  LOG(INFO) << "[NativeEmbed] WebNativeBridgeImpl::OnSurfaceDestroyed";
   DCHECK(main_task_runner_->BelongsToCurrentThread());
   client_->OnDestroyNativeSurface();
 }
 
 void WebNativeBridgeImpl::OnTextureSizeChange(const gfx::Size& size) {
+  DCHECK(main_task_runner_->BelongsToCurrentThread());
   surface_texture_size_ = size;
   if (!texture_size_changed_cb_.is_null()) {
     std::move(texture_size_changed_cb_).Run(size);
@@ -208,8 +199,8 @@ gfx::Size WebNativeBridgeImpl::NaturalSize() const {
 void WebNativeBridgeImpl::OnSetLayer() {
   DVLOG(1) << __func__;
   DCHECK(main_task_runner_->BelongsToCurrentThread());
-
   DCHECK(!video_layer_);
+
   video_layer_ =
       cc::VideoLayer::Create(compositor_.get(), media::kNoTransformation);
   video_layer_->SetContentsOpaque(opaque_);

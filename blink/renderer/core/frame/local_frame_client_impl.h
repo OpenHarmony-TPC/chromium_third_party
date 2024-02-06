@@ -287,7 +287,7 @@ class CORE_EXPORT LocalFrameClientImpl final : public LocalFrameClient {
   void SetMouseCapture(bool capture) override;
 #ifdef BUILDFLAG(IS_OHOS)
   void DidNativeEmbedEvent(const WebPointerEvent& web_pointer_event, std::string embedId,
-                        gfx::Rect& rect, bool isCancel) override;
+                        PhysicalOffset& offset, bool isCancel) override;
 #endif
   bool UsePrintingLayout() const override;
 

@@ -306,7 +306,7 @@ class CORE_EXPORT PointerEventManager final
   bool hit_embed_tag_ = false;
   WebInputEvent::Type last_point_type_ = WebInputEvent::Type::kUndefined;
   bool is_last_native_type_ = false;
-  gfx::Rect embed_rect_ {};
+  PhysicalOffset offset_ {};
   std::string embed_id_;
 #endif
   WeakMember<Scrollbar> captured_scrollbar_;

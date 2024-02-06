@@ -513,13 +513,10 @@ void PointerEventManager::DidNativeEmbedEvent(
     Element* target = hit_test_result.InnerElement();
     if (auto* htmlNativeElement = DynamicTo<HTMLNativeElement>(target)) {
       embed_id_ = std::to_string(htmlNativeElement->GetNativeEmbedId());
-      if (auto* element = htmlNativeElement->GetLocalOwner()) {
-        embed_rect_ = element->getBoundingClientRect()->ToEnclosingRect();
-        is_last_native_type_ = true;
-        last_point_type_ = web_pointer_event.GetType();
-        frame_->Client()->DidNativeEmbedEvent(web_pointer_event, embed_id_,
-                                              embed_rect_, false);
-      }
+      is_last_native_type_ = true;
+      last_point_type_ = web_pointer_event.GetType();
+      offset_ = hit_test_result.GetLocalPoint();
+      frame_->Client()->DidNativeEmbedEvent(web_pointer_event, embed_id_, offset_, false);
     }
     return;
   }
@@ -528,8 +525,7 @@ void PointerEventManager::DidNativeEmbedEvent(
       is_last_native_type_) {
     is_last_native_type_ = false;
     last_point_type_ = web_pointer_event.GetType();
-    frame_->Client()->DidNativeEmbedEvent(web_pointer_event, embed_id_,
-                                          embed_rect_, true);
+    frame_->Client()->DidNativeEmbedEvent(web_pointer_event, embed_id_, offset_, true);
   }
 }
 #endif

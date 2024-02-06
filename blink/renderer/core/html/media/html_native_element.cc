@@ -119,7 +119,6 @@ HTMLNativeElement::HTMLNativeElement(Document& document)
   ResetMojoState();
 
   if (document.LocalOwner()) {
-    localOwner_ = document.LocalOwner();
     native_type_ = document.LocalOwner()->NativeType();
     native_source_ = document.LocalOwner()->NativeSource();
     embed_element_id_ = document.LocalOwner()->IdAttribute();
@@ -134,10 +133,6 @@ HTMLNativeElement::HTMLNativeElement(Document& document)
 
 HTMLNativeElement::~HTMLNativeElement() {
   DVLOG(1) << "~HTMLNativeElement(" << *this << ")";
-}
-
-HTMLFrameOwnerElement* HTMLNativeElement::GetLocalOwner() {
-  return localOwner_;
 }
 
 void HTMLNativeElement::Dispose() {
@@ -470,7 +465,7 @@ void HTMLNativeElement::OnCreateNativeSurface(int native_embed_id) {
     bounding_size = layout_view->GetLayoutSize();
   }
   native_embed_id_ = native_embed_id;
-  bounding_size = gfx::ScaleToCeiledSize(bounding_size, 1 / GetDocument().DevicePixelRatio());
+  bounding_size = gfx::ScaleToFlooredSize(bounding_size, 1 / GetDocument().DevicePixelRatio());
   for (auto& observer : native_bridge_observer_remote_set_->Value()) {
     observer->UpdateElementId(embed_element_id_);
     observer->UpdateElementSource(native_source_);
@@ -510,10 +505,10 @@ void HTMLNativeElement::Repaint() {
 void HTMLNativeElement::SizeChanged(const gfx::Size& size) {
   ScheduleEvent(event_type_names::kResize);
   LOG(INFO) << "[NativeEmbed] HTMLNativeElement::SizeChanged size " << size.ToString();
-  UpdateLayoutObject();
   if (web_native_bridge_) {
-    auto bounding_size = gfx::ScaleToCeiledSize(size, 1 / GetDocument().DevicePixelRatio());
+    auto bounding_size = gfx::ScaleToFlooredSize(size, 1 / GetDocument().DevicePixelRatio());
     web_native_bridge_->OnTextureSizeChange(bounding_size);
+    UpdateLayoutObject();
 
     for (auto& observer : native_bridge_observer_remote_set_->Value()) {
       observer->OnEmbedSizeChange(bounding_size);

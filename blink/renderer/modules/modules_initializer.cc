@@ -357,10 +357,8 @@ std::unique_ptr<WebNativeBridge> ModulesInitializer::CreateWebNativeBridge(
     WebLocalFrameClient* web_frame_client,
     HTMLNativeElement& html_native_element,
     WebNativeClient* web_native_client) const {
-  FrameWidget* frame_widget =
-      html_native_element.GetDocument().GetFrame()->GetWidgetForLocalRoot();
-  return base::WrapUnique(web_frame_client->CreateWebNativeBridge(
-      web_native_client, frame_widget->GetLayerTreeSettings()));
+  return base::WrapUnique(
+      web_frame_client->CreateWebNativeBridge(web_native_client));
 }
 #endif
 

@@ -214,6 +214,12 @@ class CORE_EXPORT HitTestResult {
       Node* resolved_inner_node,
       const PhysicalOffset& resolved_point_in_main_frame);
 
+#if BUILDFLAG(IS_OHOS)
+  PhysicalOffset GetLocalPoint() {
+    return local_point_;
+  }
+#endif
+
  private:
   NodeSet& MutableListBasedTestResult();  // See above.
   HTMLMediaElement* MediaElement() const;

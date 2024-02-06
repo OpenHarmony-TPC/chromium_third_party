@@ -851,7 +851,8 @@ HTMLPlugInElement::CustomStyleForLayoutObject(
 
 #if BUILDFLAG(IS_OHOS)
 bool HTMLPlugInElement::IsNativeType() const {
-  if (!GetDocument().GetSettings()->GetNativeEmbedModeEnabled()) {
+  auto settings = GetDocument().GetSettings();
+  if (!settings || !settings->GetNativeEmbedModeEnabled()) {
     return false;
   }
 
