@@ -186,9 +186,7 @@ class BLINK_EXPORT WebLocalFrameClient {
   }
 
 #if BUILDFLAG(IS_OHOS)
-  virtual WebNativeBridge* CreateWebNativeBridge(
-      WebNativeClient* client,
-      const cc::LayerTreeSettings* settings) {
+  virtual WebNativeBridge* CreateWebNativeBridge(WebNativeClient* client) {
     return nullptr;
   }
 #endif
@@ -518,7 +516,7 @@ class BLINK_EXPORT WebLocalFrameClient {
 #ifdef OHOS_DRAG_DROP
   // Tell the UI to dismiss the contextmenu popup window
   virtual void ClearContextMenu() {}
-#endif //OHOS_DRAG_DROP
+#endif  // OHOS_DRAG_DROP
 
   // Called when a new element gets focused. |from_element| is the previously
   // focused element, |to_element| is the newly focused one. Either can be null.

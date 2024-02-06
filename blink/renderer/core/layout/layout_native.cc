@@ -52,7 +52,6 @@ void LayoutNative::IntrinsicSizeChanged() {
 void LayoutNative::UpdateIntrinsicSize(bool is_in_layout) {
   NOT_DESTROYED();
   LayoutSize size = CalculateIntrinsicSize(StyleRef().EffectiveZoom());
-
   // Never set the element size to zero when in a media document.
   if (size.IsEmpty() && GetNode()->ownerDocument() &&
       GetNode()->ownerDocument()->IsMediaDocument())
@@ -97,32 +96,9 @@ void LayoutNative::ImageChanged(WrappedImagePtr new_image,
   NOT_DESTROYED();
   LayoutImage::ImageChanged(new_image, defer);
 
-  // Cache the image intrinsic size so we can continue to use it to draw the
-  // image correctly even if we know the video intrinsic size but aren't able to
-  // draw video frames yet (we don't want to scale the poster to the video size
-  // without keeping aspect ratio). We do not need to check
-  // |ShouldDisplayPosterImage| because the image can be ready before we find
-  // out we actually need it.
-  cached_image_size_ = IntrinsicSize();
-
   // The intrinsic size is now that of the image, but in case we already had the
   // intrinsic size of the video we call this here to restore the video size.
   UpdateIntrinsicSize(/* is_in_layout */ false);
-}
-
-bool LayoutNative::IsChildAllowed(LayoutObject* child,
-                                 const ComputedStyle& style) const {
-  NOT_DESTROYED();
-  // Two types of child layout objects are allowed: media controls
-  // and the text track container. Filter children by node type.
-  DCHECK(child->GetNode());
-
-  // Out-of-flow positioned or floating child breaks layout hierarchy.
-  if (style.HasOutOfFlowPosition() ||
-      (style.IsFloating() && !style.IsInsideDisplayIgnoringFloatingChildren()))
-    return false;
-
-  return false;
 }
 
 void LayoutNative::PaintReplaced(const PaintInfo& paint_info,
@@ -170,9 +146,8 @@ PhysicalRect LayoutNative::ReplacedContentRectFrom(
     const NGPhysicalBoxStrut& border_padding) const {
   NOT_DESTROYED();
 
-  // If we are displaying the poster image no pre-rounding is needed, but the
-  // size of the image should be used for fitting instead.
-  return ComputeReplacedContentRect(size, border_padding, &cached_image_size_);
+  return PreSnappedRectForPersistentSizing(
+        ComputeReplacedContentRect(size, border_padding));
 }
 
 

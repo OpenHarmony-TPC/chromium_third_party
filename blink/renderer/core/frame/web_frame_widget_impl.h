@@ -424,7 +424,7 @@ class CORE_EXPORT WebFrameWidgetImpl
   float GetEmulatorScale() override;
 #if BUILDFLAG(IS_OHOS)
   void DidNativeEmbedEvent(const WebPointerEvent& web_pointer_event, std::string embedId,
-                        gfx::Rect& rect, bool isCancel);
+                        PhysicalOffset& offset, bool isCancel);
 #endif
   // WidgetBaseClient overrides:
   void OnCommitRequested() override;

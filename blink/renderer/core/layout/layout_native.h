@@ -56,14 +56,12 @@ class LayoutNative final : public LayoutImage {
   LayoutSize CalculateIntrinsicSize(float scale);
   void UpdateIntrinsicSize(bool is_in_layout);
 
-  bool IsChildAllowed(LayoutObject*, const ComputedStyle&) const final;
-
-  bool BackgroundShouldAlwaysBeClipped() const final {
+  bool IsChildAllowed(LayoutObject*, const ComputedStyle&) const final {
     NOT_DESTROYED();
     return false;
   }
 
-  bool IsImage() const final {
+  bool BackgroundShouldAlwaysBeClipped() const final {
     NOT_DESTROYED();
     return false;
   }
@@ -72,8 +70,7 @@ class LayoutNative final : public LayoutImage {
 
   bool IsOfType(LayoutObjectType type) const override {
     NOT_DESTROYED();
-    return type == kLayoutObjectVideo || type == kLayoutObjectMedia ||
-           LayoutImage::IsOfType(type);
+    return LayoutImage::IsOfType(type);
   }
 
   void PaintReplaced(const PaintInfo&,
@@ -88,13 +85,13 @@ class LayoutNative final : public LayoutImage {
   CompositingReasons AdditionalCompositingReasons() const override;
 
   void UpdatePlayer(bool is_in_layout);
-
-  LayoutSize cached_image_size_;
 };
 
 template <>
 struct DowncastTraits<LayoutNative> {
-  static bool AllowFrom(const LayoutObject& object) { return object.IsVideo(); }
+  static bool AllowFrom(const LayoutObject& object) {
+    return object.IsLayoutImage();
+  }
 };
 
 }  // namespace blink

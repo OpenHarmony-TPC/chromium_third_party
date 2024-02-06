@@ -65,9 +65,8 @@ class BLINK_PLATFORM_EXPORT WebNativeBridgeImpl
       blink::WebNativeDelegate* delegate,
       std::unique_ptr<media::RendererFactorySelector> renderer_factory_selector,
       std::unique_ptr<VideoFrameCompositor> compositor,
-      scoped_refptr<ThreadSafeBrowserInterfaceBrokerProxy> remote_interfaces,
-      const scoped_refptr<base::SequencedTaskRunner> media_task_runner,
-      const scoped_refptr<base::SingleThreadTaskRunner>&
+      scoped_refptr<base::SequencedTaskRunner> media_task_runner,
+      scoped_refptr<base::SingleThreadTaskRunner>
           video_frame_compositor_task_runner);
   WebNativeBridgeImpl(const WebNativeBridgeImpl&) = delete;
   WebNativeBridgeImpl& operator=(const WebNativeBridgeImpl&) = delete;
@@ -131,7 +130,7 @@ class BLINK_PLATFORM_EXPORT WebNativeBridgeImpl
   scoped_refptr<cc::VideoLayer> video_layer_;
 
   // Whether the video is known to be opaque or not.
-  bool opaque_ = false;
+  bool opaque_ = true;
   gfx::Size surface_texture_size_;
 
   base::WeakPtr<WebNativeBridgeImpl> weak_this_;

@@ -4698,16 +4698,16 @@ void WebFrameWidgetImpl::SetOverscrollMode(int mode) {
 }
 
 void WebFrameWidgetImpl::DidNativeEmbedEvent(const WebPointerEvent& web_pointer_event, std::string embedId,
-                                            gfx::Rect& rect, bool isCancel) {
+                                            PhysicalOffset& offset, bool isCancel) {
   if (mojom::blink::WidgetInputHandlerHost* host =
           widget_base_->widget_input_handler_manager()
               ->GetWidgetInputHandlerHost()) {
-    auto x = web_pointer_event.PositionInWidget().x() - rect.x();
-    auto y = web_pointer_event.PositionInWidget().y() - rect.y();
+    auto x = offset.left.ToFloat();
+    auto y = offset.top.ToFloat();
     auto screenX = web_pointer_event.PositionInScreen().x();
     auto screenY = web_pointer_event.PositionInScreen().y();
-    float offsetX = rect.x();
-    float offsetY = rect.y();
+    float offsetX = offset.left.ToFloat();
+    float offsetY = offset.top.ToFloat();
     PointerId id = web_pointer_event.id;
     mojom::blink::TouchType type;
     switch(web_pointer_event.GetType()){

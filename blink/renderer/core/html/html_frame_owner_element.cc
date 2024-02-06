@@ -719,6 +719,11 @@ bool HTMLFrameOwnerElement::LoadOrRedirectSubframe(
   UpdateRequiredPolicy();
 
   KURL url_to_request = url.IsNull() ? BlankURL() : url;
+#if BUILDFLAG(IS_OHOS)
+  if (load_for_native) {
+    url_to_request = BlankURL();
+  }
+#endif
   ResourceRequestHead request(url_to_request);
   request.SetReferrerPolicy(ReferrerPolicyAttribute());
   request.SetHasUserGesture(

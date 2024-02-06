@@ -77,6 +77,9 @@
 #include "third_party/blink/renderer/platform/wtf/forward.h"
 #include "third_party/blink/renderer/platform/wtf/vector.h"
 #include "v8/include/v8.h"
+#ifdef BUILDFLAG(IS_OHOS)
+#include "third_party/blink/renderer/core/layout/geometry/physical_offset.h"
+#endif
 
 namespace network {
 class SharedURLLoaderFactory;
@@ -447,7 +450,7 @@ class CORE_EXPORT LocalFrameClient : public FrameClient {
 
 #ifdef BUILDFLAG(IS_OHOS)
   virtual void DidNativeEmbedEvent(const WebPointerEvent& web_pointer_event, std::string embedId,
-                                  gfx::Rect& rect, bool isCancel) {}
+                                  PhysicalOffset& offset, bool isCancel) {}
 #endif
   // Returns whether we are associated with a print context who suggests to use
   // printing layout.
