@@ -20,6 +20,7 @@
 
 #include "base/time/time.h"
 #include "cc/layers/layer.h"
+#include "media/mojo/mojom/native_bridge.mojom.h"
 #include "third_party/blink/public/common/associated_interfaces/associated_interface_provider.h"
 #include "third_party/blink/public/platform/platform.h"
 #include "third_party/blink/public/platform/task_type.h"
@@ -40,6 +41,7 @@
 #include "third_party/blink/renderer/core/inspector/console_message.h"
 #include "third_party/blink/renderer/core/intersection_observer/intersection_observer.h"
 #include "third_party/blink/renderer/core/intersection_observer/intersection_observer_entry.h"
+#include "third_party/blink/renderer/core/layout/layout_native.h"
 #include "third_party/blink/renderer/core/layout/layout_view.h"
 #include "third_party/blink/renderer/core/page/chrome_client.h"
 #include "third_party/blink/renderer/core/page/page.h"
@@ -48,10 +50,8 @@
 #include "third_party/blink/renderer/platform/heap/garbage_collected.h"
 #include "third_party/blink/renderer/platform/loader/fetch/resource_fetcher.h"
 #include "third_party/blink/renderer/platform/network/network_state_notifier.h"
-#include "third_party/blink/renderer/platform/wtf/functional.h"
-#include "third_party/blink/renderer/core/html/html_frame_owner_element.h"
-#include "third_party/blink/renderer/core/layout/layout_native.h"
 #include "third_party/blink/renderer/platform/web_native_bridge.h"
+#include "third_party/blink/renderer/platform/wtf/functional.h"
 
 namespace blink {
 
@@ -87,8 +87,9 @@ void RemoveElementFromDocumentMap(HTMLNativeElement* element,
   DCHECK(it != map.end());
   WeakNativeElementSet* set = it->value;
   set->erase(element);
-  if (set->empty())
+  if (set->empty()) {
     map.erase(it);
+  }
 }
 
 std::ostream& operator<<(std::ostream& stream,
@@ -117,15 +118,6 @@ HTMLNativeElement::HTMLNativeElement(Document& document)
       processing_preference_change_(false),
       lazy_load_intersection_observer_(nullptr) {
   ResetMojoState();
-
-  if (document.LocalOwner()) {
-    native_type_ = document.LocalOwner()->NativeType();
-    native_source_ = document.LocalOwner()->NativeSource();
-    embed_element_id_ = document.LocalOwner()->IdAttribute();
-    LOG(INFO)
-        << "[NativeEmbed] ConstructHTMLNativeElement native type = "
-        << native_type_ << ", native source = " << native_source_ << ", embed element id = " << embed_element_id_;
-  }
 
   SetHasCustomStyleCallbacks();
   AddElementToDocumentMap(this, &document);
@@ -169,14 +161,14 @@ void HTMLNativeElement::DidMoveToNewDocument(Document& old_document) {
   // document: GetDocument().GetFrame()->Opener() == old_document.GetFrame().
   auto new_origin = GetDocument().TopFrameOrigin();
   auto old_origin = old_document.TopFrameOrigin();
-  const bool reuse =
-      new_origin &&
-      old_origin && old_origin->IsSameOriginWith(new_origin.get());
+  const bool reuse = new_origin && old_origin &&
+                     old_origin->IsSameOriginWith(new_origin.get());
   if (!reuse) {
     // Don't worry about notifications from any previous document if we're not
     // re-using the player.
-    if (opener_context_observer_)
+    if (opener_context_observer_) {
       opener_context_observer_->SetContextLifecycleNotifier(nullptr);
+    }
     AttachToNewFrame();
   } else {
     opener_document_ = old_document;
@@ -213,11 +205,52 @@ void HTMLNativeElement::ResetMojoState() {
   native_bridge_host_remote_ = MakeGarbageCollected<DisallowNewWrapper<
       HeapMojoAssociatedRemote<media::mojom::blink::NativeBridgeHost>>>(
       GetExecutionContext());
-  if (native_bridge_observer_remote_set_)
+  if (native_bridge_observer_remote_set_) {
     native_bridge_observer_remote_set_->Value().Clear();
+  }
   native_bridge_observer_remote_set_ = MakeGarbageCollected<DisallowNewWrapper<
       HeapMojoAssociatedRemoteSet<media::mojom::blink::NativeBridgeObserver>>>(
       GetExecutionContext());
+}
+
+String HTMLNativeElement::GetTypeAttribute() {
+  if (auto* element = GetDocument().LocalOwner()) {
+    return element->TypeAttribute();
+  }
+
+  return String();
+}
+
+String HTMLNativeElement::GetSrcAttribute() {
+  if (auto* element = GetDocument().LocalOwner()) {
+    return element->SrcAttribute();
+  }
+
+  return String();
+}
+
+String HTMLNativeElement::GetIdAttribute() {
+  if (auto* element = GetDocument().LocalOwner()) {
+    return element->IdAttribute();
+  }
+
+  return String();
+}
+
+String HTMLNativeElement::GetTagName() {
+  if (auto* element = GetDocument().LocalOwner()) {
+    return element->tagName();
+  }
+
+  return String();
+}
+
+ParamMap HTMLNativeElement::GetParamList() {
+  if (auto* element = GetDocument().LocalOwner()) {
+    return element->ParamList();
+  }
+
+  return ParamMap();
 }
 
 bool HTMLNativeElement::SupportsFocus() const {
@@ -243,8 +276,9 @@ void HTMLNativeElement::ParserDidSetAttributes() {
 // attribute as there is no callback notifying about the end of a cloning
 // operation. Indeed, it is required per spec to set the muted state based on
 // the content attribute when the object is created.
-void HTMLNativeElement::CloneNonAttributePropertiesFrom(const Element& other,
-                                                       CloneChildrenFlag flag) {
+void HTMLNativeElement::CloneNonAttributePropertiesFrom(
+    const Element& other,
+    CloneChildrenFlag flag) {
   HTMLElement::CloneNonAttributePropertiesFrom(other, flag);
 }
 
@@ -287,8 +321,9 @@ void HTMLNativeElement::AttachLayoutTree(AttachContext& context) {
 }
 
 void HTMLNativeElement::DidRecalcStyle(const StyleRecalcChange change) {
-  if (!change.ReattachLayoutTree())
+  if (!change.ReattachLayoutTree()) {
     UpdateLayoutObject();
+  }
 }
 
 void HTMLNativeElement::ScheduleLoadResource() {
@@ -356,8 +391,9 @@ void HTMLNativeElement::InvokeLoadAlgorithm() {
 
   CancelPendingEventsAndCallbacks();
 
-  if (network_state_ == kNetworkLoading || network_state_ == kNetworkIdle)
+  if (network_state_ == kNetworkLoading || network_state_ == kNetworkIdle) {
     ScheduleEvent(event_type_names::kAbort);
+  }
 
   // If the element's networkState is not set to NETWORK_EMPTY, then
   // run these substeps
@@ -400,14 +436,17 @@ LocalFrame* HTMLNativeElement::LocalFrameForNative() {
 void HTMLNativeElement::LoadForWebNative(LocalFrame* frame) {
   LOG(INFO) << "[NativeEmbed] HTMLNativeElement::LoadForWebNative";
   web_native_bridge_ = frame->Client()->CreateWebNativeBridge(*this, this);
-  if (!web_native_bridge_)
+  if (!web_native_bridge_) {
     return;
+  }
 
-  GetNativeBridgeHostRemote().OnNativeBridgeAdded(AddNativeBridgeObserverAndPassReceiver(),
+  GetNativeBridgeHostRemote().OnNativeBridgeAdded(
+      AddNativeBridgeObserverAndPassReceiver(),
       web_native_bridge_->GetDelegateId());
 
-  if (GetLayoutObject())
+  if (GetLayoutObject()) {
     GetLayoutObject()->SetShouldDoFullPaintInvalidation();
+  }
 
   web_native_bridge_->StartPipeline();
 }
@@ -454,30 +493,41 @@ void HTMLNativeElement::CancelPendingEventsAndCallbacks() {
 }
 
 void HTMLNativeElement::UpdateLayoutObject() {
-  if (GetLayoutObject())
+  if (GetLayoutObject()) {
     GetLayoutObject()->UpdateFromElement();
+  }
 }
 
 void HTMLNativeElement::OnCreateNativeSurface(int native_embed_id) {
-  LOG(INFO) << "[NativeEmbed] HTMLNativeElement::OnCreateNativeSurface.";
   auto bounding_size = PixelSnappedBoundingBox().size();
   if (auto* layout_view = GetDocument().GetLayoutView()) {
     bounding_size = layout_view->GetLayoutSize();
   }
   native_embed_id_ = native_embed_id;
-  bounding_size = gfx::ScaleToFlooredSize(bounding_size, 1 / GetDocument().DevicePixelRatio());
+  bounding_size = gfx::ScaleToFlooredSize(bounding_size,
+                                          1 / GetDocument().DevicePixelRatio());
+
+  auto embed_info = media::mojom::blink::NativeEmbedInfo::New();
+  embed_info->embed_id = native_embed_id_;
+  embed_info->size = bounding_size;
+  embed_info->type = GetTypeAttribute().IsNull() ? "" : GetTypeAttribute();
+  embed_info->element_id = GetIdAttribute().IsNull() ? "" : GetIdAttribute();
+  embed_info->source = GetSrcAttribute().IsNull() ? "" : GetSrcAttribute();
+  embed_info->tag = GetTagName().IsNull() ? "" : GetTagName();
+  if (!GetParamList().empty()) {
+    embed_info->params = GetParamList();
+  }
+
   for (auto& observer : native_bridge_observer_remote_set_->Value()) {
-    observer->UpdateElementId(embed_element_id_);
-    observer->UpdateElementSource(native_source_);
-    observer->OnCreateNativeSurface(
-        native_embed_id, bounding_size, native_type_);
+    // TODO: We actually only have one observer now so just using std::move
+    // here.
+    observer->OnCreateNativeSurface(std::move(embed_info));
   }
 
   web_native_bridge_->OnTextureSizeChange(bounding_size);
 }
 
-void HTMLNativeElement::
-    ClearResourceWithoutLocking() {
+void HTMLNativeElement::ClearResourceWithoutLocking() {
   if (web_native_bridge_) {
     web_native_bridge_.reset();
     native_bridge_observer_remote_set_->Value().Clear();
@@ -485,8 +535,9 @@ void HTMLNativeElement::
 }
 
 void HTMLNativeElement::OnDestroyNativeSurface() {
-  if (!native_bridge_observer_remote_set_)
+  if (!native_bridge_observer_remote_set_) {
     return;
+  }
 
   for (auto& observer : native_bridge_observer_remote_set_->Value()) {
     observer->OnDestroyNativeSurface();
@@ -494,19 +545,23 @@ void HTMLNativeElement::OnDestroyNativeSurface() {
 }
 
 void HTMLNativeElement::Repaint() {
-  if (cc_layer_)
+  if (cc_layer_) {
     cc_layer_->SetNeedsDisplay();
+  }
 
   UpdateLayoutObject();
-  if (GetLayoutObject())
+  if (GetLayoutObject()) {
     GetLayoutObject()->SetShouldDoFullPaintInvalidation();
+  }
 }
 
 void HTMLNativeElement::SizeChanged(const gfx::Size& size) {
   ScheduleEvent(event_type_names::kResize);
-  LOG(INFO) << "[NativeEmbed] HTMLNativeElement::SizeChanged size " << size.ToString();
+  LOG(INFO) << "[NativeEmbed] HTMLNativeElement::SizeChanged size "
+            << size.ToString();
   if (web_native_bridge_) {
-    auto bounding_size = gfx::ScaleToFlooredSize(size, 1 / GetDocument().DevicePixelRatio());
+    auto bounding_size =
+        gfx::ScaleToFlooredSize(size, 1 / GetDocument().DevicePixelRatio());
     web_native_bridge_->OnTextureSizeChange(bounding_size);
     UpdateLayoutObject();
 
@@ -517,8 +572,9 @@ void HTMLNativeElement::SizeChanged(const gfx::Size& size) {
 }
 
 void HTMLNativeElement::SetCcLayer(cc::Layer* cc_layer) {
-  if (cc_layer == cc_layer_)
+  if (cc_layer == cc_layer_) {
     return;
+  }
 
   SetNeedsCompositingUpdate();
   cc_layer_ = cc_layer;
@@ -539,8 +595,9 @@ void HTMLNativeElement::ClearNativeResource() {
 
   ClearResourceWithoutLocking();
 
-  if (GetLayoutObject())
+  if (GetLayoutObject()) {
     GetLayoutObject()->SetShouldDoFullPaintInvalidation();
+  }
 }
 
 void HTMLNativeElement::ContextDestroyed() {
@@ -570,12 +627,14 @@ bool HTMLNativeElement::HasPendingActivityInternal() const {
   // The delaying-the-load-event flag is set by resource selection algorithm
   // when looking for a resource to load, before networkState has reached to
   // kNetworkLoading.
-  if (should_delay_load_event_)
+  if (should_delay_load_event_) {
     return true;
+  }
 
   // Wait for any pending events to be fired.
-  if (async_event_queue_->HasPendingEvents())
+  if (async_event_queue_->HasPendingEvents()) {
     return true;
+  }
 
   return false;
 }
@@ -594,14 +653,16 @@ bool HTMLNativeElement::IsURLAttribute(const Attribute& attribute) const {
 }
 
 void HTMLNativeElement::SetShouldDelayLoadEvent(bool should_delay) {
-  if (should_delay_load_event_ == should_delay)
+  if (should_delay_load_event_ == should_delay) {
     return;
+  }
 
   should_delay_load_event_ = should_delay;
-  if (should_delay)
+  if (should_delay) {
     GetDocument().IncrementLoadEventDelayCount();
-  else
+  } else {
     GetDocument().DecrementLoadEventDelayCount();
+  }
 }
 
 void HTMLNativeElement::Trace(Visitor* visitor) const {
@@ -619,9 +680,10 @@ void HTMLNativeElement::Trace(Visitor* visitor) const {
 }
 
 void HTMLNativeElement::SetNetworkState(NetworkState state,
-                                       bool update_media_controls) {
-  if (network_state_ == state)
+                                        bool update_media_controls) {
+  if (network_state_ == state) {
     return;
+  }
 
   network_state_ = state;
 }
@@ -655,8 +717,9 @@ HTMLNativeElement::AddNativeBridgeObserverAndPassReceiver() {
 void HTMLNativeElement::SetError(MediaError* error) {
   error_ = error;
 
-  if (!error)
+  if (!error) {
     return;
+  }
 }
 
 HTMLNativeElement::OpenerContextObserver::OpenerContextObserver(

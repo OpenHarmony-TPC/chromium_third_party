@@ -27,6 +27,7 @@
 #include "third_party/blink/renderer/core/core_export.h"
 #include "third_party/blink/renderer/core/execution_context/execution_context_lifecycle_state_observer.h"
 #include "third_party/blink/renderer/core/html/html_element.h"
+#include "third_party/blink/renderer/core/html/html_frame_owner_element.h"
 #include "third_party/blink/renderer/core/intersection_observer/intersection_observer.h"
 #include "third_party/blink/renderer/platform/bindings/exception_state.h"
 #include "third_party/blink/renderer/platform/heap/disallow_new_wrapper.h"
@@ -198,6 +199,16 @@ class CORE_EXPORT HTMLNativeElement
 
   void ResetMojoState();
 
+  String GetTypeAttribute();
+
+  String GetSrcAttribute();
+
+  String GetIdAttribute();
+
+  String GetTagName();
+
+  ParamMap GetParamList();
+
   // Adds a new NativeBridgeObserver remote that will be notified about native
   // bridge events and returns a receiver that an observer implementation can
   // bind to.
@@ -255,9 +266,6 @@ class CORE_EXPORT HTMLNativeElement
   Member<Document> opener_document_;
   Member<OpenerContextObserver> opener_context_observer_;
 
-  String native_type_;
-  String native_source_;
-  String embed_element_id_;
   std::unique_ptr<WebNativeBridge> web_native_bridge_;
   int native_embed_id_;
 

@@ -47,6 +47,9 @@ class LayoutEmbeddedContent;
 class LazyLoadFrameObserver;
 class WebPluginContainerImpl;
 class ResourceRequestHead;
+#if BUILDFLAG(IS_OHOS)
+typedef HashMap<String, String> ParamMap;
+#endif
 
 class CORE_EXPORT HTMLFrameOwnerElement : public HTMLElement,
                                           public FrameOwner {
@@ -80,13 +83,15 @@ class CORE_EXPORT HTMLFrameOwnerElement : public HTMLElement,
   void SetColorScheme(mojom::blink::ColorScheme);
 
 #if BUILDFLAG(IS_OHOS)
-  virtual const String NativeType() { return String(); }
+  virtual const String TypeAttribute() { return String(); }
 
-  virtual const String NativeSource() { return String(); }
+  virtual const String SrcAttribute() { return String(); }
 
   virtual const String IdAttribute() { return String(); }
 
   virtual bool IsNativeType() const { return false; }
+
+  virtual ParamMap ParamList() { return ParamMap(); }
 #endif
 
   class PluginDisposeSuspendScope {
