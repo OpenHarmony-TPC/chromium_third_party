@@ -856,7 +856,15 @@ bool HTMLPlugInElement::IsNativeType() const {
     return false;
   }
 
-  return service_type_.StartsWith("native/");
+  if (IsA<HTMLObjectElement>(this)) {
+    return service_type_.StartsWith("application/view");
+  }
+
+  if (IsA<HTMLEmbedElement>(this)) {
+    return service_type_.StartsWith("native/");
+  }
+
+  return false;
 }
 #endif
 

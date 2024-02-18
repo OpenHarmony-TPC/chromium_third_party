@@ -99,9 +99,9 @@ class CORE_EXPORT HTMLPlugInElement
   virtual bool UseFallbackContent() const;
 
 #if BUILDFLAG(IS_OHOS)
-  const String NativeSource() override { return Url(); }
+  const String SrcAttribute() override { return Url(); }
 
-  const String NativeType() override { return service_type_; }
+  const String TypeAttribute() override { return service_type_; }
 
   const String IdAttribute() override { return GetIdAttribute().GetString(); }
 

@@ -61,11 +61,6 @@
 #include "third_party/blink/renderer/platform/wtf/casting.h"
 #include "ui/gfx/geometry/rect.h"
 
-#if BUILDFLAG(IS_OHOS)
-#include "display_manager_adapter.h"
-#include "ohos_adapter_helper.h"
-#endif
-
 namespace cc {
 class AnimationHost;
 class AnimationTimeline;
@@ -1209,8 +1204,6 @@ class CORE_EXPORT LocalFrameView final
 #endif
 
 #if BUILDFLAG(IS_OHOS)
-  std::unique_ptr<OHOS::NWeb::DisplayManagerAdapter> display_manager_adapter_ =
-      nullptr;
   float initial_layout_size_ratio_ = 2.0;
 #endif
 

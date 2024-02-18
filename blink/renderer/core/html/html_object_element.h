@@ -84,6 +84,10 @@ class CORE_EXPORT HTMLObjectElement final : public HTMLPlugInElement,
   FormAssociated* ToFormAssociatedOrNull() override { return this; }
   void AssociateWith(HTMLFormElement*) override;
 
+#if BUILDFLAG(IS_OHOS)
+  ParamMap ParamList() override;
+#endif
+
   // Returns true if this object started to load something, and finished
   // the loading regardless of success or failure.
   bool DidFinishLoading() const;
