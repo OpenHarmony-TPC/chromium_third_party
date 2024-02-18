@@ -124,6 +124,7 @@ static const float kDragTextAlpha = 0.7f;
 // drag image's alpha and scale will be processed in ImageDragShadowBuilder.java
 static const float kDragImageAlpha = 1.0f;
 static const float kUxDragImageScale = 1.0f;
+static const char* kDragLinkGrayStyle = "; color: gray;";
 #else
 static const float kDragImageAlpha = 0.75f;
 #endif // #ifdef OHOS_DRAG_DROP
@@ -236,6 +237,9 @@ void DragController::ClearDragCaret() {
 }
 
 void DragController::DragEnded() {
+#ifdef OHOS_DRAG_DROP
+  RestoreDragLinkEffects();
+#endif
   drag_initiator_ = nullptr;
   did_initiate_drag_ = false;
   page_->GetDragCaret().Clear();
@@ -1541,6 +1545,7 @@ void DragController::DoSystemDrag(DragImage* image,
 #ifdef OHOS_DRAG_DROP
     StartDragTextEffects();
     StartDragImageEffects();
+    StartDragLinkEffects();
 #endif
   page_->GetChromeClient().StartDragging(frame, drag_data, drag_operation_mask,
                                          std::move(drag_image), cursor_offset,
@@ -1585,6 +1590,194 @@ void DragController::ContextDestroyed() {
 }
 
 #ifdef OHOS_DRAG_DROP
+bool DragController::IsHyperLinkDragging() {
+  if (!drag_state_) {
+    LOG(WARNING) << "DragDrop state null, drag nothing";
+    return false;
+  }
+
+  if (drag_state_->drag_type_ != kDragSourceActionLink) {
+    LOG(DEBUG) << "DragDrop type is not link, just pass";
+    return false;
+  }
+
+  Node* node = drag_state_->drag_src_.Get();
+  if (!node) {
+    LOG(DEBUG) << "DragDrop node null, drag nothing";
+    return false;
+  }
+  Element* element = static_cast<Element*>(node);
+  if (!element) {
+    LOG(WARNING) << "DragDrop element null, not a element node";
+    return false;
+  }
+
+  auto document = node->ownerDocument();
+  if (!document) {
+    LOG(WARNING) << "DragDrop document null, not a hyper link dragging";
+    return false;
+  }
+  LocalFrame* frame = document->GetFrame();
+  if (!frame) {
+    LOG(WARNING) << "DragDrop frame null, not a hyper link dragging";
+    return false;
+  }
+  return drag_state_->drag_type_ == kDragSourceActionLink &&
+         did_initiate_drag_ && frame->Selection().SelectionHasFocus();
+}
+
+bool DragController::DragLinkCheckSrcAndType() {
+  if (!drag_state_) {
+    LOG(WARNING) << "DragDrop state null, drag nothing";
+    return false;
+  }
+  if (drag_state_->drag_type_ != kDragSourceActionLink) {
+    LOG(DEBUG) << "DragDrop type is not link, just pass";
+    return false;
+  }
+
+  if (!did_initiate_drag_) {
+    LOG(DEBUG) << "DragDrop drag not start";
+    return false;
+  }
+
+  if (!drag_state_->drag_src_) {
+    LOG(WARNING) << "DragDrop node src null, drag nothing";
+    return false;
+  }
+
+  Node* node = drag_state_->drag_src_.Get();
+  if (!node) {
+    LOG(WARNING) << "DragDrop node src null, drag nothing";
+    return false;
+  }
+  return true;
+}
+
+void DragController::UpdateLinkStyle(Node* node) {
+  if (!node) {
+    LOG(WARNING) << "DragDrop node null, do not update style";
+    return;
+  }
+
+  NodeList *list = node->childNodes();
+  if (!list) {
+    LOG(WARNING) << "DragDrop has no child nodes, no need to update";
+    return;
+  }
+
+  unsigned len = list->length();
+  const WTF::String grayStyle(kDragLinkGrayStyle);
+  for (unsigned i = 0; i < len; i++) {
+    Node* tempNode = list->item(i);
+    if (!tempNode) {
+      continue;
+    }
+
+    auto* tempEle = DynamicTo<Element>(tempNode);
+    if (!tempEle) {
+      continue;
+    }
+
+    StringBuilder tmpStyle;
+    tmpStyle.Append(String(AtomicString(tempEle->getAttribute(html_names::kStyleAttr))));
+    tmpStyle.Append(grayStyle);
+    tempEle->setAttribute(html_names::kStyleAttr, tmpStyle.ToAtomicString());
+    UpdateLinkStyle(tempNode);
+  }
+}
+
+void DragController::StartDragLinkEffects() {
+  if (!DragLinkCheckSrcAndType()) {
+    LOG(DEBUG) << "DragDrop check not pass, no need to change style";
+    return;
+  }
+
+  Node* node = drag_state_->drag_src_.Get();
+  if (!node) {
+    LOG(WARNING) << "DragDrop node null, drag nothing";
+    return;
+  }
+
+  auto* element = DynamicTo<Element>(node);
+  if (element) {
+    element->GetDocument().UpdateStyleAndLayoutTree();
+  }
+
+  StringBuilder tmpStyle;
+  const WTF::String grayStyle(kDragLinkGrayStyle);
+  tmpStyle.Append(String(AtomicString(element->getAttribute(html_names::kStyleAttr))));
+  tmpStyle.Append(grayStyle);
+  element->setAttribute(html_names::kStyleAttr, tmpStyle.ToAtomicString());
+  UpdateLinkStyle(node);
+
+  LayoutObject* layout_object = node->GetLayoutObject();
+  if (layout_object) {
+    layout_object->SetNeedsPaintPropertyUpdate();
+  }
+  InvalidateSelectionForDrag(node->ownerDocument());
+}
+
+void DragController::RestoreLinkStyle(Node* node) {
+  if (!node) {
+    LOG(DEBUG) << "DragDrop node null, do not update style";
+    return;
+  }
+
+  NodeList *list = node->childNodes();
+  if (list) {
+    unsigned len = list->length();
+    const WTF::String grayStyle(kDragLinkGrayStyle);
+    for (unsigned i = 0; i < len; i++) {
+      Node* tempNode = list->item(i);
+      if (tempNode) {
+        auto* tempEle = DynamicTo<Element>(tempNode);
+        if (tempEle) {
+          String styleAttr = String(AtomicString(tempEle->getAttribute(html_names::kStyleAttr)));
+          size_t pos = styleAttr.Find(grayStyle);
+          if (pos != WTF::kNotFound) {
+            String oriStyle = styleAttr.replace((unsigned)pos, grayStyle.length(), "");
+            tempEle->setAttribute(html_names::kStyleAttr, AtomicString(oriStyle));
+          }
+          RestoreLinkStyle(tempNode);
+        }
+      }
+    }
+  }
+}
+
+void DragController::RestoreDragLinkEffects() {
+  if (!DragLinkCheckSrcAndType()) {
+    LOG(DEBUG) << "DragDrop check not pass, no need to change style";
+    return;
+  }
+
+  Node* node = drag_state_->drag_src_.Get();
+  if (!node) {
+    LOG(WARNING) << "DragDrop node null, drag nothing";
+    return;
+  }
+  auto* element = DynamicTo<Element>(node);
+  if (element) {
+    element->GetDocument().UpdateStyleAndLayoutTree();
+  }
+
+  const WTF::String grayStyle(kDragLinkGrayStyle);
+  String styleAttr = String(AtomicString(element->getAttribute(html_names::kStyleAttr)));
+  size_t pos = styleAttr.Find(grayStyle);
+  if (pos != WTF::kNotFound) {
+    String oriStyle = styleAttr.replace((unsigned)pos, grayStyle.length(), "");
+    element->setAttribute(html_names::kStyleAttr, AtomicString(oriStyle));
+  }
+  RestoreLinkStyle(node);
+
+  LayoutObject* layout_object = node->GetLayoutObject();
+  if (layout_object) {
+    layout_object->SetNeedsPaintPropertyUpdate();
+  }
+  InvalidateSelectionForDrag(node->ownerDocument());
+}
+
 void DragController::StartDragTextEffects() {
   if (!drag_state_)
     return;

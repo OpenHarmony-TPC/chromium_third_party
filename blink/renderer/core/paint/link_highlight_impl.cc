@@ -216,6 +216,10 @@ LinkHighlightImpl::LinkHighlightFragment::PaintContentsToDisplayList() {
   flags.setStyle(cc::PaintFlags::kFill_Style);
   flags.setAntiAlias(true);
   flags.setColor(color_.Rgb());
+#ifdef OHOS_DRAG_DROP
+  flags.setColor(0x00FFFFFF); // transparent
+  flags.setBlendMode(SkBlendMode::kSrcOver); // blend mode
+#endif
   canvas->drawPath(path_.GetSkPath(), flags);
 
   display_list->StartPaint();

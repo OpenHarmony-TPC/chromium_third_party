@@ -493,4 +493,11 @@ absl::optional<Color> HighlightPaintingUtils::HighlightTextDecorationColor(
   return absl::nullopt;
 }
 
+// static
+#ifdef OHOS_DRAG_DROP
+bool HighlightPaintingUtils::IsHyperLinkDragging(const Document& document) {
+  return document.GetPage() && document.GetPage()->IsHyperLinkDragging() && !document.Printing();
+}
+#endif
+
 }  // namespace blink

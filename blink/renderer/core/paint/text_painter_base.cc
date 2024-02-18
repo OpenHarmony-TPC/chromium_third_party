@@ -147,6 +147,27 @@ TextPaintStyle TextPainterBase::TextPaintingStyle(const Document& document,
     text_style.emphasis_mark_color = Color::kBlack;
     text_style.shadow = nullptr;
   } else {
+
+#ifdef OHOS_DRAG_DROP
+    if (HighlightPaintingUtils::IsHyperLinkDragging(document)) {
+      // when dragging, make all the colors of the source target gray
+      LOG(DEBUG) << "DragDrop drag a hyper link, change color to gray";
+      text_style.current_color = Color::kLightGray;
+      text_style.fill_color = Color::kLightGray;
+      text_style.stroke_color = Color::kLightGray;
+      text_style.emphasis_mark_color = Color::kLightGray;
+    } else {
+      text_style.current_color =
+        style.VisitedDependentColorFast(GetCSSPropertyColor());
+      text_style.fill_color =
+          style.VisitedDependentColorFast(GetCSSPropertyWebkitTextFillColor());
+      text_style.stroke_color =
+          style.VisitedDependentColorFast(GetCSSPropertyWebkitTextStrokeColor());
+      text_style.emphasis_mark_color =
+          style.VisitedDependentColorFast(GetCSSPropertyTextEmphasisColor());
+      text_style.shadow = style.TextShadow();
+    }
+#else
     text_style.current_color =
         style.VisitedDependentColorFast(GetCSSPropertyColor());
     text_style.fill_color =
@@ -156,6 +177,7 @@ TextPaintStyle TextPainterBase::TextPaintingStyle(const Document& document,
     text_style.emphasis_mark_color =
         style.VisitedDependentColorFast(GetCSSPropertyTextEmphasisColor());
     text_style.shadow = style.TextShadow();
+#endif
 
     // Adjust text color when printing with a white background.
     bool force_background_to_white =
