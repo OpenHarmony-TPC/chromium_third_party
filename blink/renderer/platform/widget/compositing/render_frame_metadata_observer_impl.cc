@@ -184,6 +184,9 @@ bool RenderFrameMetadataObserverImpl::ShouldSendRenderFrameMetadata(
 #if BUILDFLAG(IS_OHOS)
       || rfm1.root_layer_size != rfm2.root_layer_size
 #endif
+#ifdef OHOS_CLIPBOARD
+      || rfm1.clipped_selection_bounds != rfm2.clipped_selection_bounds
+#endif
   ) {
     *needs_activation_notification = true;
     return true;

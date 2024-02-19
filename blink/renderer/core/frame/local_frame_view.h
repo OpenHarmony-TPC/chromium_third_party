@@ -798,6 +798,9 @@ class CORE_EXPORT LocalFrameView final
   void SetInitalLayoutRatio();
 #endif
 
+#ifdef OHOS_CLIPBOARD
+  void UpdateCompositedSelectionIfNeed();
+#endif
 #if DCHECK_IS_ON()
   class DisallowLayoutInvalidationScope {
     STACK_ALLOCATED();

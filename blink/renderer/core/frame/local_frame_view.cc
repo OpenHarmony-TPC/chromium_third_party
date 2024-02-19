@@ -2636,8 +2636,39 @@ bool LocalFrameView::RunCompositingInputsLifecyclePhase(
         DocumentLifecycle::kCompositingInputsClean);
   });
 
+#ifdef OHOS_CLIPBOARD
+  UpdateCompositedSelectionIfNeed();
+#endif
+
   return target_state > DocumentLifecycle::kCompositingInputsClean;
 }
+
+#ifdef OHOS_CLIPBOARD
+void LocalFrameView::UpdateCompositedSelectionIfNeed() {
+  Page* page = GetFrame().GetPage();
+  if (!page) {
+    return;
+  }
+
+  LocalFrame* focus_frame = page->GetFocusController().FocusedFrame();
+  LocalFrame* local_frame =
+    (focus_frame &&
+      (focus_frame->LocalFrameRoot() == frame_->LocalFrameRoot()))
+        ? focus_frame
+        : nullptr;
+  if (!local_frame) {
+    return;
+  }
+  gfx::Rect clipped_selection_bounds =
+    ToPixelSnappedRect(local_frame->Selection().AbsoluteUnclippedBounds());
+  if(!clipped_selection_bounds.IsEmpty()) {
+    if (auto* frame_widget = local_frame->GetWidgetForLocalRoot()) {
+      frame_widget->RegisterClippedVisualViewportSelectionBounds(
+        clipped_selection_bounds);
+    }
+  }
+}
+#endif
 
 bool LocalFrameView::RunPrePaintLifecyclePhase(
     DocumentLifecycle::LifecycleState target_state) {

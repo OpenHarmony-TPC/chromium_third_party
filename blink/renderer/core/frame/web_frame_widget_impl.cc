@@ -4743,4 +4743,14 @@ void WebFrameWidgetImpl::SelectAndCopy() {
 }
 #endif
 
+#ifdef OHOS_CLIPBOARD
+void WebFrameWidgetImpl::RegisterClippedVisualViewportSelectionBounds(
+  gfx::Rect clipped_selection_bounds) {
+  if (!View()->does_composite()) {
+    return;
+  }
+  widget_base_->LayerTreeHost()->RegisterClippedVisualViewportSelectionBounds(
+    clipped_selection_bounds);
+}
+#endif
 }  // namespace blink
