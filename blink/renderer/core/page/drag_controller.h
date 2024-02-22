@@ -110,6 +110,12 @@ class CORE_EXPORT DragController final
 
   void Trace(Visitor*) const final;
 #ifdef OHOS_DRAG_DROP
+  bool DragLinkCheckSrcAndType();
+  void UpdateLinkStyle(Node* node);
+  void RestoreLinkStyle(Node* node);
+  bool IsHyperLinkDragging();
+  void StartDragLinkEffects();
+  void RestoreDragLinkEffects();
   void StartDragImageEffects();
   void RestoreDragImageEffects();
   void StartDragTextEffects();

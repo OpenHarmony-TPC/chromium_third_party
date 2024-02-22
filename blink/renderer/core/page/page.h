@@ -207,6 +207,7 @@ class CORE_EXPORT Page final : public GarbageCollected<Page>,
   DragController& GetDragController() const { return *drag_controller_; }
 #ifdef OHOS_DRAG_DROP
   bool IsInTextDraging();
+  bool IsHyperLinkDragging();
 #endif // #ifdef OHOS_DRAG_DROP
   FocusController& GetFocusController() const { return *focus_controller_; }
   SpatialNavigationController& GetSpatialNavigationController();

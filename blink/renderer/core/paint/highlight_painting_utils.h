@@ -65,6 +65,9 @@ class CORE_EXPORT HighlightPaintingUtils {
       const ComputedStyle& style,
       PseudoId pseudo,
       const AtomicString& pseudo_argument = g_null_atom);
+#ifdef OHOS_DRAG_DROP
+  static bool IsHyperLinkDragging(const Document& document);
+#endif
 };
 
 }  // namespace blink

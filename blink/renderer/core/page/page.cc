@@ -1161,6 +1161,13 @@ void Page::PrepareForLeakDetection() {
 }
 
 #ifdef OHOS_DRAG_DROP
+bool Page::IsHyperLinkDragging() {
+  if (drag_controller_) {
+    return drag_controller_->IsHyperLinkDragging();
+  }
+  return false;
+}
+
 bool Page::IsInTextDraging() {
   if (drag_controller_) {
     return drag_controller_->IsInTextDraging();

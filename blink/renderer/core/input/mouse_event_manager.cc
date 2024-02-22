@@ -1101,6 +1101,7 @@ void MouseEventManager::ResetDragSource() {
     return;
 
 #ifdef OHOS_DRAG_DROP
+  frame_->GetPage()->GetDragController().RestoreDragLinkEffects();
   frame_->GetPage()->GetDragController().RestoreDragTextEffects();
   frame_->GetPage()->GetDragController().RestoreDragImageEffects();
 #endif
