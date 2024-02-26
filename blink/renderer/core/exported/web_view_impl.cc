@@ -2503,6 +2503,14 @@ void WebViewImpl::SetZoomFactorForDeviceScaleFactor(
   // need to propagate the correct zoom factor to newly navigated frames.
   zoom_factor_for_device_scale_factor_ = zoom_factor_for_device_scale_factor;
   SetZoomLevel(zoom_level_);
+#if defined(OHOS_ZOOM)
+  if (page_) {
+    auto* main_frame = DynamicTo<LocalFrame>(page_->MainFrame());
+    if (main_frame && main_frame->GetDocument()) {
+      main_frame->GetDocument()->UpdateStyleAndLayoutTree();
+    }
+  }
+#endif  // defined(OHOS_ZOOM)
 }
 
 void WebViewImpl::SetPageLifecycleStateFromNewPageCommit(
