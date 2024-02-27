@@ -804,6 +804,9 @@ struct BLINK_COMMON_EXPORT StructTraits<blink::mojom::WebPreferencesDataView,
       const blink::web_pref::WebPreferences& r) {
     return r.native_embed_mode_enabled;
   }
+  static uint32_t draw_mode(const blink::web_pref::WebPreferences& r) {
+    return r.draw_mode;
+  }
 #endif  // BUILDFLAG(IS_OHOS)
 
 #if defined(OHOS_INPUT_EVENTS)

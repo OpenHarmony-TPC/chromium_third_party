@@ -182,9 +182,17 @@ cc::ManagedMemoryPolicy GetGpuMemoryPolicy(
     // Clamp the observed value to a specific range on Android or OHOS.
     actual.bytes_limit_when_visible = std::max(
         actual.bytes_limit_when_visible, static_cast<size_t>(8 * 1024 * 1024));
-    actual.bytes_limit_when_visible =
+    Platform* platform = Platform::Current();
+    if (platform->GetDrawMode()) {
+      actual.bytes_limit_when_visible =
+        std::min(actual.bytes_limit_when_visible,
+                 static_cast<size_t>(2000 * 1024 * 1024));
+    } else {
+      actual.bytes_limit_when_visible =
         std::min(actual.bytes_limit_when_visible,
                  static_cast<size_t>(256 * 1024 * 1024));
+    }
+    
   }
   actual.priority_cutoff_when_visible =
       gpu::MemoryAllocation::CUTOFF_ALLOW_EVERYTHING;
