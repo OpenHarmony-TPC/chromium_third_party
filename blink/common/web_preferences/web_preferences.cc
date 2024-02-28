@@ -82,6 +82,7 @@ WebPreferences::WebPreferences()
 #endif  // defined(OHOS_INPUT_EVENTS)
 #if BUILDFLAG(IS_OHOS)
       native_embed_mode_enabled(false),
+      draw_mode(0),
 #endif  // BUILDFLAG(IS_OHOS)
 #ifdef OHOS_SCROLLBAR
       scrollbar_color(0),

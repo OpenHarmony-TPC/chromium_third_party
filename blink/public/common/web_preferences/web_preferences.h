@@ -96,6 +96,7 @@ struct BLINK_COMMON_EXPORT WebPreferences {
 #endif  // defined(OHOS_INPUT_EVENTS)
 #if BUILDFLAG(IS_OHOS)
   bool native_embed_mode_enabled;
+  int draw_mode;
 #endif  // BUILDFLAG(IS_OHOS)
 #ifdef OHOS_SCROLLBAR
   uint32_t scrollbar_color;

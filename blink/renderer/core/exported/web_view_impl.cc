@@ -1577,6 +1577,7 @@ void WebView::ApplyWebPreferences(const web_pref::WebPreferences& prefs,
 
 #if BUILDFLAG(IS_OHOS)
   settings->SetNativeEmbedModeEnabled(prefs.native_embed_mode_enabled);
+  settings->SetDrawMode(prefs.draw_mode);
 #endif // BUILDFLAG(IS_OHOS)
 
 #ifdef OHOS_SCROLLBAR

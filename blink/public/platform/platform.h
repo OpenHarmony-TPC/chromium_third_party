@@ -254,6 +254,11 @@ class BLINK_PLATFORM_EXPORT Platform {
   // URLs outside that site.
   virtual bool IsLockedToSite() const { return false; }
 
+#if BUILDFLAG(IS_OHOS)
+  virtual int32_t GetDrawMode() { return 0; }
+#endif
+
+
   // Network -------------------------------------------------------------
 
   // Returns the default User-Agent string, it can either full User-Agent string

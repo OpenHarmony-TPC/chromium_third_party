@@ -1101,5 +1101,10 @@
       initial: false,
       type: "bool",
     },
+    {
+      name: "drawMode",
+      initial: 0,
+      type: "int",
+    },
   ],
 }

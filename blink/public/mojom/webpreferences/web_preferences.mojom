@@ -178,6 +178,10 @@ struct WebPreferences {
   bool native_embed_mode_enabled;
   // #endif
 
+  [EnableIf=is_ohos]
+  bool draw_mode;
+  // #endif
+
   // #if defined(OHOS_EX_FREE_COPY)
   [EnableIf=ohos_ex_free_copy]
   bool contextmenu_customization_enabled;

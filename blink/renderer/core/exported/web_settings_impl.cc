@@ -523,6 +523,9 @@ void WebSettingsImpl::EnableBlankTargetPopupIntercept(bool enabled) {
 void WebSettingsImpl::SetNativeEmbedModeEnabled(bool enabled) {
   settings_->SetNativeEmbedModeEnabled(enabled);
 }
+void WebSettingsImpl::SetDrawMode(int mode) {
+  settings_->SetDrawMode(mode);
+}
 #endif
 
 void WebSettingsImpl::SetMockGestureTapHighlightsEnabled(bool enabled) {
