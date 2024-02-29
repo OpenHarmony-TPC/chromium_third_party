@@ -4,6 +4,7 @@
 
 #include "third_party/blink/renderer/core/loader/cookie_jar.h"
 
+#include "base/time/time.h"
 #include "base/debug/dump_without_crashing.h"
 #include "base/metrics/histogram_functions.h"
 #include "base/metrics/histogram_macros.h"
@@ -49,7 +50,10 @@ bool ContainsTruncatingChar(UChar c) {
 }  // namespace
 
 CookieJar::CookieJar(blink::Document* document)
-    : backend_(document->GetExecutionContext()), document_(document) {}
+    : backend_(document->GetExecutionContext()),
+      document_(document) {}
+#if BUILDFLAG(IS_OHOS)
+      , helper_(document_)
 
 CookieJar::~CookieJar() = default;
 
