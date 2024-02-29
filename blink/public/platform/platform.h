@@ -495,6 +495,11 @@ class BLINK_PLATFORM_EXPORT Platform {
   virtual std::unique_ptr<WebGraphicsContext3DProvider>
   CreateWebGPUGraphicsContext3DProvider(const WebURL& top_document_url);
 
+  virtual void CreateWebGPUGraphicsContext3DProviderAsync(
+      const blink::WebURL& document_url,
+      base::OnceCallback<
+          void(std::unique_ptr<blink::WebGraphicsContext3DProvider>)> callback);
+
   virtual gpu::GpuMemoryBufferManager* GetGpuMemoryBufferManager() {
     return nullptr;
   }
