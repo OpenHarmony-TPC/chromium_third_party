@@ -36,6 +36,12 @@ typedef std::map<std::string, std::u16string> ScriptFontFamilyMap;
 // specified.
 BLINK_COMMON_EXPORT extern const char kCommonScript[];
 
+#if BUILDFLAG(IS_OHOS)
+BLINK_COMMON_EXPORT extern const char kObjectTag[];
+BLINK_COMMON_EXPORT extern const char kEmbedTag[];
+BLINK_COMMON_EXPORT extern const char kNativeType[];
+#endif
+
 // A struct for managing blink's settings.
 //
 // Adding new values to this class probably involves updating
@@ -96,6 +102,8 @@ struct BLINK_COMMON_EXPORT WebPreferences {
 #endif  // defined(OHOS_INPUT_EVENTS)
 #if BUILDFLAG(IS_OHOS)
   bool native_embed_mode_enabled;
+  std::string embed_tag;
+  std::string embed_tag_type;
   int draw_mode;
 #endif  // BUILDFLAG(IS_OHOS)
 #ifdef OHOS_SCROLLBAR

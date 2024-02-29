@@ -523,6 +523,12 @@ void WebSettingsImpl::EnableBlankTargetPopupIntercept(bool enabled) {
 void WebSettingsImpl::SetNativeEmbedModeEnabled(bool enabled) {
   settings_->SetNativeEmbedModeEnabled(enabled);
 }
+
+void WebSettingsImpl::RegisterNativeEmbedRule(const WebString& tag,
+                                              const WebString& type) {
+  settings_->RegisterNativeEmbedRule(tag, type);
+}
+
 void WebSettingsImpl::SetDrawMode(int mode) {
   settings_->SetDrawMode(mode);
 }

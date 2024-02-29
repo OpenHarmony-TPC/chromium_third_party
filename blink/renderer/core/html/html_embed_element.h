@@ -25,6 +25,9 @@
 
 #include "third_party/blink/renderer/core/core_export.h"
 #include "third_party/blink/renderer/core/html/html_plugin_element.h"
+#if BUILDFLAG(IS_OHOS)
+#include "third_party/blink/renderer/core/frame/settings.h"
+#endif
 
 namespace blink {
 
@@ -42,6 +45,12 @@ class CORE_EXPORT HTMLEmbedElement final : public HTMLPlugInElement {
   FrameOwnerElementType OwnerType() const final {
     return FrameOwnerElementType::kEmbed;
   }
+
+#if BUILDFLAG(IS_OHOS)
+  bool IsNativeType() const override {
+    return CheckNativeType(web_pref::kEmbedTag);
+  }
+#endif
 
  private:
   void ParseAttribute(const AttributeModificationParams&) override;

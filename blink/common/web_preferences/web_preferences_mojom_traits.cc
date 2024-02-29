@@ -51,6 +51,10 @@ bool StructTraits<blink::mojom::WebPreferencesDataView,
 #if BUILDFLAG(IS_ANDROID)
       || !data.ReadDefaultVideoPosterUrl(&out->default_video_poster_url)
 #endif
+#if BUILDFLAG(IS_OHOS)
+      || !data.ReadEmbedTag(&out->embed_tag) ||
+      !data.ReadEmbedTagType(&out->embed_tag_type)
+#endif
   )
     return false;
 

@@ -303,6 +303,7 @@ class WebSettings {
 
 #if BUILDFLAG(IS_OHOS)
   virtual void SetNativeEmbedModeEnabled(bool) = 0;
+  virtual void RegisterNativeEmbedRule(const WebString&, const WebString&) = 0;
   virtual void SetDrawMode(int) = 0;
 #endif
 
