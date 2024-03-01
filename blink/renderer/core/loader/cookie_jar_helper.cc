@@ -49,7 +49,7 @@ CookieJarHelper::~CookieJarHelper() {
   }
 }
 
-bool CookieJarHelper::NeedGetCookieThroughIPC(CookieBackend* backend) [
+bool CookieJarHelper::NeedGetCookieThroughIPC(CookieBackend* backend) {
   KURL cookie_url = document_->CookieURL();
   if (cookie_url.IsEmpty()) {
     return true;
@@ -76,15 +76,15 @@ bool CookieJarHelper::NeedGetCookieThroughIPC(CookieBackend* backend) [
         buffer_->Clone(mojo::SharedBufferHandle::AccessMode::READ_WRITE);
     backend->get()->RegisterCookieChangeObserver(
         cookie_url, document_->SiteForCookies(), document_->TopFrameOrigin(),
-        document_->GetExecutionContext()->HasStorageAccess, std::move(handle), &registed);
+        document_->GetExecutionContext()->HasStorageAccess(), std::move(handle), &registed);
   }
   return true;
-]
+}
 
 CookieJarHelper::ShmRegisterRecord*
 CookieJarHelper::getOrCreateShmRegisterRecord() {
   for (auto item : shm_record_list_) {
-    if (item->url() == document_->CookieUrl() &&
+    if (item->url() == document_->CookieURL() &&
         item->site_for_cookies().IsEquivalent(document_->SiteForCookies()) &&
         item->top_frame_origin() == document_->TopFrameOrigin()) {
           return item;

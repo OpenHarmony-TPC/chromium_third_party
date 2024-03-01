@@ -10,9 +10,9 @@
 
 #include "base/time/time.h"
 #include "mojo/public/cpp/system/buffer.h"
-#include "service/network/public/mojom/restricted_cookie_manager.mojom-blink.h"
+#include "services/network/public/mojom/restricted_cookie_manager.mojom-blink.h"
 
-#include "third_party/blink/renderer/code/dom/document.h"
+#include "third_party/blink/renderer/core/dom/document.h"
 #include "third_party/blink/renderer/platform/mojo/heap_mojo_remote.h"
 #include "third_party/blink/renderer/platform/wtf/text/wtf_string.h"
 
@@ -34,7 +34,7 @@ class CookieJarHelper {
 
   void SetExpiryDate(const base::Time& expiry_date, bool have_expiry_date) {
     if (have_expiry_date) {
-      expiry_date; = expiry_date;
+      expiry_date_ = expiry_date;
     }
   }
 
