@@ -97,7 +97,7 @@ absl::optional<webrtc::SdpVideoFormat> VEAToWebRTCFormat(
     webrtc::H264Profile h264_profile;
     switch (profile.profile) {
       case media::H264PROFILE_BASELINE:
-#if BUILDFLAG(IS_ANDROID)
+#if BUILDFLAG(IS_ANDROID) || BUILDFLAG(IS_OHOS)
         // Force HW H264 on Android to be CBP for most compatibility, since:
         // - Only HW H264 is available on Android at present.
         // - MediaCodec only advise BP, which works same as CBP in most cases.
