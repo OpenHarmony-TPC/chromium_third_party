@@ -1033,6 +1033,18 @@ void MainThreadSchedulerImpl::ResumeTimersForAndroidWebView() {
 }
 #endif
 
+#if BUILDFLAG(IS_OHOS)
+void MainThreadSchedulerImpl::PauseTimersForOHOSWebView() {
+  main_thread_only().pause_timers_for_webview = true;
+  UpdatePolicy();
+}
+
+void MainThreadSchedulerImpl::ResumeTimersForOHOSWebView() {
+  main_thread_only().pause_timers_for_webview = false;
+  UpdatePolicy();
+}
+#endif
+
 void MainThreadSchedulerImpl::OnAudioStateChanged() {
   bool is_audio_playing = false;
   for (PageSchedulerImpl* page_scheduler : main_thread_only().page_schedulers) {
