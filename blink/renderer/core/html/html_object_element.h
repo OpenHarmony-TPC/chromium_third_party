@@ -27,6 +27,9 @@
 #include "third_party/blink/renderer/core/html/forms/form_associated.h"
 #include "third_party/blink/renderer/core/html/forms/listed_element.h"
 #include "third_party/blink/renderer/core/html/html_plugin_element.h"
+#if BUILDFLAG(IS_OHOS)
+#include "third_party/blink/renderer/core/frame/settings.h"
+#endif
 
 namespace blink {
 
@@ -86,6 +89,10 @@ class CORE_EXPORT HTMLObjectElement final : public HTMLPlugInElement,
 
 #if BUILDFLAG(IS_OHOS)
   ParamMap ParamList() override;
+
+  bool IsNativeType() const override {
+    return CheckNativeType(web_pref::kObjectTag);
+  }
 #endif
 
   // Returns true if this object started to load something, and finished

@@ -440,5 +440,4 @@ ParamMap HTMLObjectElement::ParamList() {
 }
 #endif
 
-
 }  // namespace blink

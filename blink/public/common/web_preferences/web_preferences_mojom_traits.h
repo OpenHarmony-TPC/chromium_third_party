@@ -800,10 +800,22 @@ struct BLINK_COMMON_EXPORT StructTraits<blink::mojom::WebPreferencesDataView,
   static uint32_t scrollbar_color(const blink::web_pref::WebPreferences& r) {
     return r.scrollbar_color;
   }
+
   static bool native_embed_mode_enabled(
       const blink::web_pref::WebPreferences& r) {
     return r.native_embed_mode_enabled;
   }
+
+  static const std::string& embed_tag(
+      const blink::web_pref::WebPreferences& r) {
+    return r.embed_tag;
+  }
+
+  static const std::string& embed_tag_type(
+      const blink::web_pref::WebPreferences& r) {
+    return r.embed_tag_type;
+  }
+
   static uint32_t draw_mode(const blink::web_pref::WebPreferences& r) {
     return r.draw_mode;
   }

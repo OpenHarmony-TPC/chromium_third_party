@@ -250,6 +250,8 @@ class CORE_EXPORT WebSettingsImpl final : public WebSettings {
 
 #if BUILDFLAG(IS_OHOS)
   void SetNativeEmbedModeEnabled(bool) override;
+  void RegisterNativeEmbedRule(const WebString& tag,
+                               const WebString& type) override;
   void SetDrawMode(int) override;
 #endif
 

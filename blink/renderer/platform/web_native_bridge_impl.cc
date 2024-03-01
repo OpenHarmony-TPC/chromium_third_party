@@ -174,7 +174,7 @@ void WebNativeBridgeImpl::OnSurfaceCreated(
     int native_embed_id) {
   DCHECK(main_task_runner_->BelongsToCurrentThread());
   LOG(INFO) << "[NativeEmbed] WebNativeBridgeImpl::OnSurfaceCreated";
-  texture_size_changed_cb_ = std::move(texture_size_changed_cb);
+  texture_size_changed_cb_ = texture_size_changed_cb;
   client_->OnCreateNativeSurface(native_embed_id);
 }
 
@@ -188,7 +188,7 @@ void WebNativeBridgeImpl::OnTextureSizeChange(const gfx::Size& size) {
   DCHECK(main_task_runner_->BelongsToCurrentThread());
   surface_texture_size_ = size;
   if (!texture_size_changed_cb_.is_null()) {
-    std::move(texture_size_changed_cb_).Run(size);
+    texture_size_changed_cb_.Run(size);
   }
 }
 

@@ -37,6 +37,11 @@ using blink::mojom::EffectiveConnectionType;
 
 // "Zyyy" is the ISO 15924 script code for undetermined script aka Common.
 const char kCommonScript[] = "Zyyy";
+#if BUILDFLAG(IS_OHOS)
+const char kObjectTag[] = "object";
+const char kEmbedTag[] = "embed";
+const char kNativeType[] = "native/";
+#endif
 
 WebPreferences::WebPreferences()
     : default_font_size(16),
@@ -82,6 +87,8 @@ WebPreferences::WebPreferences()
 #endif  // defined(OHOS_INPUT_EVENTS)
 #if BUILDFLAG(IS_OHOS)
       native_embed_mode_enabled(false),
+      embed_tag(kEmbedTag),
+      embed_tag_type(kNativeType),
       draw_mode(0),
 #endif  // BUILDFLAG(IS_OHOS)
 #ifdef OHOS_SCROLLBAR

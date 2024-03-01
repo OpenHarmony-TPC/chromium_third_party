@@ -567,11 +567,7 @@ HTMLPlugInElement::ObjectContentType HTMLPlugInElement::GetObjectContentType()
     return ObjectContentType::kPlugin;
   if (MIMETypeRegistry::IsSupportedNonImageMIMEType(mime_type))
     return ObjectContentType::kFrame;
-#if BUILDFLAG(IS_OHOS)
-  if (IsNativeType()) {
-    return ObjectContentType::kFrame;
-  }
-#endif
+
   return ObjectContentType::kNone;
 }
 
@@ -617,6 +613,9 @@ bool HTMLPlugInElement::RequestObject(const PluginParameters& plugin_params) {
   if (handled_externally)
     ResetInstance();
   if (object_type == ObjectContentType::kFrame ||
+#if BUILDFLAG(IS_OHOS)
+      (IsNativeType() && object_type == ObjectContentType::kNone)||
+#endif
       object_type == ObjectContentType::kImage || handled_externally) {
     if (object_type == ObjectContentType::kFrame) {
       UseCounter::Count(GetDocument(),
@@ -646,7 +645,7 @@ bool HTMLPlugInElement::RequestObject(const PluginParameters& plugin_params) {
     // new frame and set it as the LayoutEmbeddedContent's EmbeddedContentView,
     // causing what was previously in the EmbeddedContentView to be torn down.
 #if BUILDFLAG(IS_OHOS)
-    LOG(INFO) << "[NativeEmbed] RequestObject is native type: " << IsNativeType() << ", service type: " << service_type_;
+    LOG(INFO) << "[NativeEmbed] RequestObject is native type " << IsNativeType() << ", service type is " << service_type_;
     return LoadOrRedirectSubframe(completed_url, GetNameAttribute(), true, IsNativeType());
 #else
     return LoadOrRedirectSubframe(completed_url, GetNameAttribute(), true);
@@ -850,21 +849,20 @@ HTMLPlugInElement::CustomStyleForLayoutObject(
 }
 
 #if BUILDFLAG(IS_OHOS)
-bool HTMLPlugInElement::IsNativeType() const {
+bool HTMLPlugInElement::CheckNativeType(const char* key) const {
   auto settings = GetDocument().GetSettings();
   if (!settings || !settings->GetNativeEmbedModeEnabled()) {
     return false;
   }
 
-  if (IsA<HTMLObjectElement>(this)) {
-    return service_type_.StartsWith("application/view");
+  auto rule = settings->NativeEmbedRule();
+  auto valid_key =
+      WebString::FromUTF8(key, strlen(key));
+  if (rule.find(valid_key) == rule.end()) {
+    return false;
   }
 
-  if (IsA<HTMLEmbedElement>(this)) {
-    return service_type_.StartsWith("native/");
-  }
-
-  return false;
+  return service_type_.StartsWith(rule[valid_key]);
 }
 #endif
 

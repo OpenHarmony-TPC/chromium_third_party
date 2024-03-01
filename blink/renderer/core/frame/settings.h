@@ -48,6 +48,9 @@
 #include "third_party/blink/renderer/platform/weborigin/kurl.h"
 #include "ui/base/pointer/pointer_device.h"
 #include "ui/gfx/geometry/size.h"
+#if BUILDFLAG(IS_OHOS)
+#include "third_party/blink/public/platform/web_string.h"
+#endif
 
 namespace blink {
 
@@ -112,6 +115,16 @@ class CORE_EXPORT Settings {
   }
 #endif
 
+#if BUILDFLAG(IS_OHOS)
+  void RegisterNativeEmbedRule(const WebString& tag, const WebString& type) {
+    embed_rule_[tag] = type;
+  }
+
+  std::map<WebString, WebString> NativeEmbedRule() {
+    return embed_rule_;
+  }
+#endif
+
 #ifdef OHOS_EX_BLANK_TARGET_POPUP_INTERCEPT
   void EnableBlankTargetPopupIntercept(bool enabled) {
     blank_target_popup_intercept_enabled_ = enabled;
@@ -160,6 +173,10 @@ class CORE_EXPORT Settings {
 
 #ifdef OHOS_EX_BLANK_TARGET_POPUP_INTERCEPT
   bool blank_target_popup_intercept_enabled_ = true;
+#endif
+
+#if BUILDFLAG(IS_OHOS)
+  std::map<WebString, WebString> embed_rule_;
 #endif
 
 #if defined(OHOS_CLIPBOARD)
