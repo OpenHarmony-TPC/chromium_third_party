@@ -61,6 +61,12 @@
 #include "third_party/blink/renderer/platform/runtime_enabled_features.h"
 #include "third_party/blink/renderer/platform/scheduler/public/event_loop.h"
 
+#if defined(OHOS_MEDIA)
+#include "third_party/blink/renderer/core/html/html_collection.h"
+#include "third_party/blink/renderer/core/html/media/html_video_element.h"
+#include "third_party/blink/renderer/core/layout/layout_object.h"
+#endif  // defined(OHOS_MEDIA)
+
 namespace blink {
 
 namespace {
@@ -756,7 +762,33 @@ ScriptPromise Fullscreen::RequestFullscreen(Element& pending,
         MakeGarbageCollected<PendingRequest>(&pending, request_type, options,
                                              resolver));
     LocalFrame& frame = *window.GetFrame();
+#if defined(OHOS_MEDIA)
+    HTMLVideoElement* video_element = nullptr;
+    absl::optional<gfx::Size> video_natural_size = absl::nullopt;
+
+    if (auto* element = DynamicTo<HTMLVideoElement>(pending)) {
+      video_element = element;
+    } else {
+      HTMLCollection* children = pending.getElementsByTagName("video");
+      for (unsigned int i = 0; children && i < children->length(); i++) {
+        Element* child_element = children->item(i);
+        if (child_element->GetLayoutObject() &&
+            child_element->GetLayoutObject()->IsVideo()) {
+          video_element = DynamicTo<HTMLVideoElement>(*child_element);
+          break;
+        }
+      }
+    }
+    if (video_element) {
+      video_natural_size =
+          gfx::Size(video_element->videoWidth(), video_element->videoHeight());
+    }
+
+    frame.GetChromeClient().EnterFullscreen(frame, options, request_type,
+                                            video_natural_size);
+#else
     frame.GetChromeClient().EnterFullscreen(frame, options, request_type);
+#endif  // defined(OHOS_MEDIA)
 
     if (!for_cross_process_descendant) {
       // Consume any transient user activation and delegated fullscreen token.

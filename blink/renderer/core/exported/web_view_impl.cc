@@ -1580,7 +1580,7 @@ void WebView::ApplyWebPreferences(const web_pref::WebPreferences& prefs,
   settings->RegisterNativeEmbedRule(WebString::FromASCII(prefs.embed_tag),
                                     WebString::FromASCII(prefs.embed_tag_type));
   settings->SetDrawMode(prefs.draw_mode);
-#endif // BUILDFLAG(IS_OHOS)
+#endif  // BUILDFLAG(IS_OHOS)
 
 #ifdef OHOS_SCROLLBAR
   settings->SetScrollBarColor(prefs.scrollbar_color);
@@ -1704,7 +1704,7 @@ void WebView::ApplyWebPreferences(const web_pref::WebPreferences& prefs,
 
 #if defined(OHOS_CLIPBOARD)
   settings->SetCopyOption(prefs.copy_option);
-#endif // defined(OHOS_CLIPBOARD)
+#endif  // defined(OHOS_CLIPBOARD)
 
 #if defined(OHOS_VIEWPORT) || defined(OHOS_MEDIA)
   bool is_2in1_device = base::ohos::IsPcDevice();
@@ -1982,10 +1982,21 @@ void WebViewImpl::ThemeChanged() {
     page->InvalidatePaint();
 }
 
-void WebViewImpl::EnterFullscreen(LocalFrame& frame,
-                                  const FullscreenOptions* options,
-                                  FullscreenRequestType request_type) {
-  fullscreen_controller_->EnterFullscreen(frame, options, request_type);
+void WebViewImpl::EnterFullscreen(
+    LocalFrame& frame,
+    const FullscreenOptions* options,
+    FullscreenRequestType request_type
+#if defined(OHOS_MEDIA)
+    ,
+    const absl::optional<gfx::Size>& video_natural_size
+#endif  // defined(OHOS_MEDIA)
+) {
+  fullscreen_controller_->EnterFullscreen(frame, options, request_type
+#if defined(OHOS_MEDIA)
+                                          ,
+                                          video_natural_size
+#endif  // defined(OHOS_MEDIA)
+  );
 }
 
 void WebViewImpl::ExitFullscreen(LocalFrame& frame) {

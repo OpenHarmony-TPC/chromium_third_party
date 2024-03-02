@@ -56,7 +56,12 @@ namespace {
 mojom::blink::FullscreenOptionsPtr ToMojoOptions(
     LocalFrame* frame,
     const FullscreenOptions* options,
-    FullscreenRequestType request_type) {
+    FullscreenRequestType request_type
+#if defined(OHOS_MEDIA)
+    ,
+    const absl::optional<gfx::Size>& video_natural_size = absl::nullopt
+#endif  // defined(OHOS_MEDIA)
+) {
   auto fullscreen_options = mojom::blink::FullscreenOptions::New();
   fullscreen_options->prefers_navigation_bar =
       options->navigationUI() == "show";
@@ -74,6 +79,12 @@ mojom::blink::FullscreenOptionsPtr ToMojoOptions(
       request_type & FullscreenRequestType::kForXrOverlay;
   fullscreen_options->prefers_status_bar =
       request_type & FullscreenRequestType::kForXrArWithCamera;
+
+#if defined(OHOS_MEDIA)
+  if (video_natural_size.has_value()) {
+    fullscreen_options->video_natural_size = video_natural_size.value();
+  }
+#endif  // defined(OHOS_MEDIA)
 
   return fullscreen_options;
 }
@@ -143,9 +154,15 @@ void FullscreenController::DidExitFullscreen() {
   }
 }
 
-void FullscreenController::EnterFullscreen(LocalFrame& frame,
-                                           const FullscreenOptions* options,
-                                           FullscreenRequestType request_type) {
+void FullscreenController::EnterFullscreen(
+    LocalFrame& frame,
+    const FullscreenOptions* options,
+    FullscreenRequestType request_type
+#if defined(OHOS_MEDIA)
+    ,
+    const absl::optional<gfx::Size>& video_natural_size
+#endif  // defined(OHOS_MEDIA)
+) {
   const auto& screen_info = frame.GetChromeClient().GetScreenInfo(frame);
 
   const bool requesting_other_screen =
@@ -185,7 +202,12 @@ void FullscreenController::EnterFullscreen(LocalFrame& frame,
   }
 
   DCHECK(state_ == State::kInitial || requesting_fullscreen_screen_change);
-  auto fullscreen_options = ToMojoOptions(&frame, options, request_type);
+  auto fullscreen_options = ToMojoOptions(&frame, options, request_type
+#if defined(OHOS_MEDIA)
+                                          ,
+                                          video_natural_size
+#endif  // defined(OHOS_MEDIA)
+  );
 
   // We want to disallow entering fullscreen with status and navigation bars
   // both visible, as this would translate into "no fullscreen at all".
