@@ -129,8 +129,6 @@ class BLINK_PLATFORM_EXPORT WebNativeBridgeImpl
   // playback.
   scoped_refptr<cc::VideoLayer> video_layer_;
 
-  // Whether the video is known to be opaque or not.
-  bool opaque_ = true;
   gfx::Size surface_texture_size_;
 
   base::WeakPtr<WebNativeBridgeImpl> weak_this_;

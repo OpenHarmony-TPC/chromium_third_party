@@ -203,7 +203,6 @@ void WebNativeBridgeImpl::OnSetLayer() {
 
   video_layer_ =
       cc::VideoLayer::Create(compositor_.get(), media::kNoTransformation);
-  video_layer_->SetContentsOpaque(opaque_);
   client_->SetCcLayer(video_layer_.get());
 }
 
