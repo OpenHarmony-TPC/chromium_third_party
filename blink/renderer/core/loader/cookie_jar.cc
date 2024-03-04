@@ -4,11 +4,11 @@
 
 #include "third_party/blink/renderer/core/loader/cookie_jar.h"
 
-#include "base/time/time.h"
 #include "base/debug/dump_without_crashing.h"
 #include "base/metrics/histogram_functions.h"
 #include "base/metrics/histogram_macros.h"
 #include "base/strings/strcat.h"
+#include "base/time/time.h"
 #include "third_party/blink/public/common/browser_interface_broker_proxy.h"
 #include "third_party/blink/renderer/core/dom/document.h"
 #include "third_party/blink/renderer/core/execution_context/execution_context.h"
@@ -130,7 +130,7 @@ String CookieJar::Cookies() {
 #if BUILDFLAG(IS_OHOS)
   base::Time expiry_date;
   bool have_expiry_date = false;
-  if (helper_.NeedGetCookieThroughIPC(&backend_)) {
+  if (helper_.IPCNeeded(&backend_)) {
     backend_->GetCookiesStringAndExpiryDate(
       cookie_url, document_->SiteForCookies(), document_->TopFrameOrigin(),
       document_->GetExecutionContext()->HasStorageAccess(), &helper_.cookie(),

@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 #include "cookie_jar_helper.h"
-#include "third_party/blink/renderer/platform/weborigin/kurl.h"
 #include "third_party/blink/renderer/core/execution_context/execution_context.h"
+#include "third_party/blink/renderer/platform/weborigin/kurl.h"
 
 namespace blink {
 
@@ -48,7 +48,7 @@ CookieJarHelper::~CookieJarHelper() {
   }
 }
 
-bool CookieJarHelper::NeedGetCookieThroughIPC(CookieBackend* backend) {
+bool CookieJarHelper::IPCNeeded(CookieBackend* backend) {
   KURL cookie_url = document_->CookieURL();
   if (cookie_url.IsEmpty()) {
     return true;
@@ -57,10 +57,7 @@ bool CookieJarHelper::NeedGetCookieThroughIPC(CookieBackend* backend) {
   bool& registed = getOrCreateShmRegisterRecord()->registed();
   if (registed) {
     bool* cookie_changed(static_cast<bool*>(mapping_.get()));
-    if (*cookie_changed == true) {
-      *cookie_changed = false;
-      return true;
-    } else if (IsExpired(base::Time::Now())) {
+    if (*cookie_changed == true || IsExpired(base::Time::Now())) {
       *cookie_changed = false;
       return true;
     } else {
