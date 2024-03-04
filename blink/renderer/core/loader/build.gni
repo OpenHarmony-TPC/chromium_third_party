@@ -175,7 +175,6 @@ if (is_ohos) {
   blink_core_sources_loader += [
     "cookie_jar_helper.cc",
     "cookie_jar_helper.h",
-    "cookie_status.h",
   ]
 }
 

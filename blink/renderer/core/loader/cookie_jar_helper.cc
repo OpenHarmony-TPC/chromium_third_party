@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 #include "cookie_jar_helper.h"
-#include "cookie_status.h"
 #include "third_party/blink/renderer/platform/weborigin/kurl.h"
 #include "third_party/blink/renderer/core/execution_context/execution_context.h"
 
@@ -57,12 +56,12 @@ bool CookieJarHelper::NeedGetCookieThroughIPC(CookieBackend* backend) {
 
   bool& registed = getOrCreateShmRegisterRecord()->registed();
   if (registed) {
-    bool* cookie_status(static_cast<bool*>(mapping_.get()));
-    if (*cookie_status == COOKIE_PRODUCED) {
-      *cookie_status = COOKIE_CONSUMED;
+    bool* cookie_changed(static_cast<bool*>(mapping_.get()));
+    if (*cookie_changed == true) {
+      *cookie_changed = false;
       return true;
     } else if (IsExpired(base::Time::Now())) {
-      *cookie_status = COOKIE_CONSUMED;
+      *cookie_changed = false;
       return true;
     } else {
       return false;
