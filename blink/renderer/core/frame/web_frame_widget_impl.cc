@@ -1686,8 +1686,13 @@ void WebFrameWidgetImpl::UpdateVisualProperties(
   // TODO(crbug.com/939118): This code path where scroll_focused_node_into_view
   // is set is used only for WebView, crbug 939118 tracks fixing webviews to
   // not use scroll_focused_node_into_view.
+#if defined(OHOS_INPUT_EVENTS)
+    ScrollFocusedEditableElementIntoView(
+        visual_properties.scroll_focused_node_into_view);
+#else
   if (visual_properties.scroll_focused_node_into_view)
     ScrollFocusedEditableElementIntoView();
+#endif
 }
 
 void WebFrameWidgetImpl::ApplyVisualPropertiesSizing(
@@ -2191,6 +2196,75 @@ bool WebFrameWidgetImpl::ScrollFocusedEditableElementIntoView() {
 
   return true;
 }
+
+#if defined(OHOS_INPUT_EVENTS)
+bool WebFrameWidgetImpl::ScrollFocusedEditableElementIntoView(bool shouldScroll) {
+  Element* element = FocusedElement();
+  if (!element)
+    return false;
+
+  EditContext* edit_context = element->GetDocument()
+                                  .GetFrame()
+                                  ->GetInputMethodController()
+                                  .GetActiveEditContext();
+
+  if (!WebElement(element).IsEditable() && !edit_context)
+    return false;
+
+  element->GetDocument().UpdateStyleAndLayout(DocumentUpdateReason::kSelection);
+
+  if (!element->GetLayoutObject())
+    return false;
+
+  mojom::blink::ScrollIntoViewParamsPtr params =
+      ScrollAlignment::CreateScrollIntoViewParams(
+          ScrollAlignment::CenterIfNeeded(), ScrollAlignment::CenterIfNeeded(),
+          mojom::blink::ScrollType::kProgrammatic,
+          /*make_visible_in_visual_viewport=*/false,
+          mojom::blink::ScrollBehavior::kInstant);
+
+  PhysicalRect absolute_element_bounds;
+  PhysicalRect absolute_caret_bounds;
+
+  if (edit_context) {
+    gfx::Rect control_bounds_in_physical_pixels;
+    gfx::Rect selection_bounds_in_physical_pixels;
+    edit_context->GetLayoutBounds(&control_bounds_in_physical_pixels,
+                                  &selection_bounds_in_physical_pixels);
+
+    absolute_element_bounds = PhysicalRect(control_bounds_in_physical_pixels);
+    absolute_caret_bounds = PhysicalRect(selection_bounds_in_physical_pixels);
+  } else {
+    absolute_element_bounds =
+        PhysicalRect(element->GetLayoutObject()->AbsoluteBoundingBoxRect());
+    absolute_caret_bounds = PhysicalRect(
+        element->GetDocument().GetFrame()->Selection().ComputeRectToScroll(
+            kRevealExtent));
+  }
+
+  gfx::Vector2dF editable_offset_from_caret(absolute_element_bounds.offset -
+                                            absolute_caret_bounds.offset);
+  gfx::SizeF editable_size(absolute_element_bounds.size);
+
+  if (editable_size.IsEmpty()) {
+    return false;
+  }
+
+  if (shouldScroll) {
+    params->for_focused_editable = mojom::blink::FocusedEditableParams::New();
+    TouchAction action = touch_action_util::ComputeEffectiveTouchAction(*element);
+    params->for_focused_editable->can_zoom =
+        static_cast<int>(action) & static_cast<int>(TouchAction::kPinchZoom);
+    params->for_focused_editable->relative_location = editable_offset_from_caret;
+    params->for_focused_editable->size = editable_size;
+  }
+
+  scroll_into_view_util::ScrollRectToVisible(
+      *element->GetLayoutObject(), absolute_caret_bounds, std::move(params));
+
+  return true;
+}
+#endif
 
 void WebFrameWidgetImpl::ResetMeaningfulLayoutStateForMainFrame() {
   MainFrameData& data = main_data();
