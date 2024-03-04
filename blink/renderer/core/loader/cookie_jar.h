@@ -13,6 +13,10 @@
 #include "third_party/blink/renderer/platform/weborigin/kurl.h"
 #include "third_party/blink/renderer/platform/wtf/text/wtf_string.h"
 
+#if BUILDFLAG(IS_OHOS)
+#include "cookie_jar_helper.h"
+#endif
+
 namespace blink {
 class Document;
 
@@ -44,6 +48,10 @@ class CookieJar : public GarbageCollected<CookieJar> {
 
   HeapMojoRemote<network::mojom::blink::RestrictedCookieManager> backend_;
   Member<blink::Document> document_;
+
+#if BUILDFLAG(IS_OHOS)
+  CookieJarHelper helper_;
+#endif
 
   // Hash used to determine if the value returned by a call to
   // RestrictedCookieManager::GetCookiesString is the same as a previous one.

@@ -8,6 +8,7 @@
 #include "base/metrics/histogram_functions.h"
 #include "base/metrics/histogram_macros.h"
 #include "base/strings/strcat.h"
+#include "base/time/time.h"
 #include "third_party/blink/public/common/browser_interface_broker_proxy.h"
 #include "third_party/blink/renderer/core/dom/document.h"
 #include "third_party/blink/renderer/core/execution_context/execution_context.h"
@@ -49,7 +50,12 @@ bool ContainsTruncatingChar(UChar c) {
 }  // namespace
 
 CookieJar::CookieJar(blink::Document* document)
-    : backend_(document->GetExecutionContext()), document_(document) {}
+    : backend_(document->GetExecutionContext()),
+      document_(document)
+#if BUILDFLAG(IS_OHOS)
+      , helper_(document_)
+#endif
+{}
 
 CookieJar::~CookieJar() = default;
 
@@ -121,6 +127,19 @@ String CookieJar::Cookies() {
   base::ElapsedTimer timer;
   bool requested = RequestRestrictedCookieManagerIfNeeded();
   String value;
+#if BUILDFLAG(IS_OHOS)
+  base::Time expiry_date;
+  bool have_expiry_date = false;
+  if (helper_.IPCNeeded(&backend_)) {
+    backend_->GetCookiesStringAndExpiryDate(
+      cookie_url, document_->SiteForCookies(), document_->TopFrameOrigin(),
+      document_->GetExecutionContext()->HasStorageAccess(), &helper_.cookie(),
+      &expiry_date, &have_expiry_date);
+    LogCookieHistogram("Blink.CookiesTime.", requested, timer.Elapsed());
+  }
+  helper_.SetExpiryDate(expiry_date, have_expiry_date);
+  return helper_.cookie();
+#else
   backend_->GetCookiesString(
       cookie_url, document_->SiteForCookies(), document_->TopFrameOrigin(),
       document_->GetExecutionContext()->HasStorageAccess(), &value);
@@ -129,6 +148,7 @@ String CookieJar::Cookies() {
 
   last_operation_was_set_ = false;
   return value;
+#endif
 }
 
 bool CookieJar::CookiesEnabled() {
