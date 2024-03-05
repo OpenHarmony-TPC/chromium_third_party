@@ -69,7 +69,7 @@ struct ElementId;
 class Layer;
 struct OverscrollBehavior;
 class ScopedPauseRendering;
-}
+}  // namespace cc
 
 namespace display {
 struct ScreenInfo;
@@ -428,7 +428,13 @@ class CORE_EXPORT ChromeClient : public GarbageCollected<ChromeClient> {
 
   virtual void EnterFullscreen(LocalFrame&,
                                const FullscreenOptions*,
-                               FullscreenRequestType) {}
+                               FullscreenRequestType
+#if defined(OHOS_MEDIA)
+                               ,
+                               const absl::optional<gfx::Size>&
+#endif  // defined(OHOS_MEDIA)
+  ) {
+  }
   virtual void ExitFullscreen(LocalFrame&) {}
   virtual void FullscreenElementChanged(Element* old_element,
                                         Element* new_element,

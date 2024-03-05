@@ -489,7 +489,12 @@ class CORE_EXPORT WebViewImpl final : public WebView,
 
   void EnterFullscreen(LocalFrame&,
                        const FullscreenOptions*,
-                       FullscreenRequestType);
+                       FullscreenRequestType
+#if defined(OHOS_MEDIA)
+                       ,
+                       const absl::optional<gfx::Size>&
+#endif  // defined(OHOS_MEDIA)
+  );
   void ExitFullscreen(LocalFrame&);
   void FullscreenElementChanged(Element* old_element,
                                 Element* new_element,
@@ -523,9 +528,7 @@ class CORE_EXPORT WebViewImpl final : public WebView,
 
   gfx::Vector2dF ElasticOverscroll() const { return elastic_overscroll_; }
 
-  class ChromeClient& GetChromeClient() const {
-    return *chrome_client_.Get();
-  }
+  class ChromeClient& GetChromeClient() const { return *chrome_client_.Get(); }
 
   // Allows main frame updates to occur if they were previously blocked. They
   // are blocked during loading a navigation, to allow Blink to proceed without
@@ -677,7 +680,7 @@ class CORE_EXPORT WebViewImpl final : public WebView,
   void RefreshPageScaleFactor();
 #if BUILDFLAG(IS_OHOS)
   void SetPinchSmoothMode(bool isEnable);
-#endif // BUILDFLAG(IS_OHOS)
+#endif  // BUILDFLAG(IS_OHOS)
   gfx::Size ContentsSize() const;
 
   void UpdateBrowserControlsConstraint(cc::BrowserControlsState constraint);
@@ -925,7 +928,7 @@ class CORE_EXPORT WebViewImpl final : public WebView,
 
 #if BUILDFLAG(IS_OHOS)
   bool pinch_smooth_mode = false;
-#endif // BUILDFLAG(IS_OHOS)
+#endif  // BUILDFLAG(IS_OHOS)
 
   // Cache the preferred size of the page in order to prevent sending the IPC
   // when layout() recomputes but doesn't actually change sizes.

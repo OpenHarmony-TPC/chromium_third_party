@@ -61,7 +61,12 @@ class CORE_EXPORT FullscreenController {
   // fullscreen.
   void EnterFullscreen(LocalFrame&,
                        const FullscreenOptions*,
-                       FullscreenRequestType request_type);
+                       FullscreenRequestType request_type
+#if defined(OHOS_MEDIA)
+                       ,
+                       const absl::optional<gfx::Size>& video_natural_size
+#endif  // defined(OHOS_MEDIA)
+  );
   void ExitFullscreen(LocalFrame&);
 
   // Called by content::RenderWidget (via WebWidget) to notify that we've

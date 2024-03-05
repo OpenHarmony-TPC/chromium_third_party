@@ -540,7 +540,6 @@ gfx::Rect ChromeClientImpl::LocalRootToScreenDIPs(
 
 float ChromeClientImpl::WindowToViewportScalar(LocalFrame* frame,
                                                const float scalar_value) const {
-
   // TODO(darin): Clean up callers to not pass null. E.g., VisualViewport::
   // ScrollbarThickness() is one such caller. See https://pastebin.com/axgctw0N
   // for a sample call stack.
@@ -881,11 +880,22 @@ cc::AnimationTimeline* ChromeClientImpl::GetScrollAnimationTimeline(
   return widget->ScrollAnimationTimeline();
 }
 
-void ChromeClientImpl::EnterFullscreen(LocalFrame& frame,
-                                       const FullscreenOptions* options,
-                                       FullscreenRequestType request_type) {
+void ChromeClientImpl::EnterFullscreen(
+    LocalFrame& frame,
+    const FullscreenOptions* options,
+    FullscreenRequestType request_type
+#if defined(OHOS_MEDIA)
+    ,
+    const absl::optional<gfx::Size>& video_natural_size
+#endif  // defined(OHOS_MEDIA)
+) {
   DCHECK(web_view_);
-  web_view_->EnterFullscreen(frame, options, request_type);
+  web_view_->EnterFullscreen(frame, options, request_type
+#if defined(OHOS_MEDIA)
+                             ,
+                             video_natural_size
+#endif  // defined(OHOS_MEDIA)
+  );
 }
 
 void ChromeClientImpl::ExitFullscreen(LocalFrame& frame) {
@@ -1215,10 +1225,10 @@ void ChromeClientImpl::DidChangeValueInTextField(
     if (auto* rc = doc.GetResourceCoordinator()) {
       rc->SetHadFormInteraction();
 #if BUILDFLAG(IS_OHOS)
-    if (element.Form()) {
-      uint64_t form_id = element.Form()->UniqueRendererFormId();
-      rc->OnFormEditingStateChanged(form_id, false);
-    }
+      if (element.Form()) {
+        uint64_t form_id = element.Form()->UniqueRendererFormId();
+        rc->OnFormEditingStateChanged(form_id, false);
+      }
 #endif
     }
   }
@@ -1254,11 +1264,11 @@ void ChromeClientImpl::DidChangeSelectionInSelectControl(
     fill_client->SelectControlDidChange(WebFormControlElement(&element));
 #if BUILDFLAG(IS_OHOS)
   if (auto* rc = doc.GetResourceCoordinator()) {
-      rc->SetHadFormInteraction();
-      if (element.Form()) {
-        uint64_t form_id = element.Form()->UniqueRendererFormId();
-        rc->OnFormEditingStateChanged(form_id, false);
-      }
+    rc->SetHadFormInteraction();
+    if (element.Form()) {
+      uint64_t form_id = element.Form()->UniqueRendererFormId();
+      rc->OnFormEditingStateChanged(form_id, false);
+    }
   }
 #endif
 }

@@ -205,7 +205,12 @@ class CORE_EXPORT ChromeClientImpl final : public ChromeClient {
 
   void EnterFullscreen(LocalFrame&,
                        const FullscreenOptions*,
-                       FullscreenRequestType) override;
+                       FullscreenRequestType
+#if defined(OHOS_MEDIA)
+                       ,
+                       const absl::optional<gfx::Size>&
+#endif  // defined(OHOS_MEDIA)
+                       ) override;
   void ExitFullscreen(LocalFrame&) override;
   void FullscreenElementChanged(Element* old_element,
                                 Element* new_element,
