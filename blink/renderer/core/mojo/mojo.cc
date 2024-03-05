@@ -103,6 +103,9 @@ void Mojo::bindInterface(ScriptState* script_state,
                          MojoHandle* request_handle,
                          const String& scope,
                          ExceptionState& exception_state) {
+#if BUILDFLAG(IS_OHOS)
+  return;
+#else
   std::string name = interface_name.Utf8();
   auto handle =
       mojo::ScopedMessagePipeHandle::From(request_handle->TakeHandle());
@@ -130,6 +133,7 @@ void Mojo::bindInterface(ScriptState* script_state,
   }
 
   context->GetBrowserInterfaceBroker().GetInterface(name, std::move(handle));
+#endif
 }
 
 }  // namespace blink
