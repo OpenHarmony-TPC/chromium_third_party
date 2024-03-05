@@ -99,6 +99,15 @@ blink_modules_sources("media_controls") {
     "media_controls_text_track_manager.h",
   ]
 
+  if (ohos_media) {
+     sources += [
+       "elements/media_control_entered_fullscreen_panel_element.cc",
+       "elements/media_control_entered_fullscreen_panel_element.h",
+       "elements/media_control_entered_fullscreen_title_display_element.cc",
+       "elements/media_control_entered_fullscreen_title_display_element.h",
+     ]
+  }
+
   deps = [
     ":media_controls_resources",
     "//services/service_manager/public/cpp",

@@ -66,6 +66,10 @@
 #include "third_party/blink/renderer/modules/media_controls/elements/media_control_display_cutout_fullscreen_button_element.h"
 #include "third_party/blink/renderer/modules/media_controls/elements/media_control_download_button_element.h"
 #include "third_party/blink/renderer/modules/media_controls/elements/media_control_elements_helper.h"
+#if defined(OHOS_MEDIA)
+#include "third_party/blink/renderer/modules/media_controls/elements/media_control_entered_fullscreen_panel_element.h"
+#include "third_party/blink/renderer/modules/media_controls/elements/media_control_entered_fullscreen_title_display_element.h"
+#endif // defined(OHOS_MEDIA)
 #include "third_party/blink/renderer/modules/media_controls/elements/media_control_fullscreen_button_element.h"
 #include "third_party/blink/renderer/modules/media_controls/elements/media_control_loading_panel_element.h"
 #include "third_party/blink/renderer/modules/media_controls/elements/media_control_mute_button_element.h"
@@ -366,6 +370,10 @@ MediaControlsImpl::MediaControlsImpl(HTMLMediaElement& media_element)
       fullscreen_button_(nullptr),
       display_cutout_fullscreen_button_(nullptr),
       download_button_(nullptr),
+#if defined(OHOS_MEDIA)
+      entered_fullscreen_panel_(nullptr),
+      entered_fullscreen_title_display_(nullptr),
+#endif // defined(OHOS_MEDIA)
       media_event_listener_(
           MakeGarbageCollected<MediaControlsMediaEventListener>(this)),
       orientation_lock_delegate_(nullptr),
@@ -503,6 +511,18 @@ MediaControlsImpl* MediaControlsImpl::Create(HTMLMediaElement& media_element,
 // +-MediaControlDisplayCutoutFullscreenElement
 //       (-internal-media-controls-display-cutout-fullscreen-button)
 void MediaControlsImpl::InitializeControls() {
+#if defined(OHOS_MEDIA)
+  entered_fullscreen_panel_ =
+      MakeGarbageCollected<MediaControlEnteredFullscreenPanelElement>(*this);
+  entered_fullscreen_panel_->setInnerHTML("");
+  ParserAppendChild(entered_fullscreen_panel_);
+
+  entered_fullscreen_panel_->SetIsWanted(false);
+
+  entered_fullscreen_title_display_ =
+      MakeGarbageCollected<MediaControlEnteredFullscreenTitleDisplayElement>(
+          *this);
+#endif // defined(OHOS_MEDIA)
   if (ShouldShowVideoControls()) {
     loading_panel_ =
         MakeGarbageCollected<MediaControlLoadingPanelElement>(*this);
@@ -1003,6 +1023,12 @@ void MediaControlsImpl::Hide() {
     is_paused_for_scrubbing_ = false;
     EndScrubbing();
   }
+
+#if defined(OHOS_MEDIA)
+  if (MediaElement().IsFullscreen()) {
+    entered_fullscreen_title_display_->SetIsWanted(false);
+  }
+#endif // defined(OHOS_MEDIA)
   timeline_->OnControlsHidden();
   volume_slider_->OnControlsHidden();
 
@@ -1027,6 +1053,11 @@ void MediaControlsImpl::MaybeShowOverlayPlayButton() {
 
 void MediaControlsImpl::MakeOpaque() {
   ShowCursor();
+#if defined(OHOS_MEDIA)
+  if (MediaElement().IsFullscreen()) {
+    entered_fullscreen_title_display_->SetIsWanted(true);
+  }
+#endif // defined(OHOS_MEDIA)
   panel_->MakeOpaque();
   MaybeShowOverlayPlayButton();
 }
@@ -1044,6 +1075,11 @@ void MediaControlsImpl::MakeOpaqueFromPointerEvent() {
 }
 
 void MediaControlsImpl::MakeTransparent() {
+#if defined(OHOS_MEDIA)
+  if (MediaElement().IsFullscreen()) {
+    entered_fullscreen_title_display_->SetIsWanted(false);
+  }
+#endif // defined(OHOS_MEDIA)
   // Only hide the cursor if the controls are enabled.
   if (MediaElement().ShouldShowControls())
     HideCursor();
@@ -1898,6 +1934,17 @@ void MediaControlsImpl::OnLoadedMetadata() {
 }
 
 void MediaControlsImpl::OnEnteredFullscreen() {
+#if defined(OHOS_MEDIA)
+  entered_fullscreen_panel_->ParserAppendChild(
+      entered_fullscreen_title_display_);
+  entered_fullscreen_panel_->SetIsWanted(true);
+
+  SetClass("fullscreen", true);
+
+  if (!IsVisible()) {
+    entered_fullscreen_title_display_->SetIsWanted(false);
+  }
+#endif // defined(OHOS_MEDIA)
   fullscreen_button_->SetIsFullscreen(true);
   if (display_cutout_fullscreen_button_)
     display_cutout_fullscreen_button_->SetIsWanted(true);
@@ -1907,6 +1954,13 @@ void MediaControlsImpl::OnEnteredFullscreen() {
 }
 
 void MediaControlsImpl::OnExitedFullscreen() {
+#if defined(OHOS_MEDIA)
+  entered_fullscreen_panel_->ParserRemoveChild(
+      *entered_fullscreen_title_display_);
+  entered_fullscreen_panel_->SetIsWanted(false);
+
+  SetClass("fullscreen", false);
+#endif // defined(OHOS_MEDIA)
   fullscreen_button_->SetIsFullscreen(false);
   if (display_cutout_fullscreen_button_)
     display_cutout_fullscreen_button_->SetIsWanted(false);
@@ -2213,6 +2267,10 @@ void MediaControlsImpl::Trace(Visitor* visitor) const {
   visitor->Trace(display_cutout_fullscreen_button_);
   visitor->Trace(volume_control_container_);
   visitor->Trace(text_track_manager_);
+#if defined(OHOS_MEDIA)
+  visitor->Trace(entered_fullscreen_panel_);
+  visitor->Trace(entered_fullscreen_title_display_);
+#endif // defined(OHOS_MEDIA)
   MediaControls::Trace(visitor);
   HTMLDivElement::Trace(visitor);
 }

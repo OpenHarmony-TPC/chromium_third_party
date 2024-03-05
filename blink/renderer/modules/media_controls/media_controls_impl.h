@@ -71,6 +71,10 @@ class MediaControlVolumeControlContainerElement;
 class MediaControlVolumeSliderElement;
 class ShadowRoot;
 class TextTrack;
+#if defined(OHOS_MEDIA)
+class MediaControlEnteredFullscreenPanelElement;
+class MediaControlEnteredFullscreenTitleDisplayElement;
+#endif // defined(OHOS_MEDIA)
 
 // Default implementation of the core/ MediaControls interface used by
 // HTMLMediaElement.
@@ -392,6 +396,11 @@ class MODULES_EXPORT MediaControlsImpl final : public HTMLDivElement,
   Member<MediaControlDisplayCutoutFullscreenButtonElement>
       display_cutout_fullscreen_button_;
   Member<MediaControlDownloadButtonElement> download_button_;
+#if defined(OHOS_MEDIA)
+  Member<MediaControlEnteredFullscreenPanelElement> entered_fullscreen_panel_;
+  Member<MediaControlEnteredFullscreenTitleDisplayElement>
+      entered_fullscreen_title_display_;
+#endif // defined(OHOS_MEDIA)
 
   Member<MediaControlsMediaEventListener> media_event_listener_;
   Member<MediaControlsOrientationLockDelegate> orientation_lock_delegate_;

@@ -4,6 +4,9 @@
 
 #include "third_party/blink/renderer/modules/media_controls/elements/media_control_div_element.h"
 
+#if defined(OHOS_MEDIA)
+#include "third_party/blink/renderer/core/dom/dom_token_list.h"
+#endif // defined(OHOS_MEDIA)
 #include "third_party/blink/renderer/modules/media_controls/elements/media_control_elements_helper.h"
 #include "third_party/blink/renderer/modules/media_controls/media_controls_impl.h"
 #include "ui/gfx/geometry/size.h"
@@ -35,6 +38,17 @@ bool MediaControlDivElement::IsDisabled() const {
   // Div elements cannot be disabled.
   return false;
 }
+
+#if defined(OHOS_MEDIA)
+void MediaControlDivElement::SetClass(const AtomicString& class_name,
+                                      bool should_have_class) {
+  if (should_have_class) {
+    classList().Add(class_name);
+  } else {
+    classList().Remove(class_name);
+  }
+}
+#endif // defined(OHOS_MEDIA)
 
 void MediaControlDivElement::Trace(Visitor* visitor) const {
   HTMLDivElement::Trace(visitor);

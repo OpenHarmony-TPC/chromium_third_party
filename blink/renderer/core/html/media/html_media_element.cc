@@ -1459,6 +1459,18 @@ LocalFrame* HTMLMediaElement::LocalFrameForPlayer() {
                           : GetDocument().GetFrame();
 }
 
+#if defined(OHOS_MEDIA)
+WebString HTMLMediaElement::GetTitle() const {
+  if (GetDocument().GetPage() && GetDocument().GetPage()->MainFrame()) {
+    Frame* main_frame = GetDocument().GetPage()->MainFrame();
+    if (main_frame && main_frame->IsLocalFrame()) {
+      return DynamicTo<LocalFrame>(main_frame)->GetDocument()->title();
+    }
+  }
+  return WebString();
+}
+#endif // defined(OHOS_MEDIA)
+
 void HTMLMediaElement::StartPlayerLoad() {
   DCHECK(!web_media_player_);
 

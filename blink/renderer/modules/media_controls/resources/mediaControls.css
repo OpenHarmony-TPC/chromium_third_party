@@ -29,6 +29,63 @@ video::-webkit-media-controls {
   margin-bottom: env(safe-area-inset-bottom);
 }
 
+video::-internal-media-controls-entered-fullscreen-panel {
+  -webkit-appearance: -internal-media-control;
+  display: flex;
+
+  top: 0;
+  width: 100%;
+  height: 48px;
+  z-index: 1;
+  overflow: hidden;
+  text-align: right;
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+audio::-internal-media-controls-entered-fullscreen-title-item,
+video::-internal-media-controls-entered-fullscreen-title-item {
+  flex: auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+audio::-internal-media-controls-entered-fullscreen-title-display,
+video::-internal-media-controls-entered-fullscreen-title-display {
+  position: absolute;
+  top: 4px;
+  left: 24px;
+  right: 16px;
+  height: 48px;
+  line-height: 48px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-align: left;
+  text-overflow: ellipsis;
+  font-size: 18px;
+  font-weight: normal;
+  color: #FFFFFF;
+  direction: ltr;
+  display: flex;
+  align-items: center;
+}
+
+audio::-internal-media-controls-entered-fullscreen-title-display.rtl_lang,
+video::-internal-media-controls-entered-fullscreen-title-display.rtl_lang {
+  direction: rtl;
+  unicode-bidi: embed;
+}
+
+audio::-webkit-media-controls.rtl div[pseudo="-internal-media-controls-entered-fullscreen-title-display" i],
+video::-webkit-media-controls.rtl div[pseudo="-internal-media-controls-entered-fullscreen-title-display" i],
+audio::-webkit-media-controls[local_lang="ur"] [pseudo="-internal-media-controls-entered-fullscreen-title-display"],
+video::-webkit-media-controls[local_lang="ur"] [pseudo="-internal-media-controls-entered-fullscreen-title-display"] {
+  left: 16px;
+  right: 56px;
+  text-align: right;
+}
+
 audio::-webkit-media-controls-enclosure,
 video::-webkit-media-controls-enclosure {
   bottom: 0;
