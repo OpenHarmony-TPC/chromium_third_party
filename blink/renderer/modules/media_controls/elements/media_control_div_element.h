@@ -27,6 +27,10 @@ class MODULES_EXPORT MediaControlDivElement : public HTMLDivElement,
 
   bool IsDisabled() const override;
 
+#if defined(OHOS_MEDIA)
+  void SetClass(const AtomicString& class_name, bool should_have_class);
+#endif // defined(OHOS_MEDIA)
+
   void Trace(Visitor*) const override;
 
  protected:

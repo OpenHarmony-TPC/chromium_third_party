@@ -412,6 +412,10 @@ class CORE_EXPORT HTMLMediaElement
   // reason while in picture in picture mode.
   LocalFrame* LocalFrameForPlayer();
 
+#if defined(OHOS_MEDIA)
+  WebString GetTitle() const;
+#endif // defined(OHOS_MEDIA)
+
  protected:
   // Assert the correct order of the children in shadow dom when DCHECK is on.
   static void AssertShadowRootChildren(ShadowRoot&);
