@@ -103,6 +103,9 @@ void Mojo::bindInterface(ScriptState* script_state,
                          MojoHandle* request_handle,
                          const String& scope,
                          ExceptionState& exception_state) {
+#if defined(OHOS_DISABLE_MOJOJS)
+  return;
+#endif
   std::string name = interface_name.Utf8();
   auto handle =
       mojo::ScopedMessagePipeHandle::From(request_handle->TakeHandle());
