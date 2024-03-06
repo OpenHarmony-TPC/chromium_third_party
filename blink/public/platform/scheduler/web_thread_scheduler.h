@@ -90,6 +90,11 @@ class BLINK_PLATFORM_EXPORT WebThreadScheduler {
   virtual void ResumeTimersForAndroidWebView();
 #endif  // BUILDFLAG(IS_ANDROID)
 
+#if BUILDFLAG(IS_OHOS)
+  virtual void PauseTimersForOHOSWebView();
+  virtual void ResumeTimersForOHOSWebView();
+#endif  // BUILDFLAG(IS_OHOS)
+
   // Sets the kind of renderer process. Should be called on the main thread
   // once.
   virtual void SetRendererProcessType(WebRendererProcessType type);

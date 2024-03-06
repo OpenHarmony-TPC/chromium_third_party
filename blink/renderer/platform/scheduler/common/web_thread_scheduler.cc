@@ -79,6 +79,16 @@ void WebThreadScheduler::ResumeTimersForAndroidWebView() {
 }
 #endif  // BUILDFLAG(IS_ANDROID)
 
+#if BUILDFLAG(IS_OHOS)
+void WebThreadScheduler::PauseTimersForOHOSWebView() {
+  NOTREACHED();
+}
+
+void WebThreadScheduler::ResumeTimersForOHOSWebView() {
+  NOTREACHED();
+}
+#endif  // BUILDFLAG(IS_OHOS)
+
 void WebThreadScheduler::SetRendererProcessType(WebRendererProcessType type) {
   NOTREACHED();
 }

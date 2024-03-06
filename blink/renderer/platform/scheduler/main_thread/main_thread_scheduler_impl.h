@@ -150,6 +150,10 @@ class PLATFORM_EXPORT MainThreadSchedulerImpl
   void PauseTimersForAndroidWebView() override;
   void ResumeTimersForAndroidWebView() override;
 #endif
+#if BUILDFLAG(IS_OHOS)
+  void PauseTimersForOHOSWebView() override;
+  void ResumeTimersForOHOSWebView() override;
+#endif
   void SetRendererProcessType(WebRendererProcessType type) override;
 
   // WebThreadScheduler and ThreadScheduler implementation:
