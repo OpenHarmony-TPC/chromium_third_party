@@ -15,12 +15,7 @@ if (is_android) {
   }
 } else if (is_ohos) {
   import("//build/config/ohos/config.gni")
-  config("ohos_system_libs") {
-    libs = [ "nweb_ohos_adapter.z" ]
-
-    include_dirs = ohos_src_includes
-    lib_dirs = ohos_libs_dir
-  }
+  include_dirs = ohos_src_includes
 
   source_set("ashmem") {
     sources = [
@@ -28,6 +23,6 @@ if (is_android) {
       "ohos_ashmem.cc",
     ]
 
-    configs += [ ":ohos_system_libs" ]
+    deps = ["//third_party/ohos_ndk:ohos_isolation"]
   }
 }

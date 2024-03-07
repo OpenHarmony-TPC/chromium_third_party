@@ -83,11 +83,7 @@ if (is_ios) {
 
 if (is_ohos) {
   import("//build/config/ohos/config.gni")
-  config("ohos_system_libs") {
-    libs = [ "nweb_ohos_adapter.z" ]
-    include_dirs = ohos_src_includes
-    lib_dirs = ohos_libs_dir
-  }
+  include_dirs = ohos_src_includes
 }
 
 visibility = [
@@ -314,10 +310,6 @@ component("core") {
   configs += core_config_add
   configs += [ "//v8:external_startup_data" ]
 
-  if (is_ohos) {
-    configs += [ ":ohos_system_libs" ]
-  }
-
   public_deps = [
     ":core_generated",
     ":core_hot",
@@ -382,6 +374,12 @@ component("core") {
     "//ui/gfx/geometry",
     "//ui/gfx/geometry:geometry_skia",
   ]
+
+  if (is_ohos) {
+    deps += [
+      "//third_party/ohos_ndk:ohos_isolation",
+    ]
+  }
 
   if (is_mac) {
     deps += [ "//ui/base/mojom" ]
