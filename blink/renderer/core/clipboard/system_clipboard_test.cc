@@ -69,7 +69,7 @@ TEST_F(SystemClipboardTest, Text) {
   EXPECT_EQ(system_clipboard().ReadPlainText(), "");
 
   // Setting text in the host is visible in system.
-  clipboard_host()->WriteText("first");
+  clipboard_host()->WriteText("first", ::blink::mojom::CopyOptionMode::NONE);
   EXPECT_EQ(system_clipboard().ReadPlainText(), "first");
 
   // Inside a snapshot scope, the first read from the system clipboard
@@ -77,10 +77,10 @@ TEST_F(SystemClipboardTest, Text) {
   {
     ScopedSystemClipboardSnapshot snapshot(system_clipboard());
 
-    clipboard_host()->WriteText("second");
+    clipboard_host()->WriteText("second", ::blink::mojom::CopyOptionMode::NONE);
     EXPECT_EQ(system_clipboard().ReadPlainText(), "second");
 
-    clipboard_host()->WriteText("third");
+    clipboard_host()->WriteText("third", ::blink::mojom::CopyOptionMode::NONE);
     EXPECT_EQ(system_clipboard().ReadPlainText(), "second");
   }
 
@@ -98,7 +98,7 @@ TEST_F(SystemClipboardTest, Html) {
   EXPECT_EQ(system_clipboard().ReadHTML(url, fragment_start, fragment_end), "");
 
   // Setting text in the host is visible in system.
-  clipboard_host()->WriteHtml("first", KURL("http://first.com"));
+  clipboard_host()->WriteHtml("first", KURL("http://first.com"), ::blink::mojom::CopyOptionMode::NONE);
   EXPECT_EQ(system_clipboard().ReadHTML(url, fragment_start, fragment_end),
             "first");
   EXPECT_EQ(url, KURL("http://first.com"));
@@ -108,12 +108,12 @@ TEST_F(SystemClipboardTest, Html) {
   {
     ScopedSystemClipboardSnapshot snapshot(system_clipboard());
 
-    clipboard_host()->WriteHtml("second", KURL("http://second.com"));
+    clipboard_host()->WriteHtml("second", KURL("http://second.com"), ::blink::mojom::CopyOptionMode::NONE);
     EXPECT_EQ(system_clipboard().ReadHTML(url, fragment_start, fragment_end),
               "second");
     EXPECT_EQ(url, KURL("http://second.com"));
 
-    clipboard_host()->WriteHtml("third", KURL("http://third.com"));
+    clipboard_host()->WriteHtml("third", KURL("http://third.com"), ::blink::mojom::CopyOptionMode::NONE);
     EXPECT_EQ(system_clipboard().ReadHTML(url, fragment_start, fragment_end),
               "second");
     EXPECT_EQ(url, KURL("http://second.com"));
@@ -133,7 +133,7 @@ TEST_F(SystemClipboardTest, ReadHtml_SameFragmentArgs) {
   const String kHtmlText = "first";
 
   // Setting text in the host is visible in system.
-  clipboard_host()->WriteHtml(kHtmlText, KURL("http://first.com"));
+  clipboard_host()->WriteHtml(kHtmlText, KURL("http://first.com"), ::blink::mojom::CopyOptionMode::NONE);
 
   EXPECT_EQ(system_clipboard().ReadHTML(url, fragment_start, fragment_end),
             kHtmlText);
@@ -203,7 +203,7 @@ TEST_F(SystemClipboardTest, Png) {
       SkImageInfo::Make(400, 300, kN32_SkColorType, kOpaque_SkAlphaType), 0));
 
   // Setting image in the host is visible in system.
-  clipboard_host()->WriteImage(bitmap1);
+  clipboard_host()->WriteImage(bitmap1, ::blink::mojom::CopyOptionMode::NONE);
   clipboard_host()->CommitWrite();
 
   SkBitmap bitmap;
@@ -217,14 +217,14 @@ TEST_F(SystemClipboardTest, Png) {
   {
     ScopedSystemClipboardSnapshot snapshot(system_clipboard());
 
-    clipboard_host()->WriteImage(bitmap2);
+    clipboard_host()->WriteImage(bitmap2, ::blink::mojom::CopyOptionMode::NONE);
     clipboard_host()->CommitWrite();
     png = system_clipboard().ReadPng(buf);
     ASSERT_TRUE(gfx::PNGCodec::Decode(png.data(), png.size(), &bitmap));
     EXPECT_EQ(bitmap.width(), 40);
     EXPECT_EQ(bitmap.height(), 30);
 
-    clipboard_host()->WriteImage(bitmap3);
+    clipboard_host()->WriteImage(bitmap3, ::blink::mojom::CopyOptionMode::NONE);
     clipboard_host()->CommitWrite();
     png = system_clipboard().ReadPng(buf);
     ASSERT_TRUE(gfx::PNGCodec::Decode(png.data(), png.size(), &bitmap));
@@ -297,7 +297,7 @@ TEST_F(SystemClipboardTest, SnapshotNesting) {
   EXPECT_EQ(system_clipboard().ReadPlainText(), "");
 
   // Setting text in the host is visible in system.
-  clipboard_host()->WriteText("first");
+  clipboard_host()->WriteText("first", ::blink::mojom::CopyOptionMode::NONE);
   EXPECT_EQ(system_clipboard().ReadPlainText(), "first");
 
   // Inside a snapshot scope, the first read from the system clipboard
@@ -305,23 +305,23 @@ TEST_F(SystemClipboardTest, SnapshotNesting) {
   {
     ScopedSystemClipboardSnapshot snapshot(system_clipboard());
 
-    clipboard_host()->WriteText("second");
+    clipboard_host()->WriteText("second", ::blink::mojom::CopyOptionMode::NONE);
     EXPECT_EQ(system_clipboard().ReadPlainText(), "second");
 
-    clipboard_host()->WriteText("third");
+    clipboard_host()->WriteText("third", ::blink::mojom::CopyOptionMode::NONE);
     EXPECT_EQ(system_clipboard().ReadPlainText(), "second");
 
     // Nest another snapshot.  Things should remain stable.
     {
       ScopedSystemClipboardSnapshot snapshot2(system_clipboard());
 
-      clipboard_host()->WriteText("fourth");
+      clipboard_host()->WriteText("fourth", ::blink::mojom::CopyOptionMode::NONE);
       EXPECT_EQ(system_clipboard().ReadPlainText(), "second");
     }
 
     // When second snapshot closes, the original one should still be be in
     // effect.
-    clipboard_host()->WriteText("fifth");
+    clipboard_host()->WriteText("fifth", ::blink::mojom::CopyOptionMode::NONE);
     EXPECT_EQ(system_clipboard().ReadPlainText(), "second");
   }
 

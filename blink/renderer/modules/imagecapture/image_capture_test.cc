@@ -124,7 +124,7 @@ struct ConstrainWithDictionaryTraits<Vector<String>> {
 
 template <typename T>
 using ConstrainWithDictionaryType =
-    ConstrainWithDictionaryTraits<T>::DictionaryType;
+    typename ConstrainWithDictionaryTraits<T>::DictionaryType;
 
 // The `ConstrainDOMStringParameters` dictionary type has `exact` and `ideal`
 // members of type `(DOMString or sequence<DOMString>)`.

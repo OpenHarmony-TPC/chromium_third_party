@@ -608,6 +608,7 @@ class TestWidgetInputHandlerHost : public mojom::blink::WidgetInputHandlerHost {
   void RequestMouseLock(bool from_user_gesture,
                         bool unadjusted_movement,
                         RequestMouseLockCallback callback) override;
+  void DidNativeEmbedEvent(mojom::blink::EmbedTouchEventPtr event) override {}
 
  private:
   mojo::Receiver<mojom::blink::WidgetInputHandlerHost> receiver_{this};

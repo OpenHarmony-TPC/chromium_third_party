@@ -170,6 +170,12 @@ class FakeInterfaceFactory : public media::mojom::InterfaceFactory {
           client_extension_remote) override {}
 #endif  // BUILDFLAG(IS_WIN)
 
+#if BUILDFLAG(IS_OHOS)
+void CreateMediaPlayerRenderer(::mojo::PendingRemote<::media::mojom::MediaPlayerRendererClientExtension> client_extension,
+::mojo::PendingReceiver<::media::mojom::Renderer> renderer,
+::mojo::PendingReceiver<::media::mojom::MediaPlayerRendererExtension> renderer_extension) override {}
+#endif  // BUILDFLAG(IS_OHOS)
+
  private:
   FakeMojoMediaClient mojo_media_client_;
   media::MojoCdmServiceContext cdm_service_context_;
