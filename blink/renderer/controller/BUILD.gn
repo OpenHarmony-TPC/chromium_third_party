@@ -189,6 +189,12 @@ test("blink_unittests") {
       "//build/config/fuchsia/test/mark_vmo_executable.shard.test-cml",
     ]
   }
+
+  if (is_ohos) {
+    deps += [
+      "//cef:libcef_static",
+    ]
+  }
 }
 
 test("blink_perf_tests") {

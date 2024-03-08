@@ -292,7 +292,7 @@ TEST_F(WebRtcAudioRendererTest, DISABLED_VerifySinkParameters) {
 #if BUILDFLAG(IS_LINUX) || BUILDFLAG(IS_CHROMEOS) || BUILDFLAG(IS_APPLE) || \
     BUILDFLAG(IS_FUCHSIA)
   static const int kExpectedBufferSize = kHardwareSampleRate / 100;
-#elif BUILDFLAG(IS_ANDROID)
+#elif BUILDFLAG(IS_ANDROID) || BUILDFLAG(IS_OHOS)
   static const int kExpectedBufferSize = 2 * kHardwareSampleRate / 100;
 #elif BUILDFLAG(IS_WIN)
   static const int kExpectedBufferSize = kHardwareBufferSize;

@@ -55,13 +55,14 @@ class MockClipboardHost : public mojom::blink::ClipboardHost {
   void ReadCustomData(mojom::ClipboardBuffer clipboard_buffer,
                       const String& type,
                       ReadCustomDataCallback callback) override;
-  void WriteText(const String& text) override;
-  void WriteHtml(const String& markup, const KURL& url) override;
+  void WriteText(const ::WTF::String& text, ::blink::mojom::blink::CopyOptionMode copy_option) override;
+  void WriteHtml(const ::WTF::String& markup, const ::blink::KURL& url, ::blink::mojom::blink::CopyOptionMode copy_option) override;
   void WriteSvg(const String& markup) override;
-  void WriteSmartPasteMarker() override;
+  void WriteSmartPasteMarker(::blink::mojom::blink::CopyOptionMode copy_option) override;
   void WriteCustomData(const HashMap<String, String>& data) override;
-  void WriteBookmark(const String& url, const String& title) override;
-  void WriteImage(const SkBitmap& bitmap) override;
+  void WriteBookmark(const WTF::String& url, const ::WTF::String& title, ::blink::mojom::blink::CopyOptionMode copy_option) override;
+  void WriteImage(const ::SkBitmap& image,
+                  ::blink::mojom::blink::CopyOptionMode copy_option) override;
   void CommitWrite() override;
   void ReadAvailableCustomAndStandardFormats(
       ReadAvailableCustomAndStandardFormatsCallback callback) override;

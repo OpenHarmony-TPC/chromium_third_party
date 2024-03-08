@@ -141,13 +141,13 @@ void MockClipboardHost::ReadCustomData(mojom::ClipboardBuffer clipboard_buffer,
                                                    : g_empty_string);
 }
 
-void MockClipboardHost::WriteText(const String& text) {
+void MockClipboardHost::WriteText(const String& text, ::blink::mojom::blink::CopyOptionMode copy_option) {
   if (needs_reset_)
     Reset();
   plain_text_ = text;
 }
 
-void MockClipboardHost::WriteHtml(const String& markup, const KURL& url) {
+void MockClipboardHost::WriteHtml(const String& markup, const ::blink::KURL& url, ::blink::mojom::blink::CopyOptionMode copy_option) {
   if (needs_reset_)
     Reset();
   html_text_ = markup;
@@ -160,7 +160,7 @@ void MockClipboardHost::WriteSvg(const String& markup) {
   svg_text_ = markup;
 }
 
-void MockClipboardHost::WriteSmartPasteMarker() {
+void MockClipboardHost::WriteSmartPasteMarker(::blink::mojom::blink::CopyOptionMode copy_option) {
   if (needs_reset_)
     Reset();
   write_smart_paste_ = true;
@@ -173,9 +173,10 @@ void MockClipboardHost::WriteCustomData(const HashMap<String, String>& data) {
     custom_data_.Set(it.key, it.value);
 }
 
-void MockClipboardHost::WriteBookmark(const String& url, const String& title) {}
+void MockClipboardHost::WriteBookmark(const WTF::String& url, const ::WTF::String& title,
+                                      ::blink::mojom::blink::CopyOptionMode copy_option) {}
 
-void MockClipboardHost::WriteImage(const SkBitmap& bitmap) {
+void MockClipboardHost::WriteImage(const SkBitmap& bitmap, ::blink::mojom::blink::CopyOptionMode copy_option) {
   if (needs_reset_)
     Reset();
   SkPixmap pixmap;

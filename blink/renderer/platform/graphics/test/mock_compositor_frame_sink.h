@@ -69,7 +69,8 @@ class MockCompositorFrameSink : public viz::mojom::blink::CompositorFrameSink {
   MOCK_METHOD1(BindLayerContext,
                void(viz::mojom::blink::PendingLayerContextPtr));
   MOCK_METHOD1(SetThreadIds, void(const WTF::Vector<int32_t>&));
-
+  void ReportKeyThreadIds(const WTF::Vector<int32_t>& thread_ids,
+                         int32_t process_id, bool is_created) override {}
  private:
   mojo::Receiver<viz::mojom::blink::CompositorFrameSink> receiver_{this};
 };
