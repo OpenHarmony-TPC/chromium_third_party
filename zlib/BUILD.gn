@@ -522,6 +522,7 @@ if (build_with_chromium) {
     }
 
     deps = [
+      ":minizip",
       ":zlib",
       "google:compression_utils",
       "google:zip",
