@@ -49,7 +49,9 @@ class FakeLocalFrameHost : public mojom::blink::LocalFrameHost {
   void DidChangeThemeColor(absl::optional<::SkColor> theme_color) override;
   void DidChangeBackgroundColor(const SkColor4f& background_color,
                                 bool color_adjust) override;
+#ifdef OHOS_EX_FREE_COPY
   void NotifyContextMenuWillShow() override {}
+#endif
   void DidFailLoadWithError(const ::blink::KURL& url,
                             int32_t error_code) override;
   void DidFocusFrame() override;
