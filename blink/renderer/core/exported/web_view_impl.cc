@@ -197,6 +197,7 @@
 
 #if defined(OHOS_VIEWPORT)
 #include "base/ohos/sys_info_utils.h"
+#include "content/public/common/content_switches.h"
 #endif
 
 // Get rid of WTF's pow define so we can use std::pow.
@@ -1707,7 +1708,8 @@ void WebView::ApplyWebPreferences(const web_pref::WebPreferences& prefs,
 #endif  // defined(OHOS_CLIPBOARD)
 
 #if defined(OHOS_VIEWPORT) || defined(OHOS_MEDIA)
-  bool is_2in1_device = base::ohos::IsPcDevice();
+  bool is_2in1_device = base::CommandLine::ForCurrentProcess()
+      ->HasSwitch(::switches::kWebViewImplForLargeScreen);
 #endif  // defined(OHOS_VIEWPORT) || defined(OHOS_MEDIA)
 
   // Needs to happen before SetDefaultPageScaleLimits below since that'll
