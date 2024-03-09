@@ -114,13 +114,16 @@ class CORE_EXPORT HTMLNativeElement
 
   WebNativeBridge* GetWebNativeBridge() { return web_native_bridge_.get(); }
 
+  int GetNativeEmbedId();
+
   // WebNativeClient implementation.
   void OnCreateNativeSurface(int native_embed_id) final;
+  void OnLayerRectChange(const gfx::Rect& rect) final;
   void OnDestroyNativeSurface() final;
   void Repaint() final;
-  void SizeChanged(const gfx::Size& size) final;
   void SetCcLayer(cc::Layer*) final;
-  int GetNativeEmbedId();
+  gfx::Rect OwnerBoundingRect() final;
+
  protected:
   // Assert the correct order of the children in shadow dom when DCHECK is on.
   static void AssertShadowRootChildren(ShadowRoot&);
@@ -227,6 +230,8 @@ class CORE_EXPORT HTMLNativeElement
   Member<MediaError> error_;
 
   cc::Layer* cc_layer_;
+
+   gfx::Rect paint_rect_;
 
   typedef unsigned PendingActionFlags;
   PendingActionFlags pending_action_flags_;

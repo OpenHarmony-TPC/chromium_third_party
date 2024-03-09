@@ -40,7 +40,6 @@
 #include "third_party/blink/public/platform/media/video_frame_compositor.h"
 #include "third_party/blink/public/platform/web_native_client.h"
 #include "third_party/blink/public/web/web_local_frame.h"
-#include "ui/gfx/geometry/size.h"
 
 namespace blink {
 
@@ -102,7 +101,7 @@ WebNativeBridgeImpl::WebNativeBridgeImpl(
 WebNativeBridgeImpl::~WebNativeBridgeImpl() {
   DVLOG(1) << __func__;
   DCHECK(main_task_runner_->BelongsToCurrentThread());
-  texture_size_changed_cb_.Reset();
+  layer_rect_changed_cb_.Reset();
 
   // delegate_->PlayerGone(delegate_id_);
   delegate_->RemoveObserver(delegate_id_);
@@ -118,8 +117,9 @@ WebNativeBridgeImpl::~WebNativeBridgeImpl() {
   // Destruct compositor resources in the proper order.
   client_->SetCcLayer(nullptr);
 
-  if (video_layer_)
+  if (video_layer_) {
     video_layer_->StopUsingProvider();
+  }
 
   // Handle destruction of things that need to be destructed after the pipeline
   // completes stopping on the media thread.
@@ -169,12 +169,15 @@ void WebNativeBridgeImpl::OnFirstFrame(base::TimeTicks frame_time) {
   }
 }
 
-void WebNativeBridgeImpl::OnSurfaceCreated(
-    media::TextureSizeChangedCB texture_size_changed_cb,
-    int native_embed_id) {
+void WebNativeBridgeImpl::OnSurfaceCreated(media::RectChangedCB rect_changed_cb,
+                                           int native_embed_id) {
   DCHECK(main_task_runner_->BelongsToCurrentThread());
   LOG(INFO) << "[NativeEmbed] WebNativeBridgeImpl::OnSurfaceCreated";
-  texture_size_changed_cb_ = texture_size_changed_cb;
+  layer_rect_changed_cb_ = rect_changed_cb;
+  if (!layer_rect_changed_cb_.is_null()) {
+    layer_rect_changed_cb_.Run(client_->OwnerBoundingRect());
+  }
+
   client_->OnCreateNativeSurface(native_embed_id);
 }
 
@@ -184,25 +187,34 @@ void WebNativeBridgeImpl::OnSurfaceDestroyed() {
   client_->OnDestroyNativeSurface();
 }
 
-void WebNativeBridgeImpl::OnTextureSizeChange(const gfx::Size& size) {
+void WebNativeBridgeImpl::OnLayerRectChange(const gfx::Rect& rect) {
   DCHECK(main_task_runner_->BelongsToCurrentThread());
-  surface_texture_size_ = size;
-  if (!texture_size_changed_cb_.is_null()) {
-    texture_size_changed_cb_.Run(size);
+  if (layer_rect_.ApproximatelyEqual(rect, 1)) {
+    return;
   }
+
+  if (!layer_rect_changed_cb_.is_null() && layer_rect_.size() != rect.size()) {
+    layer_rect_changed_cb_.Run(rect);
+  }
+  client_->OnLayerRectChange(rect);
+
+  layer_rect_ = rect;
 }
 
 gfx::Size WebNativeBridgeImpl::NaturalSize() const {
-  return surface_texture_size_;
+  return layer_rect_.size();
 }
 
 void WebNativeBridgeImpl::OnSetLayer() {
+  LOG(INFO) << "[NativeEmbed] WebNativeBridgeImpl::OnSetLayer";
   DVLOG(1) << __func__;
   DCHECK(main_task_runner_->BelongsToCurrentThread());
   DCHECK(!video_layer_);
+  media::RectChangedCB rect_change_cb = base::BindRepeating(
+      &WebNativeBridgeImpl::OnLayerRectChange, base::Unretained(this));
 
-  video_layer_ =
-      cc::VideoLayer::Create(compositor_.get(), media::kNoTransformation);
+  video_layer_ = cc::VideoLayer::Create(
+      compositor_.get(), media::kNoTransformation, std::move(rect_change_cb));
   client_->SetCcLayer(video_layer_.get());
 }
 
