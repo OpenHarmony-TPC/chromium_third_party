@@ -200,9 +200,15 @@ class SignalHandler {
   static void HandleOrReraiseSignal(int signo,
                                     siginfo_t* siginfo,
                                     void* context) {
+#if defined(OHOS_CRASHPAD)
+    LOG(INFO) << "crashpad SignalHandler::HandleOrReraiseSignal, received signo = " << signo;
+#endif // defined(OHOS_CRASHPAD)
     if (handler_->first_chance_handler_ &&
         handler_->first_chance_handler_(
             signo, siginfo, static_cast<ucontext_t*>(context))) {
+#if defined(OHOS_CRASHPAD)
+      LOG(INFO) << "crashpad SignalHandler::HandleOrReraiseSignal, first_chance_handler_ handled, return, signo = " << signo;
+#endif // defined(OHOS_CRASHPAD)
       return;
     }
 
@@ -297,7 +303,6 @@ class LaunchAtCrashHandler : public SignalHandler {
 
   void HandleCrashImpl() override {
     ScopedPrSetPtracer set_ptracer(sys_getpid(), /* may_log= */ false);
-
     pid_t pid = fork();
     if (pid < 0) {
       return;
@@ -308,13 +313,25 @@ class LaunchAtCrashHandler : public SignalHandler {
                const_cast<char* const*>(argv_.data()),
                const_cast<char* const*>(envp_.data()));
       } else {
+#if defined(OHOS_CRASHPAD)
+        int ret = execv(argv_[0], const_cast<char* const*>(argv_.data()));
+        if (ret != 0 ) {
+          LOG(ERROR) << "crashpad LaunchAtCrashHandler::HandleCrashImpl, child process execv failed, execv bin = " \
+            << argv_[0] << ", errno = " << errno;
+        }
+#else
         execv(argv_[0], const_cast<char* const*>(argv_.data()));
+#endif // defined(OHOS_CRASHPAD)
       }
       _exit(EXIT_FAILURE);
     }
 
     int status;
     waitpid(pid, &status, 0);
+#if defined(OHOS_CRASHPAD)
+    LOG(INFO) << "crashpad LaunchAtCrashHandler::HandleCrashImpl, parent process wait child process exit, status = " \
+      << status << ", child process pid = " << pid;
+#endif // defined(OHOS_CRASHPAD)
   }
 
  private:
@@ -683,7 +700,15 @@ bool CrashpadClient::StartHandlerAtCrash(
   std::vector<std::string> argv = BuildHandlerArgvStrings(
       handler, database, metrics_dir, url, annotations, arguments, attachments);
 
+#if defined(OHOS_CRASHPAD)
+  LOG(INFO) << "crashpad CrashpadClient::StartHandlerAtCrash enter";
+#endif // defined(OHOS_CRASHPAD)
   auto signal_handler = LaunchAtCrashHandler::Get();
+  for (auto sig : unhandled_signals_) {
+#if defined(OHOS_CRASHPAD)
+    LOG(INFO) << "crashpad CrashpadClient::StartHandlerAtCrash, unhandled signals = " << sig;
+#endif // defined(OHOS_CRASHPAD)
+  }
   return signal_handler->Initialize(&argv, nullptr, &unhandled_signals_);
 }
 

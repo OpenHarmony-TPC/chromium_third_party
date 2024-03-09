@@ -27,6 +27,12 @@
 #include "base/memory/page_size.h"
 #include "base/posix/eintr_wrapper.h"
 #include "third_party/lss/lss.h"
+
+#if defined(OHOS_CRASHPAD)
+#include "base/logging.h"
+#include "util/linux/proc_info_ohos.h"
+#endif // defined(OHOS_CRASHPAD)
+
 #include "util/linux/scoped_ptrace_attach.h"
 #include "util/misc/memory_sanitizer.h"
 #include "util/posix/scoped_mmap.h"
@@ -113,7 +119,6 @@ PtraceBroker::PtraceBroker(int sock, pid_t pid, bool is_64_bit)
   static constexpr char kProc[] = "/proc/";
   size_t root_length = strlen(kProc);
   memcpy(file_root_buffer_, kProc, root_length);
-
   if (pid >= 0) {
     root_length += FormatPID(file_root_buffer_ + root_length, pid);
     DCHECK_LT(root_length, sizeof(file_root_buffer_));
@@ -123,6 +128,18 @@ PtraceBroker::PtraceBroker(int sock, pid_t pid, bool is_64_bit)
 
   DCHECK_LT(root_length, sizeof(file_root_buffer_));
   file_root_buffer_[root_length] = '\0';
+
+#if defined(OHOS_CRASHPAD)
+  ProcInfo proc;
+  if (GetProcStatusByPid(pid, proc)) {
+    is_in_pid_ns_ = proc.ns;
+    LOG(INFO) << "crashpad PtraceBroker::PtraceBroker, pid " << pid << ", in pid namespace = " << is_in_pid_ns_;
+  }
+
+  if (is_in_pid_ns_) {
+    (void)GetTidMapByPid(pid, tid_nstid_map_);
+  }
+#endif // defined(OHOS_CRASHPAD)
 }
 
 PtraceBroker::~PtraceBroker() = default;
@@ -143,15 +160,29 @@ int PtraceBroker::RunImpl(AttachmentsArray* attachments) {
   while (true) {
     Request request = {};
     if (!ReadFileExactly(sock_, &request, sizeof(request))) {
+#if defined(OHOS_CRASHPAD)
+      LOG(ERROR) << "crashpad PtraceBroker::RunImpl, read request msg failed, errno = " << errno;
+#endif // defined(OHOS_CRASHPAD)
       return errno;
     }
 
     if (request.version != Request::kVersion) {
+#if defined(OHOS_CRASHPAD)
+      LOG(ERROR) << "crashpad PtraceBroker::RunImpl, read request msg failed, version no match, reqeust version = " \
+        << request.version;
+#endif // defined(OHOS_CRASHPAD)
       return EINVAL;
     }
 
     switch (request.type) {
       case Request::kTypeAttach: {
+#if defined(OHOS_CRASHPAD)
+        pid_t ns_tid = ConvertRealtidToNstid(request.tid);
+        LOG(DEBUG) << "crashpad PtraceBroker::RunImpl, received request msg = kTypeAttach, tid = " \
+          << request.tid << ", convert ns tid = " << ns_tid;
+        request.tid = ns_tid;
+#endif // defined(OHOS_CRASHPAD)
+
         ExceptionHandlerProtocol::Bool status =
             attachments->Attach(request.tid)
                 ? ExceptionHandlerProtocol::kBoolTrue
@@ -167,7 +198,6 @@ int PtraceBroker::RunImpl(AttachmentsArray* attachments) {
             return errno;
           }
         }
-
         continue;
       }
 
@@ -182,6 +212,13 @@ int PtraceBroker::RunImpl(AttachmentsArray* attachments) {
       }
 
       case Request::kTypeGetThreadInfo: {
+#if defined(OHOS_CRASHPAD)
+        pid_t ns_tid = ConvertRealtidToNstid(request.tid);
+        LOG(DEBUG) << "crashpad PtraceBroker::RunImpl, received request msg = kTypeGetThreadInfo, tid = " \
+          << request.tid << ", convert ns tid = " << ns_tid;
+        request.tid = ns_tid;
+#endif // defined(OHOS_CRASHPAD)
+
         GetThreadInfoResponse response;
         response.success = ptracer_.GetThreadInfo(request.tid, &response.info)
                                ? ExceptionHandlerProtocol::kBoolTrue
@@ -201,15 +238,27 @@ int PtraceBroker::RunImpl(AttachmentsArray* attachments) {
       }
 
       case Request::kTypeReadFile: {
+#if defined(OHOS_CRASHPAD)
+        LOG(DEBUG) << "crashpad PtraceBroker::RunImpl, received request msg = kTypeReadFile, tid = " \
+          << request.tid;
+#endif // defined(OHOS_CRASHPAD)
         ScopedFileHandle handle;
         int result = ReceiveAndOpenFilePath(request.path.path_length,
                                             /* is_directory= */ false,
                                             &handle);
         if (result != 0) {
+#if defined(OHOS_CRASHPAD)
+        LOG(ERROR) << "crashpad PtraceBroker::RunImpl, received request msg = kTypeReadFile, tid = " \
+          << request.tid << ", received file path failed, errno = " << errno;
+#endif // defined(OHOS_CRASHPAD)
           return result;
         }
 
         if (!handle.is_valid()) {
+#if defined(OHOS_CRASHPAD)
+        LOG(WARNING) << "crashpad PtraceBroker::RunImpl, received request msg = kTypeReadFile, tid = " \
+          << request.tid << ", received file path failed, file handle is invalid, errno = " << errno;
+#endif // defined(OHOS_CRASHPAD)
           continue;
         }
 
@@ -325,7 +374,13 @@ int PtraceBroker::SendMemory(pid_t pid, VMAddress address, VMSize size) {
     return SendReadError(kReadErrorAccessDenied);
   }
 
+#if defined(OHOS_CRASHPAD)
+  // todo: use TryOpeningMemFile when pread bugfix.
+  pid = ConvertRealtidToNstid(pid);
+#else
   TryOpeningMemFile();
+#endif // defined(OHOS_CRASHPAD)
+
   auto read_memory = [this, pid](VMAddress address, size_t size, char* buffer) {
     return this->memory_file_.is_valid()
                ? HANDLE_EINTR(
@@ -393,7 +448,6 @@ int PtraceBroker::ReceiveAndOpenFilePath(VMSize path_length,
                                          bool is_directory,
                                          ScopedFileHandle* handle) {
   char path[std::max(4096, PATH_MAX)];
-
   if (path_length >= sizeof(path)) {
     return SendOpenResult(kOpenResultTooLong);
   }
@@ -419,5 +473,30 @@ int PtraceBroker::ReceiveAndOpenFilePath(VMSize path_length,
   handle->reset(local_handle.release());
   return SendOpenResult(kOpenResultSuccess);
 }
+
+#if defined(OHOS_CRASHPAD)
+int PtraceBroker::ConvertRealtidToNstid(int real_tid) {
+  if (is_in_pid_ns_) {
+    auto it = tid_nstid_map_.find(real_tid);
+    if (it != tid_nstid_map_.end()) {
+      return it->second;
+    }
+  }
+
+  return real_tid;
+}
+
+int PtraceBroker::ConvertNstidToRealtid(int ns_tid) {
+  if (is_in_pid_ns_) {
+    for (auto it : tid_nstid_map_) {
+      if (ns_tid == it.second) {
+        return it.first;
+      }
+    }
+  }
+
+  return ns_tid;
+}
+#endif // defined(OHOS_CRASHPAD)
 
 }  // namespace crashpad

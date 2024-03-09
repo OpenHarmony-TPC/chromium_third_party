@@ -38,6 +38,8 @@ ProcessMemoryLinux::ProcessMemoryLinux(PtraceConnection* connection)
   }
 #endif  // ARCH_CPU_ARM_FAMILY
 
+#if !defined(OHOS_CRASHPAD)
+  // todo: need to revert this when hm kernel pread bugfix
   char path[32];
   snprintf(path, sizeof(path), "/proc/%d/mem", connection->GetProcessID());
   mem_fd_.reset(HANDLE_EINTR(open(path, O_RDONLY | O_NOCTTY | O_CLOEXEC)));
@@ -52,6 +54,7 @@ ProcessMemoryLinux::ProcessMemoryLinux(PtraceConnection* connection)
     };
     return;
   }
+#endif // !defined(OHOS_CRASHPAD)
 
   read_up_to_ = std::bind(&PtraceConnection::ReadUpTo,
                           connection,

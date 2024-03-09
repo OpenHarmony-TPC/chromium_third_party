@@ -218,6 +218,11 @@ bool SpawnSubprocess(const std::vector<std::string>& argv,
                                 attr_p,
                                 argv_for_spawn,
                                 envp_for_spawn)) != 0) {
+#if defined(OHOS_CRASHPAD)
+      std::string use_func = use_path ? "posix_spawnp" : "posix_spawn";
+      LOG(ERROR) << "crashpad posix spawn child process failed, errno = " \
+        << errno << ", use posix function = " << use_func;
+#endif // defined(OHOS_CRASHPAD)
       PLOG(FATAL) << (use_path ? "posix_spawnp" : "posix_spawn");
     }
 
@@ -255,6 +260,9 @@ bool SpawnSubprocess(const std::vector<std::string>& argv,
                  << WEXITSTATUS(status);
   }
 
+#if defined(OHOS_CRASHPAD)
+  LOG(INFO) << "crashpad wait child process exit, child process pid = " << pid << ", status = " << status;
+#endif // defined(OHOS_CRASHPAD)
   return true;
 }
 

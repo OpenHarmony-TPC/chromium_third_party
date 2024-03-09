@@ -475,6 +475,13 @@ crashpad_static_library("util") {
     ]
   }
 
+  if (ohos_crashpad) {
+    sources += [
+      "linux/proc_info_ohos.cc",
+      "linux/proc_info_ohos.h",
+    ]
+  }
+
   if (crashpad_is_win) {
     sources += [
       "file/directory_reader_win.cc",

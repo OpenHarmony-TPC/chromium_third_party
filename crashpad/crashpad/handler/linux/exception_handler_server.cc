@@ -416,6 +416,10 @@ bool ExceptionHandlerServer::ReceiveClientMessage(Event* event) {
   ucred creds;
   if (!UnixCredentialSocket::RecvMsg(
           event->fd.get(), &message, sizeof(message), &creds)) {
+#if defined(OHOS_CRASHPAD)
+    LOG(WARNING) << "crashpad ExceptionHandlerServer::ReceiveClientMessage, received message failed, errno = "
+      << errno << ", event fd = " << event->fd.get();
+#endif
     return false;
   }
 
@@ -424,12 +428,25 @@ bool ExceptionHandlerServer::ReceiveClientMessage(Event* event) {
       return SendCredentials(event->fd.get());
 
     case ExceptionHandlerProtocol::ClientToServerMessage::kTypeCrashDumpRequest:
+#if defined(OHOS_CRASHPAD)
+      {
+        LOG(INFO) << "crashpad ExceptionHandlerServer::ReceiveClientMessage, message type = kTypeCrashDumpRequest";
+        return HandleCrashDumpRequest(
+            creds,
+            message.client_info,
+            message.requesting_thread_stack_address,
+            event->fd.get(),
+            event->type == Event::Type::kSharedSocketMessage,
+            message.real_pid);
+      }
+#else
       return HandleCrashDumpRequest(
           creds,
           message.client_info,
           message.requesting_thread_stack_address,
           event->fd.get(),
           event->type == Event::Type::kSharedSocketMessage);
+#endif // defined(OHOS_CRASHPAD)
   }
 
   DCHECK(false);
@@ -437,25 +454,54 @@ bool ExceptionHandlerServer::ReceiveClientMessage(Event* event) {
   return false;
 }
 
+#if defined(OHOS_CRASHPAD)
+bool ExceptionHandlerServer::HandleCrashDumpRequest(
+    const ucred& creds,
+    const ExceptionHandlerProtocol::ClientInformation& client_info,
+    VMAddress requesting_thread_stack_address,
+    int client_sock,
+    bool multiple_clients,
+    pid_t real_pid) {
+#else
 bool ExceptionHandlerServer::HandleCrashDumpRequest(
     const ucred& creds,
     const ExceptionHandlerProtocol::ClientInformation& client_info,
     VMAddress requesting_thread_stack_address,
     int client_sock,
     bool multiple_clients) {
+#endif // defined(OHOS_CRASHPAD)
+
+#if defined(OHOS_CRASHPAD)
+  pid_t client_process_id = real_pid;
+#else
   pid_t client_process_id = creds.pid;
+#endif // defined(OHOS_CRASHPAD)
+
   pid_t requesting_thread_id = -1;
   uid_t client_uid = creds.uid;
+
+#if defined(OHOS_CRASHPAD)
+  LOG(INFO) << "crashpad ExceptionHandlerServer::HandleCrashDumpRequest, client process id = " \
+    << client_process_id << ", client uid = " << client_uid << ", multi client = " << multiple_clients;
+#endif // defined(OHOS_CRASHPAD)
 
   switch (
       strategy_decider_->ChooseStrategy(client_sock, multiple_clients, creds)) {
     case PtraceStrategyDecider::Strategy::kError:
+#if defined(OHOS_CRASHPAD)
+      LOG(INFO) << "crashpad ExceptionHandlerServer::HandleCrashDumpRequest \
+        PtraceStrategyDecider::Strategy::kError";
+#endif // defined(OHOS_CRASHPAD)
       if (multiple_clients) {
         SendSIGCONT(client_process_id, requesting_thread_id);
       }
       return false;
 
     case PtraceStrategyDecider::Strategy::kNoPtrace:
+#if defined(OHOS_CRASHPAD)
+      LOG(INFO) << "crashpad ExceptionHandlerServer::HandleCrashDumpRequest" \
+        " PtraceStrategyDecider::Strategy::kNoPtrace";
+#endif // defined(OHOS_CRASHPAD)
       if (multiple_clients) {
         SendSIGCONT(client_process_id, requesting_thread_id);
         return true;
@@ -466,6 +512,10 @@ bool ExceptionHandlerServer::HandleCrashDumpRequest(
               kTypeCrashDumpFailed);
 
     case PtraceStrategyDecider::Strategy::kDirectPtrace: {
+#if defined(OHOS_CRASHPAD)
+      LOG(INFO) << "crashpad ExceptionHandlerServer::HandleCrashDumpRequest" \
+        " PtraceStrategyDecider::Strategy::kDirectPtrace";
+#endif // defined(OHOS_CRASHPAD)
       delegate_->HandleException(client_process_id,
                                  client_uid,
                                  client_info,
@@ -479,6 +529,10 @@ bool ExceptionHandlerServer::HandleCrashDumpRequest(
     }
 
     case PtraceStrategyDecider::Strategy::kUseBroker:
+#if defined(OHOS_CRASHPAD)
+      LOG(INFO) << "crashpad ExceptionHandlerServer::HandleCrashDumpRequest" \
+        " PtraceStrategyDecider::Strategy::kUseBroker";
+#endif // defined(OHOS_CRASHPAD)
       DCHECK(!multiple_clients);
       delegate_->HandleExceptionWithBroker(
           client_process_id, client_uid, client_info, client_sock);

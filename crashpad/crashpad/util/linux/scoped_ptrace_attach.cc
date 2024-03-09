@@ -17,6 +17,11 @@
 #include <sys/ptrace.h>
 #include <sys/wait.h>
 
+#if defined(OHOS_CRASHPAD)
+// todo: need to delete this, when HM kernel fix ptrace PTRACE_ATTACH
+#include <unistd.h>
+#endif // defined(OHOS_CRASHPAD)
+
 #include "base/logging.h"
 #include "base/posix/eintr_wrapper.h"
 
@@ -37,6 +42,12 @@ bool PtraceAttach(pid_t pid, bool can_log) {
     LOG_IF(ERROR, can_log) << "process not stopped";
     return false;
   }
+
+#if defined(OHOS_CRASHPAD)
+  // todo: need to delete this, when HM kernel fix ptrace PTRACE_ATTACH
+  usleep(1000);
+#endif // defined(OHOS_CRASHPAD)
+
   return true;
 }
 
