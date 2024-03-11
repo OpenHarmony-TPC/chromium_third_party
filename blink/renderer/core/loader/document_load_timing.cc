@@ -253,6 +253,8 @@ void DocumentLoadTiming::SetResponseEnd(base::TimeTicks response_end) {
 
 void DocumentLoadTiming::MarkLoadEventStart() {
   load_event_start_ = tick_clock_->NowTicks();
+  TRACE_EVENT1("navigation", "PAGE_LOAD_TIME",
+               "loadEventStart", load_event_start_);
   TRACE_EVENT_MARK_WITH_TIMESTAMP1("blink.user_timing", "loadEventStart",
                                    load_event_start_, "frame",
                                    GetFrameIdForTracing(GetFrame()));
@@ -261,6 +263,8 @@ void DocumentLoadTiming::MarkLoadEventStart() {
 
 void DocumentLoadTiming::MarkLoadEventEnd() {
   load_event_end_ = tick_clock_->NowTicks();
+  TRACE_EVENT1("navigation", "PAGE_LOAD_TIME",
+               "loadEventEnd", load_event_end_);
   TRACE_EVENT_MARK_WITH_TIMESTAMP1("blink.user_timing", "loadEventEnd",
                                    load_event_end_, "frame",
                                    GetFrameIdForTracing(GetFrame()));
