@@ -204,7 +204,10 @@ class PtraceBroker {
   int ReceiveAndOpenFilePath(VMSize path_length,
                              bool is_directory,
                              ScopedFileHandle* handle);
-
+#if defined(OHOS_CRASHPAD)
+  int ConvertRealtidToNstid(int real_tid);
+  int ConvertNstidToRealtid(int ns_tid);
+#endif // defined(OHOS_CRASHPAD)
   char file_root_buffer_[32];
   Ptracer ptracer_;
   const char* file_root_;
@@ -212,6 +215,11 @@ class PtraceBroker {
   int sock_;
   pid_t memory_pid_;
   bool tried_opening_mem_file_;
+
+#if defined(OHOS_CRASHPAD)
+  bool is_in_pid_ns_ = false;
+  std::unordered_map<int, int> tid_nstid_map_;
+#endif // defined(OHOS_CRASHPAD)
 };
 
 }  // namespace crashpad

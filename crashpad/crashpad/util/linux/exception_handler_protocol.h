@@ -93,6 +93,11 @@ class ExceptionHandlerProtocol {
       //! \brief Valid for type == kCrashDumpRequest
       ClientInformation client_info;
     };
+
+#if defined(OHOS_CRASHPAD)
+    // todo: need to delete this when hm kernel fix it
+    pid_t real_pid = -1;
+#endif // defined(OHOS_CRASHPAD)
   };
 
   //! \brief The message passed from server to client.

@@ -258,6 +258,10 @@ bool GetThreadArea64(pid_t tid,
                      const ThreadContext& context,
                      LinuxVMAddress* address,
                      bool can_log) {
+#if defined(OHOS_CRASHPAD)
+  // todo: don't support NT_ARM_TLS option
+  return true;
+#else
   iovec iov;
   iov.iov_base = address;
   iov.iov_len = sizeof(*address);
@@ -272,6 +276,7 @@ bool GetThreadArea64(pid_t tid,
     return false;
   }
   return true;
+#endif // defined(OHOS_CRASHPAD)
 }
 #elif defined(ARCH_CPU_MIPS_FAMILY)
 // PTRACE_GETREGSET, introduced in Linux 2.6.34 (2225a122ae26), requires kernel
