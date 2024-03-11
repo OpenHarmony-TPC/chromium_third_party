@@ -532,9 +532,8 @@ cc::LayerTreeSettings GenerateLayerTreeSettings(
   if (base::CommandLine::ForCurrentProcess()->HasSwitch(
           ::switches::kForBrowser) &&
       !base::SysInfo::IsLowEndDevice()) {
-    bool excludable_devices =
-      base::ohos::IsTabletDevice() || base::ohos::IsPcDevice();
-
+    bool excludable_devices = base::CommandLine::ForCurrentProcess()
+      ->HasSwitch(::switches::kEnableDeleteUnusedResourcesDelay);
     settings.enable_delete_unused_resources_delay = !excludable_devices;
   }
 #endif
