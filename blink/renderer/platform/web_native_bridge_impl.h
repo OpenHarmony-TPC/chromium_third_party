@@ -45,7 +45,7 @@ class VideoLayer;
 }
 
 namespace gfx {
-class Size;
+class Rect;
 }
 
 namespace blink {
@@ -73,7 +73,7 @@ class BLINK_PLATFORM_EXPORT WebNativeBridgeImpl
   ~WebNativeBridgeImpl() override;
 
   void StartPipeline() override;
-  void OnTextureSizeChange(const gfx::Size& size) override;
+  void OnLayerRectChange(const gfx::Rect& rect) override;
   int GetDelegateId() override { return delegate_id_; }
   gfx::Size NaturalSize() const override;
 
@@ -83,7 +83,7 @@ class BLINK_PLATFORM_EXPORT WebNativeBridgeImpl
   std::unique_ptr<media::Renderer> CreateRenderer(
       absl::optional<media::RendererType> renderer_type);
 
-  void OnSurfaceCreated(media::TextureSizeChangedCB texture_size_changed_cb,
+  void OnSurfaceCreated(media::RectChangedCB rect_changed_cb,
                         int native_embed_id);
 
   void OnSurfaceDestroyed();
@@ -108,7 +108,7 @@ class BLINK_PLATFORM_EXPORT WebNativeBridgeImpl
   // |pipeline_controller_| owns an instance of Pipeline.
   std::unique_ptr<media::NativePipelineController> native_pipeline_controller_;
 
-  media::TextureSizeChangedCB texture_size_changed_cb_;
+  media::RectChangedCB layer_rect_changed_cb_;
 
   WebNativeClient* const client_;
 
@@ -129,7 +129,7 @@ class BLINK_PLATFORM_EXPORT WebNativeBridgeImpl
   // playback.
   scoped_refptr<cc::VideoLayer> video_layer_;
 
-  gfx::Size surface_texture_size_;
+  gfx::Rect layer_rect_;
 
   base::WeakPtr<WebNativeBridgeImpl> weak_this_;
   base::WeakPtrFactory<WebNativeBridgeImpl> weak_factory_{this};

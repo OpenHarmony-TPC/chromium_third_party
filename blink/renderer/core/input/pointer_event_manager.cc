@@ -516,6 +516,7 @@ void PointerEventManager::DidNativeEmbedEvent(
       is_last_native_type_ = true;
       last_point_type_ = web_pointer_event.GetType();
       offset_ = hit_test_result.GetLocalPoint();
+      offset_.Scale(frame->View() ? frame->View()->InputEventsScaleFactor() : 1.0f);
       frame_->Client()->DidNativeEmbedEvent(web_pointer_event, embed_id_, offset_, false);
     }
     return;

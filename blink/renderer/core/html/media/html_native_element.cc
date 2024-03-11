@@ -434,7 +434,6 @@ LocalFrame* HTMLNativeElement::LocalFrameForNative() {
 }
 
 void HTMLNativeElement::LoadForWebNative(LocalFrame* frame) {
-  LOG(INFO) << "[NativeEmbed] HTMLNativeElement::LoadForWebNative";
   web_native_bridge_ = frame->Client()->CreateWebNativeBridge(*this, this);
   if (!web_native_bridge_) {
     return;
@@ -498,18 +497,31 @@ void HTMLNativeElement::UpdateLayoutObject() {
   }
 }
 
-void HTMLNativeElement::OnCreateNativeSurface(int native_embed_id) {
-  auto bounding_size = PixelSnappedBoundingBox().size();
-  if (auto* layout_view = GetDocument().GetLayoutView()) {
-    bounding_size = layout_view->GetLayoutSize();
+gfx::Rect HTMLNativeElement::OwnerBoundingRect() {
+  if (paint_rect_.IsEmpty()) {
+    if (auto* owner_element = GetDocument().LocalOwner()) {
+      paint_rect_ = owner_element->PixelSnappedBoundingBox();
+    }
+
+    auto* frame = LocalFrameForNative();
+    if (frame && frame->View()) {
+      paint_rect_ = gfx::ScaleToEnclosingRect(
+          paint_rect_, frame->View()->InputEventsScaleFactor());
+    }
   }
+
+  return paint_rect_;
+}
+
+void HTMLNativeElement::OnCreateNativeSurface(int native_embed_id) {
   native_embed_id_ = native_embed_id;
-  bounding_size = gfx::ScaleToFlooredSize(bounding_size,
-                                          1 / GetDocument().DevicePixelRatio());
+  if (!native_bridge_observer_remote_set_) {
+    return;
+  }
 
   auto embed_info = media::mojom::blink::NativeEmbedInfo::New();
   embed_info->embed_id = native_embed_id_;
-  embed_info->size = bounding_size;
+  embed_info->rect = OwnerBoundingRect();
   embed_info->type = GetTypeAttribute().IsNull() ? "" : GetTypeAttribute();
   embed_info->element_id = GetIdAttribute().IsNull() ? "" : GetIdAttribute();
   embed_info->source = GetSrcAttribute().IsNull() ? "" : GetSrcAttribute();
@@ -523,14 +535,31 @@ void HTMLNativeElement::OnCreateNativeSurface(int native_embed_id) {
     // here.
     observer->OnCreateNativeSurface(std::move(embed_info));
   }
-
-  web_native_bridge_->OnTextureSizeChange(bounding_size);
 }
 
 void HTMLNativeElement::ClearResourceWithoutLocking() {
   if (web_native_bridge_) {
     web_native_bridge_.reset();
     native_bridge_observer_remote_set_->Value().Clear();
+  }
+}
+
+void HTMLNativeElement::OnLayerRectChange(const gfx::Rect& rect) {
+  if (paint_rect_.ApproximatelyEqual(rect, 1)) {
+    return;
+  }
+
+  if (paint_rect_.size() != rect.size()) {
+    ScheduleEvent(event_type_names::kResize);
+  }
+  paint_rect_ = rect;
+
+  if (!native_bridge_observer_remote_set_) {
+    return;
+  }
+
+  for (auto& observer : native_bridge_observer_remote_set_->Value()) {
+    observer->OnEmbedRectChange(paint_rect_);
   }
 }
 
@@ -552,22 +581,6 @@ void HTMLNativeElement::Repaint() {
   UpdateLayoutObject();
   if (GetLayoutObject()) {
     GetLayoutObject()->SetShouldDoFullPaintInvalidation();
-  }
-}
-
-void HTMLNativeElement::SizeChanged(const gfx::Size& size) {
-  ScheduleEvent(event_type_names::kResize);
-  LOG(INFO) << "[NativeEmbed] HTMLNativeElement::SizeChanged size "
-            << size.ToString();
-  if (web_native_bridge_) {
-    auto bounding_size =
-        gfx::ScaleToFlooredSize(size, 1 / GetDocument().DevicePixelRatio());
-    web_native_bridge_->OnTextureSizeChange(bounding_size);
-    UpdateLayoutObject();
-
-    for (auto& observer : native_bridge_observer_remote_set_->Value()) {
-      observer->OnEmbedSizeChange(bounding_size);
-    }
   }
 }
 

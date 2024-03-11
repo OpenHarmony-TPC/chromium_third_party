@@ -17,7 +17,7 @@
 #define THIRD_PARTY_BLINK_PUBLIC_PLATFORM_WEB_NATIVE_BRIDGE_H_
 
 namespace gfx {
-class Size;
+class Rect;
 }
 
 namespace blink {
@@ -29,7 +29,7 @@ class BLINK_PLATFORM_EXPORT WebNativeBridge {
 
   virtual void StartPipeline() = 0;
 
-  virtual void OnTextureSizeChange(const gfx::Size& size) = 0;
+  virtual void OnLayerRectChange(const gfx::Rect& rect) = 0;
 
   virtual int GetDelegateId() { return -1; }
 

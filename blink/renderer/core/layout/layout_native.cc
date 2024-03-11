@@ -70,8 +70,6 @@ void LayoutNative::UpdateIntrinsicSize(bool is_in_layout) {
     SetNeedsLayoutAndFullPaintInvalidation(
         layout_invalidation_reason::kSizeChanged);
   }
-
-  NativeElement()->SizeChanged(ToRoundedSize(size));
 }
 
 LayoutSize LayoutNative::CalculateIntrinsicSize(float scale) {
