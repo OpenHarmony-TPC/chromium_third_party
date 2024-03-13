@@ -113,6 +113,10 @@
 #include "ui/base/ui_base_features.h"
 #include "ui/gfx/geometry/point_conversions.h"
 
+#if BUILDFLAG(IS_OHOS)
+#include "base/ohos/sys_info_utils.h"
+#endif
+
 namespace blink {
 
 PaintLayerScrollableAreaRareData::PaintLayerScrollableAreaRareData() = default;
@@ -122,6 +126,12 @@ void PaintLayerScrollableAreaRareData::Trace(Visitor* visitor) const {
 }
 
 const int kResizerControlExpandRatioForTouch = 2;
+
+#if BUILDFLAG(IS_OHOS)
+const int kResizerControlReduceRatioForPcOhos = 2;
+const int kResizerControlReduceRatioForOhos = 6;
+const int kMaxScrollbarThicknessForOhos = 20;
+#endif
 
 PaintLayerScrollableArea::PaintLayerScrollableArea(PaintLayer& layer)
     : ScrollableArea(layer.GetLayoutBox()
@@ -327,6 +337,33 @@ gfx::Rect PaintLayerScrollableArea::CornerRect() const {
     vertical_thickness = HorizontalScrollbar()->ScrollbarThickness();
   }
   gfx::Size border_box_size = PixelSnappedBorderBoxSize();
+
+#if BUILDFLAG(IS_OHOS)
+  // Due to the CSS resize property's control icon size being related to the
+  // current element's scrollbar width, on HarmonyOS, the scrollbar width has
+  // been enlarged to 36, causing the resize icon size to appear overly large.
+  // Here, a special ratio treatment is conducted.
+
+  // TODO:If the scrollbar width (kOverlayScrollbarThumbWidthPressed in
+  // overlay_scrollbar_constants_aura.h) changes subsequently, the corresponding
+  // adjustments should also be made here for
+  // kResizerControlReduceRatioForPcOhos and kResizerControlReduceRatioForOhos.
+  if (horizontal_thickness >= kMaxScrollbarThicknessForOhos ||
+      vertical_thickness >= kMaxScrollbarThicknessForOhos) {
+    if (base::ohos::IsPcDevice()) {
+      horizontal_thickness =
+          horizontal_thickness / kResizerControlReduceRatioForPcOhos;
+      vertical_thickness =
+          vertical_thickness / kResizerControlReduceRatioForPcOhos;
+    } else {
+      horizontal_thickness =
+          horizontal_thickness / kResizerControlReduceRatioForOhos;
+      vertical_thickness =
+          vertical_thickness / kResizerControlReduceRatioForOhos;
+    }
+  }
+#endif
+
   return gfx::Rect(CornerStart(*GetLayoutBox(), 0, border_box_size.width(),
                                horizontal_thickness),
                    border_box_size.height() - vertical_thickness -
