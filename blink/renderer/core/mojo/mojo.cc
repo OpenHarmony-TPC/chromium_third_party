@@ -24,6 +24,10 @@
 #include "third_party/blink/renderer/platform/wtf/text/string_utf8_adaptor.h"
 
 namespace blink {
+const char kExtensionsKeepAlive[] = "extensions.KeepAlive";
+const char kExtensionsMimeHandlerMimeHandlerService[] = "extensions.mimeHandler.MimeHandlerService";
+const char kExtensionsMimeHandlerBeforeUnloadControl[] = "extensions.mimeHandler.BeforeUnloadControl";
+
 
 // static
 MojoCreateMessagePipeResult* Mojo::createMessagePipe() {
@@ -104,7 +108,11 @@ void Mojo::bindInterface(ScriptState* script_state,
                          const String& scope,
                          ExceptionState& exception_state) {
 #if BUILDFLAG(IS_OHOS)
-  return;
+  if (interface_name != kExtensionsKeepAlive
+      && interface_name != kExtensionsMimeHandlerMimeHandlerService
+      && interface_name != kExtensionsMimeHandlerBeforeUnloadControl)
+    return;
+
 #else
   std::string name = interface_name.Utf8();
   auto handle =
