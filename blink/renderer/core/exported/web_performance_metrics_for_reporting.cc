@@ -98,8 +98,28 @@ double WebPerformanceMetricsForReporting::InputForNavigationStart() const {
   return MillisecondsToSeconds(private_->timingForReporting()->inputStart());
 }
 
+double WebPerformanceMetricsForReporting::RedirectStart() const {
+  return MillisecondsToSeconds(private_->timing()->redirectStart());
+}
+
+double WebPerformanceMetricsForReporting::RedirectEnd() const {
+  return MillisecondsToSeconds(private_->timing()->redirectEnd());
+}
+
+double WebPerformanceMetricsForReporting::FetchStart() const {
+  return MillisecondsToSeconds(private_->timing()->fetchStart());
+}
+
 double WebPerformanceMetricsForReporting::ResponseStart() const {
   return MillisecondsToSeconds(private_->timing()->responseStart());
+}
+
+double WebPerformanceMetricsForReporting::ResponseEnd() const {
+  return MillisecondsToSeconds(private_->timing()->responseEnd());
+}
+
+double WebPerformanceMetricsForReporting::DomInteractive() const {
+  return MillisecondsToSeconds(private_->timing()->domInteractive());
 }
 
 double WebPerformanceMetricsForReporting::DomContentLoadedEventStart() const {
