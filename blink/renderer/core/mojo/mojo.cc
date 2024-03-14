@@ -30,8 +30,8 @@
 namespace blink {
 #if BUILDFLAG(IS_OHOS)
 const char kExtensionsKeepAlive[] = "extensions.KeepAlive";
-const char kExtensionsMimeHandlerMimeHandlerService[] = "extensions.mimeHandler.MimeHandlerService";
-const char kExtensionsMimeHandlerBeforeUnloadControl[] = "extensions.mimeHandler.BeforeUnloadControl";
+const char kExtensionsMimeHandlerMimeHandlerService[] = "extensions.mime_handler.MimeHandlerService";
+const char kExtensionsMimeHandlerBeforeUnloadControl[] = "extensions.mime_handler.BeforeUnloadControl";
 #endif
 
 // static
@@ -146,7 +146,6 @@ void Mojo::bindInterface(ScriptState* script_state,
   }
 
   context->GetBrowserInterfaceBroker().GetInterface(name, std::move(handle));
-#endif
 }
 
 }  // namespace blink
