@@ -57,6 +57,7 @@
 #include "third_party/blink/renderer/platform/scheduler/public/event_loop.h"
 #include "third_party/blink/renderer/platform/weborigin/security_origin.h"
 #include "third_party/blink/renderer/platform/wtf/functional.h"
+#include "third_party/ohos_ndk/includes/ohos_adapter/ohos_adapter_helper.h"
 
 namespace blink {
 
@@ -414,6 +415,16 @@ ScriptPromise MediaDevices::getUserMedia(
   auto* resolver = MakeGarbageCollected<
       ScriptPromiseResolverWithTracker<UserMediaRequestResult>>(
       script_state, "Media.MediaDevices.GetUserMedia", base::Seconds(8));
+
+  bool isAdvancedSecurityMode = OHOS::NWeb::OhosAdapterHelper::GetInstance()
+                              .GetSystemPropertiesInstance().GetLockdownModeStatus();
+  if (isAdvancedSecurityMode) {
+    resolver->RecordAndThrowDOMException(
+        exception_state, DOMExceptionCode::kNotSupportedError,
+        "can't use getUserMedia on advancedSecurityMode!",
+        UserMediaRequestResult::kNotSupportedError);
+    return ScriptPromise();
+  }
 
   DCHECK(options);  // Guaranteed by the default value in the IDL.
   DCHECK(!exception_state.HadException());

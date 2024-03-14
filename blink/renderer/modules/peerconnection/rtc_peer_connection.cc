@@ -138,6 +138,7 @@
 #include "third_party/webrtc/api/peer_connection_interface.h"
 #include "third_party/webrtc/pc/session_description.h"
 #include "third_party/webrtc/rtc_base/ssl_identity.h"
+#include "third_party/ohos_ndk/includes/ohos_adapter/ohos_adapter_helper.h"
 
 namespace blink {
 
@@ -1977,6 +1978,13 @@ RTCDataChannel* RTCPeerConnection::createDataChannel(
     ExceptionState& exception_state) {
   if (ThrowExceptionIfSignalingStateClosed(signaling_state_, &exception_state))
     return nullptr;
+
+  bool isAdvancedSecurityMode = OHOS::NWeb::OhosAdapterHelper::GetInstance()
+                              .GetSystemPropertiesInstance().GetLockdownModeStatus();
+  if (isAdvancedSecurityMode) {
+    exception_state.ThrowTypeError("RTCDataChannel can't be used on advancedSecurityMode!");
+    return nullptr;
+  }
 
   webrtc::DataChannelInit init;
   // TODO(jiayl): remove the deprecated reliable field once Libjingle is updated
