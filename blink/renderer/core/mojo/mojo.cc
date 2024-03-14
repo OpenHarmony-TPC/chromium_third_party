@@ -23,7 +23,16 @@
 #include "third_party/blink/renderer/platform/bindings/script_state.h"
 #include "third_party/blink/renderer/platform/wtf/text/string_utf8_adaptor.h"
 
+#if BUILDFLAG(IS_OHOS)
+#include "base/strings/string_util.h"
+#endif
+
 namespace blink {
+#if BUILDFLAG(IS_OHOS)
+const char kExtensionsKeepAlive[] = "extensions.KeepAlive";
+const char kExtensionsMimeHandlerMimeHandlerService[] = "extensions.mime_handler.MimeHandlerService";
+const char kExtensionsMimeHandlerBeforeUnloadControl[] = "extensions.mime_handler.BeforeUnloadControl";
+#endif
 
 // static
 MojoCreateMessagePipeResult* Mojo::createMessagePipe() {
@@ -103,10 +112,14 @@ void Mojo::bindInterface(ScriptState* script_state,
                          MojoHandle* request_handle,
                          const String& scope,
                          ExceptionState& exception_state) {
-#if BUILDFLAG(IS_OHOS)
-  return;
-#else
   std::string name = interface_name.Utf8();
+#if BUILDFLAG(IS_OHOS)
+  if (!base::EqualsCaseInsensitiveASCII(name.c_str(), kExtensionsKeepAlive)
+      && !base::EqualsCaseInsensitiveASCII(name.c_str(), kExtensionsMimeHandlerMimeHandlerService)
+      && !base::EqualsCaseInsensitiveASCII(name.c_str(), kExtensionsMimeHandlerBeforeUnloadControl))
+    return;
+#endif
+
   auto handle =
       mojo::ScopedMessagePipeHandle::From(request_handle->TakeHandle());
 
@@ -133,7 +146,6 @@ void Mojo::bindInterface(ScriptState* script_state,
   }
 
   context->GetBrowserInterfaceBroker().GetInterface(name, std::move(handle));
-#endif
 }
 
 }  // namespace blink
