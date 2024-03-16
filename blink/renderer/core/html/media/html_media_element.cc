@@ -2481,6 +2481,12 @@ bool HTMLMediaElement::seeking() const {
   return seeking_;
 }
 
+#if defined(OHOS_MEDIA_POLICY)
+void HTMLMediaElement::SetHtmlPlayEnabled(bool enabled) {
+  is_enabled_HTML_play_ = enabled;
+}
+#endif // defined(OHOS_MEDIA_POLICY)
+
 // https://www.w3.org/TR/html51/semantics-embedded-content.html#earliest-possible-position
 // The earliest possible position is not explicitly exposed in the API; it
 // corresponds to the start time of the first range in the seekable attribute’s
@@ -2784,6 +2790,11 @@ ScriptPromise HTMLMediaElement::playForBindings(ScriptState* script_state) {
 
 absl::optional<DOMExceptionCode> HTMLMediaElement::Play() {
   DVLOG(2) << "play(" << *this << ")";
+
+#if defined(OHOS_MEDIA_POLICY)
+  if (!is_enabled_HTML_play_)
+    return absl::nullopt;
+#endif // defined(OHOS_MEDIA_POLICY)
 
   absl::optional<DOMExceptionCode> exception_code =
       autoplay_policy_->RequestPlay();
