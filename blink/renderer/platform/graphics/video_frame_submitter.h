@@ -231,6 +231,14 @@ class PLATFORM_EXPORT VideoFrameSubmitter
   THREAD_CHECKER(thread_checker_);
 
   base::WeakPtrFactory<VideoFrameSubmitter> weak_ptr_factory_{this};
+
+#if BUILDFLAG(IS_OHOS)
+  bool is_first_frame_ = true;
+  bool should_report_frame_dropped_ = false;
+  int64_t dropped_frame_count_ = 0;
+  int64_t dropped_frame_duration_ = 0;
+  base::TimeTicks last_frame_time_ = base::TimeTicks();
+#endif
 };
 
 }  // namespace blink
