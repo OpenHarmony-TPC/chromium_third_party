@@ -259,6 +259,10 @@ bool StructTraits<blink::mojom::WebPreferencesDataView,
 #if defined(OHOS_CLIPBOARD)
   out->copy_option = data.copy_option();
 #endif // defined(OHOS_CLIPBOARD)
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+  out->custom_video_player_enable = data.custom_video_player_enable();
+  out->custom_video_player_overlay = data.custom_video_player_overlay();
+#endif // OHOS_CUSTOM_VIDEO_PLAYER
   return true;
 }
 

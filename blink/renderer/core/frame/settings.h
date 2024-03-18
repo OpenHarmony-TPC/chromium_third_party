@@ -147,6 +147,21 @@ class CORE_EXPORT Settings {
   }
 #endif // defined(OHOS_CLIPBOARD)
 
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+void SetCustomVideoPlayerEnabled(bool enable) {
+  custom_video_player_enabled_ = enable;
+}
+bool IsCustomVideoPlayerEnabled() const {
+  return custom_video_player_enabled_;
+}
+void SetCustomVideoPlayerOverlay(bool overlay) {
+  custom_video_player_overlay_ = overlay;
+}
+bool IsCustomVideoPlayerOverlay() const {
+  return custom_video_player_overlay_;
+}
+#endif // OHOS_CUSTOM_VIDEO_PLAYER
+
  private:
   void Invalidate(SettingsDelegate::ChangeType);
 
@@ -182,6 +197,11 @@ class CORE_EXPORT Settings {
 #if defined(OHOS_CLIPBOARD)
   mojom::CopyOptionMode copy_option_ = mojom::CopyOptionMode::CROSS_DEVICE;
 #endif // defined(OHOS_CLIPBOARD)
+
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+  bool custom_video_player_enabled_ = false;
+  bool custom_video_player_overlay_ = false;
+#endif // OHOS_CUSTOM_VIDEO_PLAYER
 };
 
 }  // namespace blink

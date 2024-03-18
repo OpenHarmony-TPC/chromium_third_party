@@ -515,5 +515,12 @@ struct WebPreferences {
   [EnableIf=ohos_ex_blank_target_popup_intercept]
   bool blank_target_popup_intercept_enabled = true;
   // #endif
+
+  // #if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+  [EnableIf=ohos_custom_video_player]
+  bool custom_video_player_enable = false;
+  [EnableIf=ohos_custom_video_player]
+  bool custom_video_player_overlay = false;
+  // #endif OHOS_CUSTOM_VIDEO_PLAYER
 };
 

@@ -1977,6 +1977,10 @@ void WebView::ApplyWebPreferences(const web_pref::WebPreferences& prefs,
 #if BUILDFLAG(IS_OHOS)
   web_view_impl->SetPinchSmoothMode(prefs.pinch_smooth_mode);
 #endif  // BUILDFLAG(IS_OHOS)
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+  settings->SetCustomVideoPlayerEnabled(prefs.custom_video_player_enable);
+  settings->SetCustomVideoPlayerOverlay(prefs.custom_video_player_overlay);
+#endif // OHOS_CUSTOM_VIDEO_PLAYER
 }
 
 void WebViewImpl::ThemeChanged() {

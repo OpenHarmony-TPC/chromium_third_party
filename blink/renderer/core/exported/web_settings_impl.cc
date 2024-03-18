@@ -849,4 +849,13 @@ void WebSettingsImpl::SetWebXRImmersiveArAllowed(
 void WebSettingsImpl::SetModalContextMenu(bool is_available) {
   settings_->SetModalContextMenu(is_available);
 }
+
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+void WebSettingsImpl::SetCustomVideoPlayerEnabled(bool enable) {
+  settings_->SetCustomVideoPlayerEnabled(enable);
+}
+void WebSettingsImpl::SetCustomVideoPlayerOverlay(bool overlay) {
+  settings_->SetCustomVideoPlayerOverlay(overlay);
+}
+#endif // OHOS_CUSTOM_VIDEO_PLAYER
 }  // namespace blink
