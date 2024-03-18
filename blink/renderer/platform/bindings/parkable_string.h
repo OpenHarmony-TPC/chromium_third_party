@@ -334,6 +334,7 @@ class PLATFORM_EXPORT ParkableString final {
 
  public:
   ParkableString() : impl_(nullptr) {}
+  explicit ParkableString(scoped_refptr<StringImpl>&& impl, bool is_parkable);
   explicit ParkableString(scoped_refptr<StringImpl>&& impl);
   ParkableString(scoped_refptr<StringImpl>&& impl,
                  std::unique_ptr<ParkableStringImpl::SecureDigest> digest);

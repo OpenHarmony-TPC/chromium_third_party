@@ -46,6 +46,10 @@ class CORE_EXPORT ClassicScript final : public Script {
   // behavior.
   // TODO(crbug/1112266): Use kSanitize for all existing callers if possible, or
   // otherwise add comments why kDoNotSanitize should be used.
+  static ClassicScript* CreateUnparkScript(
+      const String& source_text,
+      ScriptSourceLocationType = ScriptSourceLocationType::kUnknown,
+      SanitizeScriptErrors = SanitizeScriptErrors::kSanitize);
   static ClassicScript* CreateUnspecifiedScript(
       const String& source_text,
       ScriptSourceLocationType = ScriptSourceLocationType::kUnknown,

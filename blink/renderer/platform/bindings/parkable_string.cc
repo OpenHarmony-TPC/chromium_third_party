@@ -880,6 +880,20 @@ void ParkableStringImpl::OnWritingCompleteOnMainThread(
   ParkableStringManager::Instance().RecordDiskWriteTime(writing_time);
 }
 
+ParkableString::ParkableString(scoped_refptr<StringImpl>&& impl, bool is_parkable) {
+  if (!impl) {
+    impl_ = nullptr;
+    return;
+  }
+
+  if (is_parkable) {
+    impl_ = ParkableStringManager::Instance().Add(std::move(impl),
+                                                  nullptr);
+  } else {
+    impl_ = ParkableStringImpl::MakeNonParkable(std::move(impl));
+  }
+}
+
 ParkableString::ParkableString(scoped_refptr<StringImpl>&& impl)
     : ParkableString(std::move(impl), nullptr) {}
 
