@@ -437,6 +437,19 @@ void VideoFrameSubmitter::OnBeginFrame(
     return;
   }
 
+#if BUILDFLAG(IS_OHOS)
+  if (!is_first_frame_) {
+    base::TimeTicks cur_frame_time = args.frame_time + args.interval;
+    dropped_frame_count_ = (cur_frame_time - last_frame_time_).IntDiv(args.interval);
+    dropped_frame_duration_ = (cur_frame_time - last_frame_time_).InMilliseconds();
+    if (!!dropped_frame_count_)
+      should_report_frame_dropped_ = true;
+  } else {
+    is_first_frame_ = false;
+  }
+  last_frame_time_ = args.frame_time + 2 * args.interval;
+#endif
+
   // Update the current frame, even if we haven't gotten an ack for a previous
   // frame yet. That probably signals a dropped frame, and this will let the
   // provider know that it happened, since we won't PutCurrentFrame this one.
@@ -853,6 +866,13 @@ viz::CompositorFrame VideoFrameSubmitter::CreateCompositorFrame(
     const bool is_opaque = media::IsOpaque(video_frame->format());
     resource_provider_->AppendQuads(render_pass.get(), std::move(video_frame),
                                     transform, is_opaque);
+#if BUILDFLAG(IS_OHOS)
+    if (should_report_frame_dropped_) {
+      compositor_frame.metadata.dropped_frame_count = dropped_frame_count_;
+      compositor_frame.metadata.dropped_frame_duration = dropped_frame_duration_;
+      should_report_frame_dropped_ = false;
+    }
+#endif
   }
 
   compositor_frame.render_pass_list.emplace_back(std::move(render_pass));
