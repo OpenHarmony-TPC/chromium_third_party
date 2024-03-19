@@ -592,6 +592,9 @@ class CORE_EXPORT HTMLMediaElement
 
   // media::mojom::MediaPlayer  implementation.
   void RequestPlay() override;
+#if defined(OHOS_MEDIA_POLICY)
+  void SetHtmlPlayEnabled(bool enabled) override;
+#endif // defined(OHOS_MEDIA_POLICY)
   void RequestPause(bool triggered_by_user) override;
   void RequestSeekForward(base::TimeDelta seek_time) override;
   void RequestSeekBackward(base::TimeDelta seek_time) override;
@@ -753,6 +756,10 @@ class CORE_EXPORT HTMLMediaElement
   NetworkState network_state_;
   ReadyState ready_state_;
   ReadyState ready_state_maximum_;
+
+#if defined(OHOS_MEDIA_POLICY)
+  bool is_enabled_HTML_play_ = true;
+#endif // defined(OHOS_MEDIA_POLICY)
 
   SourceMetadata current_src_;
   KURL current_src_after_redirects_;
