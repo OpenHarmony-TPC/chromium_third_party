@@ -143,6 +143,15 @@ ClassicScript* ClassicScript::CreateUnspecifiedScript(
       sanitize_script_errors);
 }
 
+ClassicScript* ClassicScript::CreateUnparkScript(
+    const String& source_text,
+    ScriptSourceLocationType source_location_type,
+    SanitizeScriptErrors sanitize_script_errors) {
+  return MakeGarbageCollected<ClassicScript>(
+    ParkableString(source_text.Impl(), false), KURL(), KURL(), ScriptFetchOptions(),
+      source_location_type, sanitize_script_errors);
+}
+
 ClassicScript::ClassicScript(
     const ParkableString& source_text,
     const KURL& source_url,
