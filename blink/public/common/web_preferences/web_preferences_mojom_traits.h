@@ -853,6 +853,17 @@ struct BLINK_COMMON_EXPORT StructTraits<blink::mojom::WebPreferencesDataView,
   }
 #endif // defined(OHOS_CLIPBOARD)
 
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+  static bool custom_video_player_enable(
+      const blink::web_pref::WebPreferences& r) {
+    return r.custom_video_player_enable;
+  }
+  static bool custom_video_player_overlay(
+      const blink::web_pref::WebPreferences& r) {
+    return r.custom_video_player_overlay;
+  }
+#endif // OHOS_CUSTOM_VIDEO_PLAYER
+
 };
 
 }  // namespace mojo

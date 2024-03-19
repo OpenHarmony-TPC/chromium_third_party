@@ -413,6 +413,11 @@ struct BLINK_COMMON_EXPORT WebPreferences {
   bool pinch_smooth_mode = false;
 #endif // BUILDFLAG(IS_OHOS)
 
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+  bool custom_video_player_enable = false;
+  bool custom_video_player_overlay = false;
+#endif // OHOS_CUSTOM_VIDEO_PLAYER
+
   // We try to keep the default values the same as the default values in
   // chrome, except for the cases where it would require lots of extra work for
   // the embedder to use the same default value.

@@ -255,6 +255,11 @@ class CORE_EXPORT WebSettingsImpl final : public WebSettings {
   void SetDrawMode(int) override;
 #endif
 
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+  void SetCustomVideoPlayerEnabled(bool enable) override;
+  void SetCustomVideoPlayerOverlay(bool overlay) override;
+#endif // OHOS_CUSTOM_VIDEO_PLAYER
+
   bool RenderVSyncNotificationEnabled() const {
     return render_v_sync_notification_enabled_;
   }

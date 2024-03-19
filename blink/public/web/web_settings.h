@@ -306,6 +306,10 @@ class WebSettings {
   virtual void RegisterNativeEmbedRule(const WebString&, const WebString&) = 0;
   virtual void SetDrawMode(int) = 0;
 #endif
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+  virtual void SetCustomVideoPlayerEnabled(bool enable) = 0;
+  virtual void SetCustomVideoPlayerOverlay(bool overlay) = 0;
+#endif // OHOS_CUSTOM_VIDEO_PLAYER
 
  protected:
   ~WebSettings() = default;
