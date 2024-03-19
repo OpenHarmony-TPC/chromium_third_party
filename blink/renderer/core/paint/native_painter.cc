@@ -80,6 +80,11 @@ void NativePainter::PaintReplaced(const PaintInfo& paint_info,
                                   !force_software_video_paint;
   if (paint_with_foreign_layer) {
     if (cc::Layer* layer = layout_native_.NativeElement()->CcLayer()) {
+      gfx::RectF rect(-replaced_rect.X().ToFloat(),
+                      -replaced_rect.Y().ToFloat(),
+                      layout_native_.Size().Width().ToFloat(),
+                      layout_native_.Size().Height().ToFloat());
+      layer->SetNativeRect(rect);
       layer->SetBounds(snapped_replaced_rect.size());
       layer->SetIsDrawable(true);
       layer->SetHitTestable(true);

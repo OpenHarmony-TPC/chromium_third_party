@@ -4778,11 +4778,6 @@ void WebFrameWidgetImpl::DidNativeEmbedEvent(const WebPointerEvent& web_pointer_
               ->GetWidgetInputHandlerHost()) {
     auto x = offset.left.ToFloat();
     auto y = offset.top.ToFloat();
-    auto screenX = web_pointer_event.PositionInScreen().x();
-    auto screenY = web_pointer_event.PositionInScreen().y();
-    float offsetX = offset.left.ToFloat();
-    float offsetY = offset.top.ToFloat();
-    PointerId id = web_pointer_event.id;
     mojom::blink::TouchType type;
     switch(web_pointer_event.GetType()){
       case WebInputEvent::Type::kPointerDown:
@@ -4801,8 +4796,6 @@ void WebFrameWidgetImpl::DidNativeEmbedEvent(const WebPointerEvent& web_pointer_
       type = mojom::blink::TouchType::CANCEL;
     }
     LOG(DEBUG) << "NativeEmbed type = " << type << ",x = " << x << ",y = " << y;
-    host->DidNativeEmbedEvent(mojom::blink::EmbedTouchEvent::New(
-      static_cast<String>(embedId), id, x, y, screenX, screenY, type, offsetX, offsetY));
   }
 }
 #endif  // defined(OHOS_INPUT_EVENTS)

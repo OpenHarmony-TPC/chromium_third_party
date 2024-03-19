@@ -1727,6 +1727,28 @@ absl::optional<int> WidgetBase::GetMaxRenderBufferBounds() const {
              : max_render_buffer_bounds_gpu_;
 }
 
+#if BUILDFLAG(IS_OHOS)
+void WidgetBase::DidNativeEmbedEvent(blink::WebInputEvent::Type type,
+                                    std::string embedId, int32_t id, float x, float y) {
+  mojom::blink::NativeTouchType nativeType;
+  switch(type) {
+    case WebInputEvent::Type::kTouchStart:
+          nativeType = mojom::blink::NativeTouchType::DOWN;
+          break;
+    case WebInputEvent::Type::kTouchMove:
+          nativeType = mojom::blink::NativeTouchType::MOVE;
+          break;
+    case WebInputEvent::Type::kTouchEnd:
+          nativeType = mojom::blink::NativeTouchType::UP;
+          break;
+    default:
+          nativeType = mojom::blink::NativeTouchType::CANCEL;
+  }
+  LOG(DEBUG)<<"[NativeEmbed] DidNativeEmbedEvent type is : "<< nativeType <<" x: "<<x <<" y: "<<y;
+  widget_host_->DidNativeEmbedEvent(
+    mojom::blink::NativeEmbedTouchEvent::New(static_cast<String>(embedId), id, x, y, x, y, nativeType, x, y));
+}
+#endif
 #if defined(OHOS_INPUT_EVENTS)
 void WidgetBase::SetZoomLevel(float magnify_delta, const gfx::Point& anchor) {
   if (!widget_input_handler_manager_) {

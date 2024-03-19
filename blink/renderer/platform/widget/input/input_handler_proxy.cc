@@ -35,6 +35,7 @@
 #include "third_party/blink/public/common/input/web_touch_event.h"
 #include "third_party/blink/public/mojom/input/input_handler.mojom-blink.h"
 #include "third_party/blink/renderer/platform/widget/input/compositor_thread_event_queue.h"
+#include "third_party/blink/renderer/platform/widget/input/native_embed_event_queue.h"
 #include "third_party/blink/renderer/platform/widget/input/cursor_control_handler.h"
 #include "third_party/blink/renderer/platform/widget/input/elastic_overscroll_controller.h"
 #include "third_party/blink/renderer/platform/widget/input/event_with_callback.h"
@@ -45,6 +46,7 @@
 #include "ui/events/types/scroll_input_type.h"
 #include "ui/gfx/geometry/point_conversions.h"
 #include "ui/latency/latency_info.h"
+#include "cc/layers/layer_impl.h"
 
 using perfetto::protos::pbzero::ChromeLatencyInfo;
 using perfetto::protos::pbzero::TrackEvent;
@@ -209,6 +211,20 @@ bool IsGestureScrollOrPinch(WebInputEvent::Type type) {
   }
 }
 
+#if BUILDFLAG(IS_OHOS)
+bool IsTouchEventType(WebInputEvent::Type type) {
+  switch (type) {
+    case WebInputEvent::Type::kTouchStart:
+    case WebInputEvent::Type::kTouchMove:
+    case WebInputEvent::Type::kTouchEnd:
+    case WebInputEvent::Type::kTouchCancel:
+      return true;
+    default:
+      return false;
+  }
+}
+#endif
+
 }  // namespace
 
 InputHandlerProxy::InputHandlerProxy(cc::InputHandler& input_handler,
@@ -297,8 +313,18 @@ void InputHandlerProxy::HandleInputEventWithLatencyInfo(
     base::ScopedSampleMetadata metadata("Input.GestureScrollOrPinch",
                                         NO_SCROLL_PINCH,
                                         base::SampleMetadataScope::kProcess);
-    DispatchSingleInputEvent(std::move(event_with_callback),
+  #if BUILDFLAG(IS_OHOS)
+    bool result = DidNativeEmbedEvent(event_with_callback->event());
+    LOG(DEBUG)<<"[NativeEmbed] DidNativeEmbedEvent return result is : "<<result;
+    if (result) {
+      native_event_queue_->Queue(std::move(event_with_callback));
+    } else {
+  #endif
+      DispatchSingleInputEvent(std::move(event_with_callback),
                              tick_clock_->NowTicks());
+  #if BUILDFLAG(IS_OHOS)
+    }
+  #endif
     return;
   }
 
@@ -381,6 +407,57 @@ void InputHandlerProxy::HandleInputEventWithLatencyInfo(
                            tick_clock_->NowTicks());
 }
 
+#if BUILDFLAG(IS_OHOS)
+bool InputHandlerProxy::DidNativeEmbedEvent(const WebInputEvent& event) {
+  const WebTouchEvent& touch_event = static_cast<const WebTouchEvent&>(event);
+  bool result = false;
+  if (IsTouchEventType(event.GetType())) {
+    for(size_t i = 0; i < touch_event.touches_length; ++i) {
+      float x = touch_event.touches[i].PositionInWidget().x();
+      float y = touch_event.touches[i].PositionInWidget().y();
+
+      cc::LayerImpl* layer_impl = input_handler_->GetLayerImpl(gfx::Point(x, y));
+      if (layer_impl && layer_impl->may_contain_native()) {
+        is_last_native_type_ = true;
+        last_native_index_ = i;
+        float scale = layer_impl->GetIdealContentsScaleKey();
+        embed_id_ = std::to_string(layer_impl->native_embed_id());
+        gfx::RectF nativeRect = layer_impl->GetNativeRect();
+        x = (x - nativeRect.x()) / scale;
+        y = (y - nativeRect.y()) / scale;
+        const WebPointerEvent& web_pointer_event = static_cast<const WebPointerEvent&>(event);
+        client_->DidNativeEmbedEvent(event.GetType(), embed_id_, web_pointer_event.id, x, y);
+        result = true;
+      }
+      if (layer_impl && !layer_impl->may_contain_native() &&
+          event.GetType() == WebInputEvent::Type::kTouchMove &&
+          is_last_native_type_ &&
+          last_native_index_ == i) {
+        is_last_native_type_ = false;
+        const WebPointerEvent& web_pointer_event = static_cast<const WebPointerEvent&>(event);
+        client_->DidNativeEmbedEvent(WebInputEvent::Type::kTouchCancel, embed_id_, web_pointer_event.id, x, y);
+        result = true;
+      }
+    }
+  }
+  return result;
+}
+
+void InputHandlerProxy::SetGestureEventResult(bool result) {
+  LOG(DEBUG)<<"[NativeEmbed] SetGestureEventResult result is : "<<result;
+  if (native_event_queue_->empty()) {
+    LOG(DEBUG)<<"[NativeEmbed] native_event_queue_ is empty";
+    return;
+  }
+  base::TimeTicks now = tick_clock_->NowTicks();
+  if (result) {
+    DispatchSingleInputEvent(native_event_queue_->Pop(), now, true);
+  } else {
+    DispatchSingleInputEvent(native_event_queue_->Pop(), now);
+  }
+}
+#endif
+
 void InputHandlerProxy::ContinueScrollBeginAfterMainThreadHitTest(
     std::unique_ptr<blink::WebCoalescedInputEvent> event,
     std::unique_ptr<cc::EventMetrics> metrics,
@@ -443,7 +520,7 @@ void InputHandlerProxy::ContinueScrollBeginAfterMainThreadHitTest(
 
 void InputHandlerProxy::DispatchSingleInputEvent(
     std::unique_ptr<EventWithCallback> event_with_callback,
-    const base::TimeTicks now) {
+    const base::TimeTicks now, bool isDrop) {
   ui::LatencyInfo monitored_latency_info = event_with_callback->latency_info();
   std::unique_ptr<cc::LatencyInfoSwapPromiseMonitor>
       latency_info_swap_promise_monitor =
@@ -456,6 +533,12 @@ void InputHandlerProxy::DispatchSingleInputEvent(
       PerformEventAttribution(event_with_callback->event());
   InputHandlerProxy::EventDisposition disposition =
       RouteToTypeSpecificHandler(event_with_callback.get(), attribution);
+
+#if BUILDFLAG(IS_OHOS)
+  if (isDrop) {
+    disposition = DID_HANDLE;
+  }
+#endif
 
   const WebInputEvent& event = event_with_callback->event();
   const WebGestureEvent::Type type = event.GetType();

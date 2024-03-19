@@ -23,6 +23,35 @@ interface WidgetCompositor {
   VisualStateRequest() => ();
 };
 
+[EnableIf=is_ohos]
+// Touch types
+enum NativeTouchType{
+    DOWN,
+    UP,
+    MOVE,
+    CANCEL,
+    PULL_DOWN,
+    PULL_UP,
+    PULL_MOVE,
+    PULL_IN_WINDOW,
+    PULL_OUT_WINDOW,
+    UNKNOWN,
+};
+
+[EnableIf=is_ohos]
+// Touch event data
+struct NativeEmbedTouchEvent {
+    string embedId;
+    int32 id = 0;
+    float x;
+    float y;
+    float screenX;
+    float screenY;
+    NativeTouchType type;
+    float offsetX = 0.0;
+    float offsetY = 0.0;
+};
+
 // Implemented in Browser, this interface defines widget-specific methods that
 // will be invoked from the render process (e.g. content::RenderWidgetHostImpl).
 interface WidgetHost {
@@ -80,6 +109,8 @@ interface WidgetHost {
         render_frame_metadata_observer_client_receiver,
       pending_remote<cc.mojom.RenderFrameMetadataObserver>
         render_frame_metadata_observer);
+  [EnableIf=is_ohos]
+  DidNativeEmbedEvent(NativeEmbedTouchEvent event);
 };
 
 // Implemented in Blink, this interface defines widget-specific methods that
