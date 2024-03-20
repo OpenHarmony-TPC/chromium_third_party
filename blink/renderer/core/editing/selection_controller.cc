@@ -1250,9 +1250,17 @@ bool SelectionController::HandleGestureLongPress(
 
   Node* inner_node = hit_test_result.InnerPossiblyPseudoNode();
   inner_node->GetDocument().UpdateStyleAndLayoutTree();
+#ifdef OHOS_CLIPBOARD
+  bool inner_node_is_selectable = IsEditable(*inner_node) ||
+                                  inner_node->IsTextNode() ||
+                                  inner_node->CanStartSelection() ||
+                                  IsEditable(*inner_node->parentNode()) ||
+                                  inner_node->parentNode()->CanStartSelection();
+#else
   bool inner_node_is_selectable = IsEditable(*inner_node) ||
                                   inner_node->IsTextNode() ||
                                   inner_node->CanStartSelection();
+#endif
   if (!inner_node_is_selectable)
     return false;
 
