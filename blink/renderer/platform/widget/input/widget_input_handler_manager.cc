@@ -1133,6 +1133,19 @@ void WidgetInputHandlerManager::UpdateBrowserControlsState(
                                                    animate);
 }
 
+#if BUILDFLAG(IS_OHOS)
+void WidgetInputHandlerManager::DidNativeEmbedEvent(blink::WebInputEvent::Type type,
+                                                    std::string embedId,
+                                                    int32_t id,
+                                                    float x,float y) {
+  widget_->DidNativeEmbedEvent(type, embedId, id, x, y);
+}
+
+void WidgetInputHandlerManager::SetGestureEventResult(bool result) {
+  input_handler_proxy_->SetGestureEventResult(result);
+}
+#endif
+
 #if defined(OHOS_INPUT_EVENTS)
 void WidgetInputHandlerManager::SetZoomLevel(float magnify_delta,
                                              const gfx::Point& anchor) {

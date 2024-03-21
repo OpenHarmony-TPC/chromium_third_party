@@ -277,10 +277,6 @@ interface WidgetInputHandlerHost {
   // restrictions on the root scroll offset.
   DidOverscroll(DidOverscrollParams params);
 
-  [EnableIf=is_ohos]
-  // Sent by the touch embed tag/
-  DidNativeEmbedEvent(EmbedTouchEvent event);
-
   // Sent by the compositor when a GSB has started scrolling the viewport.
   DidStartScrollingViewport();
 
@@ -562,4 +558,6 @@ interface WidgetInputHandler {
   UpdateBrowserControlsState(cc.mojom.BrowserControlsState constraints,
                              cc.mojom.BrowserControlsState current,
                              bool animate);
+  [EnableIf=is_ohos]
+  SetGestureEventResult(bool result);
 };

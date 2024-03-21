@@ -388,6 +388,11 @@ class PLATFORM_EXPORT WidgetBase : public mojom::blink::Widget,
   void SetOverscrollMode(int mode);
 #endif  // defined(OHOS_INPUT_EVENTS)
 
+#if BUILDFLAG(IS_OHOS)
+  void DidNativeEmbedEvent(blink::WebInputEvent::Type type,
+                           std::string embedId, int32_t id, float x, float y);
+#endif
+
  private:
   bool CanComposeInline();
   void UpdateTextInputStateInternal(bool show_virtual_keyboard,

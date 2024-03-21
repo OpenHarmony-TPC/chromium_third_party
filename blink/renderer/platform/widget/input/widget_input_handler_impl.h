@@ -87,6 +87,10 @@ class WidgetInputHandlerImpl : public mojom::blink::WidgetInputHandler {
 
   void InputWasProcessed();
 
+#if BUILDFLAG(IS_OHOS)
+  void SetGestureEventResult(bool result) override;
+#endif
+
  private:
   bool ShouldProxyToMainThread() const;
   void RunOnMainThread(base::OnceClosure closure);

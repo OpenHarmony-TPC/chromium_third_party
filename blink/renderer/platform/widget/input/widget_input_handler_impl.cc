@@ -240,4 +240,10 @@ void WidgetInputHandlerImpl::Release() {
   delete this;
 }
 
+#if BUILDFLAG(IS_OHOS)
+void WidgetInputHandlerImpl::SetGestureEventResult(bool result) {
+  input_handler_manager_->SetGestureEventResult(result);
+}
+#endif
+
 }  // namespace blink

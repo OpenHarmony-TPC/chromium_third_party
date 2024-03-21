@@ -15,6 +15,7 @@
 #include "third_party/blink/public/common/input/web_coalesced_input_event.h"
 #include "third_party/blink/public/common/input/web_gesture_event.h"
 #include "third_party/blink/public/mojom/input/input_handler.mojom-blink.h"
+#include "third_party/blink/public/mojom/widget/platform_widget.mojom-blink.h"
 #include "third_party/blink/public/platform/web_common.h"
 #include "third_party/blink/renderer/platform/platform_export.h"
 
@@ -54,6 +55,7 @@ class InputHandlerProxyClient;
 class ScrollPredictor;
 class MomentumScrollJankTracker;
 class CursorControlHandler;
+class NativeEmbedEventQueue;
 
 class SynchronousInputHandler {
  public:
@@ -154,6 +156,10 @@ class PLATFORM_EXPORT InputHandlerProxy : public cc::InputHandlerClient,
       const blink::WebInputEventAttribution&,
       std::unique_ptr<cc::EventMetrics> metrics,
       mojom::blink::ScrollResultDataPtr)>;
+
+#if BUILDFLAG(IS_OHOS)
+  using GestureEventCallback = base::OnceCallback<void(bool)>;
+#endif
   void HandleInputEventWithLatencyInfo(
       std::unique_ptr<blink::WebCoalescedInputEvent> event,
       std::unique_ptr<cc::EventMetrics> metrics,
@@ -229,6 +235,8 @@ class PLATFORM_EXPORT InputHandlerProxy : public cc::InputHandlerClient,
     current_internal_begin_frame_args_ = args;
     need_flush_scroll_update_gesture_ = true;
   }
+  bool DidNativeEmbedEvent(const WebInputEvent& event);
+  void SetGestureEventResult(bool result);
 #endif
 #if defined(OHOS_INPUT_EVENTS)
   void SetOverscrollMode(int mode);
@@ -264,7 +272,8 @@ class PLATFORM_EXPORT InputHandlerProxy : public cc::InputHandlerClient,
   friend class test::InputHandlerProxyForceHandlingOnMainThread;
 
   void DispatchSingleInputEvent(std::unique_ptr<EventWithCallback>,
-                                const base::TimeTicks);
+                                const base::TimeTicks,
+                                bool isDrop = false);
   void DispatchQueuedInputEvents(bool frame_aligned);
   void UpdateElasticOverscroll();
 
@@ -436,6 +445,10 @@ class PLATFORM_EXPORT InputHandlerProxy : public cc::InputHandlerClient,
   // scrollupdate doing
   bool need_flush_scroll_update_gesture_ = false;
   viz::BeginFrameArgs current_internal_begin_frame_args_;
+  std::unique_ptr<NativeEmbedEventQueue> native_event_queue_;
+  bool is_last_native_type_ = false;
+  size_t last_native_index_ = 0;
+  std::string embed_id_;
 #endif
 };
 

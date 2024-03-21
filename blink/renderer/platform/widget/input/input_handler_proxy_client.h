@@ -47,7 +47,10 @@ class InputHandlerProxyClient {
   virtual void SetAllowedTouchAction(cc::TouchAction touch_action) = 0;
 
   virtual bool AllowsScrollResampling() = 0;
-
+#if BUILDFLAG(IS_OHOS)
+  virtual void DidNativeEmbedEvent(blink::WebInputEvent::Type type,
+                           std::string embedId, int32_t id, float x, float y) = 0;
+#endif
  protected:
   virtual ~InputHandlerProxyClient() {}
 };
