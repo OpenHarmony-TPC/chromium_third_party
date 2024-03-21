@@ -85,7 +85,7 @@ int ashmem_get_prot_region(int fd) {
 }
 
 int ashmem_pin_region(int fd, size_t offset, size_t len) {
-  LOG(INFO) << "ashmem_pin_region";
+  LOG(DEBUG) << "ashmem_pin_region";
   struct ashmem_pin pin = {static_cast<uint32_t>(offset),
                            static_cast<uint32_t>(len)};
   return ashmem_check_failure(fd,
@@ -93,7 +93,7 @@ int ashmem_pin_region(int fd, size_t offset, size_t len) {
 }
 
 int ashmem_unpin_region(int fd, size_t offset, size_t len) {
-  LOG(INFO) << "ashmem_unpin_region";
+  LOG(DEBUG) << "ashmem_unpin_region";
   struct ashmem_pin pin = {static_cast<uint32_t>(offset),
                            static_cast<uint32_t>(len)};
   return ashmem_check_failure(
