@@ -93,6 +93,13 @@ config("config") {
   cflags = []
   defines = []
 
+  if (is_ohos) {
+    cflags += [
+      "-O3",
+      "-fomit-frame-pointer"
+    ]
+  }
+
   if (is_win) {
     cflags += [
       "/wd4305",  # Truncation from 'type1' to 'type2'.
