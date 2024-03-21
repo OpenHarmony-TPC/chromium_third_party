@@ -515,6 +515,9 @@ gfx::Rect HTMLNativeElement::OwnerBoundingRect() {
 
 void HTMLNativeElement::OnCreateNativeSurface(int native_embed_id) {
   native_embed_id_ = native_embed_id;
+  if (cc_layer_) {
+    cc_layer_->SetNativeEmbedId(native_embed_id_);
+  }
   if (!native_bridge_observer_remote_set_) {
     return;
   }
@@ -594,7 +597,6 @@ void HTMLNativeElement::SetCcLayer(cc::Layer* cc_layer) {
   if (cc_layer_) {
     LOG(INFO) << "[NativeEmbed] set native flag";
     cc_layer_->SetMayContainNative(true);
-    cc_layer_->SetNativeEmbedId(native_embed_id_);
     cc_layer_->SetNeedsPushProperties();
   }
 }
