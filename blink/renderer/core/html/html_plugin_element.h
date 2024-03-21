@@ -106,6 +106,10 @@ class CORE_EXPORT HTMLPlugInElement
   const String IdAttribute() override { return GetIdAttribute().GetString(); }
 
   bool CheckNativeType(const char* key) const;
+
+  bool ShouldLoadForNative() const {
+    return IsNativeType() && GetObjectContentType() == ObjectContentType::kNone;
+  }
 #endif
 
  protected:

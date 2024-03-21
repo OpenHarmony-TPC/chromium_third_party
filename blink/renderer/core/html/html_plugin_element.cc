@@ -614,7 +614,7 @@ bool HTMLPlugInElement::RequestObject(const PluginParameters& plugin_params) {
     ResetInstance();
   if (object_type == ObjectContentType::kFrame ||
 #if BUILDFLAG(IS_OHOS)
-      (IsNativeType() && object_type == ObjectContentType::kNone)||
+      ShouldLoadForNative() ||
 #endif
       object_type == ObjectContentType::kImage || handled_externally) {
     if (object_type == ObjectContentType::kFrame) {
@@ -645,8 +645,12 @@ bool HTMLPlugInElement::RequestObject(const PluginParameters& plugin_params) {
     // new frame and set it as the LayoutEmbeddedContent's EmbeddedContentView,
     // causing what was previously in the EmbeddedContentView to be torn down.
 #if BUILDFLAG(IS_OHOS)
-    LOG(INFO) << "[NativeEmbed] RequestObject is native type " << IsNativeType() << ", service type is " << service_type_;
-    return LoadOrRedirectSubframe(completed_url, GetNameAttribute(), true, IsNativeType());
+    if (IsNativeType() && !ShouldLoadForNative()) {
+      LOG(ERROR) << "[NativeEmbed] " << service_type_
+                 << " service type can't be loaded for native type.";
+    }
+    return LoadOrRedirectSubframe(completed_url, GetNameAttribute(), true,
+                                  ShouldLoadForNative());
 #else
     return LoadOrRedirectSubframe(completed_url, GetNameAttribute(), true);
 #endif
@@ -856,8 +860,7 @@ bool HTMLPlugInElement::CheckNativeType(const char* key) const {
   }
 
   auto rule = settings->NativeEmbedRule();
-  auto valid_key =
-      WebString::FromUTF8(key, strlen(key));
+  auto valid_key = WebString::FromUTF8(key, strlen(key));
   if (rule.find(valid_key) == rule.end()) {
     return false;
   }
