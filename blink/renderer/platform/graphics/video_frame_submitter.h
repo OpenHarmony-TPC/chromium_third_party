@@ -232,7 +232,7 @@ class PLATFORM_EXPORT VideoFrameSubmitter
 
   base::WeakPtrFactory<VideoFrameSubmitter> weak_ptr_factory_{this};
 
-#if BUILDFLAG(IS_OHOS)
+#if defined(REPORT_SYS_EVENT)
   bool is_first_frame_ = true;
   bool should_report_frame_dropped_ = false;
   int64_t dropped_frame_count_ = 0;
