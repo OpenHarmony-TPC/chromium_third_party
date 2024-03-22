@@ -437,7 +437,7 @@ void VideoFrameSubmitter::OnBeginFrame(
     return;
   }
 
-#if BUILDFLAG(IS_OHOS)
+#if defined(REPORT_SYS_EVENT)
   if (!is_first_frame_) {
     base::TimeTicks cur_frame_time = args.frame_time + args.interval;
     dropped_frame_count_ = (cur_frame_time - last_frame_time_).IntDiv(args.interval);
@@ -866,7 +866,7 @@ viz::CompositorFrame VideoFrameSubmitter::CreateCompositorFrame(
     const bool is_opaque = media::IsOpaque(video_frame->format());
     resource_provider_->AppendQuads(render_pass.get(), std::move(video_frame),
                                     transform, is_opaque);
-#if BUILDFLAG(IS_OHOS)
+#if defined(REPORT_SYS_EVENT)
     if (should_report_frame_dropped_) {
       compositor_frame.metadata.dropped_frame_count = dropped_frame_count_;
       compositor_frame.metadata.dropped_frame_duration = dropped_frame_duration_;
