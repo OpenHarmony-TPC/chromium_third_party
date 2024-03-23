@@ -875,7 +875,7 @@ void LocalFrameMojoHandler::JavaScriptExecuteRequestExt(
   MojoUnwrapPlatformHandle(handle_fd.release().value(), nullptr, &platform_handle);
   int fd = static_cast<int>(platform_handle.value);
 
-  auto flowbufferAdapter = OhosAdapterHelper::GetInstance().CreateFlowbufferAdapter();
+  auto flowbufferAdapter = OHOS::NWeb::OhosAdapterHelper::GetInstance().CreateFlowbufferAdapter();
   if (!flowbufferAdapter) {
     LOG(ERROR) << "create flowbuffer adapter failed";
     return;
