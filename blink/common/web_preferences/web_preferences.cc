@@ -14,6 +14,7 @@
 #include "ui/base/ui_base_switches_util.h"
 
 #if BUILDFLAG(IS_OHOS)
+#include "base/ohos/sys_info_utils.h"
 #include "display_manager_adapter.h"
 #include "ohos_adapter_helper.h"
 #endif
@@ -26,6 +27,18 @@ bool IsTouchDragDropEnabled() {
   static const bool enabled = switches::IsTouchDragDropEnabled();
   return enabled;
 }
+
+#if BUILDFLAG(IS_OHOS)
+bool IsContextMenuOnMouseUpEnabled() {
+  // Cache the enabled state so it isn't queried on every WebPreferences
+  // creation. Note that this means unit tests can't override the state.
+
+  // To match platform convention like Windows, context menu should be shown
+  // on mouse up instead of mouse down for pc device.
+  static const bool enabled = base::ohos::IsPcDevice();
+  return enabled;
+}
+#endif
 
 }  // namespace
 
@@ -51,6 +64,8 @@ WebPreferences::WebPreferences()
       default_encoding("ISO-8859-1"),
 #if BUILDFLAG(IS_WIN)
       context_menu_on_mouse_up(true),
+#elif BUILDFLAG(IS_OHOS)
+      context_menu_on_mouse_up(IsContextMenuOnMouseUpEnabled()),
 #else
       context_menu_on_mouse_up(false),
 #endif
