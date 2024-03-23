@@ -167,6 +167,7 @@ class VideoFrameSubmitter::FrameSinkBundleProxy
   void ReportKeyThreadIds(const WTF::Vector<int32_t>& thread_ids,
                           int32_t process_id,
                           bool is_created) override {}
+  void OnVsyncReceived() override {}
 #endif
 
  private:
