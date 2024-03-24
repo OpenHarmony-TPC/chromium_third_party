@@ -246,6 +246,7 @@ InputHandlerProxy::InputHandlerProxy(cc::InputHandler& input_handler,
 
   UpdateElasticOverscroll();
   compositor_event_queue_ = std::make_unique<CompositorThreadEventQueue>();
+  native_event_queue_ = std::make_unique<NativeEmbedEventQueue>();
   scroll_predictor_ =
       (base::FeatureList::IsEnabled(blink::features::kResamplingScrollEvents) &&
        client->AllowsScrollResampling())
