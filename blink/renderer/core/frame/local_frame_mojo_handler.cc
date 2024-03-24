@@ -843,7 +843,7 @@ void LocalFrameMojoHandler::JavaScriptExecuteRequest(
 
   v8::HandleScope handle_scope(ToIsolate(frame_));
   v8::Local<v8::Value> result =
-      ClassicScript::CreateUnspecifiedScript(javascript)
+      ClassicScript::CreateUnparkScript(javascript)
           ->RunScriptAndReturnValue(DomWindow())
           .GetSuccessValueOrEmpty();
 
