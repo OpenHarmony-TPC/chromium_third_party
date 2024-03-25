@@ -246,6 +246,7 @@ InputHandlerProxy::InputHandlerProxy(cc::InputHandler& input_handler,
 
   UpdateElasticOverscroll();
   compositor_event_queue_ = std::make_unique<CompositorThreadEventQueue>();
+  native_event_queue_ = std::make_unique<NativeEmbedEventQueue>();
   scroll_predictor_ =
       (base::FeatureList::IsEnabled(blink::features::kResamplingScrollEvents) &&
        client->AllowsScrollResampling())
@@ -420,11 +421,7 @@ bool InputHandlerProxy::DidNativeEmbedEvent(const WebInputEvent& event) {
       if (layer_impl && layer_impl->may_contain_native()) {
         is_last_native_type_ = true;
         last_native_index_ = i;
-        float scale = layer_impl->GetIdealContentsScaleKey();
         embed_id_ = std::to_string(layer_impl->native_embed_id());
-        gfx::RectF nativeRect = layer_impl->GetNativeRect();
-        x = (x - nativeRect.x()) / scale;
-        y = (y - nativeRect.y()) / scale;
         const WebPointerEvent& web_pointer_event = static_cast<const WebPointerEvent&>(event);
         client_->DidNativeEmbedEvent(event.GetType(), embed_id_, web_pointer_event.id, x, y);
         result = true;
