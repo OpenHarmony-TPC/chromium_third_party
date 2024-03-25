@@ -831,12 +831,6 @@ InputHandlerProxy::RouteToTypeSpecificHandler(
       input_handler_->PinchGestureUpdate(
           gesture_event.data.pinch_update.scale,
           gfx::ToFlooredPoint(gesture_event.PositionInWidget()));
-
-#if defined(OHOS_INPUT_EVENTS)
-      input_handler_->PinchGestureEnd(
-          gfx::ToFlooredPoint(gesture_event.PositionInWidget()));
-#endif
-
       return DID_HANDLE;
     }
 
