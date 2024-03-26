@@ -151,6 +151,13 @@ class LocalFrameMojoHandler
       const String& javascript,
       bool wants_result,
       JavaScriptExecuteRequestCallback callback) final;
+#if BUILDFLAG(IS_OHOS)
+  void JavaScriptExecuteRequestExt(
+      mojo::ScopedHandle handle_fd,
+      const uint64_t scriptLength,
+      bool wants_result,
+      JavaScriptExecuteRequestCallback callback) final;
+#endif
   void JavaScriptExecuteRequestForTests(
       const String& javascript,
       bool has_user_gesture,

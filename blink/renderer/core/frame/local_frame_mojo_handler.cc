@@ -4,12 +4,19 @@
 
 #include "third_party/blink/renderer/core/frame/local_frame_mojo_handler.h"
 
+#if BUILDFLAG(IS_OHOS)
+#include <sys/mman.h>
+#endif
+
 #include "base/metrics/histogram_functions.h"
 #include "base/numerics/safe_conversions.h"
 #include "base/time/time.h"
 #include "build/build_config.h"
 #include "components/power_scheduler/power_mode.h"
 #include "components/power_scheduler/power_mode_arbiter.h"
+#if BUILDFLAG(IS_OHOS)
+#include "ohos_adapter_helper.h"
+#endif
 #include "services/network/public/cpp/url_loader_completion_status.h"
 #include "services/network/public/mojom/url_response_head.mojom.h"
 #include "third_party/blink/public/common/associated_interfaces/associated_interface_provider.h"
@@ -836,7 +843,7 @@ void LocalFrameMojoHandler::JavaScriptExecuteRequest(
 
   v8::HandleScope handle_scope(ToIsolate(frame_));
   v8::Local<v8::Value> result =
-      ClassicScript::CreateUnspecifiedScript(javascript)
+      ClassicScript::CreateUnparkScript(javascript)
           ->RunScriptAndReturnValue(DomWindow())
           .GetSuccessValueOrEmpty();
 
@@ -856,6 +863,33 @@ void LocalFrameMojoHandler::JavaScriptExecuteRequest(
   script_execution_power_mode_voter_->ResetVoteAfterTimeout(
       power_scheduler::PowerModeVoter::kScriptExecutionTimeout);
 }
+
+#if BUILDFLAG(IS_OHOS)
+void LocalFrameMojoHandler::JavaScriptExecuteRequestExt(
+    mojo::ScopedHandle handle_fd,
+    const uint64_t scriptLength,
+    bool wants_result,
+    JavaScriptExecuteRequestCallback callback) {
+  MojoPlatformHandle platform_handle;
+  platform_handle.struct_size = sizeof(platform_handle);
+  MojoUnwrapPlatformHandle(handle_fd.release().value(), nullptr, &platform_handle);
+  int fd = static_cast<int>(platform_handle.value);
+
+  auto flowbufferAdapter = OHOS::NWeb::OhosAdapterHelper::GetInstance().CreateFlowbufferAdapter();
+  if (!flowbufferAdapter) {
+    LOG(ERROR) << "create flowbuffer adapter failed";
+    return;
+  }
+  char* ashmem = static_cast<char*>(
+    flowbufferAdapter->CreateAshmemWithFd(fd, static_cast<size_t>(scriptLength), PROT_READ));
+  if (!ashmem) {
+    return;
+  }
+  String javascript = String::FromUTF8(ashmem);
+  JavaScriptExecuteRequest(javascript, wants_result, std::move(callback));
+  close(fd);
+}
+#endif
 
 void LocalFrameMojoHandler::JavaScriptExecuteRequestForTests(
     const String& javascript,
