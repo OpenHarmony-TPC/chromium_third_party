@@ -416,14 +416,13 @@ bool InputHandlerProxy::DidNativeEmbedEvent(const WebInputEvent& event) {
     for(size_t i = 0; i < touch_event.touches_length; ++i) {
       float x = touch_event.touches[i].PositionInWidget().x();
       float y = touch_event.touches[i].PositionInWidget().y();
-
+      int32_t id = touch_event.touches[i].id;
       cc::LayerImpl* layer_impl = input_handler_->GetLayerImpl(gfx::Point(x, y));
       if (layer_impl && layer_impl->may_contain_native()) {
         is_last_native_type_ = true;
         last_native_index_ = i;
         embed_id_ = std::to_string(layer_impl->native_embed_id());
-        const WebPointerEvent& web_pointer_event = static_cast<const WebPointerEvent&>(event);
-        client_->DidNativeEmbedEvent(event.GetType(), embed_id_, web_pointer_event.id, x, y);
+        client_->DidNativeEmbedEvent(event.GetType(), embed_id_, id, x, y);
         result = true;
       }
       if (layer_impl && !layer_impl->may_contain_native() &&
@@ -431,8 +430,7 @@ bool InputHandlerProxy::DidNativeEmbedEvent(const WebInputEvent& event) {
           is_last_native_type_ &&
           last_native_index_ == i) {
         is_last_native_type_ = false;
-        const WebPointerEvent& web_pointer_event = static_cast<const WebPointerEvent&>(event);
-        client_->DidNativeEmbedEvent(WebInputEvent::Type::kTouchCancel, embed_id_, web_pointer_event.id, x, y);
+        client_->DidNativeEmbedEvent(WebInputEvent::Type::kTouchCancel, embed_id_, id, x, y);
         result = true;
       }
     }
