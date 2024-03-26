@@ -2477,6 +2477,7 @@ void WebMediaPlayerImpl::OnVideoPipelineInfoChange(
 
 void WebMediaPlayerImpl::OnFrameHidden() {
   DCHECK(main_task_runner_->BelongsToCurrentThread());
+  LOG(INFO) << "WebMediaPlayerImpl::OnFrameHidden()";
 
   // Backgrounding a video requires a user gesture to resume playback.
   if (IsHidden())
@@ -3982,4 +3983,9 @@ bool WebMediaPlayerImpl::PassedTimingAllowOriginCheck() const {
   return demuxer_manager_->PassedDataSourceTimingAllowOriginCheck();
 }
 
+#ifdef OHOS_MEDIA_POLICY
+bool WebMediaPlayerImpl::IsFrameHidden() {
+  return IsHidden();
+}
+#endif
 }  // namespace blink

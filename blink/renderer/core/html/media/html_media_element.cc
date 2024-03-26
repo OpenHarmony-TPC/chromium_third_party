@@ -3908,6 +3908,18 @@ void HTMLMediaElement::UpdatePlayState(bool pause_speech /* = true */) {
 
   if (should_be_playing && !muted_)
     was_always_muted_ = false;
+#ifdef OHOS_MEDIA_POLICY
+  auto media_player = GetWebMediaPlayer();
+  if (media_player && media_player->IsFrameHidden() &&
+      IsHTMLVideoElement()) {
+    if (should_be_playing && media_player->HasVideo()) {
+      should_be_playing = false;
+      pause();
+      LOG(INFO) << "UpdatePlayState document is hidden, video do not "
+                   "be allow to play";
+    }
+  }
+  #endif
 
   if (should_be_playing) {
     if (!is_playing) {
