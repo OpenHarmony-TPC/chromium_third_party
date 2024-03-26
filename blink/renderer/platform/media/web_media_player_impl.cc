@@ -3985,7 +3985,7 @@ bool WebMediaPlayerImpl::PassedTimingAllowOriginCheck() const {
 
 #ifdef OHOS_MEDIA_POLICY
 bool WebMediaPlayerImpl::IsFrameHidden() {
-  return IsFrameHidden();
+  return IsHidden();
 }
 #endif
 }  // namespace blink
