@@ -3908,7 +3908,7 @@ void HTMLMediaElement::UpdatePlayState(bool pause_speech /* = true */) {
 
   if (should_be_playing && !muted_)
     was_always_muted_ = false;
-
+#ifdef OHOS_MEDIA_POLICY
   auto media_player = GetWebMediaPlayer();
   if (media_player && media_player->IsFrameHidden() &&
       IsHTMLVideoElement()) {
@@ -3919,6 +3919,7 @@ void HTMLMediaElement::UpdatePlayState(bool pause_speech /* = true */) {
                    "be allow to play";
     }
   }
+  #endif
 
   if (should_be_playing) {
     if (!is_playing) {

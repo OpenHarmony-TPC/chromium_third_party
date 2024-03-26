@@ -316,7 +316,9 @@ class PLATFORM_EXPORT WebMediaPlayerImpl
   base::WeakPtr<WebMediaPlayer> AsWeakPtr() override;
   void RegisterFrameSinkHierarchy() override;
   void UnregisterFrameSinkHierarchy() override;
+#ifdef OHOS_MEDIA_POLICY
   bool IsFrameHidden() override;
+#endif
 
   bool IsBackgroundMediaSuspendEnabled() const {
     return is_background_suspend_enabled_;

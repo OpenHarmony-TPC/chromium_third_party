@@ -3983,7 +3983,9 @@ bool WebMediaPlayerImpl::PassedTimingAllowOriginCheck() const {
   return demuxer_manager_->PassedDataSourceTimingAllowOriginCheck();
 }
 
+#ifdef OHOS_MEDIA_POLICY
 bool WebMediaPlayerImpl::IsFrameHidden() {
   return IsFrameHidden();
-
+}
+#endif
 }  // namespace blink
