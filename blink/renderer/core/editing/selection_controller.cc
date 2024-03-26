@@ -1254,8 +1254,7 @@ bool SelectionController::HandleGestureLongPress(
   bool inner_node_is_selectable = IsEditable(*inner_node) ||
                                   inner_node->IsTextNode() ||
                                   inner_node->CanStartSelection() ||
-                                  IsEditable(*inner_node->parentNode()) ||
-                                  inner_node->parentNode()->CanStartSelection();
+                                  IsEditable(*inner_node->parentNode());
 #else
   bool inner_node_is_selectable = IsEditable(*inner_node) ||
                                   inner_node->IsTextNode() ||
