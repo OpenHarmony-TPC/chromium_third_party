@@ -3909,6 +3909,17 @@ void HTMLMediaElement::UpdatePlayState(bool pause_speech /* = true */) {
   if (should_be_playing && !muted_)
     was_always_muted_ = false;
 
+  auto media_player = GetWebMediaPlayer();
+  if (media_player && media_player->IsFrameHidden() &&
+      IsHTMLVideoElement()) {
+    if (should_be_playing && media_player->HasVideo()) {
+      should_be_playing = false;
+      pause();
+      LOG(INFO) << "UpdatePlayState document is hidden, video do not "
+                   "be allow to play";
+    }
+  }
+
   if (should_be_playing) {
     if (!is_playing) {
       // Set rate, muted before calling play in case they were set before the

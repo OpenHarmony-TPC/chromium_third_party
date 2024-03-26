@@ -383,6 +383,7 @@ class WebMediaPlayer {
   // Adjusts the frame sink hierarchy for the media frame sink.
   virtual void RegisterFrameSinkHierarchy() {}
   virtual void UnregisterFrameSinkHierarchy() {}
+  virtual bool IsFrameHidden() { return false; }
 };
 
 }  // namespace blink
