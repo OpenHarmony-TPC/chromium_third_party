@@ -910,14 +910,14 @@ void WidgetBase::ReportForegroundThreadPool() {
     for (auto& worker : create_workers) {
       host->ReportKeyThread(static_cast<int32_t>(OHOS::NWeb::ResSchedStatusAdapter::THREAD_CREATED),
         base::GetCurrentRealPid(), worker->GetRealTid(),
-        OHOS::NWeb::ResSchedRoleAdapter::IMAGE_DECODE);
+        static_cast<int32_t>(OHOS::NWeb::ResSchedRoleAdapter::IMAGE_DECODE));
     }
     std::vector<scoped_refptr<base::internal::WorkerThread>>& destroy_workers =
       foreground_thread_group->ReportDestroyWorkers();
     for (auto& worker : destroy_workers) {
       host->ReportKeyThread(static_cast<int32_t>(OHOS::NWeb::ResSchedStatusAdapter::THREAD_DESTROYED),
         base::GetCurrentRealPid(), worker->GetRealTid(),
-        OHOS::NWeb::ResSchedRoleAdapter::IMAGE_DECODE);
+        static_cast<int32_t>(OHOS::NWeb::ResSchedRoleAdapter::IMAGE_DECODE));
     }
     create_workers.clear();
     destroy_workers.clear();
