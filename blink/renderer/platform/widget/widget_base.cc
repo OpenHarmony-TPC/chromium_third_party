@@ -879,7 +879,7 @@ void WidgetBase::ReportForegroundThreadPool() {
     return;
   }
   cc::CategorizedWorkerPool* worker_pool = cc::CategorizedWorkerPool::GetOrCreate(
-    &BlinkCategorizedWorkerPoolDelegate::Get()));
+    &BlinkCategorizedWorkerPoolDelegate::Get());
   cc::CategorizedWorkerPoolJob* worker_pool_job =
     static_cast<cc::CategorizedWorkerPoolJob*>(worker_pool);
   base::JobHandle* foreground_job_handle = worker_pool_job->GetForegroundJobHandle();
