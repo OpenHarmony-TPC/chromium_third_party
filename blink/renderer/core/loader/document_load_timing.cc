@@ -140,6 +140,14 @@ void DocumentLoadTiming::SetNavigationStart(base::TimeTicks navigation_start) {
   // been set yet in order to have a valid reference time in both units.
   EnsureReferenceTimesSet();
   navigation_start_ = navigation_start;
+#if !BUILDFLAG(IS_OHOS)
+  TRACE_EVENT_MARK_WITH_TIMESTAMP2(
+      "blink.user_timing", "navigationStart", navigation_start_, "frame",
+      GetFrameIdForTracing(GetFrame()), "data",
+      [&](perfetto::TracedValue context) {
+        WriteNavigationStartDataIntoTracedValue(std::move(context));
+      });
+#endif
 
   // The reference times are adjusted based on the embedder's navigationStart.
   DCHECK(!reference_monotonic_time_.is_null());
@@ -195,11 +203,21 @@ void DocumentLoadTiming::AddRedirect(const KURL& redirecting_url,
 
 void DocumentLoadTiming::SetRedirectStart(base::TimeTicks redirect_start) {
   redirect_start_ = redirect_start;
+#if !BUILDFLAG(IS_OHOS)
+  TRACE_EVENT_MARK_WITH_TIMESTAMP1("blink.user_timing", "redirectStart",
+                                   redirect_start_, "frame",
+                                   GetFrameIdForTracing(GetFrame()));
+#endif
   NotifyDocumentTimingChanged();
 }
 
 void DocumentLoadTiming::SetRedirectEnd(base::TimeTicks redirect_end) {
   redirect_end_ = redirect_end;
+#if !BUILDFLAG(IS_OHOS)
+  TRACE_EVENT_MARK_WITH_TIMESTAMP1("blink.user_timing", "redirectEnd",
+                                   redirect_end_, "frame",
+                                   GetFrameIdForTracing(GetFrame()));
+#endif
   NotifyDocumentTimingChanged();
 }
 
@@ -225,25 +243,47 @@ void DocumentLoadTiming::MarkFetchStart() {
 
 void DocumentLoadTiming::SetFetchStart(base::TimeTicks fetch_start) {
   fetch_start_ = fetch_start;
+#if !BUILDFLAG(IS_OHOS)
+  TRACE_EVENT_MARK_WITH_TIMESTAMP1("blink.user_timing", "fetchStart",
+                                   fetch_start_, "frame",
+                                   GetFrameIdForTracing(GetFrame()));
+#endif
   NotifyDocumentTimingChanged();
 }
 
 void DocumentLoadTiming::SetResponseEnd(base::TimeTicks response_end) {
   response_end_ = response_end;
+#if !BUILDFLAG(IS_OHOS)
+  TRACE_EVENT_MARK_WITH_TIMESTAMP1("blink.user_timing", "responseEnd",
+                                   response_end_, "frame",
+                                   GetFrameIdForTracing(GetFrame()));
+#endif
   NotifyDocumentTimingChanged();
 }
 
 void DocumentLoadTiming::MarkLoadEventStart() {
   load_event_start_ = tick_clock_->NowTicks();
+#if BUILDFLAG(IS_OHOS)
   TRACE_EVENT1("navigation", "PAGE_LOAD_TIME",
                "loadEventStart", load_event_start_);
+#else
+  TRACE_EVENT_MARK_WITH_TIMESTAMP1("blink.user_timing", "loadEventStart",
+                                   load_event_start_, "frame",
+                                   GetFrameIdForTracing(GetFrame()));
+#endif
   NotifyDocumentTimingChanged();
 }
 
 void DocumentLoadTiming::MarkLoadEventEnd() {
   load_event_end_ = tick_clock_->NowTicks();
+#if BUILDFLAG(IS_OHOS)
   TRACE_EVENT1("navigation", "PAGE_LOAD_TIME",
                "loadEventEnd", load_event_end_);
+#else
+  TRACE_EVENT_MARK_WITH_TIMESTAMP1("blink.user_timing", "loadEventEnd",
+                                   load_event_end_, "frame",
+                                   GetFrameIdForTracing(GetFrame()));
+#endif
   NotifyDocumentTimingChanged();
 }
 

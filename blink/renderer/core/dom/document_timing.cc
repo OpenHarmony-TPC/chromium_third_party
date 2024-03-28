@@ -32,29 +32,54 @@ void DocumentTiming::NotifyDocumentTimingChanged() {
 
 void DocumentTiming::MarkDomLoading() {
   dom_loading_ = base::TimeTicks::Now();
+#if BUILDFLAG(IS_OHOS)
   TRACE_EVENT1("navigation", "PAGE_LOAD_TIME",
                "domLoading", dom_loading_);
+#else
+  TRACE_EVENT_MARK_WITH_TIMESTAMP1("blink.user_timing,rail", "domLoading",
+                                   dom_loading_, "frame",
+                                   GetFrameIdForTracing(GetFrame()));
+#endif
   NotifyDocumentTimingChanged();
 }
 
 void DocumentTiming::MarkDomInteractive() {
   dom_interactive_ = base::TimeTicks::Now();
+#if BUILDFLAG(IS_OHOS)
   TRACE_EVENT1("navigation", "PAGE_LOAD_TIME",
                "domInteractive", dom_interactive_);
+#else
+  TRACE_EVENT_MARK_WITH_TIMESTAMP1("blink.user_timing,rail", "domInteractive",
+                                   dom_interactive_, "frame",
+                                   GetFrameIdForTracing(GetFrame()));
+#endif
   NotifyDocumentTimingChanged();
 }
 
 void DocumentTiming::MarkDomContentLoadedEventStart() {
   dom_content_loaded_event_start_ = base::TimeTicks::Now();
+#if BUILDFLAG(IS_OHOS)
   TRACE_EVENT1("navigation", "PAGE_LOAD_TIME",
                "domContentLoadedEventStart", dom_content_loaded_event_start_);
+#else
+  TRACE_EVENT_MARK_WITH_TIMESTAMP1("blink.user_timing,rail",
+                                   "domContentLoadedEventStart",
+                                   dom_content_loaded_event_start_, "frame",
+                                   GetFrameIdForTracing(GetFrame()));
+#endif
   NotifyDocumentTimingChanged();
 }
 
 void DocumentTiming::MarkDomContentLoadedEventEnd() {
   dom_content_loaded_event_end_ = base::TimeTicks::Now();
+#if BUILDFLAG(IS_OHOS)
   TRACE_EVENT1("navigation", "PAGE_LOAD_TIME",
                "domContentLoadedEventEnd", dom_content_loaded_event_end_);
+#else
+  TRACE_EVENT_MARK_WITH_TIMESTAMP1(
+      "blink.user_timing,rail", "domContentLoadedEventEnd",
+      dom_content_loaded_event_end_, "frame", GetFrameIdForTracing(GetFrame()));
+#endif
   InteractiveDetector* interactive_detector(
       InteractiveDetector::From(*document_));
   if (interactive_detector) {
