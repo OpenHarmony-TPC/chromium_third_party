@@ -77,6 +77,12 @@ bool CookieJarHelper::IPCNeeded(CookieBackend* backend) {
   return true;
 }
 
+void CookieJarHelper::NoticeCookieChanged() {
+  bool* cookie_changed(static_cast<bool*>(mapping_.get()));
+  *cookie_changed = true;
+}
+
+
 CookieJarHelper::ShmRegisterRecord*
 CookieJarHelper::getOrCreateShmRegisterRecord() {
   for (auto item : shm_record_list_) {
