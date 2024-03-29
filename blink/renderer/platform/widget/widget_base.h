@@ -391,6 +391,7 @@ class PLATFORM_EXPORT WidgetBase : public mojom::blink::Widget,
 #if BUILDFLAG(IS_OHOS)
   void DidNativeEmbedEvent(blink::WebInputEvent::Type type,
                            std::string embedId, int32_t id, float x, float y);
+  void ReportForegroundThreadPool();
 #endif
 
  private:
@@ -573,6 +574,10 @@ class PLATFORM_EXPORT WidgetBase : public mojom::blink::Widget,
   absl::optional<int> max_render_buffer_bounds_sw_;
 
   base::WeakPtrFactory<WidgetBase> weak_ptr_factory_{this};
+
+#if BUILDFLAG(IS_OHOS)
+  bool is_worker_pool_initial_ = false;
+#endif
 };
 
 }  // namespace blink
