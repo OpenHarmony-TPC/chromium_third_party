@@ -118,7 +118,7 @@ double WebPerformanceMetricsForReporting::ResponseEnd() const {
 double WebPerformanceMetricsForReporting::DomInteractive() const {
   return MillisecondsToSeconds(private_->timing()->domInteractive());
 }
-#if defined(REPORT_SYS_EVENT)
+#endif
 
 double WebPerformanceMetricsForReporting::ResponseStart() const {
   return MillisecondsToSeconds(private_->timing()->responseStart());
