@@ -261,6 +261,11 @@ class LocalFrameMojoHandler
 #if BUILDFLAG(IS_OHOS)
   void GetImageFromCache(const WTF::String& url,
                          GetImageFromCacheCallback callback) final;
+
+  void GenerateCodeCache(const WTF::String& url,
+                         const WTF::String& script,
+                         mojom::blink::CacheOptionsPtr cache_options,
+                         GenerateCodeCacheCallback callback) final;
 #endif
 
   // mojom::blink::HighPriorityLocalFrame implementation:

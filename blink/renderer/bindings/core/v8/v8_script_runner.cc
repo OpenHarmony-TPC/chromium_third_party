@@ -505,6 +505,8 @@ ScriptEvaluationResult V8ScriptRunner::CompileAndRunScript(
     std::tie(compile_options, produce_cache_options, no_cache_reason) =
         V8CodeCache::GetCompileOptions(execution_context->GetV8CacheOptions(),
                                        *classic_script);
+    LOG(DEBUG) << "CompileAndRunScript. no cache reason: " << static_cast<int>(no_cache_reason) <<
+        ". url: " << classic_script->SourceUrl().GetString();
 
     v8::ScriptOrigin origin = classic_script->CreateScriptOrigin(isolate);
     v8::MaybeLocal<v8::Value> maybe_result;

@@ -15,6 +15,7 @@
 #include "third_party/blink/renderer/platform/wtf/allocator/allocator.h"
 #include "third_party/blink/renderer/platform/wtf/text/wtf_string.h"
 #include "v8/include/v8.h"
+#include "third_party/blink/renderer/platform/loader/fetch/script_cached_metadata_handler.h"
 
 namespace WTF {
 class TextEncoding;
@@ -46,6 +47,23 @@ class CORE_EXPORT V8CodeCache final {
     kNoProduceCache,
     kSetTimeStamp,
     kProduceCodeCache,
+  };
+
+  enum class CacheError {
+    kNoError = 0,
+    kInternalError = -1,
+  };
+
+  class CacheOptions {
+   public:
+    explicit CacheOptions(const WTF::HashMap<WTF::String, WTF::String> response_headers,
+                          const bool is_module,
+                          const bool is_top_level) :
+        response_headers_(response_headers), is_module_(is_module), is_top_level_(is_top_level) {}
+
+    WTF::HashMap<WTF::String, WTF::String> response_headers_;
+    bool is_module_;
+    bool is_top_level_;
   };
 
   static uint32_t TagForCodeCache(const CachedMetadataHandler*);
@@ -102,6 +120,19 @@ class CORE_EXPORT V8CodeCache final {
       const KURL& source_url,
       const WTF::TextEncoding&,
       OpaqueMode);
+
+  static CacheError GenerateCodeCache(
+      ScriptState* script_state,
+      const String& url,
+      const String& script,
+      CacheOptions cache_options);
+
+  static CacheError GenerateCodeCacheInternal(
+      ScriptState* script_state,
+      const String& script_string,
+      const KURL& source_url,
+      ScriptCachedMetadataHandler* cache_handler,
+      CacheOptions cache_options);
 };
 
 }  // namespace blink

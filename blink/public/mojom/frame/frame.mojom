@@ -201,6 +201,12 @@ struct IframeAttributes {
   string? src;
 };
 
+struct CacheOptions {
+  map<string, string> response_headers;
+  bool is_module;
+  bool is_top_level;
+};
+
 // Implemented in Browser, this interface defines frame-specific methods that
 // will be invoked from the render process (e.g. content::RenderFrameHostImpl).
 //
@@ -1049,6 +1055,10 @@ interface LocalFrame {
   // this url
   [EnableIf=is_ohos]
   GetImageFromCache(string url) => (uint32 buffer_size, mojo_base.mojom.ReadOnlySharedMemoryRegion? region);
+
+  // Request the renderer to generate code cache for the given javascript.
+  [EnableIf=is_ohos]
+  GenerateCodeCache(string url, string script, CacheOptions cache_options) => (int32 result);
 };
 
 // Also implemented in Blink, this interface defines frame-specific methods
