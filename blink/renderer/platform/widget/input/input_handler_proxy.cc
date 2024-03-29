@@ -425,6 +425,10 @@ bool InputHandlerProxy::DidNativeEmbedEvent(const WebInputEvent& event) {
         gfx::RectF nativeRect = layer_impl->GetNativeRect();
         x = x - nativeRect.x();
         y = y - nativeRect.y();
+        if (isTouchStart_ && i < touch_event.touches_length - 1) {
+          continue;
+        }
+        isTouchStart_ = (event.GetType() == WebInputEvent::Type::kTouchStart);
         client_->DidNativeEmbedEvent(event.GetType(), embed_id_, id, x, y);
         result = true;
       }
