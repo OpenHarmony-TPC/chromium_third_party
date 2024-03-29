@@ -80,6 +80,7 @@
 #include "third_party/blink/renderer/core/view_transition/view_transition_supplement.h"
 #include "third_party/blink/renderer/platform/loader/fetch/resource_timing_utils.h"
 #include "third_party/blink/renderer/platform/widget/frame_widget.h"
+#include "third_party/blink/renderer/bindings/core/v8/v8_code_cache.h"
 
 #if BUILDFLAG(IS_MAC)
 #include "base/mac/foundation_util.h"
@@ -1440,6 +1441,17 @@ void LocalFrameMojoHandler::GetImageFromCache(
   // Client()->OnGetImageDataForUrl(url, resource_buffer->size(), &ro_region);
   std::move(callback).Run(static_cast<uint32_t>(resource_buffer->size()), std::move(ro_region));
   return;
+}
+
+void LocalFrameMojoHandler::GenerateCodeCache(const WTF::String& url,
+                                              const WTF::String& script,
+                                              mojom::blink::CacheOptionsPtr cache_options,
+                                              GenerateCodeCacheCallback callback) {
+  ScriptState* script_state = ToScriptStateForMainWorld(frame_);
+  V8CodeCache::CacheOptions options(
+      cache_options->response_headers, cache_options->is_module, cache_options->is_top_level);
+  V8CodeCache::CacheError err = V8CodeCache::GenerateCodeCache(script_state, url, script, options);
+  std::move(callback).Run(static_cast<int32_t>(err));
 }
 #endif
 

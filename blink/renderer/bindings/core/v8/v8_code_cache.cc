@@ -182,6 +182,7 @@ V8CodeCache::GetCompileOptions(mojom::blink::V8CacheOptions cache_options,
   }
 
   if (HasCodeCache(cache_handler)) {
+    LOG(ERROR) << "find exist code cache. url: " << url.GetString(); 
     return std::make_tuple(v8::ScriptCompiler::kConsumeCodeCache,
                            ProduceCacheOptions::kNoProduceCache,
                            no_cache_reason);
@@ -412,6 +413,79 @@ scoped_refptr<CachedMetadata> V8CodeCache::GenerateFullCodeCache(
   }
 
   return cached_metadata;
+}
+
+V8CodeCache::CacheError V8CodeCache::GenerateCodeCache(
+    ScriptState* script_state,
+    const String& url,
+    const String& script,
+    CacheOptions cache_options) {
+  KURL source_url(url);
+  ResourceResponse response(source_url);
+  for (auto header : cache_options.response_headers_) {
+    response.SetHttpHeaderField(AtomicString(header.key), AtomicString(header.value));
+  }
+
+  response.SetResponseTime(base::Time::UnixEpoch());
+  response.SetMimeType("text/javascript");
+
+  auto sender = CachedMetadataSender::Create(
+      response, mojom::blink::CodeCacheType::kJavascript, SecurityOrigin::Create(source_url));
+  
+  auto cache_handler = 
+      MakeGarbageCollected<ScriptCachedMetadataHandler>(UTF8Encoding(), std::move(sender));
+
+  V8CodeCache::CacheError error = GenerateCodeCacheInternal(
+      script_state, script, source_url, cache_handler, cache_options);
+  LOG(ERROR) << "Generate code cache end. Error code: " << static_cast<int>(error) << ". url: " << url;
+  return error;
+}
+
+V8CodeCache::CacheError V8CodeCache::GenerateCodeCacheInternal(
+    ScriptState* script_state,
+    const String& script_string,
+    const KURL& source_url,
+    ScriptCachedMetadataHandler* cache_handler,
+    CacheOptions cache_options) {
+  const String file_name = source_url.GetString();
+
+  ScriptState::Scope scope(script_state);
+  v8::Isolate* isolate = script_state->GetIsolate();
+  v8::TryCatch block(isolate);
+
+  ReferrerScriptInfo referrer_info;
+  
+  v8::ScriptOrigin origin(isolate, V8String(isolate, file_name));
+
+  v8::Local<v8::String> code(V8String(isolate, script_string));
+  v8::ScriptCompiler::Source source(code, origin);
+
+  v8::MaybeLocal<v8::UnboundScript> maybe_unbound_script =
+      v8::ScriptCompiler::CompileUnboundScript(
+          isolate, &source, v8::ScriptCompiler::kEagerCompile);
+
+  v8::Local<v8::UnboundScript> unbound_script;
+  if (!maybe_unbound_script.ToLocal(&unbound_script)) {
+    LOG(ERROR) << "Generate code cache failed: compile script error. url: " << source_url.GetString();
+    return V8CodeCache::CacheError::kInternalError;
+  }
+
+  std::unique_ptr<v8::ScriptCompiler::CachedData> cached_data(
+      v8::ScriptCompiler::CreateCodeCache(unbound_script));
+  if (!cached_data || !cached_data->length) {
+    LOG(ERROR) << "Generate code cache failed: create cached metadata failed. url: " << source_url.GetString();
+    return V8CodeCache::CacheError::kInternalError;
+  }
+
+  auto execution_context = ExecutionContext::From(script_state);
+  auto code_cache_host = ExecutionContext::GetCodeCacheHostFromContext(execution_context);
+  V8CodeCache::SetCacheTimeStamp(code_cache_host, cache_handler);
+  cache_handler->ClearCachedMetadata(code_cache_host, CachedMetadataHandler::kClearLocally);
+  cache_handler->SetCachedMetadata(code_cache_host, V8CodeCache::TagForCodeCache(cache_handler),
+      cached_data->data, cached_data->length);
+
+  LOG(ERROR) << "Generate code cache successfully. url: " << source_url.GetString();
+  return V8CodeCache::CacheError::kNoError;
 }
 
 }  // namespace blink
