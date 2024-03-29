@@ -38,6 +38,8 @@ class CookieJarHelper {
     }
   }
 
+  void NoticeCookieChanged();
+
  private:
   class ShmRegisterRecord;
   using ShmRegisterRecordList = std::list<ShmRegisterRecord*>;

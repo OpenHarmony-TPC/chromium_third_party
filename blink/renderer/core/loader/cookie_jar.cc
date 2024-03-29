@@ -69,6 +69,10 @@ void CookieJar::SetCookie(const String& value) {
   if (cookie_url.IsEmpty())
     return;
 
+  #if BUILDFLAG(IS_OHOS)
+    helper_.NoticeCookieChanged();
+  #endif
+
   base::ElapsedTimer timer;
   bool requested = RequestRestrictedCookieManagerIfNeeded();
   bool site_for_cookies_ok = true;
