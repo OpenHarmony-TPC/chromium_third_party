@@ -769,6 +769,11 @@ void ChromeClientImpl::OpenFileChooser(
     // Choosing failed, so try the next chooser.
     DidCompleteFileChooser(*file_chooser);
   }
+#ifdef OHOS_FILE_UPLOAD
+  else {
+    file_chooser_queue_.front().get()->DisconnectClient();
+  }
+#endif
 }
 
 void ChromeClientImpl::DidCompleteFileChooser(FileChooser& chooser) {
