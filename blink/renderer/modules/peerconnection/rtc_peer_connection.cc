@@ -1980,7 +1980,7 @@ RTCDataChannel* RTCPeerConnection::createDataChannel(
     return nullptr;
 
   bool isAdvancedSecurityMode = OHOS::NWeb::OhosAdapterHelper::GetInstance()
-                              .GetSystemPropertiesInstance().GetLockdownModeStatus();
+                              .GetSystemPropertiesInstance().IsAdvancedSecurityMode();
   if (isAdvancedSecurityMode) {
     exception_state.ThrowTypeError("RTCDataChannel can't be used on advancedSecurityMode!");
     return nullptr;

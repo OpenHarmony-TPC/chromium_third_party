@@ -417,7 +417,7 @@ ScriptPromise MediaDevices::getUserMedia(
       script_state, "Media.MediaDevices.GetUserMedia", base::Seconds(8));
 
   bool isAdvancedSecurityMode = OHOS::NWeb::OhosAdapterHelper::GetInstance()
-                              .GetSystemPropertiesInstance().GetLockdownModeStatus();
+                              .GetSystemPropertiesInstance().IsAdvancedSecurityMode();
   if (isAdvancedSecurityMode) {
     resolver->RecordAndThrowDOMException(
         exception_state, DOMExceptionCode::kNotSupportedError,
