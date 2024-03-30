@@ -122,7 +122,7 @@ class ListAttributeTargetObserver : public IdTargetObserver {
 };
 
 #ifdef OHOS_CSS_FONT
-const int kDefaultSize = 13;
+const int kDefaultSize = 12;
 #else
 const int kDefaultSize = 20;
 #endif
