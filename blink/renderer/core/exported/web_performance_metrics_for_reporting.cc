@@ -98,6 +98,7 @@ double WebPerformanceMetricsForReporting::InputForNavigationStart() const {
   return MillisecondsToSeconds(private_->timingForReporting()->inputStart());
 }
 
+#if BUILDFLAG(IS_OHOS)
 double WebPerformanceMetricsForReporting::RedirectStart() const {
   return MillisecondsToSeconds(private_->timing()->redirectStart());
 }
@@ -110,16 +111,17 @@ double WebPerformanceMetricsForReporting::FetchStart() const {
   return MillisecondsToSeconds(private_->timing()->fetchStart());
 }
 
-double WebPerformanceMetricsForReporting::ResponseStart() const {
-  return MillisecondsToSeconds(private_->timing()->responseStart());
-}
-
 double WebPerformanceMetricsForReporting::ResponseEnd() const {
   return MillisecondsToSeconds(private_->timing()->responseEnd());
 }
 
 double WebPerformanceMetricsForReporting::DomInteractive() const {
   return MillisecondsToSeconds(private_->timing()->domInteractive());
+}
+#endif
+
+double WebPerformanceMetricsForReporting::ResponseStart() const {
+  return MillisecondsToSeconds(private_->timing()->responseStart());
 }
 
 double WebPerformanceMetricsForReporting::DomContentLoadedEventStart() const {
