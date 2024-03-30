@@ -5023,6 +5023,17 @@ bool IsListBox(const LayoutObject* object) {
   return select && !select->UsesMenuList();
 }
 
+#ifdef BUILDFLAG(OHOS_CLIPBOARD)
+bool LayoutObject::VisibleToHitTestRequest(const HitTestRequest& request) const {
+  if (IsImage() && request.OnDoHitTest()) {
+    return StyleRef().Visibility() == EVisibility::kVisible;
+  }
+  return StyleRef().Visibility() == EVisibility::kVisible &&
+          (request.IgnorePointerEventsNone() ||
+          StyleRef().VisibleToHitTesting());
+}
+#endif
+
 }  // namespace blink
 
 #if DCHECK_IS_ON()

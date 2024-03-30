@@ -55,6 +55,9 @@ class HitTestRequest {
     kAvoidCache = 1 << 13,
     kIgnoreZeroOpacityObjects = 1 << 14,
     kHitTestVisualOverflow = 1 << 15,
+#ifdef BUILDFLAG(OHOS_CLIPBOARD)
+    kOnDoHitTest = 1 << 16,
+#endif
   };
 
   typedef unsigned HitTestRequestType;
@@ -66,6 +69,9 @@ class HitTestRequest {
     DCHECK(!(request_type & kPenetratingList) || (request_type & kListBased));
   }
 
+#ifdef BUILDFLAG(OHOS_CLIPBOARD)
+  bool OnDoHitTest() const { return request_type_ & kOnDoHitTest; }
+#endif
   bool ReadOnly() const { return request_type_ & kReadOnly; }
   bool Active() const { return request_type_ & kActive; }
   bool Move() const { return request_type_ & kMove; }
