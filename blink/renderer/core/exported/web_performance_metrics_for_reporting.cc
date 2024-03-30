@@ -98,7 +98,7 @@ double WebPerformanceMetricsForReporting::InputForNavigationStart() const {
   return MillisecondsToSeconds(private_->timingForReporting()->inputStart());
 }
 
-#if defined(REPORT_SYS_EVENT)
+#if defined(IS_OHOS)
 double WebPerformanceMetricsForReporting::RedirectStart() const {
   return MillisecondsToSeconds(private_->timing()->redirectStart());
 }

@@ -66,7 +66,7 @@ class BLINK_EXPORT WebPerformanceMetricsForReporting {
   double NavigationStart() const;
   base::TimeTicks NavigationStartAsMonotonicTime() const;
   BackForwardCacheRestoreTimings BackForwardCacheRestore() const;
-#if defined(REPORT_SYS_EVENT)
+#if defined(IS_OHOS)
   double RedirectStart() const;
   double RedirectEnd() const;
   double FetchStart() const;
