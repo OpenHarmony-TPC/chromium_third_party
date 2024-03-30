@@ -1173,7 +1173,7 @@ InputHandlerProxy::HandleGestureScrollUpdate(
   const float provided_delta_y = gesture_event.data.scroll_update.delta_y;
 #if BUILDFLAG(IS_OHOS)
   if (need_flush_scroll_update_gesture_) {
-    LOG(INFO)<<"InputHandlerProxy::HandleGestureScrollUpdate internalbeginframe scrollupdate";
+    LOG(DEBUG)<<"InputHandlerProxy::HandleGestureScrollUpdate internalbeginframe scrollupdate";
     need_flush_scroll_update_gesture_ = false;
   }
 #endif
