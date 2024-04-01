@@ -78,6 +78,14 @@ bool CookieJarHelper::IPCNeeded(CookieBackend* backend) {
 }
 
 void CookieJarHelper::NoticeCookieChanged() {
+  KURL cookie_url = document_->CookieURL();
+  if (cookie_url.IsEmpty()) {
+    return;
+  }
+  bool& registed = getOrCreateShmRegisterRecord()->registed();
+  if (!registed) {
+    return;
+  }
   bool* cookie_changed(static_cast<bool*>(mapping_.get()));
   *cookie_changed = true;
 }

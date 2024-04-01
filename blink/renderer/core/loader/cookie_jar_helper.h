@@ -25,7 +25,7 @@ class CookieJarHelper {
 
   explicit CookieJarHelper(Document* document);
   ~CookieJarHelper();
-  bool IPCNeeded(CookieBackend* backend_);
+  bool IPCNeeded(CookieBackend* backend);
   String& cookie() { return cookie_value_; }
 
   bool IsExpired(const base::Time& current) const {
