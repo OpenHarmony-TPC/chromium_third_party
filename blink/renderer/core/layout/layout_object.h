@@ -2827,12 +2827,16 @@ class CORE_EXPORT LayoutObject : public GarbageCollected<LayoutObject>,
       Parent()->RemoveChild(this);
   }
 
+#ifndef OHOS_CLIPBOARD
   bool VisibleToHitTestRequest(const HitTestRequest& request) const {
     NOT_DESTROYED();
     return StyleRef().Visibility() == EVisibility::kVisible &&
            (request.IgnorePointerEventsNone() ||
             StyleRef().UsedPointerEvents() != EPointerEvents::kNone);
   }
+#else
+  bool VisibleToHitTestRequest(const HitTestRequest& request) const;
+#endif
 
   bool VisibleToHitTesting() const {
     NOT_DESTROYED();

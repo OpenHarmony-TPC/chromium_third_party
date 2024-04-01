@@ -445,7 +445,12 @@ bool ContextMenuController::ShowContextMenu(LocalFrame* frame,
 
   HitTestRequest::HitTestRequestType type =
       HitTestRequest::kReadOnly | HitTestRequest::kActive |
+#ifdef BUILDFLAG(OHOS_CLIPBOARD)
+      HitTestRequest::kPenetratingList | HitTestRequest::kListBased |
+      HitTestRequest::kOnDoHitTest;
+#else
       HitTestRequest::kPenetratingList | HitTestRequest::kListBased;
+#endif
 
   HitTestLocation location(point);
   HitTestResult result(type, location);
@@ -608,6 +613,11 @@ bool ContextMenuController::ShowContextMenu(LocalFrame* frame,
     if (media_element->ShouldShowAllControls())
       data.media_flags |= ContextMenuData::kMediaControls;
 #if BUILDFLAG(IS_OHOS)
+  } else if (!result.AbsoluteImageURL().IsEmpty()) {
+    data.src_url = GURL(result.AbsoluteImageURL());
+    data.media_type = mojom::blink::ContextMenuDataMediaType::kImage;
+    data.media_flags |= ContextMenuData::kMediaCanPrint;
+    data.has_image_contents = result.GetImage() && !result.GetImage()->IsNull();
   } else if (data.src_url.is_empty() && !background_url.empty()) {
     data.src_url =
         GURL(result.InnerNode()->GetDocument().CompleteURL(background_url));

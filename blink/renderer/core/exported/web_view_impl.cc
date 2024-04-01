@@ -3921,11 +3921,20 @@ WebHitTestResult WebViewImpl::HitTestResultForTap(
       TransformWebGestureEvent(MainFrameImpl()->GetFrameView(), tap_event);
 
   HitTestResult result =
+#ifdef BUILDFLAG(OHOS_CLIPBOARD)
+      main_frame->GetEventHandler()
+          .HitTestResultForGestureEvent(
+              scaled_event, 
+              HitTestRequest::kReadOnly |
+              HitTestRequest::kActive |
+              HitTestRequest::kOnDoHitTest)
+          .GetHitTestResult();
+#else
       main_frame->GetEventHandler()
           .HitTestResultForGestureEvent(
               scaled_event, HitTestRequest::kReadOnly | HitTestRequest::kActive)
           .GetHitTestResult();
-
+#endif //OHOS_CLIPBOARD
   result.SetToShadowHostIfInRestrictedShadowRoot();
   return result;
 }
