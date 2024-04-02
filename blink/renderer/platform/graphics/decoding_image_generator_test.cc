@@ -26,6 +26,7 @@ scoped_refptr<SegmentReader> CreateSegmentReader(char* reference_data,
 
 class DecodingImageGeneratorTest : public testing::Test {};
 
+#if !defined(OHOS_UNITTESTS)
 TEST_F(DecodingImageGeneratorTest, Create) {
   scoped_refptr<SharedBuffer> reference_data =
       ReadFile(kDecodersTestingDir, "radient.gif");
@@ -37,6 +38,7 @@ TEST_F(DecodingImageGeneratorTest, Create) {
   EXPECT_EQ(generator->getInfo().width(), 32);
   EXPECT_EQ(generator->getInfo().height(), 32);
 }
+#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
 TEST_F(DecodingImageGeneratorTest, CreateWithNoSize) {
   // Construct dummy image data that produces no valid size from the

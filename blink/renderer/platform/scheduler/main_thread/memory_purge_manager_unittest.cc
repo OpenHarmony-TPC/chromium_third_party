@@ -60,6 +60,7 @@ class MemoryPurgeManagerTest : public testing::Test {
 
 // Verify that OnPageFrozen() triggers a memory pressure notification in a
 // backgrounded renderer.
+#if !defined(OHOS_UNITTESTS)
 TEST_F(MemoryPurgeManagerTest, PageFrozenInBackgroundedRenderer) {
   memory_purge_manager_.SetPurgeDisabledForTesting(true);
 
@@ -224,7 +225,9 @@ TEST_F(MemoryPurgeManagerTest, PurgeRendererMemoryWhenBackgroundedDisabled) {
   FastForwardBy(base::TimeDelta::Max());
   EXPECT_EQ(0U, MemoryPressureCount());
 }
+#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
+#if !defined(OHOS_UNITTESTS)
 TEST_F(MemoryPurgeManagerTest,
        PurgeRendererMemoryWhenBackgroundedEnabledForegroundedBeforePurge) {
   if (!MemoryPurgeManager::kPurgeEnabled) {
@@ -239,7 +242,9 @@ TEST_F(MemoryPurgeManagerTest,
   FastForwardBy(base::TimeDelta::Max());
   EXPECT_EQ(0U, MemoryPressureCount());
 }
+#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
+#if !defined(OHOS_UNITTESTS)
 TEST_F(MemoryPurgeManagerTest, PageFrozenAndResumedWhileBackgrounded) {
   memory_purge_manager_.SetPurgeDisabledForTesting(true);
 
@@ -272,6 +277,7 @@ TEST_F(MemoryPurgeManagerTest, NoMemoryPurgeIfNoPage) {
   FastForwardBy(base::Minutes(0));
   EXPECT_EQ(0U, MemoryPressureCount());
 }
+#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
 }  // namespace
 

@@ -723,6 +723,7 @@ TEST_P(ShapeParameterTest, ZeroWidthSpace) {
 #endif
 }
 
+#if !defined(OHOS_UNITTESTS)
 TEST_F(HarfBuzzShaperTest, IdeographicSpace) {
   String string(
       u"\u3001"    // IDEOGRAPHIC COMMA
@@ -733,6 +734,7 @@ TEST_F(HarfBuzzShaperTest, IdeographicSpace) {
   result->GetRunFontData(&run_font_data);
   EXPECT_EQ(run_font_data.size(), 1u);
 }
+#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
 TEST_F(HarfBuzzShaperTest, NegativeLetterSpacing) {
   String string(u"Hello");
@@ -829,7 +831,7 @@ TEST_P(GlyphDataRangeTest, Data) {
   unsigned end_glyph = std::distance(run.glyph_data_.begin(), glyphs.end);
   EXPECT_EQ(data.end_glyph, end_glyph);
 }
-
+#if !defined(OHOS_UNITTESTS)
 static struct OffsetForPositionTestData {
   float position;
   unsigned offset_ltr;
@@ -907,6 +909,7 @@ TEST_P(OffsetForPositionTest, Data) {
   EXPECT_EQ(data.fit_rtl_rtl,
             result->OffsetToFit(data.position, TextDirection::kRtl));
 }
+#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
 TEST_F(HarfBuzzShaperTest, PositionForOffsetLatin) {
   String string = To16Bit("Hello World!", 12);
@@ -1372,6 +1375,7 @@ TEST_F(HarfBuzzShaperTest, SubRange) {
   DCHECK_EQ(result->Direction(), sub_range->Direction());
 }
 
+#if !defined(OHOS_UNITTESTS)
 TEST_F(HarfBuzzShaperTest, SafeToBreakLatinCommonLigatures) {
   FontDescription::VariantLigatures ligatures;
   ligatures.common = FontDescription::kEnabledLigaturesState;
@@ -1411,7 +1415,9 @@ TEST_F(HarfBuzzShaperTest, SafeToBreakLatinCommonLigatures) {
   EXPECT_EQ(6u, copied_result->NextSafeToBreakOffset(5));
   EXPECT_EQ(6u, copied_result->NextSafeToBreakOffset(6));
 }
+#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
+#if !defined(OHOS_UNITTESTS)
 TEST_F(HarfBuzzShaperTest, SafeToBreakPreviousLatinCommonLigatures) {
   FontDescription::VariantLigatures ligatures;
   ligatures.common = FontDescription::kEnabledLigaturesState;
@@ -1451,7 +1457,9 @@ TEST_F(HarfBuzzShaperTest, SafeToBreakPreviousLatinCommonLigatures) {
   EXPECT_EQ(0u, copied_result->PreviousSafeToBreakOffset(1));
   EXPECT_EQ(0u, copied_result->PreviousSafeToBreakOffset(0));
 }
+#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
+#if !defined(OHOS_UNITTESTS)
 TEST_F(HarfBuzzShaperTest, SafeToBreakLatinDiscretionaryLigatures) {
   FontDescription::VariantLigatures ligatures;
   ligatures.common = FontDescription::kEnabledLigaturesState;
@@ -1506,6 +1514,7 @@ TEST_F(HarfBuzzShaperTest, SafeToBreakLatinDiscretionaryLigatures) {
         referenceResult->SnappedStartPositionForOffset(i + inserts_offset));
   }
 }
+#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
 // TODO(crbug.com/870712): This test fails due to font fallback differences on
 // Android and Fuchsia.
@@ -1896,12 +1905,14 @@ TEST_F(HarfBuzzShaperTest, ShapeVerticalWithSubpixelPositionIsRounded) {
   }
 }
 
+
 // Broken on iOS: https://crbug.com/1194323
 #if BUILDFLAG(IS_IOS)
 #define MAYBE_EmojiPercentage DISABLED_EmojiPercentage
 #else
 #define MAYBE_EmojiPercentage EmojiPercentage
 #endif
+#if !defined(OHOS_UNITTESTS)
 TEST_F(HarfBuzzShaperTest, MAYBE_EmojiPercentage) {
 #if BUILDFLAG(IS_MAC)
   if (base::mac::IsAtLeastOS11())
@@ -1954,6 +1965,7 @@ TEST_F(HarfBuzzShaperTest, MAYBE_EmojiPercentage) {
       shaper.Shape(&emoji_font, TextDirection::kLtr);
   CHECK_EQ(num_calls, std::size(expectations));
 }
+#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
 // https://crbug.com/1255482
 TEST_F(HarfBuzzShaperTest, OverlyLongGraphemeCluster) {

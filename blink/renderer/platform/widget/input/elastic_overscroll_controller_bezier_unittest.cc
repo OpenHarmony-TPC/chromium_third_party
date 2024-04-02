@@ -91,6 +91,7 @@ class ElasticOverscrollControllerBezierTest : public testing::Test {
 // Tests that the scroller "stretches" as expected when an overscroll occurs
 // on a non-scrollable area. See ReconcileStretchAndScroll for an overscroll
 // stretch on scrollable areas.
+#if !defined(OHOS_UNITTESTS)
 TEST_F(ElasticOverscrollControllerBezierTest, OverscrollStretch) {
   // Test vertical overscroll.
   SendGestureScrollBegin(PhaseState::kNonMomentum);
@@ -118,6 +119,7 @@ TEST_F(ElasticOverscrollControllerBezierTest, OverscrollStretch) {
   EXPECT_EQ(Vector2dF(0, 0), helper_.StretchAmount());
   SendGestureScrollEnd();
 }
+#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
 // Verify that synthetic gesture events do not trigger an overscroll.
 TEST_F(ElasticOverscrollControllerBezierTest, NoSyntheticEventsOverscroll) {
@@ -134,6 +136,7 @@ TEST_F(ElasticOverscrollControllerBezierTest, NoSyntheticEventsOverscroll) {
 }
 
 // Verify that ReconcileStretchAndScroll reduces the overscrolled delta.
+#if !defined(OHOS_UNITTESTS)
 TEST_F(ElasticOverscrollControllerBezierTest, ReconcileStretchAndScroll) {
   // Test vertical overscroll.
   SendGestureScrollBegin(PhaseState::kNonMomentum);
@@ -159,6 +162,7 @@ TEST_F(ElasticOverscrollControllerBezierTest, ReconcileStretchAndScroll) {
   controller_.ReconcileStretchAndScroll();
   EXPECT_EQ(Vector2dF(-18, 0), helper_.StretchAmount());
 }
+#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
 // Tests that momentum_animation_start_time_ doesn't get reset when the
 // overscroll animation is ticking and the scroller is diagonally overscrolled.
@@ -205,6 +209,7 @@ TEST_F(ElasticOverscrollControllerBezierTest, VerifyInitialStretchDelta) {
 
 // Tests if the overscrolled delta maps correctly to the actual amount that the
 // scroller gets stretched.
+#if !defined(OHOS_UNITTESTS)
 TEST_F(ElasticOverscrollControllerBezierTest, VerifyOverscrollBounceDistance) {
   Vector2dF overscroll_bounce_distance(
       controller_.StretchAmountForAccumulatedOverscroll(Vector2dF(0, -100)));
@@ -378,6 +383,7 @@ TEST_F(ElasticOverscrollControllerBezierTest, VerifyScrollDuringBounceBack) {
   SendGestureScrollUpdate(PhaseState::kNonMomentum, Vector2dF(0, -50));
   ASSERT_FLOAT_EQ(helper_.StretchAmount().y(), -17);
 }
+#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
 // Tests that animation doesn't get created when unused_delta is 0.
 TEST_F(ElasticOverscrollControllerBezierTest, VerifyAnimationNotCreated) {

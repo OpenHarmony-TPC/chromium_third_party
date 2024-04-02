@@ -87,6 +87,7 @@ void TestInvalidImage(const char* webp_file, bool parse_error_expected) {
 
 }  // anonymous namespace
 
+#if !defined(OHOS_UNITTESTS)
 TEST(AnimatedWebPTests, uniqueGenerationIDs) {
   std::unique_ptr<ImageDecoder> decoder = CreateWEBPDecoder();
 
@@ -102,7 +103,9 @@ TEST(AnimatedWebPTests, uniqueGenerationIDs) {
 
   EXPECT_TRUE(generation_id0 != generation_id1);
 }
+#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
+#if !defined(OHOS_UNITTESTS)
 TEST(AnimatedWebPTests, verifyAnimationParametersTransparentImage) {
   std::unique_ptr<ImageDecoder> decoder = CreateWEBPDecoder();
   EXPECT_EQ(kAnimationLoopOnce, decoder->RepetitionCount());
@@ -227,7 +230,9 @@ TEST(AnimatedWebPTests, verifyAnimationParametersBlendOverwrite) {
   EXPECT_EQ(std::size(kFrameParameters), decoder->FrameCount());
   EXPECT_EQ(kAnimationLoopInfinite, decoder->RepetitionCount());
 }
+#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
+#if !defined(OHOS_UNITTESTS)
 TEST(AnimatedWebPTests, parseAndDecodeByteByByte) {
   TestByteByByteDecode(&CreateWEBPDecoder,
                        "/images/resources/webp-animated.webp", 3u,
@@ -236,6 +241,7 @@ TEST(AnimatedWebPTests, parseAndDecodeByteByByte) {
                        "/images/resources/webp-animated-icc-xmp.webp", 13u,
                        31999);
 }
+#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
 TEST(AnimatedWebPTests, invalidImages) {
   // ANMF chunk size is smaller than ANMF header size.
@@ -244,6 +250,7 @@ TEST(AnimatedWebPTests, invalidImages) {
   TestInvalidImage("/images/resources/invalid-animated-webp3.webp", true);
 }
 
+#if !defined(OHOS_UNITTESTS)
 TEST(AnimatedWebPTests, truncatedLastFrame) {
   std::unique_ptr<ImageDecoder> decoder = CreateWEBPDecoder();
 
@@ -266,7 +273,9 @@ TEST(AnimatedWebPTests, truncatedLastFrame) {
   ASSERT_TRUE(frame);
   EXPECT_EQ(ImageFrame::kFrameComplete, frame->GetStatus());
 }
+#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
+#if !defined(OHOS_UNITTESTS)
 TEST(AnimatedWebPTests, truncatedInBetweenFrame) {
   std::unique_ptr<ImageDecoder> decoder = CreateWEBPDecoder();
 
@@ -285,9 +294,11 @@ TEST(AnimatedWebPTests, truncatedInBetweenFrame) {
   EXPECT_EQ(ImageFrame::kFramePartial, frame->GetStatus());
   EXPECT_TRUE(decoder->Failed());
 }
+#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
 // Tests for a crash that used to happen for a specific file with specific
 // sequence of method calls.
+#if !defined(OHOS_UNITTESTS)
 TEST(AnimatedWebPTests, reproCrash) {
   std::unique_ptr<ImageDecoder> decoder = CreateWEBPDecoder();
 
@@ -317,12 +328,14 @@ TEST(AnimatedWebPTests, reproCrash) {
   EXPECT_EQ(kAnimationLoopOnce, decoder->RepetitionCount());
   EXPECT_TRUE(decoder->Failed());
 }
+#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
 TEST(AnimatedWebPTests, progressiveDecode) {
   TestProgressiveDecoding(&CreateWEBPDecoder,
                           "/images/resources/webp-animated.webp");
 }
 
+#if !defined(OHOS_UNITTESTS)
 TEST(AnimatedWebPTests, frameIsCompleteAndDuration) {
   std::unique_ptr<ImageDecoder> decoder = CreateWEBPDecoder();
 
@@ -352,11 +365,14 @@ TEST(AnimatedWebPTests, frameIsCompleteAndDuration) {
   EXPECT_TRUE(decoder->FrameIsReceivedAtIndex(2));
   EXPECT_EQ(base::Milliseconds(1000), decoder->FrameDurationAtIndex(2));
 }
+#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
+#if !defined(OHOS_UNITTESTS)
 TEST(AnimatedWebPTests, updateRequiredPreviousFrameAfterFirstDecode) {
   TestUpdateRequiredPreviousFrameAfterFirstDecode(
       &CreateWEBPDecoder, "/images/resources/webp-animated.webp");
 }
+#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
 TEST(AnimatedWebPTests, randomFrameDecode) {
   TestRandomFrameDecode(&CreateWEBPDecoder,
@@ -399,6 +415,7 @@ TEST(AnimatedWebPTests, alphaBlending) {
                     "/images/resources/webp-animated-semitransparent4.webp");
 }
 
+#if !defined(OHOS_UNITTESTS)
 TEST(AnimatedWebPTests, isSizeAvailable) {
   TestByteByByteSizeAvailable(&CreateWEBPDecoder,
                               "/images/resources/webp-animated.webp", 142u,
@@ -408,7 +425,9 @@ TEST(AnimatedWebPTests, isSizeAvailable) {
                               "/images/resources/webp-animated-icc-xmp.webp",
                               1404u, false, 31999);
 }
+#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
+#if !defined(OHOS_UNITTESTS)
 TEST(AnimatedWEBPTests, clearCacheExceptFrameWithAncestors) {
   std::unique_ptr<ImageDecoder> decoder = CreateWEBPDecoder();
 
@@ -484,14 +503,18 @@ TEST(AnimatedWEBPTests, clearCacheExceptFrameWithAncestors) {
   EXPECT_EQ(ImageFrame::kFrameEmpty, buffers[1]->GetStatus());
   EXPECT_EQ(ImageFrame::kFramePartial, buffers[2]->GetStatus());
 }
+#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
+#if !defined(OHOS_UNITTESTS)
 TEST(StaticWebPTests, truncatedImage) {
   // VP8 data is truncated.
   TestInvalidImage("/images/resources/truncated.webp", false);
   // Chunk size in RIFF header doesn't match the file size.
   TestInvalidImage("/images/resources/truncated2.webp", true);
 }
+#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
+#if !defined(OHOS_UNITTESTS)
 // Regression test for a bug where some valid images were failing to decode
 // incrementally.
 TEST(StaticWebPTests, incrementalDecode) {
@@ -502,7 +525,9 @@ TEST(StaticWebPTests, incrementalDecode) {
                        "/images/resources/size-failure.b186640109.webp", 1u,
                        kAnimationNone);
 }
+#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
+#if !defined(OHOS_UNITTESTS)
 TEST(StaticWebPTests, isSizeAvailable) {
   TestByteByByteSizeAvailable(&CreateWEBPDecoder,
                               "/images/resources/webp-color-profile-lossy.webp",
@@ -513,7 +538,9 @@ TEST(StaticWebPTests, isSizeAvailable) {
                               "/images/resources/size-failure.b186640109.webp",
                               25u, false, kAnimationNone);
 }
+#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
+#if !defined(OHOS_UNITTESTS)
 TEST(StaticWebPTests, notAnimated) {
   std::unique_ptr<ImageDecoder> decoder = CreateWEBPDecoder();
   scoped_refptr<SharedBuffer> data =
@@ -523,5 +550,6 @@ TEST(StaticWebPTests, notAnimated) {
   EXPECT_EQ(1u, decoder->FrameCount());
   EXPECT_EQ(kAnimationNone, decoder->RepetitionCount());
 }
+#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
 }  // namespace blink

@@ -70,6 +70,7 @@ struct StaticColorCheckParam {
   std::vector<ExpectedColor> colors;
 };
 
+#if !defined(OHOS_UNITTESTS)
 std::ostream& operator<<(std::ostream& os, const StaticColorCheckParam& param) {
   const char* color_type;
   switch (param.color_type) {
@@ -133,6 +134,7 @@ std::ostream& operator<<(std::ostream& os, const StaticColorCheckParam& param) {
             << ",\n  color_behavior: " << color_behavior
             << ",\n  orientation: " << orientation << "\n}";
 }
+#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
 StaticColorCheckParam kTestParams[] = {
     {
@@ -558,6 +560,7 @@ StaticColorCheckParam kTestParams[] = {
 
 enum class ErrorPhase { kParse, kDecode };
 
+#if !defined(OHOS_UNITTESTS)
 // If 'error_phase' is ErrorPhase::kParse, error is expected during parse
 // (SetData() call); else error is expected during decode
 // (DecodeFrameBufferAtIndex() call).
@@ -689,7 +692,9 @@ void ReadYUV(const char* file_name,
                         ->GetColorTransformForTesting();
   transform->Transform(rgb_pixel, 1);
 }
+#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
+#if !defined(OHOS_UNITTESTS)
 void TestYUVRed(const char* file_name,
                 const gfx::Size& expected_uv_size,
                 SkColorType color_type = kGray_8_SkColorType,
@@ -737,9 +742,11 @@ void DecodeTask(const SharedBuffer* data, base::RepeatingClosure* done) {
 
   done->Run();
 }
+#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
 }  // namespace
 
+#if !defined(OHOS_UNITTESTS)
 TEST(AnimatedAVIFTests, ValidImages) {
   // star-animated-8bpc.avif, star-animated-10bpc.avif, and
   // star-animated-12bpc.avif contain an EditListBox whose `flags` field is
@@ -767,13 +774,16 @@ TEST(AnimatedAVIFTests, ValidImages) {
       kAnimationLoopInfinite);
   // TODO(ryoh): Add animated avif files with EditListBox.
 }
+#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
+#if !defined(OHOS_UNITTESTS)
 TEST(AnimatedAVIFTests, HasMultipleSubImages) {
   std::unique_ptr<ImageDecoder> decoder = CreateAVIFDecoder();
   decoder->SetData(ReadFile("/images/resources/avif/star-animated-8bpc.avif"),
                    true);
   EXPECT_TRUE(decoder->ImageHasBothStillAndAnimatedSubImages());
 }
+#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
 TEST(StaticAVIFTests, DoesNotHaveMultipleSubImages) {
   std::unique_ptr<ImageDecoder> decoder = CreateAVIFDecoder();
@@ -783,6 +793,7 @@ TEST(StaticAVIFTests, DoesNotHaveMultipleSubImages) {
   EXPECT_FALSE(decoder->ImageHasBothStillAndAnimatedSubImages());
 }
 
+#if !defined(OHOS_UNITTESTS)
 TEST(StaticAVIFTests, HasTimingInformation) {
   std::unique_ptr<ImageDecoder> decoder = CreateAVIFDecoder();
   decoder->SetData(ReadFile("/images/resources/avif/"
@@ -794,7 +805,9 @@ TEST(StaticAVIFTests, HasTimingInformation) {
   // so any duration value is valid, but the timestamp should be zero.
   EXPECT_EQ(base::TimeDelta(), decoder->FrameTimestampAtIndex(0));
 }
+#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
+#if !defined(OHOS_UNITTESTS)
 TEST(AnimatedAVIFTests, HasTimingInformation) {
   std::unique_ptr<ImageDecoder> decoder = CreateAVIFDecoder();
   decoder->SetData(ReadFile("/images/resources/avif/star-animated-8bpc.avif"),
@@ -810,6 +823,7 @@ TEST(AnimatedAVIFTests, HasTimingInformation) {
   EXPECT_EQ(kDuration, decoder->FrameTimestampAtIndex(1));
   EXPECT_EQ(kDuration, decoder->FrameDurationAtIndex(1));
 }
+#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
 TEST(StaticAVIFTests, NoCrashWhenCheckingForMultipleSubImages) {
   std::unique_ptr<ImageDecoder> decoder = CreateAVIFDecoder();
@@ -820,6 +834,7 @@ TEST(StaticAVIFTests, NoCrashWhenCheckingForMultipleSubImages) {
   EXPECT_FALSE(decoder->ImageHasBothStillAndAnimatedSubImages());
 }
 
+#if !defined(OHOS_UNITTESTS)
 // TODO(ryoh): Add corrupted video tests.
 
 TEST(StaticAVIFTests, invalidImages) {
@@ -869,7 +884,9 @@ TEST(StaticAVIFTests, ValidImages) {
       "/images/resources/avif/gracehopper_422_12b_grid2x4.avif", 1,
       kAnimationNone);
 }
+#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
+#if !defined(OHOS_UNITTESTS)
 TEST(StaticAVIFTests, YUV) {
   // 3x3, YUV 4:2:0
   constexpr gfx::Size kUVSize420(2, 2);
@@ -913,7 +930,9 @@ TEST(StaticAVIFTests, YUV) {
     TestYUVRed("red-full-range-bt2020-hlg-444-12bpc.avif", kUVSize444, ct, 12);
   }
 }
+#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
+#if !defined(OHOS_UNITTESTS)
 TEST(StaticAVIFTests, SizeAvailableBeforeAllDataReceived) {
   scoped_refptr<SharedBuffer> stream_buffer = WTF::SharedBuffer::Create();
   scoped_refptr<SegmentReader> segment_reader =
@@ -938,7 +957,9 @@ TEST(StaticAVIFTests, SizeAvailableBeforeAllDataReceived) {
   decoder->SetData(stream_buffer, /*all_data_received=*/true);
   EXPECT_TRUE(decoder->IsSizeAvailable());
 }
+#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
+#if !defined(OHOS_UNITTESTS)
 TEST(StaticAVIFTests, ProgressiveDecoding) {
   scoped_refptr<SharedBuffer> stream_buffer = WTF::SharedBuffer::Create();
   scoped_refptr<SegmentReader> segment_reader =
@@ -978,7 +999,9 @@ TEST(StaticAVIFTests, ProgressiveDecoding) {
   EXPECT_EQ(frame->GetStatus(), ImageFrame::kFramePartial);
   EXPECT_FALSE(decoder->Failed());
 }
+#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
+#if !defined(OHOS_UNITTESTS)
 TEST(StaticAVIFTests, IncrementalDecoding) {
   scoped_refptr<SharedBuffer> stream_buffer = WTF::SharedBuffer::Create();
   scoped_refptr<SegmentReader> segment_reader =
@@ -1035,7 +1058,9 @@ TEST(StaticAVIFTests, IncrementalDecoding) {
     previous_size = step.size;
   }
 }
+#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
+#if !defined(OHOS_UNITTESTS)
 // Reproduces crbug.com/1402841. Decodes a large AVIF image 104 times in
 // parallel from base::ThreadPool. Should not cause temporary deadlock of
 // base::ThreadPool.
@@ -1072,6 +1097,7 @@ TEST(StaticAVIFTests, ParallelDecoding) {
 
   event.Wait();
 }
+#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
 TEST(StaticAVIFTests, AlphaHasNoIspeProperty) {
   std::unique_ptr<ImageDecoder> decoder = CreateAVIFDecoder();
@@ -1091,6 +1117,7 @@ TEST(StaticAVIFTests, UnsupportedTransferFunctionInColrProperty) {
 
 using StaticAVIFColorTests = ::testing::TestWithParam<StaticColorCheckParam>;
 
+#if !defined(OHOS_UNITTESTS)
 INSTANTIATE_TEST_SUITE_P(Parameterized,
                          StaticAVIFColorTests,
                          ::testing::ValuesIn(kTestParams));
@@ -1161,5 +1188,6 @@ TEST_P(StaticAVIFColorTests, InspectImage) {
     }
   }
 }
+#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
 }  // namespace blink

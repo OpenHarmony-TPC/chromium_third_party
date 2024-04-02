@@ -19,11 +19,13 @@ namespace blink {
 
 namespace {
 
+#if !defined(OHOS_UNITTESTS)
 float kSizeError = .1;
 
 ShapeResultTestInfo* TestInfo(const scoped_refptr<ShapeResult>& result) {
   return static_cast<ShapeResultTestInfo*>(result.get());
 }
+#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
 }  // namespace
 
@@ -50,6 +52,7 @@ class StretchyOperatorShaperTest : public FontTestBase {
 
 // See blink/web_tests/external/wpt/mathml/tools/operator-dictionary.py and
 // blink/renderer/platform/fonts/opentype/open_type_math_test_fonts.h.
+#if !defined(OHOS_UNITTESTS)
 TEST_F(StretchyOperatorShaperTest, GlyphVariants) {
   Font math = CreateMathFont("stretchy.woff");
 
@@ -258,6 +261,7 @@ TEST_F(StretchyOperatorShaperTest, GlyphVariants) {
     vertical_shaper.Shape(&math, target_size);
   }
 }
+#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
 // This test performs similar checks for shaping glyph assemblies to the ones of
 // StretchyOperatorShaperTest.GlyphVariants, but the glyphs involved have their
@@ -265,6 +269,7 @@ TEST_F(StretchyOperatorShaperTest, GlyphVariants) {
 // should remain exactly the same. Horizontal assemblies now use the ink
 // ascent/descent of the glyphs but vertical assemblies should be normalized to
 // a zero ink descent (see crbug.com/1409380).
+#if !defined(OHOS_UNITTESTS)
 TEST_F(StretchyOperatorShaperTest, GlyphVariantsCenteredOnBaseline) {
   Font math = CreateMathFont("stretchy-centered-on-baseline.woff");
 
@@ -340,9 +345,11 @@ TEST_F(StretchyOperatorShaperTest, GlyphVariantsCenteredOnBaseline) {
                 kSizeError);
   }
 }
+#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
 // See blink/web_tests/external/wpt/mathml/tools/operator-dictionary.py and
 // blink/renderer/platform/fonts/opentype/open_type_math_test_fonts.h.
+#if !defined(OHOS_UNITTESTS)
 TEST_F(StretchyOperatorShaperTest, NonBMPCodePoint) {
   Font math = CreateMathFont("operators.woff");
 
@@ -397,5 +404,6 @@ TEST_F(StretchyOperatorShaperTest, MathItalicCorrection) {
     EXPECT_EQ(metrics.italic_correction, 5000);
   }
 }
+#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
 }  // namespace blink

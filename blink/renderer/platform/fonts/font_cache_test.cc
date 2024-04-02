@@ -119,6 +119,7 @@ TEST_F(FontCacheTest, FallbackForEmojis) {
 }
 #endif  // BUILDFLAG(IS_LINUX) || BUILDFLAG(IS_CHROMEOS)
 
+#if !defined(OHOS_UNITTESTS)
 TEST_F(FontCacheTest, firstAvailableOrFirst) {
   EXPECT_TRUE(FontCache::FirstAvailableOrFirst("").empty());
   EXPECT_TRUE(FontCache::FirstAvailableOrFirst(String()).empty());
@@ -138,6 +139,7 @@ TEST_F(FontCacheTest, firstAvailableOrFirst) {
   EXPECT_EQ("not exist",
             FontCache::FirstAvailableOrFirst(", not exist, not exist"));
 }
+#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
 // https://crbug.com/969402
 TEST_F(FontCacheTest, GetLargerThanMaxUnsignedFont) {

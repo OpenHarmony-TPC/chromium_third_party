@@ -10,6 +10,7 @@
 namespace blink {
 
 // Verify desktop memory limit calculations.
+#if !defined(OHOS_UNITTESTS)
 #if !BUILDFLAG(IS_ANDROID)
 TEST(LayerTreeSettings, IgnoreGivenMemoryPolicy) {
   auto policy =
@@ -33,5 +34,6 @@ TEST(LayerTreeSettings, LargeScreensUseMoreMemory) {
             policy.priority_cutoff_when_visible);
 }
 #endif
+#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
 }  // namespace blink

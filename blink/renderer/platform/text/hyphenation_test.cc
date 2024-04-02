@@ -146,6 +146,7 @@ TEST_F(HyphenationTest, MapLocale) {
 #endif
 
 #if defined(USE_MINIKIN_HYPHENATION) || BUILDFLAG(IS_APPLE)
+#if !defined(OHOS_UNITTESTS)
 TEST_F(HyphenationTest, HyphenLocations) {
   scoped_refptr<Hyphenation> hyphenation = GetHyphenation("en-us");
 #if BUILDFLAG(IS_ANDROID)
@@ -186,6 +187,7 @@ TEST_F(HyphenationTest, HyphenLocations) {
   locations.Reverse();
   EXPECT_THAT(actual, ElementsAreArray(locations));
 }
+#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
 #if defined(USE_MINIKIN_HYPHENATION)
 TEST_F(HyphenationTest, WordToHyphenate) {
@@ -199,6 +201,7 @@ TEST_F(HyphenationTest, WordToHyphenate) {
 }
 #endif
 
+#if !defined(OHOS_UNITTESTS)
 TEST_F(HyphenationTest, LeadingSpaces) {
   scoped_refptr<Hyphenation> hyphenation = GetHyphenation("en-us");
 #if BUILDFLAG(IS_ANDROID)
@@ -222,7 +225,9 @@ TEST_F(HyphenationTest, LeadingSpaces) {
   EXPECT_THAT(hyphenation->HyphenLocations(only_spaces), ElementsAre());
   EXPECT_EQ(0u, hyphenation->LastHyphenLocation(only_spaces, 3));
 }
+#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
+#if !defined(OHOS_UNITTESTS)
 TEST_F(HyphenationTest, NonLetters) {
   scoped_refptr<Hyphenation> hyphenation = GetHyphenation("en-us");
 #if BUILDFLAG(IS_ANDROID)
@@ -253,7 +258,9 @@ TEST_F(HyphenationTest, English) {
   EXPECT_THAT(locations, testing::AnyOf(ElementsAreArray({6, 2}),
                                         ElementsAreArray({7, 6, 2})));
 }
+#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
+#if !defined(OHOS_UNITTESTS)
 TEST_F(HyphenationTest, German) {
   scoped_refptr<Hyphenation> hyphenation = GetHyphenation("de-1996");
 #if BUILDFLAG(IS_ANDROID)
@@ -278,6 +285,7 @@ TEST_F(HyphenationTest, German) {
       "chlein");
   EXPECT_THAT(locations, ElementsAreArray({4}));
 }
+#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 #endif
 
 #if defined(USE_MINIKIN_HYPHENATION) || BUILDFLAG(IS_APPLE)

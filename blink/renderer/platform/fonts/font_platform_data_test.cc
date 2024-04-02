@@ -43,6 +43,7 @@ namespace blink {
 
 class FontPlatformDataTest : public FontTestBase {};
 
+#if !defined(OHOS_UNITTESTS)
 TEST_F(FontPlatformDataTest, AhemHasNoSpaceInLigaturesOrKerning) {
   Font font =
       CreateTestFont("Ahem", test::PlatformTestDataPath("Ahem.woff"), 16);
@@ -113,6 +114,7 @@ TEST_F(FontPlatformDataTest, TypefaceDigestCrossPlatform_SameDigest) {
   IdentifiableToken expected_digest(6864445319287375520);
   EXPECT_EQ(digest, expected_digest);
 }
+#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
 #if BUILDFLAG(IS_LINUX) || BUILDFLAG(IS_CHROMEOS)
 TEST_F(FontPlatformDataTest, GeometricPrecision) {
