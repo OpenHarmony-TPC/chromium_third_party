@@ -874,6 +874,36 @@ void WidgetBase::EndUpdateLayers() {
 }
 
 #if BUILDFLAG(IS_OHOS)
+static void GetThreadIdsAndReport(
+    std::vector<base::internal::WorkerThread*>& workers, bool is_created) {
+  std::vector<int32_t> thread_ids;
+  std::vector<base::internal::WorkerThread*> remain_workers;
+  for (auto& worker : workers) {
+    if (worker) {
+      auto tid = worker->GetRealTid();
+      if (tid) {
+        thread_ids.push_back(tid);
+      } else {
+        remain_workers.push_back(worker);
+      }
+    }
+  }
+  workers.clear();
+  if (remain_workers.size()) {
+    workers = std::move(remain_workers);
+  }
+
+  auto* thread = content::ChildThreadImpl::current();
+  if (thread) {
+    auto host = thread->child_process_host();
+    auto status = is_created ? OHOS::NWeb::ResSchedStatusAdapter::THREAD_CREATED :
+                               OHOS::NWeb::ResSchedStatusAdapter::THREAD_DESTROYED;
+    host->ReportKeyThreadIds(static_cast<int32_t>(status),
+      base::GetCurrentRealPid(), thread_ids,
+      static_cast<int32_t>(OHOS::NWeb::ResSchedRoleAdapter::USER_INTERACT));
+  }
+}
+
 void WidgetBase::ReportForegroundThreadPool() {
   if (!is_worker_pool_initial_) {
     return;
@@ -900,27 +930,16 @@ void WidgetBase::ReportForegroundThreadPool() {
   base::internal::ThreadGroupImpl* foreground_thread_group =
     static_cast<base::internal::ThreadGroupImpl*>(thread_pool->GetForegroundThreadGroup());
   if (foreground_thread_group) {
-    auto* thread = content::ChildThreadImpl::current();
-    if (!thread) {
-      return;
-    }
-    auto host = thread->child_process_host();
-    std::vector<scoped_refptr<base::internal::WorkerThread>>& create_workers =
+    std::vector<base::internal::WorkerThread*>& create_workers =
       foreground_thread_group->ReportCreateWorkers();
-    for (auto& worker : create_workers) {
-      host->ReportKeyThread(static_cast<int32_t>(OHOS::NWeb::ResSchedStatusAdapter::THREAD_CREATED),
-        base::GetCurrentRealPid(), worker->GetRealTid(),
-        static_cast<int32_t>(OHOS::NWeb::ResSchedRoleAdapter::IMAGE_DECODE));
+    if (create_workers.size()) {
+      GetThreadIdsAndReport(create_workers, true);
     }
-    std::vector<scoped_refptr<base::internal::WorkerThread>>& destroy_workers =
+    std::vector<base::internal::WorkerThread*>& destroy_workers =
       foreground_thread_group->ReportDestroyWorkers();
-    for (auto& worker : destroy_workers) {
-      host->ReportKeyThread(static_cast<int32_t>(OHOS::NWeb::ResSchedStatusAdapter::THREAD_DESTROYED),
-        base::GetCurrentRealPid(), worker->GetRealTid(),
-        static_cast<int32_t>(OHOS::NWeb::ResSchedRoleAdapter::IMAGE_DECODE));
+    if (destroy_workers.size()) {
+      GetThreadIdsAndReport(destroy_workers, false);
     }
-    create_workers.clear();
-    destroy_workers.clear();
   }
 }
 #endif
