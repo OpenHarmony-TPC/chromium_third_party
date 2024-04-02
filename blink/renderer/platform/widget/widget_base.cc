@@ -900,7 +900,7 @@ static void GetThreadIdsAndReport(
                                OHOS::NWeb::ResSchedStatusAdapter::THREAD_DESTROYED;
     host->ReportKeyThreadIds(static_cast<int32_t>(status),
       base::GetCurrentRealPid(), thread_ids,
-      static_cast<int32_t>(OHOS::NWeb::ResSchedRoleAdapter::IMAGE_DECODE));
+      static_cast<int32_t>(OHOS::NWeb::ResSchedRoleAdapter::USER_INTERACT));
   }
 }
 
