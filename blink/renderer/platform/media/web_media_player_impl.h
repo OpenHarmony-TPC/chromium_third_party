@@ -423,6 +423,9 @@ class PLATFORM_EXPORT WebMediaPlayerImpl
   bool IsMediaPlayerRendererClient() override;
   void StopForDemuxerReset() override;
   void RestartForHls() override;
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+  void RestartForPrimitive() override;
+#endif // OHOS_CUSTOM_VIDEO_PLAYER
   bool IsSecurityOriginCryptographic() const override;
   void UpdateLoadedUrl(const GURL& url) override;
 
@@ -455,6 +458,9 @@ class PLATFORM_EXPORT WebMediaPlayerImpl
               const WebURL& url,
               CorsMode cors_mode,
               bool is_cache_disabled);
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+  void DoReloadForPrimitive();
+#endif // OHOS_CUSTOM_VIDEO_PLAYER
 
   // Called after synchronous initialization of a data source completes.
   void DataSourceInitialized(bool success);
@@ -720,6 +726,16 @@ class PLATFORM_EXPORT WebMediaPlayerImpl
                                          media::Pipeline::StartType start_type,
                                          bool is_streaming,
                                          bool is_static);
+
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+  void OnNativeTextureCreated(int native_texture_id);
+  void UpdatePlaybackStatus(uint32_t status);
+  void UpdateVolume(double volume);
+  void UpdateMuted(bool muted);
+  void UpdatePlaybackRate(double playback_rate);
+
+  bool IsUsingCustomRenderer() const override;
+#endif // OHOS_CUSTOM_VIDEO_PLAYER
 
   WebLocalFrame* const frame_;
 
@@ -1115,6 +1131,16 @@ class PLATFORM_EXPORT WebMediaPlayerImpl
 
   // Count the number of times a video frame is being readback.
   unsigned video_frame_readback_count_ = 0;
+
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+  bool should_create_custom_renderer_ = false;
+  bool should_overlay_ = false;
+  media::RendererType primitive_renderer_type_ = media::RendererType::kRendererImpl;
+  CorsMode cors_mode_ = kCorsModeUnspecified;
+  bool is_cache_disabled_ = false;
+  std::string poster_url_;
+  int native_texture_id_ = 0;
+#endif // OHOS_CUSTOM_VIDEO_PLAYER
 
   base::WeakPtr<WebMediaPlayerImpl> weak_this_;
   base::WeakPtrFactory<WebMediaPlayerImpl> weak_factory_{this};

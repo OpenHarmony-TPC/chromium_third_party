@@ -824,6 +824,9 @@ void PaintArtifactCompositor::Update(
   PendingLayer::DecompositeTransforms(pending_layers_);
 
   LayerListBuilder layer_list_builder;
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+  LayerListBuilder layer_list_builder_for_video;
+#endif // OHOS_CUSTOM_VIDEO_PLAYER
   PropertyTreeManager property_tree_manager(*this, *host->property_trees(),
                                             *root_layer_, layer_list_builder,
                                             g_s_property_tree_sequence_number);
@@ -873,7 +876,15 @@ void PaintArtifactCompositor::Update(
         property_tree_manager.EnsureCompositorScrollAndTransformNode(
             scroll_translation);
 
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+    if (layer.ShouldOverlay()) {
+      layer_list_builder_for_video.Add(&layer);
+    } else {
+      layer_list_builder.Add(&layer);
+    }
+#else
     layer_list_builder.Add(&layer);
+#endif // OHOS_CUSTOM_VIDEO_PLAYER
 
     layer.set_property_tree_sequence_number(
         root_layer_->property_tree_sequence_number());
@@ -894,6 +905,13 @@ void PaintArtifactCompositor::Update(
           .AddTransitionPseudoElementEffectId(effect_id);
     }
   }
+
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+  auto video_layers = layer_list_builder_for_video.Finalize();
+  for (const auto& video_layer : video_layers) {
+    layer_list_builder.Add(video_layer);
+  }
+#endif // OHOS_CUSTOM_VIDEO_PLAYER
 
   if (unification_enabled) {
     // We want to create a cc::TransformNode only if the scroller is painted.

@@ -69,6 +69,10 @@
 #include "ui/gfx/geometry/quad_f.h"
 #include "ui/gfx/geometry/transform.h"
 
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+#include "cc/layers/layer_client.h"
+#endif // OHOS_CUSTOM_VIDEO_PLAYER
+
 namespace ui {
 class Cursor;
 }
@@ -275,6 +279,9 @@ struct RecalcLayoutOverflowResult {
 // See the individual getters below for more details about what each width is.
 class CORE_EXPORT LayoutObject : public GarbageCollected<LayoutObject>,
                                  public ImageResourceObserver,
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+                                 public cc::LayerClient,
+#endif // OHOS_CUSTOM_VIDEO_PLAYER
                                  public DisplayItemClient {
   friend class LayoutObjectChildList;
   FRIEND_TEST_ALL_PREFIXES(LayoutObjectTest, MutableForPaintingClearPaintFlags);
@@ -332,6 +339,10 @@ class CORE_EXPORT LayoutObject : public GarbageCollected<LayoutObject>,
   // Returns true if the offset ot the containing block depends on the point
   // being mapped.
   bool OffsetForContainerDependsOnPoint(const LayoutObject* container) const;
+
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+  void OnLayerRectChange(int x, int y, int width, int height) override;
+#endif // OHOS_CUSTOM_VIDEO_PLAYER
 
  protected:
   void EnsureIdForTesting() {

@@ -585,6 +585,25 @@ class CORE_EXPORT HTMLMediaElement
   void DidPlayerSizeChange(const gfx::Size& size) override;
   void OnRemotePlaybackDisabled(bool disabled) override;
 
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+  bool IsCustomVideoPlayerEnabled() override;
+  bool ShouldCustomVideoPlayerOverlay() override;
+  bool ShouldShowMediaControls() override;
+  Vector<WebString> GetMediaControlsList() override;
+  base::flat_map<std::string, std::string> GetElementAttributes() override;
+
+  void UpdatePlaybackStatus(uint32_t status) override;
+  void UpdateVolume(double volume) override;
+  void UpdateMuted(bool muted) override;
+  void UpdatePlaybackRate(double playback_rate) override;
+
+  void OnLayerRectChange(int x,
+                         int y,
+                         int width,
+                         int height,
+                         bool is_fixed) override;
+#endif // OHOS_CUSTOM_VIDEO_PLAYER
+
   // Returns a reference to the mojo remote for the MediaPlayerHost interface,
   // requesting it first from the BrowserInterfaceBroker if needed. It is an
   // error to call this method before having access to the document's frame.
@@ -1012,6 +1031,10 @@ class CORE_EXPORT HTMLMediaElement
       HeapMojoAssociatedReceiverSet<media::mojom::blink::MediaPlayer,
                                     HTMLMediaElement>>>
       media_player_receiver_set_;
+
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+  gfx::Rect layer_rect_;
+#endif // OHOS_CUSTOM_VIDEO_PLAYER
 };
 
 template <>

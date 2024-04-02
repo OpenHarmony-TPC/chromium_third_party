@@ -4990,6 +4990,78 @@ void HTMLMediaElement::OpenerContextObserver::ContextDestroyed() {
   element_->AttachToNewFrame();
 }
 
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+bool HTMLMediaElement::IsCustomVideoPlayerEnabled() {
+  return GetDocument().GetSettings() &&
+         GetDocument().GetSettings()->IsCustomVideoPlayerEnabled();
+}
+bool HTMLMediaElement::ShouldCustomVideoPlayerOverlay() {
+  return GetDocument().GetSettings() &&
+         GetDocument().GetSettings()->IsCustomVideoPlayerOverlay();
+}
+bool HTMLMediaElement::ShouldShowMediaControls() {
+  return FastHasAttribute(html_names::kControlsAttr);
+}
+Vector<WebString> HTMLMediaElement::GetMediaControlsList() {
+  Vector<WebString> list;
+  list.reserve(controls_list_->length());
+  for (unsigned i = 0; i < controls_list_->length(); i++) {
+    list.emplace_back(controls_list_->item(i));
+  }
+  return list;
+}
+
+base::flat_map<std::string, std::string> HTMLMediaElement::GetElementAttributes() {
+  base::flat_map<std::string, std::string> attributes_map;
+  AttributeCollection attribute_collection = Element::AttributesWithoutUpdate();
+  for (const auto& attribute : attribute_collection) {
+    attributes_map.insert({
+        attribute.LocalName().Utf8(), attribute.Value().Utf8()});
+  }
+  return attributes_map;
+}
+void HTMLMediaElement::UpdatePlaybackStatus(uint32_t status) {
+  if (paused_ == !status) {
+    return;
+  }
+  if (status) {
+    PlayInternal();
+  } else {
+    PauseInternal(PlayPromiseError::kPaused_PauseCalled);
+  }
+}
+void HTMLMediaElement::UpdateVolume(double volume) {
+  if (volume_ == volume) {
+    return;
+  }
+  volume_ = volume;
+  ScheduleEvent(event_type_names::kVolumechange);
+}
+void HTMLMediaElement::UpdateMuted(bool muted) {
+  setMuted(muted);
+}
+void HTMLMediaElement::UpdatePlaybackRate(double playback_rate) {
+  if (playback_rate_ == playback_rate) {
+    return;
+  }
+  playback_rate_ = playback_rate;
+  ScheduleEvent(event_type_names::kRatechange);
+}
+void HTMLMediaElement::OnLayerRectChange(int x, int y, int width, int height,
+                                         bool is_fixed) {
+  if (layer_rect_.x() == x &&
+      layer_rect_.y() == y &&
+      layer_rect_.width() == width &&
+      layer_rect_.height() == height) {
+    return;
+  }
+  layer_rect_.SetRect(x, y, width, height);
+  for (auto& observer : media_player_observer_remote_set_->Value()) {
+    observer->UpdateLayerRect(layer_rect_);
+  }
+}
+#endif // OHOS_CUSTOM_VIDEO_PLAYER
+
 STATIC_ASSERT_ENUM(WebMediaPlayer::kReadyStateHaveNothing,
                    HTMLMediaElement::kHaveNothing);
 STATIC_ASSERT_ENUM(WebMediaPlayer::kReadyStateHaveMetadata,

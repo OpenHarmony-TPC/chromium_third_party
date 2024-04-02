@@ -61,6 +61,12 @@ class PLATFORM_EXPORT SurfaceLayerBridge
   void RegisterFrameSinkHierarchy() override;
   void UnregisterFrameSinkHierarchy() override;
 
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+  void SetShouldOverlay(bool should_verlay) override;
+  void SetShouldInterceptTouchEvent(bool should_intercept) override;
+  void SetNativeEmbedId(int embed_id) override;
+#endif // OHOS_CUSTOM_VIDEO_PLAYER
+
  private:
   scoped_refptr<cc::SurfaceLayer> surface_layer_;
   scoped_refptr<cc::SolidColorLayer> solid_color_layer_;

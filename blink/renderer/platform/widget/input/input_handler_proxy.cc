@@ -418,11 +418,16 @@ bool InputHandlerProxy::DidNativeEmbedEvent(const WebInputEvent& event) {
       float y = touch_event.touches[i].PositionInWidget().y();
       int32_t id = touch_event.touches[i].id;
       cc::LayerImpl* layer_impl = input_handler_->GetLayerImpl(gfx::Point(x, y));
-      if (layer_impl && layer_impl->may_contain_native()) {
+      if (layer_impl && layer_impl->ShouldInterceptTouchEvent()) {
         is_last_native_type_ = true;
         last_native_index_ = i;
         embed_id_ = std::to_string(layer_impl->native_embed_id());
         gfx::RectF nativeRect = layer_impl->GetNativeRect();
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+        if (layer_impl->may_contain_video()) {
+          nativeRect = layer_impl->VideoRectInScreenSpace();
+        }
+#endif // OHOS_CUSTOM_VIDEO_PLAYER
         x = x - nativeRect.x();
         y = y - nativeRect.y();
         if (isTouchStart_ && i < touch_event.touches_length - 1) {
@@ -432,7 +437,7 @@ bool InputHandlerProxy::DidNativeEmbedEvent(const WebInputEvent& event) {
         client_->DidNativeEmbedEvent(event.GetType(), embed_id_, id, x, y);
         result = true;
       }
-      if (layer_impl && !layer_impl->may_contain_native() &&
+      if (layer_impl && !layer_impl->ShouldInterceptTouchEvent() &&
           event.GetType() == WebInputEvent::Type::kTouchMove &&
           is_last_native_type_ &&
           last_native_index_ == i) {

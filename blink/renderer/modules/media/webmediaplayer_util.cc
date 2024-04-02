@@ -98,6 +98,9 @@ WebMediaPlayer::NetworkState PipelineErrorToNetworkState(
       return WebMediaPlayer::kNetworkStateNetworkError;
 
     case media::PIPELINE_ERROR_INITIALIZATION_FAILED:
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+    case media::PIPELINE_ERROR_INITIALIZATION_FAILED_CUSTOM_PLAYER:
+#endif // OHOS_CUSTOM_VIDEO_PLAYER
     case media::PIPELINE_ERROR_COULD_NOT_RENDER:
     case media::PIPELINE_ERROR_EXTERNAL_RENDERER_FAILED:
     case media::DEMUXER_ERROR_COULD_NOT_OPEN:

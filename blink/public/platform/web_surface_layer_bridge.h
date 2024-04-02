@@ -49,6 +49,12 @@ class BLINK_PLATFORM_EXPORT WebSurfaceLayerBridge {
   virtual void ClearObserver() = 0;
   virtual void RegisterFrameSinkHierarchy() = 0;
   virtual void UnregisterFrameSinkHierarchy() = 0;
+
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+  virtual void SetShouldOverlay(bool should_overlay) {}
+  virtual void SetShouldInterceptTouchEvent(bool should_intercept) {}
+  virtual void SetNativeEmbedId(int embed_id) {}
+#endif // OHOS_CUSTOM_VIDEO_PLAYER
 };
 
 }  // namespace blink
