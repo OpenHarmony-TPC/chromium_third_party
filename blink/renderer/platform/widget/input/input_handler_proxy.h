@@ -449,6 +449,7 @@ class PLATFORM_EXPORT InputHandlerProxy : public cc::InputHandlerClient,
   bool is_last_native_type_ = false;
   size_t last_native_index_ = 0;
   std::string embed_id_;
+  bool isTouchStart_ = false;
 #endif
 };
 
