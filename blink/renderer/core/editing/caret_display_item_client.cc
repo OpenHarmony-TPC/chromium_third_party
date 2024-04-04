@@ -278,9 +278,17 @@ void CaretDisplayItemClient::PaintCaret(
   }
 
   gfx::Rect paint_rect = ToPixelSnappedRect(drawing_rect);
+#ifdef OHOS_INPUT_EVENTS
+  const int widthExtension = 2;
+  const RGBA32 kCaretColor = 0xFF0000FF;
+  Color color = Color::FromRGBA32(kCaretColor);
+  paint_rect.set_width(paint_rect.width() + widthExtension);
+  context.FillRect(paint_rect, color, AutoDarkMode::Disabled());
+#else
   context.FillRect(paint_rect, color_,
                    PaintAutoDarkMode(layout_block_->StyleRef(),
                                      DarkModeFilter::ElementRole::kForeground));
+#endif
 }
 
 void CaretDisplayItemClient::RecordSelection(
