@@ -1147,6 +1147,9 @@ class CORE_EXPORT WebFrameWidgetImpl
   // the popup that is closed by its previous GestureTapDown, the popup remains
   // closed.
   scoped_refptr<WebPagePopupImpl> last_hidden_page_popup_;
+#if defined(OHOS_INPUT_EVENTS)
+  Element* last_focused_element_;
+#endif
 
   base::WeakPtrFactory<mojom::blink::FrameWidgetInputHandler>
       input_handler_weak_ptr_factory_{this};

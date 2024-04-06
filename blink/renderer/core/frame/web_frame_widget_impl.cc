@@ -2200,9 +2200,13 @@ bool WebFrameWidgetImpl::ScrollFocusedEditableElementIntoView() {
 #if defined(OHOS_INPUT_EVENTS)
 bool WebFrameWidgetImpl::ScrollFocusedEditableElementIntoView(bool shouldScroll) {
   Element* element = FocusedElement();
-  if (!element)
-    return false;
-
+  if (!element) {
+    if (last_focused_element_) {
+      element = last_focused_element_;
+    } else {
+      return false;
+    }
+  }
   EditContext* edit_context = element->GetDocument()
                                   .GetFrame()
                                   ->GetInputMethodController()
@@ -2210,6 +2214,8 @@ bool WebFrameWidgetImpl::ScrollFocusedEditableElementIntoView(bool shouldScroll)
 
   if (!WebElement(element).IsEditable() && !edit_context)
     return false;
+
+  last_focused_element_ = element;
 
   element->GetDocument().UpdateStyleAndLayout(DocumentUpdateReason::kSelection);
 
