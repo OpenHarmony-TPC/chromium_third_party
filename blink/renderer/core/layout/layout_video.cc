@@ -125,6 +125,11 @@ LayoutSize LayoutVideo::CalculateIntrinsicSize(float scale) {
     // Otherwise, the intrinsic width is that of the video.
     case kVideo:
       if (const auto* player = MediaElement()->GetWebMediaPlayer()) {
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+        if (player->IsUsingCustomRenderer()) {
+          return Size();
+        }
+#endif // OHOS_CUSTOM_VIDEO_PLAYER
         gfx::Size size = player->NaturalSize();
         if (!size.IsEmpty()) {
           LayoutSize layout_size = LayoutSize(size);

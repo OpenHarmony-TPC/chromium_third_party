@@ -386,6 +386,10 @@ class WebMediaPlayer {
 #ifdef OHOS_MEDIA_POLICY
   virtual bool IsFrameHidden() { return false; }
 #endif
+
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+  virtual bool IsUsingCustomRenderer() const { return false; }
+#endif // OHOS_CUSTOM_VIDEO_PLAYER
 };
 
 }  // namespace blink

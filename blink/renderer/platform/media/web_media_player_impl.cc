@@ -527,6 +527,12 @@ WebMediaPlayerImpl::WebMediaPlayerImpl(
       base::BindPostTaskToCurrentDefault(base::BindRepeating(
           &WebMediaPlayerImpl::OnRemotePlayStateChange, weak_this_)));
 #endif  // defined (IS_ANDROID)
+
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+  should_create_custom_renderer_ = client_->IsCustomVideoPlayerEnabled();
+  should_overlay_ = should_create_custom_renderer_ &&
+      client_->ShouldCustomVideoPlayerOverlay();
+#endif // OHOS_CUSTOM_VIDEO_PLAYER
 }
 
 WebMediaPlayerImpl::~WebMediaPlayerImpl() {
@@ -871,6 +877,16 @@ void WebMediaPlayerImpl::DoLoad(LoadType load_type,
     return;
   }
 
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+  if (should_create_custom_renderer_) {
+    cors_mode_ = cors_mode;
+    is_cache_disabled_ = is_cache_disabled;
+    demuxer_manager_->SetLoadedUrl(loaded_url_);
+    StartPipeline();
+    return;
+  }
+#endif // OHOS_CUSTOM_VIDEO_PLAYER
+
   // Short circuit the more complex loading path for data:// URLs. Sending
   // them through the network based loading path just wastes memory and causes
   // worse performance since reads become asynchronous.
@@ -906,6 +922,45 @@ void WebMediaPlayerImpl::DoLoad(LoadType load_type,
   mb_data_source->Initialize(base::BindOnce(
       &WebMediaPlayerImpl::MultiBufferDataSourceInitialized, weak_this_));
 }
+
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+void WebMediaPlayerImpl::DoReloadForPrimitive() {
+  // Short circuit the more complex loading path for data:// URLs. Sending
+  // them through the network based loading path just wastes memory and causes
+  // worse performance since reads become asynchronous.
+  if (loaded_url_.SchemeIs(url::kDataScheme)) {
+    std::string mime_type, charset, data;
+    if (!net::DataURL::Parse(loaded_url_, &mime_type, &charset, &data) ||
+        data.empty()) {
+      return MemoryDataSourceInitialized(false, 0);
+    }
+    size_t data_size = data.size();
+    demuxer_manager_->SetLoadedUrl(loaded_url_);
+    demuxer_manager_->SetDataSource(
+        std::make_unique<media::MemoryDataSource>(std::move(data)));
+    MemoryDataSourceInitialized(true, data_size);
+    return;
+  }
+
+  auto data_source = std::make_unique<MultiBufferDataSource>(
+      main_task_runner_,
+      url_index_->GetByUrl(
+          loaded_url_, static_cast<UrlData::CorsMode>(cors_mode_),
+          is_cache_disabled_ ? UrlIndex::kCacheDisabled : UrlIndex::kNormal),
+      media_log_.get(), buffered_data_source_host_.get(),
+      base::BindRepeating(&WebMediaPlayerImpl::NotifyDownloading, weak_this_));
+
+  auto* mb_data_source = data_source.get();
+  demuxer_manager_->SetDataSource(std::move(data_source));
+
+  mb_data_source->OnRedirect(base::BindRepeating(
+      &WebMediaPlayerImpl::OnDataSourceRedirected, weak_this_));
+  mb_data_source->SetPreload(preload_);
+  mb_data_source->SetIsClientAudioElement(client_->IsAudioElement());
+  mb_data_source->Initialize(base::BindOnce(
+      &WebMediaPlayerImpl::MultiBufferDataSourceInitialized, weak_this_));
+}
+#endif // OHOS_CUSTOM_VIDEO_PLAYER
 
 void WebMediaPlayerImpl::Play() {
   DVLOG(1) << __func__;
@@ -1850,6 +1905,19 @@ void WebMediaPlayerImpl::RestartForHls() {
   StartPipeline();
 }
 
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+void WebMediaPlayerImpl::RestartForPrimitive() {
+  DVLOG(1) << __func__;
+  DCHECK(main_task_runner_->BelongsToCurrentThread());
+  should_create_custom_renderer_= false;
+  should_overlay_ = false;
+  renderer_factory_selector_->SetBaseRendererType(primitive_renderer_type_);
+
+  SetMemoryReportingState(false);
+  DoReloadForPrimitive();
+}
+#endif // OHOS_CUSTOM_VIDEO_PLAYER
+
 void WebMediaPlayerImpl::OnError(media::PipelineStatus status) {
   DVLOG(1) << __func__ << ": status=" << status;
   DCHECK(main_task_runner_->BelongsToCurrentThread());
@@ -1953,7 +2021,16 @@ void WebMediaPlayerImpl::OnMetadata(const media::PipelineMetadata& metadata) {
     }
 
     if (use_surface_layer_) {
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+      if (!surface_layer_for_video_enabled_) {
+        ActivateSurfaceLayerForVideo();
+      }
+      bridge_->SetShouldOverlay(should_overlay_);
+      bridge_->SetShouldInterceptTouchEvent(should_create_custom_renderer_);
+      bridge_->SetNativeEmbedId(native_texture_id_);
+#else
       ActivateSurfaceLayerForVideo();
+#endif // OHOS_CUSTOM_VIDEO_PLAYER
     } else {
       DCHECK(!video_layer_);
       video_layer_ = cc::VideoLayer::Create(
@@ -2642,6 +2719,9 @@ void WebMediaPlayerImpl::OnRemotePlayStateChange(
 #endif  // BUILDFLAG(IS_ANDROID)
 
 void WebMediaPlayerImpl::SetPoster(const WebURL& poster) {
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+  poster_url_ = poster.GetString().Utf8();
+#endif // OHOS_CUSTOM_VIDEO_PLAYER
   has_poster_ = !poster.IsEmpty();
 }
 
@@ -2812,6 +2892,15 @@ std::unique_ptr<media::Renderer> WebMediaPlayerImpl::CreateRenderer(
   }
 
   bool old_uses_audio_service = UsesAudioService(renderer_type_);
+
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+  primitive_renderer_type_ = renderer_factory_selector_->GetCurrentRendererType();
+  if (should_create_custom_renderer_) {
+    renderer_factory_selector_->SetBaseRendererType(
+        media::RendererType::kOHOSCustomMediaPlayer);
+  }
+#endif // OHOS_CUSTOM_VIDEO_PLAYER
+
   renderer_type_ = renderer_factory_selector_->GetCurrentRendererType();
 
   bool new_uses_audio_service = UsesAudioService(renderer_type_);
@@ -2820,6 +2909,50 @@ std::unique_ptr<media::Renderer> WebMediaPlayerImpl::CreateRenderer(
 
   media_metrics_provider_->SetRendererType(renderer_type_);
   media_log_->SetProperty<MediaLogProperty::kRendererName>(renderer_type_);
+
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+  if (should_create_custom_renderer_) {
+    auto renderer = renderer_factory_selector_->GetCurrentFactory()->
+        CreateCustomRenderer(media_task_runner_, worker_task_runner_,
+            audio_source_provider_.get(), compositor_.get(),
+            std::move(request_overlay_info_cb),
+            client_->TargetColorSpace(), GetDelegateId());
+    media::Renderer::MediaSourceInfo media_source_info;
+    media_source_info.media_source = loaded_url_.spec();
+    renderer->SetMediaSourceList({media_source_info});
+    std::vector<std::string> controls_list;
+    for (const auto& controls_list_item : client_->GetMediaControlsList()) {
+      controls_list.emplace_back(controls_list_item.Utf8());
+    }
+    renderer->SetMediaControls(client_->ShouldShowMediaControls(), controls_list);
+    renderer->SetPoster(poster_url_);
+    renderer->SetAttributes(client_->GetElementAttributes());
+
+    renderer->SetSurfaceCreatedCallback(
+        base::BindOnce(&WebMediaPlayerImpl::OnNativeTextureCreated,
+            weak_this_));
+
+    renderer->SetUpdatePlaybackStatusCallback(
+        base::BindPostTaskToCurrentDefault(base::BindRepeating(
+            &WebMediaPlayerImpl::UpdatePlaybackStatus,
+            weak_this_)));
+    renderer->SetUpdateVolumeCallback(
+        base::BindPostTaskToCurrentDefault(base::BindRepeating(
+            &WebMediaPlayerImpl::UpdateVolume,
+            weak_this_)));
+    renderer->SetUpdateMutedCallback(
+        base::BindPostTaskToCurrentDefault(base::BindRepeating(
+            &WebMediaPlayerImpl::UpdateMuted,
+            weak_this_)));
+    renderer->SetUpdatePlaybackRateCallback(
+        base::BindPostTaskToCurrentDefault(base::BindRepeating(
+            &WebMediaPlayerImpl::UpdatePlaybackRate,
+            weak_this_)));
+
+    renderer->SetIsAudio(client_->IsAudioElement());
+    return renderer;
+  }
+#endif // OHOS_CUSTOM_VIDEO_PLAYER
 
   return renderer_factory_selector_->GetCurrentFactory()->CreateRenderer(
       media_task_runner_, worker_task_runner_, audio_source_provider_.get(),
@@ -2877,6 +3010,9 @@ void WebMediaPlayerImpl::StartPipeline() {
   // method directly and immediately.
   auto create_demuxer_error = demuxer_manager_->CreateDemuxer(
       load_type_ == kLoadTypeMediaSource, preload_, has_poster_,
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+      should_create_custom_renderer_,
+#endif // OHOS_CUSTOM_VIDEO_PLAYER
       base::BindOnce(&WebMediaPlayerImpl::OnDemuxerCreated,
                      base::Unretained(this)));
 
@@ -3988,4 +4124,29 @@ bool WebMediaPlayerImpl::IsFrameHidden() {
   return IsHidden();
 }
 #endif
+
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+void WebMediaPlayerImpl::OnNativeTextureCreated(int native_texture_id) {
+  native_texture_id_ = native_texture_id;
+  if (bridge_) {
+    bridge_->SetNativeEmbedId(native_texture_id);
+  }
+}
+void WebMediaPlayerImpl::UpdatePlaybackStatus(uint32_t status) {
+  client_->UpdatePlaybackStatus(status);
+}
+void WebMediaPlayerImpl::UpdateVolume(double volume) {
+  client_->UpdateVolume(volume);
+}
+void WebMediaPlayerImpl::UpdateMuted(bool muted) {
+  client_->UpdateMuted(muted);
+}
+void WebMediaPlayerImpl::UpdatePlaybackRate(double playback_rate) {
+  client_->UpdatePlaybackRate(playback_rate);
+}
+bool WebMediaPlayerImpl::IsUsingCustomRenderer() const {
+  return should_create_custom_renderer_;
+}
+#endif // OHOS_CUSTOM_VIDEO_PLAYER
+
 }  // namespace blink

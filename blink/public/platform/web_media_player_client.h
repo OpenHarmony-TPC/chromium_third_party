@@ -40,6 +40,10 @@
 #include "third_party/blink/public/platform/web_texttrack_metadata.h"
 #include "third_party/blink/renderer/platform/wtf/vector.h"
 
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+#include "base/containers/flat_map.h"
+#endif // OHOS_CUSTOM_VIDEO_PLAYER
+
 namespace cc {
 class Layer;
 }
@@ -231,6 +235,19 @@ class BLINK_PLATFORM_EXPORT WebMediaPlayerClient {
 
   // Notify the client that the RemotePlayback has been disabled/enabled.
   virtual void OnRemotePlaybackDisabled(bool disabled) = 0;
+
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+  virtual bool IsCustomVideoPlayerEnabled() { return false; }
+  virtual bool ShouldCustomVideoPlayerOverlay() { return false; }
+  virtual bool ShouldShowMediaControls() { return false; }
+  virtual Vector<WebString> GetMediaControlsList() { return {}; }
+  virtual base::flat_map<std::string, std::string> GetElementAttributes() { return {}; }
+
+  virtual void UpdatePlaybackStatus(uint32_t status) {}
+  virtual void UpdateVolume(double volume) {}
+  virtual void UpdateMuted(bool muted) {}
+  virtual void UpdatePlaybackRate(double playback_rate) {}
+#endif // OHOS_CUSTOM_VIDEO_PLAYER
 
  protected:
   ~WebMediaPlayerClient() = default;

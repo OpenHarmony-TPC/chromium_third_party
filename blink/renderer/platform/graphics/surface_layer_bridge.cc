@@ -154,4 +154,22 @@ void SurfaceLayerBridge::UnregisterFrameSinkHierarchy() {
   embedded_frame_sink_provider_->UnregisterFrameSinkHierarchy(frame_sink_id_);
 }
 
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+void SurfaceLayerBridge::SetShouldOverlay(bool should_verlay) {
+  if (surface_layer_) {
+    surface_layer_->SetShouldOverlay(should_verlay);
+  }
+}
+void SurfaceLayerBridge::SetShouldInterceptTouchEvent(bool should_intercept) {
+  if (surface_layer_) {
+    surface_layer_->SetShouldInterceptTouchEvent(should_intercept);
+  }
+}
+void SurfaceLayerBridge::SetNativeEmbedId(int embed_id) {
+  if (surface_layer_) {
+    surface_layer_->SetNativeEmbedId(embed_id);
+  }
+}
+#endif // OHOS_CUSTOM_VIDEO_PLAYER
+
 }  // namespace blink

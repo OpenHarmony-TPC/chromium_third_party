@@ -307,6 +307,9 @@ LayoutObject::SetLayoutNeededForbiddenScope::~SetLayoutNeededForbiddenScope() {
 
 struct SameSizeAsLayoutObject : public GarbageCollected<SameSizeAsLayoutObject>,
                                 ImageResourceObserver,
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+                                public cc::LayerClient,
+#endif // OHOS_CUSTOM_VIDEO_PLAYER
                                 DisplayItemClient {
   // Normally these additional bitfields can use the gap between
   // DisplayItemClient and bitfields_.
@@ -5033,6 +5036,14 @@ bool LayoutObject::VisibleToHitTestRequest(const HitTestRequest& request) const 
           StyleRef().VisibleToHitTesting());
 }
 #endif
+
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+void LayoutObject::OnLayerRectChange(int x, int y, int width, int height) {
+  if (GetNode()) {
+    GetNode()->OnLayerRectChange(x, y, width, height, false);
+  }
+}
+#endif // OHOS_CUSTOM_VIDEO_PLAYER
 
 }  // namespace blink
 
