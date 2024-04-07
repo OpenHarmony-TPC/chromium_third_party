@@ -586,9 +586,11 @@ class CORE_EXPORT HTMLMediaElement
   void OnRemotePlaybackDisabled(bool disabled) override;
 
 #if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+  bool IsMuted() override;
   bool IsCustomVideoPlayerEnabled() override;
   bool ShouldCustomVideoPlayerOverlay() override;
   bool ShouldShowMediaControls() override;
+  Vector<WebURL> GetRemainSourceInfos() override;
   Vector<WebString> GetMediaControlsList() override;
   base::flat_map<std::string, std::string> GetElementAttributes() override;
 
