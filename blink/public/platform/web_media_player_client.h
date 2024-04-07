@@ -244,6 +244,7 @@ class BLINK_PLATFORM_EXPORT WebMediaPlayerClient {
   virtual Vector<WebURL> GetRemainSourceInfos() { return {}; }
   virtual Vector<WebString> GetMediaControlsList() { return {}; }
   virtual base::flat_map<std::string, std::string> GetElementAttributes() { return {}; }
+  virtual std::string GetOutgoingReferrerString() { return std::string(); }
 
   virtual void UpdatePlaybackStatus(uint32_t status) {}
   virtual void UpdateVolume(double volume) {}

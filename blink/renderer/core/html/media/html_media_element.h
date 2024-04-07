@@ -593,6 +593,7 @@ class CORE_EXPORT HTMLMediaElement
   Vector<WebURL> GetRemainSourceInfos() override;
   Vector<WebString> GetMediaControlsList() override;
   base::flat_map<std::string, std::string> GetElementAttributes() override;
+  std::string GetOutgoingReferrerString() override;
 
   void UpdatePlaybackStatus(uint32_t status) override;
   void UpdateVolume(double volume) override;

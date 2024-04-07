@@ -2934,6 +2934,7 @@ std::unique_ptr<media::Renderer> WebMediaPlayerImpl::CreateRenderer(
     renderer->SetPoster(poster_url_);
     renderer->SetMuted(client_->IsMuted());
     renderer->SetAttributes(client_->GetElementAttributes());
+    renderer->SetReferrer(client_->GetOutgoingReferrerString());
 
     renderer->SetSurfaceCreatedCallback(
         base::BindOnce(&WebMediaPlayerImpl::OnNativeTextureCreated,
