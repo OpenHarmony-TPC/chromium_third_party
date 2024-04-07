@@ -121,6 +121,10 @@
 #include "ui/accessibility/accessibility_features.h"
 #include "ui/display/screen_info.h"
 
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+#include "third_party/blink/renderer/platform/weborigin/security_policy.h"
+#endif // OHOS_CUSTOM_VIDEO_PLAYER
+
 #ifndef LOG_MEDIA_EVENTS
 // Default to not logging events because so many are generated they can
 // overwhelm the rest of the logging.
@@ -5020,6 +5024,15 @@ base::flat_map<std::string, std::string> HTMLMediaElement::GetElementAttributes(
   }
   return attributes_map;
 }
+std::string HTMLMediaElement::GetOutgoingReferrerString() {
+  ExecutionContext* context = GetExecutionContext();
+  if (!context) {
+    return std::string();
+  }
+  return SecurityPolicy::GenerateReferrer(context->GetReferrerPolicy(),
+      currentSrc(), context->OutgoingReferrer()).referrer.Utf8();
+}
+
 void HTMLMediaElement::UpdatePlaybackStatus(uint32_t status) {
   if (paused_ == !status) {
     return;
