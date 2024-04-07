@@ -505,8 +505,12 @@ gfx::Rect HTMLNativeElement::OwnerBoundingRect() {
 
     auto* frame = LocalFrameForNative();
     if (frame && frame->View()) {
+      auto frame_to_viewport = frame->View()->FrameToViewport(paint_rect_);
       paint_rect_ = gfx::ScaleToEnclosingRect(
           paint_rect_, frame->View()->InputEventsScaleFactor());
+      paint_rect_.set_origin(
+          gfx::Point(frame_to_viewport.x() - paint_rect_.x(),
+                     frame_to_viewport.y() - paint_rect_.y()));
     }
   }
 
