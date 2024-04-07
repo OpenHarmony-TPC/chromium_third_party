@@ -2917,15 +2917,22 @@ std::unique_ptr<media::Renderer> WebMediaPlayerImpl::CreateRenderer(
             audio_source_provider_.get(), compositor_.get(),
             std::move(request_overlay_info_cb),
             client_->TargetColorSpace(), GetDelegateId());
+    std::vector<media::Renderer::MediaSourceInfo> media_source_list;
     media::Renderer::MediaSourceInfo media_source_info;
     media_source_info.media_source = loaded_url_.spec();
-    renderer->SetMediaSourceList({media_source_info});
+    media_source_list.emplace_back(media_source_info);
+    for (const auto& source_info : client_->GetRemainSourceInfos()) {
+      media_source_info.media_source = GURL(source_info).spec();
+      media_source_list.emplace_back(media_source_info);
+    }
+    renderer->SetMediaSourceList(media_source_list);
     std::vector<std::string> controls_list;
     for (const auto& controls_list_item : client_->GetMediaControlsList()) {
       controls_list.emplace_back(controls_list_item.Utf8());
     }
     renderer->SetMediaControls(client_->ShouldShowMediaControls(), controls_list);
     renderer->SetPoster(poster_url_);
+    renderer->SetMuted(client_->IsMuted());
     renderer->SetAttributes(client_->GetElementAttributes());
 
     renderer->SetSurfaceCreatedCallback(

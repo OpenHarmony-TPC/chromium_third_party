@@ -4991,6 +4991,9 @@ void HTMLMediaElement::OpenerContextObserver::ContextDestroyed() {
 }
 
 #if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+bool HTMLMediaElement::IsMuted() {
+  return muted_;
+}
 bool HTMLMediaElement::IsCustomVideoPlayerEnabled() {
   return GetDocument().GetSettings() &&
          GetDocument().GetSettings()->IsCustomVideoPlayerEnabled();
@@ -5001,6 +5004,36 @@ bool HTMLMediaElement::ShouldCustomVideoPlayerOverlay() {
 }
 bool HTMLMediaElement::ShouldShowMediaControls() {
   return FastHasAttribute(html_names::kControlsAttr);
+}
+
+Vector<WebURL> HTMLMediaElement::GetRemainSourceInfos() {
+  Vector<WebURL> sourceInfos;
+  if (load_state_ == kLoadingFromSourceElement) {
+    NodeVector potential_source_nodes;
+    GetChildNodes(*this, potential_source_nodes);
+
+    bool looking_for_start_node = false;
+    for (unsigned i = 0; i < potential_source_nodes.size(); ++i) {
+      Node* node = potential_source_nodes[i].Get();
+      if (!looking_for_start_node && (next_child_node_to_consider_ != node))
+        continue;
+
+      looking_for_start_node = true;
+      HTMLSourceElement* source = DynamicTo<HTMLSourceElement>(node);
+      if (!source || (node->parentNode() != this))
+        continue;
+
+      current_source_node_ = source;
+      next_child_node_to_consider_ = source->nextSibling();
+
+      const AtomicString& src_value = source->FastGetAttribute(html_names::kSrcAttr);
+      if (src_value.empty())
+        continue;
+
+      sourceInfos.emplace_back(WebURL(source->GetDocument().CompleteURL(src_value)));
+    }
+  }
+  return sourceInfos;
 }
 Vector<WebString> HTMLMediaElement::GetMediaControlsList() {
   Vector<WebString> list;

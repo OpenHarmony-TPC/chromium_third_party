@@ -237,9 +237,11 @@ class BLINK_PLATFORM_EXPORT WebMediaPlayerClient {
   virtual void OnRemotePlaybackDisabled(bool disabled) = 0;
 
 #if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+  virtual bool IsMuted() { return false; }
   virtual bool IsCustomVideoPlayerEnabled() { return false; }
   virtual bool ShouldCustomVideoPlayerOverlay() { return false; }
   virtual bool ShouldShowMediaControls() { return false; }
+  virtual Vector<WebURL> GetRemainSourceInfos() { return {}; }
   virtual Vector<WebString> GetMediaControlsList() { return {}; }
   virtual base::flat_map<std::string, std::string> GetElementAttributes() { return {}; }
 
