@@ -428,8 +428,10 @@ bool InputHandlerProxy::DidNativeEmbedEvent(const WebInputEvent& event) {
           nativeRect = layer_impl->VideoRectInScreenSpace();
         }
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
-        x = x - nativeRect.x();
-        y = y - nativeRect.y();
+        float scale = layer_impl->GetIdealContentsScaleKey();
+        float initScale = layer_impl->GetInitScale();
+        x = (x - nativeRect.x()) / (scale / initScale);
+        y = (y - nativeRect.y()) / (scale / initScale);
         if (isTouchStart_ && i < touch_event.touches_length - 1) {
           continue;
         }
