@@ -23,6 +23,7 @@
 #include "media/mojo/mojom/native_bridge.mojom-blink.h"
 #include "third_party/abseil-cpp/absl/types/optional.h"
 #include "third_party/blink/public/common/media/display_type.h"
+#include "third_party/blink/public/platform/web_native_client.h"
 #include "third_party/blink/renderer/bindings/core/v8/active_script_wrappable.h"
 #include "third_party/blink/renderer/core/core_export.h"
 #include "third_party/blink/renderer/core/execution_context/execution_context_lifecycle_state_observer.h"
@@ -42,7 +43,6 @@
 #include "third_party/blink/renderer/platform/weborigin/kurl.h"
 #include "third_party/blink/renderer/platform/wtf/threading_primitives.h"
 #include "third_party/blink/renderer/platform/wtf/vector.h"
-#include "third_party/blink/public/platform/web_native_client.h"
 
 namespace cc {
 class Layer;
@@ -78,9 +78,7 @@ class CORE_EXPORT HTMLNativeElement
 
   cc::Layer* CcLayer() const;
 
-  enum DelayedActionType {
-    kLoadMediaResource = 1 << 0
-  };
+  enum DelayedActionType { kLoadMediaResource = 1 << 0 };
   // error state
   MediaError* error() const;
 
@@ -117,12 +115,12 @@ class CORE_EXPORT HTMLNativeElement
   int GetNativeEmbedId();
 
   // WebNativeClient implementation.
-  void OnCreateNativeSurface(int native_embed_id) final;
+  void OnCreateNativeSurface(int native_embed_id,
+                             RectChangeCB rect_changed_cb) final;
   void OnLayerRectChange(const gfx::Rect& rect) final;
   void OnDestroyNativeSurface() final;
   void Repaint() final;
   void SetCcLayer(cc::Layer*) final;
-  gfx::Rect OwnerBoundingRect() final;
 
 #if defined(OHOS_CUSTOM_VIDEO_PLAYER)
   void OnLayerRectChange(int x,
@@ -210,15 +208,17 @@ class CORE_EXPORT HTMLNativeElement
 
   void ResetMojoState();
 
-  String GetTypeAttribute();
+  String GetTypeAttribute() const;
 
-  String GetSrcAttribute();
+  String GetSrcAttribute() const;
 
-  String GetIdAttribute();
+  String GetIdAttribute() const;
 
-  String GetTagName();
+  String GetTagName() const;
 
-  ParamMap GetParamList();
+  ParamMap GetParamList() const;
+
+  gfx::Rect OwnerBoundingRect();
 
   // Adds a new NativeBridgeObserver remote that will be notified about native
   // bridge events and returns a receiver that an observer implementation can
@@ -239,7 +239,9 @@ class CORE_EXPORT HTMLNativeElement
 
   cc::Layer* cc_layer_;
 
-   gfx::Rect paint_rect_;
+  gfx::Rect bounding_rect_;
+
+  RectChangeCB bounding_rect_changed_cb_;
 
   typedef unsigned PendingActionFlags;
   PendingActionFlags pending_action_flags_;

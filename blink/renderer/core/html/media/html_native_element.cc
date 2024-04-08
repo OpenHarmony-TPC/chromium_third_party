@@ -35,6 +35,8 @@
 #include "third_party/blink/renderer/core/frame/local_frame.h"
 #include "third_party/blink/renderer/core/frame/local_frame_client.h"
 #include "third_party/blink/renderer/core/frame/local_frame_view.h"
+#include "third_party/blink/renderer/core/frame/page_scale_constraints_set.h"
+#include "third_party/blink/renderer/core/frame/visual_viewport.h"
 #include "third_party/blink/renderer/core/fullscreen/fullscreen.h"
 #include "third_party/blink/renderer/core/html/media/media_error.h"
 #include "third_party/blink/renderer/core/html_names.h"
@@ -95,6 +97,14 @@ void RemoveElementFromDocumentMap(HTMLNativeElement* element,
 std::ostream& operator<<(std::ostream& stream,
                          HTMLNativeElement const& media_element) {
   return stream << static_cast<void const*>(&media_element);
+}
+
+float PageConstraintInitalScale(const Document& document) {
+  float scale = 1.0;
+  if (auto* page = document.GetPage()) {
+    scale = page->GetPageScaleConstraintsSet().FinalConstraints().initial_scale;
+  }
+  return scale;
 }
 
 }  // anonymous namespace
@@ -213,7 +223,7 @@ void HTMLNativeElement::ResetMojoState() {
       GetExecutionContext());
 }
 
-String HTMLNativeElement::GetTypeAttribute() {
+String HTMLNativeElement::GetTypeAttribute() const {
   if (auto* element = GetDocument().LocalOwner()) {
     return element->TypeAttribute();
   }
@@ -221,7 +231,7 @@ String HTMLNativeElement::GetTypeAttribute() {
   return String();
 }
 
-String HTMLNativeElement::GetSrcAttribute() {
+String HTMLNativeElement::GetSrcAttribute() const {
   if (auto* element = GetDocument().LocalOwner()) {
     return element->SrcAttribute();
   }
@@ -229,7 +239,7 @@ String HTMLNativeElement::GetSrcAttribute() {
   return String();
 }
 
-String HTMLNativeElement::GetIdAttribute() {
+String HTMLNativeElement::GetIdAttribute() const {
   if (auto* element = GetDocument().LocalOwner()) {
     return element->IdAttribute();
   }
@@ -237,7 +247,7 @@ String HTMLNativeElement::GetIdAttribute() {
   return String();
 }
 
-String HTMLNativeElement::GetTagName() {
+String HTMLNativeElement::GetTagName() const {
   if (auto* element = GetDocument().LocalOwner()) {
     return element->tagName();
   }
@@ -245,7 +255,7 @@ String HTMLNativeElement::GetTagName() {
   return String();
 }
 
-ParamMap HTMLNativeElement::GetParamList() {
+ParamMap HTMLNativeElement::GetParamList() const {
   if (auto* element = GetDocument().LocalOwner()) {
     return element->ParamList();
   }
@@ -498,37 +508,46 @@ void HTMLNativeElement::UpdateLayoutObject() {
 }
 
 gfx::Rect HTMLNativeElement::OwnerBoundingRect() {
-  if (paint_rect_.IsEmpty()) {
+  if (bounding_rect_.IsEmpty()) {
     if (auto* owner_element = GetDocument().LocalOwner()) {
-      paint_rect_ = owner_element->PixelSnappedBoundingBox();
-    }
-
-    auto* frame = LocalFrameForNative();
-    if (frame && frame->View()) {
-      auto frame_to_viewport = frame->View()->FrameToViewport(paint_rect_);
-      paint_rect_ = gfx::ScaleToEnclosingRect(
-          paint_rect_, frame->View()->InputEventsScaleFactor());
-      paint_rect_.set_origin(
-          gfx::Point(frame_to_viewport.x() - paint_rect_.x(),
-                     frame_to_viewport.y() - paint_rect_.y()));
+      bounding_rect_ = owner_element->PixelSnappedBoundingBox();
     }
   }
 
-  return paint_rect_;
+  return bounding_rect_;
 }
 
-void HTMLNativeElement::OnCreateNativeSurface(int native_embed_id) {
+void HTMLNativeElement::OnCreateNativeSurface(int native_embed_id,
+                                              RectChangeCB rect_changed_cb) {
   native_embed_id_ = native_embed_id;
+  bounding_rect_changed_cb_ = rect_changed_cb;
   if (cc_layer_) {
     cc_layer_->SetNativeEmbedId(native_embed_id_);
   }
+
   if (!native_bridge_observer_remote_set_) {
     return;
   }
 
   auto embed_info = media::mojom::blink::NativeEmbedInfo::New();
+  auto* frame = LocalFrameForNative();
+  if (frame && frame->View()) {
+    auto frame_to_viewport =
+        frame->View()->FrameToViewport(OwnerBoundingRect());
+    auto bounding_rect = gfx::ScaleToEnclosingRect(
+        OwnerBoundingRect(), PageConstraintInitalScale(GetDocument()));
+    // We will use the position relative to visual viewport.
+    bounding_rect.set_origin(
+        gfx::Point(frame_to_viewport.x() - bounding_rect.x(),
+                   frame_to_viewport.y() - bounding_rect.y()));
+    bounding_rect_.set_origin(bounding_rect.origin());
+    embed_info->rect = bounding_rect;
+    if (!bounding_rect_changed_cb_.is_null()) {
+      bounding_rect_changed_cb_.Run(bounding_rect);
+    }
+  }
+
   embed_info->embed_id = native_embed_id_;
-  embed_info->rect = OwnerBoundingRect();
   embed_info->type = GetTypeAttribute().IsNull() ? "" : GetTypeAttribute();
   embed_info->element_id = GetIdAttribute().IsNull() ? "" : GetIdAttribute();
   embed_info->source = GetSrcAttribute().IsNull() ? "" : GetSrcAttribute();
@@ -552,25 +571,35 @@ void HTMLNativeElement::ClearResourceWithoutLocking() {
 }
 
 void HTMLNativeElement::OnLayerRectChange(const gfx::Rect& rect) {
-  if (paint_rect_.ApproximatelyEqual(rect, 1)) {
+  if (OwnerBoundingRect().ApproximatelyEqual(rect, 1)) {
     return;
   }
 
-  if (paint_rect_.size() != rect.size()) {
+  if (OwnerBoundingRect().size() != rect.size()) {
     ScheduleEvent(event_type_names::kResize);
+    bounding_rect_ = rect;
+    if (!bounding_rect_changed_cb_.is_null()) {
+      bounding_rect_changed_cb_.Run(gfx::ScaleToEnclosingRect(
+          bounding_rect_, PageConstraintInitalScale(GetDocument())));
+    }
+  } else {
+    bounding_rect_.set_origin(rect.origin());
   }
-  paint_rect_ = rect;
 
   if (!native_bridge_observer_remote_set_) {
     return;
   }
 
   for (auto& observer : native_bridge_observer_remote_set_->Value()) {
-    observer->OnEmbedRectChange(paint_rect_);
+    observer->OnEmbedRectChange(gfx::Rect(
+        bounding_rect_.origin(),
+        gfx::ScaleToCeiledSize(bounding_rect_.size(),
+                               PageConstraintInitalScale(GetDocument()))));
   }
 }
 
 void HTMLNativeElement::OnDestroyNativeSurface() {
+  bounding_rect_changed_cb_.Reset();
   if (!native_bridge_observer_remote_set_) {
     return;
   }

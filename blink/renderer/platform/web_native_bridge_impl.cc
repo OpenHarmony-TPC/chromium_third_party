@@ -101,7 +101,6 @@ WebNativeBridgeImpl::WebNativeBridgeImpl(
 WebNativeBridgeImpl::~WebNativeBridgeImpl() {
   DVLOG(1) << __func__;
   DCHECK(main_task_runner_->BelongsToCurrentThread());
-  layer_rect_changed_cb_.Reset();
 
   // delegate_->PlayerGone(delegate_id_);
   delegate_->RemoveObserver(delegate_id_);
@@ -173,12 +172,8 @@ void WebNativeBridgeImpl::OnSurfaceCreated(media::RectChangedCB rect_changed_cb,
                                            int native_embed_id) {
   DCHECK(main_task_runner_->BelongsToCurrentThread());
   LOG(INFO) << "[NativeEmbed] WebNativeBridgeImpl::OnSurfaceCreated";
-  layer_rect_changed_cb_ = rect_changed_cb;
-  if (!layer_rect_changed_cb_.is_null()) {
-    layer_rect_changed_cb_.Run(client_->OwnerBoundingRect());
-  }
 
-  client_->OnCreateNativeSurface(native_embed_id);
+  client_->OnCreateNativeSurface(native_embed_id, rect_changed_cb);
 }
 
 void WebNativeBridgeImpl::OnSurfaceDestroyed() {
@@ -189,13 +184,7 @@ void WebNativeBridgeImpl::OnSurfaceDestroyed() {
 
 void WebNativeBridgeImpl::OnLayerRectChange(const gfx::Rect& rect) {
   DCHECK(main_task_runner_->BelongsToCurrentThread());
-  if (layer_rect_.ApproximatelyEqual(rect, 1)) {
-    return;
-  }
 
-  if (!layer_rect_changed_cb_.is_null() && layer_rect_.size() != rect.size()) {
-    layer_rect_changed_cb_.Run(rect);
-  }
   client_->OnLayerRectChange(rect);
 
   layer_rect_ = rect;
