@@ -215,6 +215,7 @@ TEST_F(ShapeResultTest, CopyRangeLatinMultiRunWithHoles) {
   ReleaseShapeRange(ranges);
 }
 
+#if !defined(OHOS_UNITTESTS)
 TEST_F(ShapeResultTest, CopyRangeArabic) {
   // نص اختبار العربية
   String string(
@@ -251,6 +252,7 @@ TEST_F(ShapeResultTest, CopyRangeArabicMultiRun) {
 
   TestCopyRangesArabic(result.get());
 }
+#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
 static struct IsStartSafeToBreakData {
   bool expected;

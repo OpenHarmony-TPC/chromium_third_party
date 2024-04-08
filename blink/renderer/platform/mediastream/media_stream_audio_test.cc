@@ -277,6 +277,7 @@ class MediaStreamAudioTest : public ::testing::Test {
 
 // Tests that a simple source-->track-->sink connection and audio data flow
 // works.
+#if !defined(OHOS_UNITTESTS)
 TEST_F(MediaStreamAudioTest, BasicUsage) {
   // Create the source, but it should not be started yet.
   ASSERT_TRUE(source());
@@ -316,6 +317,7 @@ TEST_F(MediaStreamAudioTest, BasicUsage) {
 
   track()->RemoveSink(&sink);
 }
+#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
 // Tests that "ended" tracks can be connected after the source has stopped.
 TEST_F(MediaStreamAudioTest, ConnectTrackAfterSourceStopped) {

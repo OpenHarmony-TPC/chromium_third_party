@@ -17,7 +17,9 @@
 namespace blink {
 namespace {
 
+#if !defined(OHOS_UNITTESTS)
 const float kEpsilon = 0.00001;
+#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
 }  // namespace
 
@@ -50,6 +52,7 @@ class DarkModeImageClassifierTest : public testing::Test {
   std::unique_ptr<DarkModeImageClassifier> dark_mode_image_classifier_;
 };
 
+#if !defined(OHOS_UNITTESTS)
 TEST_F(DarkModeImageClassifierTest, ValidImage) {
   scoped_refptr<BitmapImage> image;
   SkBitmap bitmap;
@@ -153,6 +156,7 @@ TEST_F(DarkModeImageClassifierTest, ImageSpriteAlternateFragmentsSame) {
       image_classifier()->Classify(pixmap, SkIRect::MakeXYWH(0, 180, 95, 36)),
       DarkModeResult::kDoNotApplyFilter);
 }
+#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
 TEST_F(DarkModeImageClassifierTest, BlockSamples) {
   SkBitmap bitmap;
@@ -251,6 +255,7 @@ TEST_F(DarkModeImageClassifierTest, BlockSamples) {
   EXPECT_EQ(transparent_pixels_count, 4);
 }
 
+#if !defined(OHOS_UNITTESTS)
 TEST_F(DarkModeImageClassifierTest, FeaturesAndClassification) {
   DarkModeImageClassifier::Features features;
   scoped_refptr<BitmapImage> image;
@@ -365,5 +370,6 @@ TEST_F(DarkModeImageClassifierTest, FeaturesAndClassification) {
   EXPECT_NEAR(0.0f, features.transparency_ratio, kEpsilon);
   EXPECT_NEAR(0.0f, features.background_ratio, kEpsilon);
 }
+#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
 }  // namespace blink

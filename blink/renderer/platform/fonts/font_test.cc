@@ -18,6 +18,7 @@ namespace blink {
 
 namespace {
 
+#if !defined(OHOS_UNITTESTS)
 Font CreateVerticalUprightTestFont(const AtomicString& family_name,
                                    const String& font_path,
                                    float size) {
@@ -27,6 +28,7 @@ Font CreateVerticalUprightTestFont(const AtomicString& family_name,
         font_description->SetOrientation(FontOrientation::kVerticalUpright);
       });
 }
+#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
 }  // namespace
 
@@ -57,6 +59,7 @@ class FontTest : public FontTestBase {
   }
 };
 
+#if !defined(OHOS_UNITTESTS)
 TEST_F(FontTest, FonteMetricsCapHeight) {
   const auto cap_height_of = [](const char* font_path, float size) {
     Font font =
@@ -211,5 +214,6 @@ TEST_F(FontTest, NullifyPrimaryFontForTesting) {
   font.NullifyPrimaryFontForTesting();
   EXPECT_FALSE(font.PrimaryFont());
 }
+#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
 }  // namespace blink

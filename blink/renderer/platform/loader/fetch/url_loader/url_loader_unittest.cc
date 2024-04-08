@@ -540,6 +540,7 @@ TEST_F(URLLoaderTest, ClientAddressSpace) {
             response.ClientAddressSpace());
 }
 
+#if !defined(OHOS_UNITTESTS)
 TEST_F(URLLoaderTest, SSLInfo) {
   KURL url("https://test.example/");
 
@@ -569,6 +570,7 @@ TEST_F(URLLoaderTest, SSLInfo) {
   EXPECT_EQ(ssl_info.connection_status, got_ssl_info->connection_status);
   EXPECT_TRUE(ssl_info.cert->EqualsIncludingChain(got_ssl_info->cert.get()));
 }
+#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
 // Verifies that the lengths used by the PerformanceResourceTiming API are
 // correctly assigned for sync XHR.

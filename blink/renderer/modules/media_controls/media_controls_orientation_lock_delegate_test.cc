@@ -144,7 +144,12 @@ class MockChromeClientForOrientationLockDelegate final
   // async due to IPC, emulate that by posting tasks:
   void EnterFullscreen(LocalFrame& frame,
                        const FullscreenOptions*,
-                       FullscreenRequestType) override {
+                       FullscreenRequestType
+#if defined(OHOS_MEDIA) && defined(OHOS_UNITTESTS)
+                       ,
+                       const absl::optional<gfx::Size>&
+#endif  // OHOS_MEDIA && OHOS_UNITTESTS
+                       ) override {
     frame.GetTaskRunner(TaskType::kInternalNavigationAssociated)
         ->PostTask(FROM_HERE,
                    WTF::BindOnce(DidEnterFullscreen,

@@ -217,7 +217,9 @@ class TestWebFrameWidgetHost : public mojom::blink::WidgetHost,
   void BindWidgetHost(
       mojo::PendingAssociatedReceiver<mojom::blink::WidgetHost>,
       mojo::PendingAssociatedReceiver<mojom::blink::FrameWidgetHost>);
-
+#if defined(OHOS_UNITTESTS)
+  void DidNativeEmbedEvent(mojom::blink::NativeEmbedTouchEventPtr event) override {}
+#endif // OHOS_UNITTESTS
  private:
   size_t cursor_set_count_ = 0;
   size_t virtual_keyboard_request_count_ = 0;
@@ -608,8 +610,9 @@ class TestWidgetInputHandlerHost : public mojom::blink::WidgetInputHandlerHost {
   void RequestMouseLock(bool from_user_gesture,
                         bool unadjusted_movement,
                         RequestMouseLockCallback callback) override;
-  void DidNativeEmbedEvent(mojom::blink::EmbedTouchEventPtr event) override {}
-
+#if !defined(OHOS_UNITTESTS)
+  void DidNativeEmbedEvent(mojom::blink::NativeEmbedTouchEventPtr event) override {}
+#endif // OHOS_UNITTESTS
  private:
   mojo::Receiver<mojom::blink::WidgetInputHandlerHost> receiver_{this};
 };

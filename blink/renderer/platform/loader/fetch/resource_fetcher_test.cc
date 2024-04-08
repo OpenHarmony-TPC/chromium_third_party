@@ -230,6 +230,7 @@ TEST_F(ResourceFetcherTest, StartLoadAfterFrameDetach) {
       secure_url, SecurityOrigin::CreateUniqueOpaque(), ResourceType::kImage));
 }
 
+#if !defined(OHOS_UNITTESTS)
 TEST_F(ResourceFetcherTest, UseExistingResource) {
   blink::HistogramTester histogram_tester;
   auto* fetcher = CreateFetcher();
@@ -277,6 +278,7 @@ TEST_F(ResourceFetcherTest, UseExistingResource) {
       "Blink.MemoryCache.RevalidationPolicy.Mock",
       0 /* RevalidationPolicy::kUse */, 2);
 }
+#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
 TEST_F(ResourceFetcherTest, MemoryCachePerContextUseExistingResource) {
   blink::HistogramTester histogram_tester;
@@ -348,6 +350,7 @@ TEST_F(ResourceFetcherTest, MemoryCachePerContextUseExistingResource) {
       0 /* RevalidationPolicy::kUse */, 3);
 }
 
+#if !defined(OHOS_UNITTESTS)
 TEST_F(ResourceFetcherTest, MetricsPerTopFrameSite) {
   blink::HistogramTester histogram_tester;
 
@@ -500,6 +503,7 @@ TEST_F(ResourceFetcherTest, MetricsPerTopFrameSiteOpaqueOrigins) {
       "Blink.MemoryCache.RevalidationPolicy.Mock",
       0 /* RevalidationPolicy::kUse */, 2);
 }
+#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
 // Verify that the ad bit is copied to WillSendRequest's request when the
 // response is served from the memory cache.
@@ -599,6 +603,7 @@ TEST_F(ResourceFetcherTest, VaryOnBack) {
   EXPECT_EQ(resource, new_resource);
 }
 
+#if !defined(OHOS_UNITTESTS)
 TEST_F(ResourceFetcherTest, VaryResource) {
   auto* fetcher = CreateFetcher();
 
@@ -624,6 +629,7 @@ TEST_F(ResourceFetcherTest, VaryResource) {
   Resource* new_resource = MockResource::Fetch(fetch_params, fetcher, nullptr);
   EXPECT_EQ(resource, new_resource);
 }
+#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
 class RequestSameResourceOnComplete
     : public GarbageCollected<RequestSameResourceOnComplete>,
@@ -674,6 +680,7 @@ class RequestSameResourceOnComplete
   scoped_refptr<const SecurityOrigin> source_origin_;
 };
 
+#if !defined(OHOS_UNITTESTS)
 TEST_F(ResourceFetcherTest, RevalidateWhileFinishingLoading) {
   scoped_refptr<const SecurityOrigin> source_origin =
       SecurityOrigin::CreateUniqueOpaque();
@@ -699,6 +706,7 @@ TEST_F(ResourceFetcherTest, RevalidateWhileFinishingLoading) {
   platform_->GetURLLoaderMockFactory()->ServeAsynchronousRequests();
   EXPECT_TRUE(client->NotifyFinishedCalled());
 }
+#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
 // TODO(crbug.com/850785): Reenable this.
 #if BUILDFLAG(IS_ANDROID)
@@ -838,6 +846,7 @@ class ScopedMockRedirectRequester {
   const scoped_refptr<base::SingleThreadTaskRunner> task_runner_;
 };
 
+#if !defined(OHOS_UNITTESTS)
 TEST_F(ResourceFetcherTest, SynchronousRequest) {
   KURL url("http://127.0.0.1:8000/foo.png");
   RegisterMockedURLLoad(url);
@@ -854,6 +863,7 @@ TEST_F(ResourceFetcherTest, SynchronousRequest) {
   EXPECT_EQ(ResourceLoadPriority::kHighest,
             resource->GetResourceRequest().Priority());
 }
+#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
 TEST_F(ResourceFetcherTest, PingPriority) {
   KURL url("http://127.0.0.1:8000/foo.png");
@@ -1200,6 +1210,7 @@ TEST_F(ResourceFetcherTest, ContentIdURL) {
   }
 }
 
+#if !defined(OHOS_UNITTESTS)
 TEST_F(ResourceFetcherTest, StaleWhileRevalidate) {
   scoped_refptr<const SecurityOrigin> source_origin =
       SecurityOrigin::CreateUniqueOpaque();
@@ -1260,6 +1271,7 @@ TEST_F(ResourceFetcherTest, StaleWhileRevalidate) {
   platform_->GetURLLoaderMockFactory()->ServeAsynchronousRequests();
   EXPECT_FALSE(MemoryCache::Get()->Contains(resource));
 }
+#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
 TEST_F(ResourceFetcherTest, CachedResourceShouldNotCrashByNullURL) {
   auto* fetcher = CreateFetcher();

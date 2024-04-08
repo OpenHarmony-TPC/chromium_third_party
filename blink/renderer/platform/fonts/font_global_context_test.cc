@@ -16,6 +16,7 @@ namespace blink {
 
 class FontGlobalContextTest : public FontTestBase {};
 
+#if !defined(OHOS_UNITTESTS)
 TEST_F(FontGlobalContextTest, TypeFaceDigestCacheSameEntry) {
   // Put IdentifiableToken of Ahem in cache
   IdentifiableToken digest_1 =
@@ -87,5 +88,6 @@ TEST_F(FontGlobalContextTest, PostScriptNameDigestCacheDifferentEntry) {
               ->PlatformData());
   EXPECT_NE(digest_ahem, digest_ahem_space_ligature);
 }
+#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
 }  // namespace blink

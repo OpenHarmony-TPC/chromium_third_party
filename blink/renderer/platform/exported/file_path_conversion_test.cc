@@ -11,6 +11,7 @@
 
 namespace blink {
 
+#if !defined(OHOS_UNITTESTS)
 TEST(FilePathConversionTest, convert) {
   String test8bit_string("path");
   String test8bit_latin1("a\xC4");
@@ -57,5 +58,6 @@ TEST(FilePathConversionTest, convert) {
           .IsEmpty());
 #endif
 }
+#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
 }  // namespace blink

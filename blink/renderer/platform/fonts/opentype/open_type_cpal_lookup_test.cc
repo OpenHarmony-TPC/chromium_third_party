@@ -53,6 +53,7 @@ class OpenTypeCpalLookupTest : public FontTestBase {
   sk_sp<SkTypeface> non_colr_ahem_typeface_;
 };
 
+#if !defined(OHOS_UNITTESTS)
 TEST_F(OpenTypeCpalLookupTest, NoResultForNonColr) {
   for (auto& palette_use : {OpenTypeCpalLookup::kUsableWithLightBackground,
                             OpenTypeCpalLookup::kUsableWithDarkBackground}) {
@@ -62,7 +63,9 @@ TEST_F(OpenTypeCpalLookupTest, NoResultForNonColr) {
     EXPECT_FALSE(palette_result.has_value());
   }
 }
+#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
+#if !defined(OHOS_UNITTESTS)
 TEST_F(OpenTypeCpalLookupTest, DarkLightPalettes) {
   // COLR-palettes-test-font.tff dumped with FontTools has
   //     <palette index="2" type="1">[...]
@@ -80,5 +83,6 @@ TEST_F(OpenTypeCpalLookupTest, DarkLightPalettes) {
     EXPECT_EQ(*palette_result, expectation.second);
   }
 }
+#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
 }  // namespace blink

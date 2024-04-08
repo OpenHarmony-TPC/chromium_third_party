@@ -22,10 +22,18 @@ namespace {
 
 class FullscreenMockChromeClient : public EmptyChromeClient {
  public:
+#if defined(OHOS_MEDIA) && defined(OHOS_UNITTESTS)
+  MOCK_METHOD4(EnterFullscreen,
+               void(LocalFrame&,
+                    const FullscreenOptions*,
+                    FullscreenRequestType, 
+                    const absl::optional<gfx::Size>&));
+#else
   MOCK_METHOD3(EnterFullscreen,
                void(LocalFrame&,
                     const FullscreenOptions*,
                     FullscreenRequestType));
+#endif  // OHOS_MEDIA && OHOS_UNITTESTS
   MOCK_METHOD1(ExitFullscreen, void(LocalFrame&));
 };
 
@@ -97,7 +105,11 @@ TEST_F(HTMLVideoElementPersistentTest, nothingIsFullscreen) {
 TEST_F(HTMLVideoElementPersistentTest, videoIsFullscreen) {
   EXPECT_EQ(FullscreenElement(), nullptr);
 
+#if defined(OHOS_MEDIA) && defined(OHOS_UNITTESTS)
+  EXPECT_CALL(GetMockChromeClient(), EnterFullscreen(_, _, _, _)).Times(1);
+#else
   EXPECT_CALL(GetMockChromeClient(), EnterFullscreen(_, _, _)).Times(1);
+#endif  // OHOS_MEDIA && OHOS_UNITTESTS
   EXPECT_CALL(GetMockChromeClient(), ExitFullscreen(_)).Times(0);
 
   LocalFrame::NotifyUserActivation(
@@ -124,7 +136,11 @@ TEST_F(HTMLVideoElementPersistentTest, videoIsFullscreen) {
 TEST_F(HTMLVideoElementPersistentTest, divIsFullscreen) {
   EXPECT_EQ(FullscreenElement(), nullptr);
 
+#if defined(OHOS_MEDIA) && defined(OHOS_UNITTESTS)
+  EXPECT_CALL(GetMockChromeClient(), EnterFullscreen(_, _, _, _)).Times(1);
+#else
   EXPECT_CALL(GetMockChromeClient(), EnterFullscreen(_, _, _)).Times(1);
+#endif  // OHOS_MEDIA && OHOS_UNITTESTS
   EXPECT_CALL(GetMockChromeClient(), ExitFullscreen(_)).Times(0);
 
   LocalFrame::NotifyUserActivation(
@@ -158,7 +174,11 @@ TEST_F(HTMLVideoElementPersistentTest, divIsFullscreen) {
 TEST_F(HTMLVideoElementPersistentTest, exitFullscreenBeforePersistence) {
   EXPECT_EQ(FullscreenElement(), nullptr);
 
+#if defined(OHOS_MEDIA) && defined(OHOS_UNITTESTS)
+  EXPECT_CALL(GetMockChromeClient(), EnterFullscreen(_, _, _, _)).Times(1);
+#else
   EXPECT_CALL(GetMockChromeClient(), EnterFullscreen(_, _, _)).Times(1);
+#endif  // OHOS_MEDIA && OHOS_UNITTESTS
   EXPECT_CALL(GetMockChromeClient(), ExitFullscreen(_)).Times(1);
 
   LocalFrame::NotifyUserActivation(
@@ -188,7 +208,11 @@ TEST_F(HTMLVideoElementPersistentTest, exitFullscreenBeforePersistence) {
 TEST_F(HTMLVideoElementPersistentTest, internalPseudoClassOnlyUAStyleSheet) {
   EXPECT_EQ(FullscreenElement(), nullptr);
 
+#if defined(OHOS_MEDIA) && defined(OHOS_UNITTESTS)
+  EXPECT_CALL(GetMockChromeClient(), EnterFullscreen(_, _, _, _)).Times(1);
+#else
   EXPECT_CALL(GetMockChromeClient(), EnterFullscreen(_, _, _)).Times(1);
+#endif  // OHOS_MEDIA && OHOS_UNITTESTS
   EXPECT_CALL(GetMockChromeClient(), ExitFullscreen(_)).Times(0);
 
   DummyExceptionStateForTesting exception_state;
@@ -237,7 +261,11 @@ TEST_F(HTMLVideoElementPersistentTest, internalPseudoClassOnlyUAStyleSheet) {
 TEST_F(HTMLVideoElementPersistentTest, removeContainerWhilePersisting) {
   EXPECT_EQ(FullscreenElement(), nullptr);
 
+#if defined(OHOS_MEDIA) && defined(OHOS_UNITTESTS)
+  EXPECT_CALL(GetMockChromeClient(), EnterFullscreen(_, _, _, _)).Times(1);
+#else
   EXPECT_CALL(GetMockChromeClient(), EnterFullscreen(_, _, _)).Times(1);
+#endif  // OHOS_MEDIA && OHOS_UNITTESTS
   EXPECT_CALL(GetMockChromeClient(), ExitFullscreen(_)).Times(1);
 
   LocalFrame::NotifyUserActivation(
@@ -259,7 +287,11 @@ TEST_F(HTMLVideoElementPersistentTest, removeContainerWhilePersisting) {
 TEST_F(HTMLVideoElementPersistentTest, removeVideoWhilePersisting) {
   EXPECT_EQ(FullscreenElement(), nullptr);
 
+#if defined(OHOS_MEDIA) && defined(OHOS_UNITTESTS)
+  EXPECT_CALL(GetMockChromeClient(), EnterFullscreen(_, _, _, _)).Times(1);
+#else
   EXPECT_CALL(GetMockChromeClient(), EnterFullscreen(_, _, _)).Times(1);
+#endif  // OHOS_MEDIA && OHOS_UNITTESTS
   EXPECT_CALL(GetMockChromeClient(), ExitFullscreen(_)).Times(0);
 
   LocalFrame::NotifyUserActivation(
@@ -286,7 +318,11 @@ TEST_F(HTMLVideoElementPersistentTest, removeVideoWithLayerWhilePersisting) {
   DivElement()->AppendChild(span);
   span->AppendChild(VideoElement());
 
+#if defined(OHOS_MEDIA) && defined(OHOS_UNITTESTS)
+  EXPECT_CALL(GetMockChromeClient(), EnterFullscreen(_, _, _, _)).Times(1);
+#else
   EXPECT_CALL(GetMockChromeClient(), EnterFullscreen(_, _, _)).Times(1);
+#endif  // OHOS_MEDIA && OHOS_UNITTESTS
   EXPECT_CALL(GetMockChromeClient(), ExitFullscreen(_)).Times(0);
 
   LocalFrame::NotifyUserActivation(
@@ -308,7 +344,11 @@ TEST_F(HTMLVideoElementPersistentTest, removeVideoWithLayerWhilePersisting) {
 TEST_F(HTMLVideoElementPersistentTest, containsPersistentVideoScopedToFS) {
   EXPECT_EQ(FullscreenElement(), nullptr);
 
+#if defined(OHOS_MEDIA) && defined(OHOS_UNITTESTS)
+  EXPECT_CALL(GetMockChromeClient(), EnterFullscreen(_, _, _, _)).Times(1);
+#else
   EXPECT_CALL(GetMockChromeClient(), EnterFullscreen(_, _, _)).Times(1);
+#endif  // OHOS_MEDIA && OHOS_UNITTESTS
   EXPECT_CALL(GetMockChromeClient(), ExitFullscreen(_)).Times(0);
 
   LocalFrame::NotifyUserActivation(

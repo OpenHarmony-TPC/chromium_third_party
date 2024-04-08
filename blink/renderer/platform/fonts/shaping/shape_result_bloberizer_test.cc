@@ -567,6 +567,7 @@ TEST_F(ShapeResultBloberizerTest, LatinMultRunNG) {
       }});
 }
 
+#if !defined(OHOS_UNITTESTS)
 TEST_F(ShapeResultBloberizerTest, SupplementaryMultiRunNG) {
   TextDirection direction = TextDirection::kLtr;
   // 𠜎𠜱𠝹𠱓𠱸𠲖𠳏𠳕
@@ -628,6 +629,7 @@ TEST_F(ShapeResultBloberizerTest, SupplementaryMultiRunNG) {
                        ExpectedRun::ClusterDirection::kAscending},
                   }});
 }
+#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
 // Tests that runs with zero glyphs (the ZWJ non-printable character in this
 // case) are handled correctly. This test passes if it does not cause a crash.

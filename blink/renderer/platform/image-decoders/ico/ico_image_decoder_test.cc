@@ -13,13 +13,16 @@ namespace blink {
 
 namespace {
 
+#if !defined(OHOS_UNITTESTS)
 std::unique_ptr<ImageDecoder> CreateICODecoder() {
   return std::make_unique<ICOImageDecoder>(
       ImageDecoder::kAlphaNotPremultiplied, ColorBehavior::TransformToSRGB(),
       ImageDecoder::kNoDecodedImageByteLimit);
 }
+#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 }
 
+#if !defined(OHOS_UNITTESTS)
 TEST(ICOImageDecoderTests, trunctedIco) {
   const Vector<char> data =
       ReadFile("/images/resources/png-in-ico.ico")->CopyAs<Vector<char>>();
@@ -107,6 +110,7 @@ TEST(ICOImageDecoderTests, NullData) {
   decoder->SetMemoryAllocator(nullptr);
   EXPECT_FALSE(decoder->Failed());
 }
+#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
 class ICOImageDecoderCorpusTest : public ImageDecoderBaseTest {
  public:

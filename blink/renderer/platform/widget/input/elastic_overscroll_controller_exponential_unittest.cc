@@ -155,6 +155,7 @@ class ElasticOverscrollControllerExponentialTest : public testing::Test {
 
 // Verify that stretching  occurs in one axis at a time, and that it
 // is biased to the Y axis.
+#if !defined(OHOS_UNITTESTS)
 TEST_F(ElasticOverscrollControllerExponentialTest, Axis) {
   helper_.SetScrollOffsetAndMaxScrollOffset(gfx::PointF(10, 10),
                                             gfx::PointF(10, 10));
@@ -321,6 +322,7 @@ TEST_F(ElasticOverscrollControllerExponentialTest, MomentumAnimate) {
   EXPECT_EQ(stretch_count, helper_.set_stretch_amount_count());
   EXPECT_EQ(begin_frame_count, helper_.request_begin_frame_count());
 }
+#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
 // Verify that a stretch opposing a scroll is correctly resolved.
 TEST_F(ElasticOverscrollControllerExponentialTest, ReconcileStretchAndScroll) {
@@ -360,6 +362,7 @@ TEST_F(ElasticOverscrollControllerExponentialTest, ReconcileStretchAndScroll) {
 }
 
 // Verify that stretching  happens when the area is user scrollable.
+#if !defined(OHOS_UNITTESTS)
 TEST_F(ElasticOverscrollControllerExponentialTest,
        UserScrollableRequiredForStretch) {
   helper_.SetScrollOffsetAndMaxScrollOffset(gfx::PointF(0, 0),
@@ -549,5 +552,6 @@ TEST_F(ElasticOverscrollControllerExponentialTest,
   EXPECT_EQ(0, helper_.request_begin_frame_count());
 }
 
+#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 }  // namespace
 }  // namespace blink

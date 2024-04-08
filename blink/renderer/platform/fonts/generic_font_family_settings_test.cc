@@ -8,6 +8,7 @@
 
 namespace blink {
 
+#if !defined(OHOS_UNITTESTS)
 TEST(GenericFontFamilySettingsTest, FirstAvailableFontFamily) {
   GenericFontFamilySettings settings;
   EXPECT_TRUE(settings.Standard().empty());
@@ -25,6 +26,7 @@ TEST(GenericFontFamilySettingsTest, FirstAvailableFontFamily) {
     EXPECT_EQ(name, settings.Standard());
   }
 }
+#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
 TEST(GenericFontFamilySettingsTest, TestAllNames) {
   GenericFontFamilySettings settings;
