@@ -202,6 +202,11 @@ class CORE_EXPORT HTMLVideoElement final
   void RequestExitPictureInPicture() final;
   void RequestMediaRemoting() final;
 
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+  void RequestEnterFullscreen() final;
+  void RequestExitFullscreen() final;
+#endif // OHOS_CUSTOM_VIDEO_PLAYER
+
   void DidMoveToNewDocument(Document& old_document) override;
 
   void UpdatePictureInPictureAvailability();

@@ -42,6 +42,10 @@ enum class FullscreenRequestType {
   // the status bar should stay visible.
   kForXrArWithCamera = 8,
 
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+  kForCustomMediaPlayer = 16,
+#endif // OHOS_CUSTOM_VIDEO_PLAYER
+
   // Convenience value for "no flags".
   kUnprefixed = kNull,
 };

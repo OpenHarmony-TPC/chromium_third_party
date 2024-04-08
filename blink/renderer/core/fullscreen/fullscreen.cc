@@ -745,6 +745,12 @@ ScriptPromise Fullscreen::RequestFullscreen(Element& pending,
     error = RequestFullscreenConditionsNotMet(pending, document);
   }
 
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+  if (request_type & FullscreenRequestType::kForCustomMediaPlayer) {
+    error = nullptr;
+  }
+#endif // OHOS_CUSTOM_VIDEO_PLAYER
+
   // 7. Return |promise|, and run the remaining steps in parallel.
   ScriptPromise promise = resolver ? resolver->Promise() : ScriptPromise();
 

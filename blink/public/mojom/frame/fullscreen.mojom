@@ -31,5 +31,8 @@ struct FullscreenOptions {
 
   [EnableIf=ohos_media]
   gfx.mojom.Size? video_natural_size;
+
+  [EnableIf=ohos_custom_video_player]
+  bool is_custom_media_player = false;
 };
 
