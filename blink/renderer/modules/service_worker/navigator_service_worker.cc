@@ -13,6 +13,9 @@
 #include "third_party/blink/renderer/modules/service_worker/service_worker_container.h"
 #include "third_party/blink/renderer/platform/bindings/script_state.h"
 #include "third_party/blink/renderer/platform/instrumentation/use_counter.h"
+#if BUILDFLAG(IS_OHOS)
+  #include "third_party/ohos_ndk/includes/ohos_adapter/ohos_adapter_helper.h"
+#endif
 
 namespace blink {
 
@@ -27,6 +30,17 @@ ServiceWorkerContainer* NavigatorServiceWorker::serviceWorker(
     ScriptState* script_state,
     Navigator& navigator,
     ExceptionState& exception_state) {
+#if BUILDFLAG(IS_OHOS)
+  // block it on advanced security mode.
+  bool isAdvancedSecurityMode = OHOS::NWeb::OhosAdapterHelper::GetInstance()
+                            .GetSystemPropertiesInstance().IsAdvancedSecurityMode();
+  if (isAdvancedSecurityMode) {
+    String err_message = "cannot use serviceWorker on advancedSecurityMode!";
+    exception_state.ThrowSecurityError(err_message);
+    return nullptr;
+  }
+#endif // BUILDFLAG(IS_OHOS)
+
   if (!navigator.DomWindow())
     return nullptr;
   LocalDOMWindow& window = *navigator.DomWindow();
