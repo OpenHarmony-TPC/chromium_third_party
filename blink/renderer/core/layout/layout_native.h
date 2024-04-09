@@ -84,7 +84,7 @@ class LayoutNative final : public LayoutImage {
   }
   CompositingReasons AdditionalCompositingReasons() const override;
 
-  void UpdatePlayer(bool is_in_layout);
+  void UpdateNativeContent(bool is_in_layout);
 };
 
 template <>

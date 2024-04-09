@@ -108,8 +108,6 @@ class BLINK_PLATFORM_EXPORT WebNativeBridgeImpl
   // |pipeline_controller_| owns an instance of Pipeline.
   std::unique_ptr<media::NativePipelineController> native_pipeline_controller_;
 
-  media::RectChangedCB layer_rect_changed_cb_;
-
   WebNativeClient* const client_;
 
   WebNativeDelegate* delegate_;
