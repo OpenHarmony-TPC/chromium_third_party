@@ -446,10 +446,9 @@ class PLATFORM_EXPORT InputHandlerProxy : public cc::InputHandlerClient,
   bool need_flush_scroll_update_gesture_ = false;
   viz::BeginFrameArgs current_internal_begin_frame_args_;
   std::unique_ptr<NativeEmbedEventQueue> native_event_queue_;
-  bool is_last_native_type_ = false;
-  size_t last_native_index_ = 0;
   std::string embed_id_;
   bool isTouchStart_ = false;
+  std::unordered_map<size_t, bool> native_map_;
 #endif
 };
 

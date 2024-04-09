@@ -419,8 +419,12 @@ bool InputHandlerProxy::DidNativeEmbedEvent(const WebInputEvent& event) {
       int32_t id = touch_event.touches[i].id;
       cc::LayerImpl* layer_impl = input_handler_->GetLayerImpl(gfx::Point(x, y));
       if (layer_impl && layer_impl->ShouldInterceptTouchEvent()) {
-        is_last_native_type_ = true;
-        last_native_index_ = i;
+        if(event.GetType() == WebInputEvent::Type::kTouchEnd) {
+          native_map_[i] = false;
+        } else {
+          native_map_[i] = true;
+        }
+        
         embed_id_ = std::to_string(layer_impl->native_embed_id());
         gfx::RectF nativeRect = layer_impl->GetNativeRect();
 #if defined(OHOS_CUSTOM_VIDEO_PLAYER)
@@ -444,12 +448,10 @@ bool InputHandlerProxy::DidNativeEmbedEvent(const WebInputEvent& event) {
         isTouchStart_ = (event.GetType() == WebInputEvent::Type::kTouchStart);
         client_->DidNativeEmbedEvent(event.GetType(), embed_id_, id, x, y);
         result = true;
-      }
-      if (layer_impl && !layer_impl->ShouldInterceptTouchEvent() &&
-          event.GetType() == WebInputEvent::Type::kTouchMove &&
-          is_last_native_type_ &&
-          last_native_index_ == i) {
-        is_last_native_type_ = false;
+      } else if (event.GetType() == WebInputEvent::Type::kTouchMove && 
+                  native_map_.find(i) != native_map_.end() && 
+                  native_map_.find(i)->second) {
+        native_map_[i] = false;
         client_->DidNativeEmbedEvent(WebInputEvent::Type::kTouchCancel, embed_id_, id, x, y);
         result = true;
       }
