@@ -669,6 +669,11 @@ class CORE_EXPORT WebFrameWidgetImpl
   // Ask compositor to create the shared memory for smoothness ukm region.
   base::ReadOnlySharedMemoryRegion CreateSharedMemoryForSmoothnessUkm();
 
+#ifdef OHOS_EX_FREE_COPY
+  WTF::Vector<int8_t> GetWordSelection(const WTF::String& text,
+                                       int8_t offset);
+#endif
+
  protected:
   // WidgetBaseClient overrides:
   void WillBeginMainFrame() override;

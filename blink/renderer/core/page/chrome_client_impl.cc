@@ -1387,6 +1387,15 @@ float ChromeClientImpl::ZoomFactorForViewportLayout() {
   return web_view_->ZoomFactorForViewportLayout();
 }
 
+#ifdef OHOS_EX_FREE_COPY
+WTF::Vector<int8_t> ChromeClientImpl::GetWordSelection(LocalFrame* frame,
+                                                       const WTF::String& text,
+                                                       int8_t offset) {
+  WebLocalFrameImpl* web_frame = WebLocalFrameImpl::FromFrame(frame);
+  return web_frame->LocalRootFrameWidget()->GetWordSelection(text, offset);
+}
+#endif
+
 gfx::Rect ChromeClientImpl::AdjustWindowRectForMinimum(
     const gfx::Rect& pending_rect) {
   gfx::Rect window = pending_rect;

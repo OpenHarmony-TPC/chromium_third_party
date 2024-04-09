@@ -586,7 +586,11 @@ unsigned ShapeResult::CaretOffsetForHitTest(
   GlyphIndexResult result;
   OffsetForPosition(x, break_glyphs_option, &result);
 
+#ifdef OHOS_INPUT_EVENTS
+  if (x - result.origin_x <= result.advance * 0.6)
+#else
   if (x - result.origin_x <= result.advance / 2)
+#endif
     return result.left_character_index;
   return result.right_character_index;
 }

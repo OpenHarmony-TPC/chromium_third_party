@@ -310,6 +310,11 @@ class CORE_EXPORT ChromeClientImpl final : public ChromeClient {
 
   float ZoomFactorForViewportLayout() override;
 
+#ifdef OHOS_EX_FREE_COPY
+  WTF::Vector<int8_t> GetWordSelection(LocalFrame* frame,
+                                       const WTF::String& text,
+                                       int8_t offset) override;
+#endif
  private:
   bool IsChromeClientImpl() const override { return true; }
 
