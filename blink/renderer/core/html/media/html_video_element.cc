@@ -460,6 +460,10 @@ void HTMLVideoElement::DidEnterFullscreen() {
       GetWebMediaPlayer()->EnteredFullscreen();
     GetWebMediaPlayer()->OnDisplayTypeChanged(GetDisplayType());
   }
+
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+  FullscreenChanged(true);
+#endif // OHOS_CUSTOM_VIDEO_PLAYER
 }
 
 void HTMLVideoElement::DidExitFullscreen() {
@@ -474,6 +478,10 @@ void HTMLVideoElement::DidExitFullscreen() {
       !FastHasAttribute(html_names::kPlaysinlineAttr)) {
     pause();
   }
+
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+  FullscreenChanged(false);
+#endif // OHOS_CUSTOM_VIDEO_PLAYER
 }
 
 void HTMLVideoElement::DidMoveToNewDocument(Document& old_document) {
@@ -775,5 +783,22 @@ void HTMLVideoElement::AttributeChanged(
 void HTMLVideoElement::OnRequestVideoFrameCallback() {
   VideoFrameCallbackRequester::From(*this)->OnRequestVideoFrameCallback();
 }
+
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+void HTMLVideoElement::RequestEnterFullscreen() {
+  if (!IsFullscreen()) {
+    FullscreenOptions* options = FullscreenOptions::Create();
+    options->setNavigationUI("hide");
+    Fullscreen::RequestFullscreen(*this, options,
+        FullscreenRequestType::kForCustomMediaPlayer);
+  }
+}
+
+void HTMLVideoElement::RequestExitFullscreen() {
+  if (IsFullscreen()) {
+    Fullscreen::ExitFullscreen(GetDocument());
+  }
+}
+#endif // OHOS_CUSTOM_VIDEO_PLAYER
 
 }  // namespace blink

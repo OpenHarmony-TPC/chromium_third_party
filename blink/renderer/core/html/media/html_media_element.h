@@ -458,6 +458,10 @@ class CORE_EXPORT HTMLMediaElement
 
   void UpdateLayoutObject();
 
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+  void FullscreenChanged(bool is_fullscreen);
+#endif // OHOS_CUSTOM_VIDEO_PLAYER
+
  private:
   // Friend class for testing.
   friend class ContextMenuControllerTest;
@@ -630,6 +634,10 @@ class CORE_EXPORT HTMLMediaElement
   void SetAudioSinkId(const String&) override;
   void SuspendForFrameClosed() override;
   void RequestMediaRemoting() override {}
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+  void RequestEnterFullscreen() override {}
+  void RequestExitFullscreen() override {}
+#endif // OHOS_CUSTOM_VIDEO_PLAYER
 
   void LoadTimerFired(TimerBase*);
   void ProgressEventTimerFired();

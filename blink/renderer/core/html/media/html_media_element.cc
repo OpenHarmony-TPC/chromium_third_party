@@ -5106,6 +5106,13 @@ void HTMLMediaElement::OnLayerRectChange(int x, int y, int width, int height,
     observer->UpdateLayerRect(layer_rect_);
   }
 }
+
+void HTMLMediaElement::FullscreenChanged(bool is_fullscreen) {
+  DVLOG(1) << "FullscreenChanged(" << is_fullscreen << ")";
+  for (auto& observer : media_player_observer_remote_set_->Value()) {
+    observer->FullscreenChanged(is_fullscreen);
+  }
+}
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
 
 STATIC_ASSERT_ENUM(WebMediaPlayer::kReadyStateHaveNothing,
