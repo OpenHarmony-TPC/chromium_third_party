@@ -4655,12 +4655,11 @@ WebFrameWidgetImpl::CreateSharedMemoryForSmoothnessUkm() {
 #ifdef OHOS_EX_FREE_COPY
 WTF::Vector<int8_t> WebFrameWidgetImpl::GetWordSelection(const WTF::String& text,
                                                          int8_t offset) {
-  WTF::Vector<int8_t> temp = { -1, -1 };
-  WTF::Vector<int8_t>* select = &temp;
-  if (GetAssociatedFrameWidgetHost()->GetWordSelection(text, offset, select)) {
-    return *select;
+  WTF::Vector<int8_t> select;
+  if (!GetAssociatedFrameWidgetHost()->GetWordSelection(text, offset, &select)) {
+    select = { -1, -1 };
   }
-  return temp;
+  return select;
 }
 #endif
 

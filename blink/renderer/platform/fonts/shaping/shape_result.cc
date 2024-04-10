@@ -56,6 +56,10 @@ namespace blink {
 constexpr unsigned HarfBuzzRunGlyphData::kMaxCharacterIndex;
 constexpr unsigned HarfBuzzRunGlyphData::kMaxGlyphs;
 
+#ifdef OHOS_INPUT_EVENTS
+static constexpr double SEGMENTATION_THREDHOLD = 0.6;
+#endif
+
 struct SameSizeAsHarfBuzzRunGlyphData {
   unsigned glyph : 16;
   unsigned char_index_and_bit_field : 16;
@@ -587,7 +591,7 @@ unsigned ShapeResult::CaretOffsetForHitTest(
   OffsetForPosition(x, break_glyphs_option, &result);
 
 #ifdef OHOS_INPUT_EVENTS
-  if (x - result.origin_x <= result.advance * 0.6)
+  if (x - result.origin_x <= result.advance * SEGMENTATION_THREDHOLD)
 #else
   if (x - result.origin_x <= result.advance / 2)
 #endif

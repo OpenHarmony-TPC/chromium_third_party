@@ -722,17 +722,30 @@ bool SelectionController::SelectClosestWordFromHitTestResult(
             << static_cast<int>(select.at(0))
             << ", end: "
             << static_cast<int>(select.at(1));
-  const SelectionInFlatTree new_selection =
-      pos.IsNotNull()
-          ? select.at(0) != -1 && select.at(1) != -1
-              ? SelectionInFlatTree::Builder()
-                  .Collapse(PositionInFlatTree::CreateWithoutValidation(*pos.AnchorNode(), select.at(0)))
-                  .Extend(PositionInFlatTree::CreateWithoutValidation(*pos.AnchorNode(), select.at(1)))
-                  .Build()
-              : ExpandWithGranularity(
-                    SelectionInFlatTree::Builder().Collapse(pos).Build(),
-                    TextGranularity::kWord)
-          : SelectionInFlatTree();
+  SelectionInFlatTree temp_selection;
+  if (pos.IsNotNull()) {
+    if (select.at(0) != -1 && select.at(1) != -1) {
+      temp_selection =
+          SelectionInFlatTree::Builder()
+              .Collapse(
+                  PositionInFlatTree::CreateWithoutValidation(
+                      *pos.AnchorNode(),
+                      select.at(0)))
+              .Extend(
+                  PositionInFlatTree::CreateWithoutValidation(
+                      *pos.AnchorNode(),
+                      select.at(1)))
+              .Build();
+    } else {
+      temp_selection =
+          ExpandWithGranularity(
+              SelectionInFlatTree::Builder().Collapse(pos).Build(),
+              TextGranularity::kWord);
+    }
+  } else {
+    temp_selection = SelectionInFlatTree();
+  }
+  const SelectionInFlatTree new_selection = temp_selection;
 #else
   const SelectionInFlatTree new_selection =
       pos.IsNotNull()
