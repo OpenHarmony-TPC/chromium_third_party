@@ -64,6 +64,7 @@
 
 #ifdef OHOS_EX_FREE_COPY
 #include "third_party/blink/renderer/core/input/context_menu_allowed_scope.h"
+#include "third_party/blink/renderer/core/page/chrome_client.h"
 #endif
 
 namespace blink {
@@ -712,12 +713,47 @@ bool SelectionController::SelectClosestWordFromHitTestResult(
       CreateVisiblePosition(
           PositionWithAffinityOfHitTestResult(adjusted_hit_test_result))
           .ToPositionWithAffinity();
+#ifdef OHOS_EX_FREE_COPY
+  WTF::Vector<int8_t> select = frame_->View()->GetChromeClient()->GetWordSelection(
+      frame_,
+      inner_node->textContent(),
+      pos.GetPosition().OffsetInContainerNode());
+  LOG(INFO) << "GetWordSelection, start: "
+            << static_cast<int>(select.at(0))
+            << ", end: "
+            << static_cast<int>(select.at(1));
+  SelectionInFlatTree temp_selection;
+  if (pos.IsNotNull()) {
+    if (select.at(0) != -1 && select.at(1) != -1) {
+      temp_selection =
+          SelectionInFlatTree::Builder()
+              .Collapse(
+                  PositionInFlatTree::CreateWithoutValidation(
+                      *pos.AnchorNode(),
+                      select.at(0)))
+              .Extend(
+                  PositionInFlatTree::CreateWithoutValidation(
+                      *pos.AnchorNode(),
+                      select.at(1)))
+              .Build();
+    } else {
+      temp_selection =
+          ExpandWithGranularity(
+              SelectionInFlatTree::Builder().Collapse(pos).Build(),
+              TextGranularity::kWord);
+    }
+  } else {
+    temp_selection = SelectionInFlatTree();
+  }
+  const SelectionInFlatTree new_selection = temp_selection;
+#else
   const SelectionInFlatTree new_selection =
       pos.IsNotNull()
           ? ExpandWithGranularity(
                 SelectionInFlatTree::Builder().Collapse(pos).Build(),
                 TextGranularity::kWord)
           : SelectionInFlatTree();
+#endif
 
   // TODO(editing-dev): Fix CreateVisibleSelectionWithGranularity() to not
   // return invalid ranges. Until we do that, we need this check here to avoid a

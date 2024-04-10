@@ -251,6 +251,13 @@ class CORE_EXPORT EmptyChromeClient : public ChromeClient {
   void InstallSupplements(LocalFrame&) override {}
   void OutermostMainFrameScrollOffsetChanged() const override {}
 
+#ifdef OHOS_EX_FREE_COPY
+  WTF::Vector<int8_t> GetWordSelection(LocalFrame* frame,
+                                       const WTF::String& text,
+                                       int8_t offset) override {
+    return { -1, -1 };
+  }
+#endif
  private:
   const display::ScreenInfos empty_screen_infos_{display::ScreenInfo()};
 };

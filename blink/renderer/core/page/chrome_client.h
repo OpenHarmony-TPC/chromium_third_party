@@ -586,6 +586,11 @@ class CORE_EXPORT ChromeClient : public GarbageCollected<ChromeClient> {
 
   virtual float ZoomFactorForViewportLayout() { return 1; }
 
+#ifdef OHOS_EX_FREE_COPY
+  virtual WTF::Vector<int8_t> GetWordSelection(LocalFrame* frame,
+                                               const WTF::String& text,
+                                               int8_t offset) = 0;
+#endif
  protected:
   ChromeClient() = default;
 

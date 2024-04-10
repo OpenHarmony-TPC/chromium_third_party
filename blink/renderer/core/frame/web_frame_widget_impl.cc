@@ -4652,6 +4652,17 @@ WebFrameWidgetImpl::CreateSharedMemoryForSmoothnessUkm() {
   return LayerTreeHost()->CreateSharedMemoryForSmoothnessUkm();
 }
 
+#ifdef OHOS_EX_FREE_COPY
+WTF::Vector<int8_t> WebFrameWidgetImpl::GetWordSelection(const WTF::String& text,
+                                                         int8_t offset) {
+  WTF::Vector<int8_t> select;
+  if (!GetAssociatedFrameWidgetHost()->GetWordSelection(text, offset, &select)) {
+    select = { -1, -1 };
+  }
+  return select;
+}
+#endif
+
 bool WebFrameWidgetImpl::CanComposeInline() {
   if (auto* plugin = GetFocusedPluginContainer())
     return plugin->CanComposeInline();
