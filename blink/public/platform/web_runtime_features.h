@@ -68,6 +68,11 @@ class BLINK_PLATFORM_EXPORT WebRuntimeFeatures : public WebRuntimeFeaturesBase {
   static void EnableOverlayScrollbars(bool);
   static void EnableFluentScrollbars(bool);
 
+#if BUILDFLAG(IS_OHOS)
+  // advanced security mode feature
+  static void EnableNonAdvancedSecurityMode(bool);
+#endif
+
   WebRuntimeFeatures() = delete;
 };
 
