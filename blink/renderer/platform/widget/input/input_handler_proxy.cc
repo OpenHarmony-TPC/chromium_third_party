@@ -385,11 +385,6 @@ void InputHandlerProxy::HandleInputEventWithLatencyInfo(
     bool queue_was_empty = compositor_event_queue_->empty();
     compositor_event_queue_->Queue(std::move(event_with_callback),
                                    tick_clock_->NowTicks());
-#if BUILDFLAG(IS_OHOS)
-    if (need_flush_scroll_update_gesture_ && gesture_event.GetType() == WebGestureEvent::Type::kGestureScrollUpdate) {
-      DeliverInputForBeginFrame(current_internal_begin_frame_args_);
-    }
-#endif
     // |synchronous_input_handler_| is WebView only. WebView has different
     // mechanisms and we want to forward all events immediately.
     if (is_from_blocking_touch || is_scroll_end_from_wheel ||
@@ -399,6 +394,11 @@ void InputHandlerProxy::HandleInputEventWithLatencyInfo(
     if (queue_was_empty && !compositor_event_queue_->empty()) {
       input_handler_->SetNeedsAnimateInput();
     }
+  #if BUILDFLAG(IS_OHOS)
+    if (need_flush_scroll_update_gesture_ && gesture_event.GetType() == WebGestureEvent::Type::kGestureScrollUpdate) {
+      DeliverInputForBeginFrame(current_internal_begin_frame_args_);
+    }
+#endif
     return;
   }
 
