@@ -394,7 +394,7 @@ void InputHandlerProxy::HandleInputEventWithLatencyInfo(
     if (queue_was_empty && !compositor_event_queue_->empty()) {
       input_handler_->SetNeedsAnimateInput();
     }
-  #if BUILDFLAG(IS_OHOS)
+#if BUILDFLAG(IS_OHOS)
     if (need_flush_scroll_update_gesture_ && gesture_event.GetType() == WebGestureEvent::Type::kGestureScrollUpdate) {
       DeliverInputForBeginFrame(current_internal_begin_frame_args_);
     }
