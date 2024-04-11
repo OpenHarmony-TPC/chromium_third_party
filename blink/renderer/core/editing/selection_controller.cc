@@ -69,6 +69,11 @@
 
 namespace blink {
 
+#ifdef OHOS_EX_FREE_COPY
+static constexpr int MAX_LENGTH = 100;
+static constexpr int HALF_LENGTH = 50;
+#endif
+
 SelectionController::SelectionController(LocalFrame& frame)
     : ExecutionContextLifecycleObserver(frame.DomWindow()),
       frame_(&frame),
@@ -714,14 +719,30 @@ bool SelectionController::SelectClosestWordFromHitTestResult(
           PositionWithAffinityOfHitTestResult(adjusted_hit_test_result))
           .ToPositionWithAffinity();
 #ifdef OHOS_EX_FREE_COPY
+  WTF::String str = inner_node->textContent();
+  unsigned len = str.length();
+  int offset = pos.GetPosition().OffsetInContainerNode();
+  int temp_offset = offset;
+  if (len > MAX_LENGTH) {
+    if (temp_offset < HALF_LENGTH) {
+      str = str.Left(MAX_LENGTH);
+    } else if (len - temp_offset <= HALF_LENGTH) {
+      str = str.Right(MAX_LENGTH);
+      temp_offset -= len - MAX_LENGTH;
+    } else {
+      str = str.Substring(temp_offset - HALF_LENGTH, MAX_LENGTH);
+      temp_offset = HALF_LENGTH;
+    }
+  }
+
   WTF::Vector<int8_t> select = frame_->View()->GetChromeClient()->GetWordSelection(
       frame_,
-      inner_node->textContent(),
-      pos.GetPosition().OffsetInContainerNode());
+      str,
+      temp_offset);
   LOG(INFO) << "GetWordSelection, start: "
-            << static_cast<int>(select.at(0))
+            << static_cast<int>(select.at(0) - temp_offset + offset)
             << ", end: "
-            << static_cast<int>(select.at(1));
+            << static_cast<int>(select.at(1) - temp_offset + offset);
   SelectionInFlatTree temp_selection;
   if (pos.IsNotNull()) {
     if (select.at(0) != -1 && select.at(1) != -1) {
@@ -730,11 +751,11 @@ bool SelectionController::SelectClosestWordFromHitTestResult(
               .Collapse(
                   PositionInFlatTree::CreateWithoutValidation(
                       *pos.AnchorNode(),
-                      select.at(0)))
+                      select.at(0) - temp_offset + offset))
               .Extend(
                   PositionInFlatTree::CreateWithoutValidation(
                       *pos.AnchorNode(),
-                      select.at(1)))
+                      select.at(1) - temp_offset + offset))
               .Build();
     } else {
       temp_selection =
