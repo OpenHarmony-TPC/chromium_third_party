@@ -42,6 +42,7 @@
 
 #if defined(OHOS_CUSTOM_VIDEO_PLAYER)
 #include "base/containers/flat_map.h"
+#include "media/base/renderer.h"
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
 
 namespace cc {
@@ -241,7 +242,9 @@ class BLINK_PLATFORM_EXPORT WebMediaPlayerClient {
   virtual bool IsCustomVideoPlayerEnabled() { return false; }
   virtual bool ShouldCustomVideoPlayerOverlay() { return false; }
   virtual bool ShouldShowMediaControls() { return false; }
-  virtual Vector<WebURL> GetRemainSourceInfos() { return {}; }
+  virtual std::string GetMediaFormat() { return ""; }
+  virtual void RestartForPrimitive() {}
+  virtual Vector<media::Renderer::MediaSourceInfo> GetRemainSourceInfos() { return {}; }
   virtual Vector<WebString> GetMediaControlsList() { return {}; }
   virtual base::flat_map<std::string, std::string> GetElementAttributes() { return {}; }
 
