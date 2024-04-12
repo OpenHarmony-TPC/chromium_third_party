@@ -284,6 +284,14 @@ WebInputEventResult GestureManager::HandleGestureTap(
   WebInputEventResult mouse_down_event_result =
       WebInputEventResult::kHandledSuppressed;
   if (!suppress_mouse_events_from_gestures_) {
+#ifdef OHOS_CLIPBOARD
+    if (selection_controller_->HandleGestureTapIfSelectionExist(
+        MouseEventWithHitTestResults(fake_mouse_down,
+                                     current_hit_test_location,
+                                     current_hit_test))) {
+      return WebInputEventResult::kHandledSystem;
+    }
+#endif  // OHOS_CLIPBOARD
     mouse_event_manager_->SetClickCount(gesture_event.TapCount());
 
     mouse_down_event_result =

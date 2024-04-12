@@ -39,6 +39,10 @@ class CORE_EXPORT SetSelectionOptions final {
   bool ShouldShrinkNextTap() const { return should_shrink_next_tap_; }
   bool IsDirectional() const { return is_directional_; }
 
+#ifdef OHOS_CLIPBOARD
+  bool IsSelectAll() const { return is_select_all_; }
+#endif  // OHOS_CLIPBOARD
+
  private:
   CursorAlignOnScroll cursor_align_on_scroll_ = CursorAlignOnScroll::kIfNeeded;
   bool do_not_clear_strategy_ = false;
@@ -50,6 +54,10 @@ class CORE_EXPORT SetSelectionOptions final {
   bool should_show_handle_ = false;
   bool should_shrink_next_tap_ = false;
   bool is_directional_ = false;
+
+#ifdef OHOS_CLIPBOARD
+  bool is_select_all_ = false;
+#endif  // OHOS_CLIPBOARD
 };
 
 // This class is used for building |SelectionData| object.
@@ -74,6 +82,10 @@ class CORE_EXPORT SetSelectionOptions::Builder final {
   Builder& SetShouldShowHandle(bool);
   Builder& SetShouldShrinkNextTap(bool);
   Builder& SetIsDirectional(bool);
+
+#ifdef OHOS_CLIPBOARD
+  Builder& SetIsSelectAll(bool);
+#endif  // OHOS_CLIPBOARD
 
  private:
   SetSelectionOptions data_;

@@ -316,6 +316,11 @@ class CORE_EXPORT FrameSelection final
       const NGInlineCursorPosition& position) const;
 
   void Trace(Visitor*) const override;
+
+#ifdef OHOS_CLIPBOARD
+  bool IsSelectAll() { return is_select_all_; }
+#endif  // OHOS_CLIPBOARD
+
 #ifdef OHOS_DRAG_DROP
   void InvalidateSelectionForDrag();
 #endif //OHOS_DRAG_DROP
@@ -375,6 +380,10 @@ class CORE_EXPORT FrameSelection final
   std::unique_ptr<GranularityStrategy> granularity_strategy_;
 
   const Member<FrameCaret> frame_caret_;
+
+#ifdef OHOS_CLIPBOARD
+  bool is_select_all_ = false;
+#endif  // OHOS_CLIPBOARD
 };
 
 }  // namespace blink
