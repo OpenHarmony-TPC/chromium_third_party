@@ -198,6 +198,14 @@ void RecordProgressEventTimerState(ProgressEventTimerState state) {
 
 static const base::TimeDelta kStalledNotificationInterval = base::Seconds(3);
 
+std::string GetFormatFromType(std::string type) {
+  std::string format;
+  size_t index = type.find('/');
+  if (index != std::string::npos)
+    format = type.substr(index + 1);
+  return format;
+}
+
 String UrlForLoggingMedia(const KURL& url) {
   static const unsigned kMaximumURLLengthForLogging = 128;
 
@@ -892,6 +900,10 @@ void HTMLMediaElement::ScheduleEvent(Event* event) {
 void HTMLMediaElement::LoadTimerFired(TimerBase*) {
   if (pending_action_flags_ & kLoadTextTrackResource)
     HonorUserPreferencesForAutomaticTextTrackSelection();
+
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+    media_format_ = "";
+#endif // OHOS_CUSTOM_VIDEO_PLAYER
 
   if (pending_action_flags_ & kLoadMediaResource) {
     if (load_state_ == kLoadingFromSourceElement)
@@ -3554,6 +3566,10 @@ KURL HTMLMediaElement::SelectNextSourceChild(
     // last changed.
     media_url = source->GetDocument().CompleteURL(src_value);
 
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+    media_format_ = GetFormatFromType(source->type().Latin1());
+#endif // OHOS_CUSTOM_VIDEO_PLAYER
+
     // 4. If urlString was not obtained successfully, then end the
     // synchronous section, and jump down to the failed with elements step
     // below.
@@ -4999,7 +5015,7 @@ bool HTMLMediaElement::IsMuted() {
   return muted_;
 }
 bool HTMLMediaElement::IsCustomVideoPlayerEnabled() {
-  return GetDocument().GetSettings() &&
+  return should_create_custom_renderer_ && GetDocument().GetSettings() &&
          GetDocument().GetSettings()->IsCustomVideoPlayerEnabled();
 }
 bool HTMLMediaElement::ShouldCustomVideoPlayerOverlay() {
@@ -5010,11 +5026,22 @@ bool HTMLMediaElement::ShouldShowMediaControls() {
   return FastHasAttribute(html_names::kControlsAttr);
 }
 
-Vector<WebURL> HTMLMediaElement::GetRemainSourceInfos() {
-  Vector<WebURL> sourceInfos;
+std::string HTMLMediaElement::GetMediaFormat() {
+  return media_format_;
+}
+
+void HTMLMediaElement::RestartForPrimitive() {
+  should_create_custom_renderer_ = false;
+  next_child_node_to_consider_ = next_retry_child_node_;
+}
+
+Vector<media::Renderer::MediaSourceInfo> HTMLMediaElement::GetRemainSourceInfos() {
+  Vector<media::Renderer::MediaSourceInfo> source_infos;
   if (load_state_ == kLoadingFromSourceElement) {
     NodeVector potential_source_nodes;
     GetChildNodes(*this, potential_source_nodes);
+
+    next_retry_child_node_ = next_child_node_to_consider_;
 
     bool looking_for_start_node = false;
     for (unsigned i = 0; i < potential_source_nodes.size(); ++i) {
@@ -5034,10 +5061,14 @@ Vector<WebURL> HTMLMediaElement::GetRemainSourceInfos() {
       if (src_value.empty())
         continue;
 
-      sourceInfos.emplace_back(WebURL(source->GetDocument().CompleteURL(src_value)));
+      media::Renderer::MediaSourceInfo source_info;
+      source_info.media_format = GetFormatFromType(source->type().Latin1());
+      source_info.media_source =
+          source->GetDocument().CompleteURL(src_value).GetString().Latin1();
+      source_infos.emplace_back(source_info);
     }
   }
-  return sourceInfos;
+  return source_infos;
 }
 Vector<WebString> HTMLMediaElement::GetMediaControlsList() {
   Vector<WebString> list;
