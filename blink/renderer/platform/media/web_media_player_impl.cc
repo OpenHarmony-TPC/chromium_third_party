@@ -3100,6 +3100,12 @@ void WebMediaPlayerImpl::UpdatePlayState() {
       can_auto_suspend = false;
   }
 
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+  if (should_overlay_) {
+    can_auto_suspend = false;
+  }
+#endif // OHOS_CUSTOM_VIDEO_PLAYER
+
   bool is_suspended = pipeline_controller_->IsSuspended();
   bool is_backgrounded = IsBackgroundSuspendEnabled(this) && IsHidden();
   PlayState state = UpdatePlayState_ComputePlayState(
