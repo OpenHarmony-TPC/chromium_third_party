@@ -434,7 +434,7 @@ bool InputHandlerProxy::DidNativeEmbedEvent(const WebInputEvent& event) {
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
         float scale = layer_impl->GetIdealContentsScaleKey();
         float initScale = layer_impl->GetInitScale();
-        if (initScale > 0.f|| scale > 0.f) {
+        if (initScale > 0.f && scale > 0.f) {
           x = (x - nativeRect.x()) / (scale / initScale);
           y = (y - nativeRect.y()) / (scale / initScale);
         } else {
