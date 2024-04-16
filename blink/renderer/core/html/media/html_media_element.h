@@ -458,6 +458,10 @@ class CORE_EXPORT HTMLMediaElement
 
   void UpdateLayoutObject();
 
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+  void FullscreenChanged(bool is_fullscreen);
+#endif // OHOS_CUSTOM_VIDEO_PLAYER
+
  private:
   // Friend class for testing.
   friend class ContextMenuControllerTest;
@@ -590,7 +594,9 @@ class CORE_EXPORT HTMLMediaElement
   bool IsCustomVideoPlayerEnabled() override;
   bool ShouldCustomVideoPlayerOverlay() override;
   bool ShouldShowMediaControls() override;
-  Vector<WebURL> GetRemainSourceInfos() override;
+  std::string GetMediaFormat() override;
+  void RestartForPrimitive() override;
+  Vector<media::Renderer::MediaSourceInfo> GetRemainSourceInfos() override;
   Vector<WebString> GetMediaControlsList() override;
   base::flat_map<std::string, std::string> GetElementAttributes() override;
   std::string GetOutgoingReferrerString() override;
@@ -630,6 +636,10 @@ class CORE_EXPORT HTMLMediaElement
   void SetAudioSinkId(const String&) override;
   void SuspendForFrameClosed() override;
   void RequestMediaRemoting() override {}
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+  void RequestEnterFullscreen() override {}
+  void RequestExitFullscreen() override {}
+#endif // OHOS_CUSTOM_VIDEO_PLAYER
 
   void LoadTimerFired(TimerBase*);
   void ProgressEventTimerFired();
@@ -1037,6 +1047,9 @@ class CORE_EXPORT HTMLMediaElement
 
 #if defined(OHOS_CUSTOM_VIDEO_PLAYER)
   gfx::Rect layer_rect_;
+  std::string media_format_;
+  Node* next_retry_child_node_ = nullptr;
+  bool should_create_custom_renderer_ = true;
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
 };
 

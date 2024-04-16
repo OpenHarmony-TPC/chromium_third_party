@@ -2170,7 +2170,13 @@
       status: "stable",
     },
     {
+      name: "NonAdvancedSecurityMode",
+      status: "stable",
+      base_feature: "none",
+    },
+    {
       name: "MathMLCore",
+      depends_on: ["NonAdvancedSecurityMode"],
       status: "stable",
     },
     {
@@ -2990,12 +2996,14 @@
     {
       name: "ScriptedSpeechRecognition",
       public: true,
+      depends_on: ["NonAdvancedSecurityMode"],
       status: "stable",
       base_feature: "none",
     },
     {
       name: "ScriptedSpeechSynthesis",
       public: true,
+      depends_on: ["NonAdvancedSecurityMode"],
       status: "stable",
       base_feature: "none",
     },

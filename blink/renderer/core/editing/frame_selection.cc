@@ -260,6 +260,10 @@ bool FrameSelection::SetSelectionDeprecated(
   if (options.ShouldClearTypingStyle())
     frame_->GetEditor().ClearTypingStyle();
 
+#ifdef OHOS_CLIPBOARD
+  is_select_all_ = options.IsSelectAll();
+#endif  // OHOS_CLIPBOARD
+
   const SelectionInDOMTree old_selection_in_dom_tree =
       selection_editor_->GetSelectionInDOMTree();
   const bool is_changed = old_selection_in_dom_tree != new_selection;
@@ -813,6 +817,9 @@ void FrameSelection::SelectAll(SetSelectionBy set_selection_by) {
                    .SetShouldCloseTyping(true)
                    .SetShouldClearTypingStyle(true)
                    .SetShouldShowHandle(IsHandleVisible())
+#ifdef OHOS_CLIPBOARD
+                   .SetIsSelectAll(true)
+#endif  // OHOS_CLIPBOARD
                    .Build());
   SelectFrameElementInParentIfFullySelected();
   // TODO(editing-dev): Should we pass in set_selection_by?

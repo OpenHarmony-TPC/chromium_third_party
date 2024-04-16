@@ -81,4 +81,12 @@ SetSelectionOptions::Builder& SetSelectionOptions::Builder::SetIsDirectional(
   data_.is_directional_ = new_value;
   return *this;
 }
+
+#ifdef OHOS_CLIPBOARD
+SetSelectionOptions::Builder& SetSelectionOptions::Builder::SetIsSelectAll(
+    bool new_value) {
+  data_.is_select_all_ = new_value;
+  return *this;
+}
+#endif  // OHOS_CLIPBOARD
 }  // namespace blink

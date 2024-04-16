@@ -65,4 +65,10 @@ void WebRuntimeFeatures::EnableFluentScrollbars(bool enable) {
   ScrollbarThemeSettings::SetFluentScrollbarsEnabled(enable);
 }
 
+#if BUILDFLAG(IS_OHOS)
+void WebRuntimeFeatures::EnableNonAdvancedSecurityMode(bool enable) {
+  RuntimeEnabledFeatures::SetNonAdvancedSecurityModeEnabled(enable);
+}
+#endif
+
 }  // namespace blink

@@ -80,6 +80,11 @@ mojom::blink::FullscreenOptionsPtr ToMojoOptions(
   fullscreen_options->prefers_status_bar =
       request_type & FullscreenRequestType::kForXrArWithCamera;
 
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+  fullscreen_options->is_custom_media_player =
+      request_type & FullscreenRequestType::kForCustomMediaPlayer;
+#endif // OHOS_CUSTOM_VIDEO_PLAYER
+
 #if defined(OHOS_MEDIA)
   if (video_natural_size.has_value()) {
     fullscreen_options->video_natural_size = video_natural_size.value();

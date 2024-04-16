@@ -82,6 +82,9 @@
 #include "third_party/webrtc_overrides/metronome_source.h"
 #include "third_party/webrtc_overrides/task_queue_factory.h"
 #include "third_party/webrtc_overrides/timer_based_tick_provider.h"
+#if BUILDFLAG(IS_OHOS)
+  #include "third_party/ohos_ndk/includes/ohos_adapter/ohos_adapter_helper.h"
+#endif
 
 namespace WTF {
 template <>
@@ -748,8 +751,17 @@ PeerConnectionDependencyFactory::CreatePortAllocator(
       // |request_multiple_routes|. Whether local IP addresses could be
       // collected depends on if mic/camera permission is granted for this
       // origin.
-      WebRTCIPHandlingPolicy policy =
-          GetWebRTCIPHandlingPolicy(webrtc_ip_handling_policy);
+#if BUILDFLAG(IS_OHOS)
+      WebRTCIPHandlingPolicy policy = kDisableNonProxiedUdp;
+      bool isAdvancedSecurityMode = OHOS::NWeb::OhosAdapterHelper::GetInstance()
+                              .GetSystemPropertiesInstance().IsAdvancedSecurityMode();
+      if (!isAdvancedSecurityMode) {
+        policy = GetWebRTCIPHandlingPolicy(webrtc_ip_handling_policy);
+      }
+#else
+      WebRTCIPHandlingPolicy policy = GetWebRTCIPHandlingPolicy(webrtc_ip_handling_policy);
+#endif // BUILDFLAG(IS_OHOS)
+
       switch (policy) {
         // TODO(guoweis): specify the flag of disabling local candidate
         // collection when webrtc is updated.

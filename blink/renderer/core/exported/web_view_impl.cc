@@ -1578,8 +1578,9 @@ void WebView::ApplyWebPreferences(const web_pref::WebPreferences& prefs,
 
 #if BUILDFLAG(IS_OHOS)
   settings->SetNativeEmbedModeEnabled(prefs.native_embed_mode_enabled);
-  settings->RegisterNativeEmbedRule(WebString::FromASCII(prefs.embed_tag),
-                                    WebString::FromASCII(prefs.embed_tag_type));
+  settings->RegisterNativeEmbedRule(
+      WebString::FromASCII(base::ToLowerASCII(prefs.embed_tag)),
+      WebString::FromASCII(base::ToLowerASCII(prefs.embed_tag_type)));
   settings->SetDrawMode(prefs.draw_mode);
 #endif  // BUILDFLAG(IS_OHOS)
 
@@ -1838,11 +1839,7 @@ void WebView::ApplyWebPreferences(const web_pref::WebPreferences& prefs,
   settings->SetLoadWithOverviewMode(prefs.initialize_at_minimum_page_scale);
   settings->SetMainFrameResizesAreOrientationChanges(
       prefs.main_frame_resizes_are_orientation_changes);
-#if BUILDFLAG(IS_OHOS)
-  settings->SetShowContextMenuOnMouseUp(true);
-#else
   settings->SetShowContextMenuOnMouseUp(prefs.context_menu_on_mouse_up);
-#endif
   settings->SetAlwaysShowContextMenuOnTouch(
       prefs.always_show_context_menu_on_touch);
   settings->SetSmoothScrollForFindEnabled(prefs.smooth_scroll_for_find_enabled);

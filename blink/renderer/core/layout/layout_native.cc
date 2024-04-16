@@ -107,7 +107,7 @@ void LayoutNative::PaintReplaced(const PaintInfo& paint_info,
 
 void LayoutNative::UpdateLayout() {
   NOT_DESTROYED();
-  UpdatePlayer(/* is_in_layout */ true);
+  UpdateNativeContent(/* is_in_layout */ true);
 
   LayoutImage::UpdateLayout();
 }
@@ -120,12 +120,12 @@ HTMLNativeElement* LayoutNative::NativeElement() const {
 void LayoutNative::UpdateFromElement() {
   NOT_DESTROYED();
   LayoutImage::UpdateFromElement();
-  UpdatePlayer(/* is_in_layout */ false);
+  UpdateNativeContent(/* is_in_layout */ false);
 
   SetShouldDoFullPaintInvalidation();
 }
 
-void LayoutNative::UpdatePlayer(bool is_in_layout) {
+void LayoutNative::UpdateNativeContent(bool is_in_layout) {
   NOT_DESTROYED();
   UpdateIntrinsicSize(is_in_layout);
 

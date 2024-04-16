@@ -79,6 +79,10 @@ class CORE_EXPORT SelectionController final
     return selection_state_ == SelectionState::kExtendedSelection;
   }
 
+#ifdef OHOS_CLIPBOARD
+  bool HandleGestureTapIfSelectionExist(const MouseEventWithHitTestResults&);
+#endif  // OHOS_CLIPBOARD
+
 #ifdef OHOS_EX_FREE_COPY
   void FocusDocumentView();
   bool ShowSelectionByLastLongPressHitTestResult();

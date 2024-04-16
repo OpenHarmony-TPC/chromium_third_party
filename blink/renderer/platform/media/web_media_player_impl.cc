@@ -1913,6 +1913,8 @@ void WebMediaPlayerImpl::RestartForPrimitive() {
   should_overlay_ = false;
   renderer_factory_selector_->SetBaseRendererType(primitive_renderer_type_);
 
+  client_->RestartForPrimitive();
+
   SetMemoryReportingState(false);
   DoReloadForPrimitive();
 }
@@ -2919,11 +2921,11 @@ std::unique_ptr<media::Renderer> WebMediaPlayerImpl::CreateRenderer(
             client_->TargetColorSpace(), GetDelegateId());
     std::vector<media::Renderer::MediaSourceInfo> media_source_list;
     media::Renderer::MediaSourceInfo media_source_info;
+    media_source_info.media_format = client_->GetMediaFormat();
     media_source_info.media_source = loaded_url_.spec();
     media_source_list.emplace_back(media_source_info);
     for (const auto& source_info : client_->GetRemainSourceInfos()) {
-      media_source_info.media_source = GURL(source_info).spec();
-      media_source_list.emplace_back(media_source_info);
+      media_source_list.emplace_back(source_info);
     }
     renderer->SetMediaSourceList(media_source_list);
     std::vector<std::string> controls_list;
@@ -3099,6 +3101,12 @@ void WebMediaPlayerImpl::UpdatePlayState() {
     if (!at_beginning || GetPipelineMediaDuration() == media::kInfiniteDuration)
       can_auto_suspend = false;
   }
+
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+  if (should_overlay_) {
+    can_auto_suspend = false;
+  }
+#endif // OHOS_CUSTOM_VIDEO_PLAYER
 
   bool is_suspended = pipeline_controller_->IsSuspended();
   bool is_backgrounded = IsBackgroundSuspendEnabled(this) && IsHidden();

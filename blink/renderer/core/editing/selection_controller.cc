@@ -1498,6 +1498,39 @@ bool IsExtendingSelection(const MouseEventWithHitTestResults& event) {
 template void SelectionController::UpdateSelectionForContextMenuEvent<
     MouseEvent>(const MouseEvent*, const HitTestResult&, const PhysicalOffset&);
 
+#ifdef OHOS_CLIPBOARD
+bool SelectionController::HandleGestureTapIfSelectionExist(
+    const MouseEventWithHitTestResults& event) {
+  TRACE_EVENT0("blink",
+               "SelectionController::HandleGestureTapIfSelectionExist");
+  if (!Selection().IsAvailable() || !Selection().IsHandleVisible()) {
+    return false;
+  }
+
+  bool single_click = event.Event().click_count <= 1;
+  bool extend_selection = IsExtendingSelection(event);
+  if (!single_click || extend_selection || !event.Event().FromTouch()) {
+    return false;
+  }
+
+  if (Selection().IsSelectAll()) {
+    return false;
+  }
+
+  LocalFrameView* view = frame_->View();
+  if (!view) {
+    return false;
+  }
+  const PhysicalOffset v_point(view->ConvertFromRootFrame(
+      gfx::ToFlooredPoint(event.Event().PositionInRootFrame())));
+  if (!Selection().Contains(v_point)) {
+    LOG(INFO) << "Tap outside the selected range to clear selection";
+    frame_->Selection().Clear();
+  }
+  return true;
+}
+#endif  // OHOS_CLIPBOARD
+
 #ifdef OHOS_EX_FREE_COPY
 void SelectionController::SetLastLongPressHitTestResult(
     const HitTestResult& other) {
