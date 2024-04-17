@@ -591,6 +591,10 @@ unsigned ShapeResult::CaretOffsetForHitTest(
   OffsetForPosition(x, break_glyphs_option, &result);
 
 #ifdef OHOS_INPUT_EVENTS
+  LOG(DEBUG) << "ShapeResult::CaretOffsetForHitTest, x - result.origin_x: "
+             << (x - result.origin_x)
+             << ", result.advance: "
+             << result.advance;
   if (x - result.origin_x <= result.advance * SEGMENTATION_THREDHOLD)
 #else
   if (x - result.origin_x <= result.advance / 2)
