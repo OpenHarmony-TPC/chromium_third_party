@@ -76,6 +76,10 @@ class MediaControlTimelineElement : public MediaControlSliderElement {
 
   bool is_live_ = false;
 
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+  double seek_time_ = -1.0;
+#endif // OHOS_CUSTOM_VIDEO_PLAYER
+
   absl::optional<LiveAnchorTime> live_anchor_time_;
 
   HeapTaskRunnerTimer<MediaControlTimelineElement> render_timeline_timer_;

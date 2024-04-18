@@ -5014,6 +5014,9 @@ void HTMLMediaElement::OpenerContextObserver::ContextDestroyed() {
 bool HTMLMediaElement::IsMuted() {
   return muted_;
 }
+bool HTMLMediaElement::IsUsedCustomVideoPlayer() {
+  return IsCustomVideoPlayerEnabled();
+}
 bool HTMLMediaElement::IsCustomVideoPlayerEnabled() {
   return should_create_custom_renderer_ && GetDocument().GetSettings() &&
          GetDocument().GetSettings()->IsCustomVideoPlayerEnabled();
