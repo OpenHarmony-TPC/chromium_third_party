@@ -2208,9 +2208,7 @@ bool WebFrameWidgetImpl::ScrollFocusedEditableElementIntoView(bool shouldScroll)
       return false;
     }
   }
-  if (!element->GetDocument()
-      || !element->GetDocument().GetFrame()
-      || !element->GetDocument().GetFrame()->GetInputMethodController()) {
+  if (!element->GetDocument().GetFrame()) {
     return false;
   }
   EditContext* edit_context = element->GetDocument()
