@@ -2202,10 +2202,16 @@ bool WebFrameWidgetImpl::ScrollFocusedEditableElementIntoView(bool shouldScroll)
   Element* element = FocusedElement();
   if (!element) {
     if (last_focused_element_) {
+      LOG(INFO) << "WebFrameWidgetImpl::ScrollFocusedEditableElementIntoView";
       element = last_focused_element_;
     } else {
       return false;
     }
+  }
+  if (!element->GetDocument()
+      || !element->GetDocument().GetFrame()
+      || !element->GetDocument().GetFrame()->GetInputMethodController()) {
+    return false;
   }
   EditContext* edit_context = element->GetDocument()
                                   .GetFrame()
