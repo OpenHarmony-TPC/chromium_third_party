@@ -2939,8 +2939,9 @@ std::unique_ptr<media::Renderer> WebMediaPlayerImpl::CreateRenderer(
     renderer->SetReferrer(client_->GetOutgoingReferrerString());
 
     renderer->SetSurfaceCreatedCallback(
-        base::BindOnce(&WebMediaPlayerImpl::OnNativeTextureCreated,
-            weak_this_));
+        base::BindPostTaskToCurrentDefault(base::BindOnce(
+            &WebMediaPlayerImpl::OnNativeTextureCreated,
+            weak_this_)));
 
     renderer->SetUpdatePlaybackStatusCallback(
         base::BindPostTaskToCurrentDefault(base::BindRepeating(
@@ -4142,11 +4143,13 @@ bool WebMediaPlayerImpl::IsFrameHidden() {
 #endif
 
 #if defined(OHOS_CUSTOM_VIDEO_PLAYER)
-void WebMediaPlayerImpl::OnNativeTextureCreated(int native_texture_id) {
+void WebMediaPlayerImpl::OnNativeTextureCreated(int native_texture_id,
+    media::Renderer::OnGetRectCallback callback) {
   native_texture_id_ = native_texture_id;
   if (bridge_) {
     bridge_->SetNativeEmbedId(native_texture_id);
   }
+  std::move(callback).Run(client_->GetVideoRect());
 }
 void WebMediaPlayerImpl::UpdatePlaybackStatus(uint32_t status) {
   client_->UpdatePlaybackStatus(status);

@@ -253,6 +253,8 @@ class BLINK_PLATFORM_EXPORT WebMediaPlayerClient {
   virtual void UpdateVolume(double volume) {}
   virtual void UpdateMuted(bool muted) {}
   virtual void UpdatePlaybackRate(double playback_rate) {}
+
+  virtual gfx::Rect GetVideoRect() { return gfx::Rect(); }
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
 
  protected:

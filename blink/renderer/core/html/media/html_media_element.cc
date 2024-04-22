@@ -4014,6 +4014,10 @@ void HTMLMediaElement::
   }
 
   OnWebMediaPlayerCleared();
+
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+  layer_rect_ = gfx::Rect();
+#endif // OHOS_CUSTOM_VIDEO_PLAYER
 }
 
 void HTMLMediaElement::ClearMediaPlayer() {
@@ -5126,6 +5130,18 @@ void HTMLMediaElement::UpdatePlaybackRate(double playback_rate) {
   }
   playback_rate_ = playback_rate;
   ScheduleEvent(event_type_names::kRatechange);
+}
+gfx::Rect HTMLMediaElement::GetVideoRect() {
+  if (!layer_rect_.IsEmpty()) {
+    return layer_rect_;
+  }
+  if (GetLayoutObject() && GetLayoutObject()->IsBox()) {
+    auto* layout_box = To<LayoutBox>(GetLayoutObject());
+    return gfx::Rect(ToFlooredPoint(layout_box->Location()),
+        ToFlooredSize(layout_box->Size()));
+  }
+  return gfx::Rect(LayoutReplaced::kDefaultWidth,
+        LayoutReplaced::kDefaultHeight);
 }
 void HTMLMediaElement::OnLayerRectChange(int x, int y, int width, int height,
                                          bool is_fixed) {

@@ -728,7 +728,8 @@ class PLATFORM_EXPORT WebMediaPlayerImpl
                                          bool is_static);
 
 #if defined(OHOS_CUSTOM_VIDEO_PLAYER)
-  void OnNativeTextureCreated(int native_texture_id);
+  void OnNativeTextureCreated(int native_texture_id,
+      media::Renderer::OnGetRectCallback callback);
   void UpdatePlaybackStatus(uint32_t status);
   void UpdateVolume(double volume);
   void UpdateMuted(bool muted);

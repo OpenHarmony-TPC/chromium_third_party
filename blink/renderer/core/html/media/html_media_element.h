@@ -610,6 +610,8 @@ class CORE_EXPORT HTMLMediaElement
   void UpdateMuted(bool muted) override;
   void UpdatePlaybackRate(double playback_rate) override;
 
+  gfx::Rect GetVideoRect() override;
+
   void OnLayerRectChange(int x,
                          int y,
                          int width,
