@@ -106,6 +106,10 @@ class CORE_EXPORT SelectionController final
 
   Document& GetDocument() const;
 
+#if defined(OHOS_CLIPBOARD)
+  bool MouseSelectMenuShow(bool show);
+#endif
+
   // Returns |true| if a word was selected.
   bool SelectClosestWordFromHitTestResult(const HitTestResult&,
                                           AppendTrailingWhitespace,
@@ -161,6 +165,10 @@ class CORE_EXPORT SelectionController final
   SelectionState selection_state_;
 #ifdef OHOS_EX_FREE_COPY
   HitTestResult last_long_press_hit_test_result_;
+#endif
+#if defined(OHOS_CLIPBOARD)
+  bool mouse_menu_show_ = false;
+  bool mouse_click_down_allows_ = false;
 #endif
 };
 

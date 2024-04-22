@@ -513,6 +513,11 @@ class BLINK_EXPORT WebLocalFrameClient {
   virtual void UpdateContextMenuDataForTesting(
       const ContextMenuData&,
       const absl::optional<gfx::Point>&) {}
+
+#if defined(OHOS_CLIPBOARD)
+  virtual void MouseSelectMenuShow(bool show) {}
+#endif
+
 #ifdef OHOS_DRAG_DROP
   // Tell the UI to dismiss the contextmenu popup window
   virtual void ClearContextMenu() {}
