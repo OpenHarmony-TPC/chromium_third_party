@@ -14,7 +14,7 @@
 #include "third_party/blink/renderer/platform/bindings/script_state.h"
 #include "third_party/blink/renderer/platform/instrumentation/use_counter.h"
 #if BUILDFLAG(IS_OHOS)
-  #include "third_party/ohos_ndk/includes/ohos_adapter/ohos_adapter_helper.h"
+#include "third_party/ohos_ndk/includes/ohos_adapter/ohos_adapter_helper.h"
 #endif
 
 namespace blink {
