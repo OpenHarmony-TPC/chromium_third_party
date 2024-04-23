@@ -138,6 +138,10 @@ class TestMediaPlayerObserver final
   }
 
   // media::mojom::blink::MediaPlayerObserver implementation.
+#if defined(OHOS_UNITTESTS)
+  void UpdateLayerRect(const ::gfx::Rect& rect) override {}
+  void FullscreenChanged(bool is_fullscreen) override {}
+#endif // OHOS_UNITTESTS
   void OnMediaPlaying() override {
     received_media_playing_ = true;
     run_loop_->Quit();
