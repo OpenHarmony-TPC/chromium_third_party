@@ -83,7 +83,7 @@
 #include "third_party/webrtc_overrides/task_queue_factory.h"
 #include "third_party/webrtc_overrides/timer_based_tick_provider.h"
 #if BUILDFLAG(IS_OHOS)
-  #include "third_party/ohos_ndk/includes/ohos_adapter/ohos_adapter_helper.h"
+#include "third_party/ohos_ndk/includes/ohos_adapter/ohos_adapter_helper.h"
 #endif
 
 namespace WTF {

@@ -57,7 +57,9 @@
 #include "third_party/blink/renderer/platform/scheduler/public/event_loop.h"
 #include "third_party/blink/renderer/platform/weborigin/security_origin.h"
 #include "third_party/blink/renderer/platform/wtf/functional.h"
+#if BUILDFLAG(IS_OHOS)
 #include "third_party/ohos_ndk/includes/ohos_adapter/ohos_adapter_helper.h"
+#endif
 
 namespace blink {
 
@@ -416,6 +418,7 @@ ScriptPromise MediaDevices::getUserMedia(
       ScriptPromiseResolverWithTracker<UserMediaRequestResult>>(
       script_state, "Media.MediaDevices.GetUserMedia", base::Seconds(8));
 
+#if BUILDFLAG(IS_OHOS)
   bool isAdvancedSecurityMode = OHOS::NWeb::OhosAdapterHelper::GetInstance()
                               .GetSystemPropertiesInstance().IsAdvancedSecurityMode();
   if (isAdvancedSecurityMode) {
@@ -425,6 +428,7 @@ ScriptPromise MediaDevices::getUserMedia(
         UserMediaRequestResult::kNotSupportedError);
     return ScriptPromise();
   }
+#endif
 
   DCHECK(options);  // Guaranteed by the default value in the IDL.
   DCHECK(!exception_state.HadException());
