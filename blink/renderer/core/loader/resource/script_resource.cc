@@ -55,6 +55,10 @@
 #include "third_party/blink/renderer/platform/wtf/functional.h"
 #include "third_party/blink/renderer/platform/wtf/shared_buffer.h"
 
+#if BUILDFLAG(IS_OHOS)
+#include "base/logging.h"
+#endif
+
 namespace blink {
 
 namespace {
@@ -318,7 +322,18 @@ void ScriptResource::ResponseReceived(const ResourceResponse& response) {
           GetResourceRequest().Url().Protocol()) &&
       GetResourceRequest().Url().ProtocolIs(
           response.CurrentRequestUrl().Protocol());
-  bool code_cache_supported = http_family || code_cache_with_hashing_supported;
+#if BUILDFLAG(IS_OHOS)
+  bool code_cache_with_response_time_supported =
+      SchemeRegistry::SchemeSupportsCodeCacheWithResponseTime(
+          GetResourceRequest().Url().Protocol());
+  LOG(DEBUG) << "Script resource if scheme supports code cache:"
+             << code_cache_with_response_time_supported;
+#endif
+  bool code_cache_supported = http_family || code_cache_with_hashing_supported
+#if BUILDFLAG(IS_OHOS)
+                              || code_cache_with_response_time_supported
+#endif
+      ;
   if (code_cache_supported) {
     std::unique_ptr<CachedMetadataSender> sender = CachedMetadataSender::Create(
         response, mojom::blink::CodeCacheType::kJavascript,

@@ -97,6 +97,10 @@
 #include "third_party/blink/renderer/platform/wtf/text/string_builder.h"
 #include "url/url_constants.h"
 
+#if BUILDFLAG(IS_OHOS)
+#include "base/logging.h"
+#endif
+
 namespace blink {
 
 namespace {
@@ -534,7 +538,18 @@ bool ResourceLoader::ShouldFetchCodeCache() {
   bool should_use_source_hash =
       SchemeRegistry::SchemeSupportsCodeCacheWithHashing(
           request.Url().Protocol());
-  if (!request.Url().ProtocolIsInHTTPFamily() && !should_use_source_hash) {
+#if BUILDFLAG(IS_OHOS)
+  bool is_protocal_support_code_cache =
+      SchemeRegistry::SchemeSupportsCodeCacheWithResponseTime(
+          request.Url().Protocol());
+  LOG(DEBUG) << "Resource loader if scheme supports code cache:"
+             << is_protocal_support_code_cache;
+#endif
+  if (!request.Url().ProtocolIsInHTTPFamily() && !should_use_source_hash
+#if BUILDFLAG(IS_OHOS)
+      && !is_protocal_support_code_cache
+#endif
+  ) {
     return false;
   }
   // When loading the service worker scripts, we don't need to check the
