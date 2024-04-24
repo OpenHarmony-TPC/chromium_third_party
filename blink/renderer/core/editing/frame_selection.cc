@@ -103,6 +103,11 @@
 #include "third_party/blink/renderer/platform/bindings/exception_state.h"
 #endif
 
+#if defined(OHOS_CLIPBOARD)
+#include "ui/gfx/geometry/rect_conversions.h"
+#include "third_party/blink/renderer/core/frame/visual_viewport.h"
+#endif
+
 #define EDIT_DEBUG 0
 
 namespace blink {
@@ -1089,6 +1094,42 @@ PhysicalRect FrameSelection::AbsoluteUnclippedBounds() const {
 
   return PhysicalRect(layout_selection_->AbsoluteSelectionBounds());
 }
+
+#if defined(OHOS_CLIPBOARD)
+gfx::Rect FrameSelection::ClippedSelectionBoundsInRootFrame() const {
+  if (!frame_ || !frame_->GetPage()) {
+    return gfx::Rect();
+  }
+  const VisibleSelection& selection = ComputeVisibleSelectionInDOMTree();
+  if (selection.IsNone() || !selection.IsRange()) {
+    return gfx::Rect();
+  }
+
+  auto start_position = selection.Start();
+  auto end_position = selection.End();
+  gfx::Rect selection_bounds;
+  if ((start_position.AnchorNode() && !start_position.AnchorNode()->IsTextNode()) ||
+      (end_position.AnchorNode() && !end_position.AnchorNode()->IsTextNode())) {
+    selection_bounds = blink::ToPixelSnappedRect(AbsoluteUnclippedBounds());
+    selection_bounds.Offset(
+        -(int)(frame_->GetPage()->GetVisualViewport().GetScrollOffset().x()),
+        -(int)(frame_->GetPage()->GetVisualViewport().GetScrollOffset().y()));
+    return gfx::ScaleToEnclosingRect(selection_bounds, frame_->GetPage()->GetVisualViewport().Scale());
+  }
+  gfx::Rect selection_start_rect = AbsoluteSelectionBoundsOf(CreateVisiblePosition(start_position));
+  gfx::Rect selection_end_rect = AbsoluteSelectionBoundsOf(CreateVisiblePosition(end_position));
+
+  int left = std::min(selection_start_rect.bottom_left().x(), selection_end_rect.bottom_left().x());
+  int right = std::max(selection_start_rect.top_right().x(), selection_end_rect.top_right().x());
+  int bottom = std::max(selection_start_rect.bottom_left().y(), selection_end_rect.bottom_left().y());
+  int top = std::min(selection_start_rect.top_right().y(), selection_end_rect.top_right().y());
+  selection_bounds = gfx::Rect(left, top, right - left, bottom - top);
+  selection_bounds.Offset(
+        -(int)(frame_->GetPage()->GetVisualViewport().GetScrollOffset().x()),
+        -(int)(frame_->GetPage()->GetVisualViewport().GetScrollOffset().y()));
+  return gfx::ScaleToEnclosingRect(selection_bounds, frame_->GetPage()->GetVisualViewport().Scale());
+}
+#endif
 
 gfx::Rect FrameSelection::ComputeRectToScroll(
     RevealExtentOption reveal_extent_option) {

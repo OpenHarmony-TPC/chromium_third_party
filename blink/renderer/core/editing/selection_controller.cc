@@ -67,6 +67,11 @@
 #include "third_party/blink/renderer/core/page/chrome_client.h"
 #endif
 
+#if defined(OHOS_CLIPBOARD)
+#include "third_party/blink/public/web/web_local_frame_client.h"
+#include "third_party/blink/renderer/core/frame/web_local_frame_impl.h"
+#endif
+
 namespace blink {
 
 #ifdef OHOS_EX_FREE_COPY
@@ -1146,6 +1151,9 @@ bool SelectionController::HandleMousePressEvent(
                                   IsSelectionOverLink(event)) &&
                                  !event.GetScrollbar();
   mouse_down_was_single_click_in_selection_ = false;
+#if defined(OHOS_CLIPBOARD)
+  mouse_click_down_allows_ = !event.Event().FromTouch();
+#endif
   if (!Selection().IsAvailable()) {
     // "gesture-tap-frame-removed.html" reaches here.
     mouse_down_allows_multi_click_ = !event.Event().FromTouch();
@@ -1204,6 +1212,17 @@ void SelectionController::UpdateSelectionForMouseDrag(
   UpdateSelectionForMouseDrag(result, last_known_mouse_position_in_root_frame);
 }
 
+#if defined(OHOS_CLIPBOARD)
+bool SelectionController::MouseSelectMenuShow(bool show) {
+  WebLocalFrameImpl* web_local_frame = WebLocalFrameImpl::FromFrame(frame_);
+  if (web_local_frame && web_local_frame->Client()) {
+    web_local_frame->Client()->MouseSelectMenuShow(show);
+    return true;
+  }
+  return false;
+}
+#endif
+
 bool SelectionController::HandleMouseReleaseEvent(
     const MouseEventWithHitTestResults& event,
     const PhysicalOffset& drag_start_pos) {
@@ -1211,6 +1230,19 @@ bool SelectionController::HandleMouseReleaseEvent(
 
   if (!Selection().IsAvailable())
     return false;
+
+#if defined(OHOS_CLIPBOARD)
+  bool is_rang = Selection().ComputeVisibleSelectionInDOMTree().IsRange();
+  if (mouse_down_was_single_click_in_selection_ || !is_rang || !mouse_down_may_start_select_) {
+    if (mouse_click_down_allows_ && mouse_menu_show_) {
+      mouse_menu_show_ = false;
+      MouseSelectMenuShow(false);
+    }
+  } else if (is_rang && !event.Event().FromTouch()) {
+    mouse_menu_show_ = MouseSelectMenuShow(true);
+  }
+  mouse_click_down_allows_ = false;
+#endif
 
   bool handled = false;
   mouse_down_may_start_select_ = false;
@@ -1503,8 +1535,13 @@ bool SelectionController::HandleGestureTapIfSelectionExist(
     const MouseEventWithHitTestResults& event) {
   TRACE_EVENT0("blink",
                "SelectionController::HandleGestureTapIfSelectionExist");
-  if (!Selection().IsAvailable() || !Selection().IsHandleVisible()) {
+  if (!Selection().IsAvailable()) {
     return false;
+  }
+  if (!Selection().IsHandleVisible()) {
+    if (!mouse_menu_show_ || !Selection().ComputeVisibleSelectionInDOMTree().IsRange()) {
+      return false;
+    }
   }
 
   bool single_click = event.Event().click_count <= 1;
@@ -1526,6 +1563,10 @@ bool SelectionController::HandleGestureTapIfSelectionExist(
   if (!Selection().Contains(v_point)) {
     LOG(INFO) << "Tap outside the selected range to clear selection";
     frame_->Selection().Clear();
+  }
+  if (mouse_menu_show_) {
+    mouse_menu_show_ = false;
+    MouseSelectMenuShow(false);
   }
   return true;
 }

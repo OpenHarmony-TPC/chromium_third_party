@@ -287,6 +287,10 @@ class CORE_EXPORT FrameSelection final
   // SelectionEditor keeps.
   PhysicalRect AbsoluteUnclippedBounds() const;
 
+#if defined(OHOS_CLIPBOARD)
+  gfx::Rect ClippedSelectionBoundsInRootFrame() const;
+#endif
+
   // TODO(tkent): This function has a bug that scrolling doesn't work well in
   // a case of RangeSelection. crbug.com/443061
   void RevealSelection(
