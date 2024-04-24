@@ -48,7 +48,6 @@ TEST_F(ShapeResultViewTest,
   EXPECT_EQ(string.length(), end);
 }
 
-#if !defined(OHOS_UNITTESTS)
 TEST_F(ShapeResultViewTest, LatinSingleView) {
   String string =
       To16Bit("Test run with multiple words and breaking opportunities.", 56);
@@ -98,7 +97,6 @@ TEST_F(ShapeResultViewTest, LatinSingleView) {
   EXPECT_EQ(last2_glyphs.size(), 23u);
   EXPECT_TRUE(CompareResultGlyphs(last2_glyphs, glyphs, 33u, 23u));
 }
-#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
 TEST_F(ShapeResultViewTest, ArabicSingleView) {
   String string = To16Bit("عربى نص", 7);
@@ -186,7 +184,6 @@ TEST_F(ShapeResultViewTest, PreviousSafeToBreak) {
   } while (--offset > start_offset);
 }
 
-#if !defined(OHOS_UNITTESTS)
 TEST_F(ShapeResultViewTest, LatinMultiRun) {
   TextDirection direction = TextDirection::kLtr;
   HarfBuzzShaper shaper_a(To16Bit("hello", 5));
@@ -256,8 +253,6 @@ TEST_F(ShapeResultViewTest, LatinMultiRun) {
   EXPECT_EQ(composite_view->Width(), composite_copy->Width());
 }
 
-#endif // OHOS_UNITTESTS blink_platform_unittests drop case
-#if !defined(OHOS_UNITTESTS)
 TEST_F(ShapeResultViewTest, LatinCompositeView) {
   String string =
       To16Bit("Test run with multiple words and breaking opportunities.", 56);
@@ -310,7 +305,6 @@ TEST_F(ShapeResultViewTest, LatinCompositeView) {
   EXPECT_TRUE(CompareResultGlyphs(composite_glyphs, reference_glyphs, 0u, 22u));
   EXPECT_EQ(composite_view->Width(), composite_copy->Width());
 }
-#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
 TEST_F(ShapeResultViewTest, MixedScriptsCompositeView) {
   String string_a = To16Bit("Test with multiple 字体 ", 22);

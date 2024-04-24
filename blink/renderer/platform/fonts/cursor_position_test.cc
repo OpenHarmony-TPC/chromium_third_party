@@ -82,7 +82,6 @@ class CursorPositionTest : public FontTestBase {
   };
 };
 
-#if !defined(OHOS_UNITTESTS)
 TEST_F(CursorPositionTest, LTRMouse) {
   EXPECT_EQ(GetCharacter(kAhem, "X", true, 0, false), 0);
   EXPECT_EQ(GetCharacter(kAhem, "X", true, 0, true), 0);
@@ -106,9 +105,7 @@ TEST_F(CursorPositionTest, LTRMouse) {
   EXPECT_EQ(GetCharacter(kAhem, "XXX", true, 175, false), 1);
   EXPECT_EQ(GetCharacter(kAhem, "XXX", true, 175, true), 2);
 }
-#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
-#if !defined(OHOS_UNITTESTS)
 TEST_F(CursorPositionTest, LTRLigatureMouse) {
   const float kFUWidth = GetWidth(kMegalopolis, "FU", true);
   const float kRAWidth = GetWidth(kMegalopolis, "RA", true);
@@ -197,9 +194,7 @@ TEST_F(CursorPositionTest, LTRLigatureMouse) {
       GetCharacter(kMegalopolis, "FURA", true, kFUWidth + kRAWidth + 1, true),
       4);
 }
-#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
-#if !defined(OHOS_UNITTESTS)
 TEST_F(CursorPositionTest, RTLMouse) {
   // The widths below are from the final shaped version, not from the single
   // characters. They were extracted with "hb-shape --font-size=100"
@@ -263,9 +258,7 @@ TEST_F(CursorPositionTest, RTLMouse) {
                          2 * (kAboveTaWidth + kAboveKhaWidth), true),
             0);
 }
-#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
-#if !defined(OHOS_UNITTESTS)
 TEST_F(CursorPositionTest, RTLLigatureMouse) {
   const float kFUWidth = GetWidth(kMegalopolis, "FU", true);
   const float kRAWidth = GetWidth(kMegalopolis, "RA", true);
@@ -356,9 +349,7 @@ TEST_F(CursorPositionTest, RTLLigatureMouse) {
       GetCharacter(kMegalopolis, "ARUF", false, kFUWidth + kRAWidth + 1, true),
       0);
 }
-#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
-#if !defined(OHOS_UNITTESTS)
 TEST_F(CursorPositionTest, LTRText) {
   EXPECT_EQ(GetWidth(kAhem, "X", true, 0, 1), 100);
 
@@ -369,9 +360,7 @@ TEST_F(CursorPositionTest, LTRText) {
   EXPECT_EQ(GetWidth(kAhem, "XXX", true, 1, 3), 200);
   EXPECT_EQ(GetWidth(kAhem, "XXX", true, 2, 3), 100);
 }
-#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
-#if !defined(OHOS_UNITTESTS)
 TEST_F(CursorPositionTest, LTRLigature) {
   const float kFUWidth = GetWidth(kMegalopolis, "FU", true);
   const float kRAWidth = GetWidth(kMegalopolis, "RA", true);
@@ -413,9 +402,7 @@ TEST_F(CursorPositionTest, LTRLigature) {
               1.0);
   EXPECT_NEAR(GetWidth(kRoboto, u"ffî", true, 2, 3), kIWidth, 1.0);
 }
-#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
-#if !defined(OHOS_UNITTESTS)
 TEST_F(CursorPositionTest, RTLText) {
   // The widths below are from the final shaped version, not from the single
   // characters. They were extracted with "hb-shape --font-size=100"
@@ -455,9 +442,7 @@ TEST_F(CursorPositionTest, RTLText) {
   EXPECT_EQ(GetWidth(kAmiri, u"مَ", false, 0, 2), kMeemWidth);
   EXPECT_EQ(GetWidth(kAmiri, u"مَ", false, 1, 2), kMeemWidth);
 }
-#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
-#if !defined(OHOS_UNITTESTS)
 TEST_F(CursorPositionTest, RTLLigature) {
   const float kFUWidth = GetWidth(kMegalopolis, "FU", true);
   const float kRAWidth = GetWidth(kMegalopolis, "RA", true);
@@ -480,6 +465,5 @@ TEST_F(CursorPositionTest, RTLLigature) {
 
   EXPECT_NEAR(GetWidth(kMegalopolis, "ARUF", false, 3, 4), kFUWidth / 2, 1.0);
 }
-#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
 }  // namespace blink

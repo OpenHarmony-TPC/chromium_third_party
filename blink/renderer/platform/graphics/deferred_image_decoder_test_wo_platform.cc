@@ -18,17 +18,14 @@
 namespace blink {
 namespace {
 
-#if !defined(OHOS_UNITTESTS)
 sk_sp<SkImage> CreateFrameAtIndex(DeferredImageDecoder* decoder, size_t index) {
   return SkImages::DeferredFromGenerator(
       std::make_unique<SkiaPaintImageGenerator>(
           decoder->CreateGenerator(), index,
           cc::PaintImage::kDefaultGeneratorClientId));
 }
-#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
 }  // namespace
-#if !defined(OHOS_UNITTESTS)
 
 /**
  *  Used to test decoding SkImages out of order.
@@ -73,9 +70,7 @@ static void MixImages(const char* file_name,
   surf->getCanvas()->drawImage(image_with_more_data, 0, 0);
   surf->getCanvas()->drawImage(partial_image, 0, 0);
 }
-#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
-#if !defined(OHOS_UNITTESTS)
 TEST(DeferredImageDecoderTestWoPlatform, mixImagesGif) {
   MixImages("/images/resources/animated.gif", 818u, 1u);
 }
@@ -99,9 +94,7 @@ TEST(DeferredImageDecoderTestWoPlatform, mixImagesBmp) {
 TEST(DeferredImageDecoderTestWoPlatform, mixImagesIco) {
   MixImages("/images/resources/wrong-frame-dimensions.ico", 1376u, 1u);
 }
-#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
-#if !defined(OHOS_UNITTESTS)
 TEST(DeferredImageDecoderTestWoPlatform, fragmentedSignature) {
   base::test::SingleThreadTaskEnvironment task_environment;
   const char* test_files[] = {
@@ -140,6 +133,5 @@ TEST(DeferredImageDecoderTestWoPlatform, fragmentedSignature) {
     EXPECT_TRUE(String(test_files[i]).EndsWith(decoder->FilenameExtension()));
   }
 }
-#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
 }  // namespace blink

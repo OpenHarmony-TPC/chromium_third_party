@@ -494,7 +494,6 @@ TEST_F(SecurityOriginTest, CanonicalizeHost) {
   }
 }
 
-#if !defined(OHOS_UNITTESTS)
 TEST_F(SecurityOriginTest, UrlOriginConversions) {
   url::ScopedSchemeRegistryForTests scoped_registry;
   url::AddNoAccessScheme("no-access");
@@ -615,7 +614,6 @@ TEST_F(SecurityOriginTest, UrlOriginConversions) {
     }
   }
 }
-#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
 TEST_F(SecurityOriginTest, InvalidWrappedUrls) {
   const char* kTestCases[] = {
@@ -1243,11 +1241,9 @@ INSTANTIATE_TYPED_TEST_SUITE_P(BlinkSecurityOrigin,
 namespace network {
 namespace test {
 
-#if !defined(OHOS_UNITTESTS)
 INSTANTIATE_TYPED_TEST_SUITE_P(BlinkSecurityOrigin,
                                AbstractTrustworthinessTest,
                                url::BlinkSecurityOriginTestTraits);
-#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
 }  // namespace test
 }  // namespace network

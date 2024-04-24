@@ -408,7 +408,6 @@ TEST_F(ZipTest, UnzipEvil) {
       "UP/levilevilevilevilevilevilevilevilevilevilevilevil")));
 }
 
-#if !defined(OHOS_UNITTESTS)
 TEST_F(ZipTest, UnzipEvil2) {
   // The ZIP file contains a file with invalid UTF-8 in its file name.
   base::FilePath path =
@@ -420,7 +419,6 @@ TEST_F(ZipTest, UnzipEvil2) {
       output_dir.Append(base::FilePath::FromUTF8Unsafe(".�.�evil.txt"))));
   ASSERT_FALSE(base::PathExists(output_dir.AppendASCII("../evil.txt")));
 }
-#endif // OHOS_UNITTESTS zlib_unittests drop case
 
 TEST_F(ZipTest, UnzipWithFilter) {
   auto filter = base::BindRepeating([](const base::FilePath& path) {
@@ -738,7 +736,6 @@ TEST_F(ZipTest, UnzipDifferentCasesContinueOnError) {
 #endif
 }
 
-#if !defined(OHOS_UNITTESTS)
 TEST_F(ZipTest, UnzipMixedPaths) {
   EXPECT_TRUE(zip::Unzip(GetDataDirectory().AppendASCII("Mixed Paths.zip"),
                          test_dir_, {.continue_on_error = true}));
@@ -898,7 +895,6 @@ TEST_F(ZipTest, UnzipMixedPaths) {
           "u/v/w/x/y",
       }));
 }
-#endif // OHOS_UNITTESTS zlib_unittests drop case
 
 TEST_F(ZipTest, UnzipWithDelegates) {
   auto dir_creator =
@@ -955,7 +951,6 @@ TEST_F(ZipTest, UnzipOnlyDirectories) {
   EXPECT_FALSE(base::PathExists(dir_foo_bar.AppendASCII("quux.txt")));
 }
 
-#if !defined(OHOS_UNITTESTS)
 // Tests that a ZIP archive containing SJIS-encoded file names can be correctly
 // extracted if the encoding is specified.
 TEST_F(ZipTest, UnzipSjis) {
@@ -980,9 +975,7 @@ TEST_F(ZipTest, UnzipSjis) {
                                      &contents));
   EXPECT_EQ("This file name is coded in Shift JIS in the archive.", contents);
 }
-#endif // OHOS_UNITTESTS zlib_unittests drop case
 
-#if !defined(OHOS_UNITTESTS)
 // Tests that a ZIP archive containing SJIS-encoded file names can be extracted
 // even if the encoding is not specified. In this case, file names are
 // interpreted as UTF-8, which leads to garbled names where invalid UTF-8
@@ -1013,7 +1006,6 @@ TEST_F(ZipTest, UnzipSjisAsUtf8) {
                                      &contents));
   EXPECT_EQ("This file name is coded in Shift JIS in the archive.", contents);
 }
-#endif // OHOS_UNITTESTS zlib_unittests drop case
 
 TEST_F(ZipTest, Zip) {
   base::FilePath src_dir = GetDataDirectory().AppendASCII("test");
@@ -1037,7 +1029,6 @@ TEST_F(ZipTest, ZipIgnoreHidden) {
   TestUnzipFile(zip_file, false);
 }
 
-#if !defined(OHOS_UNITTESTS)
 TEST_F(ZipTest, ZipNonASCIIDir) {
   base::FilePath src_dir = GetDataDirectory().AppendASCII("test");
 
@@ -1053,7 +1044,6 @@ TEST_F(ZipTest, ZipNonASCIIDir) {
   TestUnzipFile(zip_file, true);
 }
 
-#endif // OHOS_UNITTESTS zlib_unittests drop case
 TEST_F(ZipTest, ZipTimeStamp) {
   // The dates tested are arbitrary, with some constraints. The zip format can
   // only store years from 1980 to 2107 and an even number of seconds, due to it

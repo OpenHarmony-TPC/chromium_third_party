@@ -44,9 +44,7 @@
 
 namespace blink {
 
-#if !defined(OHOS_UNITTESTS)
 static const size_t kLargeEnoughSize = 1000 * 1000;
-#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
 namespace {
 
@@ -56,7 +54,6 @@ std::unique_ptr<JPEGImageDecoder> CreateJPEGDecoder(size_t max_decoded_bytes) {
       max_decoded_bytes);
 }
 
-#if !defined(OHOS_UNITTESTS)
 std::unique_ptr<ImageDecoder> CreateJPEGDecoder() {
   return CreateJPEGDecoder(ImageDecoder::kNoDecodedImageByteLimit);
 }
@@ -127,7 +124,6 @@ void ReadYUV(size_t max_decoded_bytes,
   EXPECT_EQ(expect_decoding_failure, decoder->Failed());
   EXPECT_TRUE(decoder->HasDisplayableYUVData());
 }
-#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
 }  // anonymous namespace
 
@@ -138,7 +134,6 @@ TEST(JPEGImageDecoderTest, tooBig) {
   EXPECT_TRUE(decoder->Failed());
 }
 
-#if !defined(OHOS_UNITTESTS)
 // Tests that the JPEG decoder can downsample image whose width and height are
 // multiples of 8, to ensure we compute the correct DecodedSize and pass correct
 // parameters to libjpeg to output the image with the expected size.
@@ -193,9 +188,7 @@ TEST(JPEGImageDecoderTest, downsampleImageSizeNotMultipleOf8) {
   // 7/8 downsample.
   Downsample(230 * 230 * 4, jpeg_file, gfx::Size(241, 182));
 }
-#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
-#if !defined(OHOS_UNITTESTS)
 // Tests that upsampling is not allowed.
 TEST(JPEGImageDecoderTest, upsample) {
   const char* jpeg_file = "/images/resources/gracehopper.jpg";  // 256x256
@@ -240,7 +233,6 @@ TEST(JPEGImageDecoderTest, missingEoi) {
           /*expect_decoding_failure=*/true);
 }
 
-#if !defined(OHOS_UNITTESTS)
 TEST(JPEGImageDecoderTest,
      byteByByteBaselineJPEGWithColorProfileAndRestartMarkers) {
   TestByteByByteDecode(&CreateJPEGDecoder,
@@ -259,7 +251,6 @@ TEST(JPEGImageDecoderTest, byteByByteRGBJPEGWithAdobeMarkers) {
                        "/images/resources/rgb-jpeg-with-adobe-marker-only.jpg",
                        1u, kAnimationNone);
 }
-#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
 // This test verifies that calling SharedBuffer::MergeSegmentsIntoBuffer() does
 // not break JPEG decoding at a critical point: in between a call to decode the
@@ -354,9 +345,7 @@ TEST(JPEGImageDecoderTest, SupportedSizesRectangle) {
         << sizes[i].height();
   }
 }
-#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
-#if !defined(OHOS_UNITTESTS)
 TEST(JPEGImageDecoderTest,
      SupportedSizesRectangleNotMultipleOfMCUIfMemoryBound) {
   // This 275x207 image uses 4:2:0 sampling format. The MCU is therefore 16x16.
@@ -443,7 +432,6 @@ TEST(JPEGImageDecoderTest, SupportedSizesTruncatedIfMemoryBound) {
         << sizes[i].height();
   }
 }
-#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
 TEST(JPEGImageDecoderTest, SupportedScaleNumeratorBound) {
   auto numerator_default = JPEGImageDecoder::DesiredScaleNumerator(10, 9, 8);
@@ -475,7 +463,6 @@ void PrintTo(const ColorSpaceTestParam& param, std::ostream* os) {
 
 class ColorSpaceTest : public ::testing::TestWithParam<ColorSpaceTestParam> {};
 
-#if !defined(OHOS_UNITTESTS)
 // Tests that the JPEG color space/subsampling is recorded correctly as a UMA
 // for a variety of images. When the decode fails, no UMA should be recorded.
 TEST_P(ColorSpaceTest, CorrectColorSpaceUMARecorded) {
@@ -645,6 +632,5 @@ TEST(JPEGImageDecoderTest, PartialRgbDecodeBlocksYuvDecoding) {
   decoder->SetData(full_data.get(), true);
   EXPECT_FALSE(decoder->CanDecodeToYUV());
 }
-#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
 }  // namespace blink

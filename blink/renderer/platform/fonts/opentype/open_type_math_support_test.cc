@@ -48,7 +48,6 @@ class OpenTypeMathSupportTest : public FontTestBase {
   Font font;
 };
 
-#if !defined(OHOS_UNITTESTS)
 TEST_F(OpenTypeMathSupportTest, HasMathData) {
   // Null parameter.
   EXPECT_FALSE(OpenTypeMathSupport::HasMathData(nullptr));
@@ -440,6 +439,5 @@ TEST_F(OpenTypeMathSupportTest, MathItalicCorrection) {
     EXPECT_FLOAT_EQ(italic_correction, 5000);
   }
 }
-#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
 }  // namespace blink

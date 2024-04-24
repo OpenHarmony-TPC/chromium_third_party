@@ -49,7 +49,6 @@ std::unique_ptr<ImageDecoder> CreateDecoder() {
       ImageDecoder::kNoDecodedImageByteLimit);
 }
 
-#if !defined(OHOS_UNITTESTS)
 void TestRepetitionCount(const char* dir,
                          const char* file,
                          int expected_repetition_count) {
@@ -59,11 +58,9 @@ void TestRepetitionCount(const char* dir,
   decoder->SetData(data.get(), true);
   EXPECT_EQ(expected_repetition_count, decoder->RepetitionCount());
 }
-#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
 }  // anonymous namespace
 
-#if !defined(OHOS_UNITTESTS)
 TEST(GIFImageDecoderTest, decodeTwoFrames) {
   std::unique_ptr<ImageDecoder> decoder = CreateDecoder();
 
@@ -88,9 +85,7 @@ TEST(GIFImageDecoderTest, decodeTwoFrames) {
   EXPECT_EQ(2u, decoder->FrameCount());
   EXPECT_EQ(kAnimationLoopInfinite, decoder->RepetitionCount());
 }
-#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
-#if !defined(OHOS_UNITTESTS)
 TEST(GIFImageDecoderTest, crbug779261) {
   std::unique_ptr<ImageDecoder> decoder = CreateDecoder();
   scoped_refptr<SharedBuffer> data =
@@ -111,9 +106,7 @@ TEST(GIFImageDecoderTest, crbug779261) {
 
   EXPECT_FALSE(decoder->Failed());
 }
-#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
-#if !defined(OHOS_UNITTESTS)
 TEST(GIFImageDecoderTest, parseAndDecode) {
   std::unique_ptr<ImageDecoder> decoder = CreateDecoder();
 
@@ -136,9 +129,7 @@ TEST(GIFImageDecoderTest, parseAndDecode) {
   EXPECT_EQ(16, frame->Bitmap().height());
   EXPECT_EQ(kAnimationLoopInfinite, decoder->RepetitionCount());
 }
-#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
-#if !defined(OHOS_UNITTESTS)
 TEST(GIFImageDecoderTest, parseByteByByte) {
   std::unique_ptr<ImageDecoder> decoder = CreateDecoder();
 
@@ -183,13 +174,11 @@ TEST(GIFImageDecoderTest, brokenSecondFrame) {
   ImageFrame* frame = decoder->DecodeFrameBufferAtIndex(1);
   EXPECT_FALSE(frame);
 }
-#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
 TEST(GIFImageDecoderTest, progressiveDecode) {
   TestProgressiveDecoding(&CreateDecoder, kDecodersTestingDir, "radient.gif");
 }
 
-#if !defined(OHOS_UNITTESTS)
 TEST(GIFImageDecoderTest, allDataReceivedTruncation) {
   std::unique_ptr<ImageDecoder> decoder = CreateDecoder();
 
@@ -248,9 +237,7 @@ TEST(GIFImageDecoderTest, frameIsCompleteLoading) {
   EXPECT_TRUE(decoder->FrameIsReceivedAtIndex(0));
   EXPECT_TRUE(decoder->FrameIsReceivedAtIndex(1));
 }
-#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
-#if !defined(OHOS_UNITTESTS)
 TEST(GIFImageDecoderTest, badTerminator) {
   scoped_refptr<SharedBuffer> reference_data =
       ReadFile(kDecodersTestingDir, "radient.gif");
@@ -274,14 +261,11 @@ TEST(GIFImageDecoderTest, badTerminator) {
   EXPECT_EQ(HashBitmap(reference_frame->Bitmap()),
             HashBitmap(test_frame->Bitmap()));
 }
-#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
-#if !defined(OHOS_UNITTESTS)
 TEST(GIFImageDecoderTest, updateRequiredPreviousFrameAfterFirstDecode) {
   TestUpdateRequiredPreviousFrameAfterFirstDecode(
       &CreateDecoder, kWebTestsResourcesDir, "animated-10color.gif");
 }
-#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
 TEST(GIFImageDecoderTest, randomFrameDecode) {
   // Single frame image.
@@ -307,7 +291,6 @@ TEST(GIFImageDecoderTest, randomDecodeAfterClearFrameBufferCache) {
 // The first LZW codes in the image are invalid values that try to create a loop
 // in the dictionary. Decoding should fail, but not infinitely loop or corrupt
 // memory.
-#if !defined(OHOS_UNITTESTS)
 TEST(GIFImageDecoderTest, badInitialCode) {
   scoped_refptr<SharedBuffer> test_data =
       ReadFile(kDecodersTestingDir, "bad-initial-code.gif");
@@ -333,9 +316,7 @@ TEST(GIFImageDecoderTest, badCode) {
   ASSERT_TRUE(test_decoder->DecodeFrameBufferAtIndex(0));
   EXPECT_TRUE(test_decoder->Failed());
 }
-#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
-#if !defined(OHOS_UNITTESTS)
 TEST(GIFImageDecoderTest, invalidDisposalMethod) {
   std::unique_ptr<ImageDecoder> decoder = CreateDecoder();
 
@@ -356,7 +337,6 @@ TEST(GIFImageDecoderTest, invalidDisposalMethod) {
   EXPECT_EQ(ImageFrame::kDisposeKeep,
             decoder->DecodeFrameBufferAtIndex(1)->GetDisposalMethod());
 }
-#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
 TEST(GIFImageDecoderTest, firstFrameHasGreaterSizeThanScreenSize) {
   const Vector<char> full_data =
@@ -385,7 +365,6 @@ TEST(GIFImageDecoderTest, firstFrameHasGreaterSizeThanScreenSize) {
   }
 }
 
-#if !defined(OHOS_UNITTESTS)
 TEST(GIFImageDecoderTest, verifyRepetitionCount) {
   // full2loop.gif has 3 frames (it is an animated GIF) and an explicit loop
   // count of 2.
@@ -472,7 +451,6 @@ TEST(GIFImageDecoderTest, bitmapAlphaType) {
               unpremul_frame->GetStatus() == ImageFrame::kFrameComplete);
   EXPECT_EQ(kOpaque_SkAlphaType, unpremul_frame->Bitmap().alphaType());
 }
-#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
 namespace {
 // Needed to exercise ImageDecoder::SetMemoryAllocator, but still does the
@@ -484,7 +462,6 @@ class Allocator final : public SkBitmap::Allocator {
 
 // Ensure that calling SetMemoryAllocator does not short-circuit
 // InitializeNewFrame.
-#if !defined(OHOS_UNITTESTS)
 TEST(GIFImageDecoderTest, externalAllocator) {
   auto data = ReadFile(kWebTestsResourcesDir, "boston.gif");
   ASSERT_TRUE(data.get());
@@ -541,6 +518,5 @@ TEST(GIFImageDecoderTest, recursiveDecodeFailure) {
     ASSERT_EQ(frame->RequiredPreviousFrameIndex(), 2u);
   }
 }
-#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
 }  // namespace blink

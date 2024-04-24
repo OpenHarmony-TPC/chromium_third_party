@@ -327,7 +327,6 @@ TEST_F(ZipReaderTest, InvalidUTF8File) {
   EXPECT_FALSE(entry->is_directory);
 }
 
-#if !defined(OHOS_UNITTESTS)
 // By default, file paths in ZIPs are interpreted as UTF-8. But in this test,
 // the ZIP archive contains file paths that are actually encoded in Shift JIS.
 // The SJIS-encoded paths are thus wrongly interpreted as UTF-8, resulting in
@@ -341,9 +340,7 @@ TEST_F(ZipReaderTest, EncodingSjisAsUtf8) {
           base::FilePath::FromUTF8Unsafe(
               "�V�����t�H���_/�V�����e�L�X�g �h�L�������g.txt")));
 }
-#endif // OHOS_UNITTESTS zlib_unittests drop case
 
-#if !defined(OHOS_UNITTESTS)
 // In this test, SJIS-encoded paths are interpreted as Code Page 1252. This
 // results in garbled paths. Note the presence of C1 control codes U+0090 and
 // U+0081 in the garbled paths.
@@ -356,9 +353,7 @@ TEST_F(ZipReaderTest, EncodingSjisAs1252) {
                       "\u0090V‚µ‚¢ƒtƒHƒ‹ƒ_/\u0090V‚µ‚¢ƒeƒLƒXƒg "
                       "ƒhƒLƒ…ƒ\u0081ƒ“ƒg.txt")));
 }
-#endif // OHOS_UNITTESTS zlib_unittests drop case
 
-#if !defined(OHOS_UNITTESTS)
 // In this test, SJIS-encoded paths are interpreted as Code Page 866. This
 // results in garbled paths.
 TEST_F(ZipReaderTest, EncodingSjisAsIbm866) {
@@ -369,9 +364,7 @@ TEST_F(ZipReaderTest, EncodingSjisAsIbm866) {
           base::FilePath::FromUTF8Unsafe(
               "РVВ╡ВвГtГHГЛГ_/РVВ╡ВвГeГLГXГg ГhГLГЕГБГУГg.txt")));
 }
-#endif // OHOS_UNITTESTS zlib_unittests drop case
 
-#if !defined(OHOS_UNITTESTS)
 // Tests that SJIS-encoded paths are correctly converted to Unicode.
 TEST_F(ZipReaderTest, EncodingSjis) {
   EXPECT_THAT(
@@ -381,7 +374,6 @@ TEST_F(ZipReaderTest, EncodingSjis) {
           base::FilePath::FromUTF8Unsafe(
               "新しいフォルダ/新しいテキスト ドキュメント.txt")));
 }
-#endif // OHOS_UNITTESTS zlib_unittests drop case
 
 TEST_F(ZipReaderTest, AbsoluteFile) {
   ZipReader reader;
