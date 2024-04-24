@@ -237,6 +237,8 @@ class PLATFORM_EXPORT InputHandlerProxy : public cc::InputHandlerClient,
   }
   bool DidNativeEmbedEvent(const WebInputEvent& event);
   void SetGestureEventResult(bool result);
+  void SendNativeEvent(const WebTouchEvent& touch_event, WebInputEvent::Type type, size_t i);
+  void NativeHitTestResult(bool native, size_t fingerId);
 #endif
 #if defined(OHOS_INPUT_EVENTS)
   void SetOverscrollMode(int mode);
@@ -446,9 +448,11 @@ class PLATFORM_EXPORT InputHandlerProxy : public cc::InputHandlerClient,
   bool need_flush_scroll_update_gesture_ = false;
   viz::BeginFrameArgs current_internal_begin_frame_args_;
   std::unique_ptr<NativeEmbedEventQueue> native_event_queue_;
-  std::string embed_id_;
-  bool isTouchStart_ = false;
+  std::string embed_id_ = "-1";
+  bool isNativeType_ = true;
   std::unordered_map<size_t, bool> native_map_;
+  cc::LayerImpl* layer_impl_;
+  WebTouchEvent start_touch_event_;
 #endif
 };
 

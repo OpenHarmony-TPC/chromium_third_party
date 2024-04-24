@@ -432,6 +432,7 @@ class CORE_EXPORT WebFrameWidgetImpl
 #if BUILDFLAG(IS_OHOS)
   void DidNativeEmbedEvent(const WebPointerEvent& web_pointer_event, std::string embedId,
                         PhysicalOffset& offset, bool isCancel);
+  void TouchHitTest(const WebPointerEvent& event, size_t i) override;
 #endif
   // WidgetBaseClient overrides:
   void OnCommitRequested() override;

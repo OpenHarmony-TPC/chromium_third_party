@@ -4312,6 +4312,24 @@ void WebFrameWidgetImpl::NotifyPageScaleFactorChanged(
 void WebFrameWidgetImpl::SetPinchSmoothMode(bool isEnable) {
   widget_base_->LayerTreeHost()->SetPinchSmoothMode(isEnable);
 }
+void WebFrameWidgetImpl::TouchHitTest(const WebPointerEvent& event, size_t fingerId) {
+  WebPointerEvent transformed_event =
+          TransformWebPointerEvent(LocalRootImpl()->GetFrameView(), event);
+  WebPointerEvent pointer_event = transformed_event.WebPointerEventInRootFrame();
+  HitTestRequest::HitTestRequestType hit_type = HitTestRequest::kTouchEvent |
+                                                  HitTestRequest::kReadOnly;
+    HitTestLocation location(LocalRootImpl()->GetFrameView()->ConvertFromRootFrame(
+        PhysicalOffset::FromPointFRound(pointer_event.PositionInWidget())));
+    HitTestResult hit_test_result =
+        LocalRootImpl()->GetFrame()->GetEventHandler().HitTestResultAtLocation(location, hit_type);
+
+    LocalFrame* frame = hit_test_result.InnerNodeFrame();
+    bool isNativeType = false;
+    if (frame) {
+       isNativeType = frame->IsNativeType();
+    }
+    widget_base_->NativeHitTestResult(isNativeType, fingerId);
+}
 #endif  // BUILDFLAG(IS_OHOS)
 
 void WebFrameWidgetImpl::SetPageScaleStateAndLimits(
