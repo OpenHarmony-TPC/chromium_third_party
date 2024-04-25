@@ -223,6 +223,21 @@ bool IsTouchEventType(WebInputEvent::Type type) {
       return false;
   }
 }
+bool IsSameEventType(WebInputEvent::Type type, WebTouchPoint::State state) {
+  switch (type) {
+    case WebInputEvent::Type::kTouchStart:
+      return state == WebTouchPoint::State::kStatePressed;
+    case WebInputEvent::Type::kTouchMove:
+      return state == WebTouchPoint::State::kStateMoved;
+    case WebInputEvent::Type::kTouchEnd:
+      return state == WebTouchPoint::State::kStateReleased;
+    case WebInputEvent::Type::kTouchCancel:
+      return true;
+    default:
+      return false;
+  }
+}
+
 #endif
 
 }  // namespace
@@ -409,6 +424,42 @@ void InputHandlerProxy::HandleInputEventWithLatencyInfo(
 }
 
 #if BUILDFLAG(IS_OHOS)
+void InputHandlerProxy::NativeHitTestResult(bool native, size_t fingerId) {
+
+  isNativeType_ = native;
+  if (native) {
+    SendNativeEvent(start_touch_event_, WebInputEvent::Type::kTouchStart, fingerId);
+  } else if (!native_event_queue_->empty()) {
+    auto event_with_callback = native_event_queue_->Pop();
+    DispatchSingleInputEvent(std::move(event_with_callback), tick_clock_->NowTicks());
+  }
+}
+void InputHandlerProxy::SendNativeEvent(const WebTouchEvent& touch_event,
+                                        WebInputEvent::Type type, size_t i) {
+  float x = touch_event.touches[i].PositionInWidget().x();
+  float y = touch_event.touches[i].PositionInWidget().y();
+  int32_t id = touch_event.touches[i].id;
+
+  embed_id_ = std::to_string(layer_impl_->native_embed_id());
+  gfx::RectF nativeRect = layer_impl_->GetNativeRect();
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+  if (layer_impl_->may_contain_video()) {
+    nativeRect = layer_impl_->VideoRectInScreenSpace();
+  }
+#endif // OHOS_CUSTOM_VIDEO_PLAYER
+  float scale = layer_impl_->GetIdealContentsScaleKey();
+  float initScale = layer_impl_->GetInitScale();
+  if (initScale > 0.f && scale > 0.f) {
+    x = (x - nativeRect.x()) / (scale / initScale);
+    y = (y - nativeRect.y()) / (scale / initScale);
+  } else {
+    x = x - nativeRect.x();
+    y = y - nativeRect.y();
+  }
+
+  client_->DidNativeEmbedEvent(type, embed_id_, id, x, y);
+}
+
 bool InputHandlerProxy::DidNativeEmbedEvent(const WebInputEvent& event) {
   const WebTouchEvent& touch_event = static_cast<const WebTouchEvent&>(event);
   bool result = false;
@@ -417,36 +468,35 @@ bool InputHandlerProxy::DidNativeEmbedEvent(const WebInputEvent& event) {
       float x = touch_event.touches[i].PositionInWidget().x();
       float y = touch_event.touches[i].PositionInWidget().y();
       int32_t id = touch_event.touches[i].id;
+      WebTouchPoint::State state = touch_event.touches[i].state;
+
       cc::LayerImpl* layer_impl = input_handler_->GetLayerImpl(gfx::Point(x, y));
-      if (layer_impl && layer_impl->ShouldInterceptTouchEvent()) {
+      layer_impl_ = layer_impl;
+      std::string embed_id = "-1";
+      if (layer_impl) {
+        embed_id = std::to_string(layer_impl->native_embed_id());
+      }
+      if (layer_impl && layer_impl->ShouldInterceptTouchEvent() &&
+        isNativeType_ && (embed_id_ == "-1" || embed_id_ == embed_id)) {
+
+        if (!IsSameEventType(event.GetType(), state)) {
+          continue;
+        }
+        if(event.GetType() == WebInputEvent::Type::kTouchStart) {
+          start_touch_event_ = touch_event;
+          const WebTouchPoint& touch_point = touch_event.touches[i];
+          WebPointerEvent pointer_event = WebPointerEvent(touch_event, touch_point);
+          client_->TouchHitTest(pointer_event, i);
+          result = true;
+          continue;
+        }
         if(event.GetType() == WebInputEvent::Type::kTouchEnd) {
           native_map_[i] = false;
         } else {
           native_map_[i] = true;
         }
         
-        embed_id_ = std::to_string(layer_impl->native_embed_id());
-        gfx::RectF nativeRect = layer_impl->GetNativeRect();
-#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
-        if (layer_impl->may_contain_video()) {
-          nativeRect = layer_impl->VideoRectInScreenSpace();
-        }
-#endif // OHOS_CUSTOM_VIDEO_PLAYER
-        float scale = layer_impl->GetIdealContentsScaleKey();
-        float initScale = layer_impl->GetInitScale();
-        if (initScale > 0.f && scale > 0.f) {
-          x = (x - nativeRect.x()) / (scale / initScale);
-          y = (y - nativeRect.y()) / (scale / initScale);
-        } else {
-          x = x - nativeRect.x();
-          y = y - nativeRect.y();
-        }
-        
-        if (isTouchStart_ && i < touch_event.touches_length - 1) {
-          continue;
-        }
-        isTouchStart_ = (event.GetType() == WebInputEvent::Type::kTouchStart);
-        client_->DidNativeEmbedEvent(event.GetType(), embed_id_, id, x, y);
+        SendNativeEvent(touch_event, event.GetType(), i);
         result = true;
       } else if (event.GetType() == WebInputEvent::Type::kTouchMove && 
                   native_map_.find(i) != native_map_.end() && 
@@ -455,6 +505,10 @@ bool InputHandlerProxy::DidNativeEmbedEvent(const WebInputEvent& event) {
         client_->DidNativeEmbedEvent(WebInputEvent::Type::kTouchCancel, embed_id_, id, x, y);
         result = true;
       }
+    }
+    if (event.GetType() == WebInputEvent::Type::kTouchEnd) {
+      isNativeType_ = true;
+      embed_id_ = "-1";
     }
   }
   return result;

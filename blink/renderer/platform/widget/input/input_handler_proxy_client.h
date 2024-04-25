@@ -50,6 +50,7 @@ class InputHandlerProxyClient {
 #if BUILDFLAG(IS_OHOS)
   virtual void DidNativeEmbedEvent(blink::WebInputEvent::Type type,
                            std::string embedId, int32_t id, float x, float y) = 0;
+  virtual void TouchHitTest(const WebPointerEvent& event, size_t i) = 0;
 #endif
  protected:
   virtual ~InputHandlerProxyClient() {}

@@ -1755,6 +1755,17 @@ void WidgetBase::CountDroppedPointerDownForEventTiming(unsigned count) {
   client_->CountDroppedPointerDownForEventTiming(count);
 }
 
+void WidgetBase::TouchHitTest(const WebPointerEvent& event, size_t i) {
+  FrameWidget* frame_widget = client_->FrameWidget();
+  if (!frame_widget)
+    return;
+  frame_widget->TouchHitTest(event, i);
+}
+void WidgetBase::NativeHitTestResult(bool isNative, size_t fingerId) {
+  if (widget_input_handler_manager_) {
+    widget_input_handler_manager_->NativeHitTestResult(isNative, fingerId);
+  }
+}
 gfx::PointF WidgetBase::DIPsToBlinkSpace(const gfx::PointF& point) {
   // TODO(danakj): Should this use non-original scale factor so it changes under
   // emulation?

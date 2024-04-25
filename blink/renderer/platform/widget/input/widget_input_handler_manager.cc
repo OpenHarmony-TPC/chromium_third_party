@@ -1144,6 +1144,24 @@ void WidgetInputHandlerManager::DidNativeEmbedEvent(blink::WebInputEvent::Type t
 void WidgetInputHandlerManager::SetGestureEventResult(bool result) {
   input_handler_proxy_->SetGestureEventResult(result);
 }
+
+void WidgetInputHandlerManager::TouchHitTest(const WebPointerEvent& event, size_t fingerId) {
+  main_thread_task_runner_->PostTask(
+      FROM_HERE,
+      base::BindOnce(&WidgetBase::TouchHitTest, widget_, event, fingerId));
+}
+
+void WidgetInputHandlerManager::NativeHitTestResult(bool isNative, size_t fingerId) {
+  compositor_thread_default_task_runner_->PostTask(
+        FROM_HERE, base::BindOnce(&WidgetInputHandlerManager::AsyncNativeHitTestResult, this, isNative, fingerId));
+}
+
+void WidgetInputHandlerManager::AsyncNativeHitTestResult(bool isNative, size_t fingerId) {
+  if (input_handler_proxy_) {
+    input_handler_proxy_->NativeHitTestResult(isNative, fingerId);
+  }
+}
+
 #endif
 
 #if defined(OHOS_INPUT_EVENTS)

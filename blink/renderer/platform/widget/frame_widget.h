@@ -302,6 +302,9 @@ class PLATFORM_EXPORT FrameWidget {
                                        base::TimeTicks end_time,
                                        base::TimeTicks desired_execution_time,
                                        LocalFrame*) = 0;
+#if BUILDFLAG(IS_OHOS)
+  virtual void TouchHitTest(const WebPointerEvent& event, size_t i) = 0;
+#endif
 };
 
 }  // namespace blink
