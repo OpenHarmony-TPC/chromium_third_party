@@ -422,7 +422,6 @@ TEST_F(NavigationBodyLoaderTest, SetDefersLoadingFromCloseThenOnComplete) {
 
 // Tests that FillNavigationParamsResponseAndBodyLoader populates security
 // details on the response when they are present.
-#if !defined(OHOS_UNITTESTS)
 TEST_F(NavigationBodyLoaderTest, FillResponseWithSecurityDetails) {
   auto response = network::mojom::URLResponseHead::New();
   response->ssl_info = net::SSLInfo();
@@ -464,7 +463,6 @@ TEST_F(NavigationBodyLoaderTest, FillResponseWithSecurityDetails) {
   EXPECT_TRUE(
       navigation_params.response.ToResourceResponse().GetSSLInfo().has_value());
 }
-#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
 // Tests that FillNavigationParamsResponseAndBodyLoader populates referrer
 // on redirects correctly.

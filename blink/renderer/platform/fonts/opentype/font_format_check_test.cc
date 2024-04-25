@@ -21,7 +21,6 @@ class FontFormatCheckTest : public testing::Test {
   sk_sp<SkData> font_data_;
 };
 
-#if !defined(OHOS_UNITTESTS)
 TEST_F(FontFormatCheckTest, NoCOLR) {
   EnsureFontData("roboto-a.ttf");
   FontFormatCheck format_check(font_data_);
@@ -42,6 +41,5 @@ TEST_F(FontFormatCheckTest, COLRV0) {
   ASSERT_TRUE(format_check.IsColrCpalColorFontV0());
   ASSERT_FALSE(format_check.IsColrCpalColorFontV1());
 }
-#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
 }  // namespace blink

@@ -253,7 +253,6 @@ class BitmapImageTest : public testing::Test {
       platform_;
 };
 
-#if !defined(OHOS_UNITTESTS)
 TEST_F(BitmapImageTest, destroyDecodedData) {
   LoadImage("animated-10color.gif");
   image_->PaintImageForCurrentFrame();
@@ -303,16 +302,13 @@ TEST_F(BitmapImageTest, pngHasColorProfile) {
   EXPECT_EQ(65536u, DecodedSize());
   EXPECT_TRUE(image_->HasColorProfile());
 }
-#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
-#if !defined(OHOS_UNITTESTS)
 TEST_F(BitmapImageTest, webpHasColorProfile) {
   LoadImage("webp-color-profile-lossy.webp");
   image_->PaintImageForCurrentFrame();
   EXPECT_EQ(2560000u, DecodedSize());
   EXPECT_TRUE(image_->HasColorProfile());
 }
-#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
 TEST_F(BitmapImageTest, icoHasWrongFrameDimensions) {
   LoadImage("wrong-frame-dimensions.ico");
@@ -329,7 +325,6 @@ TEST_F(BitmapImageTest, correctDecodedDataSize) {
   EXPECT_EQ(frame_size, LastDecodedSizeChange());
 }
 
-#if !defined(OHOS_UNITTESTS)
 TEST_F(BitmapImageTest, recachingFrameAfterDataChanged) {
   LoadImage("green.jpg");
   image_->PaintImageForCurrentFrame();
@@ -344,9 +339,7 @@ TEST_F(BitmapImageTest, recachingFrameAfterDataChanged) {
   image_->PaintImageForCurrentFrame();
   EXPECT_EQ(0, LastDecodedSizeChange());
 }
-#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
-#if !defined(OHOS_UNITTESTS)
 TEST_F(BitmapImageTest, ConstantImageIdForPartiallyLoadedImages) {
   scoped_refptr<SharedBuffer> image_data = ReadFile("green.jpg");
   ASSERT_TRUE(image_data.get());
@@ -402,9 +395,7 @@ TEST_F(BitmapImageTest, ConstantImageIdForPartiallyLoadedImages) {
   EXPECT_EQ(new_complete_image.GetKeyForFrame(PaintImage::kDefaultFrameIndex),
             complete_image.GetKeyForFrame(PaintImage::kDefaultFrameIndex));
 }
-#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
-#if !defined(OHOS_UNITTESTS)
 TEST_F(BitmapImageTest, ImageForDefaultFrame_MultiFrame) {
   LoadImage("anim_none.gif");
 
@@ -420,7 +411,6 @@ TEST_F(BitmapImageTest, ImageForDefaultFrame_MultiFrame) {
   EXPECT_EQ(paint_image1.GetSwSkImage()->uniqueID(),
             paint_image2.GetSwSkImage()->uniqueID());
 }
-#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
 TEST_F(BitmapImageTest, ImageForDefaultFrame_SingleFrame) {
   LoadImage("green.jpg");
@@ -429,7 +419,6 @@ TEST_F(BitmapImageTest, ImageForDefaultFrame_SingleFrame) {
   EXPECT_EQ(image_->ImageForDefaultFrame(), image_);
 }
 
-#if !defined(OHOS_UNITTESTS)
 TEST_F(BitmapImageTest, GifDecoderFrame0) {
   LoadImage("green-red-blue-yellow-animated.gif");
   auto bitmap = GenerateBitmap(0u);
@@ -454,9 +443,7 @@ TEST_F(BitmapImageTest, GifDecoderFrame3) {
   auto bitmap = GenerateBitmap(3u);
   VerifyBitmap(bitmap, SK_ColorYELLOW);
 }
-#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
-#if !defined(OHOS_UNITTESTS)
 TEST_F(BitmapImageTest, GifDecoderMultiThreaded) {
   LoadImage("green-red-blue-yellow-animated.gif");
   auto paint_image = image_->PaintImageForTesting();
@@ -487,9 +474,7 @@ TEST_F(BitmapImageTest, GifDecoderMultiThreaded) {
     VerifyBitmap(decodes[i].bitmap, expected_color[i]);
   }
 }
-#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
-#if !defined(OHOS_UNITTESTS)
 TEST_F(BitmapImageTest, APNGDecoder00) {
   LoadImage("apng00.png");
   auto actual_bitmap = GenerateBitmap(0u);
@@ -615,7 +600,6 @@ TEST_F(BitmapImageTest, DecoderAndCacheMipLevels) {
               gfx::SkISizeToSize(scaled_size));
   }
 }
-#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
 class BitmapImageTestWithMockDecoder : public BitmapImageTest,
                                        public MockImageDecoderClient {
@@ -825,7 +809,6 @@ class BitmapHistogramTest : public BitmapImageTest {
   }
 };
 
-#if !defined(OHOS_UNITTESTS)
 TEST_F(BitmapHistogramTest, DecodedImageType) {
   ExpectImageRecordsSample("green.jpg", "Blink.DecodedImageType",
                            BitmapImageMetrics::DecodedImageType::kJPEG);
@@ -879,6 +862,5 @@ TEST_F(BitmapHistogramTest, DecodedImageDensityKiBWeighted) {
                            "Blink.DecodedImage.WebPDensity.KiBWeighted", 24,
                            19);
 }
-#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
 }  // namespace blink

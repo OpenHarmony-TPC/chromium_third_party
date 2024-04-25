@@ -35,7 +35,6 @@ using testing::Invoke;
 
 }  // namespace
 
-#if !defined(OHOS_UNITTESTS)
 TEST(WebMessagePortTest, EndToEnd) {
   base::test::SingleThreadTaskEnvironment task_env;
 
@@ -155,7 +154,6 @@ TEST(WebMessagePortTest, EndToEnd) {
   EXPECT_FALSE(port1.HasReceiver());
   EXPECT_FALSE(port1.CanPostMessage());
 }
-#endif // OHOS_UNITTESTS blink_common_unittests drop case
 
 TEST(WebMessagePortTest, MoveAssignToConnectedPort) {
   base::test::SingleThreadTaskEnvironment task_env;

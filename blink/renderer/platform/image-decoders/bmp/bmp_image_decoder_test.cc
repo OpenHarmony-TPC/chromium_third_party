@@ -22,7 +22,6 @@ std::unique_ptr<ImageDecoder> CreateBMPDecoder() {
 
 }  // anonymous namespace
 
-#if !defined(OHOS_UNITTESTS)
 TEST(BMPImageDecoderTest, isSizeAvailable) {
   // This image is 256x256.
   static constexpr char kBmpFile[] = "/images/resources/gracehopper.bmp";
@@ -52,7 +51,6 @@ TEST(BMPImageDecoderTest, parseAndDecode) {
   EXPECT_EQ(256, frame->Bitmap().height());
   EXPECT_FALSE(decoder->Failed());
 }
-#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
 // Test if a BMP decoder returns a proper error while decoding an empty image.
 TEST(BMPImageDecoderTest, emptyImage) {
@@ -69,7 +67,6 @@ TEST(BMPImageDecoderTest, emptyImage) {
   EXPECT_TRUE(decoder->Failed());
 }
 
-#if !defined(OHOS_UNITTESTS)
 TEST(BMPImageDecoderTest, int32MinHeight) {
   static constexpr char kBmpFile[] =
       "/images/resources/1xint32_min.bmp";  // 0xINT32_MIN
@@ -89,7 +86,6 @@ TEST(BMPImageDecoderTest, mergeBuffer) {
   static constexpr char kBmpFile[] = "/images/resources/gracehopper.bmp";
   TestMergeBuffer(&CreateBMPDecoder, kBmpFile);
 }
-#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
 // Verify that decoding this image does not crash.
 TEST(BMPImageDecoderTest, crbug752898) {

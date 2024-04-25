@@ -50,7 +50,6 @@ std::unique_ptr<ImageDecoder> CreatePNGDecoder() {
   return CreatePNGDecoder(ImageDecoder::kAlphaNotPremultiplied);
 }
 
-#if !defined(OHOS_UNITTESTS)
 std::unique_ptr<ImageDecoder> Create16BitPNGDecoder() {
   return std::make_unique<PNGImageDecoder>(
       ImageDecoder::kAlphaNotPremultiplied,
@@ -115,7 +114,6 @@ void TestRepetitionCount(const char* png_file, int expected_repetition_count) {
   EXPECT_FALSE(decoder->Failed());
   EXPECT_EQ(expected_repetition_count, decoder->RepetitionCount());
 }
-#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
 struct PublicFrameInfo {
   base::TimeDelta duration;
@@ -124,7 +122,6 @@ struct PublicFrameInfo {
   ImageFrame::DisposalMethod disposal_method;
 };
 
-#if !defined(OHOS_UNITTESTS)
 // This is the frame data for the following PNG image:
 // web_tests/images/resources/png-animated-idat-part-of-animation.png
 static PublicFrameInfo g_png_animated_frame_info[] = {
@@ -274,13 +271,11 @@ void TestProgressiveDecodingContinuesAfterFullData(
   EXPECT_NE(hash_full, hash_partial);
   EXPECT_EQ(hash_full, hash_upfront);
 }
-#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
 }  // Anonymous namespace
 
 // Animated PNG Tests
 
-#if !defined(OHOS_UNITTESTS)
 TEST(AnimatedPNGTests, sizeTest) {
   TestSize(
       "/images/resources/"
@@ -381,7 +376,6 @@ TEST(AnimatedPNGTests, ByteByByteMetaData) {
   EXPECT_EQ(kExpectedFrameCount, decoder->FrameCount());
   EXPECT_FALSE(decoder->Failed());
 }
-#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
 TEST(AnimatedPNGTests, TestRandomFrameDecode) {
   TestRandomFrameDecode(&CreatePNGDecoder,
@@ -403,16 +397,13 @@ TEST(AnimatedPNGTests, ProgressiveDecode) {
                           13u);
 }
 
-#if !defined(OHOS_UNITTESTS)
 TEST(AnimatedPNGTests, ParseAndDecodeByteByByte) {
   TestByteByByteDecode(&CreatePNGDecoder,
                        "/images/resources/"
                        "png-animated-idat-part-of-animation.png",
                        4u, 6u);
 }
-#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
-#if !defined(OHOS_UNITTESTS)
 TEST(AnimatedPNGTests, FailureDuringParsing) {
   // Test the first fcTL in the stream. Because no frame data has been set at
   // this point, the expected frame count is zero. 95 bytes is just before the
@@ -732,7 +723,6 @@ TEST(AnimatedPNGTests, ProgressiveDecodingContinuesAfterFullData) {
       160u);
 }
 
-#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 TEST(AnimatedPNGTests, RandomDecodeAfterClearFrameBufferCache) {
   TestRandomDecodeAfterClearFrameBufferCache(
       &CreatePNGDecoder,
@@ -761,7 +751,6 @@ TEST(AnimatedPNGTests, VerifyAlphaBlending) {
 // there are three frames which can be shown.
 // Attempting to decode the third frame should fail, since the file is
 // truncated.
-#if !defined(OHOS_UNITTESTS)
 TEST(AnimatedPNGTests, FailureMissingIendChunk) {
   scoped_refptr<SharedBuffer> full_data = ReadFile(
       "/images/resources/"
@@ -852,11 +841,9 @@ TEST(AnimatedPNGTests, MixedDataChunks) {
   decoder->FrameCount();
   EXPECT_TRUE(decoder->Failed());
 }
-#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
 // Verify that erroneous values for the disposal method and alpha blending
 // cause the decoder to fail.
-#if !defined(OHOS_UNITTESTS)
 TEST(AnimatedPNGTests, VerifyInvalidDisposalAndBlending) {
   const char* png_file =
       "/images/resources/"
@@ -887,7 +874,6 @@ TEST(AnimatedPNGTests, VerifyInvalidDisposalAndBlending) {
   decoder->FrameCount();
   ASSERT_TRUE(decoder->Failed());
 }
-#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
 // This test verifies that the following situation does not invalidate the
 // decoder:
@@ -899,7 +885,6 @@ TEST(AnimatedPNGTests, VerifyInvalidDisposalAndBlending) {
 // This is a tricky case since the decoder resets the png struct for each frame,
 // and this test verifies that it does not break the decoding of frame 0, even
 // though it already started in the first call.
-#if !defined(OHOS_UNITTESTS)
 TEST(AnimatedPNGTests, VerifySuccessfulFirstFrameDecodeAfterLaterFrame) {
   const char* png_file =
       "/images/resources/"
@@ -931,13 +916,11 @@ TEST(AnimatedPNGTests, VerifySuccessfulFirstFrameDecodeAfterLaterFrame) {
             decoder->DecodeFrameBufferAtIndex(0)->GetStatus());
   EXPECT_FALSE(decoder->Failed());
 }
-#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
 // If the decoder attempts to decode a non-first frame which is subset and
 // independent, it needs to discard its png_struct so it can use a modified
 // IHDR. Test this by comparing a decode of frame 1 after frame 0 to a decode
 // of frame 1 without decoding frame 0.
-#if !defined(OHOS_UNITTESTS)
 TEST(AnimatedPNGTests, DecodeFromIndependentFrame) {
   const char* png_file =
       "/images/resources/"
@@ -988,12 +971,10 @@ TEST(AnimatedPNGTests, DecodeFromIndependentFrame) {
   ASSERT_TRUE(frame);
   EXPECT_EQ(hash, HashBitmap(frame->Bitmap()));
 }
-#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
 // If the first frame is subset from IHDR (only allowed if the first frame is
 // not the default image), the decoder has to destroy the png_struct it used
 // for parsing so it can use a modified IHDR.
-#if !defined(OHOS_UNITTESTS)
 TEST(AnimatedPNGTests, SubsetFromIHDR) {
   const char* png_file =
       "/images/resources/"
@@ -1023,9 +1004,7 @@ TEST(AnimatedPNGTests, SubsetFromIHDR) {
   // This will test both byte by byte and using the full data, and compare.
   TestByteByByteDecode(CreatePNGDecoder, data.get(), 1, kAnimationNone);
 }
-#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
-#if !defined(OHOS_UNITTESTS)
 TEST(AnimatedPNGTests, Offset) {
   const char* png_file = "/images/resources/apng18.png";
   scoped_refptr<SharedBuffer> original_data = ReadFile(png_file);
@@ -1057,9 +1036,7 @@ TEST(AnimatedPNGTests, Offset) {
     EXPECT_EQ(baseline_hashes[i], HashBitmap(frame->Bitmap()));
   }
 }
-#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
-#if !defined(OHOS_UNITTESTS)
 TEST(AnimatedPNGTests, ExtraChunksBeforeIHDR) {
   const char* png_file = "/images/resources/apng18.png";
   scoped_refptr<SharedBuffer> original_data = ReadFile(png_file);
@@ -1094,9 +1071,7 @@ TEST(AnimatedPNGTests, ExtraChunksBeforeIHDR) {
     EXPECT_EQ(baseline_hashes[i], HashBitmap(frame->Bitmap()));
   }
 }
-#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
-#if !defined(OHOS_UNITTESTS)
 // Static PNG tests
 
 TEST(StaticPNGTests, repetitionCountTest) {
@@ -1106,9 +1081,7 @@ TEST(StaticPNGTests, repetitionCountTest) {
 TEST(StaticPNGTests, sizeTest) {
   TestSize("/images/resources/png-simple.png", gfx::Size(111, 29));
 }
-#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
-#if !defined(OHOS_UNITTESTS)
 TEST(StaticPNGTests, MetaDataTest) {
   const size_t kExpectedFrameCount = 1;
   const base::TimeDelta kExpectedDuration;
@@ -1117,25 +1090,20 @@ TEST(StaticPNGTests, MetaDataTest) {
   EXPECT_EQ(kExpectedFrameCount, decoder->FrameCount());
   EXPECT_EQ(kExpectedDuration, decoder->FrameDurationAtIndex(0));
 }
-#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
-#if !defined(OHOS_UNITTESTS)
 TEST(StaticPNGTests, InvalidIHDRChunk) {
   TestMissingDataBreaksDecoding("/images/resources/png-simple.png", 20u, 2u);
 }
-#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
 TEST(StaticPNGTests, ProgressiveDecoding) {
   TestProgressiveDecoding(&CreatePNGDecoder, "/images/resources/png-simple.png",
                           11u);
 }
 
-#if !defined(OHOS_UNITTESTS)
 TEST(StaticPNGTests, ProgressiveDecodingContinuesAfterFullData) {
   TestProgressiveDecodingContinuesAfterFullData(
       "/images/resources/png-simple.png", 1000u);
 }
-#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
 struct PNGSample {
   String filename;
@@ -1146,7 +1114,6 @@ struct PNGSample {
   Vector<float> expected_pixels;
 };
 
-#if !defined(OHOS_UNITTESTS)
 static void TestHighBitDepthPNGDecoding(const PNGSample& png_sample,
                                         ImageDecoder* decoder) {
   scoped_refptr<SharedBuffer> png = png_sample.png_contents;
@@ -1350,9 +1317,7 @@ static Vector<PNGSample> GetPNGSamplesInfo(bool include_8bit_pngs) {
 
   return png_samples;
 }
-#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
-#if !defined(OHOS_UNITTESTS)
 TEST(StaticPNGTests, DecodeHighBitDepthPngToHalfFloat) {
   const bool include_8bit_pngs = false;
   Vector<PNGSample> png_samples = GetPNGSamplesInfo(include_8bit_pngs);
@@ -1389,9 +1354,7 @@ TEST(StaticPNGTests, ImageIsHighBitDepth) {
     }
   }
 }
-#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
-#if !defined(OHOS_UNITTESTS)
 TEST(PNGTests, VerifyFrameCompleteBehavior) {
   struct {
     const char* name;
@@ -1457,18 +1420,14 @@ TEST(PNGTests, VerifyFrameCompleteBehavior) {
     EXPECT_TRUE(decoder->FrameIsReceivedAtIndex(0));
   }
 }
-#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
-#if !defined(OHOS_UNITTESTS)
 TEST(PNGTests, sizeMayOverflow) {
   auto decoder =
       CreatePNGDecoderWithPngData("/images/resources/crbug702934.png");
   EXPECT_FALSE(decoder->IsSizeAvailable());
   EXPECT_TRUE(decoder->Failed());
 }
-#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
-#if !defined(OHOS_UNITTESTS)
 TEST(PNGTests, truncated) {
   auto decoder =
       CreatePNGDecoderWithPngData("/images/resources/crbug807324.png");
@@ -1484,9 +1443,7 @@ TEST(PNGTests, truncated) {
     }
   }
 }
-#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
-#if !defined(OHOS_UNITTESTS)
 TEST(PNGTests, crbug827754) {
   const char* png_file = "/images/resources/crbug827754.png";
   scoped_refptr<SharedBuffer> data = ReadFile(png_file);
@@ -1498,9 +1455,7 @@ TEST(PNGTests, crbug827754) {
   ASSERT_TRUE(frame);
   ASSERT_FALSE(decoder->Failed());
 }
-#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
-#if !defined(OHOS_UNITTESTS)
 TEST(PNGTests, cicp) {
   const char* png_file = "/images/resources/cicp_pq.png";
   scoped_refptr<SharedBuffer> data = ReadFile(png_file);
@@ -1517,9 +1472,7 @@ TEST(PNGTests, cicp) {
   const skcms_ICCProfile* png_profile = transform->SrcProfile();
   EXPECT_TRUE(skcms_TransferFunction_isPQish(&png_profile->trc[0].parametric));
 }
-#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
-#if !defined(OHOS_UNITTESTS)
 TEST(AnimatedPNGTests, TrnsMeansAlpha) {
   const char* png_file =
       "/images/resources/"
@@ -1538,6 +1491,5 @@ TEST(PNGTests, CriticalPrivateChunkBeforeIHDR) {
   EXPECT_FALSE(decoder->IsSizeAvailable());
   EXPECT_TRUE(decoder->Failed());
 }
-#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 
 }  // namespace blink

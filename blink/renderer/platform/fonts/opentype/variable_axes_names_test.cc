@@ -11,7 +11,6 @@
 
 namespace blink {
 
-#if !defined(OHOS_UNITTESTS)
 TEST(VariableAxesNamesTest, TestVariableAxes) {
   String file_path = blink::test::BlinkWebTestsDir() +
                      "/third_party/Homecomputer/Sixtyfour.ttf";
@@ -33,5 +32,4 @@ TEST(VariableAxesNamesTest, TestVariableAxes) {
   EXPECT_EQ(axis2.defaultValue, 100);
 }
 
-#endif // OHOS_UNITTESTS blink_platform_unittests drop case
 }  // namespace blink
