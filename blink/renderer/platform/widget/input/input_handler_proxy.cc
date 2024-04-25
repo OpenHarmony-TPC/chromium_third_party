@@ -425,15 +425,19 @@ void InputHandlerProxy::HandleInputEventWithLatencyInfo(
 
 #if BUILDFLAG(IS_OHOS)
 void InputHandlerProxy::NativeHitTestResult(bool native, size_t fingerId) {
-
-  isNativeType_ = native;
+  LOG(DEBUG)<<"[NativeEmbed] NativeHitTestResult fingerId is : "<< fingerId << " and native is : "<< native;
+  native_map_[fingerId] = native;
   if (native) {
+    float x = start_touch_event_.touches[fingerId].PositionInWidget().x();
+    float y = start_touch_event_.touches[fingerId].PositionInWidget().y();
+    layer_impl_ = input_handler_->GetLayerImpl(gfx::Point(x, y));
     SendNativeEvent(start_touch_event_, WebInputEvent::Type::kTouchStart, fingerId);
   } else if (!native_event_queue_->empty()) {
     auto event_with_callback = native_event_queue_->Pop();
     DispatchSingleInputEvent(std::move(event_with_callback), tick_clock_->NowTicks());
   }
 }
+
 void InputHandlerProxy::SendNativeEvent(const WebTouchEvent& touch_event,
                                         WebInputEvent::Type type, size_t i) {
   float x = touch_event.touches[i].PositionInWidget().x();
@@ -465,50 +469,23 @@ bool InputHandlerProxy::DidNativeEmbedEvent(const WebInputEvent& event) {
   bool result = false;
   if (IsTouchEventType(event.GetType())) {
     for(size_t i = 0; i < touch_event.touches_length; ++i) {
-      float x = touch_event.touches[i].PositionInWidget().x();
-      float y = touch_event.touches[i].PositionInWidget().y();
-      int32_t id = touch_event.touches[i].id;
       WebTouchPoint::State state = touch_event.touches[i].state;
-
-      cc::LayerImpl* layer_impl = input_handler_->GetLayerImpl(gfx::Point(x, y));
-      layer_impl_ = layer_impl;
-      std::string embed_id = "-1";
-      if (layer_impl) {
-        embed_id = std::to_string(layer_impl->native_embed_id());
+      if (!IsSameEventType(event.GetType(), state)) {
+        continue;
       }
-      if (layer_impl && layer_impl->ShouldInterceptTouchEvent() &&
-        isNativeType_ && (embed_id_ == "-1" || embed_id_ == embed_id)) {
+      if(event.GetType() == WebInputEvent::Type::kTouchStart) {
+        start_touch_event_ = touch_event;
+        const WebTouchPoint& touch_point = touch_event.touches[i];
+        WebPointerEvent pointer_event = WebPointerEvent(touch_event, touch_point);
+        client_->TouchHitTest(pointer_event, i);
+        result = true;
+        continue;
+      }
 
-        if (!IsSameEventType(event.GetType(), state)) {
-          continue;
-        }
-        if(event.GetType() == WebInputEvent::Type::kTouchStart) {
-          start_touch_event_ = touch_event;
-          const WebTouchPoint& touch_point = touch_event.touches[i];
-          WebPointerEvent pointer_event = WebPointerEvent(touch_event, touch_point);
-          client_->TouchHitTest(pointer_event, i);
-          result = true;
-          continue;
-        }
-        if(event.GetType() == WebInputEvent::Type::kTouchEnd) {
-          native_map_[i] = false;
-        } else {
-          native_map_[i] = true;
-        }
-        
+      if (native_map_[i]) {
         SendNativeEvent(touch_event, event.GetType(), i);
         result = true;
-      } else if (event.GetType() == WebInputEvent::Type::kTouchMove && 
-                  native_map_.find(i) != native_map_.end() && 
-                  native_map_.find(i)->second) {
-        native_map_[i] = false;
-        client_->DidNativeEmbedEvent(WebInputEvent::Type::kTouchCancel, embed_id_, id, x, y);
-        result = true;
       }
-    }
-    if (event.GetType() == WebInputEvent::Type::kTouchEnd) {
-      isNativeType_ = true;
-      embed_id_ = "-1";
     }
   }
   return result;
