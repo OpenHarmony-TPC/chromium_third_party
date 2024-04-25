@@ -127,6 +127,13 @@ class FakeInterfaceFactory : public media::mojom::InterfaceFactory {
   }
 
   // Stub out other mojom::InterfaceFactory interfaces.
+#if defined(OHOS_UNITTESTS)
+  void CreateCustomMediaPlayerRenderer(
+      mojo::PendingRemote<media::mojom::CustomMediaPlayerRendererClientExtension> client_extension,
+      mojo::PendingReceiver<media::mojom::Renderer> renderer,
+      mojo::PendingReceiver<media::mojom::MediaPlayerRendererExtension> renderer_extension,
+      int32_t player_id) override {}
+#endif // OHOS_UNITTESTS
   void CreateAudioDecoder(
       mojo::PendingReceiver<media::mojom::AudioDecoder> receiver) override {}
   void CreateAudioEncoder(
