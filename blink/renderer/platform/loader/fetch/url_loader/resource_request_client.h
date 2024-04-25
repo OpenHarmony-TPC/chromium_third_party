@@ -54,6 +54,10 @@ class BLINK_PLATFORM_EXPORT ResourceRequestClient
       network::mojom::URLResponseHeadPtr head,
       base::TimeTicks response_arrival_at_renderer = base::TimeTicks()) = 0;
 
+#if BUILDFLAG(IS_OHOS)
+  virtual void OnTransferDataWithSharedMemory(base::ReadOnlySharedMemoryRegion region, uint64_t buffer_size) = 0;
+#endif
+
   // Called when the response body becomes available.
   virtual void OnStartLoadingResponseBody(
       mojo::ScopedDataPipeConsumerHandle body) = 0;

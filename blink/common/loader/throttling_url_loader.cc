@@ -750,6 +750,12 @@ void ThrottlingURLLoader::OnReceiveResponse(
       std::move(response_head), std::move(body_), std::move(cached_metadata_));
 }
 
+#if BUILDFLAG(IS_OHOS)
+void ThrottlingURLLoader::OnTransferDataWithSharedMemory(base::ReadOnlySharedMemoryRegion region, uint64_t buffer_size) {
+  forwarding_client_->OnTransferDataWithSharedMemory(std::move(region), buffer_size);
+}
+#endif
+
 void ThrottlingURLLoader::OnReceiveRedirect(
     const net::RedirectInfo& redirect_info,
     network::mojom::URLResponseHeadPtr response_head) {
