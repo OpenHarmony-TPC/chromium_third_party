@@ -104,6 +104,9 @@ class URLSchemesRegistry final {
   URLSchemesSet allowing_shared_array_buffer_schemes;
   URLSchemesSet web_ui_schemes;
   URLSchemesSet code_cache_with_hashing_schemes;
+#if BUILDFLAG(IS_OHOS)
+  URLSchemesSet code_cache_with_response_time_schemes;
+#endif
 
  private:
   friend const URLSchemesRegistry& GetURLSchemesRegistry();
@@ -486,5 +489,21 @@ bool SchemeRegistry::SchemeSupportsCodeCacheWithHashing(const String& scheme) {
   return GetURLSchemesRegistry().code_cache_with_hashing_schemes.Contains(
       scheme);
 }
+
+#if BUILDFLAG(IS_OHOS)
+void SchemeRegistry::RegisterURLSchemeAsSupportingCodeCacheWithResponseTime(
+    const String& scheme) {
+  DCHECK_EQ(scheme, scheme.LowerASCII());
+  GetMutableURLSchemesRegistry().code_cache_with_response_time_schemes.insert(scheme);
+}
+
+bool SchemeRegistry::SchemeSupportsCodeCacheWithResponseTime(const String& scheme) {
+  if (scheme.empty())
+    return false;
+  DCHECK_EQ(scheme, scheme.LowerASCII());
+  return GetURLSchemesRegistry().code_cache_with_response_time_schemes.Contains(
+      scheme);
+}
+#endif
 
 }  // namespace blink

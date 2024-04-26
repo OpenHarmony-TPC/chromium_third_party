@@ -166,6 +166,13 @@ class PLATFORM_EXPORT SchemeRegistry {
   static void RemoveURLSchemeAsCodeCacheWithHashing(const String& scheme);
   static bool SchemeSupportsCodeCacheWithHashing(const String& scheme);
 
+  // Schemes which can use code caching and check whether the script content has
+  // changed relying on a response time match from the network cache.
+#if BUILDFLAG(IS_OHOS)
+  static void RegisterURLSchemeAsSupportingCodeCacheWithResponseTime(const String& scheme);
+  static bool SchemeSupportsCodeCacheWithResponseTime(const String& scheme);
+#endif
+
  private:
   static const URLSchemesSet& LocalSchemes();
 };
