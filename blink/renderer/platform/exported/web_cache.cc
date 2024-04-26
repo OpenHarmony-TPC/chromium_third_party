@@ -40,9 +40,9 @@
 #include "third_party/blink/renderer/platform/loader/fetch/memory_cache.h"
 
 #if BUILDFLAG(IS_OHOS)
-#include "third-party/blink/renderer/platform/loader/resource/image_resource.h"
-#include "third-party/blink/renderer/platform/loader/resource/script_resource.h"
-#include "third-party/blink/renderer/platform/loader/resource/css_style_resource.h"
+#include "third_party/blink/renderer/platform/loader/resource/image_resource.h"
+#include "third_party/blink/renderer/platform/loader/resource/script_resource.h"
+#include "third_party/blink/renderer/platform/loader/resource/css_style_resource.h"
 #include "net/http/http_status_code.h"
 #endif
 
