@@ -82,15 +82,6 @@ const AtomicString& MouseEventNameForPointerEventInputType(
   }
 }
 
-#if BUILDFLAG(IS_OHOS)
-bool NativeEmbedModeEnabed(Document* document) {
-  if (auto* settings = document->GetSettings()) {
-    return settings->GetNativeEmbedModeEnabled();
-  }
-  return false;
-}
-#endif
-
 }  // namespace
 
 PointerEventManager::PointerEventManager(LocalFrame& frame,
@@ -544,10 +535,6 @@ PointerEventManager::ComputePointerEventTarget(
   // have this target yet since the processing of that will be done right
   // before firing the event.
   if (web_pointer_event.GetType() == WebInputEvent::Type::kPointerDown ||
-#if BUILDFLAG(IS_OHOS)
-      (NativeEmbedModeEnabed(frame_->GetDocument()) &&
-       (web_pointer_event.GetType() == WebInputEvent::Type::kPointerUp)) ||
-#endif
       !pending_pointer_capture_target_.Contains(pointer_id)) {
     HitTestRequest::HitTestRequestType hit_type = HitTestRequest::kTouchEvent |
                                                   HitTestRequest::kReadOnly |
@@ -562,11 +549,6 @@ PointerEventManager::ComputePointerEventTarget(
       pointer_event_target.target_element = target;
       pointer_event_target.scrollbar = hit_test_result.GetScrollbar();
     }
-#if BUILDFLAG(IS_OHOS)
-    if (NativeEmbedModeEnabed(frame_->GetDocument())) {
-      DidNativeEmbedEvent(hit_test_result, web_pointer_event);
-    }
-#endif
   } else {
     // Set the target of pointer event to the captured element as this
     // pointer is captured otherwise it would have gone to the |if| block
@@ -735,11 +717,6 @@ WebInputEventResult PointerEventManager::HandlePointerEvent(
     AdjustPointerEvent(pointer_event);
   event_handling_util::PointerEventTarget pointer_event_target =
       ComputePointerEventTarget(pointer_event);
-#if BUILDFLAG(IS_OHOS)
-  if (NativeEmbedModeEnabed(frame_->GetDocument()) && hit_embed_tag_) {
-    return WebInputEventResult::kHandledSuppressed;
-  }
-#endif
   bool discard = pointer_event_target.target_frame &&
                  event_handling_util::ShouldDiscardEventTargetingFrame(
                      event, *pointer_event_target.target_frame);
