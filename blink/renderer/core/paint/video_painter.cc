@@ -25,12 +25,6 @@ void VideoPainter::PaintReplaced(const PaintInfo& paint_info,
       paint_info.phase != PaintPhase::kSelectionDragImage)
     return;
 
-#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
-  if (cc::Layer* layer = layout_video_.MediaElement()->CcLayer()) {
-    layer->SetLayerClient(const_cast<LayoutVideo*>(&layout_video_));
-  }
-#endif // OHOS_CUSTOM_VIDEO_PLAYER
-
   WebMediaPlayer* media_player =
       layout_video_.MediaElement()->GetWebMediaPlayer();
   bool force_video_poster =
@@ -86,7 +80,7 @@ void VideoPainter::PaintReplaced(const PaintInfo& paint_info,
                       -replaced_rect.Y().ToFloat(),
                       layout_video_.Size().Width().ToFloat(),
                       layout_video_.Size().Height().ToFloat());
-      layer->SetVideoRect(rect);
+      layer->SetNativeRect(rect);
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
 
       layer->SetBounds(snapped_replaced_rect.size());

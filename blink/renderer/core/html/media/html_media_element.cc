@@ -5143,15 +5143,11 @@ gfx::Rect HTMLMediaElement::GetVideoRect() {
   return gfx::Rect(LayoutReplaced::kDefaultWidth,
         LayoutReplaced::kDefaultHeight);
 }
-void HTMLMediaElement::OnLayerRectChange(int x, int y, int width, int height,
-                                         bool is_fixed) {
-  if (layer_rect_.x() == x &&
-      layer_rect_.y() == y &&
-      layer_rect_.width() == width &&
-      layer_rect_.height() == height) {
+void HTMLMediaElement::OnLayerRectChange(const gfx::Rect& rect) {
+  if (layer_rect_ == rect) {
     return;
   }
-  layer_rect_.SetRect(x, y, width, height);
+  layer_rect_ = rect;
   for (auto& observer : media_player_observer_remote_set_->Value()) {
     observer->UpdateLayerRect(layer_rect_);
   }

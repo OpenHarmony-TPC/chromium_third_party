@@ -122,14 +122,6 @@ class CORE_EXPORT HTMLNativeElement
   void Repaint() final;
   void SetCcLayer(cc::Layer*) final;
 
-#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
-  void OnLayerRectChange(int x,
-                         int y,
-                         int width,
-                         int height,
-                         bool is_fixed) override {}
-#endif // OHOS_CUSTOM_VIDEO_PLAYER
-
  protected:
   // Assert the correct order of the children in shadow dom when DCHECK is on.
   static void AssertShadowRootChildren(ShadowRoot&);

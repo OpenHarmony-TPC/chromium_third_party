@@ -612,11 +612,7 @@ class CORE_EXPORT HTMLMediaElement
 
   gfx::Rect GetVideoRect() override;
 
-  void OnLayerRectChange(int x,
-                         int y,
-                         int width,
-                         int height,
-                         bool is_fixed) override;
+  void OnLayerRectChange(const gfx::Rect& rect) override;
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
 
   // Returns a reference to the mojo remote for the MediaPlayerHost interface,

@@ -155,19 +155,10 @@ void SurfaceLayerBridge::UnregisterFrameSinkHierarchy() {
 }
 
 #if defined(OHOS_CUSTOM_VIDEO_PLAYER)
-void SurfaceLayerBridge::SetShouldOverlay(bool should_verlay) {
+void SurfaceLayerBridge::SetVideoRectChangeCallback(
+    cc::SurfaceLayer::RectChangeCallback callback) {
   if (surface_layer_) {
-    surface_layer_->SetShouldOverlay(should_verlay);
-  }
-}
-void SurfaceLayerBridge::SetShouldInterceptTouchEvent(bool should_intercept) {
-  if (surface_layer_) {
-    surface_layer_->SetShouldInterceptTouchEvent(should_intercept);
-  }
-}
-void SurfaceLayerBridge::SetNativeEmbedId(int embed_id) {
-  if (surface_layer_) {
-    surface_layer_->SetNativeEmbedId(embed_id);
+    surface_layer_->SetVideoRectChangeCallback(std::move(callback));
   }
 }
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
