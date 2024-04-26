@@ -50,6 +50,10 @@ class CORE_EXPORT CSSStyleSheetResource final : public TextResource {
                                       ResourceClient*);
   static CSSStyleSheetResource* CreateForTest(const KURL&,
                                               const WTF::TextEncoding&);
+#if BUILDFLAG(IS_OHOS)
+  static CSSStyleSheetResource* CreateForOfflineResource(const KURL& kurl,
+                                                         const KURL& origin_url);
+#endif
 
   CSSStyleSheetResource(const ResourceRequest&,
                         const ResourceLoaderOptions&,

@@ -239,6 +239,23 @@ ImageResource* ImageResource::CreateForTest(const KURL& url) {
   return Create(request, nullptr);
 }
 
+#if BUILDFLAG(IS_OHOS)
+ImageResource* ImageResource::CreateForOfflineResource(const KURL& kurl,
+                                                       const KURL& origin_url) {
+  ResourceRequest request(kurl);
+  request.SetInspectorId(CreateUniqueIdentifier());
+  request.SetRequestorOrigin(SecurityOrigin::Create(origin_url));
+
+  ResourceLoaderOptions options(nullptr);
+
+  auto image_resource = MakeGarbageCollected<ImageResource>(
+      request, options, ImageResourceContent::CreateNotStarted());
+
+  image_resource->NotifyStartLoad();
+  return image_resource;
+}
+#endif
+
 ImageResource::ImageResource(const ResourceRequest& resource_request,
                              const ResourceLoaderOptions& options,
                              ImageResourceContent* content)

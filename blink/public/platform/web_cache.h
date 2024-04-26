@@ -31,10 +31,24 @@
 #ifndef THIRD_PARTY_BLINK_PUBLIC_PLATFORM_WEB_CACHE_H_
 #define THIRD_PARTY_BLINK_PUBLIC_PLATFORM_WEB_CACHE_H_
 
+#include "build/build_config.h"
 #include "third_party/blink/public/common/web_cache/web_cache_resource_type_stats.h"
 #include "third_party/blink/public/platform/web_common.h"
 
+#if BUILDFLAG(IS_OHOS)
+#include "third_party/blink/renderer/platform/loader/fetch/resource_response.h"
+#endif
+
 namespace blink {
+
+#if BUILDFLAG(IS_OHOS)
+enum class OfflineResourceType {
+  IMAGE,
+  CSS,
+  CLASSIC_JS,
+  MODULE_JS
+};
+#endif
 
 // An interface to query and configure Blink's resource cache.
 class BLINK_PLATFORM_EXPORT WebCache {
@@ -50,7 +64,24 @@ class BLINK_PLATFORM_EXPORT WebCache {
   // Get usage stats about the resource cache.
   static void GetResourceTypeStats(WebCacheResourceTypeStats*);
 
+#if BUILDFLAG(IS_OHOS)
+  // Add offline resource into MemoryCache.
+  static void AddResourceToCache(
+      const std::string& url,
+      const std::string& origin,
+      const std::vector<uint8_t>& resource,
+      const base::flat_map<std::string, std::string>& response_headers,
+      const uint64_t type);
+#endif
+
  private:
+
+#if BUILDFLAG(IS_OHOS)
+  static ResourceResponse GetResourceResponse(
+      const KURL& kurl,
+      const base::flat_map<std::string, std::string>& response_headers);
+#endif
+
   WebCache() = delete;  // Not intended to be instanced.
 };
 

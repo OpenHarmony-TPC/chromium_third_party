@@ -64,6 +64,10 @@ class CORE_EXPORT ImageResource final
   static ImageResource* Create(const ResourceRequest&,
                                scoped_refptr<const DOMWrapperWorld> world);
   static ImageResource* CreateForTest(const KURL&);
+#if BUILDFLAG(IS_OHOS)
+  static ImageResource* CreateForOfflineResource(const KURL& kurl,
+                                                 const KURL& origin_url);
+#endif
 
   ImageResource(const ResourceRequest&,
                 const ResourceLoaderOptions&,

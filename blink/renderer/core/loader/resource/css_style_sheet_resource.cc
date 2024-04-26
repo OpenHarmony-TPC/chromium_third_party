@@ -75,6 +75,24 @@ CSSStyleSheetResource* CSSStyleSheetResource::CreateForTest(
                                                      decoder_options);
 }
 
+#if BUILDFLAG(IS_OHOS)
+CSSStyleSheetResource* CSSStyleSheetResource::CreateForOfflineResource(
+    const KURL& kurl,
+    const KURL& origin_url) {
+  ResourceRequest request(kurl);
+  request.SetRequestorOrigin(SecurityOrigin::Create(origin_url));
+  request.SetCredentialsMode(network::mojom::CredentialsMode::kInclude);
+
+  ResourceLoaderOptions options(nullptr);
+
+  TextResourceDecoderOptions decoder_options(
+      TextResourceDecoderOptions::kCSSContent, UTF8Encoding());
+
+  return MakeGarbageCollected<CSSStyleSheetResource>(
+      request, options, decoder_options);
+}
+#endif
+
 CSSStyleSheetResource::CSSStyleSheetResource(
     const ResourceRequest& resource_request,
     const ResourceLoaderOptions& options,

@@ -285,6 +285,11 @@ void Resource::TriggerNotificationForFinishObservers(
   if (finish_observers_.empty())
     return;
 
+#if BUILDFLAG(IS_OHOS)
+  if (!task_runner)
+    return;
+#endif
+
   auto* new_collections =
       MakeGarbageCollected<HeapHashSet<WeakMember<ResourceFinishObserver>>>(
           std::move(finish_observers_));
