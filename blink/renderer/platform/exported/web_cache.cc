@@ -42,7 +42,7 @@
 #if BUILDFLAG(IS_OHOS)
 #include "third_party/blink/renderer/core/loader/resource/image_resource.h"
 #include "third_party/blink/renderer/core/loader/resource/script_resource.h"
-#include "third_party/blink/renderer/core/loader/resource/css_style_resource.h"
+#include "third_party/blink/renderer/core/loader/resource/css_style_sheet_resource.h"
 #include "net/http/http_status_code.h"
 #endif
 
