@@ -44,6 +44,7 @@
 #include "third_party/blink/renderer/core/loader/resource/script_resource.h"
 #include "third_party/blink/renderer/core/loader/resource/css_style_sheet_resource.h"
 #include "net/http/http_status_code.h"
+#include "third_party/blink/renderer/platform/network/mime/mime_type_registry.h"
 #endif
 
 namespace blink {
