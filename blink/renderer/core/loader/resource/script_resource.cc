@@ -326,7 +326,9 @@ void ScriptResource::ResponseReceived(const ResourceResponse& response) {
   bool code_cache_with_response_time_supported =
       SchemeRegistry::SchemeSupportsCodeCacheWithResponseTime(
           GetResourceRequest().Url().Protocol());
-  LOG(DEBUG) << "Script resource if scheme supports code cache:"
+  LOG(DEBUG) << "Script resource if scheme:"
+             << GetResourceRequest().Url().Protocol().Utf8().c_str()
+             << " supports code cache:"
              << code_cache_with_response_time_supported;
 #endif
   bool code_cache_supported = http_family || code_cache_with_hashing_supported

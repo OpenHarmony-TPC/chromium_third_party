@@ -542,8 +542,9 @@ bool ResourceLoader::ShouldFetchCodeCache() {
   bool is_protocal_support_code_cache =
       SchemeRegistry::SchemeSupportsCodeCacheWithResponseTime(
           request.Url().Protocol());
-  LOG(DEBUG) << "Resource loader if scheme supports code cache:"
-             << is_protocal_support_code_cache;
+  LOG(DEBUG) << "Resource loader if scheme:"
+             << request.Url().Protocol().Utf8().c_str()
+             << " supports code cache:" << is_protocal_support_code_cache;
 #endif
   if (!request.Url().ProtocolIsInHTTPFamily() && !should_use_source_hash
 #if BUILDFLAG(IS_OHOS)
