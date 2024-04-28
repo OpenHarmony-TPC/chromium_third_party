@@ -1017,7 +1017,7 @@ bool ReadHeaderTag(base::BufferIterator<const uint8_t>& iter, uint8_t& tag) {
 bool DecodeToWebMessagePayload(const TransferableMessage& message,
                                struct WebMessagePort::Message& decoded_msg) {
   base::BufferIterator<const uint8_t> iter(message.encoded_message);
-  LOG(INFO) << "decoded start, iter total_size:" << iter.total_size();
+  LOG(DEBUG) << "decoded start, iter total_size:" << iter.total_size();
 
   uint8_t tag = 0;
   if (!ReadHeaderTag(iter, tag)) {
@@ -1119,7 +1119,7 @@ bool DecodeToWebMessagePayload(const TransferableMessage& message,
       decoded_msg.type_ = WebMessagePort::Message::MessageType::STRING;
       return true;
   }
-  LOG(INFO) << "Decoded transfer message end";
+  LOG(DEBUG) << "Decoded transfer message end";
   return true;
 }
 #endif  // defined(OHOS_MSGPORT)
