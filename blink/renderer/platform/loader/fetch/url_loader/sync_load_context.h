@@ -20,6 +20,11 @@
 #include "third_party/blink/renderer/platform/loader/fetch/url_loader/resource_request_client.h"
 #include "third_party/blink/renderer/platform/loader/fetch/url_loader/resource_request_sender.h"
 
+#if BUILDFLAG(IS_OHOS)
+#include "cef/libcef/common/mojom/cef.mojom.h"
+#include "content/public/renderer/render_thread.h"
+#endif
+
 namespace base {
 class WaitableEvent;
 }
@@ -71,7 +76,14 @@ class BLINK_PLATFORM_EXPORT SyncLoadContext : public ResourceRequestClient {
       mojo::PendingRemote<mojom::blink::BlobRegistry> download_to_blob_registry,
       const Vector<String>& cors_exempt_header_list,
       std::unique_ptr<ResourceLoadInfoNotifierWrapper>
+#if BUILDFLAG(IS_OHOS)
+          resource_load_info_notifier_wrapper,
+          content::RenderThread* render_thread);
+
+  void BindRemote(content::RenderThread* render_thread);
+#else
           resource_load_info_notifier_wrapper);
+#endif
 
   SyncLoadContext(const SyncLoadContext&) = delete;
   SyncLoadContext& operator=(const SyncLoadContext&) = delete;
@@ -93,7 +105,12 @@ class BLINK_PLATFORM_EXPORT SyncLoadContext : public ResourceRequestClient {
       base::WaitableEvent* abort_event,
       base::TimeDelta timeout,
       mojo::PendingRemote<mojom::blink::BlobRegistry> download_to_blob_registry,
+#if BUILDFLAG(IS_OHOS)
+      scoped_refptr<base::SingleThreadTaskRunner> task_runner,
+      content::RenderThread* render_thread);
+#else
       scoped_refptr<base::SingleThreadTaskRunner> task_runner);
+#endif
   // ResourceRequestClient implementation:
   void OnUploadProgress(uint64_t position, uint64_t size) override;
   bool OnReceivedRedirect(const net::RedirectInfo& redirect_info,
@@ -102,6 +119,11 @@ class BLINK_PLATFORM_EXPORT SyncLoadContext : public ResourceRequestClient {
   void OnReceivedResponse(
       network::mojom::URLResponseHeadPtr head,
       base::TimeTicks response_arrival_at_renderer) override;
+
+#if BUILDFLAG(IS_OHOS)
+  void OnTransferDataWithSharedMemory(base::ReadOnlySharedMemoryRegion region, uint64_t buffer_size) override;
+#endif
+
   void OnStartLoadingResponseBody(
       mojo::ScopedDataPipeConsumerHandle body) override;
   void OnTransferSizeUpdated(int transfer_size_diff) override;
@@ -154,6 +176,9 @@ class BLINK_PLATFORM_EXPORT SyncLoadContext : public ResourceRequestClient {
 
   class SignalHelper;
   std::unique_ptr<SignalHelper> signals_;
+#if BUILDFLAG(IS_OHOS)
+  mojo::Remote<cef::mojom::ReportManager> report_manager_;
+#endif
 };
 
 }  // namespace blink

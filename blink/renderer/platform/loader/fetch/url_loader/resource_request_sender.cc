@@ -169,6 +169,10 @@ void ResourceRequestSender::SendSync(
   // this thread may block on a waitable event. It is safe to pass raw
   // pointers to on-stack objects as this stack frame will
   // survive until the request is complete.
+#if BUILDFLAG(IS_OHOS)
+  content::RenderThread* render_thread = content::RenderThread::Get();
+#endif
+
   scoped_refptr<base::SingleThreadTaskRunner> task_runner =
       base::ThreadPool::CreateSingleThreadTaskRunner({});
   SyncLoadContext* context_for_redirect = nullptr;
@@ -183,7 +187,12 @@ void ResourceRequestSender::SendSync(
           CrossThreadUnretained(&redirect_or_response_event),
           CrossThreadUnretained(terminate_sync_load_event), timeout,
           std::move(download_to_blob_registry), cors_exempt_header_list,
+#if BUILDFLAG(IS_OHOS)
+          std::move(resource_load_info_notifier_wrapper),
+          CrossThreadUnretained(render_thread)));
+#else
           std::move(resource_load_info_notifier_wrapper)));
+#endif
 
   // redirect_or_response_event will signal when each redirect completes, and
   // when the final response is complete.
@@ -428,6 +437,15 @@ void ResourceRequestSender::OnReceivedResponse(
   request_info_->resource_load_info_notifier_wrapper
       ->NotifyResourceResponseReceived(std::move(response_head));
 }
+
+#if BUILDFLAG(IS_OHOS)
+void ResourceRequestSender::OnTransferDataWithSharedMemory(base::ReadOnlySharedMemoryRegion region, uint64_t buffer_size) {
+  if(!request_info_) {
+    return;
+  }
+  request_info_->client->OnTransferDataWithSharedMemory(std::move(region), buffer_size);
+}
+#endif
 
 void ResourceRequestSender::OnReceivedCachedMetadata(
     mojo_base::BigBuffer data) {

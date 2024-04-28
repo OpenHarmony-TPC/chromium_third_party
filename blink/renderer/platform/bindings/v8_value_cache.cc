@@ -156,6 +156,7 @@ v8::Local<v8::String> StringCache::V8ExternalStringSlow(
   if (!string_impl->length())
     return v8::String::Empty(isolate);
 
+#if !BUILDFLAG(IS_OHOS)
   StringCacheMapTraits::MapType::PersistentValueReference cached_v8_string =
       string_cache_.GetReference(string_impl);
   if (!cached_v8_string.IsEmpty()) {
@@ -163,6 +164,7 @@ v8::Local<v8::String> StringCache::V8ExternalStringSlow(
     last_v8_string_ = cached_v8_string;
     return last_v8_string_.NewLocal(isolate);
   }
+#endif
 
   return CreateStringAndInsertIntoCache(isolate, string_impl);
 }
@@ -225,11 +227,13 @@ v8::Local<v8::String> StringCache::CreateStringAndInsertIntoCache(
   DCHECK(!new_string.IsEmpty());
   DCHECK(new_string->Length());
 
+#if !BUILDFLAG(IS_OHOS)
   v8::UniquePersistent<v8::String> wrapper(isolate, new_string);
 
   string_impl->AddRef();
   string_cache_.Set(string_impl, std::move(wrapper), &last_v8_string_);
   last_string_impl_ = blink_string.ReleaseImpl();
+#endif
 
   return new_string;
 }

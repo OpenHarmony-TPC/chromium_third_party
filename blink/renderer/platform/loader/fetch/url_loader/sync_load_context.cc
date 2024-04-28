@@ -26,6 +26,9 @@
 #include "third_party/blink/renderer/platform/weborigin/kurl.h"
 #include "third_party/blink/renderer/platform/wtf/shared_buffer.h"
 #include "url/origin.h"
+#if BUILDFLAG(IS_OHOS)
+#include "base/trace_event/trace_event.h"
+#endif
 
 namespace blink {
 
@@ -93,6 +96,15 @@ class SyncLoadContext::SignalHelper final {
   absl::optional<base::OneShotTimer> timeout_timer_;
 };
 
+#if BUILDFLAG(IS_OHOS)
+void SyncLoadContext::BindRemote(content::RenderThread* render_thread) {
+  if (report_manager_ || !render_thread) {
+    return;
+  }
+  render_thread->BindHostReceiver(report_manager_.BindNewPipeAndPassReceiver());
+}
+#endif
+
 // static
 void SyncLoadContext::StartAsyncWithWaitableEvent(
     std::unique_ptr<network::ResourceRequest> request,
@@ -110,11 +122,21 @@ void SyncLoadContext::StartAsyncWithWaitableEvent(
     mojo::PendingRemote<mojom::blink::BlobRegistry> download_to_blob_registry,
     const Vector<String>& cors_exempt_header_list,
     std::unique_ptr<ResourceLoadInfoNotifierWrapper>
+#if BUILDFLAG(IS_OHOS)
+        resource_load_info_notifier_wrapper,
+        content::RenderThread* render_thread) {
+#else
         resource_load_info_notifier_wrapper) {
+#endif
+
   scoped_refptr<SyncLoadContext> context(base::AdoptRef(new SyncLoadContext(
       request.get(), std::move(pending_url_loader_factory), response,
       context_for_redirect, redirect_or_response_event, abort_event, timeout,
+#if BUILDFLAG(IS_OHOS)
+      std::move(download_to_blob_registry), loading_task_runner, render_thread)));
+#else
       std::move(download_to_blob_registry), loading_task_runner)));
+#endif
   context->resource_request_sender_->SendAsync(
       std::move(request), std::move(loading_task_runner), traffic_annotation,
       loader_options, cors_exempt_header_list, context,
@@ -132,7 +154,12 @@ SyncLoadContext::SyncLoadContext(
     base::WaitableEvent* abort_event,
     base::TimeDelta timeout,
     mojo::PendingRemote<mojom::blink::BlobRegistry> download_to_blob_registry,
+#if BUILDFLAG(IS_OHOS)
+    scoped_refptr<base::SingleThreadTaskRunner> task_runner,
+    content::RenderThread* render_thread)
+#else
     scoped_refptr<base::SingleThreadTaskRunner> task_runner)
+#endif
     : response_(response),
       context_for_redirect_(context_for_redirect),
       body_watcher_(FROM_HERE, mojo::SimpleWatcher::ArmingPolicy::MANUAL),
@@ -142,6 +169,20 @@ SyncLoadContext::SyncLoadContext(
                                               redirect_or_response_event,
                                               abort_event,
                                               timeout)) {
+
+#if BUILDFLAG(IS_OHOS)
+  LOG(DEBUG) << "SyncLoadContext pid=" << base::GetCurrentProcId() << ", main thread tid=" << base::GetCurrentRealPid() << ", real tid=" << base::PlatformThread::CurrentRealId();
+  BindRemote(render_thread);
+
+  if (report_manager_) {
+    std::vector<int> tids;
+    tids.push_back(base::GetCurrentRealPid());
+    tids.push_back(base::PlatformThread::CurrentRealId());
+    report_manager_->AddRtg(tids);
+    report_manager_->FetchBegin();
+  }
+#endif
+
   if (download_to_blob_registry_)
     mode_ = Mode::kBlob;
 
@@ -216,6 +257,49 @@ void SyncLoadContext::OnReceivedResponse(
   DCHECK(!Completed());
   response_->head = std::move(head);
 }
+
+#if BUILDFLAG(IS_OHOS)
+void SyncLoadContext::OnTransferDataWithSharedMemory(base::ReadOnlySharedMemoryRegion region, uint64_t buffer_size) {
+  TRACE_EVENT0("loading", "SyncLoadContext::OnTransferDataWithSharedMemory");
+  if (!region.IsValid()) {
+    LOG(ERROR) << "shared-memory region is invalid";
+    response_->error_code = net::ERR_FAILED;
+    CompleteRequest();
+    return;
+  }
+  base::ReadOnlySharedMemoryMapping mapping = region.Map();
+  if (!mapping.IsValid()) {
+    LOG(ERROR) << "shared-memory Read-only shared memory mapping is invalid";
+    response_->error_code = net::ERR_FAILED;
+    CompleteRequest();
+    return;
+  }
+  const char* buffer = mapping.GetMemoryAs<char>();
+  size_t buffer_len = static_cast<size_t>(buffer_size);
+  if (!response_->data) {
+    response_->data = SharedBuffer::Create(buffer, buffer_len);
+  } else {
+    response_->data->Append(buffer, buffer_len);
+  }
+  auto status = network::URLLoaderCompletionStatus(net::OK);
+  status.completion_time = base::TimeTicks::Now();
+  status.encoded_data_length = buffer_len;
+  status.encoded_body_length = buffer_len;
+  // We don't support decoders, so use the same value.
+  status.decoded_body_length = buffer_len;
+  request_completed_ = true;
+  response_->error_code = status.error_code;
+  response_->extended_error_code = status.extended_error_code;
+  response_->resolve_error_info = status.resolve_error_info;
+  response_->should_collapse_initiator = status.should_collapse_initiator;
+  response_->cors_error = status.cors_error_status;
+  response_->head->encoded_data_length = status.encoded_data_length;
+  DCHECK_GE(status.encoded_body_length, 0);
+  response_->head->encoded_body_length =
+      network::mojom::EncodedBodyLength::New(status.encoded_body_length);
+  CompleteRequest();
+}
+#endif
 
 void SyncLoadContext::OnStartLoadingResponseBody(
     mojo::ScopedDataPipeConsumerHandle body) {
@@ -340,6 +424,11 @@ void SyncLoadContext::OnTimeout() {
 }
 
 void SyncLoadContext::CompleteRequest() {
+#if BUILDFLAG(IS_OHOS)
+  if (report_manager_) {
+    report_manager_->FetchEnd();
+  }
+#endif
   DCHECK(blob_finished_ || (mode_ != Mode::kBlob));
   DCHECK(!body_handle_.is_valid());
   body_watcher_.Cancel();
