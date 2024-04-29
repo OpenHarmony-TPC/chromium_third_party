@@ -23,6 +23,6 @@ if (is_android) {
       "ohos_ashmem.cc",
     ]
 
-    deps = ["//third_party/ohos_ndk:ohos_isolation"]
+    deps = [ "//ohos_glue:ohos_adapter_glue_source" ]
   }
 }
