@@ -882,7 +882,7 @@ void LocalFrameMojoHandler::JavaScriptExecuteRequestExt(
     return;
   }
   char* ashmem = static_cast<char*>(
-    flowbufferAdapter->CreateAshmemWithFd(fd, static_cast<size_t>(scriptLength), PROT_READ));
+    flowbufferAdapter->CreateAshmemWithFd(fd, static_cast<size_t>(scriptLength + 1), PROT_READ));
   if (!ashmem) {
     return;
   }
