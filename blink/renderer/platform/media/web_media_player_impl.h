@@ -736,6 +736,8 @@ class PLATFORM_EXPORT WebMediaPlayerImpl
   void UpdatePlaybackRate(double playback_rate);
 
   bool IsUsingCustomRenderer() const override;
+
+  void OnLayerRectChange(const gfx::Rect& rect);
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
 
   WebLocalFrame* const frame_;

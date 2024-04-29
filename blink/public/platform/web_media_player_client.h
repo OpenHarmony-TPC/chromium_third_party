@@ -255,6 +255,7 @@ class BLINK_PLATFORM_EXPORT WebMediaPlayerClient {
   virtual void UpdatePlaybackRate(double playback_rate) {}
 
   virtual gfx::Rect GetVideoRect() { return gfx::Rect(); }
+  virtual void OnLayerRectChange(const gfx::Rect& rect) {}
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
 
  protected:

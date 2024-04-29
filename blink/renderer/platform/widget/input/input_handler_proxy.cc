@@ -426,11 +426,12 @@ void InputHandlerProxy::HandleInputEventWithLatencyInfo(
 #if BUILDFLAG(IS_OHOS)
 void InputHandlerProxy::NativeHitTestResult(bool native, size_t fingerId) {
   LOG(DEBUG)<<"[NativeEmbed] NativeHitTestResult fingerId is : "<< fingerId << " and native is : "<< native;
+  float x = start_touch_event_.touches[fingerId].PositionInWidget().x();
+  float y = start_touch_event_.touches[fingerId].PositionInWidget().y();
+  layer_impl_ = input_handler_->GetLayerImpl(gfx::Point(x, y));
+  native = native || (layer_impl_ && layer_impl_->ShouldInterceptTouchEvent());
   native_map_[fingerId] = native;
   if (native) {
-    float x = start_touch_event_.touches[fingerId].PositionInWidget().x();
-    float y = start_touch_event_.touches[fingerId].PositionInWidget().y();
-    layer_impl_ = input_handler_->GetLayerImpl(gfx::Point(x, y));
     SendNativeEvent(start_touch_event_, WebInputEvent::Type::kTouchStart, fingerId);
   } else if (!native_event_queue_->empty()) {
     auto event_with_callback = native_event_queue_->Pop();
@@ -446,11 +447,6 @@ void InputHandlerProxy::SendNativeEvent(const WebTouchEvent& touch_event,
 
   embed_id_ = std::to_string(layer_impl_->native_embed_id());
   gfx::RectF nativeRect = layer_impl_->GetNativeRect();
-#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
-  if (layer_impl_->may_contain_video()) {
-    nativeRect = layer_impl_->VideoRectInScreenSpace();
-  }
-#endif // OHOS_CUSTOM_VIDEO_PLAYER
   float scale = layer_impl_->GetIdealContentsScaleKey();
   float initScale = layer_impl_->GetInitScale();
   if (initScale > 0.f && scale > 0.f) {

@@ -2027,9 +2027,19 @@ void WebMediaPlayerImpl::OnMetadata(const media::PipelineMetadata& metadata) {
       if (!surface_layer_for_video_enabled_) {
         ActivateSurfaceLayerForVideo();
       }
-      bridge_->SetShouldOverlay(should_overlay_);
-      bridge_->SetShouldInterceptTouchEvent(should_create_custom_renderer_);
-      bridge_->SetNativeEmbedId(native_texture_id_);
+      bridge_->GetCcLayer()->SetShouldOverlay(should_overlay_);
+      bridge_->GetCcLayer()->SetShouldInterceptTouchEvent(
+          should_create_custom_renderer_);
+      bridge_->GetCcLayer()->SetNativeEmbedId(native_texture_id_);
+      bridge_->GetCcLayer()->SetMayContainNative(
+          should_create_custom_renderer_);
+      cc::SurfaceLayer::RectChangeCallback video_rect_callback;
+      if (should_create_custom_renderer_) {
+        video_rect_callback = base::BindPostTaskToCurrentDefault(
+            base::BindRepeating(&WebMediaPlayerImpl::OnLayerRectChange,
+                weak_this_));
+      }
+      bridge_->SetVideoRectChangeCallback(video_rect_callback);
 #else
       ActivateSurfaceLayerForVideo();
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
@@ -4165,6 +4175,10 @@ void WebMediaPlayerImpl::UpdatePlaybackRate(double playback_rate) {
 }
 bool WebMediaPlayerImpl::IsUsingCustomRenderer() const {
   return should_create_custom_renderer_;
+}
+void WebMediaPlayerImpl::OnLayerRectChange(const gfx::Rect& rect) {
+  DCHECK(main_task_runner_->BelongsToCurrentThread());
+  client_->OnLayerRectChange(rect);
 }
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
 

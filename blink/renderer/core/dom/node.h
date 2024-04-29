@@ -991,14 +991,6 @@ class CORE_EXPORT Node : public EventTarget {
   }
   void Trace(Visitor*) const override;
 
-#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
-  virtual void OnLayerRectChange(int x,
-                                 int y,
-                                 int width,
-                                 int height,
-                                 bool is_fixed) {}
-#endif // OHOS_CUSTOM_VIDEO_PLAYER
-
  private:
   enum NodeFlags : uint32_t {
     // Let the NodeTypeMask comes first, so the shit operation can
