@@ -60,6 +60,10 @@
 #include "third_party/blink/renderer/platform/wtf/text/text_encoding.h"
 #include "third_party/blink/renderer/platform/wtf/text/wtf_string.h"
 
+#if BUILDFLAG(IS_OHOS)
+#include "third_party/blink/renderer/platform/heap/self_keep_alive.h"
+#endif
+
 namespace base {
 class Clock;
 }
@@ -425,6 +429,11 @@ class PLATFORM_EXPORT Resource : public GarbageCollected<Resource>,
 
   void DidRemoveClientOrObserver();
 
+#if BUILDFLAG(IS_OHOS)
+  void SetKeepAliveOn() { self_keep_alive_ = SelfKeepAlive<Resource>{this}; }
+  void SetKeepAliveOff() { self_keep_alive_ = SelfKeepAlive<Resource>{nullptr}; }
+#endif
+
  protected:
   Resource(const ResourceRequestHead&,
            ResourceType,
@@ -559,6 +568,10 @@ class PLATFORM_EXPORT Resource : public GarbageCollected<Resource>,
   scoped_refptr<SharedBuffer> data_;
 
   WebScopedVirtualTimePauser virtual_time_pauser_;
+
+#if BUILDFLAG(IS_OHOS)
+  SelfKeepAlive<Resource> self_keep_alive_;
+#endif
 
   // To compute metrics for measuring the efficacy of the
   // memory cache if it was partitioned by top-frame site (in addition to the

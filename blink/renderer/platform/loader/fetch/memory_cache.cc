@@ -201,6 +201,10 @@ void MemoryCache::RemoveInternal(ResourceMap* resource_map,
 
   Update(resource, resource->size(), 0);
   resource_map->erase(it);
+
+#if BUILDFLAG(IS_OHOS)
+  resource->SetKeepAliveOff();
+#endif
 }
 
 bool MemoryCache::Contains(const Resource* resource) const {

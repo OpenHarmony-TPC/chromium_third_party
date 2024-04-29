@@ -109,6 +109,41 @@ ScriptResource* ScriptResource::CreateForTest(
                                               kNoStreaming, script_type);
 }
 
+#if BUILDFLAG(IS_OHOS)
+ScriptResource* ScriptResource::CreateForOfflineResource(const KURL& kurl,
+                                                         const KURL& origin_url,
+                                                         const ResourceResponse& response,
+                                                         const bool is_module) {
+  ResourceRequest request(kurl);
+  if (is_module) {
+    request.SetMode(network::mojom::RequestMode::kCors);
+    request.SetCredentialsMode(network::mojom::CredentialsMode::kSameOrigin);
+  }
+
+  AtomicString cross_origin = response.HttpHeaderField(AtomicString("Cross-Origin"));
+  if (!cross_origin.empty()) {
+    request.SetMode(network::mojom::RequestMode::kCors);
+    if (cross_origin != "use-credentials") {
+      request.SetCredentialsMode(network::mojom::CredentialsMode::kSameOrigin);
+    }
+  }
+
+  request.SetRequestorOrigin(SecurityOrigin::Create(origin_url));
+
+  ResourceLoaderOptions options(nullptr);
+
+  TextResourceDecoderOptions decoder_options(
+      TextResourceDecoderOptions::kCSSContent, UTF8Encoding());
+
+  auto script_type = is_module ?
+      mojom::blink::ScriptType::kModule :
+      mojom::blink::ScriptType::kClassic;
+
+  return MakeGarbageCollected<ScriptResource>(
+      request, options, decoder_options, kAllowStreaming, script_type);
+}
+#endif
+
 ScriptResource::ScriptResource(
     const ResourceRequest& resource_request,
     const ResourceLoaderOptions& options,
