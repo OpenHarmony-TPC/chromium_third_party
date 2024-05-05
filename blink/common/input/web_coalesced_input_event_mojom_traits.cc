@@ -9,6 +9,7 @@
 #include "base/containers/contains.h"
 #include "base/i18n/char_iterator.h"
 #include "base/time/time.h"
+#include "build/build_config.h"
 #include "mojo/public/cpp/base/time_mojom_traits.h"
 #include "third_party/blink/public/common/input/web_gesture_event.h"
 #include "third_party/blink/public/common/input/web_keyboard_event.h"
@@ -311,6 +312,9 @@ bool StructTraits<blink::mojom::EventDataView,
     touch_event->moved_beyond_slop_region =
         touch_data->moved_beyond_slop_region;
     touch_event->hovering = touch_data->hovering;
+#if BUILDFLAG(IS_OHOS)
+    touch_event->is_fit_content = touch_data->is_fit_content;
+#endif
     touch_event->touch_start_or_first_touch_move =
         touch_data->touch_start_or_first_move;
     touch_event->unique_touch_event_id = touch_data->unique_touch_event_id;
@@ -557,6 +561,9 @@ StructTraits<blink::mojom::EventDataView,
   auto touch_data = blink::mojom::TouchData::New(
       touch_event->dispatch_type, touch_event->moved_beyond_slop_region,
       touch_event->touch_start_or_first_touch_move, touch_event->hovering,
+#if BUILDFLAG(IS_OHOS)
+      touch_event->is_fit_content,
+#endif
       touch_event->unique_touch_event_id,
       std::vector<blink::mojom::TouchPointPtr>());
   for (unsigned i = 0; i < touch_event->touches_length; ++i) {

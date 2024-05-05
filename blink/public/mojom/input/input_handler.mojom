@@ -161,6 +161,10 @@ struct TouchData {
   bool moved_beyond_slop_region;
   bool touch_start_or_first_move;
   bool hovering;
+
+  [EnableIf=is_ohos]
+  bool is_fit_content;
+
   uint32 unique_touch_event_id;
   array<TouchPoint> touches;
 };
