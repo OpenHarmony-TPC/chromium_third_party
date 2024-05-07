@@ -285,6 +285,7 @@ class MockInputHandlerProxyClient : public InputHandlerProxyClient {
       std::unique_ptr<cc::EventMetrics> metrics) override {}
 #ifdef OHOS_UNITTESTS
   MOCK_METHOD5(DidNativeEmbedEvent, void(blink::WebInputEvent::Type, std::string, int32_t, float, float));
+  MOCK_METHOD2(TouchHitTest, void(const WebPointerEvent& event, size_t i));
 #endif  // OHOS_UNITTESTS
   MOCK_METHOD5(DidOverscroll,
                void(const gfx::Vector2dF& accumulated_overscroll,

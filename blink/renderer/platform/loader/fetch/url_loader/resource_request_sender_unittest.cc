@@ -97,7 +97,9 @@ class MockRequestClient : public ResourceRequestClient {
     completion_status_ = status;
     complete_ = true;
   }
-
+#if defined(OHOS_UNITTESTS)
+  void OnTransferDataWithSharedMemory(base::ReadOnlySharedMemoryRegion region, uint64_t buffer_size) override {}
+#endif
   std::string data() { return data_; }
   bool received_response() { return received_response_; }
   bool complete() { return complete_; }
