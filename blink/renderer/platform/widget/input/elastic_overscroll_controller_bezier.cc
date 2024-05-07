@@ -11,7 +11,7 @@ namespace {
 // The following constants are determined experimentally.
 #if BUILDFLAG(IS_OHOS)
 // Used to determine how far the scroller is allowed to stretch.
-constexpr double kOverscrollBoundaryMultiplier = 0.3f;
+constexpr double kOverscrollBoundaryMultiplier = 0.57f;
 
 // Maximum duration for the bounce back animation.
 constexpr double kBounceBackMaxDurationMilliseconds = 500.0;
