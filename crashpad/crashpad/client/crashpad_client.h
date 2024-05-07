@@ -786,6 +786,10 @@ class CrashpadClient {
   static void SetCrashLoopBefore(uint64_t crash_loop_before_time);
 #endif
 
+#if defined(OHOS_CRASHPAD)
+  static void AddCrashpadArguments(std::vector<std::string>& argv);
+#endif
+
  private:
 #if BUILDFLAG(IS_APPLE)
   base::mac::ScopedMachSendRight exception_port_;
