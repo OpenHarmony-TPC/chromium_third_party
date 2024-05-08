@@ -2255,16 +2255,7 @@ source_set("blink_platform_unittests_sources") {
     "widget/input/prediction/filter_factory_unittests.cc",
     "widget/input/scroll_predictor_unittest.cc",
   ]
-  if (ohos_unittests) {
-    sources += [
-      "//cef/libcef/common/soc_perf_util.cc",
-      "//content/browser/browser_thread_impl.cc",
-      "//content/browser/scheduler/browser_task_executor.cc",
-      "//content/public/common/content_features.cc",
-      "//content/public/common/content_switches.cc",
-      "//content/child/child_thread_impl.cc",
-    ]
-  }
+
   if (is_android) {
     sources += [ "fonts/android/font_cache_android_test.cc" ]
   } else if (is_win) {
@@ -2344,6 +2335,12 @@ source_set("blink_platform_unittests_sources") {
     "//url:url_test_support",
     "//url/mojom:test_url_mojom_gurl_blink",
   ]
+
+  if (ohos_unittests) {
+    deps += [
+      "//cef:libcef_static",
+    ]
+  }
 
   deps += [ ":bridge_ice_controller_tests" ]
 
