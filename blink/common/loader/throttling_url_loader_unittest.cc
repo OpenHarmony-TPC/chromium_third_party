@@ -230,7 +230,9 @@ class TestURLLoaderClient : public network::mojom::URLLoaderClient {
     if (on_complete_callback_)
       std::move(on_complete_callback_).Run(status.error_code);
   }
-
+#if defined(OHOS_UNITTESTS)
+  void OnTransferDataWithSharedMemory(::base::ReadOnlySharedMemoryRegion region, uint64_t buffer_size) override {}
+#endif // OHOS_UNITTESTS
   size_t on_received_response_called_ = 0;
   size_t on_received_redirect_called_ = 0;
   size_t on_complete_called_ = 0;

@@ -117,7 +117,11 @@ class SyncLoadContextTest : public testing::Test {
             Vector<String>() /* cors_exempt_header_list */,
             std::make_unique<ResourceLoadInfoNotifierWrapper>(
                 /*resource_load_info_notifier=*/nullptr,
+#if defined(OHOS_UNITTESTS)
+                task_environment_.GetMainThreadTaskRunner()), nullptr));
+#else
                 task_environment_.GetMainThreadTaskRunner())));
+#endif // OHOS_UNITTESTS
   }
 
   static void RunSyncLoadContextViaDataPipe(
@@ -133,7 +137,11 @@ class SyncLoadContextTest : public testing::Test {
         response, context_for_redirect, redirect_or_response_event,
         nullptr /* terminate_sync_load_event */,
         base::Seconds(60) /* timeout */,
+#if defined(OHOS_UNITTESTS)
+        mojo::NullRemote() /* download_to_blob_registry */, task_runner, nullptr));
+#else
         mojo::NullRemote() /* download_to_blob_registry */, task_runner));
+#endif // OHOS_UNITTESTS
 
     auto mock_resource_request_sender =
         std::make_unique<MockResourceRequestSender>();

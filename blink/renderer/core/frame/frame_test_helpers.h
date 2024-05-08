@@ -219,6 +219,7 @@ class TestWebFrameWidgetHost : public mojom::blink::WidgetHost,
       mojo::PendingAssociatedReceiver<mojom::blink::FrameWidgetHost>);
 #if defined(OHOS_UNITTESTS)
   void DidNativeEmbedEvent(mojom::blink::NativeEmbedTouchEventPtr event) override {}
+  void GetWordSelection(const WTF::String& text, int8_t offset, GetWordSelectionCallback callback) override {}
 #endif // OHOS_UNITTESTS
  private:
   size_t cursor_set_count_ = 0;
