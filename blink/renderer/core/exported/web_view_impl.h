@@ -627,6 +627,7 @@ class CORE_EXPORT WebViewImpl final : public WebView,
 
 #if defined(OHOS_INPUT_EVENTS)
   void SetScrollOffset(const gfx::PointF point) override;
+  void UpdateDrawRect() override;
 #endif  // defined(OHOS_INPUT_EVENTS)
 
  private:
