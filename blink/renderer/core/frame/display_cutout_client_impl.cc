@@ -27,6 +27,9 @@ void DisplayCutoutClientImpl::BindMojoReceiver(
 void DisplayCutoutClientImpl::SetSafeArea(const gfx::Insets& safe_area) {
   DocumentStyleEnvironmentVariables& vars =
       frame_->GetDocument()->GetStyleEngine().EnsureEnvironmentVariables();
+#ifdef OHOS_DISPLAY_CUTOUT
+  LOG(INFO) << __func__ << " " << safe_area.ToString();
+#endif
   vars.SetVariable(UADefinedVariable::kSafeAreaInsetTop,
                    StyleEnvironmentVariables::FormatPx(safe_area.top()));
   vars.SetVariable(UADefinedVariable::kSafeAreaInsetLeft,

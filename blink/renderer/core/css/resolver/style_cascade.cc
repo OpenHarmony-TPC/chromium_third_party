@@ -1298,10 +1298,19 @@ CSSVariableData* StyleCascade::GetEnvironmentVariable(
   auto* shadow_root = DynamicTo<ShadowRoot>(&scope_root);
   bool is_ua_scope = shadow_root && shadow_root->IsUserAgent();
 
+#ifdef OHOS_DISPLAY_CUTOUT
+  CSSVariableData* result = state_.GetDocument()
+      .GetStyleEngine()
+      .EnsureEnvironmentVariables()
+      .ResolveVariable(name, std::move(indices), !is_ua_scope);
+  LOG(INFO) << __func__ << " " << name << "=" << (result ? result->OriginalText().Utf8() : std::string("null")); 
+  return result;
+#else
   return state_.GetDocument()
       .GetStyleEngine()
       .EnsureEnvironmentVariables()
       .ResolveVariable(name, std::move(indices), !is_ua_scope);
+#endif
 }
 
 const CSSParserContext* StyleCascade::GetParserContext(
