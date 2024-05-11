@@ -868,16 +868,11 @@ void WebMediaPlayerImpl::DoLoad(LoadType load_type,
                                 : media::mojom::MediaURLScheme::kUnknown,
       media::mojom::MediaStreamType::kNone);
 
-  // If a demuxer override was specified or a Media Source pipeline will be
-  // used, the pipeline can start immediately.
-  if (demuxer_manager_->HasDemuxerOverride() ||
-      load_type == kLoadTypeMediaSource ||
-      loaded_url_.SchemeIs(media::remoting::kRemotingScheme)) {
-    StartPipeline();
-    return;
-  }
-
 #if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+  if (loaded_url_.SchemeIs(media::remoting::kRemotingScheme)) {
+    should_create_custom_renderer_ = false;
+    should_overlay_ = false;
+  }
   if (should_create_custom_renderer_) {
     cors_mode_ = cors_mode;
     is_cache_disabled_ = is_cache_disabled;
@@ -886,6 +881,15 @@ void WebMediaPlayerImpl::DoLoad(LoadType load_type,
     return;
   }
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
+
+  // If a demuxer override was specified or a Media Source pipeline will be
+  // used, the pipeline can start immediately.
+  if (demuxer_manager_->HasDemuxerOverride() ||
+      load_type == kLoadTypeMediaSource ||
+      loaded_url_.SchemeIs(media::remoting::kRemotingScheme)) {
+    StartPipeline();
+    return;
+  }
 
   // Short circuit the more complex loading path for data:// URLs. Sending
   // them through the network based loading path just wastes memory and causes
