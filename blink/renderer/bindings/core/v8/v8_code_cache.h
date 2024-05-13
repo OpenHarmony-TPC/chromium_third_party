@@ -49,6 +49,7 @@ class CORE_EXPORT V8CodeCache final {
     kProduceCodeCache,
   };
 
+#if BUILDFLAG(IS_OHOS)
   enum class CacheError {
     kNoError = 0,
     kInternalError = -1,
@@ -65,6 +66,7 @@ class CORE_EXPORT V8CodeCache final {
     bool is_module_;
     bool is_top_level_;
   };
+#endif
 
   static uint32_t TagForCodeCache(const CachedMetadataHandler*);
   static uint32_t TagForTimeStamp(const CachedMetadataHandler*);
@@ -121,6 +123,7 @@ class CORE_EXPORT V8CodeCache final {
       const WTF::TextEncoding&,
       OpaqueMode);
 
+#if BUILDFLAG(IS_OHOS)
   static CacheError GenerateCodeCache(
       ScriptState* script_state,
       const String& url,
@@ -133,6 +136,7 @@ class CORE_EXPORT V8CodeCache final {
       const KURL& source_url,
       ScriptCachedMetadataHandler* cache_handler,
       CacheOptions cache_options);
+#endif
 };
 
 }  // namespace blink

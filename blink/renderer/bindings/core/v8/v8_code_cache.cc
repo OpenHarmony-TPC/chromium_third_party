@@ -182,7 +182,6 @@ V8CodeCache::GetCompileOptions(mojom::blink::V8CacheOptions cache_options,
   }
 
   if (HasCodeCache(cache_handler)) {
-    LOG(ERROR) << "find exist code cache. url: " << url.GetString(); 
     return std::make_tuple(v8::ScriptCompiler::kConsumeCodeCache,
                            ProduceCacheOptions::kNoProduceCache,
                            no_cache_reason);
@@ -441,6 +440,7 @@ V8CodeCache::CacheError V8CodeCache::GenerateCodeCache(
   return error;
 }
 
+#if BUILDFLAG(IS_OHOS)
 V8CodeCache::CacheError V8CodeCache::GenerateCodeCacheInternal(
     ScriptState* script_state,
     const String& script_string,
@@ -453,8 +453,6 @@ V8CodeCache::CacheError V8CodeCache::GenerateCodeCacheInternal(
   v8::Isolate* isolate = script_state->GetIsolate();
   v8::TryCatch block(isolate);
 
-  ReferrerScriptInfo referrer_info;
-  
   v8::ScriptOrigin origin(isolate, V8String(isolate, file_name));
 
   v8::Local<v8::String> code(V8String(isolate, script_string));
@@ -466,26 +464,24 @@ V8CodeCache::CacheError V8CodeCache::GenerateCodeCacheInternal(
 
   v8::Local<v8::UnboundScript> unbound_script;
   if (!maybe_unbound_script.ToLocal(&unbound_script)) {
-    LOG(ERROR) << "Generate code cache failed: compile script error. url: " << source_url.GetString();
-    return V8CodeCache::CacheError::kInternalError;
-  }
-
-  std::unique_ptr<v8::ScriptCompiler::CachedData> cached_data(
-      v8::ScriptCompiler::CreateCodeCache(unbound_script));
-  if (!cached_data || !cached_data->length) {
-    LOG(ERROR) << "Generate code cache failed: create cached metadata failed. url: " << source_url.GetString();
+    LOG(ERROR) << "Generate code cache failed: compile script error.";
     return V8CodeCache::CacheError::kInternalError;
   }
 
   auto execution_context = ExecutionContext::From(script_state);
   auto code_cache_host = ExecutionContext::GetCodeCacheHostFromContext(execution_context);
-  V8CodeCache::SetCacheTimeStamp(code_cache_host, cache_handler);
-  cache_handler->ClearCachedMetadata(code_cache_host, CachedMetadataHandler::kClearLocally);
-  cache_handler->SetCachedMetadata(code_cache_host, V8CodeCache::TagForCodeCache(cache_handler),
-      cached_data->data, cached_data->length);
 
-  LOG(ERROR) << "Generate code cache successfully. url: " << source_url.GetString();
+  TextPosition text_position(OrdinalNumber::First(), OrdinalNumber::First());
+  ProduceCacheInternal(
+      isolate, code_cache_host, unbound_script,
+      cache_handler, script_string.length(), source_url,
+      text_position, "v8.compile", V8CodeCache::ProduceCacheOptions::kSetTimeStamp);
+  ProduceCacheInternal(
+      isolate, code_cache_host, unbound_script,
+      cache_handler, script_string.length(), source_url,
+      text_position, "v8.compile", V8CodeCache::ProduceCacheOptions::kProduceCodeCache);
+
   return V8CodeCache::CacheError::kNoError;
 }
-
+#endif
 }  // namespace blink
