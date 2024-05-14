@@ -95,6 +95,11 @@
 #include "cef/libcef/common/cef_crash_report_upload_thread.h"
 #endif
 
+#if BUILDFLAG(IS_OHOS)
+extern std::string g_happen_time;
+extern std::string g_bundle_name;
+#endif
+
 namespace crashpad {
 
 namespace {
@@ -243,6 +248,8 @@ struct Options {
   VMAddress sanitization_information_address;
   int initial_client_fd;
   bool shared_client_connection;
+  std::string happen_time;
+  std::string bundle_name;
 #if BUILDFLAG(IS_ANDROID) || BUILDFLAG(IS_OHOS)
   bool write_minidump_to_log;
   bool write_minidump_to_database;
@@ -633,6 +640,8 @@ int HandlerMain(int argc,
     kOptionSanitizationInformation,
     kOptionSharedClientConnection,
     kOptionTraceParentWithException,
+    kOptionHappenTime,
+    kOptionBundleName,
 #endif
     kOptionURL,
     kOptionMaxUploads,
@@ -721,6 +730,14 @@ int HandlerMain(int argc,
      required_argument,
      nullptr,
      kOptionTraceParentWithException},
+    {"happen-time", 
+     required_argument, 
+     nullptr, 
+     kOptionHappenTime},
+    {"bundle-name", 
+     required_argument, 
+     nullptr, 
+     kOptionBundleName},
 #endif  // BUILDFLAG(IS_LINUX) || BUILDFLAG(IS_CHROMEOS) ||
         // BUILDFLAG(IS_ANDROID)
     {"url", required_argument, nullptr, kOptionURL},
@@ -895,6 +912,16 @@ int HandlerMain(int argc,
               me, "failed to parse --trace-parent-with-exception");
           return ExitFailure();
         }
+        break;
+      }
+      case kOptionHappenTime: {
+        options.happen_time = optarg;
+        g_happen_time = options.happen_time;
+        break;
+      }
+      case kOptionBundleName: {
+        options.bundle_name = optarg;
+        g_bundle_name = options.bundle_name;
         break;
       }
 #endif  // BUILDFLAG(IS_LINUX) || BUILDFLAG(IS_CHROMEOS) ||

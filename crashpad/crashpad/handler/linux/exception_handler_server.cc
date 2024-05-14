@@ -36,6 +36,15 @@
 #include "util/linux/socket.h"
 #include "util/misc/as_underlying_type.h"
 
+#if defined(OHOS_CRASHPAD)
+#include "third_party/crashpad/crashpad/util/linux/crashpad_dfx.h"
+#endif
+
+#if defined(OHOS_CRASHPAD)
+uid_t g_process_uid = 0;
+extern std::string g_happen_time;
+extern std::string g_bundle_name;
+#endif
 namespace crashpad {
 
 namespace {
@@ -483,6 +492,7 @@ bool ExceptionHandlerServer::HandleCrashDumpRequest(
 #if defined(OHOS_CRASHPAD)
   LOG(INFO) << "crashpad ExceptionHandlerServer::HandleCrashDumpRequest, client process id = " \
     << client_process_id << ", client uid = " << client_uid << ", multi client = " << multiple_clients;
+  g_process_uid = client_uid;
 #endif // defined(OHOS_CRASHPAD)
 
   switch (
@@ -539,6 +549,14 @@ bool ExceptionHandlerServer::HandleCrashDumpRequest(
       break;
   }
 
+#if defined(OHOS_CRASHPAD)
+    const std::string process_type = "render";
+    const std::string package_name = g_bundle_name; 
+    const std::string happen_time = g_happen_time;
+#if defined(REPORT_SYS_EVENT)
+    CrashpadDfx::ReportProcessCrash(process_type,happen_time,package_name);
+#endif
+#endif
   return SendMessageToClient(
       client_sock,
       ExceptionHandlerProtocol::ServerToClientMessage::kTypeCrashDumpComplete);
