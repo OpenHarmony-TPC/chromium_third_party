@@ -51,9 +51,6 @@ class BLINK_PLATFORM_EXPORT WebSurfaceLayerBridge {
   virtual void UnregisterFrameSinkHierarchy() = 0;
 
 #if defined(OHOS_CUSTOM_VIDEO_PLAYER)
-  virtual void SetShouldOverlay(bool should_overlay) {}
-  virtual void SetShouldInterceptTouchEvent(bool should_intercept) {}
-  virtual void SetNativeEmbedId(int embed_id) {}
   virtual void SetVideoRectChangeCallback(cc::SurfaceLayer::RectChangeCallback callback) {}
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
 };

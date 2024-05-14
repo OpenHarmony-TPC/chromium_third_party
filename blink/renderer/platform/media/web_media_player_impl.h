@@ -736,6 +736,7 @@ class PLATFORM_EXPORT WebMediaPlayerImpl
   void UpdatePlaybackRate(double playback_rate);
 
   bool IsUsingCustomRenderer() const override;
+  void SetInitialPreload(uint32_t preload) override;
 
   void OnLayerRectChange(const gfx::Rect& rect);
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
@@ -1143,6 +1144,7 @@ class PLATFORM_EXPORT WebMediaPlayerImpl
   bool is_cache_disabled_ = false;
   std::string poster_url_;
   int native_texture_id_ = 0;
+  uint32_t initial_preload_ = static_cast<uint32_t>(media::DataSource::METADATA);
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
 
   base::WeakPtr<WebMediaPlayerImpl> weak_this_;

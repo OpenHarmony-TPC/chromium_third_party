@@ -3037,6 +3037,8 @@ void WebMediaPlayerImpl::StartPipeline() {
       load_type_ == kLoadTypeMediaSource, preload_, has_poster_,
 #if defined(OHOS_CUSTOM_VIDEO_PLAYER)
       should_create_custom_renderer_,
+      initial_preload_,
+      static_cast<uint32_t>(load_type_),
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
       base::BindOnce(&WebMediaPlayerImpl::OnDemuxerCreated,
                      base::Unretained(this)));
@@ -4161,7 +4163,7 @@ void WebMediaPlayerImpl::OnNativeTextureCreated(int native_texture_id,
     media::Renderer::OnGetRectCallback callback) {
   native_texture_id_ = native_texture_id;
   if (bridge_) {
-    bridge_->SetNativeEmbedId(native_texture_id);
+    bridge_->GetCcLayer()->SetNativeEmbedId(native_texture_id);
   }
   std::move(callback).Run(client_->GetVideoRect());
 }
@@ -4179,6 +4181,9 @@ void WebMediaPlayerImpl::UpdatePlaybackRate(double playback_rate) {
 }
 bool WebMediaPlayerImpl::IsUsingCustomRenderer() const {
   return should_create_custom_renderer_;
+}
+void WebMediaPlayerImpl::SetInitialPreload(uint32_t preload) {
+  initial_preload_ = preload;
 }
 void WebMediaPlayerImpl::OnLayerRectChange(const gfx::Rect& rect) {
   DCHECK(main_task_runner_->BelongsToCurrentThread());
