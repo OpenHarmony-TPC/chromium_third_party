@@ -802,6 +802,7 @@ void CrashpadClient::SetCrashLoopBefore(uint64_t crash_loop_before_time) {
 void CrashpadClient::AddCrashpadArguments(std::vector<std::string>& argv) {
   std::string bundle_name = CrashpadDfx::GetProcessBundleName();
   std::string happen_time = CrashpadDfx::GetCurrentTime();
+  g_happen_time = happen_time;
   std::string extra_arg_happentime = "--happen-time=" + happen_time;
   std::string extra_arg_bundlename = "--bundle-name=" + bundle_name;
   argv.push_back(extra_arg_happentime);
