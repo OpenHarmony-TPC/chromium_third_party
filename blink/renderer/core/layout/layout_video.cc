@@ -125,11 +125,6 @@ LayoutSize LayoutVideo::CalculateIntrinsicSize(float scale) {
     // Otherwise, the intrinsic width is that of the video.
     case kVideo:
       if (const auto* player = MediaElement()->GetWebMediaPlayer()) {
-#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
-        if (player->IsUsingCustomRenderer()) {
-          return Size();
-        }
-#endif // OHOS_CUSTOM_VIDEO_PLAYER
         gfx::Size size = player->NaturalSize();
         if (!size.IsEmpty()) {
           LayoutSize layout_size = LayoutSize(size);
@@ -231,6 +226,16 @@ PhysicalRect LayoutVideo::ReplacedContentRectFrom(
     const NGPhysicalBoxStrut& border_padding) const {
   NOT_DESTROYED();
   if (GetDisplayMode() == kVideo) {
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+    if (const auto* player = MediaElement()->GetWebMediaPlayer()) {
+      if (player->IsUsingCustomRenderer()) {
+        auto content_size =
+            PhysicalContentBoxRectFrom(size, border_padding).size.ToLayoutSize();
+        return PreSnappedRectForPersistentSizing(
+            ComputeReplacedContentRect(size, border_padding, &content_size));
+      }
+    }
+#endif // OHOS_CUSTOM_VIDEO_PLAYER
     // Video codecs may need to restart from an I-frame when the output is
     // resized. Round size in advance to avoid 1px snap difference.
     return PreSnappedRectForPersistentSizing(

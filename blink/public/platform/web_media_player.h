@@ -389,6 +389,7 @@ class WebMediaPlayer {
 
 #if defined(OHOS_CUSTOM_VIDEO_PLAYER)
   virtual bool IsUsingCustomRenderer() const { return false; }
+  virtual void SetInitialPreload(uint32_t preload) {}
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
 };
 

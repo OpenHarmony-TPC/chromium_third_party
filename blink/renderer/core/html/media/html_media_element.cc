@@ -755,6 +755,11 @@ void HTMLMediaElement::ParseAttribute(
     // Trigger a reload, as long as the 'src' attribute is present.
     if (!params.new_value.IsNull()) {
       ignore_preload_none_ = false;
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+      if (IsCustomVideoPlayerEnabled()) {
+        ignore_preload_none_ = true;
+      }
+#endif // OHOS_CUSTOM_VIDEO_PLAYER
       InvokeLoadAlgorithm();
     }
   } else if (name == html_names::kControlsAttr) {
@@ -1570,6 +1575,10 @@ void HTMLMediaElement::StartPlayerLoad() {
   const auto preload = EffectivePreloadType();
   web_media_player_->SetPreload(preload);
 
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+  web_media_player_->SetInitialPreload(static_cast<uint32_t>(PreloadType()));
+#endif // OHOS_CUSTOM_VIDEO_PLAYER
+
   web_media_player_->RequestRemotePlaybackDisabled(
       FastHasAttribute(html_names::kDisableremoteplaybackAttr));
 
@@ -1598,6 +1607,12 @@ void HTMLMediaElement::StartPlayerLoad() {
 void HTMLMediaElement::SetPlayerPreload() {
   if (web_media_player_)
     web_media_player_->SetPreload(EffectivePreloadType());
+
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+  if (web_media_player_) {
+    web_media_player_->SetInitialPreload(static_cast<uint32_t>(PreloadType()));
+  }
+#endif // OHOS_CUSTOM_VIDEO_PLAYER
 
   if (LoadIsDeferred() &&
       EffectivePreloadType() != WebMediaPlayer::kPreloadNone)
@@ -3634,6 +3649,11 @@ void HTMLMediaElement::SourceWasAdded(HTMLSourceElement* source) {
   // the user agent must invoke the media element's resource selection
   // algorithm.
   if (getNetworkState() == HTMLMediaElement::kNetworkEmpty) {
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+    if (IsCustomVideoPlayerEnabled()) {
+      ignore_preload_none_ = true;
+    }
+#endif // OHOS_CUSTOM_VIDEO_PLAYER
     InvokeResourceSelectionAlgorithm();
     // Ignore current |next_child_node_to_consider_| and consider |source|.
     next_child_node_to_consider_ = source;
