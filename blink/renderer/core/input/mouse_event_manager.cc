@@ -659,6 +659,7 @@ void MouseEventManager::SetLastMousePositionAsUnknown() {
 WebInputEventResult MouseEventManager::HandleMousePressEvent(
     const MouseEventWithHitTestResults& event) {
   TRACE_EVENT0("blink", "MouseEventManager::handleMousePressEvent");
+
 #ifdef OHOS_AI
   create_overlay_timer_.Stop();
 #endif
