@@ -155,6 +155,10 @@
 #include "ui/gfx/geometry/point.h"
 #endif
 
+#ifdef OHOS_AI
+#include "third_party/blink/renderer/core/layout/layout_view.h"
+#endif
+
 namespace WTF {
 
 template <>
@@ -1051,6 +1055,9 @@ WebInputEventResult WebFrameWidgetImpl::HandleGestureEvent(
 #ifdef OHOS_DRAG_DROP
       case WebInputEvent::Type::kGestureDragLongPress:
 #endif
+#ifdef OHOS_AI
+      case WebInputEvent::Type::kGestureCreateOverlay:
+#endif
       case WebInputEvent::Type::kGestureTapCancel:
       case WebInputEvent::Type::kGestureTap:
         GetPage()->GetLinkHighlight().UpdateOpacityAndRequestAnimation();
@@ -1084,6 +1091,9 @@ WebInputEventResult WebFrameWidgetImpl::HandleGestureEvent(
     case WebInputEvent::Type::kGestureLongPress:
 #ifdef OHOS_DRAG_DROP
     case WebInputEvent::Type::kGestureDragLongPress:
+#endif
+#ifdef OHOS_AI
+    case WebInputEvent::Type::kGestureCreateOverlay:
 #endif
     case WebInputEvent::Type::kGestureLongTap:
       if (scaled_event.GetType() == WebInputEvent::Type::kGestureLongTap) {
@@ -4857,6 +4867,42 @@ void WebFrameWidgetImpl::RegisterClippedVisualViewportSelectionBounds(
   }
   widget_base_->LayerTreeHost()->RegisterClippedVisualViewportSelectionBounds(
     clipped_selection_bounds);
+}
+#endif
+
+#ifdef OHOS_AI
+void WebFrameWidgetImpl::CreateOverlay(const SkBitmap& image,
+                                       const gfx::Rect& image_rect,
+                                       const gfx::Point & touch_point,
+                                       OnTextSelectedCallback callback) {
+  on_text_selected_callback_ = std::move(callback);
+  GetAssociatedFrameWidgetHost()->CreateOverlay(image, image_rect, touch_point);
+}
+
+void WebFrameWidgetImpl::OnTextSelected(bool flag) {
+  if (on_text_selected_callback_) {
+    on_text_selected_callback_.Run(flag);
+  }
+}
+
+void WebFrameWidgetImpl::GetScreenRect(GetScreenRectCallback callback) {
+  LocalFrame* frame = LocalRootImpl()->GetFrame();
+  LocalFrameView* view = frame->View();
+  double ratio = frame->DevicePixelRatio();
+  float scale = PageScaleInMainFrame();
+  // view_rect is the most basic rect.
+  gfx::Rect view_rect = ToEnclosingRect(view->GetLayoutView()->ViewRect());
+  // abs_view_rect is absolute in the whole document.
+  gfx::Rect abs_view_rect = view->FrameToDocument(view_rect);
+  // rel_view_rect is relative to the screen.
+  gfx::Rect rel_view_rect = view->FrameToScreen(view_rect);
+  // screen_rect is calculate by the three rects above
+  gfx::Rect screen_rect = ToEnclosingRect(
+      gfx::RectF(abs_view_rect.x() - rel_view_rect.x() * ratio / scale,
+                 abs_view_rect.y() - rel_view_rect.y() * ratio / scale,
+                 abs_view_rect.width(),
+                 abs_view_rect.height()));
+  std::move(callback).Run(screen_rect);
 }
 #endif
 }  // namespace blink

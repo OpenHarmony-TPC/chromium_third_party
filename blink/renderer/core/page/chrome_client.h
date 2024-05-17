@@ -591,6 +591,15 @@ class CORE_EXPORT ChromeClient : public GarbageCollected<ChromeClient> {
                                                const WTF::String& text,
                                                int8_t offset) = 0;
 #endif
+
+#ifdef OHOS_AI
+  using OnTextSelectedCallback = base::RepeatingCallback<void(bool)>;
+  virtual void CreateOverlay(LocalFrame* frame,
+                             const SkBitmap& image,
+                             const gfx::Rect& image_rect,
+                             const gfx::Point& touch_point,
+                             OnTextSelectedCallback callback) = 0;
+#endif
  protected:
   ChromeClient() = default;
 

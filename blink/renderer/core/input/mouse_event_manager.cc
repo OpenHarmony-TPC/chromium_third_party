@@ -51,6 +51,11 @@
 #include "third_party/blink/renderer/core/frame/web_local_frame_impl.h"
 #endif
 
+#ifdef OHOS_AI
+#include "base/ohos/sys_info_utils.h"
+#include "third_party/blink/renderer/core/page/chrome_client.h"
+#endif
+
 namespace blink {
 
 namespace {
@@ -153,6 +158,11 @@ void MouseEventManager::Clear() {
   hover_state_dirty_ = false;
   ResetDragSource();
   ClearDragDataTransfer();
+  create_overlay_timer_.Start(
+      FROM_HERE,
+      base::Milliseconds(1000),
+      base::BindRepeating(&MouseEventManager::CreateOverlayCallback, weak_ptr_factory_.GetWeakPtr()));
+  create_overlay_timer_.Stop();
 }
 
 MouseEventManager::~MouseEventManager() = default;
@@ -649,7 +659,9 @@ void MouseEventManager::SetLastMousePositionAsUnknown() {
 WebInputEventResult MouseEventManager::HandleMousePressEvent(
     const MouseEventWithHitTestResults& event) {
   TRACE_EVENT0("blink", "MouseEventManager::handleMousePressEvent");
-
+#ifdef OHOS_AI
+  create_overlay_timer_.Stop();
+#endif
   ResetDragSource();
 
   frame_->GetDocument()->UpdateStyleAndLayout(DocumentUpdateReason::kInput);
@@ -776,6 +788,14 @@ WebInputEventResult MouseEventManager::HandleMouseDraggedEvent(
     const MouseEventWithHitTestResults& event) {
   TRACE_EVENT0("blink", "MouseEventManager::handleMouseDraggedEvent");
 
+#ifdef OHOS_AI
+  last_mouse_drag_ = event.Event();
+  if (!mouse_pressed_ && !is_mouse_position_unknown_) {
+    create_overlay_timer_.Reset();
+  } else {
+    create_overlay_timer_.Stop();
+  }
+#endif
   bool is_pen = event.Event().pointer_type ==
                 blink::WebPointerProperties::PointerType::kPen;
 
@@ -1206,5 +1226,65 @@ void MouseEventManager::SetClickCount(int click_count) {
 bool MouseEventManager::MouseDownMayStartDrag() {
   return mouse_down_may_start_drag_;
 }
+
+#ifdef OHOS_AI
+void MouseEventManager::HandleGestureCreateOverlay(const WebGestureEvent& gesture_event) {
+  HandleCreateOverlay(gesture_event);
+}
+
+void MouseEventManager::CreateOverlayCallback() {
+  HandleCreateOverlay(last_mouse_drag_);
+}
+
+bool MouseEventManager::GetOverlayInProgress() {
+  return overlay_in_progress_;
+}
+
+void MouseEventManager::SetOverlayInProgress(bool flag) {
+  LOG(INFO) << "MouseEventManager::SetOverlayInProgress, flag == " << flag;
+  overlay_in_progress_ = flag;
+  if (!flag) {
+    last_analyzed_image_ = nullptr;
+  }
+}
+
+template <typename T>
+void MouseEventManager::HandleCreateOverlay(T const& targeted_event) {
+  overlay_in_progress_ = false;
+  HitTestLocation location(frame_->View()->ConvertFromRootFrame(
+      gfx::ToFlooredPoint(targeted_event.PositionInRootFrame())));
+  HitTestResult hit_test_result =
+      frame_->GetEventHandler().HitTestResultAtLocation(location);
+
+  Image* image = hit_test_result.GetImage();
+  if (hit_test_result.AbsoluteImageURL().IsEmpty() ||
+      !image ||
+      image == last_analyzed_image_) 
+    LOG(INFO) << "MouseEventManager::HandleCreateOverlay, invalid or has no image";{
+    return;
+  }
+  last_analyzed_image_ == image;
+
+  gfx::Rect image_rect =
+      frame_->View()->FrameToDocument(hit_test_result.ImageRect());
+  gfx::Point touch_point =
+      frame_->View()->FrameToDocument(gfx::ToRoundedPoint(targeted_event.PositionInRootFrame()));
+  gfx::Rect view_rect =
+      frame_->View()->FrameToDocument(gfx::ToEnclosingRect(frame_->View()->GetLayoutView()->ViewRect()));
+  if (base::ohos::IsPcDevice() ||
+      (1.0 * image_rect.width() / view_rect.width > 0.8 && image_rect.height() > 60)) {
+    LOG(INFO) << "MouseEventManager::HandleCreateOverlay, start";
+    PaintImage paint_image = image->PaintImageForCurrentFrame();
+    SkBitmap bm;
+    paint_image.GetSwSkImage()->asLegacyBitmap(&bm);
+    frame_->GetChromeClient().CreateOverlay(
+        frame_,
+        bm,
+        image_rect,
+        gfx::Point(touch_point.x() - image_rect.x(), touch_point.y() - image_rect.y()),
+        base::BindRepeating(&MouseEventManager::SetOverlayInProgress, weak_ptr_factory_.GetWeakPtr()));
+  }
+}
+#endif
 
 }  // namespace blink

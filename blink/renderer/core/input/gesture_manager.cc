@@ -114,6 +114,9 @@ HitTestRequest::HitTestRequestType GestureManager::GetHitTypeForGestureType(
 #ifdef OHOS_DRAG_DROP
     case WebInputEvent::Type::kGestureDragLongPress:
 #endif
+#ifdef OHOS_AI
+    case WebInputEvent::Type::kGestureCreateOverlay:
+#endif
     case WebInputEvent::Type::kGestureLongTap:
     case WebInputEvent::Type::kGestureTwoFingerTap:
       // FIXME: Shouldn't LongTap and TwoFingerTap clear the Active state?
@@ -169,6 +172,10 @@ WebInputEventResult GestureManager::HandleGestureEventInFrame(
 #ifdef OHOS_DRAG_DROP
     case WebInputEvent::Type::kGestureDragLongPress:
       return HandleGestureDragLongPress(targeted_event);
+#endif
+#ifdef OHOS_AI
+    case WebInputEvent::Type::kGestureCreateOverlay:
+      return HandleGestureCreateOverlay(targeted_event);
 #endif
     case WebInputEvent::Type::kGestureLongTap:
       return HandleGestureLongTap(targeted_event);
@@ -730,5 +737,13 @@ PointerId GestureManager::GetPointerIdFromWebGestureEvent(
   // event listeners.
   return PointerEventFactory::kInvalidId;
 }
+
+#ifdef OHOS_AI
+WebInputEventResult GestureManager::HandleGestureCreateOverlay(
+    const GestureEventWithHitTestResults& targeted_event) {
+  mouse_event_manager_->HandleGestureCreateOverlay(targeted_event->Event());
+  return WebInputEventResult::kHandledSystem;
+}
+#endif
 
 }  // namespace blink

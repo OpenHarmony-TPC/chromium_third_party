@@ -82,6 +82,10 @@ class CORE_EXPORT GestureManager final
   WebInputEventResult HandleGestureDragLongPress(
       const GestureEventWithHitTestResults&);
 #endif
+#ifdef OHOS_AI
+  WebInputEventResult HandleGestureCreateOverlay(
+      const GestureEventWithHitTestResults&);
+#endif
   WebInputEventResult HandleGestureLongTap(
       const GestureEventWithHitTestResults&);
   WebInputEventResult HandleGestureTwoFingerTap(
