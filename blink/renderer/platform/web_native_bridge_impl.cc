@@ -101,6 +101,7 @@ WebNativeBridgeImpl::WebNativeBridgeImpl(
 WebNativeBridgeImpl::~WebNativeBridgeImpl() {
   DVLOG(1) << __func__;
   DCHECK(main_task_runner_->BelongsToCurrentThread());
+  LOG(DEBUG) << "[NativeEmbed] ~WebNativeBridgeImpl.";
 
   // delegate_->PlayerGone(delegate_id_);
   delegate_->RemoveObserver(delegate_id_);
@@ -118,6 +119,8 @@ WebNativeBridgeImpl::~WebNativeBridgeImpl() {
 
   if (video_layer_) {
     video_layer_->StopUsingProvider();
+    video_layer_->ResetLayerRectUpdateCallback();
+    LOG(DEBUG) << "[NativeEmbed] ResetLayerRectUpdateCallback.";
   }
 
   // Handle destruction of things that need to be destructed after the pipeline
@@ -184,6 +187,7 @@ void WebNativeBridgeImpl::OnSurfaceDestroyed() {
 
 void WebNativeBridgeImpl::OnLayerRectChange(const gfx::Rect& rect) {
   DCHECK(main_task_runner_->BelongsToCurrentThread());
+  LOG(DEBUG) << "[NativeEmbed] OnLayerRectChange.";
 
   client_->OnLayerRectChange(rect);
 
