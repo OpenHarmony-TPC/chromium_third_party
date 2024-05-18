@@ -237,7 +237,8 @@ class PLATFORM_EXPORT InputHandlerProxy : public cc::InputHandlerClient,
   }
   bool DidNativeEmbedEvent(const WebInputEvent& event);
   void SetGestureEventResult(bool result);
-  void SendNativeEvent(const WebTouchEvent& touch_event, WebInputEvent::Type type, size_t i);
+  void SendNativeEvent(const WebTouchEvent& touch_event,
+    WebInputEvent::Type type, size_t i, bool result = true);
   void NativeHitTestResult(bool native, size_t fingerId);
 #endif
 #if defined(OHOS_INPUT_EVENTS)

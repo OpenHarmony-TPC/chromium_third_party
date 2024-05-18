@@ -56,6 +56,8 @@ using ScrollThread = cc::InputHandler::ScrollThread;
 namespace blink {
 namespace {
 
+#define NO_NATIVE_TYPE 100
+
 cc::ScrollState CreateScrollStateForGesture(const WebGestureEvent& event) {
   cc::ScrollStateData scroll_state_data;
   if (event.SourceDevice() == WebGestureDevice::kScrollbar) {
@@ -434,30 +436,35 @@ void InputHandlerProxy::NativeHitTestResult(bool native, size_t fingerId) {
   if (native) {
     SendNativeEvent(start_touch_event_, WebInputEvent::Type::kTouchStart, fingerId);
   } else if (!native_event_queue_->empty()) {
+    SendNativeEvent(start_touch_event_, WebInputEvent::Type::kTouchStart, fingerId, false);
     auto event_with_callback = native_event_queue_->Pop();
     DispatchSingleInputEvent(std::move(event_with_callback), tick_clock_->NowTicks());
   }
 }
 
 void InputHandlerProxy::SendNativeEvent(const WebTouchEvent& touch_event,
-                                        WebInputEvent::Type type, size_t i) {
-  float x = touch_event.touches[i].PositionInWidget().x();
-  float y = touch_event.touches[i].PositionInWidget().y();
-  int32_t id = touch_event.touches[i].id;
+                                        WebInputEvent::Type type, size_t i, bool result) {
+  if (result) {
+    float x = touch_event.touches[i].PositionInWidget().x();
+    float y = touch_event.touches[i].PositionInWidget().y();
+    int32_t id = touch_event.touches[i].id;
 
-  embed_id_ = std::to_string(layer_impl_->native_embed_id());
-  gfx::RectF nativeRect = layer_impl_->GetNativeRect();
-  float scale = layer_impl_->GetIdealContentsScaleKey();
-  float initScale = layer_impl_->GetInitScale();
-  if (initScale > 0.f && scale > 0.f) {
-    x = (x - nativeRect.x()) / (scale / initScale);
-    y = (y - nativeRect.y()) / (scale / initScale);
+    embed_id_ = std::to_string(layer_impl_->native_embed_id());
+    gfx::RectF nativeRect = layer_impl_->GetNativeRect();
+    float scale = layer_impl_->GetIdealContentsScaleKey();
+    float initScale = layer_impl_->GetInitScale();
+    if (initScale > 0.f && scale > 0.f) {
+      x = (x - nativeRect.x()) / (scale / initScale);
+      y = (y - nativeRect.y()) / (scale / initScale);
+    } else {
+      x = x - nativeRect.x();
+      y = y - nativeRect.y();
+    }
+
+    client_->DidNativeEmbedEvent(type, embed_id_, id, x, y);
   } else {
-    x = x - nativeRect.x();
-    y = y - nativeRect.y();
+    client_->DidNativeEmbedEvent(type, embed_id_, NO_NATIVE_TYPE, 0, 0);
   }
-
-  client_->DidNativeEmbedEvent(type, embed_id_, id, x, y);
 }
 
 bool InputHandlerProxy::DidNativeEmbedEvent(const WebInputEvent& event) {
