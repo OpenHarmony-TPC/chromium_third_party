@@ -106,6 +106,13 @@ enum EventType {
   [EnableIf=ohos_drag_drop]
   kGestureDragLongPress,
   // #endif OHOS_DRAG_DROP
+
+  // #ifdef OHOS_AI
+  // Sent as soon as the create-overlay timeout fires, while the finger is
+  // still done. Directly create overlay by touch long press.
+  [EnableIf=ohos_ai]
+  kGestureCreateOverlay,
+  // #endif OHOS_AI
   
   // Sent when the finger is lifted following a GestureLongPress.
   kGestureLongTap,

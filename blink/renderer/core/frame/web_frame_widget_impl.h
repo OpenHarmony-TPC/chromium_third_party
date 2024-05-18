@@ -675,6 +675,17 @@ class CORE_EXPORT WebFrameWidgetImpl
                                        int8_t offset);
 #endif
 
+#ifdef OHOS_AI
+  using OnTextSelectedCallback = base::RepeatingCallback<void(bool)>;
+  virtual void CreateOverlay(const SkBitmap& image,
+                             const gfx::Rect& image_rect,
+                             const gfx::Point & touch_point,
+                             OnTextSelectedCallback callback);
+  void OnTextSelected(bool flag) override;
+  using GetScreenRectCallback = base::OnceCallback<void(const gfx::Rect&)>;
+  void GetScreenRect(GetScreenRectCallback callback) override;
+#endif
+
  protected:
   // WidgetBaseClient overrides:
   void WillBeginMainFrame() override;
@@ -1155,6 +1166,10 @@ class CORE_EXPORT WebFrameWidgetImpl
   scoped_refptr<WebPagePopupImpl> last_hidden_page_popup_;
 #if defined(OHOS_INPUT_EVENTS)
   Element* last_focused_element_;
+#endif
+
+#ifdef OHOS_AI
+  OnTextSelectedCallback on_text_selected_callback_;
 #endif
 
   base::WeakPtrFactory<mojom::blink::FrameWidgetInputHandler>

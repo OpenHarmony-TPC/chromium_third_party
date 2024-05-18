@@ -2008,6 +2008,9 @@ void EventHandler::ApplyTouchAdjustment(WebGestureEvent* gesture_event,
 #ifdef OHOS_DRAG_DROP
     case WebInputEvent::Type::kGestureDragLongPress:
 #endif
+#ifdef OHOS_AI
+    case WebInputEvent::Type::kGestureCreateOverlay:
+#endif
     case WebInputEvent::Type::kGestureLongTap:
     case WebInputEvent::Type::kGestureTwoFingerTap:
       adjusted = BestContextMenuNodeForHitTestResult(

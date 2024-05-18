@@ -106,6 +106,9 @@ WebInputEventResult WidgetEventHandler::HandleInputEvent(
 #if BUILDFLAG(IS_OHOS)
     case WebInputEvent::Type::kGestureDragLongPress:
 #endif
+#ifdef OHOS_AI
+    case WebInputEvent::Type::kGestureCreateOverlay:
+#endif
       return HandleGestureEvent(static_cast<const WebGestureEvent&>(event));
 
     case WebInputEvent::Type::kPointerDown:

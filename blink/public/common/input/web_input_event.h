@@ -280,6 +280,9 @@ class BLINK_COMMON_EXPORT WebInputEvent {
 #ifdef OHOS_DRAG_DROP
       CASE_TYPE(GestureDragLongPress);
 #endif
+#ifdef OHOS_AI
+      CASE_TYPE(GestureCreateOverlay);
+#endif
       CASE_TYPE(GestureLongTap);
       CASE_TYPE(GesturePinchBegin);
       CASE_TYPE(GesturePinchEnd);

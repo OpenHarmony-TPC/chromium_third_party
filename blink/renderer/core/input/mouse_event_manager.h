@@ -151,6 +151,15 @@ class CORE_EXPORT MouseEventManager final
 
   void MarkHoverStateDirty();
 
+#ifdef OHOS_AI
+  void HandleGestureCreateOverlay(const WebGestureEvent& gesture_event);
+  void CreateOverlayCallback();
+  bool GetOverlayInProgress();
+  void SetOverlayInProgress(bool flag);
+  template <typename T>
+  void HandleCreateOverlay(T const& targeted_event);
+#endif
+
  private:
   class MouseEventBoundaryEventDispatcher : public BoundaryEventDispatcher {
    public:
@@ -242,6 +251,14 @@ class CORE_EXPORT MouseEventManager final
   // ends, and at each begin frame, we will dispatch a fake mouse move event to
   // update hover when this is true.
   bool hover_state_dirty_ = false;
+  
+#ifdef OHOS_AI
+  bool overlay_in_progress_ = false;
+  WebMouseEvent last_mouse_drag_;
+  Image* last_analyzed_image_ = nullptr;
+  base::RetainingOneShotTimer create_overlay_timer_;
+  base::WeakPtrFactory<MouseEventManager> weak_ptr_factory_{this};
+#endif
 };
 
 }  // namespace blink

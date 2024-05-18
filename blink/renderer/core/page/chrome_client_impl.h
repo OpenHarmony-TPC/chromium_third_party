@@ -315,6 +315,14 @@ class CORE_EXPORT ChromeClientImpl final : public ChromeClient {
                                        const WTF::String& text,
                                        int8_t offset) override;
 #endif
+
+#ifdef OHOS_AI
+  void CreateOverlay(LocalFrame* frame,
+                     const SkBitmap& image,
+                     const gfx::Rect& image_rect,
+                     const gfx::Point& touch_point,
+                     OnTextSelectedCallback callback) override;
+#endif
  private:
   bool IsChromeClientImpl() const override { return true; }
 
