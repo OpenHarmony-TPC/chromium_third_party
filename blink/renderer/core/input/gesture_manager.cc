@@ -746,7 +746,7 @@ PointerId GestureManager::GetPointerIdFromWebGestureEvent(
 #ifdef OHOS_AI
 WebInputEventResult GestureManager::HandleGestureCreateOverlay(
     const GestureEventWithHitTestResults& targeted_event) {
-  mouse_event_manager_->HandleGestureCreateOverlay(targeted_event->Event());
+  mouse_event_manager_->HandleGestureCreateOverlay(targeted_event.Event());
   return WebInputEventResult::kHandledSystem;
 }
 #endif

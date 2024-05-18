@@ -1253,7 +1253,6 @@ void MouseEventManager::SetOverlayInProgress(bool flag) {
 
 template <typename T>
 void MouseEventManager::HandleCreateOverlay(T const& targeted_event) {
-  overlay_in_progress_ = false;
   HitTestLocation location(frame_->View()->ConvertFromRootFrame(
       gfx::ToFlooredPoint(targeted_event.PositionInRootFrame())));
   HitTestResult hit_test_result =
@@ -1266,6 +1265,7 @@ void MouseEventManager::HandleCreateOverlay(T const& targeted_event) {
     LOG(INFO) << "MouseEventManager::HandleCreateOverlay, invalid or has no image";{
     return;
   }
+  overlay_in_progress_ = false;
   last_analyzed_image_ = image;
 
   gfx::Rect image_rect =
