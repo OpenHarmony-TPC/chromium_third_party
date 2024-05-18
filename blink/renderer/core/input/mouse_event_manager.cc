@@ -158,11 +158,13 @@ void MouseEventManager::Clear() {
   hover_state_dirty_ = false;
   ResetDragSource();
   ClearDragDataTransfer();
+#ifdef OHOS_AI
   create_overlay_timer_.Start(
       FROM_HERE,
       base::Milliseconds(1000),
       base::BindRepeating(&MouseEventManager::CreateOverlayCallback, weak_ptr_factory_.GetWeakPtr()));
   create_overlay_timer_.Stop();
+#endif
 }
 
 MouseEventManager::~MouseEventManager() = default;
@@ -1264,16 +1266,16 @@ void MouseEventManager::HandleCreateOverlay(T const& targeted_event) {
     LOG(INFO) << "MouseEventManager::HandleCreateOverlay, invalid or has no image";{
     return;
   }
-  last_analyzed_image_ == image;
+  last_analyzed_image_ = image;
 
   gfx::Rect image_rect =
       frame_->View()->FrameToDocument(hit_test_result.ImageRect());
   gfx::Point touch_point =
       frame_->View()->FrameToDocument(gfx::ToRoundedPoint(targeted_event.PositionInRootFrame()));
   gfx::Rect view_rect =
-      frame_->View()->FrameToDocument(gfx::ToEnclosingRect(frame_->View()->GetLayoutView()->ViewRect()));
+      frame_->View()->FrameToDocument(ToEnclosingRect(frame_->View()->GetLayoutView()->ViewRect()));
   if (base::ohos::IsPcDevice() ||
-      (1.0 * image_rect.width() / view_rect.width > 0.8 && image_rect.height() > 60)) {
+      (1.0 * image_rect.width() / view_rect.width() > 0.8 && image_rect.height() > 60)) {
     LOG(INFO) << "MouseEventManager::HandleCreateOverlay, start";
     PaintImage paint_image = image->PaintImageForCurrentFrame();
     SkBitmap bm;

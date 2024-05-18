@@ -430,6 +430,11 @@ WebInputEventResult GestureManager::HandleGestureShortPress(
 
 WebInputEventResult GestureManager::HandleGestureLongPress(
     const GestureEventWithHitTestResults& targeted_event) {
+#ifdef OHOS_AI
+  if (mouse_event_manager_->GetOverlayInProgress()) {
+    return WebInputEventResult::kNotHandled;
+  }
+#endif
   const WebGestureEvent& gesture_event = targeted_event.Event();
 
   // FIXME: Ideally we should try to remove the extra mouse-specific hit-tests
@@ -533,7 +538,7 @@ WebInputEventResult GestureManager::HandleGestureDragLongPress(
     return WebInputEventResult::kNotHandled;
   }
 
-  if (mouse_event_manager_->HandleDragDropIfPossible(targeted_event)) {
+  if (!mouse_event_manager_->GetOverlayInProgress() && mouse_event_manager_->HandleDragDropIfPossible(targeted_event)) {
     return WebInputEventResult::kHandledSystem;
   }
 
