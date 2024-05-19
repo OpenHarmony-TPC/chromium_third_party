@@ -1538,10 +1538,8 @@ bool SelectionController::HandleGestureTapIfSelectionExist(
   if (!Selection().IsAvailable()) {
     return false;
   }
-  if (!Selection().IsHandleVisible()) {
-    if (!mouse_menu_show_ || !Selection().ComputeVisibleSelectionInDOMTree().IsRange()) {
-      return false;
-    }
+  if (!Selection().ComputeVisibleSelectionInDOMTree().IsRange()) {
+    return false;
   }
 
   bool single_click = event.Event().click_count <= 1;
