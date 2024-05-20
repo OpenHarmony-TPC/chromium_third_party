@@ -1261,8 +1261,8 @@ void MouseEventManager::HandleCreateOverlay(T const& targeted_event) {
   Image* image = hit_test_result.GetImage();
   if (hit_test_result.AbsoluteImageURL().IsEmpty() ||
       !image ||
-      image == last_analyzed_image_) 
-    LOG(INFO) << "MouseEventManager::HandleCreateOverlay, invalid or has no image";{
+      image == last_analyzed_image_) {
+    LOG(INFO) << "MouseEventManager::HandleCreateOverlay, invalid or has no image";
     return;
   }
   overlay_in_progress_ = false;
