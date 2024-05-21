@@ -626,6 +626,9 @@ void LayoutView::CalculateScrollbarModes(
       disable_scrollbars = false;
     }
 #endif
+#if defined(OHOS_SOFTWARE_COMPOSITOR)
+    disable_scrollbars = false;
+#endif
     if (disable_scrollbars) {
       TRACE_EVENT_INSTANT1(
           TRACE_DISABLED_BY_DEFAULT("blink.debug.layout.scrollbars"),

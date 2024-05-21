@@ -45,6 +45,11 @@
 #include "third_party/blink/renderer/platform/widget/input/synchronous_compositor_proxy.h"
 #endif
 
+#if defined(OHOS_SOFTWARE_COMPOSITOR)
+#include "third_party/blink/renderer/platform/widget/input/software_compositor_proxy_ohos.h"
+#include "cc/mojo_embedder/software_compositor_registry_ohos.h"
+#endif
+
 namespace blink {
 
 using ::perfetto::protos::pbzero::ChromeLatencyInfo;
@@ -188,6 +193,60 @@ class SynchronousCompositorProxyRegistry
 
 #endif
 
+#if defined(OHOS_SOFTWARE_COMPOSITOR)
+class SoftwareCompositorProxyRegistryOhos : public
+   cc::mojo_embedder::SoftwareCompositorRegistryOhos {
+ public:
+  explicit SoftwareCompositorProxyRegistryOhos(
+      scoped_refptr<base::SingleThreadTaskRunner> compositor_task_runner)
+      : compositor_thread_default_task_runner_(
+            std::move(compositor_task_runner)) {}
+
+  ~SoftwareCompositorProxyRegistryOhos() {
+    // Ensure the proxy has already been release on the compositor thread
+    // before destroying this object.
+    DCHECK(!proxy_);
+  }
+
+  void CreateProxy(InputHandlerProxy* handler) {
+    DCHECK(compositor_thread_default_task_runner_->BelongsToCurrentThread());
+    proxy_ = std::make_unique<SoftwareCompositorProxyOhos>();
+
+    if (renderer_)
+      proxy_->SetSoftwareRenderer(renderer_);
+  }
+
+  SoftwareCompositorProxyOhos* proxy() { return proxy_.get(); }
+
+  void RegisterSoftwareRenderer(
+      cc::mojo_embedder::SoftwareCompositorRendererOhos* software_renderer) override {
+    DCHECK(compositor_thread_default_task_runner_->BelongsToCurrentThread());
+    DCHECK_EQ(nullptr, renderer_);
+    renderer_ = software_renderer;
+    if (proxy_)
+      proxy_->SetSoftwareRenderer(software_renderer);
+  }
+
+  void UnregisterSoftwareRenderer(
+      cc::mojo_embedder::SoftwareCompositorRendererOhos* software_renderer) override {
+    DCHECK(compositor_thread_default_task_runner_->BelongsToCurrentThread());
+    DCHECK_EQ(software_renderer, renderer_);
+    renderer_ = nullptr;
+  }
+
+  void DestroyProxy() {
+    DCHECK(compositor_thread_default_task_runner_->BelongsToCurrentThread());
+    proxy_.reset();
+  }
+
+ private:
+  scoped_refptr<base::SingleThreadTaskRunner> compositor_thread_default_task_runner_;
+  std::unique_ptr<SoftwareCompositorProxyOhos> proxy_;
+  cc::mojo_embedder::SoftwareCompositorRendererOhos* renderer_ = nullptr;
+};
+
+#endif
+
 scoped_refptr<WidgetInputHandlerManager> WidgetInputHandlerManager::Create(
     base::WeakPtr<WidgetBase> widget,
     base::WeakPtr<mojom::blink::FrameWidgetInputHandler>
@@ -253,6 +312,13 @@ WidgetInputHandlerManager::WidgetInputHandlerManager(
   if (compositor_thread_default_task_runner_) {
     synchronous_compositor_registry_ =
         std::make_unique<SynchronousCompositorProxyRegistry>(
+            compositor_thread_default_task_runner_);
+  }
+#endif
+#if defined(OHOS_SOFTWARE_COMPOSITOR)
+  if (compositor_thread_default_task_runner_) {
+    software_proxy_registry_ =
+        std::make_unique<SoftwareCompositorProxyRegistryOhos>(
             compositor_thread_default_task_runner_);
   }
 #endif
@@ -351,6 +417,11 @@ void WidgetInputHandlerManager::WillShutdown() {
 #if BUILDFLAG(IS_ANDROID)
   if (synchronous_compositor_registry_)
     synchronous_compositor_registry_->DestroyProxy();
+#endif
+#if defined(OHOS_SOFTWARE_COMPOSITOR)
+  if (software_proxy_registry_) {
+    software_proxy_registry_->DestroyProxy();
+  }
 #endif
   input_handler_proxy_.reset();
   dropped_event_counts_timer_.reset();
@@ -456,6 +527,17 @@ void WidgetInputHandlerManager::AttachSynchronousCompositor(
     synchronous_compositor_registry_->proxy()->BindChannel(
         std::move(control_host), std::move(host),
         std::move(compositor_request));
+  }
+}
+#endif
+
+#if defined(OHOS_SOFTWARE_COMPOSITOR)
+void WidgetInputHandlerManager::AttachSoftwareCompositorOhos(
+    mojo::PendingReceiver<mojom::blink::SoftwareCompositorOhos>
+        compositor_request) {
+    if (software_proxy_registry_ && software_proxy_registry_->proxy()) {
+      software_proxy_registry_->proxy()->BindChannel(
+          std::move(compositor_request));
   }
 }
 #endif
@@ -814,6 +896,11 @@ void WidgetInputHandlerManager::InitOnInputHandlingThread(
     synchronous_compositor_registry_->CreateProxy(input_handler_proxy_.get());
   }
 #endif
+#if defined(OHOS_SOFTWARE_COMPOSITOR)
+  if (software_proxy_registry_) {
+    software_proxy_registry_->CreateProxy(input_handler_proxy_.get());
+  }
+#endif
 }
 
 void WidgetInputHandlerManager::BindChannel(
@@ -1116,6 +1203,14 @@ SynchronousCompositorRegistry*
 WidgetInputHandlerManager::GetSynchronousCompositorRegistry() {
   DCHECK(synchronous_compositor_registry_);
   return synchronous_compositor_registry_.get();
+}
+#endif
+
+#if defined(OHOS_SOFTWARE_COMPOSITOR)
+cc::mojo_embedder::SoftwareCompositorRegistryOhos*
+WidgetInputHandlerManager::GetSoftwareCompositorRegistryOhos() {
+  DCHECK(software_proxy_registry_);
+  return software_proxy_registry_.get();
 }
 #endif
 

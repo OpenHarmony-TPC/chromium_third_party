@@ -241,6 +241,10 @@ mojom("mojom_platform") {
     "worker/worker_options.mojom",
   ]
 
+  if (defined(ohos_software_compositor) && ohos_software_compositor) {
+    sources += [ "input/software_compositor_ohos.mojom" ]
+  }
+
   if (is_android) {
     sources += [ "input/synchronous_compositor.mojom" ]
   }

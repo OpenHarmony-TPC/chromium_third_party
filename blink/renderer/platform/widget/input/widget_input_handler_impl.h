@@ -78,6 +78,11 @@ class WidgetInputHandlerImpl : public mojom::blink::WidgetInputHandler {
       mojo::PendingAssociatedReceiver<mojom::blink::SynchronousCompositor>
           compositor_receiver) override;
 #endif
+#if defined(OHOS_SOFTWARE_COMPOSITOR)
+  void AttachSoftwareCompositorOhos(
+      mojo::PendingReceiver<mojom::blink::SoftwareCompositorOhos>
+          compositor_receiver) override;
+#endif
   void GetFrameWidgetInputHandler(
       mojo::PendingAssociatedReceiver<mojom::blink::FrameWidgetInputHandler>
           interface_request) override;
