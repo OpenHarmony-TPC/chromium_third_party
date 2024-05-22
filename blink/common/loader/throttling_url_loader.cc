@@ -752,6 +752,7 @@ void ThrottlingURLLoader::OnReceiveResponse(
 
 #if BUILDFLAG(IS_OHOS)
 void ThrottlingURLLoader::OnTransferDataWithSharedMemory(base::ReadOnlySharedMemoryRegion region, uint64_t buffer_size) {
+  LOG(DEBUG) << "shared-memory ThrottlingURLLoader::OnTransferDataWithSharedMemory buffer_size=" << buffer_size;
   forwarding_client_->OnTransferDataWithSharedMemory(std::move(region), buffer_size);
 }
 #endif

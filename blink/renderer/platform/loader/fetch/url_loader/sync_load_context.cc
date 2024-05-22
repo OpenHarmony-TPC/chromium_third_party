@@ -261,6 +261,7 @@ void SyncLoadContext::OnReceivedResponse(
 #if BUILDFLAG(IS_OHOS)
 void SyncLoadContext::OnTransferDataWithSharedMemory(base::ReadOnlySharedMemoryRegion region, uint64_t buffer_size) {
   TRACE_EVENT0("loading", "SyncLoadContext::OnTransferDataWithSharedMemory");
+  LOG(DEBUG) << "shared-memory SyncLoadContext::OnTransferDataWithSharedMemory+++, buffer_size=" << buffer_size;
   if (!region.IsValid()) {
     LOG(ERROR) << "shared-memory region is invalid";
     response_->error_code = net::ERR_FAILED;
@@ -298,6 +299,7 @@ void SyncLoadContext::OnTransferDataWithSharedMemory(base::ReadOnlySharedMemoryR
   response_->head->encoded_body_length =
       network::mojom::EncodedBodyLength::New(status.encoded_body_length);
   CompleteRequest();
+  LOG(DEBUG) << "shared-memory SyncLoadContext::OnTransferDataWithSharedMemory---, buffer_size=" << buffer_size;
 }
 #endif
 

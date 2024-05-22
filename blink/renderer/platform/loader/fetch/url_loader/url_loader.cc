@@ -352,7 +352,11 @@ void URLLoader::Context::Start(
       std::move(request), GetMaybeUnfreezableTaskRunner(), tag, loader_options,
       cors_exempt_header_list_, base::WrapRefCounted(this), url_loader_factory_,
       std::move(throttles), std::move(resource_load_info_notifier_wrapper),
+#if BUILDFLAG(IS_OHOS)
+      back_forward_cache_loader_helper_, false);
+#else
       back_forward_cache_loader_helper_);
+#endif
 
   if (freeze_mode_ != LoaderFreezeMode::kNone) {
     resource_request_sender_->Freeze(LoaderFreezeMode::kStrict);
@@ -528,6 +532,7 @@ void URLLoader::LoadSynchronously(
     scoped_refptr<BlobDataHandle>& downloaded_blob,
     std::unique_ptr<ResourceLoadInfoNotifierWrapper>
         resource_load_info_notifier_wrapper) {
+  LOG(DEBUG) << "intercept URLLoader::LoadSynchronously+++";
   if (!context_) {
     return;
   }
@@ -589,6 +594,7 @@ void URLLoader::LoadSynchronously(
   }
 
   data = sync_load_response.data;
+  LOG(DEBUG) << "intercept URLLoader::LoadSynchronously---";
 }
 
 void URLLoader::LoadAsynchronously(
@@ -598,6 +604,7 @@ void URLLoader::LoadAsynchronously(
     std::unique_ptr<ResourceLoadInfoNotifierWrapper>
         resource_load_info_notifier_wrapper,
     URLLoaderClient* client) {
+  LOG(DEBUG) << "intercept URLLoader::LoadASynchronously+++";
   if (!context_) {
     return;
   }
@@ -611,6 +618,7 @@ void URLLoader::LoadAsynchronously(
                   /*pass_response_pipe_to_client=*/false, no_mime_sniffing,
                   base::TimeDelta(), nullptr,
                   std::move(resource_load_info_notifier_wrapper));
+  LOG(DEBUG) << "intercept URLLoader::LoadASynchronously---";
 }
 
 void URLLoader::Cancel() {

@@ -228,7 +228,12 @@ int ResourceRequestSender::SendAsync(
     WebVector<std::unique_ptr<URLLoaderThrottle>> throttles,
     std::unique_ptr<ResourceLoadInfoNotifierWrapper>
         resource_load_info_notifier_wrapper,
+#if BUILDFLAG(IS_OHOS)
+    BackForwardCacheLoaderHelper* back_forward_cache_loader_helper,
+    bool is_sync_mode) {
+#else
     BackForwardCacheLoaderHelper* back_forward_cache_loader_helper) {
+#endif
   CheckSchemeForReferrerPolicy(*request);
 
 #if BUILDFLAG(IS_ANDROID)
@@ -247,6 +252,15 @@ int ResourceRequestSender::SendAsync(
 
   // Compute a unique request_id for this renderer process.
   int request_id = GenerateRequestId();
+#if BUILDFLAG(IS_OHOS)
+  int request_id_pro = request_id << 1;
+  if (is_sync_mode) {
+    request_id_pro = request_id_pro | 1;
+  }
+  LOG(DEBUG) << "intercept ResourceRequestSender::SendAsync, is_sync_mode=" << is_sync_mode
+              <<", request_id=" << request_id << ", request_id_pro=" << request_id_pro;
+  request_id = request_id_pro;
+#endif
   request_info_ = std::make_unique<PendingRequestInfo>(
       std::move(client), request->destination, KURL(request->url),
       std::move(resource_load_info_notifier_wrapper));
@@ -443,6 +457,7 @@ void ResourceRequestSender::OnTransferDataWithSharedMemory(base::ReadOnlySharedM
   if(!request_info_) {
     return;
   }
+  LOG(DEBUG) << "intercept ResourceRequestSender::OnTransferDataWithSharedMemory, buffer_size=" << buffer_size;
   request_info_->client->OnTransferDataWithSharedMemory(std::move(region), buffer_size);
 }
 #endif
