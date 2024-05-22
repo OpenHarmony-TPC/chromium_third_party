@@ -109,7 +109,12 @@ class BLINK_PLATFORM_EXPORT ResourceRequestSender {
       WebVector<std::unique_ptr<URLLoaderThrottle>> throttles,
       std::unique_ptr<ResourceLoadInfoNotifierWrapper>
           resource_load_info_notifier_wrapper,
+#if BUILDFLAG(IS_OHOS)
+      BackForwardCacheLoaderHelper* back_forward_cache_loader_helper,
+      bool is_sync_mode = true);
+#else
       BackForwardCacheLoaderHelper* back_forward_cache_loader_helper);
+#endif
 
   // Cancels the current request and `request_info_` will be released.
   virtual void Cancel(scoped_refptr<base::SingleThreadTaskRunner> task_runner);
