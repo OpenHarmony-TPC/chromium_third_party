@@ -25,6 +25,12 @@
 
 namespace cc {
 class EventMetrics;
+
+#if defined(OHOS_SOFTWARE_COMPOSITOR)
+namespace mojo_embedder {
+class SoftwareCompositorRegistryOhos;
+}
+#endif
 }
 
 namespace gfx {
@@ -41,6 +47,10 @@ class SynchronousCompositorRegistry;
 class SynchronousCompositorProxyRegistry;
 class WebInputEventAttribution;
 class WidgetBase;
+
+#if defined(OHOS_SOFTWARE_COMPOSITOR)
+class SoftwareCompositorProxyRegistryOhos;
+#endif
 
 // This class maintains the compositor InputHandlerProxy and is
 // responsible for passing input events on the compositor and main threads.
@@ -156,6 +166,13 @@ class PLATFORM_EXPORT WidgetInputHandlerManager final
           compositor_request);
 
   SynchronousCompositorRegistry* GetSynchronousCompositorRegistry();
+#endif
+#if defined(OHOS_SOFTWARE_COMPOSITOR)
+  void AttachSoftwareCompositorOhos(
+      mojo::PendingReceiver<mojom::blink::SoftwareCompositorOhos>
+          compositor_request);
+
+  cc::mojo_embedder::SoftwareCompositorRegistryOhos* GetSoftwareCompositorRegistryOhos();
 #endif
 
   void InvokeInputProcessedCallback();
@@ -404,6 +421,11 @@ class PLATFORM_EXPORT WidgetInputHandlerManager final
 #if BUILDFLAG(IS_ANDROID)
   std::unique_ptr<SynchronousCompositorProxyRegistry>
       synchronous_compositor_registry_;
+#endif
+
+#if defined(OHOS_SOFTWARE_COMPOSITOR)
+  std::unique_ptr<SoftwareCompositorProxyRegistryOhos>
+      software_proxy_registry_;
 #endif
 
   // Whether to use ScrollPredictor to resample scroll events. This is false for

@@ -201,6 +201,14 @@ void WidgetInputHandlerImpl::AttachSynchronousCompositor(
 }
 #endif
 
+#if defined(OHOS_SOFTWARE_COMPOSITOR)
+void WidgetInputHandlerImpl::AttachSoftwareCompositorOhos(
+    mojo::PendingReceiver<mojom::blink::SoftwareCompositorOhos>
+        compositor_receiver) {
+  input_handler_manager_->AttachSoftwareCompositorOhos(std::move(compositor_receiver));
+}
+#endif
+
 void WidgetInputHandlerImpl::GetFrameWidgetInputHandler(
     mojo::PendingAssociatedReceiver<mojom::blink::FrameWidgetInputHandler>
         frame_receiver) {

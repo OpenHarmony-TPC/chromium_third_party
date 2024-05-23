@@ -811,11 +811,22 @@ void WidgetBase::FinishRequestNewLayerTreeFrameSink(
       std::move(render_frame_metadata_observer_client_receiver),
       std::move(render_frame_metadata_observer_remote));
   params->gpu_memory_buffer_manager = gpu_memory_buffer_manager;
+#if defined(OHOS_SOFTWARE_COMPOSITOR)
+  auto sink = std::make_unique<cc::mojo_embedder::AsyncLayerTreeFrameSink>(
+      std::move(context_provider), std::move(worker_context_provider_wrapper),
+      params.get());
+  sink->InitSoftwareCompositorRender(
+      widget_input_handler_manager_->GetSoftwareCompositorRegistryOhos());
+
+  std::move(callback).Run(std::move(sink),
+                          std::move(render_frame_metadata_observer));
+#else
   std::move(callback).Run(
       std::make_unique<cc::mojo_embedder::AsyncLayerTreeFrameSink>(
           std::move(context_provider),
           std::move(worker_context_provider_wrapper), params.get()),
       std::move(render_frame_metadata_observer));
+#endif
 }
 
 void WidgetBase::DidCommitAndDrawCompositorFrame() {

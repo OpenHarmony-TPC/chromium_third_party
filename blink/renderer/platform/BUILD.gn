@@ -1578,6 +1578,13 @@ component("platform") {
     ]
   }
 
+  if (defined(ohos_software_compositor) && ohos_software_compositor) {
+    sources += [
+      "widget/input/software_compositor_proxy_ohos.cc",
+      "widget/input/software_compositor_proxy_ohos.h",
+    ]
+  }
+
   # Add in the generated files.
   sources += get_target_outputs(":character_data") +
              get_target_outputs(":color_data") +
