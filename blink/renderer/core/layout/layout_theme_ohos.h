@@ -19,9 +19,12 @@ class LayoutThemeOhos final : public LayoutThemeMobile {
   Color PlatformActiveSelectionForegroundColor(
       mojom::blink::ColorScheme color_scheme) const override;
   void AdjustInnerSpinButtonStyle(ComputedStyleBuilder&) const override;
+  bool SupportsSelectionForegroundColors() const override { return false; }
 
  private:
   ~LayoutThemeOhos() override;
+  static constexpr Color kDefaultActiveSelectionBackgroundColor =
+      Color::FromRGBA32(0x330a59f7);
 };
 
 }  // namespace blink
