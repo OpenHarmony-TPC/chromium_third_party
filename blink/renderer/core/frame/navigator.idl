@@ -32,6 +32,10 @@
     [HighEntropy=Direct, MeasureAs=NavigatorProductSub] readonly attribute DOMString productSub;
     // https://www.w3.org/Bugs/Public/show_bug.cgi?id=27786
     [HighEntropy=Direct, MeasureAs=NavigatorVendor] readonly attribute DOMString vendor;
+
+    // #if BUILDFLAG(IS_OHOS)
+    readonly attribute DOMString appPackageName;
+    // #endif // BUILDFLAG(IS_OHOS)
 };
 
 Navigator includes NavigatorConcurrentHardware;
