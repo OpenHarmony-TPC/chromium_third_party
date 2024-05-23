@@ -125,6 +125,10 @@
 #include "third_party/blink/renderer/platform/weborigin/security_policy.h"
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
 
+#ifdef OHOS_MEDIA_POLICY
+#include "base/ohos/sys_info_utils.h"
+#endif  // OHOS_MEDIA_POLICY
+
 #ifndef LOG_MEDIA_EVENTS
 // Default to not logging events because so many are generated they can
 // overwhelm the rest of the logging.
@@ -3948,10 +3952,11 @@ void HTMLMediaElement::UpdatePlayState(bool pause_speech /* = true */) {
 
   if (should_be_playing && !muted_)
     was_always_muted_ = false;
+
 #ifdef OHOS_MEDIA_POLICY
   auto media_player = GetWebMediaPlayer();
-  if (media_player && media_player->IsFrameHidden() &&
-      IsHTMLVideoElement()) {
+  if (!base::ohos::IsPcDevice() && media_player &&
+      media_player->IsFrameHidden() && IsHTMLVideoElement()) {
     if (should_be_playing && media_player->HasVideo()) {
       should_be_playing = false;
       pause();
@@ -3959,7 +3964,7 @@ void HTMLMediaElement::UpdatePlayState(bool pause_speech /* = true */) {
                    "be allow to play";
     }
   }
-  #endif
+#endif  // OHOS_MEDIA_POLICY
 
   if (should_be_playing) {
     if (!is_playing) {
