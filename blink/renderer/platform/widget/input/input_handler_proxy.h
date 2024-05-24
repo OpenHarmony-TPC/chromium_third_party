@@ -240,6 +240,7 @@ class PLATFORM_EXPORT InputHandlerProxy : public cc::InputHandlerClient,
   void SendNativeEvent(const WebTouchEvent& touch_event,
     WebInputEvent::Type type, size_t i, bool result = true);
   void NativeHitTestResult(bool native, size_t fingerId);
+  void TriggerVsyncImplTask();
 #endif
 #if defined(OHOS_INPUT_EVENTS)
   void SetOverscrollMode(int mode);

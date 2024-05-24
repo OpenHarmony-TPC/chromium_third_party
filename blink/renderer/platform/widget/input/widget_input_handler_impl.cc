@@ -21,6 +21,7 @@
 #include "third_party/blink/renderer/platform/widget/widget_base.h"
 #if BUILDFLAG(IS_OHOS)
 #include "cef/libcef/common/soc_perf_util.h"
+#include "content/child/child_thread_impl.h"
 #endif
 
 namespace blink {
@@ -149,6 +150,7 @@ void WidgetInputHandlerImpl::DispatchEvent(
     std::unique_ptr<WebCoalescedInputEvent> event,
     DispatchEventCallback callback) {
   TRACE_EVENT0("input", "WidgetInputHandlerImpl::DispatchEvent");
+  TriggerVsyncImplTask();
   input_handler_manager_->DispatchEvent(std::move(event), std::move(callback));
 }
 
@@ -167,6 +169,7 @@ void WidgetInputHandlerImpl::DispatchNonBlockingEvent(
   TRACE_EVENT0("input", "WidgetInputHandlerImpl::DispatchNonBlockingEvent");
   input_handler_manager_->DispatchEvent(std::move(event),
                                         DispatchEventCallback());
+  TriggerVsyncImplTask();
 }
 
 void WidgetInputHandlerImpl::WaitForInputProcessed(
@@ -251,6 +254,11 @@ void WidgetInputHandlerImpl::Release() {
 #if BUILDFLAG(IS_OHOS)
 void WidgetInputHandlerImpl::SetGestureEventResult(bool result) {
   input_handler_manager_->SetGestureEventResult(result);
+}
+
+void WidgetInputHandlerImpl::TriggerVsyncImplTask() {
+  LOG(INFO) << "zhaopf TriggerVsyncImplTask 0";
+  input_handler_manager_->TriggerVsyncImplTask();
 }
 #endif
 
