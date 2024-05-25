@@ -1145,6 +1145,7 @@ class PLATFORM_EXPORT WebMediaPlayerImpl
   std::string poster_url_;
   int native_texture_id_ = 0;
   uint32_t initial_preload_ = static_cast<uint32_t>(media::DataSource::METADATA);
+  media::Renderer::OnGetRectCallback on_get_rect_cb_;
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
 
   base::WeakPtr<WebMediaPlayerImpl> weak_this_;
