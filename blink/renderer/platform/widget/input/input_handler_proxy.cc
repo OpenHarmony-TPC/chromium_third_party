@@ -426,14 +426,18 @@ void InputHandlerProxy::HandleInputEventWithLatencyInfo(
 }
 
 #if BUILDFLAG(IS_OHOS)
-void InputHandlerProxy::NativeHitTestResult(bool native, size_t fingerId) {
+void InputHandlerProxy::NativeHitTestResult(bool native, size_t fingerId, int layerId) {
   LOG(DEBUG)<<"[NativeEmbed] NativeHitTestResult fingerId is : "<< fingerId << " and native is : "<< native;
   float x = start_touch_event_.touches[fingerId].PositionInWidget().x();
   float y = start_touch_event_.touches[fingerId].PositionInWidget().y();
-  layer_impl_ = input_handler_->GetLayerImpl(gfx::Point(x, y));
-  native = native || (layer_impl_ && layer_impl_->ShouldInterceptTouchEvent());
+  cc::LayerImpl* layer_impl = input_handler_->GetLayerImpl(gfx::Point(x, y));
+  if (!native && (layer_impl && layer_impl->ShouldInterceptTouchEvent())) {
+    layerId = layer_impl->id();
+  }
+  native = native || (layer_impl && layer_impl->ShouldInterceptTouchEvent());
   native_map_[fingerId] = native;
   if (native) {
+    native_id_map_[fingerId] = layerId;
     SendNativeEvent(start_touch_event_, WebInputEvent::Type::kTouchStart, fingerId);
   } else if (!native_event_queue_->empty()) {
     SendNativeEvent(start_touch_event_, WebInputEvent::Type::kTouchStart, fingerId, false);
@@ -448,20 +452,30 @@ void InputHandlerProxy::SendNativeEvent(const WebTouchEvent& touch_event,
     float x = touch_event.touches[i].PositionInWidget().x();
     float y = touch_event.touches[i].PositionInWidget().y();
     int32_t id = touch_event.touches[i].id;
+    int layer_id = native_id_map_[id];
+    cc::LayerImpl* layer_impl = input_handler_->GetLayerImplById(layer_id);
+    if (layer_impl) {
+      embed_id_ = std::to_string(layer_impl->native_embed_id());
+      gfx::RectF nativeRect = layer_impl->GetNativeRect();
+      float scale = layer_impl->GetIdealContentsScaleKey();
+      float initScale = layer_impl->GetInitScale();
+      if (initScale > 0.f && scale > 0.f) {
+        x = (x - nativeRect.x()) / (scale / initScale);
+        y = (y - nativeRect.y()) / (scale / initScale);
+      } else {
+        x = x - nativeRect.x();
+        y = y - nativeRect.y();
+      }
 
-    embed_id_ = std::to_string(layer_impl_->native_embed_id());
-    gfx::RectF nativeRect = layer_impl_->GetNativeRect();
-    float scale = layer_impl_->GetIdealContentsScaleKey();
-    float initScale = layer_impl_->GetInitScale();
-    if (initScale > 0.f && scale > 0.f) {
-      x = (x - nativeRect.x()) / (scale / initScale);
-      y = (y - nativeRect.y()) / (scale / initScale);
+      client_->DidNativeEmbedEvent(type, embed_id_, id, x, y);
     } else {
-      x = x - nativeRect.x();
-      y = y - nativeRect.y();
+      if (!native_event_queue_->empty()) {
+        auto event_with_callback = native_event_queue_->Pop();
+        DispatchSingleInputEvent(std::move(event_with_callback), tick_clock_->NowTicks());
+      }
+      LOG(ERROR)<<"[NativeEmbed] SendNativeEvent error layer_impl is null";
     }
 
-    client_->DidNativeEmbedEvent(type, embed_id_, id, x, y);
   } else {
     client_->DidNativeEmbedEvent(type, embed_id_, NO_NATIVE_TYPE, 0, 0);
   }

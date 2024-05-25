@@ -393,7 +393,7 @@ class PLATFORM_EXPORT WidgetBase : public mojom::blink::Widget,
                            std::string embedId, int32_t id, float x, float y);
   void ReportForegroundThreadPool();
   void TouchHitTest(const WebPointerEvent& event, size_t i);
-  void NativeHitTestResult(bool isNative, size_t fingerId);
+  void NativeHitTestResult(bool isNative, size_t fingerId, int layerId);
 #endif
 
  private:

@@ -1246,14 +1246,15 @@ void WidgetInputHandlerManager::TouchHitTest(const WebPointerEvent& event, size_
       base::BindOnce(&WidgetBase::TouchHitTest, widget_, event, fingerId));
 }
 
-void WidgetInputHandlerManager::NativeHitTestResult(bool isNative, size_t fingerId) {
+void WidgetInputHandlerManager::NativeHitTestResult(bool isNative, size_t fingerId, int layerId) {
   compositor_thread_default_task_runner_->PostTask(
-        FROM_HERE, base::BindOnce(&WidgetInputHandlerManager::AsyncNativeHitTestResult, this, isNative, fingerId));
+        FROM_HERE, base::BindOnce(&WidgetInputHandlerManager::AsyncNativeHitTestResult,
+        this, isNative, fingerId, layerId));
 }
 
-void WidgetInputHandlerManager::AsyncNativeHitTestResult(bool isNative, size_t fingerId) {
+void WidgetInputHandlerManager::AsyncNativeHitTestResult(bool isNative, size_t fingerId, int layerId) {
   if (input_handler_proxy_) {
-    input_handler_proxy_->NativeHitTestResult(isNative, fingerId);
+    input_handler_proxy_->NativeHitTestResult(isNative, fingerId, layerId);
   }
 }
 
