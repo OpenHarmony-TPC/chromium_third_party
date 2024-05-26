@@ -321,6 +321,8 @@ class CORE_EXPORT WebFrameWidgetImpl
       bool may_throttle_if_undrawn_frames) override;
   int GetVirtualKeyboardResizeHeight() const override;
 
+  void GetInputElementAttributes(HashMap<String, String>& attributes) const override;
+
   void OnTaskCompletedForFrame(base::TimeTicks start_time,
                                base::TimeTicks end_time,
                                base::TimeTicks desired_execution_time,

@@ -126,6 +126,8 @@ class CORE_EXPORT InputMethodController final
   int ComputeWebTextInputNextPreviousFlags() const;
   WebTextInputType TextInputType() const;
 
+  void GetInputElementAttributes(HashMap<String, String>& attributes) const;
+
   // Call this when we will change focus.
   void WillChangeFocus();
 

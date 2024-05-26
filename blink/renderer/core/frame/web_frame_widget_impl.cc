@@ -4652,6 +4652,15 @@ int WebFrameWidgetImpl::GetVirtualKeyboardResizeHeight() const {
   return virtual_keyboard_resize_height_physical_px_;
 }
 
+void WebFrameWidgetImpl::GetInputElementAttributes(HashMap<String, String>& attributes) const {
+  WebInputMethodController* controller = GetActiveWebInputMethodController();
+  if (!controller) {
+    return;
+  }
+
+  controller->GetInputElementAttributes(attributes);
+}
+
 void WebFrameWidgetImpl::SetVirtualKeyboardResizeHeightForTesting(int height) {
   virtual_keyboard_resize_height_physical_px_ = height;
 }

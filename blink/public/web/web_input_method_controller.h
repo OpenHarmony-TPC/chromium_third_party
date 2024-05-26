@@ -8,11 +8,16 @@
 #include "third_party/blink/public/platform/web_text_input_info.h"
 #include "third_party/blink/public/web/web_range.h"
 #include "third_party/blink/public/web/web_widget.h"
+#include "third_party/blink/renderer/platform/wtf/text/wtf_string.h"
 #include "ui/base/ime/ime_text_span.h"
 
 namespace gfx {
 class Rect;
 }  // namespace gfx
+
+namespace WTF {
+  class String;
+}
 
 namespace blink {
 
@@ -69,6 +74,8 @@ class WebInputMethodController {
 
   // Returns the type of current text input of this controller.
   virtual WebTextInputType TextInputType() { return kWebTextInputTypeNone; }
+
+  virtual void GetInputElementAttributes(HashMap<WTF::String, WTF::String>& attributes) {}
 
   // Fetch the current selection range of this frame.
   virtual WebRange GetSelectionOffsets() const = 0;

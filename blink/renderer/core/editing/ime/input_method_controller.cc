@@ -1856,6 +1856,33 @@ WebTextInputType InputMethodController::TextInputType() const {
   return kWebTextInputTypeNone;
 }
 
+void InputMethodController::GetInputElementAttributes(HashMap<String, String>& attributes) const {
+  Element* element = GetDocument().FocusedElement();
+  if (!element)
+    return;
+
+  bool query_attribute = false;
+  if (auto* input = DynamicTo<HTMLInputElement>(*element)) {
+    query_attribute = true;
+  } else if (IsA<HTMLTextAreaElement>(*element)) {
+    query_attribute = true;
+  } else {
+    element->GetDocument().UpdateStyleAndLayoutTree();
+    if (IsEditable(*element)) {
+      query_attribute = true;
+    }
+  }
+
+  if (!query_attribute) {
+    return;
+  }
+
+  auto attributes_collection = element->Attributes();
+  for (const Attribute& attribute : attributes_collection) {
+    attributes.insert(attribute.LocalName().GetString(), attribute.Value().GetString());
+  }
+}
+
 void InputMethodController::WillChangeFocus() {
   FinishComposingText(kKeepSelection);
 
