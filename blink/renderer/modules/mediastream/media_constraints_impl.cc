@@ -550,6 +550,7 @@ bool ValidateAndCopyConstraintSet(
                        constraint_buffer.sample_size);
   }
 
+#ifndef OHOS_WEBRTC
   if (constraints_in->hasEchoCancellation()) {
     CopyBooleanConstraint(constraints_in->echoCancellation(), naked_treatment,
                           constraint_buffer.echo_cancellation);
@@ -564,6 +565,7 @@ bool ValidateAndCopyConstraintSet(
     CopyBooleanConstraint(constraints_in->noiseSuppression(), naked_treatment,
                           constraint_buffer.goog_noise_suppression);
   }
+#endif
 
   if (constraints_in->hasLatency()) {
     CopyDoubleConstraint(constraints_in->latency(), naked_treatment,
