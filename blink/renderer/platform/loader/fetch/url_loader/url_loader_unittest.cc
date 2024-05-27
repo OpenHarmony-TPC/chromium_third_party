@@ -102,7 +102,12 @@ class MockResourceRequestSender : public ResourceRequestSender {
       WebVector<std::unique_ptr<URLLoaderThrottle>> throttles,
       std::unique_ptr<ResourceLoadInfoNotifierWrapper>
           resource_load_info_notifier_wrapper,
+      #if BUILDFLAG(IS_OHOS)
+      BackForwardCacheLoaderHelper* back_forward_cache_loader_helper,
+      bool is_sync_mode = true) override {
+      #else
       BackForwardCacheLoaderHelper* back_forward_cache_loader_helper) override {
+      #endif
     EXPECT_FALSE(resource_request_client_);
     if (sync_load_response_.head->encoded_body_length) {
       EXPECT_TRUE(loader_options & network::mojom::kURLLoadOptionSynchronous);
