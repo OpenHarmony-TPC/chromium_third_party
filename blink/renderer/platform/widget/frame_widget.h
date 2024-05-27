@@ -305,6 +305,8 @@ class PLATFORM_EXPORT FrameWidget {
 #if BUILDFLAG(IS_OHOS)
   virtual void TouchHitTest(const WebPointerEvent& event, size_t i) = 0;
 #endif
+
+  virtual void GetInputElementAttributes(HashMap<String, String>& attributes) const = 0;
 };
 
 }  // namespace blink

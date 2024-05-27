@@ -50,6 +50,7 @@ class CORE_EXPORT WebInputMethodControllerImpl
   WebTextInputInfo TextInputInfo() override;
   int ComputeWebTextInputNextPreviousFlags() override;
   WebTextInputType TextInputType() override;
+  void GetInputElementAttributes(HashMap<String, String>& attributes) override;
   WebRange CompositionRange() override;
   bool GetCompositionCharacterBounds(WebVector<gfx::Rect>& bounds) override;
 

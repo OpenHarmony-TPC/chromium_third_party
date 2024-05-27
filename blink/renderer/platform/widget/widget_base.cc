@@ -1101,6 +1101,7 @@ void WidgetBase::UpdateTextInputStateInternal(bool show_virtual_keyboard,
   bool always_hide_ime = false;
   absl::optional<gfx::Rect> control_bounds;
   absl::optional<gfx::Rect> selection_bounds;
+  HashMap<String, String> input_atrributes;
   if (frame_widget) {
     new_info = frame_widget->TextInputInfo();
     // This will be used to decide whether or not to show VK when VK policy is
@@ -1113,6 +1114,7 @@ void WidgetBase::UpdateTextInputStateInternal(bool show_virtual_keyboard,
     always_hide_ime = frame_widget->ShouldSuppressKeyboardForFocusedElement();
     frame_widget->GetEditContextBoundsInWindow(&control_bounds,
                                                &selection_bounds);
+    frame_widget->GetInputElementAttributes(input_atrributes);
   }
   const ui::TextInputMode new_mode =
       ConvertWebTextInputMode(new_info.input_mode);
@@ -1143,6 +1145,7 @@ void WidgetBase::UpdateTextInputStateInternal(bool show_virtual_keyboard,
     params->last_vk_visibility_request = last_vk_visibility_request;
     params->edit_context_control_bounds = control_bounds;
     params->edit_context_selection_bounds = selection_bounds;
+    params->input_element_attributes = input_atrributes;
 
     if (!new_info.ime_text_spans.empty()) {
       params->ime_text_spans_info =
