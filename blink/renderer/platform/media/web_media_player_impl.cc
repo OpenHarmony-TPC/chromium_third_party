@@ -4165,7 +4165,8 @@ void WebMediaPlayerImpl::OnNativeTextureCreated(int native_texture_id,
   if (bridge_) {
     bridge_->GetCcLayer()->SetNativeEmbedId(native_texture_id);
   }
-  std::move(callback).Run(client_->GetVideoRect());
+  on_get_rect_cb_ = callback;
+  on_get_rect_cb_.Run(client_->GetVideoRect());
 }
 void WebMediaPlayerImpl::UpdatePlaybackStatus(uint32_t status) {
   client_->UpdatePlaybackStatus(status);
@@ -4187,6 +4188,9 @@ void WebMediaPlayerImpl::SetInitialPreload(uint32_t preload) {
 }
 void WebMediaPlayerImpl::OnLayerRectChange(const gfx::Rect& rect) {
   DCHECK(main_task_runner_->BelongsToCurrentThread());
+  if (on_get_rect_cb_) {
+    on_get_rect_cb_.Run(rect);
+  }
   client_->OnLayerRectChange(rect);
 }
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
