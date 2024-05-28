@@ -37,6 +37,11 @@
 #include "third_party/blink/renderer/platform/instrumentation/memory_pressure_listener.h"
 #include "third_party/blink/renderer/platform/language.h"
 
+#if BUILDFLAG(IS_OHOS)
+#include "base/command_line.h"
+#include "base/base_switches.h"
+#endif  // BUILDFLAG(IS_OHOS)
+
 namespace blink {
 
 Navigator::Navigator(ExecutionContext* context) : NavigatorBase(context) {}
@@ -104,5 +109,17 @@ void Navigator::Trace(Visitor* visitor) const {
   NavigatorBase::Trace(visitor);
   Supplementable<Navigator>::Trace(visitor);
 }
+
+#if BUILDFLAG(IS_OHOS)
+String Navigator::appPackageName() const {
+  std::string package_name = "";
+  const base::CommandLine* command_line =
+    base::CommandLine::ForCurrentProcess();
+  if (command_line && command_line->HasSwitch(switches::kBundleName)) {
+    package_name = command_line->GetSwitchValueASCII(switches::kBundleName);
+  }
+  return String::FromUTF8(package_name);
+}
+#endif  // BUILDFLAG(IS_OHOS)
 
 }  // namespace blink

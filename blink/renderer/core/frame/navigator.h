@@ -52,6 +52,10 @@ class CORE_EXPORT Navigator final : public NavigatorBase,
 
   void Trace(Visitor*) const override;
 
+#if BUILDFLAG(IS_OHOS)
+  String appPackageName() const;
+#endif  // BUILDFLAG(IS_OHOS)
+
  private:
   UserAgentMetadata metadata_;
 };
