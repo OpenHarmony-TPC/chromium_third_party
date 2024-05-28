@@ -1776,9 +1776,9 @@ void WidgetBase::TouchHitTest(const WebPointerEvent& event, size_t i) {
   frame_widget->TouchHitTest(event, i);
 }
 
-void WidgetBase::NativeHitTestResult(bool isNative, size_t fingerId) {
+void WidgetBase::NativeHitTestResult(bool isNative, size_t fingerId, int layerId) {
   if (widget_input_handler_manager_) {
-    widget_input_handler_manager_->NativeHitTestResult(isNative, fingerId);
+    widget_input_handler_manager_->NativeHitTestResult(isNative, fingerId, layerId);
   }
 }
 gfx::PointF WidgetBase::DIPsToBlinkSpace(const gfx::PointF& point) {

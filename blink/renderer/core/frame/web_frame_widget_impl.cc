@@ -96,6 +96,7 @@
 #include "third_party/blink/renderer/core/html/forms/text_control_element.h"
 #include "third_party/blink/renderer/core/html/html_frame_owner_element.h"
 #include "third_party/blink/renderer/core/html/html_plugin_element.h"
+#include "third_party/blink/renderer/core/html/media/html_native_element.h"
 #include "third_party/blink/renderer/core/html/portal/document_portals.h"
 #include "third_party/blink/renderer/core/html/portal/portal_contents.h"
 #include "third_party/blink/renderer/core/input/context_menu_allowed_scope.h"
@@ -4338,7 +4339,16 @@ void WebFrameWidgetImpl::TouchHitTest(const WebPointerEvent& event, size_t finge
     if (frame) {
        isNativeType = frame->IsNativeType();
     }
-    widget_base_->NativeHitTestResult(isNativeType, fingerId);
+    int layerId = 0;
+    if (isNativeType) {
+      Element* target = hit_test_result.InnerElement();
+      if (auto* htmlNativeElement = DynamicTo<HTMLNativeElement>(target)) {
+          if (auto* layer = htmlNativeElement->CcLayer()){
+            layerId = layer->id();
+          }
+      }
+    }
+    widget_base_->NativeHitTestResult(isNativeType, fingerId, layerId);
 }
 #endif  // BUILDFLAG(IS_OHOS)
 
