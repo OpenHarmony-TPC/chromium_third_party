@@ -430,11 +430,6 @@ WebInputEventResult GestureManager::HandleGestureShortPress(
 
 WebInputEventResult GestureManager::HandleGestureLongPress(
     const GestureEventWithHitTestResults& targeted_event) {
-#ifdef OHOS_AI
-  if (mouse_event_manager_->GetOverlayInProgress()) {
-    return WebInputEventResult::kNotHandled;
-  }
-#endif
   const WebGestureEvent& gesture_event = targeted_event.Event();
 
   // FIXME: Ideally we should try to remove the extra mouse-specific hit-tests
@@ -485,6 +480,11 @@ WebInputEventResult GestureManager::HandleGestureLongPress(
         mouse_event_manager_->FocusDocumentView();
       }
     }
+#ifdef OHOS_AI
+    else if (mouse_event_manager_->GetOverlayInProgress()) {
+      return WebInputEventResult::kNotHandled;
+    }
+#endif
     selection_controller_->SetLastLongPressHitTestResult(hit_test_result);
     // notify webContentImpl reset showing_context_menu_ status, to make sure
     // update contextMenu
