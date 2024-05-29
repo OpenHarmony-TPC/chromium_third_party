@@ -1151,7 +1151,7 @@ void WidgetBase::UpdateTextInputStateInternal(bool show_virtual_keyboard,
       params->ime_text_spans_info =
           frame_widget->GetImeTextSpansInfo(new_info.ime_text_spans);
     }
-#if BUILDFLAG(IS_ANDROID)
+#if BUILDFLAG(IS_ANDROID) || BUILDFLAG(IS_OHOS)
     if (next_previous_flags_ == kInvalidNextPreviousFlagsValue) {
       // Due to a focus change, values will be reset by the frame.
       // That case we only need fresh NEXT/PREVIOUS information.
@@ -1205,7 +1205,7 @@ void WidgetBase::UpdateTextInputStateInternal(bool show_virtual_keyboard,
       }
     }
 
-#if BUILDFLAG(IS_ANDROID)
+#if BUILDFLAG(IS_ANDROID) || BUILDFLAG(IS_OHOS)
     // If we send a new TextInputStateChanged message, we must also deliver a
     // new RenderFrameMetadata, as the IME will need this info to be updated.
     // TODO(ericrk): Consider folding the above IPC into RenderFrameMetadata.
@@ -1298,7 +1298,7 @@ void WidgetBase::UpdateCompositionInfo(bool immediate_request) {
 }
 
 void WidgetBase::ForceTextInputStateUpdate() {
-#if BUILDFLAG(IS_ANDROID)
+#if BUILDFLAG(IS_ANDROID) || BUILDFLAG(IS_OHOS)
   UpdateSelectionBounds();
   UpdateTextInputStateInternal(false, true /* reply_to_request */);
 #endif
