@@ -78,6 +78,15 @@ class CORE_EXPORT StyleRuleBase : public GarbageCollected<StyleRuleBase> {
 
   RuleType GetType() const { return static_cast<RuleType>(type_); }
 
+#ifdef OHOS_ARKWEB_ADBLOCK
+  void SetForAdBlock(bool is_for_adblock) { is_for_adblock_ = is_for_adblock; }
+  bool IsForAdBlock() const { return is_for_adblock_; }
+  void SetForUserAdBlock(bool is_for_user_adblock) {
+    is_for_user_adblock_ = is_for_user_adblock;
+  }
+  bool IsForUserAdBlock() const { return is_for_user_adblock_; }
+#endif  // OHOS_ARKWEB_ADBLOCK
+
   bool IsCharsetRule() const { return GetType() == kCharset; }
   bool IsContainerRule() const { return GetType() == kContainer; }
   bool IsCounterStyleRule() const { return GetType() == kCounterStyle; }
@@ -136,6 +145,12 @@ class CORE_EXPORT StyleRuleBase : public GarbageCollected<StyleRuleBase> {
   CSSRule* CreateCSSOMWrapper(wtf_size_t position_hint,
                               CSSStyleSheet* parent_sheet,
                               CSSRule* parent_rule) const;
+
+#ifdef OHOS_ARKWEB_ADBLOCK
+  bool is_for_adblock_ : 1;
+
+  bool is_for_user_adblock_ : 1;
+#endif
 
   const uint8_t type_;
 };

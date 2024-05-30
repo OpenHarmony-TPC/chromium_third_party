@@ -245,6 +245,15 @@ void ResourceLoadObserverForFrame::DidReceiveResponse(
   if (subresource_filter && resource->GetResourceRequest().IsAdResource())
     subresource_filter->ReportAdRequestId(response.RequestId());
 
+#ifdef OHOS_ARKWEB_ADBLOCK
+  SubresourceFilter* user_subresource_filter =
+      document_loader_->GetUserSubresourceFilter();
+  if (user_subresource_filter &&
+      resource->GetResourceRequest().IsAdResource()) {
+    user_subresource_filter->ReportAdRequestId(response.RequestId());
+  }
+#endif
+
   DCHECK(frame_client);
   if (response_source == ResponseSource::kFromMemoryCache) {
     ResourceRequest resource_request(resource->GetResourceRequest());

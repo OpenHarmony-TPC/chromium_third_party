@@ -247,6 +247,9 @@ struct SameSizeAsDocumentLoader
   Member<HistoryItem> history_item;
   Member<DocumentParser> parser;
   Member<SubresourceFilter> subresource_filter;
+#ifdef OHOS_ARKWEB_ADBLOCK
+  Member<SubresourceFilter> user_subresource_filter;
+#endif
   AtomicString original_referrer;
   ResourceResponse response;
   mutable WrappedResourceResponse response_wrapper;
@@ -693,6 +696,9 @@ void DocumentLoader::Trace(Visitor* visitor) const {
   visitor->Trace(history_item_);
   visitor->Trace(parser_);
   visitor->Trace(subresource_filter_);
+#ifdef OHOS_ARKWEB_ADBLOCK
+  visitor->Trace(user_subresource_filter_);
+#endif
   visitor->Trace(content_security_notifier_);
   visitor->Trace(document_load_timing_);
   visitor->Trace(prefetched_signed_exchange_manager_);
@@ -3273,6 +3279,36 @@ void DocumentLoader::SetSubresourceFilter(
   subresource_filter_ = MakeGarbageCollected<SubresourceFilter>(
       frame_->DomWindow(), base::WrapUnique(subresource_filter));
 }
+
+#ifdef OHOS_ARKWEB_ADBLOCK
+WebDocumentSubresourceFilter* DocumentLoader::GetWebSubresourceFilter() {
+  SubresourceFilter* filter = GetSubresourceFilter();
+  if (filter){
+    return filter->GetWebDocumentSubresourceFilter();
+  }
+  return nullptr;
+}
+
+void DocumentLoader::SetUserSubresourceFilter(
+    SubresourceFilter* subresource_filter) {
+  user_subresource_filter_ = subresource_filter;
+}
+
+void DocumentLoader::SetWebUserSubresourceFilter(
+    WebDocumentSubresourceFilter* subresource_filter) {
+  DocumentLoader::SetUserSubresourceFilter(
+      MakeGarbageCollected<SubresourceFilter>(
+          GetFrame()->DomWindow(), base::WrapUnique(subresource_filter)));
+}
+
+WebDocumentSubresourceFilter* DocumentLoader::GetWebUserSubresourceFilter() {
+  SubresourceFilter* user_filter = DocumentLoader::GetUserSubresourceFilter();
+  if (user_filter) {
+    return user_filter->GetWebDocumentSubresourceFilter();
+  }
+  return nullptr;
+}
+#endif
 
 WebDocumentLoader::ExtraData* DocumentLoader::GetExtraData() const {
   return extra_data_.get();

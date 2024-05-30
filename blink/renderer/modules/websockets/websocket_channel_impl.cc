@@ -970,7 +970,16 @@ bool WebSocketChannelImpl::ShouldDisallowConnection(const KURL& url) {
       GetBaseFetchContext()->GetSubresourceFilter();
   if (!subresource_filter)
     return false;
+
+#ifdef OHOS_ARKWEB_ADBLOCK
+  SubresourceFilter* user_subresource_filter =
+      GetBaseFetchContext()->GetUserSubresourceFilter();
+  return !subresource_filter->AllowWebSocketConnection(url) ||
+         (user_subresource_filter &&
+          !user_subresource_filter->AllowWebSocketConnection(url));
+#else
   return !subresource_filter->AllowWebSocketConnection(url);
+#endif
 }
 
 BaseFetchContext* WebSocketChannelImpl::GetBaseFetchContext() const {

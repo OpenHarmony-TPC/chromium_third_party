@@ -449,6 +449,22 @@ DedicatedOrSharedWorkerFetchContextImpl::TakeSubresourceFilter() {
   return std::move(subresource_filter_builder_)->Build();
 }
 
+#ifdef OHOS_ARKWEB_ADBLOCK
+void DedicatedOrSharedWorkerFetchContextImpl::SetUserSubresourceFilterBuilder(
+    std::unique_ptr<WebDocumentSubresourceFilter::Builder>
+        user_subresource_filter_builder) {
+  user_subresource_filter_builder_ = std::move(user_subresource_filter_builder);
+}
+
+std::unique_ptr<WebDocumentSubresourceFilter>
+DedicatedOrSharedWorkerFetchContextImpl::TakeUserSubresourceFilter() {
+  if (!user_subresource_filter_builder_) {
+    return nullptr;
+  }
+  return std::move(user_subresource_filter_builder_)->Build();
+}
+#endif
+
 std::unique_ptr<WebSocketHandshakeThrottle>
 DedicatedOrSharedWorkerFetchContextImpl::CreateWebSocketHandshakeThrottle(
     scoped_refptr<base::SingleThreadTaskRunner> task_runner) {

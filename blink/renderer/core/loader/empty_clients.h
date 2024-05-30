@@ -331,6 +331,11 @@ class CORE_EXPORT EmptyLocalFrameClient : public LocalFrameClient {
   void DispatchDidDispatchDOMContentLoadedEvent() override {}
   void DispatchDidFinishLoad() override {}
 
+#ifdef OHOS_ARKWEB_ADBLOCK
+  void DispatchDidSubresourceFiltered() override {}
+
+#endif  // OHOS_ARKWEB_ADBLOCK
+
   void BeginNavigation(
       const ResourceRequest&,
       const KURL& requestor_base_url,

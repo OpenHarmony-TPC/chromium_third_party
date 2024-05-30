@@ -17,6 +17,11 @@
 #include "third_party/blink/renderer/platform/weborigin/kurl.h"
 #include "third_party/blink/renderer/platform/weborigin/reporting_disposition.h"
 
+#ifdef OHOS_ARKWEB_ADBLOCK
+#include "third_party/blink/renderer/core/page/page.h"
+#include "third_party/blink/renderer/platform/timer.h"
+#endif  // OHOS_ARKWEB_ADBLOCK
+
 namespace blink {
 
 class ExecutionContext;
@@ -35,6 +40,24 @@ class CORE_EXPORT SubresourceFilter final
   bool AllowLoad(const KURL& resource_url,
                  mojom::blink::RequestContextType,
                  ReportingDisposition);
+
+#ifdef OHOS_ARKWEB_ADBLOCK
+  std::unique_ptr<std::string> GetElementHidingSelectors(
+      const KURL& document_url,
+      bool need_common_selectors);
+
+  WebDocumentSubresourceFilter* GetWebDocumentSubresourceFilter() {
+    return subresource_filter_.get();
+  }
+
+  void DidMatchCssRule(const KURL& document_url,
+                       const std::string& dom_path,
+                       bool is_for_report = false);
+
+  bool GetDidFinishLoad() { return subresource_filter_->GetDidFinishLoad(); }
+
+#endif
+
   bool AllowWebSocketConnection(const KURL&);
   bool AllowWebTransportConnection(const KURL&);
 
@@ -46,6 +69,11 @@ class CORE_EXPORT SubresourceFilter final
   virtual void Trace(Visitor*) const;
 
  private:
+#ifdef OHOS_ARKWEB_ADBLOCK
+  void RequestSendStatistics(base::TimeDelta delay);
+  void SendStatistics(TimerBase*);
+#endif  // OHOS_ARKWEB_ADBLOCK
+
   void ReportLoad(const KURL& resource_url,
                   WebDocumentSubresourceFilter::LoadPolicy);
   void ReportLoadAsync(const KURL& resource_url,
@@ -58,6 +86,10 @@ class CORE_EXPORT SubresourceFilter final
   std::pair<std::pair<KURL, mojom::blink::RequestContextType>,
             WebDocumentSubresourceFilter::LoadPolicy>
       last_resource_check_result_;
+
+#ifdef OHOS_ARKWEB_ADBLOCK
+  HeapTaskRunnerTimer<SubresourceFilter> statistics_timer_;
+#endif  // OHOS_ARKWEB_ADBLOCK
 };
 
 }  // namespace blink

@@ -351,6 +351,14 @@ blink_core_sources_editing = [
   "visible_units_word.cc",
 ]
 
+#ifdef OHOS_ARKWEB_ADBLOCK
+  blink_core_sources_editing += [
+    "//third_party/blink/renderer/core/ohos_adblock/ohos_adblock_util.cc",
+    "//third_party/blink/renderer/core/ohos_adblock/ohos_adblock_util.h"
+  ]
+
+#endif // OHOS_ARKWEB_ADBLOCK
+
 if (is_mac) {
   blink_core_sources_editing += [
     "commands/smart_replace_cf.cc",

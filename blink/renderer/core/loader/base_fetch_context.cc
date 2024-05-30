@@ -109,6 +109,22 @@ BaseFetchContext::CanRequestBasedOnSubresourceFilterOnly(
     return ResourceRequestBlockedReason::kSubresourceFilter;
   }
 
+#ifdef OHOS_ARKWEB_ADBLOCK
+  auto* user_subresource_filter = GetUserSubresourceFilter();
+  if (user_subresource_filter &&
+      !user_subresource_filter->AllowLoad(
+          url, resource_request.GetRequestContext(), reporting_disposition)) {
+    if (reporting_disposition == ReportingDisposition::kReport) {
+      DispatchDidBlockRequest(resource_request, options,
+                              ResourceRequestBlockedReason::kSubresourceFilter,
+                              type);
+    }
+    LOG(INFO) << "[User AdBlock] Subresource request blocked : "
+              << url.GetString().Utf8();
+    return ResourceRequestBlockedReason::kSubresourceFilter;
+  }
+#endif
+
   return absl::nullopt;
 }
 
@@ -122,8 +138,16 @@ bool BaseFetchContext::CalculateIfAdSubresource(
   SubresourceFilter* filter = GetSubresourceFilter();
   const KURL& url = alias_url ? alias_url.value() : request.Url();
 
+#if OHOS_ARKWEB_ADBLOCK
+  SubresourceFilter* user_filter = GetUserSubresourceFilter();
+  return request.IsAdResource() ||
+         (filter && filter->IsAdResource(url, request.GetRequestContext())) ||
+         (user_filter &&
+          user_filter->IsAdResource(url, request.GetRequestContext()));
+#else
   return request.IsAdResource() ||
          (filter && filter->IsAdResource(url, request.GetRequestContext()));
+#endif
 }
 
 void BaseFetchContext::AddClientHintsIfNecessary(
@@ -698,12 +722,31 @@ BaseFetchContext::CanRequestInternal(
 
   // Let the client have the final say into whether or not the load should
   // proceed.
+#if OHOS_ARKWEB_ADBLOCK
+  if ((GetSubresourceFilter() &&
+       !GetSubresourceFilter()->AllowLoad(url, request_context,
+                                          reporting_disposition))) {
+    LOG(WARNING) << "[AdBlock] Subresource request blocked : "
+                 << url.GetString().Utf8();
+    return ResourceRequestBlockedReason::kSubresourceFilter;
+  }
+  if ((GetUserSubresourceFilter() &&
+       !GetUserSubresourceFilter()->AllowLoad(url, request_context,
+                                              reporting_disposition))) {
+    LOG(WARNING) << "[User AdBlock] Subresource request blocked : "
+                 << url.GetString().Utf8();
+    return ResourceRequestBlockedReason::kSubresourceFilter;
+  }
+#else
   if (GetSubresourceFilter()) {
     if (!GetSubresourceFilter()->AllowLoad(url, request_context,
                                            reporting_disposition)) {
+      LOG(WARNING) << "[AdBlock] Subresource request blocked : "
+                   << url.GetString().Utf8();
       return ResourceRequestBlockedReason::kSubresourceFilter;
     }
   }
+#endif
 
   // Warn if the resource URL's hostname contains IDNA deviation characters.
   // Only warn if the resource URL's origin is different than its requestor

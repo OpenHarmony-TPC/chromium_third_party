@@ -3523,4 +3523,22 @@ void LocalFrame::SetResourceCacheRemote(
   GetDocument()->Fetcher()->SetResourceCache(std::move(remote));
 }
 
+#ifdef OHOS_ARKWEB_ADBLOCK
+void LocalFrame::DidSubresourceFiltered() {
+  Client()->DispatchDidSubresourceFiltered();
+}
+
+void LocalFrame::SetHasElemHideTypeOption(bool has_elemhide_type_option) {
+  has_elemhide_type_option_ = has_elemhide_type_option;
+}
+
+void LocalFrame::SetHasDocumentTypeOption(bool has_document_type_option) {
+  has_document_type_option_ = has_document_type_option;
+}
+
+void LocalFrame::SetHasGenericHideTypeOption(bool has_generichide_type_option) {
+  has_generichide_type_option_ = has_generichide_type_option;
+}
+#endif  // OHOS_ARKWEB_ADBLOCK
+
 }  // namespace blink

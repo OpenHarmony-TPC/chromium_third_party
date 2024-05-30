@@ -248,6 +248,22 @@ class CORE_EXPORT MatchResult {
     return *tree_scopes_[tree_order];
   }
 
+#ifdef OHOS_ARKWEB_ADBLOCK
+  void SetDisplayNoneFromAdblock(bool has_display_none_from_adblock) {
+    has_display_none_from_adblock_ = has_display_none_from_adblock;
+  }
+
+  bool GetDisplayNoneFromAdblock() { return has_display_none_from_adblock_; }
+
+  void SetDisplayNoneFromUserAdblock(bool has_display_none_from_user_adblock) {
+    has_display_none_from_user_adblock_ = has_display_none_from_user_adblock;
+  }
+
+  bool GetDisplayNoneFromUserAdblock() {
+    return has_display_none_from_user_adblock_;
+  }
+#endif
+
  private:
   MatchedPropertiesVector matched_properties_;
   HeapVector<Member<const TreeScope>, 4> tree_scopes_;
@@ -265,6 +281,11 @@ class CORE_EXPORT MatchResult {
   CascadeOrigin current_origin_{CascadeOrigin::kUserAgent};
   uint16_t current_tree_order_{0};
   uint16_t pseudo_element_styles_{kPseudoIdNone};
+
+#ifdef OHOS_ARKWEB_ADBLOCK
+  bool has_display_none_from_adblock_{false};
+  bool has_display_none_from_user_adblock_{false};
+#endif
 };
 
 inline bool operator==(const MatchedProperties& a, const MatchedProperties& b) {

@@ -159,6 +159,9 @@ class CORE_EXPORT FrameFetchContext final : public BaseFetchContext,
   net::SiteForCookies GetSiteForCookies() const override;
   scoped_refptr<const SecurityOrigin> GetTopFrameOrigin() const override;
   SubresourceFilter* GetSubresourceFilter() const override;
+#ifdef OHOS_ARKWEB_ADBLOCK
+  SubresourceFilter* GetUserSubresourceFilter() const override;
+#endif
   bool AllowScriptFromSource(const KURL&) const override;
   bool ShouldBlockRequestByInspector(const KURL&) const override;
   void DispatchDidBlockRequest(const ResourceRequest&,
