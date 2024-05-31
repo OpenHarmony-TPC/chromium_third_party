@@ -57,7 +57,12 @@ ScrollOffset ScrollAlignment::GetScrollOffsetToExpose(
     const PhysicalRect& expose_rect,
     const mojom::blink::ScrollAlignment& align_x,
     const mojom::blink::ScrollAlignment& align_y,
-    const ScrollOffset& current_scroll_offset) {
+    const ScrollOffset& current_scroll_offset
+#ifdef OHOS_CLIPBOARD
+    ,
+    const int32_t scroll_offset_limit
+#endif
+    ) {
   // Prevent degenerate cases by giving the visible rect a minimum non-0 size.
   PhysicalRect non_zero_visible_rect = scroll_snapport_rect;
   LayoutUnit minimum_layout_unit;
@@ -174,6 +179,12 @@ ScrollOffset ScrollAlignment::GetScrollOffsetToExpose(
   } else {
     y = (expose_rect.Y() - non_zero_visible_rect.Y()).ToFloat();
   }
+
+#ifdef OHOS_CLIPBOARD
+  if (scroll_offset_limit != 0) {
+    y = current_scroll_offset.y() + scroll_offset_limit;
+  }
+#endif
 
   return ScrollOffset(x, y);
 }

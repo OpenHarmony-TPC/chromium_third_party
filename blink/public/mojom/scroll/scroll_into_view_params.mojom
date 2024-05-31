@@ -68,4 +68,9 @@ struct ScrollIntoViewParams {
   // APIs and most legacy callsites but new uses should carefully consider
   // whether they need this behavior.
   bool cross_origin_boundaries = true;
+
+  // #ifdef OHOS_CLIPBOARD
+  // control the scroll speed
+  int32 scroll_offset_limit = 0;
+  // #endif
 };

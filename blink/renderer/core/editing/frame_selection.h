@@ -387,6 +387,10 @@ class CORE_EXPORT FrameSelection final
 
 #ifdef OHOS_CLIPBOARD
   bool is_select_all_ = false;
+
+  base::TimeTicks last_autoscroll_time_;
+  bool selection_autoscroll_enabled_ = true;
+  void ScrollRectToVisualIfClosestEdge(const gfx::Point&);
 #endif  // OHOS_CLIPBOARD
 };
 

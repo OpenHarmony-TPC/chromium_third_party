@@ -71,7 +71,12 @@ class CORE_EXPORT ScrollAlignment {
       const PhysicalRect& expose_rect,
       const mojom::blink::ScrollAlignment& align_x,
       const mojom::blink::ScrollAlignment& align_y,
-      const ScrollOffset& current_scroll_offset);
+      const ScrollOffset& current_scroll_offset
+#ifdef OHOS_CLIPBOARD
+      ,
+      const int32_t scroll_offset_limit = 0
+#endif
+      );
 
   static const mojom::blink::ScrollAlignment& CenterIfNeeded();
   static const mojom::blink::ScrollAlignment& ToEdgeIfNeeded();
