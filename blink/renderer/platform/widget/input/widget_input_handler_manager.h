@@ -140,6 +140,7 @@ class PLATFORM_EXPORT WidgetInputHandlerManager final
   void NativeHitTestResult(bool isNative, size_t fingerId, int layerId);
   void AsyncNativeHitTestResult(bool isNative, size_t fingerId, int layerId);
   void TouchHitTest(const WebPointerEvent& event, size_t fingerId) override;
+  void TriggerVsyncImplTask();
 #endif
 
   void ObserveGestureEventOnMainThread(

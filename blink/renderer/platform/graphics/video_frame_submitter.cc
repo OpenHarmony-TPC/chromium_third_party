@@ -168,6 +168,8 @@ class VideoFrameSubmitter::FrameSinkBundleProxy
                           int32_t process_id,
                           bool is_created) override {}
   void OnVsyncReceived() override {}
+
+  void TriggerVsyncImplTask() override {}
 #endif
 
  private:

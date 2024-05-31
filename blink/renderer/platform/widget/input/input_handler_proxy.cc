@@ -521,6 +521,12 @@ void InputHandlerProxy::SetGestureEventResult(bool result) {
     DispatchSingleInputEvent(native_event_queue_->Pop(), now);
   }
 }
+
+void InputHandlerProxy::TriggerVsyncImplTask()
+{
+  DCHECK(input_handler_);
+  input_handler_->TriggerVsyncImplTask();
+}
 #endif
 
 void InputHandlerProxy::ContinueScrollBeginAfterMainThreadHitTest(
