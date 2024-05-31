@@ -977,7 +977,16 @@ void WebMediaPlayerImpl::Play() {
   // TODO(sandersd): Do we want to reset the idle timer here?
   delegate_->SetIdle(delegate_id_, false);
   paused_ = false;
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+  if (action_reason_ != media::ActionReason::kNormal) {
+    pipeline_controller_->SetPlaybackRateWithReason(
+        playback_rate_, action_reason_);
+  } else {
+    pipeline_controller_->SetPlaybackRate(playback_rate_);
+  }
+#else
   pipeline_controller_->SetPlaybackRate(playback_rate_);
+#endif // OHOS_CUSTOM_VIDEO_PLAYER
   background_pause_timer_.Stop();
 
   if (observer_)
@@ -1031,7 +1040,16 @@ void WebMediaPlayerImpl::Pause() {
   if (frame_->HasTransientUserActivation())
     video_locked_when_paused_when_hidden_ = true;
 
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+  if (action_reason_ != media::ActionReason::kNormal) {
+    pipeline_controller_->SetPlaybackRateWithReason(
+        0.0, action_reason_);
+  } else {
+    pipeline_controller_->SetPlaybackRate(0.0);
+  }
+#else
   pipeline_controller_->SetPlaybackRate(0.0);
+#endif // OHOS_CUSTOM_VIDEO_PLAYER
 
   // For states <= kReadyStateHaveMetadata, we may not have a renderer yet.
   if (highest_ready_state_ > WebMediaPlayer::kReadyStateHaveMetadata)
@@ -4179,6 +4197,14 @@ void WebMediaPlayerImpl::UpdateMuted(bool muted) {
 }
 void WebMediaPlayerImpl::UpdatePlaybackRate(double playback_rate) {
   client_->UpdatePlaybackRate(playback_rate);
+}
+void WebMediaPlayerImpl::PlayWithReason(media::ActionReason reason) {
+  base::AutoReset<media::ActionReason> resetter(&action_reason_, reason);
+  Play();
+}
+void WebMediaPlayerImpl::PauseWithReason(media::ActionReason reason) {
+  base::AutoReset<media::ActionReason> resetter(&action_reason_, reason);
+  Pause();
 }
 bool WebMediaPlayerImpl::IsUsingCustomRenderer() const {
   return should_create_custom_renderer_;

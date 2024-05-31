@@ -129,6 +129,10 @@
 #include "base/ohos/sys_info_utils.h"
 #endif  // OHOS_MEDIA_POLICY
 
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+#include "third_party/blink/renderer/core/frame/page_scale_constraints_set.h"
+#endif // OHOS_CUSTOM_VIDEO_PLAYER
+
 #ifndef LOG_MEDIA_EVENTS
 // Default to not logging events because so many are generated they can
 // overwhelm the rest of the logging.
@@ -395,6 +399,16 @@ std::ostream& operator<<(std::ostream& stream,
                          HTMLMediaElement const& media_element) {
   return stream << static_cast<void const*>(&media_element);
 }
+
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+float PageConstraintInitalScale(const Document& document) {
+  float scale = 1.0;
+  if (auto* page = document.GetPage()) {
+    scale = page->GetPageScaleConstraintsSet().FinalConstraints().initial_scale;
+  }
+  return scale;
+}
+#endif // OHOS_CUSTOM_VIDEO_PLAYER
 
 }  // anonymous namespace
 
@@ -3973,7 +3987,16 @@ void HTMLMediaElement::UpdatePlayState(bool pause_speech /* = true */) {
       // and muted values since it isn't already playing.
       web_media_player_->SetRate(playbackRate());
       web_media_player_->SetVolume(EffectiveMediaVolume());
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+      if (played_by_custom_mp_) {
+        web_media_player_->PlayWithReason(
+            media::ActionReason::kCustomRenderer);
+      } else {
+        web_media_player_->Play();
+      }
+#else
       web_media_player_->Play();
+#endif // OHOS_CUSTOM_VIDEO_PLAYER
       if (::features::IsTextBasedAudioDescriptionEnabled())
         SpeechSynthesis()->Resume();
 
@@ -3990,7 +4013,16 @@ void HTMLMediaElement::UpdatePlayState(bool pause_speech /* = true */) {
     playing_ = true;
   } else {  // Should not be playing right now
     if (is_playing) {
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+      if (played_by_custom_mp_) {
+        web_media_player_->PauseWithReason(
+            media::ActionReason::kCustomRenderer);
+      } else {
+        web_media_player_->Pause();
+      }
+#else
       web_media_player_->Pause();
+#endif // OHOS_CUSTOM_VIDEO_PLAYER
 
       if (pause_speech && ::features::IsTextBasedAudioDescriptionEnabled())
         SpeechSynthesis()->Pause();
@@ -5130,6 +5162,8 @@ std::string HTMLMediaElement::GetOutgoingReferrerString() {
 }
 
 void HTMLMediaElement::UpdatePlaybackStatus(uint32_t status) {
+  LOG(INFO) << "UpdatePlaybackStatus(" << status << "), paused_[" << paused_ << "]";
+  base::AutoReset<bool> resetter(&played_by_custom_mp_, true);
   if (paused_ == !status) {
     return;
   }
@@ -5173,8 +5207,9 @@ void HTMLMediaElement::OnLayerRectChange(const gfx::Rect& rect) {
     return;
   }
   layer_rect_ = rect;
+  float scale = PageConstraintInitalScale(GetDocument());
   for (auto& observer : media_player_observer_remote_set_->Value()) {
-    observer->UpdateLayerRect(layer_rect_);
+    observer->UpdateLayerRect(gfx::ScaleToEnclosingRect(layer_rect_, scale));
   }
 }
 
