@@ -735,6 +735,8 @@ class PLATFORM_EXPORT WebMediaPlayerImpl
   void UpdateMuted(bool muted);
   void UpdatePlaybackRate(double playback_rate);
 
+  void PlayWithReason(media::ActionReason reason) override;
+  void PauseWithReason(media::ActionReason reason) override;
   bool IsUsingCustomRenderer() const override;
   void SetInitialPreload(uint32_t preload) override;
 
@@ -1146,6 +1148,7 @@ class PLATFORM_EXPORT WebMediaPlayerImpl
   int native_texture_id_ = 0;
   uint32_t initial_preload_ = static_cast<uint32_t>(media::DataSource::METADATA);
   media::Renderer::OnGetRectCallback on_get_rect_cb_;
+  media::ActionReason action_reason_ = media::ActionReason::kNormal;
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
 
   base::WeakPtr<WebMediaPlayerImpl> weak_this_;

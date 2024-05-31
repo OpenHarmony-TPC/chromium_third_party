@@ -48,6 +48,10 @@
 #include "ui/gfx/geometry/size.h"
 #include "url/gurl.h"
 
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+#include "media/base/action_reason.h"
+#endif // OHOS_CUSTOM_VIDEO_PLAYER
+
 namespace cc {
 class PaintCanvas;
 class PaintFlags;
@@ -388,6 +392,8 @@ class WebMediaPlayer {
 #endif
 
 #if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+  virtual void PlayWithReason(media::ActionReason reason) {}
+  virtual void PauseWithReason(media::ActionReason reason) {}
   virtual bool IsUsingCustomRenderer() const { return false; }
   virtual void SetInitialPreload(uint32_t preload) {}
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
