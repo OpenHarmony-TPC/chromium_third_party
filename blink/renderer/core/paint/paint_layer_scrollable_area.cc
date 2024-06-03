@@ -2401,9 +2401,16 @@ PhysicalRect PaintLayerScrollableArea::ScrollIntoView(
   local_expose_rect.Move(border_origin_to_scroll_origin);
   PhysicalRect scroll_snapport_rect = VisibleScrollSnapportRect();
 
+#ifdef OHOS_CLIPBOARD
+  int32_t scroll_offset_limit = ClampScrollOffsetLimit(params->scroll_offset_limit);
+  ScrollOffset target_offset = ScrollAlignment::GetScrollOffsetToExpose(
+      scroll_snapport_rect, local_expose_rect, *params->align_x.get(),
+      *params->align_y.get(), GetScrollOffset(), scroll_offset_limit);
+#else
   ScrollOffset target_offset = ScrollAlignment::GetScrollOffsetToExpose(
       scroll_snapport_rect, local_expose_rect, *params->align_x.get(),
       *params->align_y.get(), GetScrollOffset());
+#endif
   ScrollOffset new_scroll_offset(
       ClampScrollOffset(gfx::ToRoundedVector2d(target_offset)));
 
@@ -3215,6 +3222,44 @@ gfx::Rect PaintLayerScrollableArea::ScrollingBackgroundVisualRect(
 
   return result;
 }
+
+#ifdef OHOS_CLIPBOARD
+int32_t PaintLayerScrollableArea::ClampScrollOffsetLimit(int32_t scroll_offset_limit) const {
+  if (scroll_offset_limit == 0) {
+    return 0;
+  }
+
+  // 1. root frame可以scroll时不处理paint layer的滚动,以防止元素整体上移
+  if (GetLayoutBox() && GetLayoutBox()->GetFrameView() &&
+    Layer() && Layer()->Size().Height() < ScrollHeight()) {
+      LocalFrameView* parentFrameView = GetLayoutBox()->GetFrameView();
+      while (parentFrameView && parentFrameView->ParentFrameView()) {
+        parentFrameView = parentFrameView->ParentFrameView();
+      }
+      ScrollableArea* scrollableArea =
+          (parentFrameView ? parentFrameView->GetScrollableArea() : nullptr);
+      if (scrollableArea &&
+          scrollableArea->MaximumScrollOffset() !=
+              scrollableArea->MinimumScrollOffset()) {
+        return 0;
+      }
+  }
+
+  // 2. 当前root layer无法scroll时也不处理paint layer的滚动,以防止元素整体上移
+  if (Layer()) {
+    PaintLayer* parentLayer = Layer();
+    while (parentLayer && parentLayer->Parent()) {
+      parentLayer = parentLayer->Parent();
+    }
+    if (parentLayer && parentLayer->GetLayoutBox() &&
+        parentLayer->GetLayoutBox()->PixelSnappedClientHeight() ==
+            parentLayer->GetLayoutBox()->PixelSnappedScrollHeight()) {
+      return 0;
+    }
+  }
+  return scroll_offset_limit;
+}
+#endif
 
 String
 PaintLayerScrollableArea::ScrollingBackgroundDisplayItemClient::DebugName()

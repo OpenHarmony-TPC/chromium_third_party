@@ -106,6 +106,10 @@
 #if defined(OHOS_CLIPBOARD)
 #include "ui/gfx/geometry/rect_conversions.h"
 #include "third_party/blink/renderer/core/frame/visual_viewport.h"
+
+#define AUTOSCROLL_RANGE_EDGES_SCREEN   (90.0f)   // Range of the upper and lower edges of the screen
+#define AUTOSCROLL_OFFSET_LIMIT         (20.0f)   // Offset of each scroll
+#define AUTOSCROLL_OFFSET_INTERVALS     (50)   // Rolling interval period
 #endif
 
 #define EDIT_DEBUG 0
@@ -126,7 +130,13 @@ FrameSelection::FrameSelection(LocalFrame& frame)
                frame.GetPage()->GetFocusController().FocusedFrame() == frame),
       is_directional_(ShouldAlwaysUseDirectionalSelection(frame_)),
       frame_caret_(
-          MakeGarbageCollected<FrameCaret>(frame, *selection_editor_)) {}
+          MakeGarbageCollected<FrameCaret>(frame, *selection_editor_))
+#if defined(OHOS_CLIPBOARD)
+      ,
+      last_autoscroll_time_(base::TimeTicks::Now()),
+      selection_autoscroll_enabled_(true)
+#endif
+      {}
 
 FrameSelection::~FrameSelection() = default;
 
@@ -1318,7 +1328,59 @@ void FrameSelection::MoveRangeSelectionExtent(
           .SetSetSelectionBy(SetSelectionBy::kUser)
           .SetShouldShowHandle(true)
           .Build());
+#if defined(OHOS_CLIPBOARD)
+  if (selection_autoscroll_enabled_) {
+    ScrollRectToVisualIfClosestEdge(contents_point);
+  }
+#endif
 }
+
+#if defined(OHOS_CLIPBOARD)
+void FrameSelection::ScrollRectToVisualIfClosestEdge(const gfx::Point& contents_point) {
+  if (!GetFrame() || !GetFrame()->View() || !GetFrame()->GetPage()) {
+    return;
+  }
+  gfx::Point point_in_viewport = GetFrame()->View()->FrameToViewport(contents_point);
+  int32_t visual_height = GetFrame()->GetPage()->GetVisualViewport().Size().height();
+  auto device_pixel_ratio = GetDocument().DevicePixelRatio();
+  float limit_border = device_pixel_ratio * AUTOSCROLL_RANGE_EDGES_SCREEN;
+  float autoscroll_limit = device_pixel_ratio * AUTOSCROLL_OFFSET_LIMIT;
+
+  const Position& start = ComputeVisibleSelectionInDOMTree().Start();
+  if (!start.AnchorNode() || !start.AnchorNode()->GetLayoutObject()) {
+    return;
+  }
+
+  PhysicalRect selection_rect(ComputeRectToScroll(kRevealExtent));
+  mojom::blink::ScrollAlignment alignment = ScrollAlignment::ToEdgeIfNeeded();
+  auto params = ScrollAlignment::CreateScrollIntoViewParams(alignment, alignment);
+  if (!params) {
+    return;
+  }
+
+  params->scroll_offset_limit = autoscroll_limit;
+  // top edge
+  if (point_in_viewport.y() < limit_border) {
+    params->scroll_offset_limit += autoscroll_limit *
+                                   (limit_border - point_in_viewport.y()) / limit_border;
+    params->scroll_offset_limit *= -1;
+  // bottom edge
+  } else if (point_in_viewport.y() > visual_height - limit_border) {
+    params->scroll_offset_limit += autoscroll_limit *
+                                   (point_in_viewport.y() - visual_height + limit_border) / limit_border;
+    params->scroll_offset_limit *= 1;
+  } else {
+    return;
+  }
+  base::TimeDelta delta = base::TimeTicks::Now() - last_autoscroll_time_;
+  if (delta.InMilliseconds() > AUTOSCROLL_OFFSET_INTERVALS) {
+    scroll_into_view_util::ScrollRectToVisible(
+        *start.AnchorNode()->GetLayoutObject(), selection_rect,
+        std::move(params));
+    last_autoscroll_time_ = base::TimeTicks::Now();
+  }
+}
+#endif
 
 void FrameSelection::MoveRangeSelection(const gfx::Point& base_point,
                                         const gfx::Point& extent_point,

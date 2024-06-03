@@ -727,6 +727,10 @@ class CORE_EXPORT PaintLayerScrollableArea final
       bool& previously_was_directly_composited,
       gfx::Rect& visual_rect);
 
+#ifdef OHOS_CLIPBOARD
+  int32_t ClampScrollOffsetLimit(int32_t scroll_offset_limit) const;
+#endif
+
   void DelayableClampScrollOffsetAfterOverflowChange();
   void ClampScrollOffsetAfterOverflowChangeInternal();
 

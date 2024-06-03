@@ -367,11 +367,17 @@ PhysicalRect RootFrameViewport::ScrollIntoView(
   PhysicalRect rect_in_document = rect_in_absolute;
   rect_in_document.Move(
       PhysicalOffset::FromVector2dFFloor(LayoutViewport().GetScrollOffset()));
-
+#ifdef OHOS_CLIPBOARD
+  ScrollOffset new_scroll_offset =
+      ClampScrollOffset(ScrollAlignment::GetScrollOffsetToExpose(
+          scroll_snapport_rect, rect_in_document, *params->align_x.get(),
+          *params->align_y.get(), GetScrollOffset(), params->scroll_offset_limit));
+#else
   ScrollOffset new_scroll_offset =
       ClampScrollOffset(ScrollAlignment::GetScrollOffsetToExpose(
           scroll_snapport_rect, rect_in_document, *params->align_x.get(),
           *params->align_y.get(), GetScrollOffset()));
+#endif
   if (params->type == mojom::blink::ScrollType::kUser)
     new_scroll_offset = ClampToUserScrollableOffset(new_scroll_offset);
 
