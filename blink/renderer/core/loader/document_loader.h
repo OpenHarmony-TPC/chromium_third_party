@@ -213,6 +213,19 @@ class CORE_EXPORT DocumentLoader : public GarbageCollected<DocumentLoader>,
     return subresource_filter_.Get();
   }
 
+#ifdef OHOS_ARKWEB_ADBLOCK
+  WebDocumentSubresourceFilter* GetWebSubresourceFilter() override;
+
+  void SetUserSubresourceFilter(SubresourceFilter*);
+  SubresourceFilter* GetUserSubresourceFilter() const {
+    return user_subresource_filter_.Get();
+  }
+
+  void SetWebUserSubresourceFilter(WebDocumentSubresourceFilter*) override;
+
+  WebDocumentSubresourceFilter* GetWebUserSubresourceFilter() override;
+#endif  // OHOS_ARKWEB_ADBLOCK
+
   // TODO(dcheng, japhet): Some day, Document::Url() will always match
   // DocumentLoader::Url(), and one of them will be removed. Today is not that
   // day though.
@@ -647,6 +660,10 @@ class CORE_EXPORT DocumentLoader : public GarbageCollected<DocumentLoader>,
   Member<DocumentParser> parser_;
 
   Member<SubresourceFilter> subresource_filter_;
+
+#ifdef OHOS_ARKWEB_ADBLOCK
+  Member<SubresourceFilter> user_subresource_filter_;
+#endif
 
   const AtomicString original_referrer_;
 

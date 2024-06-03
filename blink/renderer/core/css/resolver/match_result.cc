@@ -91,6 +91,11 @@ void MatchResult::FinishAddingAuthorRulesForTreeScope() {
 }
 
 void MatchResult::Reset() {
+#ifdef OHOS_ARKWEB_ADBLOCK
+  has_display_none_from_adblock_ = false;
+  has_display_none_from_user_adblock_ = false;
+#endif  // OHOS_ARKWEB_ADBLOCK
+
   matched_properties_.clear();
   is_cacheable_ = true;
   depends_on_size_container_queries_ = false;

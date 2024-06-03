@@ -40,6 +40,9 @@ class WorkerFetchContext final : public BaseFetchContext {
                      WorkerOrWorkletGlobalScope&,
                      scoped_refptr<WebWorkerFetchContext>,
                      SubresourceFilter*,
+#ifdef OHOS_ARKWEB_ADBLOCK
+                     SubresourceFilter*,
+#endif
                      ContentSecurityPolicy&,
                      WorkerResourceTimingNotifier&);
   ~WorkerFetchContext() override;
@@ -49,6 +52,9 @@ class WorkerFetchContext final : public BaseFetchContext {
   scoped_refptr<const SecurityOrigin> GetTopFrameOrigin() const override;
 
   SubresourceFilter* GetSubresourceFilter() const override;
+#ifdef OHOS_ARKWEB_ADBLOCK
+  SubresourceFilter* GetUserSubresourceFilter() const override;
+#endif
   bool AllowScriptFromSource(const KURL&) const override;
   bool ShouldBlockRequestByInspector(const KURL&) const override;
   void DispatchDidBlockRequest(const ResourceRequest&,
@@ -114,6 +120,10 @@ class WorkerFetchContext final : public BaseFetchContext {
 
   const scoped_refptr<WebWorkerFetchContext> web_context_;
   Member<SubresourceFilter> subresource_filter_;
+
+#ifdef OHOS_ARKWEB_ADBLOCK
+  Member<SubresourceFilter> user_subresource_filter_;
+#endif
 
   // In case of insideSettings fetch (=subresource fetch), this is
   // WorkerGlobalScope::GetContentSecurityPolicy().

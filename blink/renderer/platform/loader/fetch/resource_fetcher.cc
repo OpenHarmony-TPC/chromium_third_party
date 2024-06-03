@@ -2585,10 +2585,25 @@ void ResourceFetcher::EmulateLoadStartedForInspector(
   options.initiator_info.name = initiator_name;
   FetchParameters params(std::move(resource_request), options);
   ResourceRequest last_resource_request(resource->LastResourceRequest());
+
+#ifdef OHOS_ARKWEB_ADBLOCK
+  absl::optional<ResourceRequestBlockedReason> blocked_reason =
+#endif
+
   Context().CanRequest(resource->GetType(), last_resource_request,
                        last_resource_request.Url(), params.Options(),
                        ReportingDisposition::kReport,
                        last_resource_request.GetRedirectInfo());
+
+#ifdef OHOS_ARKWEB_ADBLOCK
+  if (blocked_reason) {
+    resource->FinishAsError(ResourceError::CancelledDueToAccessCheckError(
+                                params.Url(), blocked_reason.value()),
+                            freezable_task_runner_.get());
+    return;
+  }
+#endif
+
   if (resource->GetStatus() == ResourceStatus::kNotStarted ||
       resource->GetStatus() == ResourceStatus::kPending) {
     // If the loading has not started, then we return here because loading

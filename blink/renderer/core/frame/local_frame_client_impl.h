@@ -116,6 +116,11 @@ class CORE_EXPORT LocalFrameClientImpl final : public LocalFrameClient {
   void DispatchDidFinishLoad() override;
   void DispatchDidFinishLoadForPrinting() override;
 
+#ifdef OHOS_ARKWEB_ADBLOCK
+  void DispatchDidSubresourceFiltered() override;
+
+#endif  // OHOS_ARKWEB_ADBLOCK
+
   void BeginNavigation(
       const ResourceRequest&,
       const KURL& requestor_base_url,

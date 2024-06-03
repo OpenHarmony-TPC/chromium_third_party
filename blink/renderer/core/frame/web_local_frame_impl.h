@@ -560,6 +560,29 @@ class CORE_EXPORT WebLocalFrameImpl final
 
   void WillSendSubmitEvent(const WebFormElement& form);
 
+#ifdef OHOS_ARKWEB_ADBLOCK
+  void DidSubresourceFiltered() override;
+
+  void SetHasElemHideTypeOption(bool has_elemhide_type_option) override;
+
+  bool GetHasElemHideTypeOption() const override {
+    return frame_->GetHasElemHideTypeOption();
+  }
+
+  void SetHasDocumentTypeOption(bool has_document_type_option) override;
+
+  bool GetHasDocumentTypeOption() const override {
+    return frame_->GetHasDocumentTypeOption();
+  }
+
+  void SetHasGenericHideTypeOption(bool has_generichide_type_option) override;
+
+  bool GetHasGenericHideTypeOption() const override {
+    return frame_->GetHasGenericHideTypeOption();
+  }
+
+#endif  // OHOS_ARKWEB_ADBLOCK
+
  protected:
   // WebLocalFrame protected overrides:
   void AddMessageToConsoleImpl(const WebConsoleMessage&,

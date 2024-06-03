@@ -173,6 +173,11 @@ class CORE_EXPORT LocalFrameClient : public FrameClient {
   virtual void DispatchDidFinishLoad() = 0;
   virtual void DispatchDidFinishLoadForPrinting() {}
 
+#ifdef OHOS_ARKWEB_ADBLOCK
+  virtual void DispatchDidSubresourceFiltered() = 0;
+
+#endif
+
   virtual void BeginNavigation(
       const ResourceRequest&,
       const KURL& requestor_base_url,

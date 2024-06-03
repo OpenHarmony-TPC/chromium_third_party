@@ -276,6 +276,15 @@ SubresourceFilter* FrameFetchContext::GetSubresourceFilter() const {
   return document_loader_->GetSubresourceFilter();
 }
 
+#ifdef OHOS_ARKWEB_ADBLOCK
+SubresourceFilter* FrameFetchContext::GetUserSubresourceFilter() const {
+  if (GetResourceFetcherProperties().IsDetached()) {
+    return nullptr;
+  }
+  return document_loader_->GetUserSubresourceFilter();
+}
+#endif
+
 LocalFrame* FrameFetchContext::GetFrame() const {
   return document_->GetFrame();
 }

@@ -412,6 +412,25 @@ class CORE_EXPORT LocalFrame final
   void SetPageAndTextZoomFactors(float page_zoom_factor,
                                  float text_zoom_factor);
 
+#ifdef OHOS_ARKWEB_ADBLOCK
+  void DidSubresourceFiltered();
+
+  void SetHasElemHideTypeOption(bool has_elemhide_type_option);
+
+  bool GetHasElemHideTypeOption() const { return has_elemhide_type_option_; }
+
+  void SetHasDocumentTypeOption(bool has_document_type_option);
+
+  bool GetHasDocumentTypeOption() const { return has_document_type_option_; }
+
+  void SetHasGenericHideTypeOption(bool has_generichide_type_option);
+
+  bool GetHasGenericHideTypeOption() const {
+    return has_generichide_type_option_;
+  }
+
+#endif
+
   double DevicePixelRatio() const;
 
   // Informs the local root's document and its local descendant subtree that a
@@ -1024,6 +1043,13 @@ class CORE_EXPORT LocalFrame final
 
   float page_zoom_factor_;
   float text_zoom_factor_;
+
+#ifdef OHOS_ARKWEB_ADBLOCK
+  bool has_elemhide_type_option_ = false;
+  bool has_document_type_option_ = false;
+  bool has_generichide_type_option_ = false;
+
+#endif  // OHOS_ARKWEB_ADBLOCK
 
   Member<CoreProbeSink> probe_sink_;
   scoped_refptr<InspectorTaskRunner> inspector_task_runner_;

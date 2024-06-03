@@ -901,6 +901,23 @@ class BLINK_EXPORT WebLocalFrame : public WebFrame {
   // This should only be used for extensions and the webview tag.
   virtual void SetAllowsCrossBrowsingInstanceFrameLookup() = 0;
 
+#ifdef OHOS_ARKWEB_ADBLOCK
+  virtual void DidSubresourceFiltered() = 0;
+
+  virtual void SetHasElemHideTypeOption(bool has_elemhide_type_option) = 0;
+
+  virtual bool GetHasElemHideTypeOption() const = 0;
+
+  virtual void SetHasDocumentTypeOption(bool has_document_type_option) = 0;
+
+  virtual bool GetHasDocumentTypeOption() const = 0;
+
+  virtual void SetHasGenericHideTypeOption(
+      bool has_generichide_type_option) = 0;
+
+  virtual bool GetHasGenericHideTypeOption() const = 0;
+#endif  // OHOS_ARKWEB_ADBLOCK
+
   virtual void SetTargetToCurrentHistoryItem(const WebString& target) = 0;
   virtual void UpdateCurrentHistoryItem() = 0;
   virtual PageState CurrentHistoryItemToPageState() = 0;

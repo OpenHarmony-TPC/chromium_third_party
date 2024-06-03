@@ -26,12 +26,20 @@ namespace {
 
 String GetErrorStringForDisallowedLoad(const KURL& url) {
   StringBuilder builder;
+#ifdef OHOS_ARKWEB_ADBLOCK
+  builder.Append("Browser blocked resource ");
+  builder.Append(url.GetString());
+  builder.Append(
+      " on this site because this site tends to show ads that interrupt, "
+      "distract, mislead, or prevent user control.");
+#else
   builder.Append("Chrome blocked resource ");
   builder.Append(url.GetString());
   builder.Append(
       " on this site because this site tends to show ads that interrupt, "
       "distract, mislead, or prevent user control. Learn more at "
       "https://www.chromestatus.com/feature/5738264052891648");
+#endif
   return builder.ToString();
 }
 
@@ -41,7 +49,15 @@ SubresourceFilter::SubresourceFilter(
     ExecutionContext* execution_context,
     std::unique_ptr<WebDocumentSubresourceFilter> subresource_filter)
     : execution_context_(execution_context),
-      subresource_filter_(std::move(subresource_filter)) {
+      subresource_filter_(std::move(subresource_filter))
+#ifdef OHOS_ARKWEB_ADBLOCK
+      ,
+      statistics_timer_(
+          execution_context_->GetTaskRunner(TaskType::kNetworking),
+          this,
+          &SubresourceFilter::SendStatistics)
+#endif  // OHOS_ARKWEB_ADBLOCK
+{
   DCHECK(subresource_filter_);
   // Report the main resource as an ad if the subresource filter is
   // associated with an ad subframe.
@@ -56,12 +72,30 @@ SubresourceFilter::SubresourceFilter(
 
 SubresourceFilter::~SubresourceFilter() = default;
 
+#ifdef OHOS_ARKWEB_ADBLOCK
+void SubresourceFilter::RequestSendStatistics(base::TimeDelta delay) {
+  if (statistics_timer_.IsActive()) {
+    return;
+  }
+  statistics_timer_.StartOneShot(delay, FROM_HERE);
+}
+
+void SubresourceFilter::SendStatistics(TimerBase*) {
+  if (auto* window = DynamicTo<LocalDOMWindow>(execution_context_.Get())) {
+    if (window->GetFrame()) {
+      window->GetFrame()->DidSubresourceFiltered();
+    }
+  }
+}
+#endif
+
 bool SubresourceFilter::AllowLoad(
     const KURL& resource_url,
     mojom::blink::RequestContextType request_context,
     ReportingDisposition reporting_disposition) {
   // TODO(csharrison): Implement a caching layer here which is a HashMap of
   // Pair<url string, context> -> LoadPolicy.
+
   WebDocumentSubresourceFilter::LoadPolicy load_policy =
       subresource_filter_->GetLoadPolicy(resource_url, request_context);
 
@@ -70,6 +104,12 @@ bool SubresourceFilter::AllowLoad(
 
   last_resource_check_result_ = std::make_pair(
       std::make_pair(resource_url, request_context), load_policy);
+
+#ifdef OHOS_ARKWEB_ADBLOCK
+  if (load_policy == WebDocumentSubresourceFilter::kDisallow) {
+    RequestSendStatistics(base::Milliseconds(1000));
+  }
+#endif
 
   return load_policy != WebDocumentSubresourceFilter::kDisallow;
 }
@@ -88,6 +128,26 @@ void SubresourceFilter::ReportLoadAsync(
                                                  WrapPersistent(this),
                                                  resource_url, load_policy));
 }
+
+#ifdef OHOS_ARKWEB_ADBLOCK
+std::unique_ptr<std::string> SubresourceFilter::GetElementHidingSelectors(
+    const KURL& document_url,
+    bool need_common_selectors) {
+  return subresource_filter_->GetElementHidingSelectors(document_url,
+                                                        need_common_selectors);
+}
+
+void SubresourceFilter::DidMatchCssRule(const KURL& document_url,
+                                        const std::string& dom_path,
+                                        // unsigned rule_line_num,
+                                        bool is_for_report) {
+  subresource_filter_->DidMatchCssRule(document_url, dom_path,
+                                       //  rule_line_num,
+                                       is_for_report);
+  RequestSendStatistics(base::Milliseconds(1000));
+}
+
+#endif
 
 bool SubresourceFilter::AllowWebSocketConnection(const KURL& url) {
   WebDocumentSubresourceFilter::LoadPolicy load_policy =
@@ -162,6 +222,10 @@ void SubresourceFilter::ReportLoad(
 
 void SubresourceFilter::Trace(Visitor* visitor) const {
   visitor->Trace(execution_context_);
+
+#ifdef OHOS_ARKWEB_ADBLOCK
+  visitor->Trace(statistics_timer_);
+#endif
 }
 
 }  // namespace blink

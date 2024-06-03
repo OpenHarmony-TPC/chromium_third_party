@@ -38,6 +38,10 @@
 #include "third_party/blink/renderer/platform/wtf/text/wtf_string.h"
 #include "third_party/blink/renderer/platform/wtf/vector.h"
 
+#ifdef OHOS_ARKWEB_ADBLOCK
+#include "third_party/blink/public/web/web_document.h"
+#endif
+
 namespace blink {
 
 class CSSStyleSheet;
@@ -226,6 +230,12 @@ class CORE_EXPORT StyleSheetContents final
 
   void Trace(Visitor*) const;
 
+#ifdef OHOS_ARKWEB_ADBLOCK
+  void SetStyleSheetType(WebDocument::StyleSheetType type);
+  bool IsForAdBlock() const { return is_for_adblock_; }
+  bool IsForUserAdBlock() const { return is_for_user_adblock_; }
+#endif  // OHOS_ARKWEB_ADBLOCK
+
  private:
   StyleSheetContents& operator=(const StyleSheetContents&) = delete;
   void NotifyRemoveFontFaceRule(const StyleRuleFontFace*);
@@ -264,6 +274,11 @@ class CORE_EXPORT StyleSheetContents final
   String source_map_url_;
   RenderBlockingBehavior render_blocking_behavior_ =
       RenderBlockingBehavior::kUnset;
+
+#ifdef OHOS_ARKWEB_ADBLOCK
+  bool is_for_adblock_ : 1;
+  bool is_for_user_adblock_ : 1;
+#endif
 };
 
 }  // namespace blink

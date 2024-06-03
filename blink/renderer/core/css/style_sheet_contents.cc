@@ -82,7 +82,14 @@ StyleSheetContents::StyleSheetContents(const CSSParserContext* context,
       has_media_queries_(false),
       has_single_owner_document_(true),
       is_used_from_text_cache_(false),
-      parser_context_(context) {}
+      parser_context_(context)
+#ifdef OHOS_ARKWEB_ADBLOCK
+      ,
+      is_for_adblock_(false),
+      is_for_user_adblock_(false)
+#endif  // OHOS_ARKWEB_ADBLOCK
+{
+}
 
 StyleSheetContents::StyleSheetContents(const StyleSheetContents& o)
     : owner_rule_(nullptr),
@@ -103,7 +110,13 @@ StyleSheetContents::StyleSheetContents(const StyleSheetContents& o)
       has_media_queries_(o.has_media_queries_),
       has_single_owner_document_(true),
       is_used_from_text_cache_(false),
-      parser_context_(o.parser_context_) {
+      parser_context_(o.parser_context_)
+#ifdef OHOS_ARKWEB_ADBLOCK
+      ,
+      is_for_adblock_(false),
+      is_for_user_adblock_(false)
+#endif  // OHOS_ARKWEB_ADBLOCK
+{
   for (unsigned i = 0; i < pre_import_layer_statement_rules_.size(); ++i) {
     pre_import_layer_statement_rules_[i] = To<StyleRuleLayerStatement>(
         o.pre_import_layer_statement_rules_[i]->Copy());
@@ -208,6 +221,14 @@ void StyleSheetContents::ParserAppendRule(StyleRuleBase* rule) {
     namespace_rules_.push_back(namespace_rule);
     return;
   }
+
+#ifdef OHOS_ARKWEB_ADBLOCK
+  if (rule) {
+    rule->SetForAdBlock(is_for_adblock_);
+
+    rule->SetForUserAdBlock(is_for_user_adblock_);
+  }
+#endif  // OHOS_ARKWEB_ADBLOCK
 
   child_rules_.push_back(rule);
 }
@@ -827,6 +848,21 @@ void StyleSheetContents::FindFontFaceRules(
 
   FindFontFaceRulesFromRules(ChildRules(), font_face_rules);
 }
+
+#ifdef OHOS_ARKWEB_ADBLOCK
+void StyleSheetContents::SetStyleSheetType(WebDocument::StyleSheetType type) {
+  switch(type) {
+    case WebDocument::StyleSheetType::kAdBlock:
+      is_for_adblock_ = true;
+      break;
+    case WebDocument::StyleSheetType::kUserAdBlock:
+      is_for_user_adblock_ = true;
+      break;
+    default:
+      break;
+  }
+}
+#endif  // OHOS_ARKWEB_ADBLOCK
 
 void StyleSheetContents::Trace(Visitor* visitor) const {
   visitor->Trace(owner_rule_);

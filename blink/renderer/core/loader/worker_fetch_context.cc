@@ -39,6 +39,9 @@ WorkerFetchContext::WorkerFetchContext(
     WorkerOrWorkletGlobalScope& global_scope,
     scoped_refptr<WebWorkerFetchContext> web_context,
     SubresourceFilter* subresource_filter,
+#ifdef OHOS_ARKWEB_ADBLOCK
+    SubresourceFilter* user_subresource_filter,
+#endif
     ContentSecurityPolicy& content_security_policy,
     WorkerResourceTimingNotifier& resource_timing_notifier)
     : BaseFetchContext(
@@ -47,6 +50,9 @@ WorkerFetchContext::WorkerFetchContext(
       global_scope_(global_scope),
       web_context_(std::move(web_context)),
       subresource_filter_(subresource_filter),
+#ifdef OHOS_ARKWEB_ADBLOCK
+      user_subresource_filter_(user_subresource_filter),
+#endif
       content_security_policy_(&content_security_policy),
       content_security_notifier_(&global_scope),
       resource_timing_notifier_(&resource_timing_notifier),
@@ -77,6 +83,12 @@ scoped_refptr<const SecurityOrigin> WorkerFetchContext::GetTopFrameOrigin()
 SubresourceFilter* WorkerFetchContext::GetSubresourceFilter() const {
   return subresource_filter_.Get();
 }
+
+#ifdef OHOS_ARKWEB_ADBLOCK
+SubresourceFilter* WorkerFetchContext::GetUserSubresourceFilter() const {
+  return user_subresource_filter_.Get();
+}
+#endif
 
 bool WorkerFetchContext::AllowScriptFromSource(const KURL& url) const {
   if (!global_scope_->ContentSettingsClient()) {
@@ -289,6 +301,9 @@ ExecutionContext* WorkerFetchContext::GetExecutionContext() const {
 void WorkerFetchContext::Trace(Visitor* visitor) const {
   visitor->Trace(global_scope_);
   visitor->Trace(subresource_filter_);
+#ifdef OHOS_ARKWEB_ADBLOCK
+  visitor->Trace(user_subresource_filter_);
+#endif
   visitor->Trace(content_security_policy_);
   visitor->Trace(content_security_notifier_);
   BaseFetchContext::Trace(visitor);

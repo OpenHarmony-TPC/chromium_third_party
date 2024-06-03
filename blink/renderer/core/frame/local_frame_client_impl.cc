@@ -1194,4 +1194,10 @@ void LocalFrameClientImpl::UpdateSubresourceFactory(
   web_frame_->Client()->UpdateSubresourceFactory(std::move(pending_factory));
 }
 
+#ifdef OHOS_ARKWEB_ADBLOCK
+void LocalFrameClientImpl::DispatchDidSubresourceFiltered() {
+  web_frame_->DidSubresourceFiltered();
+}
+
+#endif  // OHOS_ARKWEB_ADBLOCK
 }  // namespace blink

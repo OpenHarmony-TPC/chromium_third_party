@@ -825,6 +825,10 @@ class BLINK_EXPORT WebLocalFrameClient {
       const WebURL& base_url) {
     return nullptr;
   }
+
+#ifdef OHOS_ARKWEB_ADBLOCK
+  virtual void DidSubresourceFiltered() {}
+#endif  // OHOS_ARKWEB_ADBLOCK
 };
 
 }  // namespace blink

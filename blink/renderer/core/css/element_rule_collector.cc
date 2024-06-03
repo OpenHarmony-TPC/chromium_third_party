@@ -60,6 +60,14 @@
 #include "third_party/blink/renderer/core/page/scrolling/fragment_anchor.h"
 #include "third_party/blink/renderer/core/style/computed_style.h"
 
+#ifdef OHOS_ARKWEB_ADBLOCK
+#include "base/base_switches.h"
+#include "base/command_line.h"
+#include "third_party/blink/renderer/core/loader/document_loader.h"
+#include "third_party/blink/renderer/core/loader/subresource_filter.h"
+#include "third_party/blink/renderer/core/ohos_adblock/ohos_adblock_util.h"
+#endif  // OHOS_ARKWEB_ADBLOCK
+
 namespace blink {
 namespace {
 struct CumulativeRulePerfKey {
@@ -540,6 +548,51 @@ void ElementRuleCollector::CollectMatchingRulesForListInternal(
     }
 
     matched++;
+
+#ifdef OHOS_ARKWEB_ADBLOCK
+    if (auto* rule = rule_data.Rule()) {
+      if (rule->IsForAdBlock()) {
+        result_.SetDisplayNoneFromAdblock(true);
+        if (context_.GetElement().GetDocument().Loader() &&
+            context_.GetElement()
+                .GetDocument()
+                .Loader()
+                ->GetSubresourceFilter()) {
+          context_.GetElement()
+              .GetDocument()
+              .Loader()
+              ->GetSubresourceFilter()
+              ->DidMatchCssRule(context_.GetElement().GetDocument().Url(),
+                                GetDomPath(context_.GetElement(), false, true),
+                                true);
+        }
+      }
+    }
+
+    if (auto* rule = rule_data.Rule()) {
+      if (rule->IsForUserAdBlock()) {
+        if (context_.GetElement().GetDocument().Loader() &&
+            context_.GetElement()
+                .GetDocument()
+                .Loader()
+                ->GetUserSubresourceFilter() &&
+            !(context_.GetElement()
+                  .GetDocument()
+                  .Loader()
+                  ->GetUserSubresourceFilter()
+                  ->GetDidFinishLoad())) {
+          context_.GetElement()
+              .GetDocument()
+              .Loader()
+              ->GetUserSubresourceFilter()
+              ->DidMatchCssRule(context_.GetElement().GetDocument().Url(),
+                                GetDomPath(context_.GetElement(), false, true));
+        }
+        result_.SetDisplayNoneFromUserAdblock(true);
+      }
+    }
+#endif
+
     if (perf_trace_enabled) {
       selector_statistics_collector.SetDidMatch();
     }

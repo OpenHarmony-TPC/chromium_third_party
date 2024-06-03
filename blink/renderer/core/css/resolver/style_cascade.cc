@@ -47,6 +47,12 @@
 #include "third_party/blink/renderer/platform/wtf/math_extras.h"
 #include "third_party/blink/renderer/platform/wtf/text/string_builder.h"
 
+#ifdef OHOS_ARKWEB_ADBLOCK
+#include "third_party/blink/renderer/core/loader/document_loader.h"
+#include "third_party/blink/renderer/core/loader/subresource_filter.h"
+#include "third_party/blink/renderer/core/ohos_adblock/ohos_adblock_util.h"
+#endif  // OHOS_ARKWEB_ADBLOCK
+
 namespace blink {
 
 namespace {
@@ -735,8 +741,53 @@ void StyleCascade::LookupAndApplyDeclaration(const CSSProperty& property,
   } else if (origin == CascadeOrigin::kAuthorPresentationalHint) {
     tree_scope = &GetDocument();
   }
+
+#ifdef OHOS_ARKWEB_ADBLOCK
+  blink::EDisplay tmp = state_.StyleBuilder().Display();
+#endif
+
   StyleBuilder::ApplyPhysicalProperty(property, state_,
                                       value->EnsureScopedValue(tree_scope));
+
+#ifdef OHOS_ARKWEB_ADBLOCK
+  if (match_result_.GetDisplayNoneFromAdblock() &&
+      state_.GetElement().tagName().UpperASCII() != "HEAD" &&
+      state_.GetElement().GetDocument().Loader() &&
+      state_.GetElement().GetDocument().Loader()->GetSubresourceFilter()) {
+    if (property.GetCSSPropertyName().ToAtomicString().Utf8() == "display" &&
+        state_.StyleBuilder().Display() == blink::EDisplay::kNone &&
+        state_.StyleBuilder().Display() != tmp) {
+      state_.GetElement()
+            .GetDocument()
+            .Loader()
+            ->GetSubresourceFilter()
+            ->DidMatchCssRule(state_.GetElement().GetDocument().Url(),
+                              GetDomPath(state_.GetElement(), false, true));
+      LOG(INFO) << "[AdBlock] Element("<< state_.GetElement().ToString()
+                << " ) dom path:"
+                << GetDomPath(state_.GetElement(), false, true);
+    }
+  }
+
+  if (match_result_.GetDisplayNoneFromUserAdblock() &&
+      state_.GetElement().tagName().UpperASCII() != "HEAD" &&
+      state_.GetElement().GetDocument().Loader() &&
+      state_.GetElement().GetDocument().Loader()->GetUserSubresourceFilter()) {
+    if (property.GetCSSPropertyName().ToAtomicString().Utf8() == "display" &&
+        state_.StyleBuilder().Display() == blink::EDisplay::kNone &&
+        state_.StyleBuilder().Display() != tmp) {
+      state_.GetElement()
+          .GetDocument()
+          .Loader()
+          ->GetUserSubresourceFilter()
+          ->DidMatchCssRule(state_.GetElement().GetDocument().Url(),
+                            GetDomPath(state_.GetElement(), false, true));
+      LOG(INFO) << "[User AdBlock] Element(" << state_.GetElement().ToString()
+                << ") dom path:"
+                << GetDomPath(state_.GetElement(), false, true);
+    }
+  }
+#endif
 }
 
 void StyleCascade::LookupAndApplyInterpolation(const CSSProperty& property,

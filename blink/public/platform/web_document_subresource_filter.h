@@ -7,6 +7,10 @@
 
 #include "third_party/blink/public/mojom/fetch/fetch_api_request.mojom-shared.h"
 
+#ifdef OHOS_ARKWEB_ADBLOCK
+#include "url/origin.h"
+#endif  // OHOS_ARKWEB_ADBLOCK
+
 namespace blink {
 
 class WebURL;
@@ -26,6 +30,40 @@ class WebDocumentSubresourceFilter {
   virtual ~WebDocumentSubresourceFilter() = default;
   virtual LoadPolicy GetLoadPolicy(const WebURL& resource_url,
                                    mojom::RequestContextType) = 0;
+
+#ifdef OHOS_ARKWEB_ADBLOCK
+  virtual void ClearStatistics() = 0;
+
+  virtual std::unique_ptr<std::string> GetElementHidingSelectors(
+      const WebURL& document_url,
+      bool need_common_selectors) = 0;
+
+  virtual bool HasGenericHideTypeOption(
+      const WebURL& document_url,
+      const url::Origin& parent_document_origin) = 0;
+
+  virtual bool HasElemHideTypeOption(
+      const WebURL& document_url,
+      const url::Origin& parent_document_origin) = 0;
+
+  virtual bool HasDocumentTypeOption(
+      const WebURL& document_url,
+      const url::Origin& parent_document_origin) = 0;
+
+  virtual void DidMatchCssRule(const WebURL& document_url,
+                               const std::string& dom_path,
+                               //  unsigned rule_line_num = 0,
+                               bool is_for_report = false) = 0;
+
+  virtual void SetDidFinishLoad(bool did_load_finished) = 0;
+
+  virtual bool GetDidFinishLoad() = 0;
+
+  virtual std::unique_ptr<std::vector<std::string>> GetUserDomPathSelectors(
+      const blink::WebURL& document_url,
+      bool need_generic_selectors) = 0;
+#endif
+
   virtual LoadPolicy GetLoadPolicyForWebSocketConnect(const WebURL&) = 0;
   virtual LoadPolicy GetLoadPolicyForWebTransportConnect(const WebURL&) = 0;
 

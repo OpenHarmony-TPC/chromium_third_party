@@ -3280,6 +3280,31 @@ void WebLocalFrameImpl::ResetHasScrolledFocusedEditableIntoView() {
   has_scrolled_focused_editable_node_into_rect_ = false;
 }
 
+#ifdef OHOS_ARKWEB_ADBLOCK
+void WebLocalFrameImpl::DidSubresourceFiltered() {
+  if (!Client()){
+    return;
+  }
+
+  Client()->DidSubresourceFiltered();
+}
+
+void WebLocalFrameImpl::SetHasElemHideTypeOption(
+    bool has_elemhide_type_option) {
+  frame_->SetHasElemHideTypeOption(has_elemhide_type_option);
+}
+
+void WebLocalFrameImpl::SetHasDocumentTypeOption(
+    bool has_document_type_option) {
+  frame_->SetHasDocumentTypeOption(has_document_type_option);
+}
+
+void WebLocalFrameImpl::SetHasGenericHideTypeOption(
+    bool has_generichide_type_option) {
+  frame_->SetHasGenericHideTypeOption(has_generichide_type_option);
+}
+#endif  // OHOS_ARKWEB_ADBLOCK
+
 void WebLocalFrameImpl::AddObserver(WebLocalFrameObserver* observer) {
   // Ensure that the frame is attached.
   DCHECK(GetFrame());

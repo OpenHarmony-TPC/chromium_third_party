@@ -87,6 +87,9 @@ class CORE_EXPORT BaseFetchContext : public FetchContext {
   virtual scoped_refptr<const SecurityOrigin> GetTopFrameOrigin() const = 0;
 
   virtual SubresourceFilter* GetSubresourceFilter() const = 0;
+#ifdef OHOS_ARKWEB_ADBLOCK
+  virtual SubresourceFilter* GetUserSubresourceFilter() const = 0;
+#endif
   virtual bool ShouldBlockWebSocketByMixedContentCheck(const KURL&) const = 0;
   virtual std::unique_ptr<WebSocketHandshakeThrottle>
   CreateWebSocketHandshakeThrottle() = 0;

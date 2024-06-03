@@ -299,6 +299,9 @@ void WorkerOrWorkletGlobalScope::InitializeWebFetchContextIfNeeded() {
     return;
 
   DCHECK(!subresource_filter_);
+#ifdef OHOS_ARKWEB_ADBLOCK
+  DCHECK(!user_subresource_filter_);
+#endif
   web_worker_fetch_context_->InitializeOnWorkerThread(navigator());
   std::unique_ptr<blink::WebDocumentSubresourceFilter> web_filter =
       web_worker_fetch_context_->TakeSubresourceFilter();
@@ -306,6 +309,15 @@ void WorkerOrWorkletGlobalScope::InitializeWebFetchContextIfNeeded() {
     subresource_filter_ =
         MakeGarbageCollected<SubresourceFilter>(this, std::move(web_filter));
   }
+
+#ifdef OHOS_ARKWEB_ADBLOCK
+  std::unique_ptr<blink::WebDocumentSubresourceFilter> user_web_filter =
+      web_worker_fetch_context_->TakeUserSubresourceFilter();
+  if (user_web_filter) {
+    user_subresource_filter_ = MakeGarbageCollected<SubresourceFilter>(
+        this, std::move(user_web_filter));
+  }
+#endif
 }
 
 ResourceFetcher* WorkerOrWorkletGlobalScope::Fetcher() {
@@ -345,7 +357,12 @@ ResourceFetcher* WorkerOrWorkletGlobalScope::CreateFetcherInternal(
                 web_worker_fetch_context_));
     auto* worker_fetch_context = MakeGarbageCollected<WorkerFetchContext>(
         properties, *this, web_worker_fetch_context_, subresource_filter_,
+#if OHOS_ARKWEB_ADBLOCK
+        user_subresource_filter_, content_security_policy,
+        resource_timing_notifier);
+#else
         content_security_policy, resource_timing_notifier);
+#endif
     ResourceFetcherInit init(
         properties, worker_fetch_context, GetTaskRunner(TaskType::kNetworking),
         GetTaskRunner(TaskType::kNetworkingUnfreezable),
@@ -577,6 +594,9 @@ void WorkerOrWorkletGlobalScope::Trace(Visitor* visitor) const {
   visitor->Trace(inside_settings_resource_fetcher_);
   visitor->Trace(resource_fetchers_);
   visitor->Trace(subresource_filter_);
+#ifdef OHOS_ARKWEB_ADBLOCK
+  visitor->Trace(user_subresource_filter_);
+#endif
   visitor->Trace(script_controller_);
   EventTargetWithInlineData::Trace(visitor);
   ExecutionContext::Trace(visitor);
