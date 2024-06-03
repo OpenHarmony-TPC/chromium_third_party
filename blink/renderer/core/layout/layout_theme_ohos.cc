@@ -25,8 +25,7 @@ Color LayoutThemeOhos::PlatformActiveSelectionBackgroundColor(
     mojom::blink::ColorScheme color_scheme) const {
   return color_scheme == mojom::blink::ColorScheme::kDark
              ? Color::FromRGBA32(0xFF99C8FF)
-             : LayoutThemeMobile::PlatformActiveSelectionBackgroundColor(
-                   color_scheme);
+             : LayoutThemeOhos::kDefaultActiveSelectionBackgroundColor;
 }
 
 Color LayoutThemeOhos::PlatformActiveSelectionForegroundColor(
