@@ -25,6 +25,8 @@ class LayoutThemeOhos final : public LayoutThemeMobile {
   ~LayoutThemeOhos() override;
   static constexpr Color kDefaultActiveSelectionBackgroundColor =
       Color::FromRGBA32(0x330a59f7);
+  static constexpr Color kDefaultDrakSchemeActiveSelectionBackgroundColor =
+      Color::FromRGBA32(0x66317af7);
 };
 
 }  // namespace blink
