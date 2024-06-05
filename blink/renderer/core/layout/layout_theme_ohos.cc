@@ -24,7 +24,7 @@ LayoutThemeOhos::~LayoutThemeOhos() {}
 Color LayoutThemeOhos::PlatformActiveSelectionBackgroundColor(
     mojom::blink::ColorScheme color_scheme) const {
   return color_scheme == mojom::blink::ColorScheme::kDark
-             ? Color::FromRGBA32(0xFF99C8FF)
+             ? LayoutThemeOhos::kDefaultDrakSchemeActiveSelectionBackgroundColor
              : LayoutThemeOhos::kDefaultActiveSelectionBackgroundColor;
 }
 
