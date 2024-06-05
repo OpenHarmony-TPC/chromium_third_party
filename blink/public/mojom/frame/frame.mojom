@@ -201,6 +201,7 @@ struct IframeAttributes {
   string? src;
 };
 
+[EnableIf=is_ohos]
 struct CacheOptions {
   map<string, string> response_headers;
   bool is_module;
