@@ -45,6 +45,7 @@
 #include "third_party/blink/renderer/core/loader/resource/css_style_sheet_resource.h"
 #include "net/http/http_status_code.h"
 #include "third_party/blink/renderer/platform/network/mime/mime_type_registry.h"
+#include "base/trace_event/trace_event.h"
 #endif
 
 namespace blink {
@@ -91,6 +92,7 @@ void WebCache::AddResourceToCache(const std::string& url,
                                   const std::vector<uint8_t>& resource,
                                   const base::flat_map<std::string, std::string>& response_headers,
                                   const uint64_t type) {
+  TRACE_EVENT1("net", "WebCache::AddResourceToCache", "url", url.c_str());
   MemoryCache* cache = MemoryCache::Get();
   if (!cache) {
     LOG(DEBUG) << "Cannot get MemoryCache.";
