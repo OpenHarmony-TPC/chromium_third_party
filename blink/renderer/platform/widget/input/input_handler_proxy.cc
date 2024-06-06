@@ -430,11 +430,11 @@ void InputHandlerProxy::NativeHitTestResult(bool native, size_t fingerId, int la
   LOG(DEBUG)<<"[NativeEmbed] NativeHitTestResult fingerId is : "<< fingerId << " and native is : "<< native;
   float x = start_touch_event_.touches[fingerId].PositionInWidget().x();
   float y = start_touch_event_.touches[fingerId].PositionInWidget().y();
-  cc::LayerImpl* layer_impl = input_handler_->GetLayerImpl(gfx::Point(x, y));
-  if (!native && (layer_impl && layer_impl->ShouldInterceptTouchEvent())) {
+  cc::LayerImpl* layer_impl = input_handler_->GetLayerImplIsHitByPoint(gfx::Point(x, y));
+  if (layer_impl && layer_impl->ShouldInterceptTouchEvent()) {
     layerId = layer_impl->id();
+    native = true;
   }
-  native = native || (layer_impl && layer_impl->ShouldInterceptTouchEvent());
   native_map_[fingerId] = native;
   if (native) {
     native_id_map_[fingerId] = layerId;

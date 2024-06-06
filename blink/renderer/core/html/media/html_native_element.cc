@@ -630,7 +630,6 @@ void HTMLNativeElement::SetCcLayer(cc::Layer* cc_layer) {
   if (cc_layer_) {
     LOG(INFO) << "[NativeEmbed] set native flag";
     cc_layer_->SetMayContainNative(true);
-    cc_layer_->SetShouldInterceptTouchEvent(true);
     cc_layer_->SetNeedsPushProperties();
   }
 }
