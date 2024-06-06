@@ -487,6 +487,7 @@ bool InputHandlerProxy::DidNativeEmbedEvent(const WebInputEvent& event) {
   if (IsTouchEventType(event.GetType())) {
     for(size_t i = 0; i < touch_event.touches_length; ++i) {
       WebTouchPoint::State state = touch_event.touches[i].state;
+      int32_t id = touch_event.touches[i].id;
       if (!IsSameEventType(event.GetType(), state)) {
         continue;
       }
@@ -494,14 +495,17 @@ bool InputHandlerProxy::DidNativeEmbedEvent(const WebInputEvent& event) {
         start_touch_event_ = touch_event;
         const WebTouchPoint& touch_point = touch_event.touches[i];
         WebPointerEvent pointer_event = WebPointerEvent(touch_event, touch_point);
-        client_->TouchHitTest(pointer_event, i);
+        client_->TouchHitTest(pointer_event, id);
         result = true;
         continue;
       }
 
-      if (native_map_[i]) {
+      if (native_map_[id]) {
         SendNativeEvent(touch_event, event.GetType(), i);
         result = true;
+      }
+      if (event.GetType() == WebInputEvent::Type::kTouchEnd) {
+        native_map_[id] = false;
       }
     }
   }
