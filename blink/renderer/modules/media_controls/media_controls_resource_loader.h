@@ -53,6 +53,10 @@ class MediaControlsResourceLoader
   String GetMediaControlsCSS() const;
 
   String GetMediaControlsAndroidCSS() const;
+
+#if BUILDFLAG(IS_OHOS) && defined(OHOS_MEDIA)
+  String GetMediaControlsOHOSCSS() const;
+#endif
 };
 
 }  // namespace blink

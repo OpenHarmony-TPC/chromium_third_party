@@ -11,6 +11,10 @@
 #include "third_party/blink/renderer/platform/runtime_enabled_features.h"
 #include "third_party/blink/renderer/platform/wtf/text/wtf_string.h"
 
+#if BUILDFLAG(IS_OHOS) && defined(OHOS_MEDIA)
+#include "base/ohos/sys_info_utils.h"
+#endif
+
 namespace {
 
 bool ShouldLoadAndroidCSS() {
@@ -37,6 +41,12 @@ String MediaControlsResourceLoader::GetMediaControlsCSS() const {
 String MediaControlsResourceLoader::GetMediaControlsAndroidCSS() const {
   return UncompressResourceAsString(IDR_UASTYLE_MEDIA_CONTROLS_ANDROID_CSS);
 }
+
+#if BUILDFLAG(IS_OHOS) && defined(OHOS_MEDIA)
+String MediaControlsResourceLoader::GetMediaControlsOHOSCSS() const {
+  return UncompressResourceAsString(IDR_UASTYLE_MEDIA_CONTROLS_OHOS_CSS);
+}
+#endif
 
 // static
 String MediaControlsResourceLoader::GetShadowLoadingStyleSheet() {
@@ -76,6 +86,14 @@ String MediaControlsResourceLoader::GetMediaInterstitialsStyleSheet() {
 }
 
 String MediaControlsResourceLoader::GetUAStyleSheet() {
+#if BUILDFLAG(IS_OHOS) && defined(OHOS_MEDIA)
+  // On ohos, custom video css styles only work for mobile devices.
+  if (base::ohos::IsMobileDevice()) {
+    return GetMediaControlsCSS() + GetMediaControlsAndroidCSS() +
+           GetMediaControlsOHOSCSS() + GetMediaInterstitialsStyleSheet();
+  }
+#endif
+
   if (ShouldLoadAndroidCSS()) {
     return GetMediaControlsCSS() + GetMediaControlsAndroidCSS() +
            GetMediaInterstitialsStyleSheet();
