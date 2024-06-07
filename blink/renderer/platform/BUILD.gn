@@ -2287,6 +2287,15 @@ source_set("blink_platform_unittests_sources") {
   }
 
   sources += [ "testing/run_all_tests.cc" ]
+  if (ohos_unittests) {
+    sources += [
+      "//cef/libcef/common/soc_perf_util.cc",
+      "//content/browser/browser_thread_impl.cc",
+      "//content/browser/scheduler/browser_task_executor.cc",
+      "//content/public/renderer/render_thread.cc",
+      "//content/child/child_thread_impl.cc",
+    ]
+  }
 
   configs += [
     ":blink_platform_pch",
@@ -2344,9 +2353,9 @@ source_set("blink_platform_unittests_sources") {
   ]
 
   if (ohos_unittests) {
-    deps += [
-      "//cef:libcef_static",
-    ]
+    deps +=[
+      "//cef/libcef/common/mojom"
+      ]
   }
 
   deps += [ ":bridge_ice_controller_tests" ]
