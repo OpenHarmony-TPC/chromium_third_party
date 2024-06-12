@@ -70,6 +70,8 @@ void LayoutNative::UpdateIntrinsicSize(bool is_in_layout) {
     SetNeedsLayoutAndFullPaintInvalidation(
         layout_invalidation_reason::kSizeChanged);
   }
+  NativeElement()->UpdateSize(gfx::Size(size.Width().ToInt(),
+                                        size.Height().ToInt()));
 }
 
 LayoutSize LayoutNative::CalculateIntrinsicSize(float scale) {

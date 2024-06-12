@@ -121,6 +121,7 @@ class CORE_EXPORT HTMLNativeElement
   void OnDestroyNativeSurface() final;
   void Repaint() final;
   void SetCcLayer(cc::Layer*) final;
+  void UpdateSize(gfx::Size size);
 
  protected:
   // Assert the correct order of the children in shadow dom when DCHECK is on.
