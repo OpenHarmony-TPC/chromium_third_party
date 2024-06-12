@@ -543,7 +543,7 @@ void HTMLNativeElement::OnCreateNativeSurface(int native_embed_id,
     bounding_rect_.set_origin(bounding_rect.origin());
     embed_info->rect = bounding_rect;
     if (!bounding_rect_changed_cb_.is_null()) {
-      bounding_rect_changed_cb_.Run(bounding_rect);
+      bounding_rect_changed_cb_.Run(bounding_rect, false);
     }
   }
 
@@ -570,6 +570,20 @@ void HTMLNativeElement::ClearResourceWithoutLocking() {
   }
 }
 
+void HTMLNativeElement::UpdateSize(gfx::Size size) {
+  String native_type = GetTypeAttribute();
+  LOG(INFO) << "NativeEmbed size:" << size.ToString() << ",native_type:" << native_type;
+  if (native_type == "native/video") {
+    return;
+  }
+  if (OwnerBoundingRect().size() != size) {
+    if (!bounding_rect_changed_cb_.is_null()) {
+       bounding_rect_changed_cb_.Run(gfx::ScaleToEnclosingRect(
+          bounding_rect_, PageConstraintInitalScale(GetDocument())), true);    
+    }
+  }
+}
+
 void HTMLNativeElement::OnLayerRectChange(const gfx::Rect& rect) {
   if (OwnerBoundingRect().ApproximatelyEqual(rect, 1)) {
     return;
@@ -580,7 +594,7 @@ void HTMLNativeElement::OnLayerRectChange(const gfx::Rect& rect) {
     bounding_rect_ = rect;
     if (!bounding_rect_changed_cb_.is_null()) {
       bounding_rect_changed_cb_.Run(gfx::ScaleToEnclosingRect(
-          bounding_rect_, PageConstraintInitalScale(GetDocument())));
+          bounding_rect_, PageConstraintInitalScale(GetDocument())), true);
     }
   } else {
     bounding_rect_.set_origin(rect.origin());
@@ -631,6 +645,7 @@ void HTMLNativeElement::SetCcLayer(cc::Layer* cc_layer) {
     LOG(INFO) << "[NativeEmbed] set native flag";
     cc_layer_->SetMayContainNative(true);
     cc_layer_->SetNeedsPushProperties();
+    cc_layer_->SetIsNativeVideo(GetTypeAttribute() == "native/video");
   }
 }
 
