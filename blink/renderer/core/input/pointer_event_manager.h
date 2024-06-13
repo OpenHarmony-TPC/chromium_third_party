@@ -302,13 +302,6 @@ class CORE_EXPORT PointerEventManager final
   // main thread, or all events (touch start/end/move).
   bool skip_touch_filter_discrete_ = false;
   bool skip_touch_filter_all_ = false;
-#if BUILDFLAG(IS_OHOS)
-  bool hit_embed_tag_ = false;
-  WebInputEvent::Type last_point_type_ = WebInputEvent::Type::kUndefined;
-  bool is_last_native_type_ = false;
-  PhysicalOffset offset_ {};
-  std::string embed_id_;
-#endif
   WeakMember<Scrollbar> captured_scrollbar_;
 };
 

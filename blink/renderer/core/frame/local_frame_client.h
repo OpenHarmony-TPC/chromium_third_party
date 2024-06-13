@@ -122,7 +122,7 @@ enum class SyncCondition;
 struct Impression;
 struct MobileFriendliness;
 #if BUILDFLAG(IS_OHOS)
-class HTMLNativeElement;
+class NativeLoader;
 class WebNativeBridge;
 class WebNativeClient;
 #endif
@@ -319,7 +319,7 @@ class CORE_EXPORT LocalFrameClient : public FrameClient {
       HTMLMediaElement&) = 0;
 #if BUILDFLAG(IS_OHOS)
   virtual std::unique_ptr<WebNativeBridge> CreateWebNativeBridge(
-      HTMLNativeElement&,
+      NativeLoader&,
       WebNativeClient*) {
     return nullptr;
   }

@@ -25,6 +25,9 @@
 
 #include "third_party/blink/renderer/core/core_export.h"
 #include "third_party/blink/renderer/core/loader/image_loader.h"
+#if BUILDFLAG(IS_OHOS)
+#include "third_party/blink/renderer/core/loader/native_loader.h"
+#endif
 
 namespace blink {
 
@@ -39,6 +42,18 @@ class CORE_EXPORT HTMLImageLoader final : public ImageLoader {
   void ImageNotifyFinished(ImageResourceContent*) override;
   String DebugName() const override { return "HTMLImageLoader"; }
 };
+
+#if BUILDFLAG(IS_OHOS)
+class HTMLPlugInElement;
+
+class CORE_EXPORT HTMLNativeLoader final : public NativeLoader {
+ public:
+  explicit HTMLNativeLoader(HTMLPlugInElement*);
+  ~HTMLNativeLoader() override;
+
+  String DebugName() const override { return "HTMLNativeLoader"; }
+};
+#endif
 
 }  // namespace blink
 

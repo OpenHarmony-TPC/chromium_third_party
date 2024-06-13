@@ -162,10 +162,7 @@ class CORE_EXPORT HTMLFrameOwnerElement : public HTMLElement,
 
   bool LoadOrRedirectSubframe(const KURL&,
                               const AtomicString& frame_name,
-                              bool replace_current_item
-#if BUILDFLAG(IS_OHOS)
-                              , bool load_for_native = false);
-#endif
+                              bool replace_current_item);
   bool IsKeyboardFocusable() const override;
   void FrameOwnerPropertiesChanged() override;
 

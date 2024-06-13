@@ -41,7 +41,7 @@ class MODULES_EXPORT ModulesInitializer : public CoreInitializer {
 #if BUILDFLAG(IS_OHOS)
   std::unique_ptr<WebNativeBridge> CreateWebNativeBridge(
       WebLocalFrameClient*,
-      HTMLNativeElement&,
+      NativeLoader&,
       WebNativeClient*) const override;
 #endif
 

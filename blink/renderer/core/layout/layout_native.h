@@ -20,11 +20,11 @@
 
 namespace blink {
 
-class HTMLNativeElement;
+class HTMLPlugInElement;
 
 class LayoutNative final : public LayoutImage {
  public:
-  explicit LayoutNative(HTMLNativeElement*);
+  explicit LayoutNative(Element*);
   ~LayoutNative() override;
   void Trace(Visitor*) const override;
 
@@ -36,14 +36,12 @@ class LayoutNative final : public LayoutImage {
 
   bool SupportsAcceleratedRendering() const;
 
-  HTMLNativeElement* NativeElement() const;
+  HTMLPlugInElement* NativeElement() const;
 
   const char* GetName() const override {
     NOT_DESTROYED();
     return "LayoutNative";
   }
-
-  void IntrinsicSizeChanged() override;
 
   OverflowClipAxes ComputeOverflowClipAxes() const final {
     NOT_DESTROYED();
@@ -70,7 +68,7 @@ class LayoutNative final : public LayoutImage {
 
   bool IsOfType(LayoutObjectType type) const override {
     NOT_DESTROYED();
-    return LayoutImage::IsOfType(type);
+    return type == kLayoutObjectNative || LayoutImage::IsOfType(type);
   }
 
   void PaintReplaced(const PaintInfo&,

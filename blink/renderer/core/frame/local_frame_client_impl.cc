@@ -106,7 +106,7 @@
 #include "third_party/blink/renderer/platform/wtf/text/wtf_string.h"
 #include "v8/include/v8.h"
 #if BUILDFLAG(IS_OHOS)
-#include "third_party/blink/renderer/core/html/media/html_native_element.h"
+#include "third_party/blink/renderer/core/loader/native_loader.h"
 #endif
 
 namespace blink {
@@ -958,16 +958,15 @@ std::unique_ptr<WebMediaPlayer> LocalFrameClientImpl::CreateWebMediaPlayer(
 #if BUILDFLAG(IS_OHOS)
 std::unique_ptr<WebNativeBridge>
 LocalFrameClientImpl::CreateWebNativeBridge(
-    HTMLNativeElement& html_native_element,
+    NativeLoader& native_loader,
     WebNativeClient* client) {
-  LocalFrame* local_frame = html_native_element.LocalFrameForNative();
-  WebLocalFrameImpl* web_frame = WebLocalFrameImpl::FromFrame(local_frame);
-
+  WebLocalFrameImpl* web_frame =
+      WebLocalFrameImpl::FromFrame(native_loader.CurrentFrame());
   if (!web_frame || !web_frame->Client())
     return nullptr;
 
   return CoreInitializer::GetInstance().CreateWebNativeBridge(
-      web_frame->Client(), html_native_element, client);
+      web_frame->Client(), native_loader, client);
 }
 #endif
 

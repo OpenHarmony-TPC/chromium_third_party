@@ -64,6 +64,9 @@
 #include "third_party/blink/renderer/platform/network/mime/mime_type_registry.h"
 #include "third_party/blink/renderer/platform/scheduler/public/frame_scheduler.h"
 #include "third_party/blink/renderer/platform/scheduler/public/scheduling_policy.h"
+#if BUILDFLAG(IS_OHOS)
+#include "third_party/blink/renderer/core/layout/layout_native.h"
+#endif
 
 namespace blink {
 
@@ -145,6 +148,9 @@ HTMLPlugInElement::~HTMLPlugInElement() {
 void HTMLPlugInElement::Trace(Visitor* visitor) const {
   visitor->Trace(image_loader_);
   visitor->Trace(persisted_plugin_);
+#if BUILDFLAG(IS_OHOS)
+  visitor->Trace(native_loader_);
+#endif
   HTMLFrameOwnerElement::Trace(visitor);
 }
 
@@ -229,6 +235,9 @@ void HTMLPlugInElement::AttachLayoutTree(AttachContext& context) {
     if (layout_object->IsLayoutEmbeddedContent())
       SetEmbeddedContentView(content_frame->View());
   } else if (!IsImageType() && NeedsPluginUpdate() &&
+#if BUILDFLAG(IS_OHOS)
+             !IsNativeType() &&
+#endif
              GetLayoutEmbeddedObject() &&
              !GetLayoutEmbeddedObject()->ShowsUnavailablePluginIndicator() &&
              GetObjectContentType() != ObjectContentType::kPlugin &&
@@ -251,6 +260,12 @@ void HTMLPlugInElement::AttachLayoutTree(AttachContext& context) {
         To<LayoutImage>(layout_object)->ImageResource();
     image_resource->SetImageResource(image_loader_->GetContent());
   }
+#if BUILDFLAG(IS_OHOS)
+  if (!native_loader_ && IsNativeType() && layout_object->IsLayoutNative()) {
+    native_loader_ = MakeGarbageCollected<HTMLNativeLoader>(this);
+    native_loader_->ScheduleLoadResource();
+  }
+#endif
   if (layout_object->AffectsWhitespaceSiblings())
     context.previous_in_flow = layout_object;
 
@@ -281,7 +296,9 @@ void HTMLPlugInElement::RemovedFrom(ContainerNode& insertion_point) {
   // Plugins can persist only through reattachment during a lifecycle
   // update. This method shouldn't be called in that lifecycle phase.
   DCHECK(!persisted_plugin_);
-
+  LOG(INFO)<<"HTMLPlugInElement::RemovedFrom";
+  if (native_loader_)
+    native_loader_->OnDestroyNativeSurface();
   HTMLFrameOwnerElement::RemovedFrom(insertion_point);
 }
 
@@ -361,6 +378,13 @@ LayoutObject* HTMLPlugInElement::CreateLayoutObject(
     image->SetImageResource(MakeGarbageCollected<LayoutImageResource>());
     return image;
   }
+
+#if BUILDFLAG(IS_OHOS)
+  if (IsNativeType()) {
+    LayoutNative* native = MakeGarbageCollected<LayoutNative>(this);
+    return native;
+  }
+#endif
 
   plugin_is_available_ = true;
   return MakeGarbageCollected<LayoutEmbeddedObject>(this);
@@ -613,9 +637,6 @@ bool HTMLPlugInElement::RequestObject(const PluginParameters& plugin_params) {
   if (handled_externally)
     ResetInstance();
   if (object_type == ObjectContentType::kFrame ||
-#if BUILDFLAG(IS_OHOS)
-      ShouldLoadForNative() ||
-#endif
       object_type == ObjectContentType::kImage || handled_externally) {
     if (object_type == ObjectContentType::kFrame) {
       UseCounter::Count(GetDocument(),
@@ -644,16 +665,7 @@ bool HTMLPlugInElement::RequestObject(const PluginParameters& plugin_params) {
     // loadOrRedirectSubframe will re-use it. Otherwise, it will create a
     // new frame and set it as the LayoutEmbeddedContent's EmbeddedContentView,
     // causing what was previously in the EmbeddedContentView to be torn down.
-#if BUILDFLAG(IS_OHOS)
-    if (IsNativeType() && !ShouldLoadForNative()) {
-      LOG(ERROR) << "[NativeEmbed] " << service_type_
-                 << " service type can't be loaded for native type.";
-    }
-    return LoadOrRedirectSubframe(completed_url, GetNameAttribute(), true,
-                                  ShouldLoadForNative());
-#else
     return LoadOrRedirectSubframe(completed_url, GetNameAttribute(), true);
-#endif
   }
 
   // If an object's content can't be handled and it has no fallback, let
@@ -849,6 +861,7 @@ HTMLPlugInElement::CustomStyleForLayoutObject(
       image_loader_ = MakeGarbageCollected<HTMLImageLoader>(this);
     image_loader_->UpdateFromElement();
   }
+
   return style;
 }
 

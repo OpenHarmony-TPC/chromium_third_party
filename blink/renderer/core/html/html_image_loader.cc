@@ -29,6 +29,9 @@
 #include "third_party/blink/renderer/core/html/parser/html_parser_idioms.h"
 #include "third_party/blink/renderer/core/loader/resource/image_resource_content.h"
 #include "third_party/blink/renderer/platform/loader/fetch/resource_loading_log.h"
+#if BUILDFLAG(IS_OHOS)
+#include "third_party/blink/renderer/core/html/html_plugin_element.h"
+#endif
 
 namespace blink {
 
@@ -101,5 +104,11 @@ void HTMLImageLoader::ImageNotifyFinished(ImageResourceContent*) {
         HTMLObjectElement::ErrorEventPolicy::kDoNotDispatch);
   }
 }
+
+#if BUILDFLAG(IS_OHOS)
+HTMLNativeLoader::HTMLNativeLoader(HTMLPlugInElement* element) : NativeLoader(element) {}
+
+HTMLNativeLoader::~HTMLNativeLoader() = default;
+#endif
 
 }  // namespace blink
