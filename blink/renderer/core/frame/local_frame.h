@@ -834,11 +834,6 @@ class CORE_EXPORT LocalFrame final
   void RebindTextInputHostForTesting();
 #endif
 
-#if BUILDFLAG(IS_OHOS)
-  void SetIsNativeType(bool is_native_type) { is_native_type_ = is_native_type; }
-  bool IsNativeType() { return is_native_type_; }
-#endif
-
   void WriteIntoTrace(perfetto::TracedValue ctx) const;
 
   bool AncestorOrSelfHasCSPEE() const { return ancestor_or_self_has_cspee_; }
@@ -1174,9 +1169,6 @@ class CORE_EXPORT LocalFrame final
   // is allowed to load a new child opaque-ads fenced frame.
   bool ancestor_or_self_has_cspee_ = false;
 
-#if BUILDFLAG(IS_OHOS)
-  bool is_native_type_ = false;
-#endif
   // Reduced accept language for top-level frame.
   AtomicString reduced_accept_language_;
 };

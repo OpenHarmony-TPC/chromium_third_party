@@ -120,7 +120,7 @@
 #endif
 
 #if BUILDFLAG(IS_OHOS)
-#include "third_party/blink/renderer/core/html/media/html_native_element.h"
+#include "third_party/blink/renderer/core/loader/native_loader.h"
 #endif
 
 namespace blink {
@@ -355,7 +355,7 @@ std::unique_ptr<WebMediaPlayer> ModulesInitializer::CreateWebMediaPlayer(
 #if BUILDFLAG(IS_OHOS)
 std::unique_ptr<WebNativeBridge> ModulesInitializer::CreateWebNativeBridge(
     WebLocalFrameClient* web_frame_client,
-    HTMLNativeElement& html_native_element,
+    NativeLoader& html_native_element,
     WebNativeClient* web_native_client) const {
   return base::WrapUnique(
       web_frame_client->CreateWebNativeBridge(web_native_client));

@@ -84,9 +84,6 @@ class CORE_EXPORT DocumentInit final {
     kImage,
     kPlugin,
     kMedia,
-#if BUILDFLAG(IS_OHOS)
-    kNative,
-#endif
     kSVG,
     kXML,
     kViewSource,

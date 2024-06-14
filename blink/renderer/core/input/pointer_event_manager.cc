@@ -16,7 +16,6 @@
 #include "third_party/blink/renderer/core/frame/local_frame.h"
 #include "third_party/blink/renderer/core/frame/local_frame_view.h"
 #include "third_party/blink/renderer/core/html/canvas/html_canvas_element.h"
-#include "third_party/blink/renderer/core/html/media/html_native_element.h"
 #include "third_party/blink/renderer/core/input/event_handler.h"
 #include "third_party/blink/renderer/core/input/event_handling_util.h"
 #include "third_party/blink/renderer/core/input/mouse_event_manager.h"
@@ -39,7 +38,8 @@
 #include "third_party/blink/renderer/core/frame/settings.h"
 #include "third_party/blink/renderer/core/geometry/dom_rect.h"
 #include "third_party/blink/renderer/core/html/html_frame_owner_element.h"
-#include "third_party/blink/renderer/core/html/media/html_native_element.h"
+#include "third_party/blink/renderer/core/html/html_image_loader.h"
+#include "third_party/blink/renderer/core/html/html_plugin_element.h"
 #endif
 
 namespace blink {
@@ -498,26 +498,6 @@ void PointerEventManager::DidNativeEmbedEvent(
   LocalFrame* frame = hit_test_result.InnerNodeFrame();
   if (!frame) {
     return;
-  }
-  hit_embed_tag_ = frame->IsNativeType();
-  if (hit_embed_tag_) {
-    Element* target = hit_test_result.InnerElement();
-    if (auto* htmlNativeElement = DynamicTo<HTMLNativeElement>(target)) {
-      embed_id_ = std::to_string(htmlNativeElement->GetNativeEmbedId());
-      is_last_native_type_ = true;
-      last_point_type_ = web_pointer_event.GetType();
-      offset_ = hit_test_result.GetLocalPoint();
-      offset_.Scale(frame->View() ? frame->View()->InputEventsScaleFactor() : 1.0f);
-      frame_->Client()->DidNativeEmbedEvent(web_pointer_event, embed_id_, offset_, false);
-    }
-    return;
-  }
-  if (!hit_embed_tag_ &&
-      (last_point_type_ == WebInputEvent::Type::kPointerMove) &&
-      is_last_native_type_) {
-    is_last_native_type_ = false;
-    last_point_type_ = web_pointer_event.GetType();
-    frame_->Client()->DidNativeEmbedEvent(web_pointer_event, embed_id_, offset_, true);
   }
 }
 #endif

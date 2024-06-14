@@ -313,11 +313,6 @@
       interfaceName: "HTMLElement",
     },
     {
-      // Only for OHOS
-      name: "native",
-      interfaceHeaderDir: "third_party/blink/renderer/core/html/media",
-    },
-    {
       name: "nobr",
       interfaceName: "HTMLElement",
     },

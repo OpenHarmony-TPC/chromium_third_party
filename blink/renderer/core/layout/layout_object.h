@@ -974,6 +974,12 @@ class CORE_EXPORT LayoutObject : public GarbageCollected<LayoutObject>,
     NOT_DESTROYED();
     return IsOfType(kLayoutObjectMultiColumnSpannerPlaceholder);
   }
+#if BUILDFLAG(IS_OHOS)
+  bool IsLayoutNative() const {
+    NOT_DESTROYED();
+    return IsOfType(kLayoutObjectNative);
+  }
+#endif
   bool IsLayoutReplaced() const {
     NOT_DESTROYED();
     return IsOfType(kLayoutObjectReplaced);
@@ -3508,6 +3514,9 @@ class CORE_EXPORT LayoutObject : public GarbageCollected<LayoutObject>,
     kLayoutObjectFrame,
     kLayoutObjectIFrame,
     kLayoutObjectImage,
+#if BUILDFLAG(IS_OHOS)
+    kLayoutObjectNative,
+#endif
     kLayoutObjectListMarkerImage,
     kLayoutObjectMathML,
     kLayoutObjectMathMLRoot,

@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 
-#include "third_party/blink/renderer/core/layout/layout_native.h"
-
 #include "third_party/blink/renderer/core/dom/document.h"
-#include "third_party/blink/renderer/core/html/media/html_native_element.h"
+#include "third_party/blink/renderer/core/html/html_image_loader.h"
+#include "third_party/blink/renderer/core/html/html_plugin_element.h"
+#include "third_party/blink/renderer/core/layout/layout_native.h"
 #include "third_party/blink/renderer/core/layout/layout_view.h"
-#include "third_party/blink/renderer/platform/web_native_bridge.h"
 #include "third_party/blink/renderer/core/paint/native_painter.h"
+#include "third_party/blink/renderer/platform/web_native_bridge.h"
 
 namespace blink {
 
@@ -29,7 +29,7 @@ const float kInitEffectZoom = 1.0f;
 
 }  // namespace
 
-LayoutNative::LayoutNative(HTMLNativeElement* native) : LayoutImage(native) {
+LayoutNative::LayoutNative(Element* native) : LayoutImage(native) {
   SetImageResource(MakeGarbageCollected<LayoutImageResource>());
   SetIntrinsicSize(CalculateIntrinsicSize(kInitEffectZoom));
 }
@@ -44,25 +44,22 @@ LayoutSize LayoutNative::DefaultSize() {
   return LayoutSize(kDefaultWidth, kDefaultHeight);
 }
 
-void LayoutNative::IntrinsicSizeChanged() {
-  NOT_DESTROYED();
-  UpdateIntrinsicSize(/* is_in_layout */ false);
-}
-
 void LayoutNative::UpdateIntrinsicSize(bool is_in_layout) {
   NOT_DESTROYED();
   LayoutSize size = CalculateIntrinsicSize(StyleRef().EffectiveZoom());
   // Never set the element size to zero when in a media document.
   if (size.IsEmpty() && GetNode()->ownerDocument() &&
-      GetNode()->ownerDocument()->IsMediaDocument())
+      GetNode()->ownerDocument()->IsMediaDocument()) {
     return;
+  }
 
   if (auto* layout_view = View()) {
     size = LayoutSize(layout_view->GetLayoutSize());
   }
 
-  if (size == IntrinsicSize())
+  if (size == IntrinsicSize()) {
     return;
+  }
 
   SetIntrinsicSize(size);
   SetIntrinsicLogicalWidthsDirty();
@@ -70,29 +67,39 @@ void LayoutNative::UpdateIntrinsicSize(bool is_in_layout) {
     SetNeedsLayoutAndFullPaintInvalidation(
         layout_invalidation_reason::kSizeChanged);
   }
-  NativeElement()->UpdateSize(gfx::Size(size.Width().ToInt(),
-                                        size.Height().ToInt()));
+
+  if (!NativeElement() || !NativeElement()->NativeLoader()) {
+    return;
+  }
+  NativeElement()->NativeLoader()->UpdateSize(gfx::Size(size.Width().ToInt(),
+                                         size.Height().ToInt()));
 }
 
 LayoutSize LayoutNative::CalculateIntrinsicSize(float scale) {
   NOT_DESTROYED();
 
-  if (const auto* content = NativeElement()->GetWebNativeBridge()) {
-    auto size = content->NaturalSize();
-    if (!size.IsEmpty()) {
-      LayoutSize layout_size = LayoutSize(size);
+  LayoutSize size = DefaultSize();
+  size.Scale(scale);
+
+  if (!NativeElement() || !NativeElement()->NativeLoader()) {
+    return size;
+  }
+
+  if (const auto* content =
+          NativeElement()->NativeLoader()->GetWebNativeBridge()) {
+    gfx::Size nature_size = content->NaturalSize();
+    if (!nature_size.IsEmpty()) {
+      LayoutSize layout_size = LayoutSize(nature_size);
       layout_size.Scale(scale);
       return layout_size;
     }
   }
 
-  LayoutSize size = DefaultSize();
-  size.Scale(scale);
   return size;
 }
 
 void LayoutNative::ImageChanged(WrappedImagePtr new_image,
-                               CanDeferInvalidation defer) {
+                                CanDeferInvalidation defer) {
   NOT_DESTROYED();
   LayoutImage::ImageChanged(new_image, defer);
 
@@ -102,7 +109,7 @@ void LayoutNative::ImageChanged(WrappedImagePtr new_image,
 }
 
 void LayoutNative::PaintReplaced(const PaintInfo& paint_info,
-                                const PhysicalOffset& paint_offset) const {
+                                 const PhysicalOffset& paint_offset) const {
   NOT_DESTROYED();
   NativePainter(*this).PaintReplaced(paint_info, paint_offset);
 }
@@ -114,9 +121,9 @@ void LayoutNative::UpdateLayout() {
   LayoutImage::UpdateLayout();
 }
 
-HTMLNativeElement* LayoutNative::NativeElement() const {
+HTMLPlugInElement* LayoutNative::NativeElement() const {
   NOT_DESTROYED();
-  return To<HTMLNativeElement>(GetNode());
+  return To<HTMLPlugInElement>(GetNode());
 }
 
 void LayoutNative::UpdateFromElement() {
@@ -131,12 +138,18 @@ void LayoutNative::UpdateNativeContent(bool is_in_layout) {
   NOT_DESTROYED();
   UpdateIntrinsicSize(is_in_layout);
 
-  auto* native_bridge = NativeElement()->GetWebNativeBridge();
-  if (!native_bridge)
+  if (!NativeElement() || !NativeElement()->NativeLoader()) {
     return;
+  }
 
-  if (!NativeElement()->InActiveDocument())
+  auto* native_bridge = NativeElement()->NativeLoader()->GetWebNativeBridge();
+  if (!native_bridge) {
     return;
+  }
+
+  if (!NativeElement()->InActiveDocument()) {
+    return;
+  }
 
   NativeElement()->SetNeedsCompositingUpdate();
 }
@@ -147,13 +160,15 @@ PhysicalRect LayoutNative::ReplacedContentRectFrom(
   NOT_DESTROYED();
 
   return PreSnappedRectForPersistentSizing(
-        ComputeReplacedContentRect(size, border_padding));
+      ComputeReplacedContentRect(size, border_padding));
 }
-
 
 bool LayoutNative::SupportsAcceleratedRendering() const {
   NOT_DESTROYED();
-  return !!NativeElement()->CcLayer();
+  if (!NativeElement() || !NativeElement()->NativeLoader()) {
+    return false;
+  }
+  return !!NativeElement()->NativeLoader()->CcLayer();
 }
 
 CompositingReasons LayoutNative::AdditionalCompositingReasons() const {

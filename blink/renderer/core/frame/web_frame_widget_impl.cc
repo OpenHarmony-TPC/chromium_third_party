@@ -96,7 +96,6 @@
 #include "third_party/blink/renderer/core/html/forms/text_control_element.h"
 #include "third_party/blink/renderer/core/html/html_frame_owner_element.h"
 #include "third_party/blink/renderer/core/html/html_plugin_element.h"
-#include "third_party/blink/renderer/core/html/media/html_native_element.h"
 #include "third_party/blink/renderer/core/html/portal/document_portals.h"
 #include "third_party/blink/renderer/core/html/portal/portal_contents.h"
 #include "third_party/blink/renderer/core/input/context_menu_allowed_scope.h"
@@ -154,6 +153,11 @@
 #include "third_party/blink/renderer/platform/fonts/mac/attributed_string_type_converter.h"
 #include "ui/base/mojom/attributed_string.mojom-blink.h"
 #include "ui/gfx/geometry/point.h"
+#endif
+
+#if BUILDFLAG(IS_OHOS)
+#include "third_party/blink/renderer/core/html/html_image_loader.h"
+#include "third_party/blink/renderer/core/html/html_plugin_element.h"
 #endif
 
 #ifdef OHOS_AI
@@ -4320,35 +4324,37 @@ void WebFrameWidgetImpl::NotifyPageScaleFactorChanged(
 }
 
 #if BUILDFLAG(IS_OHOS)
-void WebFrameWidgetImpl::SetPinchSmoothMode(bool isEnable) {
-  widget_base_->LayerTreeHost()->SetPinchSmoothMode(isEnable);
+void WebFrameWidgetImpl::SetPinchSmoothMode(bool enable) {
+  widget_base_->LayerTreeHost()->SetPinchSmoothMode(enable);
 }
-void WebFrameWidgetImpl::TouchHitTest(const WebPointerEvent& event, size_t fingerId) {
-  WebPointerEvent transformed_event =
-          TransformWebPointerEvent(LocalRootImpl()->GetFrameView(), event);
-  WebPointerEvent pointer_event = transformed_event.WebPointerEventInRootFrame();
-  HitTestRequest::HitTestRequestType hit_type = HitTestRequest::kTouchEvent |
-                                                  HitTestRequest::kReadOnly;
-    HitTestLocation location(LocalRootImpl()->GetFrameView()->ConvertFromRootFrame(
-        PhysicalOffset::FromPointFRound(pointer_event.PositionInWidget())));
-    HitTestResult hit_test_result =
-        LocalRootImpl()->GetFrame()->GetEventHandler().HitTestResultAtLocation(location, hit_type);
 
-    LocalFrame* frame = hit_test_result.InnerNodeFrame();
-    bool isNativeType = false;
-    if (frame) {
-       isNativeType = frame->IsNativeType();
-    }
-    int layerId = 0;
-    if (isNativeType) {
-      Element* target = hit_test_result.InnerElement();
-      if (auto* htmlNativeElement = DynamicTo<HTMLNativeElement>(target)) {
-          if (auto* layer = htmlNativeElement->CcLayer()){
-            layerId = layer->id();
-          }
+void WebFrameWidgetImpl::TouchHitTest(const WebPointerEvent& event,
+                                      size_t finger_id) {
+  WebPointerEvent transformed_event =
+      TransformWebPointerEvent(LocalRootImpl()->GetFrameView(), event);
+  WebPointerEvent pointer_event =
+      transformed_event.WebPointerEventInRootFrame();
+  HitTestRequest::HitTestRequestType hit_type =
+      HitTestRequest::kTouchEvent | HitTestRequest::kReadOnly;
+  HitTestLocation location(
+      LocalRootImpl()->GetFrameView()->ConvertFromRootFrame(
+          PhysicalOffset::FromPointFRound(pointer_event.PositionInWidget())));
+  HitTestResult hit_test_result =
+      LocalRootImpl()->GetFrame()->GetEventHandler().HitTestResultAtLocation(
+          location, hit_type);
+  int layer_id = 0;
+  bool is_native_type = false;
+  if (auto* plugin_element =
+          DynamicTo<HTMLPlugInElement>(hit_test_result.InnerElement())) {
+    if (plugin_element->NativeLoader()) {
+      if (auto* layer = plugin_element->NativeLoader()->CcLayer()) {
+        layer_id = layer->id();
       }
+      is_native_type = true;
     }
-    widget_base_->NativeHitTestResult(isNativeType, fingerId, layerId);
+  }
+
+  widget_base_->NativeHitTestResult(is_native_type, finger_id, layer_id);
 }
 #endif  // BUILDFLAG(IS_OHOS)
 

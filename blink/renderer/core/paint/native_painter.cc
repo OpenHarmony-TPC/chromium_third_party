@@ -13,46 +13,49 @@
  * limitations under the License.
  */
 
-#include "third_party/blink/renderer/core/paint/native_painter.h"
-
 #include "cc/layers/layer.h"
 #include "third_party/blink/renderer/core/dom/document.h"
 #include "third_party/blink/renderer/core/frame/local_frame_view.h"
-#include "third_party/blink/renderer/core/html/media/html_native_element.h"
+#include "third_party/blink/renderer/core/html/html_image_loader.h"
+#include "third_party/blink/renderer/core/html/html_plugin_element.h"
 #include "third_party/blink/renderer/core/layout/layout_native.h"
 #include "third_party/blink/renderer/core/paint/box_painter.h"
 #include "third_party/blink/renderer/core/paint/image_painter.h"
+#include "third_party/blink/renderer/core/paint/native_painter.h"
 #include "third_party/blink/renderer/core/paint/paint_info.h"
 #include "third_party/blink/renderer/platform/geometry/layout_point.h"
 #include "third_party/blink/renderer/platform/graphics/paint/drawing_recorder.h"
 #include "third_party/blink/renderer/platform/graphics/paint/foreign_layer_display_item.h"
-#include "third_party/blink/renderer/platform/wtf/casting.h"
 #include "third_party/blink/renderer/platform/web_native_bridge.h"
+#include "third_party/blink/renderer/platform/wtf/casting.h"
 
 namespace blink {
 
 void NativePainter::PaintReplaced(const PaintInfo& paint_info,
-                                 const PhysicalOffset& paint_offset) {
+                                  const PhysicalOffset& paint_offset) {
   if (paint_info.phase != PaintPhase::kForeground &&
-      paint_info.phase != PaintPhase::kSelectionDragImage)
+      paint_info.phase != PaintPhase::kSelectionDragImage) {
     return;
+  }
 
-  WebNativeBridge* surface_texture_wrapper =
-      layout_native_.NativeElement()->GetWebNativeBridge();
-
-  if (!surface_texture_wrapper)
+  if (!layout_native_.NativeElement() ||
+      !layout_native_.NativeElement()->NativeLoader() ||
+      !layout_native_.NativeElement()->NativeLoader()->GetWebNativeBridge()) {
     return;
+  }
 
   PhysicalRect replaced_rect = layout_native_.ReplacedContentRect();
   replaced_rect.Move(paint_offset);
   gfx::Rect snapped_replaced_rect = ToPixelSnappedRect(replaced_rect);
 
-  if (snapped_replaced_rect.IsEmpty())
+  if (snapped_replaced_rect.IsEmpty()) {
     return;
+  }
 
   if (DrawingRecorder::UseCachedDrawingIfPossible(
-          paint_info.context, layout_native_, paint_info.phase))
+          paint_info.context, layout_native_, paint_info.phase)) {
     return;
+  }
 
   GraphicsContext& context = paint_info.context;
   // Here we're not painting the video but rather preparing the layer for the
@@ -73,13 +76,13 @@ void NativePainter::PaintReplaced(const PaintInfo& paint_info,
 
   // Video frames are only painted in software for printing or capturing node
   // images via web APIs.
-  bool force_software_video_paint =
-      paint_info.ShouldOmitCompositingInfo();
+  bool force_software_video_paint = paint_info.ShouldOmitCompositingInfo();
 
   bool paint_with_foreign_layer = paint_info.phase == PaintPhase::kForeground &&
                                   !force_software_video_paint;
   if (paint_with_foreign_layer) {
-    if (cc::Layer* layer = layout_native_.NativeElement()->CcLayer()) {
+    if (cc::Layer* layer =
+            layout_native_.NativeElement()->NativeLoader()->CcLayer()) {
       gfx::RectF rect(-replaced_rect.X().ToFloat(),
                       -replaced_rect.Y().ToFloat(),
                       layout_native_.Size().Width().ToFloat(),

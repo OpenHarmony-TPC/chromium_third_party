@@ -71,7 +71,7 @@ class WebRemotePlaybackClient;
 #if BUILDFLAG(IS_OHOS)
 class WebNativeBridge;
 class WebNativeClient;
-class HTMLNativeElement;
+class NativeLoader;
 #endif
 
 class CORE_EXPORT CoreInitializer {
@@ -129,7 +129,7 @@ class CORE_EXPORT CoreInitializer {
 #if BUILDFLAG(IS_OHOS)
   virtual std::unique_ptr<WebNativeBridge> CreateWebNativeBridge(
       WebLocalFrameClient* web_frame_client,
-      HTMLNativeElement& html_native_element,
+      NativeLoader& html_native_element,
       WebNativeClient*) const = 0;
 #endif
 

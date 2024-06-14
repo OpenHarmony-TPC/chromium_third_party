@@ -36,6 +36,9 @@ class HTMLImageLoader;
 class LayoutEmbeddedContent;
 class LayoutEmbeddedObject;
 class WebPluginContainerImpl;
+#if BUILDFLAG(IS_OHOS)
+class HTMLNativeLoader;
+#endif
 
 class PluginParameters {
  public:
@@ -110,6 +113,8 @@ class CORE_EXPORT HTMLPlugInElement
   bool ShouldLoadForNative() const {
     return IsNativeType() && GetObjectContentType() == ObjectContentType::kNone;
   }
+
+  HTMLNativeLoader* NativeLoader() const { return native_loader_.Get(); }
 #endif
 
  protected:
@@ -163,6 +168,9 @@ class CORE_EXPORT HTMLPlugInElement
   KURL loaded_url_;
   Member<HTMLImageLoader> image_loader_;
   bool is_delaying_load_event_;
+#if BUILDFLAG(IS_OHOS)
+  Member<HTMLNativeLoader> native_loader_;
+#endif
 
  private:
   // EventTarget overrides:

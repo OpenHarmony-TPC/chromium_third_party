@@ -54,9 +54,6 @@ class ActiveScriptWrappableCreationKey final {
   friend class HTMLImageElement;
   friend class HTMLInputElement;
   friend class HTMLMediaElement;
-#if BUILDFLAG(IS_OHOS)
-  friend class HTMLNativeElement;
-#endif
   friend class HTMLPlugInElement;
   friend class IDBDatabase;
   friend class IDBRequest;
