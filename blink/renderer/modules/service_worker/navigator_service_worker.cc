@@ -35,8 +35,6 @@ ServiceWorkerContainer* NavigatorServiceWorker::serviceWorker(
   bool isAdvancedSecurityMode = OHOS::NWeb::OhosAdapterHelper::GetInstance()
                             .GetSystemPropertiesInstance().IsAdvancedSecurityMode();
   if (isAdvancedSecurityMode) {
-    String err_message = "cannot use serviceWorker on advancedSecurityMode!";
-    exception_state.ThrowSecurityError(err_message);
     return nullptr;
   }
 #endif // BUILDFLAG(IS_OHOS)
