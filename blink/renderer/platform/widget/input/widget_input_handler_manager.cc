@@ -1236,7 +1236,9 @@ void WidgetInputHandlerManager::DidNativeEmbedEvent(blink::WebInputEvent::Type t
                                                     std::string embedId,
                                                     int32_t id,
                                                     float x,float y) {
-  widget_->DidNativeEmbedEvent(type, embedId, id, x, y);
+  main_thread_task_runner_->PostTask(
+      FROM_HERE,
+      base::BindOnce(&WidgetBase::DidNativeEmbedEvent, widget_, type, embedId, id, x, y));
 }
 
 void WidgetInputHandlerManager::SetGestureEventResult(bool result) {
@@ -1250,7 +1252,7 @@ void WidgetInputHandlerManager::TouchHitTest(const WebPointerEvent& event, size_
 }
 
 void WidgetInputHandlerManager::NativeHitTestResult(bool isNative, size_t fingerId, int layerId) {
-  compositor_thread_default_task_runner_->PostTask(
+  main_thread_task_runner_->PostTask(
         FROM_HERE, base::BindOnce(&WidgetInputHandlerManager::AsyncNativeHitTestResult,
         this, isNative, fingerId, layerId));
 }
