@@ -1538,7 +1538,11 @@ bool SelectionController::HandleGestureTapIfSelectionExist(
   if (!Selection().IsAvailable()) {
     return false;
   }
-  if (!Selection().ComputeVisibleSelectionInDOMTree().IsRange()) {
+
+  const VisibleSelectionInFlatTree& selection =
+      Selection().ComputeVisibleSelectionInFlatTree();
+  if (selection.IsNone() ||
+      !Selection().ComputeVisibleSelectionInDOMTree().IsRange()) {
     return false;
   }
 
