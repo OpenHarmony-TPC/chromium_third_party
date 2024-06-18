@@ -22,9 +22,13 @@ BackForwardCacheDisablingFeatureTracker::
 
 void BackForwardCacheDisablingFeatureTracker::SetDelegate(
     FrameOrWorkerScheduler::Delegate* delegate) {
+  // This function is only called when initializing. `delegate_` should be
+  // nullptr at first.
   DCHECK(!delegate_);
-  delegate_ = delegate;
-  // `delegate` might be nullptr on tests.
+  // `delegate` can be nullptr for tests.
+  if (delegate) {
+    delegate_ = (*delegate).AsWeakPtr();
+  }
 }
 
 void BackForwardCacheDisablingFeatureTracker::Reset() {
@@ -133,7 +137,13 @@ void BackForwardCacheDisablingFeatureTracker::ReportFeaturesToDelegate() {
   if (mask == last_uploaded_bfcache_disabling_features_)
     return;
   last_uploaded_bfcache_disabling_features_ = mask;
-  delegate_->UpdateBackForwardCacheDisablingFeatures(mask);
+  
+  // Check if the delegate still exists. This check is necessary because
+  // `FrameOrWorkerScheduler::Delegate` might be destroyed and thus `delegate_`
+  // might be gone when `ReportFeaturesToDelegate() is executed.
+  if (delegate_) {
+    delegate_->UpdateBackForwardCacheDisablingFeatures(mask);
+  }
 }
 
 }  // namespace scheduler
