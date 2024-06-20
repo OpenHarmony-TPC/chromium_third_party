@@ -1252,7 +1252,7 @@ void WidgetInputHandlerManager::TouchHitTest(const WebPointerEvent& event, size_
 }
 
 void WidgetInputHandlerManager::NativeHitTestResult(bool isNative, size_t fingerId, int layerId) {
-  main_thread_task_runner_->PostTask(
+  compositor_thread_default_task_runner_->PostTask(
         FROM_HERE, base::BindOnce(&WidgetInputHandlerManager::AsyncNativeHitTestResult,
         this, isNative, fingerId, layerId));
 }
