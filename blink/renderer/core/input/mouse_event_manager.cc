@@ -1253,6 +1253,10 @@ void MouseEventManager::SetOverlayInProgress(bool flag) {
 
 template <typename T>
 void MouseEventManager::HandleCreateOverlay(T const& targeted_event) {
+  if (!frame_ || !frame_->View()) {
+    return;
+  }
+
   HitTestLocation location(frame_->View()->ConvertFromRootFrame(
       gfx::ToFlooredPoint(targeted_event.PositionInRootFrame())));
   HitTestResult hit_test_result =
