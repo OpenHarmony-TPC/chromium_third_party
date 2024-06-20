@@ -1592,12 +1592,11 @@ void DragController::ContextDestroyed() {
 #ifdef OHOS_DRAG_DROP
 bool DragController::IsHyperLinkDragging() {
   if (!drag_state_) {
-    LOG(WARNING) << "DragDrop state null, drag nothing";
+    LOG(DEBUG) << "DragDrop state null, drag nothing";
     return false;
   }
 
   if (drag_state_->drag_type_ != kDragSourceActionLink) {
-    LOG(DEBUG) << "DragDrop type is not link, just pass";
     return false;
   }
 
@@ -1628,7 +1627,7 @@ bool DragController::IsHyperLinkDragging() {
 
 bool DragController::DragLinkCheckSrcAndType() {
   if (!drag_state_) {
-    LOG(WARNING) << "DragDrop state null, drag nothing";
+    LOG(DEBUG) << "DragDrop state null, drag nothing";
     return false;
   }
   if (drag_state_->drag_type_ != kDragSourceActionLink) {
@@ -1754,7 +1753,7 @@ void DragController::RestoreDragLinkEffects() {
 
   Node* node = drag_state_->drag_src_.Get();
   if (!node) {
-    LOG(WARNING) << "DragDrop node null, drag nothing";
+    LOG(DEBUG) << "DragDrop node null, drag nothing";
     return;
   }
   auto* element = DynamicTo<Element>(node);
