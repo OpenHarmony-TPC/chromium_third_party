@@ -839,6 +839,32 @@ void LocalFrameView::PerformLayout() {
   }
 
   document->Fetcher()->UpdateAllImageResourcePriorities();
+#if BUILDFLAG(IS_OHOS)
+  if (!document->Url().GetString().Utf8().empty()) {
+    LayoutBox* body_box = nullptr;
+    const LayoutBox* html_box = nullptr;
+    int body_height = 0;
+    Element* document_element = document->documentElement();
+    if (document_element && document_element->GetLayoutObject()) {
+      html_box = To<LayoutBox>(document_element-<GetLayoutObject());
+    }
+    if (html_box && html_box->FirstChildBox()) {
+      body_box = html_box->FirstChildBox();
+    }
+    if (body_box && body_box->GetLayoutResults().size() > 0) {
+      body_height = body_box->ScrollHeight().ToInt();
+    } else {
+      body_height = -1;
+    }
+    if (body_height >
+        (GetFrame().ContentLayoutObject()->ViewRect().Height().ToInt() *
+        1.5)) {
+      document->Fetcher()->UpdateAllowPreloadRecord(false);
+    } else {
+      document->Fetcher()->UpdateAllowPreloadRecord(true);
+    }
+  }
+#endif
 
   Lifecycle().AdvanceTo(DocumentLifecycle::kAfterPerformLayout);
 

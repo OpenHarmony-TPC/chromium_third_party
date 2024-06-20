@@ -407,6 +407,10 @@ void PopulateResourceRequest(const ResourceRequestHead& src,
 
   dest->attribution_reporting_eligibility =
       src.GetAttributionReportingEligibility();
+#if BUILDFLAG(IS_OHOS)
+  dest->allow_preload_record = src.GetAllowPreloadRecord();
+  dest->main_page = GURL(src.GetMainPage());
+#endif
 }
 
 }  // namespace blink

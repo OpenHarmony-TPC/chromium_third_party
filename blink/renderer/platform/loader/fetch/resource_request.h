@@ -571,6 +571,14 @@ class PLATFORM_EXPORT ResourceRequestHead {
     attribution_reporting_eligibility_ = eligibility;
   }
 
+#if BUILDFLAG(IS_OHOS)
+  bool GetAllowPreloadRecord() const { return allow_preload_record_; }
+  void SetAllowPreloadRecord(bool allow) { allow_preload_record_ = allow; }
+
+  const KURL& GetMainPage() const { return main_page_; }
+  void SetMainPage(const KURL& url) { main_page_ = url; }
+#endif
+
  private:
   const CacheControlHeader& GetCacheControlHeader() const;
 
@@ -697,6 +705,10 @@ class PLATFORM_EXPORT ResourceRequestHead {
   network::mojom::AttributionReportingEligibility
       attribution_reporting_eligibility_ =
           network::mojom::AttributionReportingEligibility::kUnset;
+#if BUILDFLAG(IS_OHOS)
+  bool allow_preload_record_ = false;
+  KURL main_page_;
+#endif
 };
 
 class PLATFORM_EXPORT ResourceRequestBody {
