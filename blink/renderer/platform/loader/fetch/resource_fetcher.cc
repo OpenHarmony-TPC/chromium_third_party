@@ -1142,6 +1142,10 @@ absl::optional<ResourceRequestBlockedReason> ResourceFetcher::PrepareRequest(
     resource_request.SetAllowStoredCredentials(false);
   }
 
+#if BUILDFLAG(IS_OHOS)
+  resource_request.SetAllowPreloadRecord(allow_preload_record_);
+  resource_request.SetMainPage(main_page_);
+#endif
   return absl::nullopt;
 }
 

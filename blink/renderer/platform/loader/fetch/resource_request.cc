@@ -115,7 +115,13 @@ ResourceRequestHead::ResourceRequestHead(const KURL& url)
       referrer_string_(Referrer::ClientReferrerString()),
       referrer_policy_(network::mojom::ReferrerPolicy::kDefault),
       cors_preflight_policy_(
-          network::mojom::CorsPreflightPolicy::kConsiderPreflight) {}
+          network::mojom::CorsPreflightPolicy::kConsiderPreflight)
+#if BUILDFLAG(IS_OHOS)
+      ,
+      allow_preload_record_(false),
+      main_page_(KURL())
+#endif
+      {}
 
 ResourceRequestHead::ResourceRequestHead(const ResourceRequestHead&) = default;
 

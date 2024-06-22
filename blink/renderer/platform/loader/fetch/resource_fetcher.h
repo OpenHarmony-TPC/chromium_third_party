@@ -229,6 +229,11 @@ class PLATFORM_EXPORT ResourceFetcher
   void ClearPreloads(ClearPreloadsPolicy = kClearAllPreloads);
   void ScheduleWarnUnusedPreloads();
 
+#if BUILDFLAG(IS_OHOS)
+  void UpdateAllowPreloadRecord(bool allow) { allow_preload_record_ = allow; }
+  void SetMainPage(const KURL& url) { main_page_ = url; }
+#endif
+
   MHTMLArchive* Archive() const { return archive_.Get(); }
 
   // Set the deferring state of each loader owned by this ResourceFetcher. This
@@ -639,6 +644,11 @@ class PLATFORM_EXPORT ResourceFetcher
 
   // Area (in pixels) below which an image is considered "small"
   uint32_t small_image_max_size_ = 0;
+
+#if BUILDFLAG(IS_OHOS)
+  bool allow_preload_record_ = true;
+  KURL main_page_;
+#endif
 };
 
 class ResourceCacheValidationSuppressor {
