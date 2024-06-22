@@ -88,7 +88,7 @@ class PLATFORM_EXPORT BackForwardCacheDisablingFeatureTracker {
   uint64_t last_uploaded_bfcache_disabling_features_ = 0;
   bool feature_report_scheduled_ = false;
 
-  FrameOrWorkerScheduler::Delegate* delegate_ = nullptr;
+  base::WeakPtr<FrameOrWorkerScheduler::Delegate> delegate_ = nullptr;
   ThreadSchedulerImpl* scheduler_;
 
   base::WeakPtrFactory<BackForwardCacheDisablingFeatureTracker> weak_factory_{

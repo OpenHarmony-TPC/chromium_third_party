@@ -86,6 +86,11 @@ class PLATFORM_EXPORT FrameOrWorkerScheduler {
     // of individual features.
     virtual void UpdateBackForwardCacheDisablingFeatures(
         uint64_t features_mask) = 0;
+
+    base::WeakPtr<Delegate> AsWeakPtr() {
+      return weak_ptr_factory_.GetWeakPtr();
+    }
+    base::WeakPtrFactory<Delegate> weak_ptr_factory_{this};
   };
 
   virtual ~FrameOrWorkerScheduler();
