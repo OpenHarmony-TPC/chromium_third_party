@@ -121,11 +121,7 @@ class ListAttributeTargetObserver : public IdTargetObserver {
   Member<HTMLInputElement> element_;
 };
 
-#ifdef OHOS_CSS_FONT
-const int kDefaultSize = 12;
-#else
 const int kDefaultSize = 20;
-#endif
 
 HTMLInputElement::HTMLInputElement(Document& document,
                                    const CreateElementFlags flags)
