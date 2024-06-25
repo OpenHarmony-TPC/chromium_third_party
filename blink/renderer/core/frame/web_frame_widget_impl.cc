@@ -2282,12 +2282,13 @@ bool WebFrameWidgetImpl::ScrollFocusedEditableElementIntoView(bool shouldScroll)
         static_cast<int>(action) & static_cast<int>(TouchAction::kPinchZoom);
     params->for_focused_editable->relative_location = editable_offset_from_caret;
     params->for_focused_editable->size = editable_size;
+
+    scroll_into_view_util::ScrollRectToVisible(
+        *element->GetLayoutObject(), absolute_caret_bounds, std::move(params));
+    return true;
   }
 
-  scroll_into_view_util::ScrollRectToVisible(
-      *element->GetLayoutObject(), absolute_caret_bounds, std::move(params));
-
-  return true;
+  return false;
 }
 #endif
 
