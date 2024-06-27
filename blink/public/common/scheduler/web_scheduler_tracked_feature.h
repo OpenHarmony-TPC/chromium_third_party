@@ -129,11 +129,14 @@ enum class WebSchedulerTrackedFeature : uint32_t {
   // connection is not closed yet) that requires the page not to enter BFCache.
   kIndexedDBEvent = 61,
 
+  kEnableCacheNativeEmbed = 62,
+  kEnableCacheMediaIntercept = 63,
+
   // Please keep in sync with WebSchedulerTrackedFeature in
   // tools/metrics/histograms/enums.xml. These values should not be renumbered.
 
   // NB: This enum is used in a bitmask, so kMaxValue must be less than 64.
-  kMaxValue = kIndexedDBEvent,
+  kMaxValue = kEnableCacheMediaIntercept
 };
 
 using WebSchedulerTrackedFeatures =

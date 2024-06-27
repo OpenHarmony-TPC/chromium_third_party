@@ -127,6 +127,10 @@ FeatureNames FeatureToNames(WebSchedulerTrackedFeature feature) {
       return {"AuthorizationHeader", "Authorization header used"};
     case WebSchedulerTrackedFeature::kIndexedDBEvent:
       return {"IndexedDBEvent", "IndexedDB event is pending"};
+    case WebSchedulerTrackedFeature::kEnableCacheNativeEmbed:
+      return {"EenableCacheNativeEmbed", "enable native embed to bfcache"};
+    case WebSchedulerTrackedFeature::kEnableCacheMediaIntercept:
+      return {"EnableCacheMediaIntercept", "enable media intercept to bfcache"};
   }
   return {};
 }
