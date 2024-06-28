@@ -2814,6 +2814,10 @@ ScriptPromise HTMLMediaElement::playForBindings(ScriptState* script_state) {
   ScriptPromise promise = resolver->Promise();
   play_promise_resolvers_.push_back(resolver);
 
+#ifdef OHOS_MEDIA
+  LOG(INFO) << "OhMedia::playForBindings(" << *this << ")";
+#endif // OHOS_MEDIA
+
   absl::optional<DOMExceptionCode> code = Play();
   if (code) {
     DCHECK(!play_promise_resolvers_.empty());
