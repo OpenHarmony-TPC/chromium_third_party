@@ -66,8 +66,11 @@ void SoftwareCompositorProxyOhos::DemandDrawSwAsync(
     std::move(callback).Run(false);
     return;
   }
-  software_render_->DemandDrawSw(&canvas, params->size, params->offset);
-  std::move(callback).Run(true);
+  bool result = software_render_->DemandDrawSw(&canvas, params->size, params->offset);
+  if (!result) {
+    LOG(ERROR) << "software render error in blink";
+  }
+  std::move(callback).Run(result);
 }
 
 void SoftwareCompositorProxyOhos::BindChannel(
