@@ -30,7 +30,11 @@ class BLINK_PLATFORM_EXPORT WebMediaPlayerDelegate {
     // Called when the host frame is hidden (usually by tab switching).
     // Note: OnFrameHidden() is not called when the frame is closed, even though
     // IsFrameHidden() will start returning true.
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+    virtual void OnFrameHidden(bool storing_in_bfcache) = 0;
+#else
     virtual void OnFrameHidden() = 0;
+#endif // OHOS_CUSTOM_VIDEO_PLAYER
 
     // Called when the host frame is shown (usually by tab switching).
     virtual void OnFrameShown() = 0;

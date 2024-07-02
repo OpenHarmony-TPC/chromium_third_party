@@ -442,8 +442,14 @@ class CORE_EXPORT WebViewImpl final : public WebView,
   LocalDOMWindow* PagePopupWindow() const;
 
   PageScheduler* Scheduler() const override;
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+  void SetVisibilityState(mojom::blink::PageVisibilityState visibility_state,
+                          bool is_initial_state,
+                          bool storing_in_bfcache = false) override;
+#else
   void SetVisibilityState(mojom::blink::PageVisibilityState visibility_state,
                           bool is_initial_state) override;
+#endif // OHOS_CUSTOM_VIDEO_PLAYER
   mojom::blink::PageVisibilityState GetVisibilityState() override;
 
   void SetPageLifecycleStateFromNewPageCommit(

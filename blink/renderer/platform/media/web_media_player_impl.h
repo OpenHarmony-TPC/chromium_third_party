@@ -263,7 +263,11 @@ class PLATFORM_EXPORT WebMediaPlayerImpl
   void OnDisplayTypeChanged(DisplayType display_type) override;
 
   // WebMediaPlayerDelegate::Observer implementation.
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+  void OnFrameHidden(bool storing_in_bfcache) override;
+#else
   void OnFrameHidden() override;
+#endif
   void OnFrameShown() override;
   void OnIdleTimeout() override;
 

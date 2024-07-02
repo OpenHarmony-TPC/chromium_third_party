@@ -374,8 +374,14 @@ class BLINK_EXPORT WebView {
   // Visibility -----------------------------------------------------------
 
   // Sets the visibility of the WebView.
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+  virtual void SetVisibilityState(mojom::PageVisibilityState visibility_state,
+                                  bool is_initial_state,
+                                  bool storing_in_bfcache = false) = 0;
+#else
   virtual void SetVisibilityState(mojom::PageVisibilityState visibility_state,
                                   bool is_initial_state) = 0;
+#endif // OHOS_CUSTOM_VIDEO_PLAYER
   virtual mojom::PageVisibilityState GetVisibilityState() = 0;
 
   // PageLifecycleState ----------------------------------------------------
