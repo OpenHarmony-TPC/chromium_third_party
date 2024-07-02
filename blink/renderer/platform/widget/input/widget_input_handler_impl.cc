@@ -150,7 +150,9 @@ void WidgetInputHandlerImpl::DispatchEvent(
     std::unique_ptr<WebCoalescedInputEvent> event,
     DispatchEventCallback callback) {
   TRACE_EVENT0("input", "WidgetInputHandlerImpl::DispatchEvent");
+#if BUILDFLAG(IS_OHOS)
   TriggerVsyncImplTask();
+#endif
   input_handler_manager_->DispatchEvent(std::move(event), std::move(callback));
 }
 
@@ -169,7 +171,9 @@ void WidgetInputHandlerImpl::DispatchNonBlockingEvent(
   TRACE_EVENT0("input", "WidgetInputHandlerImpl::DispatchNonBlockingEvent");
   input_handler_manager_->DispatchEvent(std::move(event),
                                         DispatchEventCallback());
+#if BUILDFLAG(IS_OHOS)
   TriggerVsyncImplTask();
+#endif
 }
 
 void WidgetInputHandlerImpl::WaitForInputProcessed(

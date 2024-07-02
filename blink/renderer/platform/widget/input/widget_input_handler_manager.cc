@@ -1264,8 +1264,6 @@ void WidgetInputHandlerManager::AsyncNativeHitTestResult(bool isNative, size_t f
 }
 
 void WidgetInputHandlerManager::TriggerVsyncImplTask() {
-  TRACE_EVENT1("cc", "WidgetInputHandlerManager::TriggerVsyncImplTask", "res",
-    !input_handler_proxy_);
   if (input_handler_proxy_) {
     input_handler_proxy_->TriggerVsyncImplTask();
   }

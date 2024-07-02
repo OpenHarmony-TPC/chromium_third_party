@@ -336,6 +336,7 @@ void InputHandlerProxy::HandleInputEventWithLatencyInfo(
     LOG(DEBUG)<<"[NativeEmbed] DidNativeEmbedEvent return result is : "<<result;
     if (result) {
       native_event_queue_->Queue(std::move(event_with_callback));
+      TriggerVsyncImplTask();
     } else {
   #endif
       DispatchSingleInputEvent(std::move(event_with_callback),
