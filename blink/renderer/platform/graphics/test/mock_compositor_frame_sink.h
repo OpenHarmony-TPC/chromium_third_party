@@ -71,9 +71,10 @@ class MockCompositorFrameSink : public viz::mojom::blink::CompositorFrameSink {
   MOCK_METHOD1(SetThreadIds, void(const WTF::Vector<int32_t>&));
   void ReportKeyThreadIds(const WTF::Vector<int32_t>& thread_ids,
                          int32_t process_id, bool is_created) override {}
-  void OnVsyncReceived() override {}
 
   void TriggerVsyncImplTask() override {}
+
+  void SetHandledTouchEvent(bool handledTouchEvent) override {}
  private:
   mojo::Receiver<viz::mojom::blink::CompositorFrameSink> receiver_{this};
 };

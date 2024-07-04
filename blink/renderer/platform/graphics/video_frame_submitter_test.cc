@@ -86,6 +86,7 @@ class VideoMockCompositorFrameSink
     MOCK_METHOD3(ReportKeyThreadIds, void(const WTF::Vector<int32_t>&, int32_t, bool));
     MOCK_METHOD0(OnVsyncReceived, void());
     MOCK_METHOD0(TriggerVsyncImplTask, void());
+    MOCK_METHOD1(SetHandledTouchEvent, void(bool));
 #endif  // OHOS_UNITTESTS
   const viz::CompositorFrame& last_submitted_compositor_frame() const {
     return last_submitted_compositor_frame_;
