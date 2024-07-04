@@ -517,16 +517,10 @@ bool ContextMenuController::ShowContextMenu(LocalFrame* frame,
       }
 
       // the node is <IMG> , try to get image url.
-      HTMLImageElement* img_element = nullptr;
       if (IsA<HTMLImageElement>(node)) {
-        img_element = To<HTMLImageElement>(node);
-      } else if (node->firstChild() &&
-                 IsA<HTMLImageElement>(node->firstChild())) {
-        img_element = To<HTMLImageElement>(node->firstChild());
-      }
-
-      if (img_element) {
-        AtomicString img_src = img_element->getAttribute(html_names::kSrcAttr);
+        HTMLImageElement* img_element = To<HTMLImageElement>(node);
+        AtomicString img_src =
+            img_element->getAttribute(html_names::kSrcAttr);
         if (!img_src.empty()) {
           data.src_url = GURL(inner_node->GetDocument().CompleteURL(
               blink::StripLeadingAndTrailingHTMLSpaces(img_src)));
