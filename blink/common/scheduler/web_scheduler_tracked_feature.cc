@@ -127,6 +127,12 @@ FeatureNames FeatureToNames(WebSchedulerTrackedFeature feature) {
       return {"AuthorizationHeader", "Authorization header used"};
     case WebSchedulerTrackedFeature::kIndexedDBEvent:
       return {"IndexedDBEvent", "IndexedDB event is pending"};
+#ifdef OHOS_BFCACHE
+    case WebSchedulerTrackedFeature::kEnableCacheNativeEmbed:
+      return {"EenableCacheNativeEmbed", "enable native embed to bfcache"};
+    case WebSchedulerTrackedFeature::kEnableCacheMediaTakeOver:
+      return {"EnableCacheMediaIntercept", "enable media take over to bfcache"};
+#endif
   }
   return {};
 }
@@ -214,7 +220,13 @@ WebSchedulerTrackedFeatures StickyFeatures() {
       WebSchedulerTrackedFeature::kInjectedStyleSheet,
       WebSchedulerTrackedFeature::kKeepaliveRequest,
       WebSchedulerTrackedFeature::kDummy,
+#ifdef OHOS_BFCACHE
+      WebSchedulerTrackedFeature::kAuthorizationHeader,
+      WebSchedulerTrackedFeature::kEnableCacheNativeEmbed,
+      WebSchedulerTrackedFeature::kEnableCacheMediaTakeOver);
+#else
       WebSchedulerTrackedFeature::kAuthorizationHeader);
+#endif
   return features;
 }
 
