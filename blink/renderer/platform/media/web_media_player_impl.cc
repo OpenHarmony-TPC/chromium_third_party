@@ -115,6 +115,11 @@
 #include "ohos_nweb/include/nweb_native_media_player.h"
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
 
+#ifdef OHOS_BFCACHE
+#include "third_party/blink/public/common/scheduler/web_scheduler_tracked_feature.h"
+#include "third_party/blink/renderer/platform/scheduler/public/frame_scheduler.h"
+#endif
+
 namespace blink {
 namespace {
 
@@ -538,9 +543,9 @@ WebMediaPlayerImpl::WebMediaPlayerImpl(
       client_->ShouldCustomVideoPlayerOverlay();
 #if defined(OHOS_BFCACHE)
   if (should_create_custom_renderer_) {
-    auto local_frame = frame_->GetDocument()->GetFrame();
-    if (local_frame) {
-      local_frame->GetFrameScheduler()->RegisterFeature(
+    auto scheduler = frame_->Scheduler();
+    if (scheduler) {
+      scheduler->RegisterStickyFeature(
       scheduler::WebSchedulerTrackedFeature::kEnableCacheMediaTakeOver,
       {SchedulingPolicy::DisableBackForwardCache()});
     }
