@@ -178,7 +178,11 @@ class BLINK_MODULES_EXPORT WebMediaPlayerMS
   void SuspendForFrameClosed() override;
 
   // WebMediaPlayerDelegate::Observer implementation.
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+  void OnFrameHidden(bool storing_in_bfcache) override;
+#else
   void OnFrameHidden() override;
+#endif // OHOS_CUSTOM_VIDEO_PLAYER
   void OnFrameShown() override;
   void OnIdleTimeout() override;
 

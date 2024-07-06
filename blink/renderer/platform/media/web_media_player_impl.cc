@@ -111,6 +111,10 @@
 #include "third_party/blink/renderer/platform/weborigin/kurl.h"
 #endif
 
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+#include "ohos_nweb/include/nweb_native_media_player.h"
+#endif // OHOS_CUSTOM_VIDEO_PLAYER
+
 namespace blink {
 namespace {
 
@@ -532,6 +536,16 @@ WebMediaPlayerImpl::WebMediaPlayerImpl(
   should_create_custom_renderer_ = client_->IsCustomVideoPlayerEnabled();
   should_overlay_ = should_create_custom_renderer_ &&
       client_->ShouldCustomVideoPlayerOverlay();
+#if defined(OHOS_BFCACHE)
+  if (should_create_custom_renderer_) {
+    auto local_frame = frame_->GetDocument()->GetFrame();
+    if (local_frame) {
+      local_frame->GetFrameScheduler()->RegisterFeature(
+      scheduler::WebSchedulerTrackedFeature::kEnableCacheMediaTakeOver,
+      {SchedulingPolicy::DisableBackForwardCache()});
+    }
+  }
+#endif // OHOS_BFCACHE
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
 }
 
@@ -978,6 +992,7 @@ void WebMediaPlayerImpl::Play() {
   delegate_->SetIdle(delegate_id_, false);
   paused_ = false;
 #if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+  pipeline_controller_->SetMediaPlayerState(false);
   if (action_reason_ != media::ActionReason::kNormal) {
     pipeline_controller_->SetPlaybackRateWithReason(
         playback_rate_, action_reason_);
@@ -2586,7 +2601,11 @@ void WebMediaPlayerImpl::OnVideoPipelineInfoChange(
   UpdateSecondaryProperties();
 }
 
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+void WebMediaPlayerImpl::OnFrameHidden(bool storing_in_bfcache) {
+#else
 void WebMediaPlayerImpl::OnFrameHidden() {
+#endif
   DCHECK(main_task_runner_->BelongsToCurrentThread());
   LOG(INFO) << "WebMediaPlayerImpl::OnFrameHidden()";
 
@@ -2602,6 +2621,16 @@ void WebMediaPlayerImpl::OnFrameHidden() {
 
   UpdateBackgroundVideoOptimizationState();
   UpdatePlayState();
+
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+  if (storing_in_bfcache) {
+    pipeline_controller_->SetMediaPlayerState(
+        true, static_cast<int>(OHOS::NWeb::SuspendType::EnterBackForwardCache));
+  } else {
+    pipeline_controller_->SetMediaPlayerState(
+        true, static_cast<int>(OHOS::NWeb::SuspendType::EnterBackground));
+  }
+#endif // OHOS_CUSTOM_VIDEO_PLAYER
 
   // Schedule suspended playing media to be paused if the user doesn't come back
   // to it within some timeout period to avoid any autoplay surprises.
@@ -2667,6 +2696,11 @@ void WebMediaPlayerImpl::OnIdleTimeout() {
   }
 
   UpdatePlayState();
+
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+  pipeline_controller_->SetMediaPlayerState(
+      true, static_cast<int>(OHOS::NWeb::SuspendType::AutoCleanup));
+#endif // OHOS_CUSTOM_VIDEO_PLAYER
 }
 
 void WebMediaPlayerImpl::SetVolumeMultiplier(double multiplier) {
@@ -3138,7 +3172,7 @@ void WebMediaPlayerImpl::UpdatePlayState() {
   }
 
 #if defined(OHOS_CUSTOM_VIDEO_PLAYER)
-  if (should_overlay_) {
+  if (should_create_custom_renderer_) {
     can_auto_suspend = false;
   }
 #endif // OHOS_CUSTOM_VIDEO_PLAYER

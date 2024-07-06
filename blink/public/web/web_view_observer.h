@@ -35,8 +35,14 @@ class BLINK_EXPORT WebViewObserver : public base::CheckedObserver {
   virtual void OnZoomLevelChanged() {}
 
   // Called when the View's visibility changes.
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+  virtual void OnPageVisibilityChanged(
+      blink::mojom::PageVisibilityState visibility_state,
+      bool storing_in_bfcache) {}
+#else
   virtual void OnPageVisibilityChanged(
       blink::mojom::PageVisibilityState visibility_state) {}
+#endif
 
   // Retrieves the WebView that is being observed. Can be null.
   WebView* GetWebView() const;

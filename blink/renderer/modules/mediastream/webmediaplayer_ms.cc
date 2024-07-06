@@ -1130,7 +1130,11 @@ bool WebMediaPlayerMS::HasAvailableVideoFrame() const {
   return has_first_frame_;
 }
 
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+void WebMediaPlayerMS::OnFrameHidden(bool storing_in_bfcache) {
+#else
 void WebMediaPlayerMS::OnFrameHidden() {
+#endif // OHOS_CUSTOM_VIDEO_PLAYER
   DCHECK_CALLED_ON_VALID_THREAD(thread_checker_);
 
   bool in_picture_in_picture =

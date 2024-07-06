@@ -2621,7 +2621,12 @@ void WebViewImpl::SetPageLifecycleStateInternal(
     DispatchPagehide(new_state->pagehide_dispatch);
   }
   if (hiding_page) {
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+    SetVisibilityState(new_state->visibility, /*is_initial_state=*/false,
+                       storing_in_bfcache);
+#else
     SetVisibilityState(new_state->visibility, /*is_initial_state=*/false);
+#endif
   }
   if (storing_in_bfcache) {
     // TODO(https://crbug.com/1378279): Consider moving this to happen earlier
@@ -4064,9 +4069,15 @@ PageScheduler* WebViewImpl::Scheduler() const {
   return GetPage()->GetPageScheduler();
 }
 
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+void WebViewImpl::SetVisibilityState(
+    mojom::blink::PageVisibilityState visibility_state,
+    bool is_initial_state, bool storing_in_bfcache) {
+#else
 void WebViewImpl::SetVisibilityState(
     mojom::blink::PageVisibilityState visibility_state,
     bool is_initial_state) {
+#endif
   DCHECK(GetPage());
   GetPage()->SetVisibilityState(visibility_state, is_initial_state);
   GetPage()->GetPageScheduler()->SetPageVisible(
@@ -4074,7 +4085,11 @@ void WebViewImpl::SetVisibilityState(
   // Notify observers of the change.
   if (!is_initial_state) {
     for (auto& observer : observers_)
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+      observer.OnPageVisibilityChanged(visibility_state, storing_in_bfcache);
+#else
       observer.OnPageVisibilityChanged(visibility_state);
+#endif // OHOS_CUSTOM_VIDEO_PLAYER
   }
 }
 
