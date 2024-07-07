@@ -29,6 +29,9 @@
 #include "util/linux/socket.h"
 #include "util/misc/from_pointer_cast.h"
 #include "util/posix/signals.h"
+#if defined(OHOS_CRASHPAD)
+#include "base/process/process_handle.h"
+#endif
 
 #if BUILDFLAG(IS_ANDROID)
 #include <android/api-level.h>
@@ -153,7 +156,7 @@ int ExceptionHandlerClient::SendCrashDumpRequest(
   message.requesting_thread_stack_address = stack_pointer;
   message.client_info = info;
 #if defined(OHOS_CRASHPAD)
-  message.real_pid = getprocpid();
+  message.real_pid = base::GetCurrentRealPid();
 #endif // defined(OHOS_CRASHPAD)
   return UnixCredentialSocket::SendMsg(server_sock_, &message, sizeof(message));
 }
@@ -168,7 +171,7 @@ int ExceptionHandlerClient::WaitForCrashDumpComplete() {
     switch (message.type) {
       case ExceptionHandlerProtocol::ServerToClientMessage::kTypeForkBroker: {
 #if defined(OHOS_CRASHPAD)
-      pid_t real_pid = getprocpid();
+      pid_t real_pid = base::GetCurrentRealPid();
       LOG(INFO) << "crashpad ExceptionHandlerClient::WaitForCrashDumpComplete" \
         ", received message.type = kTypeForkBroker, use broker process to dump, real pid = " << real_pid;
 #endif
