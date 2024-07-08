@@ -12,10 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 #include <algorithm>
 #include <limits>
- 
+
 #include "base/time/time.h"
 #include "cc/layers/layer.h"
 #include "media/mojo/mojom/native_bridge.mojom.h"
@@ -44,16 +44,16 @@
 #include "third_party/blink/renderer/platform/loader/fetch/resource_fetcher.h"
 #include "third_party/blink/renderer/platform/web_native_bridge.h"
 #include "third_party/blink/renderer/platform/wtf/functional.h"
- 
+
 namespace blink {
- 
+
 namespace {
- 
+
 std::ostream& operator<<(std::ostream& stream,
                          NativeLoader const& native_loader) {
   return stream << static_cast<void const*>(&native_loader);
 }
- 
+
 float PageConstraintInitalScale(const Document& document) {
   float scale = 1.0;
   if (auto* page = document.GetPage()) {
@@ -61,9 +61,9 @@ float PageConstraintInitalScale(const Document& document) {
   }
   return scale;
 }
- 
+
 }  // anonymous namespace
- 
+
 NativeLoader::NativeLoader(HTMLPlugInElement* plugin_element)
     : ExecutionContextLifecycleStateObserver(GetExecutionContext()),
       load_timer_(
@@ -75,17 +75,20 @@ NativeLoader::NativeLoader(HTMLPlugInElement* plugin_element)
   LOG(INFO) << "[NativeEmbed] NativeLoader::NativeLoader element "
             << plugin_element_->ToString();
   ResetMojoState();
+
+  CurrentFrame()->GetFrameScheduler()->RegisterStickyFeature(
+    SchedulingPolicy::Feature::kEnableCacheNativeEmbed, {SchedulingPolicy::DisableBackForwardCache()});
 }
- 
+
 NativeLoader::~NativeLoader() {
   LOG(INFO) << "[NativeEmbed] NativeLoader::~NativeLoader ";
 }
- 
+
 void NativeLoader::Dispose() {
   LOG(INFO) << "[NativeEmbed] NativeLoader::Dispose " << this;
   ClearNativeResource();
 }
- 
+
 void NativeLoader::AttachToNewFrame() {
   // Reset mojo state that is coupled to |old_document|'s execution context.
   // NOTE: |native_bridge_host_remote_| is also coupled to |old_document|'s
@@ -93,7 +96,7 @@ void NativeLoader::AttachToNewFrame() {
   ResetMojoState();
   ScheduleLoadResource();
 }
- 
+
 void NativeLoader::ResetMojoState() {
   native_bridge_host_remote_ = MakeGarbageCollected<DisallowNewWrapper<
       HeapMojoAssociatedRemote<media::mojom::blink::NativeBridgeHost>>>(
@@ -105,45 +108,45 @@ void NativeLoader::ResetMojoState() {
       HeapMojoAssociatedRemoteSet<media::mojom::blink::NativeBridgeObserver>>>(
       GetExecutionContext());
 }
- 
+
 String NativeLoader::GetTypeAttribute() const {
   return plugin_element_->TypeAttribute();
 }
- 
+
 String NativeLoader::GetSrcAttribute() const {
   return plugin_element_->SrcAttribute();
 }
- 
+
 String NativeLoader::GetIdAttribute() const {
   return plugin_element_->IdAttribute();
 }
- 
+
 String NativeLoader::GetTagName() const {
   return plugin_element_->tagName();
 }
- 
+
 ParamMap NativeLoader::GetParamList() const {
   return plugin_element_->ParamList();
 }
- 
+
 LocalFrame* NativeLoader::CurrentFrame() {
   return plugin_element_->GetDocument().GetFrame();
 }
- 
+
 void NativeLoader::ScheduleLoadResource() {
   LOG(INFO) << "NativeEmbed NativeLoader::ScheduleLoadResource";
   load_timer_.Stop();
   load_timer_.StartOneShot(base::TimeDelta(), FROM_HERE);
 }
- 
+
 void NativeLoader::LoadTimerFired(TimerBase*) {
   DVLOG(3) << "LoadTimerFired(" << *this << ")";
   LOG(INFO) << "NativeEmbed NativeLoader::LoadTimerFired";
- 
+
   DCHECK(IsMainThread());
   LoadResource(CurrentFrame());
 }
- 
+
 void NativeLoader::LoadResource(LocalFrame* frame) {
   LOG(INFO) << "NativeEmbed NativeLoader::LoadResource";
   DCHECK(frame);
@@ -151,37 +154,38 @@ void NativeLoader::LoadResource(LocalFrame* frame) {
   if (!web_native_bridge_) {
     return;
   }
- 
+
   GetNativeBridgeHostRemote().OnNativeBridgeAdded(
       AddNativeBridgeObserverAndPassReceiver(),
       web_native_bridge_->GetDelegateId());
- 
+
   web_native_bridge_->StartPipeline();
 }
- 
+
 gfx::Rect NativeLoader::PluginBoundingRect() {
   if (bounding_rect_.IsEmpty()) {
     bounding_rect_ = plugin_element_->PixelSnappedBoundingBox();
   }
- 
+
   return bounding_rect_;
 }
- 
+
 void NativeLoader::OnCreateNativeSurface(int native_embed_id,
                                          RectChangeCB rect_changed_cb) {
+  LOG(INFO) << "[NativeEmbed] NativeLoader::OnCreateNativeSurface";
   if (!native_bridge_observer_remote_set_ || !cc_layer_) {
     return;
   }
- 
+
   if (PluginBoundingRect().IsEmpty()) {
     plugin_element_->GetDocument().UpdateStyleAndLayoutForNode(
         plugin_element_, DocumentUpdateReason::kPlugin);
   }
- 
+
   native_embed_id_ = native_embed_id;
   bounding_rect_changed_cb_ = rect_changed_cb;
   cc_layer_->SetNativeEmbedId(native_embed_id_);
- 
+
   auto embed_info = media::mojom::blink::NativeEmbedInfo::New();
   auto* frame = CurrentFrame();
   if (frame && frame->View()) {
@@ -194,7 +198,7 @@ void NativeLoader::OnCreateNativeSurface(int native_embed_id,
       bounding_rect_changed_cb_.Run(bounds_to_viewport, false);
     }
   }
- 
+
   embed_info->embed_id = native_embed_id_;
   embed_info->type = GetTypeAttribute().IsNull() ? "" : GetTypeAttribute();
   embed_info->element_id = GetIdAttribute().IsNull() ? "" : GetIdAttribute();
@@ -203,14 +207,14 @@ void NativeLoader::OnCreateNativeSurface(int native_embed_id,
   if (!GetParamList().empty()) {
     embed_info->params = GetParamList();
   }
- 
+
   for (auto& observer : native_bridge_observer_remote_set_->Value()) {
     // TODO: We actually only have one observer now so just using std::move
     // here.
     observer->OnCreateNativeSurface(std::move(embed_info));
   }
 }
- 
+
 void NativeLoader::UpdateSize(gfx::Size size) {
   String native_type = GetTypeAttribute();
   LOG(INFO) << "NativeEmbed size:" << size.ToString() << ",native_type:" << native_type;
@@ -224,18 +228,18 @@ void NativeLoader::UpdateSize(gfx::Size size) {
     }
   }
 }
- 
+
 void NativeLoader::OnLayerRectChange(const gfx::Rect& rect) {
   if (PluginBoundingRect().ApproximatelyEqual(rect, 1) ||
       !native_bridge_observer_remote_set_) {
     return;
   }
- 
+
   if (first_update_rect_) {
     first_update_rect_ = false;
     return;
   }
- 
+
   if (PluginBoundingRect().size() != rect.size()) {
     bounding_rect_ = rect;
     if (!bounding_rect_changed_cb_.is_null()) {
@@ -245,7 +249,7 @@ void NativeLoader::OnLayerRectChange(const gfx::Rect& rect) {
   } else {
     bounding_rect_.set_origin(rect.origin());
   }
- 
+
   for (auto& observer : native_bridge_observer_remote_set_->Value()) {
     observer->OnEmbedRectChange(gfx::Rect(
         bounding_rect_.origin(),
@@ -254,34 +258,35 @@ void NativeLoader::OnLayerRectChange(const gfx::Rect& rect) {
             PageConstraintInitalScale(plugin_element_->GetDocument()))));
   }
 }
- 
+
 void NativeLoader::OnDestroyNativeSurface() {
+  LOG(INFO) << "[NativeEmbed] NativeLoader::OnDestroyNativeSurface";
   bounding_rect_changed_cb_.Reset();
   if (!native_bridge_observer_remote_set_) {
     return;
   }
- 
+
   for (auto& observer : native_bridge_observer_remote_set_->Value()) {
     observer->OnDestroyNativeSurface();
   }
 }
- 
+
 void NativeLoader::Repaint() {
   if (cc_layer_) {
     cc_layer_->SetNeedsDisplay();
   }
- 
+
   if (auto* layout_object = plugin_element_->GetLayoutObject()) {
     layout_object->SetShouldDoFullPaintInvalidation();
   }
 }
- 
+
 void NativeLoader::SetCcLayer(cc::Layer* cc_layer) {
   LOG(INFO) << "[NativeEmbed] NativeLoader::SetCcLayer";
   if (cc_layer == cc_layer_) {
     return;
   }
- 
+
   plugin_element_->SetNeedsCompositingUpdate();
   cc_layer_ = cc_layer;
   if (cc_layer_) {
@@ -292,39 +297,39 @@ void NativeLoader::SetCcLayer(cc::Layer* cc_layer) {
     cc_layer_->SetIsNativeVideo(GetTypeAttribute() == "native/video");
   }
 }
- 
+
 void NativeLoader::ClearNativeResource() {
   LOG(INFO) << "NativeEmbed NativeLoader::ClearNativeResource";
   load_timer_.Stop();
- 
+
   if (web_native_bridge_) {
     web_native_bridge_.reset();
     native_bridge_observer_remote_set_->Value().Clear();
   }
- 
+
   if (auto* layout_object = plugin_element_->GetLayoutObject()) {
     layout_object->SetShouldDoFullPaintInvalidation();
   }
 }
- 
+
 void NativeLoader::ContextDestroyed() {
   DVLOG(3) << "contextDestroyed(" << static_cast<void*>(this) << ")";
   LOG(INFO) << "[NativeEmbed] NativeLoader::ContextDestroyed";
   // Clear everything in the Media Element
   ClearNativeResource();
 }
- 
+
 cc::Layer* NativeLoader::CcLayer() const {
   return cc_layer_;
 }
- 
+
 void NativeLoader::Trace(Visitor* visitor) const {
   visitor->Trace(load_timer_);
   visitor->Trace(native_bridge_host_remote_);
   visitor->Trace(native_bridge_observer_remote_set_);
   ExecutionContextLifecycleStateObserver::Trace(visitor);
 }
- 
+
 media::mojom::blink::NativeBridgeHost&
 NativeLoader::GetNativeBridgeHostRemote() {
   // It is an error to call this before having access to the document's frame.
@@ -338,7 +343,7 @@ NativeLoader::GetNativeBridgeHostRemote() {
   }
   return *native_bridge_host_remote_->Value().get();
 }
- 
+
 mojo::PendingAssociatedReceiver<media::mojom::blink::NativeBridgeObserver>
 NativeLoader::AddNativeBridgeObserverAndPassReceiver() {
   mojo::PendingAssociatedRemote<media::mojom::blink::NativeBridgeObserver>
@@ -349,5 +354,5 @@ NativeLoader::AddNativeBridgeObserverAndPassReceiver() {
       plugin_element_->GetDocument().GetTaskRunner(TaskType::kInternalMedia));
   return observer_receiver;
 }
- 
+
 }  // namespace blink

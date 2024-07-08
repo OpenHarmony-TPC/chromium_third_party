@@ -129,7 +129,7 @@ FeatureNames FeatureToNames(WebSchedulerTrackedFeature feature) {
       return {"IndexedDBEvent", "IndexedDB event is pending"};
 #ifdef OHOS_BFCACHE
     case WebSchedulerTrackedFeature::kEnableCacheNativeEmbed:
-      return {"EenableCacheNativeEmbed", "enable native embed to bfcache"};
+      return {"EnableCacheNativeEmbed", "enable native embed to bfcache"};
     case WebSchedulerTrackedFeature::kEnableCacheMediaTakeOver:
       return {"EnableCacheMediaIntercept", "enable media take over to bfcache"};
 #endif
