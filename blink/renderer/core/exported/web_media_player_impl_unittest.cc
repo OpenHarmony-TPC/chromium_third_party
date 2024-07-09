@@ -627,7 +627,7 @@ class WebMediaPlayerImplTest
     delegate_.SetFrameHiddenForTesting(true);
     SetWasSuspendedForFrameClosed(false);
 
-    wmpi_->OnFrameHidden();
+    wmpi_->OnFrameHidden(false);
 
     loop.Run();
 
