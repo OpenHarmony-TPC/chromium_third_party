@@ -1564,6 +1564,9 @@ bool SelectionController::HandleGestureTapIfSelectionExist(
       gfx::ToFlooredPoint(event.Event().PositionInRootFrame())));
   if (!Selection().Contains(v_point)) {
     LOG(INFO) << "Tap outside the selected range to clear selection";
+    if (frame_->GetDocument()) {
+      frame_->GetDocument()->ClearFocusedElement();
+    }
     frame_->Selection().Clear();
   }
   if (mouse_menu_show_) {
