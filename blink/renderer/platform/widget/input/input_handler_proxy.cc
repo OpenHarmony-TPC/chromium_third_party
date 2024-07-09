@@ -458,16 +458,8 @@ void InputHandlerProxy::SendNativeEvent(const WebTouchEvent& touch_event,
     if (layer_impl) {
       embed_id_ = std::to_string(layer_impl->native_embed_id());
       gfx::RectF nativeRect = layer_impl->GetNativeRect();
-      float scale = layer_impl->GetIdealContentsScaleKey();
-      float initScale = layer_impl->GetInitScale();
-      if (initScale > 0.f && scale > 0.f) {
-        x = (x - nativeRect.x()) / (scale / initScale);
-        y = (y - nativeRect.y()) / (scale / initScale);
-      } else {
-        x = x - nativeRect.x();
-        y = y - nativeRect.y();
-      }
-
+      x = x - nativeRect.x();
+      y = y - nativeRect.y();
       client_->DidNativeEmbedEvent(type, embed_id_, id, x, y);
     } else {
       if (!native_event_queue_->empty()) {
