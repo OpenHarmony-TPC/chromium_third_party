@@ -2630,10 +2630,10 @@ void WebMediaPlayerImpl::OnFrameHidden() {
 #if defined(OHOS_CUSTOM_VIDEO_PLAYER)
   if (storing_in_bfcache) {
     pipeline_controller_->SetMediaPlayerState(
-        true, static_cast<int>(OHOS::NWeb::SuspendType::EnterBackForwardCache));
+        true, static_cast<int>(OHOS::NWeb::SuspendType::ENTER_BACK_FORWARD_CACHE));
   } else {
     pipeline_controller_->SetMediaPlayerState(
-        true, static_cast<int>(OHOS::NWeb::SuspendType::EnterBackground));
+        true, static_cast<int>(OHOS::NWeb::SuspendType::ENTER_BACKGROUND));
   }
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
 
@@ -2704,7 +2704,7 @@ void WebMediaPlayerImpl::OnIdleTimeout() {
 
 #if defined(OHOS_CUSTOM_VIDEO_PLAYER)
   pipeline_controller_->SetMediaPlayerState(
-      true, static_cast<int>(OHOS::NWeb::SuspendType::AutoCleanup));
+      true, static_cast<int>(OHOS::NWeb::SuspendType::AUTO_CLEANUP));
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
 }
 
