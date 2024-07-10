@@ -469,7 +469,15 @@ bool MixedContentChecker::ShouldBlockFetch(
       // way to disable blocking Mixed Content with an IP address.
       allowed = !strict_mode;
 #else
+#if defined(OHOS_MIXED_CONTENT)
+      if (settings->GetAllowRunningOfInsecureContent()) {
+        allowed = !strict_mode;
+      } else {
+        allowed = !strict_mode && !GURL(url).HostIsIPAddress();
+      }
+#else
       allowed = !strict_mode && !GURL(url).HostIsIPAddress();
+#endif
 #endif  // BUILDFLAG(IS_FUCHSIA) && BUILDFLAG(ENABLE_CAST_RECEIVER)
 
       if (allowed) {
