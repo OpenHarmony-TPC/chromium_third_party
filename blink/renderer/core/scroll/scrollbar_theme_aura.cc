@@ -56,7 +56,9 @@ namespace {
 // TODO(crbug.com/953847): Adapt testharness tests to native themes and remove
 // this.
 constexpr int kScrollbarThicknessForWebTests = 15;
-
+#ifdef OHOS_SCROLLBAR
+constexpr int kScrollbarForceThicknessForWeb = 16;
+#endif
 // While the theme does not have specific values for scrollbar-width: thin
 // we just use a fixed 2/3 ratio of the default value.
 constexpr float kAutoProportion = 1.f;
@@ -177,6 +179,9 @@ int ScrollbarThemeAura::ScrollbarThickness(float scale_from_dip,
       WebThemeEngineHelper::GetNativeThemeEngine()->GetSize(
           WebThemeEngine::kPartScrollbarVerticalTrack);
 
+  if (!OverlayScrollbarsEnabled()) {
+    return kScrollbarForceThicknessForWeb;
+  }
   return scrollbar_size.width() * Proportion(scrollbar_width) * scale_from_dip;
 }
 
