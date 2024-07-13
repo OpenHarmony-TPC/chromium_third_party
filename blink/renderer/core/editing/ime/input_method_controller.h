@@ -175,7 +175,13 @@ class CORE_EXPORT InputMethodController final
   LocalFrame& GetFrame() const;
 
   String ComposingText() const;
+#if BUILDFLAG(IS_OHOS)
+  // isMaxLengthOverflow: Flags that handle situations where the maximum length
+  // of a text input field is exceeded
+  void SelectComposition(bool isMaxLengthOverflow = false) const;
+#else
   void SelectComposition() const;
+#endif
 
   EphemeralRange EphemeralRangeForOffsets(const PlainTextRange&) const;
 
@@ -191,9 +197,16 @@ class CORE_EXPORT InputMethodController final
                               int relative_caret_position,
                               const Vector<ImeTextSpan>& ime_text_spans);
 
+#if BUILDFLAG(IS_OHOS)
+  // isMaxLengthOverflow: Flags that handle situations where the maximum length
+  // of a text input field is exceeded
+  [[nodiscard]] bool ReplaceComposition(const String& text,
+                                        bool isMaxLengthOverflow = false);
+#else
   // Inserts the given text string in the place of the existing composition.
   // Returns true if did replace.
   [[nodiscard]] bool ReplaceComposition(const String& text);
+#endif
   // Inserts the given text string in the place of the existing composition
   // and moves caret. Returns true if did replace and moved caret successfully.
   bool ReplaceCompositionAndMoveCaret(
