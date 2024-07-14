@@ -483,7 +483,7 @@ class BLINK_EXPORT WebView {
 
 #if defined(OHOS_INPUT_EVENTS)
   virtual void SetScrollOffset(const gfx::PointF point) = 0;
-  virtual void UpdateDrawRect() = 0;
+  void UpdateDrawRect() {};
 #endif  // defined(OHOS_INPUT_EVENTS)
 
   // Misc -------------------------------------------------------------
