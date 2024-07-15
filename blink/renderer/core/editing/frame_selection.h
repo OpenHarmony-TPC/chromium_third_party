@@ -163,6 +163,12 @@ class CORE_EXPORT FrameSelection final
   void Clear();
   bool IsHidden() const;
 
+#if BUILDFLAG(IS_OHOS)
+  void SetSelectionMarkMaxLengthOverflow() {
+    isMaxLengthOverflow_ = true;
+  }
+#endif
+
   // TODO(tkent): These two functions were added to fix crbug.com/695211 without
   // changing focus behavior. Once we fix crbug.com/690272, we can remove these
   // functions.
@@ -392,6 +398,10 @@ class CORE_EXPORT FrameSelection final
   bool selection_autoscroll_enabled_ = true;
   void ScrollRectToVisualIfClosestEdge(const gfx::Point&);
 #endif  // OHOS_CLIPBOARD
+
+#if BUILDFLAG(IS_OHOS)
+  bool isMaxLengthOverflow_ = false;
+#endif
 };
 
 }  // namespace blink

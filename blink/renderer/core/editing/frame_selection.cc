@@ -283,9 +283,19 @@ bool FrameSelection::SetSelectionDeprecated(
       selection_editor_->GetSelectionInDOMTree();
   const bool is_changed = old_selection_in_dom_tree != new_selection;
   const bool should_show_handle = options.ShouldShowHandle();
+#if BUILDFLAG(IS_OHOS)
+  if (!is_changed && is_handle_visible_ == should_show_handle &&
+      is_directional_ == options.IsDirectional()) {
+    if (!isMaxLengthOverflow_) {
+      return false;
+    }
+  }
+  isMaxLengthOverflow_ = false;
+#else
   if (!is_changed && is_handle_visible_ == should_show_handle &&
       is_directional_ == options.IsDirectional())
     return false;
+#endif
   Document& current_document = GetDocument();
   if (is_changed) {
     AssertUserSelection(new_selection, options);

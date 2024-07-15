@@ -548,7 +548,11 @@ void InputMethodController::ContextDestroyed() {
   active_edit_context_ = nullptr;
 }
 
+#if BUILDFLAG(IS_OHOS)
+void InputMethodController::SelectComposition(bool isMaxLengthOverflow) const {
+#else
 void InputMethodController::SelectComposition() const {
+#endif
   const EphemeralRange range = CompositionEphemeralRange();
   if (range.IsNull())
     return;
@@ -583,6 +587,12 @@ void InputMethodController::SelectComposition() const {
   if (widget) {
     widget->SetHandlingInputEvent(old_handling_input_event);
   }
+
+#if BUILDFLAG(IS_OHOS)
+  if (isMaxLengthOverflow) {
+    GetFrame().Selection().SetSelectionMarkMaxLengthOverflow();
+  }
+#endif
 }
 
 bool IsTextTooLongAt(const Position& position) {
@@ -631,7 +641,11 @@ bool InputMethodController::FinishComposingText(
     RevealSelectionScope reveal_selection_scope(GetFrame());
 
     if (is_too_long) {
+#if BUILDFLAG(IS_OHOS)
+      std::ignore = ReplaceComposition(ComposingText(), true);
+#else
       std::ignore = ReplaceComposition(ComposingText());
+#endif
     } else {
       Clear();
       DispatchCompositionEndEvent(GetFrame(), composing);
@@ -710,7 +724,12 @@ bool InputMethodController::ReplaceText(const String& text,
        end >= range.End() ? end + selection_delta : end});
 }
 
+#if BUILDFLAG(IS_OHOS)
+bool InputMethodController::ReplaceComposition(const String& text,
+                                               bool isMaxLengthOverflow) {
+#else
 bool InputMethodController::ReplaceComposition(const String& text) {
+#endif
   // Verify that the caller is using an EventQueueScope to suppress the input
   // event from being fired until the proper time (e.g. after applying an IME
   // selection update, if necessary).
@@ -720,7 +739,11 @@ bool InputMethodController::ReplaceComposition(const String& text) {
     return false;
 
   // Select the text that will be deleted or replaced.
+#if BUILDFLAG(IS_OHOS)
+  SelectComposition(isMaxLengthOverflow);
+#else
   SelectComposition();
+#endif
 
   if (GetFrame()
           .Selection()
