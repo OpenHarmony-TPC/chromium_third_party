@@ -27,6 +27,8 @@ interface SoftwareCompositorOhos {
   DemandDrawSwAsync(SoftwareCompositorDemandDrawSwParams draw_params) =>
       (bool success);
 
+  DrawRect(gfx.mojom.Rect draw_rect);
+
   [Sync]
   SetSharedMemory(mojo_base.mojom.WritableSharedMemoryRegion shm_region) =>
       (bool success);

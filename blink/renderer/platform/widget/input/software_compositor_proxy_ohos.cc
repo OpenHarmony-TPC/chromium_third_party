@@ -79,6 +79,15 @@ void SoftwareCompositorProxyOhos::BindChannel(
   receiver_.Bind(std::move(compositor_request));
 }
 
+void SoftwareCompositorProxyOhos::DrawRect(const gfx::Rect& rect)
+{
+  LOG(DEBUG) << "DrawRect in blink";
+  if (!software_render_) {
+    LOG(ERROR) << "software render init error";
+  }
+  software_render_->DrawRect(rect);
+}
+
 void SoftwareCompositorProxyOhos::SetSharedMemory(
     base::WritableSharedMemoryRegion shm_region,
     SetSharedMemoryCallback callback) {

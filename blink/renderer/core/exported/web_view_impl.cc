@@ -790,11 +790,6 @@ void WebViewImpl::SetScrollOffset(const gfx::PointF point) {
       gfx::Vector2dF(point.OffsetFromOrigin()),
       mojom::blink::ScrollType::kProgrammatic);
 }
-
-void WebViewImpl::UpdateDrawRect() {
-  if (web_widget_)
-    web_widget_->UpdateLifecycle(WebLifecycleUpdate::kAll, DocumentUpdateReason::kBeginMainFrame);
-}
 #endif  // defined(OHOS_INPUT_EVENTS)
 
 void WebViewImpl::ComputeScaleAndScrollForBlockRect(

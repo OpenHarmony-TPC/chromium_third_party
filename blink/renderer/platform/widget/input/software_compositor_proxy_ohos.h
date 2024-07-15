@@ -42,6 +42,10 @@ class SoftwareCompositorProxyOhos
   void DemandDrawSwAsync(
       mojom::blink::SoftwareCompositorDemandDrawSwParamsPtr params,
       DemandDrawSwAsyncCallback callback) final;
+      
+  // blink::mojom::SoftwareCompositorOhos overrides.    
+  void DrawRect(const gfx::Rect& rect) final;
+
   void SetSharedMemory(base::WritableSharedMemoryRegion shm_region,
                        SetSharedMemoryCallback callback) final;
 
