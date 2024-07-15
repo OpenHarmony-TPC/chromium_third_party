@@ -81,9 +81,8 @@ void SoftwareCompositorProxyOhos::BindChannel(
 
 void SoftwareCompositorProxyOhos::DrawRect(const gfx::Rect& rect)
 {
-  LOG(INFO) << "DrawRect in blink";
-  if (!software_render_)
-  {
+  LOG(DEBUG) << "DrawRect in blink";
+  if (!software_render_) {
     LOG(ERROR) << "software render init error";
   }
   software_render_->DrawRect(rect);
