@@ -347,9 +347,6 @@ class CORE_EXPORT WebFrameWidgetImpl
   void DisableDragAndDrop() override;
   WebLocalFrameImpl* FocusedWebLocalFrameInWidget() const override;
   bool ScrollFocusedEditableElementIntoView() override;
-#if defined(OHOS_INPUT_EVENTS)
-  bool ScrollFocusedEditableElementIntoView(bool shouldScroll);
-#endif
   void ApplyViewportChangesForTesting(
       const ApplyViewportChangesArgs& args) override;
   void ApplyViewportIntersectionForTesting(
