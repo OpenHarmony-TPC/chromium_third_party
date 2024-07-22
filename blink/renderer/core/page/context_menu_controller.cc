@@ -97,6 +97,12 @@
 #include "third_party/blink/renderer/core/dom/node_computed_style.h"
 #endif
 
+#ifdef OHOS_NWEB_EX
+#include "base/base_switches.h"
+#include "base/command_line.h"
+#include "content/public/common/content_switches.h"
+#endif
+
 namespace blink {
 
 namespace {
@@ -502,11 +508,13 @@ bool ContextMenuController::ShowContextMenu(LocalFrame* frame,
   data.link_url = GURL(result.AbsoluteLinkURL());
 
 #if BUILDFLAG(IS_OHOS)
+  bool is_browser = base::CommandLine::ForCurrentProcess()->HasSwitch(
+                      ::switches::kForBrowser);
   String background_url;
   //  if InnerNode is not the image , find image from fallback.
   Node* inner_node = result.InnerNode();
   if (inner_node && inner_node->IsContainerNode() &&
-      result.AbsoluteImageURL().IsEmpty()) {
+      result.AbsoluteImageURL().IsEmpty() && !is_browser) {
     for (const auto& hit_test_result_node : result.ListBasedTestResult()) {
       Node* node = hit_test_result_node.Get();
       if (!node) {
@@ -898,7 +906,7 @@ bool ContextMenuController::ShowContextMenu(LocalFrame* frame,
   }
 
 #ifdef OHOS_CLIPBOARD
-  if (data.src_url.is_empty() && result.URLElement()) {
+  if (data.src_url.is_empty() && result.URLElement() && !is_browser) {
     // try to find image url
     data.src_url = GetChildImageUrlFromElement(blink::WebElement(result.URLElement()),
       gfx::Point(point.ToLayoutPoint().X().ToInt(), point.ToLayoutPoint().Y().ToInt()));
@@ -907,7 +915,6 @@ bool ContextMenuController::ShowContextMenu(LocalFrame* frame,
     }
   }
 #endif
-
   selected_web_frame->ShowContextMenu(
       context_menu_client_receiver_.BindNewEndpointAndPassRemote(
           selected_web_frame->GetTaskRunner(TaskType::kInternalDefault)),
