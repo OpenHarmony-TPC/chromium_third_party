@@ -89,18 +89,15 @@
 #include "third_party/blink/renderer/platform/exported/wrapped_resource_response.h"
 
 #if BUILDFLAG(IS_OHOS)
+#include "base/base_switches.h"
+#include "base/command_line.h"
+#include "content/public/common/content_switches.h"
 #include "third_party/blink/public/web/web_element_collection.h"
 #include "third_party/blink/renderer/core/css/css_image_value.h"
 #include "third_party/blink/renderer/core/css/css_uri_value.h"
 #include "third_party/blink/renderer/core/frame/settings.h"
 #include "third_party/blink/renderer/core/html/parser/html_parser_idioms.h"
 #include "third_party/blink/renderer/core/dom/node_computed_style.h"
-#endif
-
-#ifdef OHOS_NWEB_EX
-#include "base/base_switches.h"
-#include "base/command_line.h"
-#include "content/public/common/content_switches.h"
 #endif
 
 namespace blink {
