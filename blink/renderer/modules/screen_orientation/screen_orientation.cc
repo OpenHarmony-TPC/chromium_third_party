@@ -141,6 +141,9 @@ void ScreenOrientation::SetAngle(uint16_t angle) {
 ScriptPromise ScreenOrientation::lock(ScriptState* state,
                                       const AtomicString& lock_string,
                                       ExceptionState& exception_state) {
+#if defined(OHOS_MEDIA)
+  LOG(INFO) << "OhMedia::ScreenOrientation lock = " << lock_string;
+#endif // OHOS_MEDIA
   if (!state->ContextIsValid() || !Controller()) {
     exception_state.ThrowDOMException(
         DOMExceptionCode::kInvalidStateError,
