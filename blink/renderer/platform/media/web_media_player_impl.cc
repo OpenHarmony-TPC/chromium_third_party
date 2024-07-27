@@ -2279,6 +2279,12 @@ void WebMediaPlayerImpl::OnBufferingStateChangeInternal(
     media::BufferingStateChangeReason reason,
     bool for_suspended_start) {
   DVLOG(1) << __func__ << "(" << state << ", " << reason << ")";
+
+#ifdef OHOS_MEDIA
+  LOG(INFO) << "OhMedia::OnBufferingStateChangeInternal(" << (void*)this << ")"
+            << " state:" << BufferingStateToString(state, reason);
+#endif // OHOS_MEDIA
+
   DCHECK(main_task_runner_->BelongsToCurrentThread());
 
   // Ignore buffering state changes caused by back-to-back seeking, so as not

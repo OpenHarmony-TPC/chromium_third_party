@@ -910,6 +910,14 @@ void HTMLMediaElement::ScheduleEvent(const AtomicString& event_name) {
   Event* event = Event::CreateCancelable(event_name);
   event->SetTarget(this);
   ScheduleEvent(event);
+#ifdef OHOS_MEDIA
+  if (event_name == event_type_names::kPlaying ||
+      event_name == event_type_names::kWaiting ||
+      event_name == event_type_names::kSeeking ||
+      event_name == event_type_names::kStalled) {
+    LOG(INFO) << "OhMedia::ScheduleEvent(" << *this << ") " << event_name;
+  }
+#endif // OHOS_MEDIA
 }
 
 void HTMLMediaElement::ScheduleEvent(Event* event) {
