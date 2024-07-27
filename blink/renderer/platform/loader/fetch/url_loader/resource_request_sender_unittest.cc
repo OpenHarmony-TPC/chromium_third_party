@@ -178,7 +178,7 @@ class ResourceRequestSenderTest : public testing::Test,
         std::vector<std::unique_ptr<URLLoaderThrottle>>(),
         std::make_unique<ResourceLoadInfoNotifierWrapper>(
             /*resource_load_info_notifier=*/nullptr),
-        /*back_forward_cache_loader_helper=*/nullptr);
+        /*back_forward_cache_loader_helper=*/nullptr, false);
   }
 
  protected:
