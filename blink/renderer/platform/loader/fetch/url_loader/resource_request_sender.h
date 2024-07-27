@@ -111,7 +111,7 @@ class BLINK_PLATFORM_EXPORT ResourceRequestSender {
           resource_load_info_notifier_wrapper,
 #if BUILDFLAG(IS_OHOS)
       BackForwardCacheLoaderHelper* back_forward_cache_loader_helper,
-      bool is_sync_mode = true);
+      bool is_sync_mode);
 #else
       BackForwardCacheLoaderHelper* back_forward_cache_loader_helper);
 #endif

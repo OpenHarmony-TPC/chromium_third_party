@@ -253,13 +253,8 @@ int ResourceRequestSender::SendAsync(
   // Compute a unique request_id for this renderer process.
   int request_id = GenerateRequestId();
 #if BUILDFLAG(IS_OHOS)
-  int request_id_pro = request_id << 1;
-  if (is_sync_mode) {
-    request_id_pro = request_id_pro | 1;
-  }
-  LOG(DEBUG) << "intercept ResourceRequestSender::SendAsync, is_sync_mode=" << is_sync_mode
-              <<", request_id=" << request_id << ", request_id_pro=" << request_id_pro;
-  request_id = request_id_pro;
+  request->is_sync_mode = is_sync_mode;
+  LOG(DEBUG) << "intercept ResourceRequestSender::SendAsync, request->is_sync_mode=" << request->is_sync_mode;
 #endif
   request_info_ = std::make_unique<PendingRequestInfo>(
       std::move(client), request->destination, KURL(request->url),
