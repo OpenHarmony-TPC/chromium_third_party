@@ -1224,8 +1224,8 @@ Resource* ResourceFetcher::RequestResource(FetchParameters& params,
         }
       },
       base::TimeTicks::Now(), params.Url().ProtocolIsData()));
-  TRACE_EVENT1("blink,blink.resource", "ResourceFetcher::requestResource",
-               "url", params.Url().ElidedString().Utf8());
+  TRACE_EVENT2("blink,blink.resource", "ResourceFetcher::requestResource",
+               "url", params.Url().ElidedString().Utf8(), "method", params.GetResourceRequest().HttpMethod().Utf8());
 
   // |resource_request|'s origin can be null here, corresponding to the "client"
   // value in the spec. In that case client's origin is used.
