@@ -1573,11 +1573,7 @@ InputHandlerProxy::EventDisposition InputHandlerProxy::HandleTouchMove(
     EventWithCallback* event_with_callback) {
   const auto& touch_event =
       static_cast<const WebTouchEvent&>(event_with_callback->event());
-#if BUILDFLAG(IS_OHOS)
-  if (touch_event.is_fit_content) {
-    return DROP_EVENT;
-  }
-#endif
+
   TRACE_EVENT2("input", "InputHandlerProxy::HandleTouchMove", "touch_result",
                touch_result_.has_value() ? touch_result_.value() : -1,
                "is_start_or_first",
