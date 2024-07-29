@@ -860,6 +860,10 @@ class CORE_EXPORT Document : public ContainerNode,
   const KURL& Url() const { return url_; }
   void SetURL(const KURL&);
 
+#if BUILDFLAG(IS_OHOS)
+  void StartBoosting();
+#endif
+
   // Bind the url to document.url, if unavailable bind to about:blank.
   KURL urlForBinding() const;
 

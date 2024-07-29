@@ -364,6 +364,11 @@
 #include "third_party/blink/renderer/platform/wtf/text/string_buffer.h"
 #include "third_party/blink/renderer/platform/wtf/text/text_encoding_registry.h"
 
+#if BUILDFLAG(IS_OHOS)
+#include "base/ohos/ltpo/include/touch_observer.h"
+#include "ohos_adapter_helper.h"
+#endif
+
 #ifndef NDEBUG
 using WeakDocumentSet = blink::HeapHashSet<blink::WeakMember<blink::Document>>;
 static WeakDocumentSet& LiveDocumentSet();
@@ -453,6 +458,10 @@ bool DefaultFaviconAllowedByCSP(const Document* document, const IconURL& icon) {
       ContentSecurityPolicy::CheckHeaderType::kCheckAll);
 }
 
+#if BUILDFLAG(IS_OHOS)
+constexpr uint64_t MAX_TOUCH_UP_INTERVAL = 500000000;
+const int LOAD_URL_DELAY_TIME = 250;
+#endif
 }  // namespace
 
 static const unsigned kCMaxWriteRecursionDepth = 21;
@@ -4313,6 +4322,14 @@ KURL Document::urlForBinding() const {
   return BlankURL();
 }
 
+#if BUILDFLAG(IS_OHOS)
+  void Document::StartBoosting() {
+    OHOS::NWeb::OhosAdapterHelper::GetInstance()
+      .CreateSocPerfClientAdapter()
+      ->ApplySocPerfConfigByIdEx(OHOS::NWeb::SocPerfClientAdapter::SOC_PERF_WEB_GESTURE_ID, true);    
+  }
+#endif
+
 void Document::SetURL(const KURL& url) {
   KURL new_url = url.IsEmpty() ? BlankURL() : url;
   if (new_url == url_)
@@ -4320,6 +4337,15 @@ void Document::SetURL(const KURL& url) {
 
   TRACE_EVENT1("navigation", "Document::SetURL", "url",
                new_url.GetString().Utf8());
+
+#if BUILDFLAG(IS_OHOS)
+  if (::base::subtle::TimeTicksNowIgnoringOverride().since_origin().
+      InNanoseconds() - base::ohos::TouchObserver::GetInstance().GetLastTouchUpTime() < MAX_TOUCH_UP_INTERVAL) {
+    base::SingleThreadTaskRunner::GetCurrentDefault()
+      ->PostDelayedTask(FROM_HERE, WTF::BindOnce(&Document::StartBoosting,
+        WrapWeakPersistent(this)),  base::Milliseconds(LOAD_URL_DELAY_TIME));
+  }
+#endif
 
   // Strip the fragment directive from the URL fragment. E.g. "#id:~:text=a"
   // --> "#id". See https://github.com/WICG/scroll-to-text-fragment.
