@@ -1379,6 +1379,10 @@ void HTMLMediaElement::LoadResource(const WebMediaPlayerSource& source,
     DCHECK(IsSafeToLoadURL(url, kComplain));
     DVLOG(3) << "loadResource(" << *this << ", " << UrlForLoggingMedia(url)
              << ", " << content_type << ")";
+#if defined(OHOS_MEDIA)
+  } else {
+    LOG(WARNING) << "OhMedia::LoadResource source is not url";
+#endif // OHOS_MEDIA
   }
 
   LocalFrame* frame = GetDocument().GetFrame();
@@ -1959,6 +1963,11 @@ void HTMLMediaElement::MediaLoadingFailed(WebMediaPlayer::NetworkState error,
                                           const String& input_message) {
   DVLOG(3) << "MediaLoadingFailed(" << *this << ", " << int{error}
            << ", message='" << input_message << "')";
+
+#if defined(OHOS_MEDIA)
+  LOG(INFO) << "OhMedia::MediaLoadingFailed error = " << int{error}
+            << ", message='" << input_message << "')";
+#endif // OHOS_MEDIA
 
   bool should_be_opaque = MediaShouldBeOpaque();
   if (should_be_opaque)
@@ -2930,6 +2939,10 @@ void HTMLMediaElement::PlayInternal() {
 
 void HTMLMediaElement::pause() {
   DVLOG(2) << "pause(" << *this << ")";
+
+#if defined(OHOS_MEDIA)
+  LOG(WARNING) << "OhMedia::pause";
+#endif // OHOS_MEDIA
 
   // When updating pause, be sure to update PauseToLetDescriptionFinish().
   autoplay_policy_->StopAutoplayMutedWhenVisible();
@@ -3990,6 +4003,8 @@ void HTMLMediaElement::UpdatePlayState(bool pause_speech /* = true */) {
                    "be allow to play";
     }
   }
+  LOG(WARNING) << "OhMedia::UpdatePlayState should_be_playing = "
+               << should_be_playing << ", is_playing" << is_playing;
 #endif  // OHOS_MEDIA_POLICY
 
   if (should_be_playing) {

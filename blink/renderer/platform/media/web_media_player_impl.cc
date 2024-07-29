@@ -1116,6 +1116,9 @@ void WebMediaPlayerImpl::DoSeek(base::TimeDelta time, bool time_updated) {
   TRACE_EVENT2("media", "WebMediaPlayerImpl::DoSeek", "target",
                time.InSecondsF(), "id", media_player_id_);
 
+#if defined(OHOS_MEDIA)
+  LOG(WARNING) << "OhMedia::DoSeek seconds = " << time.InSecondsF();
+#endif // OHOS_MEDIA
   ReadyState old_state = ready_state_;
   if (ready_state_ > WebMediaPlayer::kReadyStateHaveMetadata)
     SetReadyState(WebMediaPlayer::kReadyStateHaveMetadata);
@@ -1196,6 +1199,10 @@ void WebMediaPlayerImpl::SetVolume(double volume) {
   if (watch_time_reporter_)
     watch_time_reporter_->OnVolumeChange(volume);
   client_->DidPlayerMutedStatusChange(volume == 0.0);
+
+#if defined(OHOS_MEDIA)
+  LOG(INFO) << "OhMedia::SetVolume volume is :" << volume;
+#endif // OHOS_MEDIA
 
   if (delegate_has_audio_ != HasUnmutedAudio()) {
     delegate_has_audio_ = HasUnmutedAudio();
@@ -1967,6 +1974,10 @@ void WebMediaPlayerImpl::OnError(media::PipelineStatus status) {
   DCHECK(main_task_runner_->BelongsToCurrentThread());
   DCHECK(status != media::PIPELINE_OK);
 
+#if defined(OHOS_MEDIA)
+  LOG(INFO) << "OhMedia::OnError PipelineStatus = " << status;
+#endif // OHOS_MEDIA
+
   if (suppress_destruction_errors_)
     return;
 
@@ -2620,6 +2631,11 @@ void WebMediaPlayerImpl::OnFrameHidden() {
   DCHECK(main_task_runner_->BelongsToCurrentThread());
   LOG(INFO) << "WebMediaPlayerImpl::OnFrameHidden()";
 
+#if defined(OHOS_MEDIA)
+  LOG(INFO) << "OhMedia::WebMediaPlayerImpl::OnFrameHidden()"
+            << " delegate_id:" << delegate_id_;
+#endif // OHOS_MEDIA
+
   // Backgrounding a video requires a user gesture to resume playback.
   if (IsHidden())
     video_locked_when_paused_when_hidden_ = true;
@@ -2666,6 +2682,11 @@ void WebMediaPlayerImpl::OnFrameShown() {
   DCHECK(main_task_runner_->BelongsToCurrentThread());
   background_pause_timer_.Stop();
 
+#if defined(OHOS_MEDIA)
+  LOG(INFO) << "OhMedia::WebMediaPlayerImpl::OnFrameShown()"
+            << " delegate_id:" << delegate_id_;
+#endif // OHOD_MEDIA
+
   // Foreground videos don't require user gesture to continue playback.
   video_locked_when_paused_when_hidden_ = false;
 
@@ -2687,6 +2708,9 @@ void WebMediaPlayerImpl::OnFrameShown() {
 
   if (paused_when_hidden_) {
     paused_when_hidden_ = false;
+#if defined(OHOS_MEDIA)
+    LOG(WARNING) << "OhMedia::OnFrameShown ResumePlayBack()";
+#endif // OHOS_MEDIA
     client_->ResumePlayback();  // Calls UpdatePlayState() so return afterwards.
     return;
   }
@@ -4042,6 +4066,11 @@ void WebMediaPlayerImpl::OnFirstFrame(base::TimeTicks frame_time) {
   media_metrics_provider_->SetTimeToFirstFrame(elapsed);
   WriteSplitHistogram<kPlaybackType | kEncrypted>(
       &base::UmaHistogramMediumTimes, "Media.TimeToFirstFrame", elapsed);
+
+#if defined(OHOS_MEDIA)
+  LOG(INFO) << __func__ << " OhMedia::delegate_id_:" << delegate_id_
+            << " elapsed:" << elapsed.InSecondsF();
+#endif // OHOS_MEDIA
 
   media::PipelineStatistics ps = GetPipelineStatistics();
   if (client_) {
