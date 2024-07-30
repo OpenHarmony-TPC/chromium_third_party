@@ -1,0 +1,1835 @@
+diff --git a/src/.gitattributes b/src/.gitattributes
+index b49779ab376ac..22b719b15f76d
+--- a/src/.gitattributes
++++ b/src/.gitattributes
+@@ -78,3 +78,5 @@ ohos_sdk/10/ets/build-tools/ets-loader/bin/ark/build/bin/ark_aot_compiler filter
+ ohos_sdk/10/native/llvm/bin/clang-15 filter=lfs diff=lfs merge=lfs -text
+ ohos_sdk/10/native/llvm/bin/clangd filter=lfs diff=lfs merge=lfs -text
+ ohos_sdk/10/native/llvm/lib/libclang.so.15.0.4 filter=lfs diff=lfs merge=lfs -text
++ohos_ndk/libs_x86/ filter=lfs diff=lfs merge=lfs -text
++ohos_ndk/sysroot_x86/ filter=lfs diff=lfs merge=lfs -text
+diff --git a/src/base/allocator/partition_allocator/partition_alloc_unittest.cc b/src/base/allocator/partition_allocator/partition_alloc_unittest.cc
+index 74a0b8a07cb18..00b380a4b97dd
+--- a/src/base/allocator/partition_allocator/partition_alloc_unittest.cc
++++ b/src/base/allocator/partition_allocator/partition_alloc_unittest.cc
+@@ -3012,25 +3012,42 @@ TEST_P(PartitionAllocTest, PreferActiveOverEmpty) {
+ 
+ #define TEST_STEP_SIZE 20
+ #define TEST_TIME 5
+-#if defined(OHOS_ENABLE_FREELIST_HARDENED)
++#define SUPER_OFFSET 4096
++#define EXTENT_OFFSET 32
++#define BUCKET_OFFSET 16
++#if defined(OHOS_ENABLE_POINTER_HARDENED)
+ TEST_P(PartitionAllocTest, FreelistHardenedTest) {
+-  for (int i = 0; i < TEST_TIME; i++) {
+-    size_t size = TEST_STEP_SIZE * i;
+-    void* ptr = allocator.root()->Alloc(size, type_name);
++  size_t size = 0x200;
++  void* ptr = allocator.root()->Alloc(size, type_name);
++  uintptr_t head = ((uintptr_t)ptr & 0xffffffffffC00000) + SUPER_OFFSET;
++  uintptr_t root = *(uintptr_t*)head;
+ 
+-    SlotSpanMetadata<base::internal::ThreadSafe>* slot_span =
+-        SlotSpanMetadata<base::internal::ThreadSafe>::FromSlotStart(
+-            allocator.root()->AdjustPointerForExtrasSubtract(ptr));
++  head += EXTENT_OFFSET;
++  PartitionBucket<base::internal::ThreadSafe>* bucket = (PartitionBucket<base::internal::ThreadSafe>*)(head + BUCKET_OFFSET);
+ 
+-    PartitionFreelistEntry *entry = slot_span->get_freelist_head();
+-    PartitionFreelistEntry *next = entry->GetNext(size, slot_span->bucket->random_cookie);
++  uintptr_t active = *(uintptr_t*)(bucket->active_slot_spans_head);
++  uintptr_t slot_span = *(uintptr_t*)head;
++  uintptr_t free = *(uintptr_t*)(slot_span + sizeof(uintptr_t));
+ 
+-    EXPECT_EQ((uintptr_t)entry & 0xfffff000, (uintptr_t)next & 0xfffff000)
+-      << "size: " << size << "e: " << (uintptr_t)entry << " n: " << next;
++  uintptr_t real_root = (uintptr_t)PartitionRoot<base::internal::ThreadSafe>::FromFirstSuperPage((uintptr_t)ptr & 0xffffffffffC00000);
++  printf("\r\nreal_root = 0x%lx\r\n", real_root);
++  printf("root = 0x%lx\r\n", root);
++  printf("active_head = 0x%lx\r\n", active);
++  printf("free_next = 0x%lx\r\n\r\n", free);
++  EXPECT_NE(real_root, root);
+ 
+-    allocator.root()->Free(ptr);
+-  }
++  // slot span must >= head and <= head + 4096(metadata page size)
++  // after hardened, active slot head is not in this scope.
++  EXPECT_NE((uintptr_t)active & 0xfffff000, (uintptr_t)head & 0xfffff000);
++
++  void* ptr1 = allocator.root()->Alloc(size, type_name);
++
++  // the member of the freelist is not in the actually allocated address.
++  EXPECT_NE((uintptr_t)ptr1 & 0xfffff000, free & 0xfffff000);
++  allocator.root()->Free(ptr);
++  allocator.root()->Free(ptr1);
+ }
++
+ #endif
+ 
+ #if defined(OHOS_ENABLE_RANDOM)
+diff --git a/src/base/allocator/partition_allocator/partition_bucket.cc b/src/base/allocator/partition_allocator/partition_bucket.cc
+index 2defcf722f97e..fedddd4e45634
+--- a/src/base/allocator/partition_allocator/partition_bucket.cc
++++ b/src/base/allocator/partition_allocator/partition_bucket.cc
+@@ -38,7 +38,7 @@
+ #if BUILDFLAG(USE_STARSCAN)
+ #include "base/allocator/partition_allocator/starscan/pcscan.h"
+ #endif
+-
++uintptr_t g_bucket_cookie = 0;
+ namespace partition_alloc::internal {
+ 
+ namespace {
+@@ -355,7 +355,12 @@ SlotSpanMetadata<thread_safe>* PartitionDirectMap(
+ 
+     auto* super_page_extent =
+         PartitionSuperPageToExtent<thread_safe>(reservation_start);
++#if defined(OHOS_ENABLE_POINTER_HARDENED)
++    super_page_extent->root = (PartitionRoot<thread_safe>*)EncodeRoot((void*)root);
++#else
+     super_page_extent->root = root;
++#endif
++
+     // The new structures are all located inside a fresh system page so they
+     // will all be zeroed out. These DCHECKs are for documentation and to assert
+     // our expectations of the kernel.
+@@ -442,11 +447,7 @@ SlotSpanMetadata<thread_safe>* PartitionDirectMap(
+       return nullptr;
+     }
+ 
+-#if defined(OHOS_ENABLE_FREELIST_HARDENED)
+-    auto* next_entry = PartitionFreelistEntry::EmplaceAndInitNull(slot_start, metadata->bucket.random_cookie);
+-#else
+     auto* next_entry = PartitionFreelistEntry::EmplaceAndInitNull(slot_start);
+-#endif
+     page->slot_span_metadata.SetFreelistHead(next_entry);
+ 
+     map_extent = &metadata->direct_map_extent;
+@@ -600,19 +601,17 @@ uint8_t ComputeSystemPagesPerSlotSpan(size_t slot_size,
+   return ComputeSystemPagesPerSlotSpanInternal(slot_size);
+ }
+ 
+-#if defined(OHOS_ENABLE_FREELIST_HARDENED)
+-uint64_t GenerateRandomCookie()
+-{
+-  return RandomValue();
+-}
+-#endif
+-
+ template <bool thread_safe>
+ void PartitionBucket<thread_safe>::Init(uint32_t new_slot_size) {
+   slot_size = new_slot_size;
+   slot_size_reciprocal = kReciprocalMask / new_slot_size + 1;
+   active_slot_spans_head =
++#if defined(OHOS_ENABLE_POINTER_HARDENED)
++      (SlotSpanMetadata<thread_safe>* )EncodeBucket((void*)SlotSpanMetadata<thread_safe>::get_sentinel_slot_span_non_const());
++#else
+       SlotSpanMetadata<thread_safe>::get_sentinel_slot_span_non_const();
++#endif
++
+   empty_slot_spans_head = nullptr;
+   decommitted_slot_spans_head = nullptr;
+   num_full_slot_spans = 0;
+@@ -625,10 +624,6 @@ void PartitionBucket<thread_safe>::Init(uint32_t new_slot_size) {
+       ;
+   num_system_pages_per_slot_span =
+       ComputeSystemPagesPerSlotSpan(slot_size, prefer_smaller_slot_spans);
+-#if defined(OHOS_ENABLE_FREELIST_HARDENED)
+-  random_cookie = GenerateRandomCookie();
+-#endif
+-
+ }
+ 
+ template <bool thread_safe>
+@@ -847,7 +842,12 @@ PA_ALWAYS_INLINE uintptr_t PartitionBucket<thread_safe>::InitializeSuperPage(
+   auto* latest_extent = PartitionSuperPageToExtent<thread_safe>(super_page);
+   // By storing the root in every extent metadata object, we have a fast way
+   // to go from a pointer within the partition to the root object.
++#if defined(OHOS_ENABLE_POINTER_HARDENED)
++  latest_extent->root = (PartitionRoot<thread_safe>*)EncodeRoot((void*)root);
++#else
+   latest_extent->root = root;
++#endif
++
+   // Most new extents will be part of a larger extent, and these two fields
+   // are unused, but we initialize them to 0 so that we get a clear signal
+   // in case they are accidentally used.
+@@ -1037,25 +1037,14 @@ PartitionBucket<thread_safe>::ProvisionMoreSlotsAndAllocOne(
+       next_slot_ptr = reinterpret_cast<void*>(next_slot);
+     }
+ #endif
+-
+-#if defined(OHOS_ENABLE_FREELIST_HARDENED)
+-    auto* entry = PartitionFreelistEntry::EmplaceAndInitNull(next_slot_ptr, random_cookie);
+-#else
+     auto* entry = PartitionFreelistEntry::EmplaceAndInitNull(next_slot_ptr);
+-#endif
+-
+     if (!slot_span->get_freelist_head()) {
+       PA_DCHECK(!prev_entry);
+       PA_DCHECK(!free_list_entries_added);
+       slot_span->SetFreelistHead(entry);
+     } else {
+       PA_DCHECK(free_list_entries_added);
+-#if defined(OHOS_ENABLE_FREELIST_HARDENED)
+-      prev_entry->SetNext(entry, random_cookie);
+-#else
+       prev_entry->SetNext(entry);
+-#endif
+-
+     }
+ #if BUILDFLAG(USE_FREESLOT_BITMAP)
+     FreeSlotBitmapMarkSlotAsFree(next_slot);
+@@ -1082,11 +1071,7 @@ PartitionBucket<thread_safe>::ProvisionMoreSlotsAndAllocOne(
+   // is large), meaning that |slot_span->freelist_head| can be nullptr.
+   if (slot_span->get_freelist_head()) {
+     PA_DCHECK(free_list_entries_added);
+-#if defined(OHOS_ENABLE_FREELIST_HARDENED)
+-    slot_span->get_freelist_head()->CheckFreeList(slot_size, random_cookie);
+-#else
+     slot_span->get_freelist_head()->CheckFreeList(slot_size);
+-#endif
+   }
+ #endif
+ 
+@@ -1098,7 +1083,11 @@ PartitionBucket<thread_safe>::ProvisionMoreSlotsAndAllocOne(
+ 
+ template <bool thread_safe>
+ bool PartitionBucket<thread_safe>::SetNewActiveSlotSpan() {
++#if defined(OHOS_ENABLE_POINTER_HARDENED)
++  SlotSpanMetadata<thread_safe>* slot_span = (SlotSpanMetadata<thread_safe>*)EncodeBucket((void*)active_slot_spans_head);
++#else
+   SlotSpanMetadata<thread_safe>* slot_span = active_slot_spans_head;
++#endif
+   if (slot_span == SlotSpanMetadata<thread_safe>::get_sentinel_slot_span()) {
+     return false;
+   }
+@@ -1141,9 +1130,17 @@ bool PartitionBucket<thread_safe>::SetNewActiveSlotSpan() {
+   for (; slot_span; slot_span = next_slot_span) {
+     next_slot_span = slot_span->next_slot_span;
+     PA_DCHECK(slot_span->bucket == this);
++#if defined(OHOS_ENABLE_POINTER_HARDENED)
++    SlotSpanMetadata<thread_safe>* real_empty =
++        (SlotSpanMetadata<thread_safe>*)EncodeBucket((void*)empty_slot_spans_head);
++    SlotSpanMetadata<thread_safe>* real_decommitted =
++        (SlotSpanMetadata<thread_safe>*)EncodeBucket((void*)decommitted_slot_spans_head);
++    PA_DCHECK(slot_span != real_empty);
++    PA_DCHECK(slot_span != real_decommitted);
++#else
+     PA_DCHECK(slot_span != empty_slot_spans_head);
+     PA_DCHECK(slot_span != decommitted_slot_spans_head);
+-
++#endif
+     if (slot_span->is_active()) {
+       // Has provisioned slots.
+       if (slot_span->get_freelist_head()) {
+@@ -1161,11 +1158,21 @@ bool PartitionBucket<thread_safe>::SetNewActiveSlotSpan() {
+         slot_span->next_slot_span = nullptr;
+       }
+     } else if (slot_span->is_empty()) {
++#if defined(OHOS_ENABLE_POINTER_HARDENED)
++      slot_span->next_slot_span = (SlotSpanMetadata<thread_safe>*)EncodeBucket((void*)empty_slot_spans_head);
++      empty_slot_spans_head = (SlotSpanMetadata<thread_safe>*)EncodeBucket((void*)slot_span);
++#else
+       slot_span->next_slot_span = empty_slot_spans_head;
+       empty_slot_spans_head = slot_span;
++#endif
+     } else if (PA_LIKELY(slot_span->is_decommitted())) {
++#if defined(OHOS_ENABLE_POINTER_HARDENED)
++      slot_span->next_slot_span = (SlotSpanMetadata<thread_safe>*)EncodeBucket((void*)decommitted_slot_spans_head);
++      decommitted_slot_spans_head = (SlotSpanMetadata<thread_safe>*)EncodeBucket((void*)slot_span);
++#else
+       slot_span->next_slot_span = decommitted_slot_spans_head;
+       decommitted_slot_spans_head = slot_span;
++#endif
+     } else {
+       PA_DCHECK(slot_span->is_full());
+       // Move this slot span... nowhere, and also mark it as full. We need it
+@@ -1193,15 +1200,29 @@ bool PartitionBucket<thread_safe>::SetNewActiveSlotSpan() {
+       slot_span->next_slot_span = to_provision_head;
+       to_provision_tail->next_slot_span = next;
+     }
++#if defined(OHOS_ENABLE_POINTER_HARDENED)
++    active_slot_spans_head = (SlotSpanMetadata<thread_safe>*)EncodeBucket((void*)slot_span);
++#else
+     active_slot_spans_head = slot_span;
++#endif
+   } else if (to_provision_head) {
+     usable_active_list_head = true;
+     // Need to provision new slots.
++#if defined(OHOS_ENABLE_POINTER_HARDENED)
++    active_slot_spans_head = (SlotSpanMetadata<thread_safe>*)EncodeBucket((void*)to_provision_head);
++#else
+     active_slot_spans_head = to_provision_head;
++#endif
++
+   } else {
+     // Active list is now empty.
+     active_slot_spans_head =
++#if defined(OHOS_ENABLE_POINTER_HARDENED)
++        (SlotSpanMetadata<thread_safe>*)EncodeBucket((void*)SlotSpanMetadata<thread_safe>::get_sentinel_slot_span_non_const());
++#else
+         SlotSpanMetadata<thread_safe>::get_sentinel_slot_span_non_const();
++#endif
++
+   }
+ 
+   return usable_active_list_head;
+@@ -1209,7 +1230,11 @@ bool PartitionBucket<thread_safe>::SetNewActiveSlotSpan() {
+ 
+ template <bool thread_safe>
+ void PartitionBucket<thread_safe>::MaintainActiveList() {
++#if defined(OHOS_ENABLE_POINTER_HARDENED)
++  SlotSpanMetadata<thread_safe>* slot_span = (SlotSpanMetadata<thread_safe>*)EncodeBucket((void*)active_slot_spans_head);
++#else
+   SlotSpanMetadata<thread_safe>* slot_span = active_slot_spans_head;
++#endif
+   if (slot_span == SlotSpanMetadata<thread_safe>::get_sentinel_slot_span()) {
+     return;
+   }
+@@ -1235,11 +1260,21 @@ void PartitionBucket<thread_safe>::MaintainActiveList() {
+       // For the empty and decommitted lists, LIFO ordering makes sense (since
+       // it would lead to reusing memory which has been touched relatively
+       // recently, which only matters for committed spans though).
++#if defined(OHOS_ENABLE_POINTER_HARDENED)
++      slot_span->next_slot_span = (SlotSpanMetadata<thread_safe>*)EncodeBucket((void*)empty_slot_spans_head);
++      empty_slot_spans_head = (SlotSpanMetadata<thread_safe>*)EncodeBucket((void*)slot_span);
++#else
+       slot_span->next_slot_span = empty_slot_spans_head;
+       empty_slot_spans_head = slot_span;
++#endif
+     } else if (slot_span->is_decommitted()) {
++#if defined(OHOS_ENABLE_POINTER_HARDENED)
++      slot_span->next_slot_span = (SlotSpanMetadata<thread_safe>*)EncodeBucket((void*)decommitted_slot_spans_head);
++      decommitted_slot_spans_head = (SlotSpanMetadata<thread_safe>*)EncodeBucket((void*)slot_span);
++#else
+       slot_span->next_slot_span = decommitted_slot_spans_head;
+       decommitted_slot_spans_head = slot_span;
++#endif
+     } else {
+       // Full slot spans are not tracked, just accounted for.
+       PA_DCHECK(slot_span->is_full());
+@@ -1254,12 +1289,22 @@ void PartitionBucket<thread_safe>::MaintainActiveList() {
+     new_active_slot_spans_head =
+         SlotSpanMetadata<thread_safe>::get_sentinel_slot_span_non_const();
+   }
++#if defined(OHOS_ENABLE_POINTER_HARDENED)
++  active_slot_spans_head = (SlotSpanMetadata<thread_safe>*)EncodeBucket((void*)new_active_slot_spans_head);
++#else
+   active_slot_spans_head = new_active_slot_spans_head;
++#endif
+ }
+ 
+ template <bool thread_safe>
+ void PartitionBucket<thread_safe>::SortSlotSpanFreelists() {
++
++#if defined(OHOS_ENABLE_POINTER_HARDENED)
++  SlotSpanMetadata<thread_safe>* real_head = (SlotSpanMetadata<thread_safe>*)EncodeBucket((void*)active_slot_spans_head);
++  for (auto* slot_span = real_head; slot_span;
++#else
+   for (auto* slot_span = active_slot_spans_head; slot_span;
++#endif
+        slot_span = slot_span->next_slot_span) {
+     // No need to sort the freelist if it's already sorted. Note that if the
+     // freelist is sorted, this means that it didn't change at all since the
+@@ -1317,7 +1362,12 @@ void PartitionBucket<thread_safe>::SortActiveSlotSpans() {
+   size_t index = 0;
+   SlotSpanMetadata<thread_safe>* overflow_spans_start = nullptr;
+ 
++#if defined(OHOS_ENABLE_POINTER_HARDENED)
++  SlotSpanMetadata<thread_safe>* real_head = (SlotSpanMetadata<thread_safe>*)EncodeBucket((void*)active_slot_spans_head);
++  for (auto* slot_span = real_head; slot_span;
++#else
+   for (auto* slot_span = active_slot_spans_head; slot_span;
++#endif
+        slot_span = slot_span->next_slot_span) {
+     if (index < kMaxSlotSpansToSort) {
+       active_spans_array[index++] = slot_span;
+@@ -1349,8 +1399,11 @@ void PartitionBucket<thread_safe>::SortActiveSlotSpans() {
+   // such an allocation.
+   std::sort(active_spans_array, active_spans_array + index, CompareSlotSpans);
+ 
++#if defined(OHOS_ENABLE_POINTER_HARDENED)
++  active_slot_spans_head = (SlotSpanMetadata<thread_safe>*)EncodeBucket((void*)overflow_spans_start);
++#else
+   active_slot_spans_head = overflow_spans_start;
+-
++#endif
+   // Reverse order, since we insert at the head of the list.
+   for (int i = index - 1; i >= 0; i--) {
+     if (active_spans_array[i] ==
+@@ -1358,9 +1411,15 @@ void PartitionBucket<thread_safe>::SortActiveSlotSpans() {
+       // The sentinel is const, don't try to write to it.
+       PA_DCHECK(active_slot_spans_head == nullptr);
+     } else {
+-      active_spans_array[i]->next_slot_span = active_slot_spans_head;
+-    }
+-    active_slot_spans_head = active_spans_array[i];
++#if defined(OHOS_ENABLE_POINTER_HARDENED)
++    active_spans_array[i]->next_slot_span = (SlotSpanMetadata<thread_safe>*)EncodeBucket((void*)active_slot_spans_head);
++  }
++  active_slot_spans_head = (SlotSpanMetadata<thread_safe>*)EncodeBucket((void*)active_spans_array[i]);
++#else
++    active_spans_array[i]->next_slot_span = active_slot_spans_head;
++  }
++  active_slot_spans_head = active_spans_array[i];
++#endif
+   }
+ }
+ 
+@@ -1378,7 +1437,13 @@ uintptr_t PartitionBucket<thread_safe>::SlowPathAlloc(
+   // when a higher-order alignment is requested, in which case the freelist
+   // logic is bypassed and we go directly for slot span allocation.
+   bool allocate_aligned_slot_span = slot_span_alignment > PartitionPageSize();
++
++#if defined(OHOS_ENABLE_POINTER_HARDENED)
++  SlotSpanMetadata<thread_safe>* real_head = (SlotSpanMetadata<thread_safe>*)EncodeBucket((void*)active_slot_spans_head);
++  PA_DCHECK(!real_head->get_freelist_head() ||
++#else
+   PA_DCHECK(!active_slot_spans_head->get_freelist_head() ||
++#endif
+             allocate_aligned_slot_span);
+ 
+   SlotSpanMetadata<thread_safe>* new_slot_span = nullptr;
+@@ -1401,7 +1466,11 @@ uintptr_t PartitionBucket<thread_safe>::SlowPathAlloc(
+   if (PA_UNLIKELY(is_direct_mapped())) {
+     PA_DCHECK(raw_size > kMaxBucketed);
+     PA_DCHECK(this == &root->sentinel_bucket);
++#if defined(OHOS_ENABLE_POINTER_HARDENED)
++    PA_DCHECK(real_head ==
++#else
+     PA_DCHECK(active_slot_spans_head ==
++#endif
+               SlotSpanMetadata<thread_safe>::get_sentinel_slot_span());
+ 
+     // No fast path for direct-mapped allocations.
+@@ -1418,7 +1487,11 @@ uintptr_t PartitionBucket<thread_safe>::SlowPathAlloc(
+     *is_already_zeroed = true;
+   } else if (PA_LIKELY(!allocate_aligned_slot_span && SetNewActiveSlotSpan())) {
+     // First, did we find an active slot span in the active list?
++#if defined(OHOS_ENABLE_POINTER_HARDENED)
++    new_slot_span = (SlotSpanMetadata<thread_safe>*)EncodeBucket((void*)active_slot_spans_head);
++#else
+     new_slot_span = active_slot_spans_head;
++#endif
+     PA_DCHECK(new_slot_span->is_active());
+   } else if (PA_LIKELY(!allocate_aligned_slot_span &&
+                        (empty_slot_spans_head != nullptr ||
+@@ -1426,10 +1499,20 @@ uintptr_t PartitionBucket<thread_safe>::SlowPathAlloc(
+     // Second, look in our lists of empty and decommitted slot spans.
+     // Check empty slot spans first, which are preferred, but beware that an
+     // empty slot span might have been decommitted.
++#if defined(OHOS_ENABLE_POINTER_HARDENED)
++    SlotSpanMetadata<thread_safe>* real_empty = (SlotSpanMetadata<thread_safe>*)EncodeBucket((void*)empty_slot_spans_head);
++    while (PA_LIKELY((new_slot_span = real_empty) != nullptr)) {
++#else
+     while (PA_LIKELY((new_slot_span = empty_slot_spans_head) != nullptr)) {
++#endif
+       PA_DCHECK(new_slot_span->bucket == this);
+       PA_DCHECK(new_slot_span->is_empty() || new_slot_span->is_decommitted());
++#if defined(OHOS_ENABLE_POINTER_HARDENED)
++      empty_slot_spans_head = (SlotSpanMetadata<thread_safe>*)EncodeBucket((void*)(new_slot_span->next_slot_span));
++      real_empty = new_slot_span->next_slot_span;
++#else
+       empty_slot_spans_head = new_slot_span->next_slot_span;
++#endif
+       // Accept the empty slot span unless it got decommitted.
+       if (new_slot_span->get_freelist_head()) {
+         new_slot_span->next_slot_span = nullptr;
+@@ -1445,8 +1528,13 @@ uintptr_t PartitionBucket<thread_safe>::SlowPathAlloc(
+         break;
+       }
+       PA_DCHECK(new_slot_span->is_decommitted());
++#if defined(OHOS_ENABLE_POINTER_HARDENED)
++      new_slot_span->next_slot_span = (SlotSpanMetadata<thread_safe>*)EncodeBucket((void*)decommitted_slot_spans_head);
++      decommitted_slot_spans_head = (SlotSpanMetadata<thread_safe>*)EncodeBucket((void*)new_slot_span);
++#else
+       new_slot_span->next_slot_span = decommitted_slot_spans_head;
+       decommitted_slot_spans_head = new_slot_span;
++#endif
+     }
+     if (PA_UNLIKELY(!new_slot_span) &&
+         PA_LIKELY(decommitted_slot_spans_head != nullptr)) {
+@@ -1455,11 +1543,18 @@ uintptr_t PartitionBucket<thread_safe>::SlowPathAlloc(
+         return 0;
+       }
+ 
++#if defined(OHOS_ENABLE_POINTER_HARDENED)
++      new_slot_span = (SlotSpanMetadata<thread_safe>*)EncodeBucket((void*)decommitted_slot_spans_head);
++#else
+       new_slot_span = decommitted_slot_spans_head;
++#endif
+       PA_DCHECK(new_slot_span->bucket == this);
+       PA_DCHECK(new_slot_span->is_decommitted());
++#if defined(OHOS_ENABLE_POINTER_HARDENED)
++      decommitted_slot_spans_head = (SlotSpanMetadata<thread_safe>*)EncodeBucket((void*)(new_slot_span->next_slot_span));
++#else
+       decommitted_slot_spans_head = new_slot_span->next_slot_span;
+-
++#endif
+       // If lazy commit is enabled, pages will be recommitted when provisioning
+       // slots, in ProvisionMoreSlotsAndAllocOne(), not here.
+       if (!kUseLazyCommit) {
+@@ -1495,7 +1590,12 @@ uintptr_t PartitionBucket<thread_safe>::SlowPathAlloc(
+ 
+   // Bail if we had a memory allocation failure.
+   if (PA_UNLIKELY(!new_slot_span)) {
++#if defined(OHOS_ENABLE_POINTER_HARDENED)
++    real_head = (SlotSpanMetadata<thread_safe>*)EncodeBucket((void*)active_slot_spans_head);
++    PA_DCHECK(real_head ==
++#else
+     PA_DCHECK(active_slot_spans_head ==
++#endif
+               SlotSpanMetadata<thread_safe>::get_sentinel_slot_span());
+     if (flags & AllocFlags::kReturnNull) {
+       return 0;
+@@ -1507,7 +1607,11 @@ uintptr_t PartitionBucket<thread_safe>::SlowPathAlloc(
+   }
+ 
+   PA_DCHECK(new_bucket != &root->sentinel_bucket);
++#if defined(OHOS_ENABLE_POINTER_HARDENED)
++  new_bucket->active_slot_spans_head = (SlotSpanMetadata<thread_safe>*)EncodeBucket((void*)new_slot_span);
++#else
+   new_bucket->active_slot_spans_head = new_slot_span;
++#endif
+   if (new_slot_span->CanStoreRawSize()) {
+     new_slot_span->SetRawSize(raw_size);
+   }
+diff --git a/src/base/allocator/partition_allocator/partition_bucket.h b/src/base/allocator/partition_allocator/partition_bucket.h
+index a740b8c48a62d..eda607b0b2543
+--- a/src/base/allocator/partition_allocator/partition_bucket.h
++++ b/src/base/allocator/partition_allocator/partition_bucket.h
+@@ -42,10 +42,6 @@ struct PartitionBucket {
+       : kPartitionNumSystemPagesPerSlotSpanBits;
+   uint32_t num_full_slot_spans : 24;
+ 
+-#if defined(OHOS_ENABLE_FREELIST_HARDENED)
+-  uintptr_t random_cookie;
+-#endif
+-
+   // `slot_size_reciprocal` is used to improve the performance of
+   // `GetSlotOffset`. It is computed as `(1 / size) * (2 ** M)` where M is
+   // chosen to provide the desired accuracy. As a result, we can replace a slow
+diff --git a/src/base/allocator/partition_allocator/partition_freelist_entry.h b/src/base/allocator/partition_allocator/partition_freelist_entry.h
+index abcab049695b1..9c4a70084f136
+--- a/src/base/allocator/partition_allocator/partition_freelist_entry.h
++++ b/src/base/allocator/partition_allocator/partition_freelist_entry.h
+@@ -25,6 +25,16 @@
+ #include "base/allocator/partition_allocator/reverse_bytes.h"
+ #endif  // !defined(ARCH_CPU_BIG_ENDIAN)
+ 
++extern uintptr_t g_freelist_cookie;
++
++#define UINT32_BIT 32
++PA_ALWAYS_INLINE static uintptr_t GetRandomValue()
++{
++    uint64_t high = partition_alloc::internal::RandomValue();
++    uint64_t low = partition_alloc::internal::RandomValue();
++    return (uintptr_t)((high << UINT32_BIT) | low);
++}
++
+ namespace partition_alloc::internal {
+ 
+ namespace {
+@@ -41,18 +51,6 @@ class PartitionFreelistEntry;
+ 
+ class EncodedPartitionFreelistEntryPtr {
+  private:
+-#if defined(OHOS_ENABLE_FREELIST_HARDENED)
+-  PA_ALWAYS_INLINE constexpr explicit EncodedPartitionFreelistEntryPtr(
+-      std::nullptr_t, uintptr_t random_cookie)
+-      : encoded_(Transform(0, 0)) {}
+-  PA_ALWAYS_INLINE explicit EncodedPartitionFreelistEntryPtr(void* ptr, uintptr_t random_cookie)
+-      // The encoded pointer stays MTE-tagged.
+-      : encoded_(Transform(reinterpret_cast<uintptr_t>(ptr), random_cookie)) {}
+-
+-  PA_ALWAYS_INLINE PartitionFreelistEntry* Decode(uintptr_t random_cookie) const {
+-    return reinterpret_cast<PartitionFreelistEntry*>(Transform(encoded_, random_cookie));
+-  }
+-#else
+   PA_ALWAYS_INLINE constexpr explicit EncodedPartitionFreelistEntryPtr(
+       std::nullptr_t)
+       : encoded_(Transform(0)) {}
+@@ -63,7 +61,7 @@ class EncodedPartitionFreelistEntryPtr {
+   PA_ALWAYS_INLINE PartitionFreelistEntry* Decode() const {
+     return reinterpret_cast<PartitionFreelistEntry*>(Transform(encoded_));
+   }
+-#endif
++
+   PA_ALWAYS_INLINE constexpr uintptr_t Inverted() const { return ~encoded_; }
+ 
+   PA_ALWAYS_INLINE constexpr void Override(uintptr_t encoded) {
+@@ -74,11 +72,7 @@ class EncodedPartitionFreelistEntryPtr {
+ 
+   // Transform() works the same in both directions, so can be used for
+   // encoding and decoding.
+-#if defined(OHOS_ENABLE_FREELIST_HARDENED)
+-  PA_ALWAYS_INLINE static constexpr uintptr_t Transform(uintptr_t address, uintptr_t random_cookie) {
+-#else
+   PA_ALWAYS_INLINE static constexpr uintptr_t Transform(uintptr_t address) {
+-#endif
+     // We use bswap on little endian as a fast transformation for two reasons:
+     // 1) On 64 bit architectures, the pointer is very unlikely to be a
+     //    canonical address. Therefore, if an object is freed and its vtable is
+@@ -88,13 +82,12 @@ class EncodedPartitionFreelistEntryPtr {
+     //    corrupt a freelist pointer, partial pointer overwrite attacks are
+     //    thwarted.
+     // For big endian, similar guarantees are arrived at with a negation.
+-
+-#if defined(OHOS_ENABLE_FREELIST_HARDENED)
+-    if (address == 0) {
++#if defined(OHOS_ENABLE_POINTER_HARDENED)
++    if (address == 0)
+       return 0;
+-    }
+-
+-    return address ^ random_cookie;
++    if (g_freelist_cookie == 0)
++      g_freelist_cookie = GetRandomValue();
++    return (address ^ g_freelist_cookie);
+ #else
+ #if defined(ARCH_CPU_BIG_ENDIAN)
+     uintptr_t transformed = ~address;
+@@ -115,26 +108,16 @@ class EncodedPartitionFreelistEntryPtr {
+ // the rationale and mechanism, respectively.
+ class PartitionFreelistEntry {
+  private:
+-#if defined(OHOS_ENABLE_FREELIST_HARDENED)
+-  constexpr explicit PartitionFreelistEntry(std::nullptr_t, uintptr_t random_cookie)
+-      : encoded_next_(EncodedPartitionFreelistEntryPtr(nullptr, random_cookie))
+-#else
+   constexpr explicit PartitionFreelistEntry(std::nullptr_t)
+       : encoded_next_(EncodedPartitionFreelistEntryPtr(nullptr))
+-#endif
+ #if PA_CONFIG(HAS_FREELIST_SHADOW_ENTRY)
+         ,
+         shadow_(encoded_next_.Inverted())
+ #endif
+   {
+   }
+-#if defined(OHOS_ENABLE_FREELIST_HARDENED)
+-  explicit PartitionFreelistEntry(PartitionFreelistEntry* next, uintptr_t random_cookie)
+-      : encoded_next_(EncodedPartitionFreelistEntryPtr(next, random_cookie))
+-#else
+   explicit PartitionFreelistEntry(PartitionFreelistEntry* next)
+       : encoded_next_(EncodedPartitionFreelistEntryPtr(next))
+-#endif
+ #if PA_CONFIG(HAS_FREELIST_SHADOW_ENTRY)
+         ,
+         shadow_(encoded_next_.Inverted())
+@@ -142,13 +125,8 @@ class PartitionFreelistEntry {
+   {
+   }
+   // For testing only.
+-#if defined(OHOS_ENABLE_FREELIST_HARDENED)
+-  PartitionFreelistEntry(void* next, bool make_shadow_match, uintptr_t random_cookie)
+-      : encoded_next_(EncodedPartitionFreelistEntryPtr(next, random_cookie))
+-#else
+   PartitionFreelistEntry(void* next, bool make_shadow_match)
+       : encoded_next_(EncodedPartitionFreelistEntryPtr(next))
+-#endif
+ #if PA_CONFIG(HAS_FREELIST_SHADOW_ENTRY)
+         ,
+         shadow_(make_shadow_match ? encoded_next_.Inverted() : 12345)
+@@ -161,18 +139,6 @@ class PartitionFreelistEntry {
+ 
+   // Emplaces the freelist entry at the beginning of the given slot span, and
+   // initializes it as null-terminated.
+-#if defined(OHOS_ENABLE_FREELIST_HARDENED)
+-  PA_ALWAYS_INLINE static PartitionFreelistEntry* EmplaceAndInitNull(
+-      void* slot_start_tagged, uintptr_t random_cookie) {
+-    // |slot_start_tagged| is MTE-tagged.
+-    auto* entry = new (slot_start_tagged) PartitionFreelistEntry(nullptr, random_cookie);
+-    return entry;
+-  }
+-  PA_ALWAYS_INLINE static PartitionFreelistEntry* EmplaceAndInitNull(
+-      uintptr_t slot_start, uintptr_t random_cookie) {
+-    return EmplaceAndInitNull(SlotStartAddr2Ptr(slot_start), random_cookie);
+-  }
+-#else
+   PA_ALWAYS_INLINE static PartitionFreelistEntry* EmplaceAndInitNull(
+       void* slot_start_tagged) {
+     // |slot_start_tagged| is MTE-tagged.
+@@ -183,26 +149,18 @@ class PartitionFreelistEntry {
+       uintptr_t slot_start) {
+     return EmplaceAndInitNull(SlotStartAddr2Ptr(slot_start));
+   }
+-#endif
++
+   // Emplaces the freelist entry at the beginning of the given slot span, and
+   // initializes it with the given |next| pointer, but encoded.
+   //
+   // This freelist is built for the purpose of thread-cache. This means that we
+   // can't perform a check that this and the next pointer belong to the same
+   // super page, as thread-cache spans may chain slots across super pages.
+-
+   PA_ALWAYS_INLINE static PartitionFreelistEntry* EmplaceAndInitForThreadCache(
+       uintptr_t slot_start,
+-#if defined(OHOS_ENABLE_FREELIST_HARDENED)
+-      PartitionFreelistEntry* next,
+-      uintptr_t random_cookie) {
+-    auto* entry =
+-        new (SlotStartAddr2Ptr(slot_start)) PartitionFreelistEntry(next, random_cookie);
+-#else
+       PartitionFreelistEntry* next) {
+     auto* entry =
+         new (SlotStartAddr2Ptr(slot_start)) PartitionFreelistEntry(next);
+-#endif
+     return entry;
+   }
+ 
+@@ -213,71 +171,37 @@ class PartitionFreelistEntry {
+   // if the shadow matches the next pointer properly or is trash.
+   PA_ALWAYS_INLINE static void EmplaceAndInitForTest(uintptr_t slot_start,
+                                                      void* next,
+-#if defined(OHOS_ENABLE_FREELIST_HARDENED)
+-                                                     bool make_shadow_match,
+-                                                     uintptr_t random_cookie) {
++                                                     bool make_shadow_match) {
+     new (SlotStartAddr2Ptr(slot_start))
+-        PartitionFreelistEntry(next, make_shadow_match, random_cookie);
+-#else
+-                                                   bool make_shadow_match) {
+-  new (SlotStartAddr2Ptr(slot_start))
+-      PartitionFreelistEntry(next, make_shadow_match);
+-#endif
++        PartitionFreelistEntry(next, make_shadow_match);
+   }
+ 
+-#if defined(OHOS_ENABLE_FREELIST_HARDENED)
+-  void CorruptNextForTesting(uintptr_t v, uintptr_t random_cookie) {
+-    // We just need a value that can never be a valid pointer here.
+-    encoded_next_.Override(EncodedPartitionFreelistEntryPtr::Transform(v, random_cookie));
+-#else
+   void CorruptNextForTesting(uintptr_t v) {
+     // We just need a value that can never be a valid pointer here.
+     encoded_next_.Override(EncodedPartitionFreelistEntryPtr::Transform(v));
+-#endif
+   }
+ 
+   // Puts |extra| on the stack before crashing in case of memory
+   // corruption. Meant to be used to report the failed allocation size.
+   template <bool crash_on_corruption>
+-#if defined(OHOS_ENABLE_FREELIST_HARDENED)
+-  PA_ALWAYS_INLINE PartitionFreelistEntry* GetNextForThreadCache(
+-      size_t extra, uintptr_t random_cookie) const;
+-  PA_ALWAYS_INLINE PartitionFreelistEntry* GetNext(size_t extra, uintptr_t random_cookie) const;
+-#else
+   PA_ALWAYS_INLINE PartitionFreelistEntry* GetNextForThreadCache(
+       size_t extra) const;
+   PA_ALWAYS_INLINE PartitionFreelistEntry* GetNext(size_t extra) const;
+-#endif
+ 
+-#if defined(OHOS_ENABLE_FREELIST_HARDENED)
+-  PA_NOINLINE void CheckFreeList(size_t extra, uintptr_t random_cookie) const {
+-    for (auto* entry = this; entry; entry = entry->GetNext(extra, random_cookie)) {
+-#else
+   PA_NOINLINE void CheckFreeList(size_t extra) const {
+     for (auto* entry = this; entry; entry = entry->GetNext(extra)) {
+-#endif
+       // |GetNext()| checks freelist integrity.
+     }
+   }
+ 
+-#if defined(OHOS_ENABLE_FREELIST_HARDENED)
+-  PA_NOINLINE void CheckFreeListForThreadCache(size_t extra, uintptr_t random_cookie) const {
+-    for (auto* entry = this; entry;
+-         entry = entry->GetNextForThreadCache<true>(extra, random_cookie)) {
+-#else
+   PA_NOINLINE void CheckFreeListForThreadCache(size_t extra) const {
+     for (auto* entry = this; entry;
+          entry = entry->GetNextForThreadCache<true>(extra)) {
+-#endif
+       // |GetNextForThreadCache()| checks freelist integrity.
+     }
+   }
+ 
+-#if defined(OHOS_ENABLE_FREELIST_HARDENED)
+-  PA_ALWAYS_INLINE void SetNext(PartitionFreelistEntry* entry, uintptr_t random_cookie) {
+-#else
+   PA_ALWAYS_INLINE void SetNext(PartitionFreelistEntry* entry) {
+-#endif
+     // SetNext() is either called on the freelist head, when provisioning new
+     // slots, or when GetNext() has been called before, no need to pass the
+     // size.
+@@ -292,11 +216,7 @@ class PartitionFreelistEntry {
+     }
+ #endif  // BUILDFLAG(PA_DCHECK_IS_ON)
+ 
+-#if defined(OHOS_ENABLE_FREELIST_HARDENED)
+-    encoded_next_ = EncodedPartitionFreelistEntryPtr(entry, random_cookie);
+-#else
+     encoded_next_ = EncodedPartitionFreelistEntryPtr(entry);
+-#endif
+ #if PA_CONFIG(HAS_FREELIST_SHADOW_ENTRY)
+     shadow_ = encoded_next_.Inverted();
+ #endif
+@@ -321,11 +241,7 @@ class PartitionFreelistEntry {
+   template <bool crash_on_corruption>
+   PA_ALWAYS_INLINE PartitionFreelistEntry* GetNextInternal(
+       size_t extra,
+-#if defined(OHOS_ENABLE_FREELIST_HARDENED)
+-      bool for_thread_cache, uintptr_t random_cookie) const;
+-#else
+       bool for_thread_cache) const;
+-#endif
+ 
+   PA_ALWAYS_INLINE static bool IsSane(const PartitionFreelistEntry* here,
+                                       const PartitionFreelistEntry* next,
+@@ -397,22 +313,14 @@ static_assert(kSmallestUsedBucket >=
+ template <bool crash_on_corruption>
+ PA_ALWAYS_INLINE PartitionFreelistEntry*
+ PartitionFreelistEntry::GetNextInternal(size_t extra,
+-#if defined(OHOS_ENABLE_FREELIST_HARDENED)
+-                                        bool for_thread_cache,
+-                                        uintptr_t random_cookie) const {
+-#else
+                                         bool for_thread_cache) const {
+-#endif
+   // GetNext() can be called on discarded memory, in which case |encoded_next_|
+   // is 0, and none of the checks apply. Don't prefetch nullptr either.
+   if (IsEncodedNextPtrZero()) {
+     return nullptr;
+   }
+-#if defined(OHOS_ENABLE_FREELIST_HARDENED)
+-  auto* ret = encoded_next_.Decode(random_cookie);
+-#else
++
+   auto* ret = encoded_next_.Decode();
+-#endif
+   // We rely on constant propagation to remove the branches coming from
+   // |for_thread_cache|, since the argument is always a compile-time constant.
+   if (PA_UNLIKELY(!IsSane(this, ret, for_thread_cache))) {
+@@ -443,15 +351,6 @@ PartitionFreelistEntry::GetNextInternal(size_t extra,
+ 
+ template <bool crash_on_corruption>
+ PA_ALWAYS_INLINE PartitionFreelistEntry*
+-#if defined(OHOS_ENABLE_FREELIST_HARDENED)
+-PartitionFreelistEntry::GetNextForThreadCache(size_t extra, uintptr_t random_cookie) const {
+-  return GetNextInternal<crash_on_corruption>(extra, true, random_cookie);
+-}
+-
+-PA_ALWAYS_INLINE PartitionFreelistEntry* PartitionFreelistEntry::GetNext(
+-    size_t extra, uintptr_t random_cookie) const {
+-  return GetNextInternal<true>(extra, false, random_cookie);
+-#else
+ PartitionFreelistEntry::GetNextForThreadCache(size_t extra) const {
+   return GetNextInternal<crash_on_corruption>(extra, true);
+ }
+@@ -459,7 +358,6 @@ PartitionFreelistEntry::GetNextForThreadCache(size_t extra) const {
+ PA_ALWAYS_INLINE PartitionFreelistEntry* PartitionFreelistEntry::GetNext(
+     size_t extra) const {
+   return GetNextInternal<true>(extra, false);
+-#endif
+ }
+ 
+ }  // namespace partition_alloc::internal
+diff --git a/src/base/allocator/partition_allocator/partition_page.cc b/src/base/allocator/partition_allocator/partition_page.cc
+index c72c119e0fe40..6be3e351d2144
+--- a/src/base/allocator/partition_allocator/partition_page.cc
++++ b/src/base/allocator/partition_allocator/partition_page.cc
+@@ -24,6 +24,8 @@
+ #include "base/allocator/partition_allocator/reservation_offset_table.h"
+ #include "base/allocator/partition_allocator/tagging.h"
+ 
++uintptr_t g_freelist_cookie = 0;
++
+ namespace partition_alloc::internal {
+ 
+ namespace {
+@@ -187,10 +189,17 @@ void SlotSpanMetadata<thread_safe>::FreeSlowPath(size_t number_of_freed) {
+     // chances of it being filled up again. The old current slot span will be
+     // the next slot span.
+     PA_DCHECK(!next_slot_span);
++#if defined(OHOS_ENABLE_POINTER_HARDENED)
++    SlotSpanMetadata<thread_safe>* real_head = (SlotSpanMetadata<thread_safe>*)EncodeBucket((void*)(bucket->active_slot_spans_head));
++    if (PA_LIKELY(real_head != get_sentinel_slot_span()))
++      next_slot_span = real_head;
++    bucket->active_slot_spans_head = (SlotSpanMetadata<thread_safe>*)EncodeBucket((void*)this);
++#else
+     if (PA_LIKELY(bucket->active_slot_spans_head != get_sentinel_slot_span())) {
+       next_slot_span = bucket->active_slot_spans_head;
+     }
+     bucket->active_slot_spans_head = this;
++#endif
+     PA_CHECK(bucket->num_full_slot_spans);  // Underflow.
+     --bucket->num_full_slot_spans;
+   }
+@@ -202,19 +211,20 @@ void SlotSpanMetadata<thread_safe>::FreeSlowPath(size_t number_of_freed) {
+       return;
+     }
+ #if BUILDFLAG(PA_DCHECK_IS_ON)
+-#if defined(OHOS_ENABLE_FREELIST_HARDENED)
+-    freelist_head->CheckFreeList(bucket->slot_size, bucket->random_cookie);
+-#else
+     freelist_head->CheckFreeList(bucket->slot_size);
+-#endif
+ #endif
+     // If it's the current active slot span, change it. We bounce the slot span
+     // to the empty list as a force towards defragmentation.
++#if defined(OHOS_ENABLE_POINTER_HARDENED)
++    if (PA_LIKELY(this == (SlotSpanMetadata<thread_safe>*)EncodeBucket((void*)(bucket->active_slot_spans_head))))
++      bucket->SetNewActiveSlotSpan();
++    PA_DCHECK((SlotSpanMetadata<thread_safe>*)EncodeBucket((void*)(bucket->active_slot_spans_head)) != this);
++#else
+     if (PA_LIKELY(this == bucket->active_slot_spans_head)) {
+       bucket->SetNewActiveSlotSpan();
+     }
+     PA_DCHECK(bucket->active_slot_spans_head != this);
+-
++#endif
+     if (CanStoreRawSize()) {
+       SetRawSize(0);
+     }
+@@ -285,11 +295,7 @@ void SlotSpanMetadata<thread_safe>::SortFreelist() {
+   size_t num_free_slots = 0;
+   size_t slot_size = bucket->slot_size;
+   for (PartitionFreelistEntry* head = freelist_head; head;
+-#if defined(OHOS_ENABLE_FREELIST_HARDENED)
+-       head = head->GetNext(slot_size, this->bucket->random_cookie)) {
+-#else
+        head = head->GetNext(slot_size)) {
+-#endif
+     ++num_free_slots;
+     size_t offset_in_slot_span = SlotStartPtr2Addr(head) - slot_span_start;
+     size_t slot_number = bucket->GetSlotNumber(offset_in_slot_span);
+@@ -307,19 +313,12 @@ void SlotSpanMetadata<thread_safe>::SortFreelist() {
+          slot_number++) {
+       if (free_slots[slot_number]) {
+         uintptr_t slot_start = slot_span_start + (slot_size * slot_number);
+-#if defined(OHOS_ENABLE_FREELIST_HARDENED)
+-        auto* entry = PartitionFreelistEntry::EmplaceAndInitNull(slot_start, this->bucket->random_cookie);
+-#else
+         auto* entry = PartitionFreelistEntry::EmplaceAndInitNull(slot_start);
+-#endif
++
+         if (!head) {
+           head = entry;
+         } else {
+-#if defined(OHOS_ENABLE_FREELIST_HARDENED)
+-          back->SetNext(entry, this->bucket->random_cookie);
+-#else
+           back->SetNext(entry);
+-#endif
+         }
+ 
+         back = entry;
+diff --git a/src/base/allocator/partition_allocator/partition_page.h b/src/base/allocator/partition_allocator/partition_page.h
+index 1d4c5d4cb8518..310396015df5b
+--- a/src/base/allocator/partition_allocator/partition_page.h
++++ b/src/base/allocator/partition_allocator/partition_page.h
+@@ -37,6 +37,24 @@
+ #include "base/allocator/partition_allocator/partition_ref_count.h"
+ #endif
+ 
++extern uintptr_t g_bucket_cookie;
++extern uintptr_t g_root_cookie;
++
++PA_ALWAYS_INLINE static void* EncodeBucket(void* ptr) {
++    if (g_bucket_cookie == 0)
++        g_bucket_cookie = GetRandomValue();
++    if (ptr == nullptr)
++        return nullptr;
++    return reinterpret_cast<void*>(reinterpret_cast<uintptr_t>(ptr) ^ g_bucket_cookie);
++}
++
++PA_ALWAYS_INLINE static void* EncodeRoot(void* ptr) {
++    if (g_root_cookie == 0)
++        g_root_cookie = GetRandomValue();
++    if (ptr == nullptr)
++        return nullptr;
++    return reinterpret_cast<void*>(reinterpret_cast<uintptr_t>(ptr) ^ g_root_cookie);
++}
+ namespace partition_alloc::internal {
+ 
+ // An "extent" is a span of consecutive superpages. We link the partition's next
+@@ -565,9 +583,16 @@ PartitionPage<thread_safe>::FromAddr(uintptr_t address) {
+ #if BUILDFLAG(PA_DCHECK_IS_ON)
+   PA_DCHECK(IsReservationStart(super_page));
+   auto* extent = PartitionSuperPageToExtent<thread_safe>(super_page);
++#if defined(OHOS_ENABLE_POINTER_HARDENED)
++  PartitionRoot* real_root = (PartitionRoot*)EncodeRoot((void*)(extent->root));
++  PA_DCHECK(IsWithinSuperPagePayload(address,
++                                     IsManagedByNormalBuckets(address) &&
++                                         real_root->IsQuarantineAllowed()));
++#else
+   PA_DCHECK(IsWithinSuperPagePayload(address,
+                                      IsManagedByNormalBuckets(address) &&
+                                          extent->root->IsQuarantineAllowed()));
++#endif
+ #endif
+ 
+   uintptr_t partition_page_index =
+@@ -743,11 +768,7 @@ SlotSpanMetadata<thread_safe>::PopForAlloc(size_t size) {
+   PartitionFreelistEntry* result = freelist_head;
+   // Not setting freelist_is_sorted_ to false since this doesn't destroy
+   // ordering.
+-#if defined(OHOS_ENABLE_FREELIST_HARDENED)
+-  freelist_head = freelist_head->GetNext(size, bucket->random_cookie);
+-#else
+   freelist_head = freelist_head->GetNext(size);
+-#endif
+   num_allocated_slots++;
+   return result;
+ }
+@@ -766,15 +787,9 @@ PA_ALWAYS_INLINE void SlotSpanMetadata<thread_safe>::Free(uintptr_t slot_start)
+   // Catches an immediate double free.
+   PA_CHECK(entry != freelist_head);
+   // Look for double free one level deeper in debug.
+-#if defined(OHOS_ENABLE_FREELIST_HARDENED)
+-  PA_DCHECK(!freelist_head ||
+-            entry != freelist_head->GetNext(bucket->slot_size, bucket->random_cookie));
+-  entry->SetNext(freelist_head, this->bucket->random_cookie);
+-#else
+   PA_DCHECK(!freelist_head ||
+             entry != freelist_head->GetNext(bucket->slot_size));
+   entry->SetNext(freelist_head);
+-#endif
+   SetFreelistHead(entry);
+   // A best effort double-free check. Works only on empty slot spans.
+   PA_CHECK(num_allocated_slots);
+@@ -800,11 +815,7 @@ PA_ALWAYS_INLINE void SlotSpanMetadata<thread_safe>::AppendFreeList(
+ #if BUILDFLAG(PA_DCHECK_IS_ON)
+   auto* root = PartitionRoot<thread_safe>::FromSlotSpan(this);
+   root->lock_.AssertAcquired();
+-#if defined(OHOS_ENABLE_FREELIST_HARDENED)
+-  PA_DCHECK(!tail->GetNext(bucket->slot_size, bucket->random_cookie));
+-#else
+   PA_DCHECK(!tail->GetNext(bucket->slot_size));
+-#endif
+   PA_DCHECK(number_of_freed);
+   PA_DCHECK(num_allocated_slots);
+   if (CanStoreRawSize()) {
+@@ -813,11 +824,7 @@ PA_ALWAYS_INLINE void SlotSpanMetadata<thread_safe>::AppendFreeList(
+   {
+     size_t number_of_entries = 0;
+     for (auto* entry = head; entry;
+-#if defined(OHOS_ENABLE_FREELIST_HARDENED)
+-         entry = entry->GetNext(bucket->slot_size, bucket->random_cookie), ++number_of_entries) {
+-#else
+          entry = entry->GetNext(bucket->slot_size), ++number_of_entries) {
+-#endif
+       uintptr_t untagged_entry = UntagPtr(entry);
+       // Check that all entries belong to this slot span.
+       PA_DCHECK(ToSlotSpanStart(this) <= untagged_entry);
+@@ -828,11 +835,7 @@ PA_ALWAYS_INLINE void SlotSpanMetadata<thread_safe>::AppendFreeList(
+   }
+ #endif
+ 
+-#if defined(OHOS_ENABLE_FREELIST_HARDENED)
+-  tail->SetNext(freelist_head, bucket->random_cookie);
+-#else
+   tail->SetNext(freelist_head);
+-#endif
+   SetFreelistHead(head);
+   PA_DCHECK(num_allocated_slots >= number_of_freed);
+   num_allocated_slots -= number_of_freed;
+@@ -924,7 +927,12 @@ void IterateSlotSpans(uintptr_t super_page,
+ #if BUILDFLAG(PA_DCHECK_IS_ON)
+   PA_DCHECK(!(super_page % kSuperPageAlignment));
+   auto* extent_entry = PartitionSuperPageToExtent<thread_safe>(super_page);
++#if defined(OHOS_ENABLE_POINTER_HARDENED)
++  PartitionRoot* real_root = (PartitionRoot*)EncodeRoot((void*)(extent_entry->root));
++  real_root->lock_.AssertAcquired();
++#else
+   extent_entry->root->lock_.AssertAcquired();
++#endif
+ #endif
+ 
+   using Page = PartitionPage<thread_safe>;
+diff --git a/src/base/allocator/partition_allocator/partition_root.cc b/src/base/allocator/partition_allocator/partition_root.cc
+index c2f14cf83f924..01a323b0d6791
+--- a/src/base/allocator/partition_allocator/partition_root.cc
++++ b/src/base/allocator/partition_allocator/partition_root.cc
+@@ -29,6 +29,8 @@
+ #include "base/allocator/partition_allocator/tagging.h"
+ #include "build/build_config.h"
+ 
++uintptr_t g_root_cookie;
++
+ #if PA_CONFIG(ENABLE_MAC11_MALLOC_SIZE_HACK) && BUILDFLAG(IS_APPLE)
+ #include "base/allocator/partition_allocator/partition_alloc_base/mac/mac_util.h"
+ #endif  // PA_CONFIG(ENABLE_MAC11_MALLOC_SIZE_HACK) && BUILDFLAG(IS_APPLE)
+@@ -424,11 +426,7 @@ static size_t PartitionPurgeSlotSpan(
+       last_slot = slot_number;
+     }
+ #endif
+-#if defined(OHOS_ENABLE_FREELIST_HARDENED)
+-    entry = entry->GetNext(slot_size, slot_span->bucket->random_cookie);
+-#else
+     entry = entry->GetNext(slot_size);
+-#endif
+   }
+ 
+   // If the slot(s) at the end of the slot span are not in used, we can truncate
+@@ -484,20 +482,12 @@ static size_t PartitionPurgeSlotSpan(
+         }
+ 
+         auto* entry = PartitionFreelistEntry::EmplaceAndInitNull(
+-#if defined(OHOS_ENABLE_FREELIST_HARDENED)
+-            slot_span_start + (slot_size * slot_index), slot_span->bucket->random_cookie);
+-#else
+             slot_span_start + (slot_size * slot_index));
+-#endif
+         if (!head) {
+           head = entry;
+           back = entry;
+         } else {
+-#if defined(OHOS_ENABLE_FREELIST_HARDENED)
+-          back->SetNext(entry, slot_span->bucket->random_cookie);
+-#else
+           back->SetNext(entry);
+-#endif
+           back = entry;
+         }
+         num_new_entries++;
+@@ -517,7 +507,6 @@ static size_t PartitionPurgeSlotSpan(
+ 
+       // Discard the memory.
+       ScopedSyscallTimer timer{root};
+-
+       DiscardSystemPages(begin_addr, unprovisioned_bytes);
+     }
+   }
+@@ -589,10 +578,20 @@ static size_t PartitionPurgeSlotSpan(
+ template <bool thread_safe>
+ static void PartitionPurgeBucket(
+     internal::PartitionBucket<thread_safe>* bucket) {
++#if defined(OHOS_ENABLE_POINTER_HARDENED)
++  internal::SlotSpanMetadata<thread_safe>* real_head =
++    (internal::SlotSpanMetadata<thread_safe>*)EncodeBucket((void*)(bucket->active_slot_spans_head));
++  if (real_head !=
++#else
+   if (bucket->active_slot_spans_head !=
++#endif
+       internal::SlotSpanMetadata<thread_safe>::get_sentinel_slot_span()) {
+     for (internal::SlotSpanMetadata<thread_safe>* slot_span =
++#if defined(OHOS_ENABLE_POINTER_HARDENED)
++             real_head;
++#else
+              bucket->active_slot_spans_head;
++#endif
+          slot_span; slot_span = slot_span->next_slot_span) {
+       PA_DCHECK(
+           slot_span !=
+@@ -648,7 +647,14 @@ static void PartitionDumpBucketStats(
+   // internal::SlotSpanMetadata::get_sentinel_slot_span()), the bucket might
+   // still need to be reported if it has a list of empty, decommitted or full
+   // slot spans.
++
++#if defined(OHOS_ENABLE_POINTER_HARDENED)
++  internal::SlotSpanMetadata<thread_safe>* real_head =
++      (internal::SlotSpanMetadata<thread_safe>*)EncodeBucket((void*)(bucket->active_slot_spans_head));
++  if (real_head ==
++#else
+   if (bucket->active_slot_spans_head ==
++#endif
+           internal::SlotSpanMetadata<thread_safe>::get_sentinel_slot_span() &&
+       !bucket->empty_slot_spans_head && !bucket->decommitted_slot_spans_head &&
+       !bucket->num_full_slot_spans) {
+@@ -670,22 +676,39 @@ static void PartitionDumpBucketStats(
+       bucket->num_full_slot_spans * stats_out->allocated_slot_span_size;
+ 
+   for (internal::SlotSpanMetadata<thread_safe>* slot_span =
++#if defined(OHOS_ENABLE_POINTER_HARDENED)
++           (internal::SlotSpanMetadata<thread_safe>*)EncodeBucket((void*)(bucket->empty_slot_spans_head));
++#else
+            bucket->empty_slot_spans_head;
++#endif
+        slot_span; slot_span = slot_span->next_slot_span) {
+     PA_DCHECK(slot_span->is_empty() || slot_span->is_decommitted());
+     PartitionDumpSlotSpanStats(stats_out, slot_span);
+   }
+   for (internal::SlotSpanMetadata<thread_safe>* slot_span =
++#if defined(OHOS_ENABLE_POINTER_HARDENED)
++           (internal::SlotSpanMetadata<thread_safe>*)EncodeBucket((void*)(bucket->decommitted_slot_spans_head));
++#else
+            bucket->decommitted_slot_spans_head;
++#endif
+        slot_span; slot_span = slot_span->next_slot_span) {
+     PA_DCHECK(slot_span->is_decommitted());
+     PartitionDumpSlotSpanStats(stats_out, slot_span);
+   }
+ 
++#if defined(OHOS_ENABLE_POINTER_HARDENED)
++  real_head = (internal::SlotSpanMetadata<thread_safe>*)EncodeBucket((void*)(bucket->active_slot_spans_head));
++  if (real_head !=
++#else
+   if (bucket->active_slot_spans_head !=
++#endif
+       internal::SlotSpanMetadata<thread_safe>::get_sentinel_slot_span()) {
+     for (internal::SlotSpanMetadata<thread_safe>* slot_span =
++#if defined(OHOS_ENABLE_POINTER_HARDENED)
++             real_head;
++#else
+              bucket->active_slot_spans_head;
++#endif
+          slot_span; slot_span = slot_span->next_slot_span) {
+       PA_DCHECK(
+           slot_span !=
+@@ -979,8 +1002,11 @@ void PartitionRoot<thread_safe>::Init(PartitionOptions opts) {
+     // logic to find a new active slot span.
+     memset(&sentinel_bucket, 0, sizeof(sentinel_bucket));
+     sentinel_bucket.active_slot_spans_head =
++#if defined(OHOS_ENABLE_POINTER_HARDENED)
++        (SlotSpan*)EncodeBucket((void*)SlotSpan::get_sentinel_slot_span_non_const());
++#else
+         SlotSpan::get_sentinel_slot_span_non_const();
+-
++#endif
+     // This is a "magic" value so we can test if a root pointer is valid.
+     inverted_self = ~reinterpret_cast<uintptr_t>(this);
+ 
+@@ -1568,10 +1594,20 @@ void PartitionRoot<thread_safe>::ResetForTesting(bool allow_leaks) {
+   if (!allow_leaks) {
+     unsigned num_allocated_slots = 0;
+     for (Bucket& bucket : buckets) {
++#if defined(OHOS_ENABLE_POINTER_HARDENED)
++      internal::SlotSpanMetadata<thread_safe>* real_head =
++          (internal::SlotSpanMetadata<thread_safe>*)EncodeBucket((void*)(bucket->active_slot_spans_head));
++      if (real_head !=
++#else
+       if (bucket.active_slot_spans_head !=
++#endif
+           internal::SlotSpanMetadata<thread_safe>::get_sentinel_slot_span()) {
+         for (internal::SlotSpanMetadata<thread_safe>* slot_span =
++#if defined(OHOS_ENABLE_POINTER_HARDENED)
++                 real_head;
++#else
+                  bucket.active_slot_spans_head;
++#endif
+              slot_span; slot_span = slot_span->next_slot_span) {
+           num_allocated_slots += slot_span->num_allocated_slots;
+         }
+@@ -1600,7 +1636,11 @@ void PartitionRoot<thread_safe>::ResetForTesting(bool allow_leaks) {
+ 
+   for (Bucket& bucket : buckets) {
+     bucket.active_slot_spans_head =
++#if defined(OHOS_ENABLE_POINTER_HARDENED)
++        (SlotSpan*)EncodeBucket((void*)SlotSpan::get_sentinel_slot_span_non_const());
++#else
+         SlotSpan::get_sentinel_slot_span_non_const();
++#endif
+     bucket.empty_slot_spans_head = nullptr;
+     bucket.decommitted_slot_spans_head = nullptr;
+     bucket.num_full_slot_spans = 0;
+diff --git a/src/base/allocator/partition_allocator/partition_root.h b/src/base/allocator/partition_allocator/partition_root.h
+index c1a797adebd22..5b60d8b02828c
+--- a/src/base/allocator/partition_allocator/partition_root.h
++++ b/src/base/allocator/partition_allocator/partition_root.h
+@@ -1099,7 +1099,12 @@ PartitionRoot<thread_safe>::AllocFromBucket(Bucket* bucket,
+                                             bool* is_already_zeroed) {
+   PA_DCHECK((slot_span_alignment >= internal::PartitionPageSize()) &&
+             internal::base::bits::IsPowerOfTwo(slot_span_alignment));
++#if defined(OHOS_ENABLE_POINTER_HARDENED)
++  SlotSpan* slot_span = (SlotSpan*)EncodeBucket((void*)bucket->active_slot_spans_head);
++#else
+   SlotSpan* slot_span = bucket->active_slot_spans_head;
++#endif
++
+   // There always must be a slot span on the active list (could be a sentinel).
+   PA_DCHECK(slot_span);
+   // Check that it isn't marked full, which could only be true if the span was
+@@ -1575,7 +1580,13 @@ PA_ALWAYS_INLINE PartitionRoot<thread_safe>*
+ PartitionRoot<thread_safe>::FromSlotSpan(SlotSpan* slot_span) {
+   auto* extent_entry = reinterpret_cast<SuperPageExtentEntry*>(
+       reinterpret_cast<uintptr_t>(slot_span) & internal::SystemPageBaseMask());
++#if defined(OHOS_ENABLE_POINTER_HARDENED)
++  PartitionRoot* real_root = (PartitionRoot*)EncodeRoot((void*)(extent_entry->root));
++  return real_root;
++#else
+   return extent_entry->root;
++#endif
++
+ }
+ 
+ template <bool thread_safe>
+@@ -1584,7 +1595,12 @@ PartitionRoot<thread_safe>::FromFirstSuperPage(uintptr_t super_page) {
+   PA_DCHECK(internal::IsReservationStart(super_page));
+   auto* extent_entry =
+       internal::PartitionSuperPageToExtent<thread_safe>(super_page);
++#if defined(OHOS_ENABLE_POINTER_HARDENED)
++  PartitionRoot* root = (PartitionRoot*)EncodeRoot((void*)(extent_entry->root));
++  #else
+   PartitionRoot* root = extent_entry->root;
++#endif
++
+   PA_DCHECK(root->inverted_self == ~reinterpret_cast<uintptr_t>(root));
+   return root;
+ }
+diff --git a/src/base/allocator/partition_allocator/starscan/pcscan_internal.cc b/src/base/allocator/partition_allocator/starscan/pcscan_internal.cc
+index eb6583404e736..21e81785e4e54
+--- a/src/base/allocator/partition_allocator/starscan/pcscan_internal.cc
++++ b/src/base/allocator/partition_allocator/starscan/pcscan_internal.cc
+@@ -409,9 +409,9 @@ SuperPageSnapshot::SuperPageSnapshot(uintptr_t super_page) {
+   using SlotSpan = SlotSpanMetadata<ThreadSafe>;
+ 
+   auto* extent_entry = PartitionSuperPageToExtent<ThreadSafe>(super_page);
+-
++  
+   ::partition_alloc::internal::ScopedGuard lock(extent_entry->root->lock_);
+-
++  
+   const size_t nonempty_slot_spans =
+       extent_entry->number_of_nonempty_slot_spans;
+   if (!nonempty_slot_spans) {
+@@ -1019,11 +1019,7 @@ void UnmarkInCardTable(uintptr_t slot_start,
+ 
+   const auto bitmap_iterator = [&](uintptr_t slot_start) {
+     SlotSpan* current_slot_span = SlotSpan::FromSlotStart(slot_start);
+-#if defined(OHOS_ENABLE_FREELIST_HARDENED)
+-    auto* entry = PartitionFreelistEntry::EmplaceAndInitNull(slot_start, current_slot_span->bucket->random_cookie);
+-#else
+     auto* entry = PartitionFreelistEntry::EmplaceAndInitNull(slot_start);
+-#endif
+ 
+     if (current_slot_span != previous_slot_span) {
+       // We started scanning a new slot span. Flush the accumulated freelist to
+@@ -1039,11 +1035,7 @@ void UnmarkInCardTable(uintptr_t slot_start,
+     }
+ 
+     if (freelist_tail) {
+-#if defined(OHOS_ENABLE_FREELIST_HARDENED)
+-      freelist_tail->SetNext(entry, current_slot_span->bucket->random_cookie);
+-#else
+       freelist_tail->SetNext(entry);
+-#endif
+     }
+     freelist_tail = entry;
+     ++freelist_entries;
+diff --git a/src/base/allocator/partition_allocator/starscan/pcscan_unittest.cc b/src/base/allocator/partition_allocator/starscan/pcscan_unittest.cc
+index 57ed4b7c9d510..390d6134cd425
+--- a/src/base/allocator/partition_allocator/starscan/pcscan_unittest.cc
++++ b/src/base/allocator/partition_allocator/starscan/pcscan_unittest.cc
+@@ -174,11 +174,7 @@ bool IsInFreeList(uintptr_t slot_start) {
+   void* slot_start_tagged = SlotStartAddr2Ptr(slot_start);
+   auto* slot_span = SlotSpan::FromSlotStart(slot_start);
+   for (auto* entry = slot_span->get_freelist_head(); entry;
+-#if defined(OHOS_ENABLE_FREELIST_HARDENED)
+-       entry = entry->GetNext(slot_span->bucket->slot_size, slot_span->bucket->random_cookie)) {
+-#else
+        entry = entry->GetNext(slot_span->bucket->slot_size)) {
+-#endif
+     if (entry == slot_start_tagged)
+       return true;
+   }
+diff --git a/src/base/allocator/partition_allocator/thread_cache.cc b/src/base/allocator/partition_allocator/thread_cache.cc
+index cb6a20c2dd70c..d34578db472ea
+--- a/src/base/allocator/partition_allocator/thread_cache.cc
++++ b/src/base/allocator/partition_allocator/thread_cache.cc
+@@ -507,9 +507,6 @@ ThreadCache::ThreadCache(PartitionRoot<>* root)
+                                std::memory_order_relaxed);
+ 
+     tcache_bucket->slot_size = root_bucket.slot_size;
+-#if defined(OHOS_ENABLE_FREELIST_HARDENED)
+-    tcache_bucket->random_cookie = root_bucket.random_cookie;
+-#endif
+     // Invalid bucket.
+     if (!root_bucket.is_valid()) {
+       // Explicitly set this, as size computations iterate over all buckets.
+@@ -667,20 +664,12 @@ void ThreadCache::ClearBucketHelper(Bucket& bucket, size_t limit) {
+   //    thread, we don't want the thread to be blocked while holding the lock,
+   //    causing a priority inversion.
+   if constexpr (crash_on_corruption) {
+-#if defined(OHOS_ENABLE_FREELIST_HARDENED)
+-    bucket.freelist_head->CheckFreeListForThreadCache(bucket.slot_size, bucket.random_cookie);
+-#else
+     bucket.freelist_head->CheckFreeListForThreadCache(bucket.slot_size);
+-#endif
+   }
+ 
+   uint8_t count_before = bucket.count;
+   if (limit == 0) {
+-#if defined(OHOS_ENABLE_FREELIST_HARDENED)
+-    FreeAfter<crash_on_corruption>(bucket.freelist_head, bucket.slot_size, bucket.random_cookie);
+-#else
+     FreeAfter<crash_on_corruption>(bucket.freelist_head, bucket.slot_size);
+-#endif
+     bucket.freelist_head = nullptr;
+   } else {
+     // Free the *end* of the list, not the head, since the head contains the
+@@ -688,24 +677,13 @@ void ThreadCache::ClearBucketHelper(Bucket& bucket, size_t limit) {
+     auto* head = bucket.freelist_head;
+     size_t items = 1;  // Cannot free the freelist head.
+     while (items < limit) {
+-#if defined(OHOS_ENABLE_FREELIST_HARDENED)
+-      head = head->GetNextForThreadCache<crash_on_corruption>(bucket.slot_size, bucket.random_cookie);
+-#else
+       head = head->GetNextForThreadCache<crash_on_corruption>(bucket.slot_size);
+-#endif
+       items++;
+     }
+-#if defined(OHOS_ENABLE_FREELIST_HARDENED)
+-    FreeAfter<crash_on_corruption>(
+-        head->GetNextForThreadCache<crash_on_corruption>(bucket.slot_size, bucket.random_cookie),
+-        bucket.slot_size, bucket.random_cookie);
+-    head->SetNext(nullptr, 0);
+-#else
+     FreeAfter<crash_on_corruption>(
+         head->GetNextForThreadCache<crash_on_corruption>(bucket.slot_size),
+         bucket.slot_size);
+     head->SetNext(nullptr);
+-#endif
+   }
+   bucket.count = limit;
+   uint8_t count_after = bucket.count;
+@@ -717,24 +695,15 @@ void ThreadCache::ClearBucketHelper(Bucket& bucket, size_t limit) {
+ }
+ 
+ template <bool crash_on_corruption>
+-#if defined(OHOS_ENABLE_FREELIST_HARDENED)
+-void ThreadCache::FreeAfter(internal::PartitionFreelistEntry* head,
+-                            size_t slot_size, uintptr_t random_cookie) {
+-#else
+ void ThreadCache::FreeAfter(internal::PartitionFreelistEntry* head,
+                             size_t slot_size) {
+-#endif
+   // Acquire the lock once. Deallocation from the same bucket are likely to be
+   // hitting the same cache lines in the central allocator, and lock
+   // acquisitions can be expensive.
+   internal::ScopedGuard guard(root_->lock_);
+   while (head) {
+     uintptr_t slot_start = internal::SlotStartPtr2Addr(head);
+-#if defined(OHOS_ENABLE_FREELIST_HARDENED)
+-    head = head->GetNextForThreadCache<crash_on_corruption>(slot_size, random_cookie);
+-#else
+     head = head->GetNextForThreadCache<crash_on_corruption>(slot_size);
+-#endif
+     root_->RawFreeLocked(slot_start);
+   }
+ }
+diff --git a/src/base/allocator/partition_allocator/thread_cache.h b/src/base/allocator/partition_allocator/thread_cache.h
+index 7fa9bf79efe4d..2ef0264d2ea9a
+--- a/src/base/allocator/partition_allocator/thread_cache.h
++++ b/src/base/allocator/partition_allocator/thread_cache.h
+@@ -363,16 +363,11 @@ class PA_COMPONENT_EXPORT(PARTITION_ALLOC) ThreadCache {
+     uint8_t count = 0;
+     std::atomic<uint8_t> limit{};  // Can be changed from another thread.
+     uint16_t slot_size = 0;
+-#if defined(OHOS_ENABLE_FREELIST_HARDENED)
+-    uintptr_t random_cookie;
+-#endif
++
+     Bucket();
+   };
+-#if defined(OHOS_ENABLE_FREELIST_HARDENED)
+-  static_assert(sizeof(Bucket) <= 3 * sizeof(void*), "Keep Bucket small.");
+-#else
+   static_assert(sizeof(Bucket) <= 2 * sizeof(void*), "Keep Bucket small.");
+-#endif
++
+   explicit ThreadCache(PartitionRoot<>* root);
+   static void Delete(void* thread_cache_ptr);
+ 
+@@ -390,11 +385,7 @@ class PA_COMPONENT_EXPORT(PARTITION_ALLOC) ThreadCache {
+   void ResetForTesting();
+   // Releases the entire freelist starting at |head| to the root.
+   template <bool crash_on_corruption>
+-#if defined(OHOS_ENABLE_FREELIST_HARDENED)
+-  void FreeAfter(internal::PartitionFreelistEntry* head, size_t slot_size, uintptr_t random_cookie);
+-#else
+   void FreeAfter(internal::PartitionFreelistEntry* head, size_t slot_size);
+-#endif
+   static void SetGlobalLimits(PartitionRoot<>* root, float multiplier);
+ 
+   static constexpr uint16_t kBucketCount =
+@@ -563,13 +554,8 @@ PA_ALWAYS_INLINE uintptr_t ThreadCache::GetFromCache(size_t bucket_index,
+   // corruption, we know the bucket size that lead to the crash, helping to
+   // narrow down the search for culprit. |bucket| was touched just now, so this
+   // does not introduce another cache miss.
+-#if defined(OHOS_ENABLE_FREELIST_HARDENED)
+-  internal::PartitionFreelistEntry* next =
+-      entry->GetNextForThreadCache<true>(bucket.slot_size, bucket.random_cookie);
+-#else
+   internal::PartitionFreelistEntry* next =
+       entry->GetNextForThreadCache<true>(bucket.slot_size);
+-#endif
+   PA_DCHECK(entry != next);
+   bucket.count--;
+   PA_DCHECK(bucket.count != 0 || !next);
+@@ -640,11 +626,7 @@ PA_ALWAYS_INLINE void ThreadCache::PutInBucket(Bucket& bucket,
+         // BUILDFLAG(HAS_64_BIT_POINTERS)
+ 
+   auto* entry = internal::PartitionFreelistEntry::EmplaceAndInitForThreadCache(
+-#if defined(OHOS_ENABLE_FREELIST_HARDENED)
+-      slot_start, bucket.freelist_head, bucket.random_cookie);
+-#else
+       slot_start, bucket.freelist_head);
+-#endif
+   bucket.freelist_head = entry;
+   bucket.count++;
+ }
+diff --git a/src/base/allocator/partition_allocator/thread_cache_unittest.cc b/src/base/allocator/partition_allocator/thread_cache_unittest.cc
+index 9f711ab199213..071ef38c97935
+--- a/src/base/allocator/partition_allocator/thread_cache_unittest.cc
++++ b/src/base/allocator/partition_allocator/thread_cache_unittest.cc
+@@ -1111,12 +1111,7 @@ TEST_P(PartitionAllocThreadCacheTest, ClearFromTail) {
+     auto* head = tcache->buckets_[index].freelist_head;
+     while (head) {
+       head =
+-#if defined(OHOS_ENABLE_FREELIST_HARDENED)
+-          head->GetNextForThreadCache<true>(tcache->buckets_[index].slot_size,
+-              tcache->buckets_[index].random_cookie);
+-#else
+           head->GetNextForThreadCache<true>(tcache->buckets_[index].slot_size);
+-#endif
+       count++;
+     }
+     return count;
+@@ -1225,10 +1220,10 @@ TEST_P(PartitionAllocThreadCacheTest, TryPurgeMultipleCorrupted) {
+   auto* medium_bucket = root()->buckets + SizeToIndex(kMediumSize);
+ 
+   auto* curr = medium_bucket->active_slot_spans_head->get_freelist_head();
+-  curr = curr->GetNextForThreadCache<true>(kMediumSize, medium_bucket->random_cookie);
++  curr = curr->GetNextForThreadCache<true>(kMediumSize);
+   curr->CorruptNextForTesting(0x12345678);
+   tcache->TryPurge();
+-  curr->SetNext(nullptr, 0);
++  curr->SetNext(nullptr);
+   root()->Free(ptr);
+ }
+ 
+diff --git a/src/base/base_paths_ohos.cc b/src/base/base_paths_ohos.cc
+index 6d0a42ac026f1..6b765f79bfa06
+--- a/src/base/base_paths_ohos.cc
++++ b/src/base/base_paths_ohos.cc
+@@ -21,6 +21,10 @@
+ namespace base {
+ 
+ bool ParseAssetsOHOS(FilePath* result) {
++  if (!base::CommandLine::ForCurrentProcess()) {
++    LOG(ERROR) << "CommandLine not init";
++    return false;
++  }
+   auto bundle_path = base::CommandLine::ForCurrentProcess()->
+     GetSwitchValueASCII(switches::kBundleInstallationDir);
+   if (bundle_path.empty()) {
+@@ -65,8 +69,12 @@ bool PathProviderOHOS(int key, FilePath* result) {
+       NOTIMPLEMENTED();
+       return false;
+     case base::DIR_CACHE:
++    #ifdef OHOS_COOKIE
++      *result = FilePath("/data/storage/el2/base/cache/web");
++    #else
+       // set to /data/local directory for W|X permission.
+       *result = FilePath("/data/local");
++    #endif // #ifdef OHOS_COOKIE
+       return true;
+     case base::DIR_ASSETS:
+       // resource file packed to system images
+diff --git a/src/base/feature_list.cc b/src/base/feature_list.cc
+index 9698a298092f2..7fed8f72ae9ea
+--- a/src/base/feature_list.cc
++++ b/src/base/feature_list.cc
+@@ -80,7 +80,7 @@ class EarlyFeatureAccessTracker {
+  private:
+   void Fail(const Feature* feature) {
+     // TODO(crbug.com/1358639): Enable this check on all platforms.
+-#if !BUILDFLAG(IS_IOS) && !BUILDFLAG(IS_ANDROID) && !BUILDFLAG(IS_CHROMEOS)
++#if !BUILDFLAG(IS_IOS) && !BUILDFLAG(IS_ANDROID) && !BUILDFLAG(IS_CHROMEOS) && !defined(OHOS_COOKIE)
+ #if !BUILDFLAG(IS_NACL)
+     // Create a crash key with the name of the feature accessed too early, to
+     // facilitate crash triage.
+diff --git a/src/base/files/file_path.cc b/src/base/files/file_path.cc
+index 4b574fe302467..58df93f41d45b
+--- a/src/base/files/file_path.cc
++++ b/src/base/files/file_path.cc
+@@ -575,6 +575,11 @@ FilePath FilePath::AppendASCII(StringPiece component) const {
+ }
+ 
+ bool FilePath::IsAbsolute() const {
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++  if (IsDataShareUri()) {
++    return true;
++  }
++#endif
+   return IsPathAbsolute(path_);
+ }
+ 
+@@ -1416,5 +1421,20 @@ bool FilePath::IsDataShareUri() const {
+          StartsWith(path_, "file://docs/",
+                     base::CompareCase::INSENSITIVE_ASCII);
+ }
++
++#endif
++
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++// static
++bool FilePath::IsDataShareUrl(const StringType& url) {
++  return StartsWith(url, "datashare://",
++                    base::CompareCase::INSENSITIVE_ASCII) ||
++         StartsWith(url, "dataability://",
++                    base::CompareCase::INSENSITIVE_ASCII) ||
++         StartsWith(url, "file://media/",
++                    base::CompareCase::INSENSITIVE_ASCII) ||
++         StartsWith(url, "file://docs/",
++                    base::CompareCase::INSENSITIVE_ASCII);
++}
+ #endif
+ }  // namespace base
+diff --git a/src/base/files/file_path.h b/src/base/files/file_path.h
+index 83f3309df2f99..3c2d4205ba199
+--- a/src/base/files/file_path.h
++++ b/src/base/files/file_path.h
+@@ -498,6 +498,11 @@ class BASE_EXPORT FilePath {
+   // otherwise
+   bool IsDataShareUri() const;
+ #endif
++
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++  static bool IsDataShareUrl(const StringType& url);
++#endif
++
+   // NOTE: When adding a new public method, consider adding it to
+   // file_path_fuzzer.cc as well.
+ 
+diff --git a/src/base/files/file_util.cc b/src/base/files/file_util.cc
+index 48288660236d0..0018698bfdd00
+--- a/src/base/files/file_util.cc
++++ b/src/base/files/file_util.cc
+@@ -37,6 +37,9 @@
+ #include <windows.h>
+ #endif
+ 
++#if BUILDFLAG(IS_OHOS) && defined(OHOS_ARKWEB_EXTENSIONS)
++#include "base/datashare_uri_utils.h"
++#endif
+ namespace base {
+ 
+ namespace {
+@@ -354,9 +357,25 @@ bool ReadFileToStringWithMaxSize(const FilePath& path,
+                                  size_t max_size) {
+   if (contents)
+     contents->clear();
++
+   if (path.ReferencesParent())
+     return false;
++
++#if BUILDFLAG(IS_OHOS) && defined(OHOS_ARKWEB_EXTENSIONS)
++  FILE* file_ptr = nullptr;
++
++  if (path.IsDataShareUri()) {
++    File infile = OpenDatashareUriForRead(path);
++    file_ptr = FileToFILE(std::move(infile), "rb");
++  } else {
++    file_ptr = OpenFile(path, "rb");
++  }
++
++  ScopedFILE file_stream(file_ptr);
++
++#else
+   ScopedFILE file_stream(OpenFile(path, "rb"));
++#endif
+   if (!file_stream)
+     return false;
+   return ReadStreamToStringWithMaxSize(file_stream.get(), max_size, contents);
+diff --git a/src/base/files/file_util_posix.cc b/src/base/files/file_util_posix.cc
+index a53078f5ae67b..9c267740b635b
+--- a/src/base/files/file_util_posix.cc
++++ b/src/base/files/file_util_posix.cc
+@@ -338,6 +338,13 @@ std::string AppendModeCharacter(StringPiece mode, char mode_char) {
+ 
+ FilePath MakeAbsoluteFilePath(const FilePath& input) {
+   ScopedBlockingCall scoped_blocking_call(FROM_HERE, BlockingType::MAY_BLOCK);
++
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++  if (input.IsDataShareUri()) {
++    return input;
++  }
++#endif
++
+   char full_path[PATH_MAX];
+   if (realpath(input.value().c_str(), full_path) == nullptr)
+     return FilePath();
+diff --git a/src/base/process/process_handle.h b/src/base/process/process_handle.h
+index e74db34a0dd8b..741a8e7fa901d
+--- a/src/base/process/process_handle.h
++++ b/src/base/process/process_handle.h
+@@ -101,6 +101,11 @@ std::ostream& operator<<(std::ostream& os, const UniqueProcId& obj);
+ // processes (use GetUniqueIdForProcess if uniqueness is required).
+ BASE_EXPORT ProcessId GetCurrentProcId();
+ 
++#if BUILDFLAG(IS_OHOS)
++// Returns the global id of the current process.
++BASE_EXPORT ProcessId GetCurrentRealPid();
++#endif
++
+ // Returns a unique ID for the current process. The ID will be unique across all
+ // currently running processes within the chrome session, but IDs of terminated
+ // processes may be reused.
+diff --git a/src/base/process/process_handle_posix.cc b/src/base/process/process_handle_posix.cc
+index e5f816a9ba642..3efcb8d4c84bd
+--- a/src/base/process/process_handle_posix.cc
++++ b/src/base/process/process_handle_posix.cc
+@@ -12,6 +12,12 @@ ProcessId GetCurrentProcId() {
+   return getpid();
+ }
+ 
++#if BUILDFLAG(IS_OHOS)
++ProcessId GetCurrentRealPid() {
++  return getprocpid();
++}
++#endif
++
+ ProcessHandle GetCurrentProcessHandle() {
+   return GetCurrentProcId();
+ }
+diff --git a/src/base/report_loss_frame.cc b/src/base/report_loss_frame.cc
+index 006545ddb315d..b8366a5766f1f
+--- a/src/base/report_loss_frame.cc
++++ b/src/base/report_loss_frame.cc
+@@ -2,6 +2,7 @@
+ #include "base/report_loss_frame.h"
+ #include <chrono>
+ #include "ohos_nweb/src/sysevent/event_reporter.h"
++#include "base/task/thread_pool.h"
+ 
+ constexpr int JANK_STATS_VER = 1;
+ 
+@@ -41,7 +42,11 @@ void ReportLossFrame::Report() {
+   }
+   int64_t now = GetCurrentTimestampMS();
+   int duration = now - start_time_for_scroll_;
+-  ReportJankStats(start_time_for_scroll_, duration, jank_stats_, JANK_STATS_VER);
++  base::ThreadPool::PostTask(
++    FROM_HERE,
++    {base::TaskPriority::LOWEST},
++    base::BindOnce(&ReportJankStats, start_time_for_scroll_, duration, jank_stats_, JANK_STATS_VER)
++  );
+   Reset();
+ }
+ 
+diff --git a/src/base/threading/platform_thread.h b/src/base/threading/platform_thread.h
+index 04c077849a137..1d98f20845f57
+--- a/src/base/threading/platform_thread.h
++++ b/src/base/threading/platform_thread.h
+@@ -164,6 +164,11 @@ class BASE_EXPORT PlatformThread {
+   // Gets the current thread id, which may be useful for logging purposes.
+   static PlatformThreadId CurrentId();
+ 
++#if BUILDFLAG(IS_OHOS)
++  // Gets the current thread global id, which may be useful for logging purposes.
++  static PlatformThreadId CurrentRealId();
++#endif
++
+   // Gets the current thread reference, which can be used to check if
+   // we're on the right thread quickly.
+   static PlatformThreadRef CurrentRef();
+diff --git a/src/base/threading/platform_thread_posix.cc b/src/base/threading/platform_thread_posix.cc
+index fc771861e53e8..1cd74fee4dc8e
+--- a/src/base/threading/platform_thread_posix.cc
++++ b/src/base/threading/platform_thread_posix.cc
+@@ -268,6 +268,14 @@ PlatformThreadId PlatformThread::CurrentId() {
+ #endif
+ }
+ 
++#if BUILDFLAG(IS_OHOS)
++PlatformThreadId PlatformThread::CurrentRealId() {
++  // - getproctid() is fast, since its return value is cached in pthread (in the
++  //   thread control block of pthread). See gettid.c in bionic.
++  return getproctid();
++}
++#endif
++
+ // static
+ PlatformThreadRef PlatformThread::CurrentRef() {
+   return PlatformThreadRef(pthread_self());
+diff --git a/src/base/threading/simple_thread.cc b/src/base/threading/simple_thread.cc
+index 579431f1bdede..7e749f99fc4d4
+--- a/src/base/threading/simple_thread.cc
++++ b/src/base/threading/simple_thread.cc
+@@ -63,12 +63,22 @@ PlatformThreadId SimpleThread::tid() {
+   return tid_;
+ }
+ 
++#if BUILDFLAG(IS_OHOS)
++PlatformThreadId SimpleThread::RealTid() {
++  DCHECK(HasBeenStarted());
++  return realTid_;
++}
++#endif
++
+ bool SimpleThread::HasBeenStarted() {
+   return event_.IsSignaled();
+ }
+ 
+ void SimpleThread::ThreadMain() {
+   tid_ = PlatformThread::CurrentId();
++#if BUILDFLAG(IS_OHOS)
++  realTid_ = PlatformThread::CurrentRealId();
++#endif
+   PlatformThread::SetName(name_);
+ 
+   // We've initialized our new thread, signal that we're done to Start().
+diff --git a/src/base/threading/simple_thread.h b/src/base/threading/simple_thread.h
+index ac7bc01cf80df..8d4e2a137715a
+--- a/src/base/threading/simple_thread.h
++++ b/src/base/threading/simple_thread.h
+@@ -117,6 +117,14 @@ class BASE_EXPORT SimpleThread : public PlatformThread::Delegate {
+   // be called before HasBeenStarted() returns True.
+   PlatformThreadId tid();
+ 
++#if BUILDFLAG(IS_OHOS)
++  // Returns the thread global id, only valid after the thread has started. If the
++  // thread was started using Start(), then this will be valid after the call to
++  // Start(). If StartAsync() was used to start the thread, then this must not
++  // be called before HasBeenStarted() returns True.
++  PlatformThreadId RealTid();
++#endif
++
+   // Returns True if the thread has been started and initialized (i.e. if
+   // ThreadMain() has run). If the thread was started with StartAsync(), but it
+   // hasn't been initialized yet (i.e. ThreadMain() has not run), then this will
+@@ -150,6 +158,9 @@ class BASE_EXPORT SimpleThread : public PlatformThread::Delegate {
+   PlatformThreadHandle thread_;  // PlatformThread handle, reset after Join.
+   WaitableEvent event_;          // Signaled if Start() was ever called.
+   PlatformThreadId tid_ = kInvalidThreadId;  // The backing thread's id.
++#if BUILDFLAG(IS_OHOS)
++  PlatformThreadId realTid_ = kInvalidThreadId;  // The backing thread's global id.
++#endif
+   bool joined_ = false;                      // True if Join has been called.
+   // Set to true when the platform-thread creation has started.
+   bool start_called_ = false;
+diff --git a/src/base/threading/thread.cc b/src/base/threading/thread.cc
+index 2af7eae2c8d2a..09e32f29f5d22
+--- a/src/base/threading/thread.cc
++++ b/src/base/threading/thread.cc
+@@ -186,7 +186,9 @@ bool Thread::StartWithOptions(Options options) {
+   // Reset |id_| here to support restarting the thread.
+   id_event_.Reset();
+   id_ = kInvalidThreadId;
+-
++#if BUILDFLAG(IS_OHOS)
++  real_id_ = kInvalidThreadId;
++#endif
+   SetThreadWasQuitProperly(false);
+ 
+   timer_slack_ = options.timer_slack;
+@@ -317,6 +319,17 @@ PlatformThreadId Thread::GetThreadId() const {
+   return id_;
+ }
+ 
++#if BUILDFLAG(IS_OHOS)
++PlatformThreadId Thread::GetThreadRealId() const {
++  if (!id_event_.IsSignaled()) {
++    // If the thread is created but not started yet, wait for |id_| being ready.
++    base::ScopedAllowBaseSyncPrimitivesOutsideBlockingScope allow_wait;
++    id_event_.Wait();
++  }
++  return real_id_;
++}
++#endif
++
+ bool Thread::IsRunning() const {
+   // TODO(gab): Fix improper usage of this API (http://crbug.com/629139) and
+   // enable this check.
+@@ -367,6 +380,9 @@ void Thread::ThreadMain() {
+   // write in StartWithOptions().
+   DCHECK_EQ(kInvalidThreadId, id_);
+   id_ = PlatformThread::CurrentId();
++#if BUILDFLAG(IS_OHOS)
++  real_id_ = PlatformThread::CurrentRealId();
++#endif
+   DCHECK_NE(kInvalidThreadId, id_);
+   id_event_.Signal();
