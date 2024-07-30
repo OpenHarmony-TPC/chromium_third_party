@@ -726,8 +726,10 @@ WebInputEventResult PointerEventManager::HandlePointerEvent(
     return WebInputEventResult::kHandledSuppressed;
   }
 
+#ifndef OHOS_WEBRTC
   if (HandleScrollbarTouchDrag(event, pointer_event_target.scrollbar))
     return WebInputEventResult::kHandledSuppressed;
+#endif
 
   if (HandleResizerDrag(pointer_event, pointer_event_target))
     return WebInputEventResult::kHandledSuppressed;
