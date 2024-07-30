@@ -10262,3 +10262,1873 @@ index c2342f515c91c..439206145aef1
  std::unique_ptr<blink::URLLoaderThrottleProvider>
  AlloyContentRendererClient::CreateURLLoaderThrottleProvider(
      blink::URLLoaderThrottleProviderType provider_type) {
+diff --git a/src/cef/libcef/renderer/alloy/alloy_content_renderer_client.h b/src/cef/libcef/renderer/alloy/alloy_content_renderer_client.h
+index 90996f5381747..f0aac2094bd10
+--- a/src/cef/libcef/renderer/alloy/alloy_content_renderer_client.h
++++ b/src/cef/libcef/renderer/alloy/alloy_content_renderer_client.h
+@@ -121,6 +121,47 @@ class AlloyContentRendererClient
+                        const net::SiteForCookies& site_for_cookies,
+                        const url::Origin* initiator_origin,
+                        GURL* new_url) override;
++
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++  bool AllowScriptExtensionForServiceWorker(
++      const url::Origin& script_origin) override;
++
++  void DidInitializeServiceWorkerContextOnWorkerThread(
++      blink::WebServiceWorkerContextProxy* context_proxy,
++      const GURL& service_worker_scope,
++      const GURL& script_url) override;
++
++  void WillEvaluateServiceWorkerOnWorkerThread(
++      blink::WebServiceWorkerContextProxy* context_proxy,
++      v8::Local<v8::Context> v8_context,
++      int64_t service_worker_version_id,
++      const GURL& service_worker_scope,
++      const GURL& script_url) override;
++
++  void DidStartServiceWorkerContextOnWorkerThread(
++      int64_t service_worker_version_id,
++      const GURL& service_worker_scope,
++      const GURL& script_url) override;
++
++  void WillDestroyServiceWorkerContextOnWorkerThread(
++      v8::Local<v8::Context> context,
++      int64_t service_worker_version_id,
++      const GURL& service_worker_scope,
++      const GURL& script_url) override;
++
++  bool ShouldEnforceWebRTCRoutingPreferences() override;
++
++  blink::WebFrame* FindFrame(blink::WebLocalFrame* relative_to_frame,
++                             const std::string& name) override;
++
++  bool IsSafeRedirectTarget(const GURL& from_url, const GURL& to_url) override;
++  void DidSetUserAgent(const std::string& user_agent) override;
++
++  bool AllowPopup() override;
++  blink::ProtocolHandlerSecurityLevel GetProtocolHandlerSecurityLevel()
++      override;
++#endif  // defined(OHOS_ARKWEB_EXTENSIONS)
++
+   uint64_t VisitedLinkHash(const char* canonical_url, size_t length) override;
+   bool IsLinkVisited(uint64_t link_hash) override;
+   bool IsOriginIsolatedPepperPlugin(const base::FilePath& plugin_path) override;
+diff --git a/src/cef/libcef/renderer/browser_impl.h b/src/cef/libcef/renderer/browser_impl.h
+index 92b600f7154f1..ba0eac9855cc8
+--- a/src/cef/libcef/renderer/browser_impl.h
++++ b/src/cef/libcef/renderer/browser_impl.h
+@@ -128,6 +128,11 @@ class CefBrowserImpl : public CefBrowser, public blink::WebViewObserver {
+   // #if defined(OHOS_NWEB_EX)
+   // NOTE: Keep the previous line commented, add NWebEx APIs below.
+   bool ShouldShowLoadingUI() override;
++  // OHOS_EX_TOPCONTROLS
++  void UpdateBrowserControlsState(int constraints,
++                                  int current,
++                                  bool animate) override {}
++  void UpdateBrowserControlsHeight(int height, bool animate) override {}
+   // #endif  // defined(OHOS_NWEB_EX)
+ 
+  private:
+diff --git a/src/cef/libcef/renderer/extensions/extensions_renderer_client.cc b/src/cef/libcef/renderer/extensions/extensions_renderer_client.cc
+index 41e4fe3a47d80..454db8eb43a22
+--- a/src/cef/libcef/renderer/extensions/extensions_renderer_client.cc
++++ b/src/cef/libcef/renderer/extensions/extensions_renderer_client.cc
+@@ -26,6 +26,11 @@
+ #include "third_party/blink/public/web/web_local_frame.h"
+ #include "third_party/blink/public/web/web_plugin_params.h"
+ 
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++#include "extensions/common/manifest_handlers/background_info.h"
++#include "third_party/blink/public/common/security/protocol_handler_security_level.h"
++#endif
++
+ namespace extensions {
+ 
+ namespace {
+@@ -74,9 +79,33 @@ void CefExtensionsRendererClient::OnExtensionUnloaded(
+ bool CefExtensionsRendererClient::ExtensionAPIEnabledForServiceWorkerScript(
+     const GURL& scope,
+     const GURL& script_url) const {
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++  if (!script_url.SchemeIs(extensions::kExtensionScheme)) {
++    return false;
++  }
++
++  const Extension* extension =
++      extensions::RendererExtensionRegistry::Get()->GetExtensionOrAppByURL(
++          script_url);
++
++  if (!extension ||
++      !extensions::BackgroundInfo::IsServiceWorkerBased(extension)) {
++    return false;
++  }
++
++  if (scope != extension->url()) {
++    return false;
++  }
++
++  const std::string& sw_script =
++      extensions::BackgroundInfo::GetBackgroundServiceWorkerScript(extension);
++
++  return extension->GetResourceURL(sw_script) == script_url;
++#else
+   // TODO(extensions): Implement to support background sevice worker scripts
+   // in extensions
+   return false;
++#endif
+ }
+ 
+ void CefExtensionsRendererClient::RenderThreadStarted() {
+@@ -101,6 +130,62 @@ void CefExtensionsRendererClient::RenderFrameCreated(
+   extension_dispatcher_->OnRenderFrameCreated(render_frame);
+ }
+ 
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++bool CefExtensionsRendererClient::AllowPopup() {
++  extensions::ScriptContext* current_context =
++      extension_dispatcher_->script_context_set().GetCurrent();
++  if (!current_context || !current_context->extension()) {
++    return false;
++  }
++
++  // See http://crbug.com/117446 for the subtlety of this check.
++  switch (current_context->context_type()) {
++    case extensions::Feature::UNSPECIFIED_CONTEXT:
++    case extensions::Feature::WEB_PAGE_CONTEXT:
++    case extensions::Feature::UNBLESSED_EXTENSION_CONTEXT:
++    case extensions::Feature::WEBUI_CONTEXT:
++    case extensions::Feature::WEBUI_UNTRUSTED_CONTEXT:
++    case extensions::Feature::OFFSCREEN_EXTENSION_CONTEXT:
++    case extensions::Feature::USER_SCRIPT_CONTEXT:
++    case extensions::Feature::LOCK_SCREEN_EXTENSION_CONTEXT:
++      return false;
++    case extensions::Feature::BLESSED_EXTENSION_CONTEXT:
++      return !current_context->IsForServiceWorker();
++    case extensions::Feature::CONTENT_SCRIPT_CONTEXT:
++      return true;
++    case extensions::Feature::BLESSED_WEB_PAGE_CONTEXT:
++      return current_context->web_frame()->IsOutermostMainFrame();
++  }
++}
++
++blink::ProtocolHandlerSecurityLevel
++CefExtensionsRendererClient::GetProtocolHandlerSecurityLevel() {
++  // WARNING: This must match the logic of
++  // Browser::GetProtocolHandlerSecurityLevel().
++  extensions::ScriptContext* current_context =
++      extension_dispatcher_->script_context_set().GetCurrent();
++  if (!current_context || !current_context->extension()) {
++    return blink::ProtocolHandlerSecurityLevel::kStrict;
++  }
++
++  switch (current_context->context_type()) {
++    case extensions::Feature::BLESSED_WEB_PAGE_CONTEXT:
++    case extensions::Feature::CONTENT_SCRIPT_CONTEXT:
++    case extensions::Feature::LOCK_SCREEN_EXTENSION_CONTEXT:
++    case extensions::Feature::OFFSCREEN_EXTENSION_CONTEXT:
++    case extensions::Feature::UNBLESSED_EXTENSION_CONTEXT:
++    case extensions::Feature::UNSPECIFIED_CONTEXT:
++    case extensions::Feature::USER_SCRIPT_CONTEXT:
++    case extensions::Feature::WEBUI_CONTEXT:
++    case extensions::Feature::WEBUI_UNTRUSTED_CONTEXT:
++    case extensions::Feature::WEB_PAGE_CONTEXT:
++      return blink::ProtocolHandlerSecurityLevel::kStrict;
++    case extensions::Feature::BLESSED_EXTENSION_CONTEXT:
++      return blink::ProtocolHandlerSecurityLevel::kExtensionFeatures;
++  }
++}
++#endif  // defined(OHOS_ARKWEB_EXTENSIONS)
++
+ bool CefExtensionsRendererClient::OverrideCreatePlugin(
+     content::RenderFrame* render_frame,
+     const blink::WebPluginParams& params) {
+@@ -147,4 +232,15 @@ void CefExtensionsRendererClient::RunScriptsAtDocumentIdle(
+   extension_dispatcher_->RunScriptsAtDocumentIdle(render_frame);
+ }
+ 
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++// static
++blink::WebFrame* CefExtensionsRendererClient::FindFrame(
++    blink::WebLocalFrame* relative_to_frame,
++    const std::string& name) {
++  content::RenderFrame* result = extensions::ExtensionFrameHelper::FindFrame(
++      content::RenderFrame::FromWebFrame(relative_to_frame), name);
++  return result ? result->GetWebFrame() : nullptr;
++}
++#endif
++
+ }  // namespace extensions
+diff --git a/src/cef/libcef/renderer/extensions/extensions_renderer_client.h b/src/cef/libcef/renderer/extensions/extensions_renderer_client.h
+index 9537652ba7e1a..eff2617014815
+--- a/src/cef/libcef/renderer/extensions/extensions_renderer_client.h
++++ b/src/cef/libcef/renderer/extensions/extensions_renderer_client.h
+@@ -16,6 +16,10 @@ class AlloyContentRendererClient;
+ class GURL;
+ 
+ namespace blink {
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++enum class ProtocolHandlerSecurityLevel;
++#endif
++
+ class WebFrame;
+ class WebLocalFrame;
+ struct WebPluginParams;
+@@ -80,6 +84,14 @@ class CefExtensionsRendererClient : public ExtensionsRendererClient {
+   void RunScriptsAtDocumentEnd(content::RenderFrame* render_frame);
+   void RunScriptsAtDocumentIdle(content::RenderFrame* render_frame);
+ 
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++  bool AllowPopup();
++  blink::ProtocolHandlerSecurityLevel GetProtocolHandlerSecurityLevel();
++
++  static blink::WebFrame* FindFrame(blink::WebLocalFrame* relative_to_frame,
++                                    const std::string& name);
++#endif
++
+  private:
+   AlloyContentRendererClient* const alloy_content_renderer_client_;
+ 
+diff --git a/src/cef/libcef/renderer/frame_impl.cc b/src/cef/libcef/renderer/frame_impl.cc
+index dd2e827c47522..e814a8fa89086
+--- a/src/cef/libcef/renderer/frame_impl.cc
++++ b/src/cef/libcef/renderer/frame_impl.cc
+@@ -941,6 +941,11 @@ void CefFrameImpl::LoadHeaderUrl(const CefString& url,
+   LoadRequest(std::move(params));
+ }
+ 
++void CefFrameImpl::PostURL(const CefString& url,
++                           const std::vector<char>& post_data) {
++  // todo(ohos) : impl this function then remove todo
++}
++
+ void CefFrameImpl::OnFocusedNodeChanged(const blink::WebElement& element) {
+ #if defined(OHOS_INPUT_EVENTS)
+   if (element.IsNull() || is_update_) {
+@@ -1298,6 +1303,12 @@ void CefFrameImpl::GetHitData(
+     cef::mojom::RenderFrame::GetHitDataCallback callback) {
+   std::move(callback).Run(cef_hit_data_.type, cef_hit_data_.extra_data);
+ }
++
++void CefFrameImpl::SetOverscrollMode(int mode) {
++  auto render_frame = content::RenderFrame::FromWebFrame(frame_);
++  DCHECK(render_frame->IsMainFrame());
++  render_frame->SetOverscrollMode(mode);
++}
+ #endif  // defined(OHOS_INPUT_EVENTS)
+ 
+ #endif  // BUILDFLAG(IS_OHOS)
+diff --git a/src/cef/libcef/renderer/frame_impl.h b/src/cef/libcef/renderer/frame_impl.h
+index 7734a079b968c..edb7fad1f47bc
+--- a/src/cef/libcef/renderer/frame_impl.h
++++ b/src/cef/libcef/renderer/frame_impl.h
+@@ -105,6 +105,11 @@ class CefFrameImpl
+   void OnFocusedNodeChanged(const blink::WebElement& element);
+ #endif  // BUILDFLAG(IS_OHOS)
+ 
++#ifdef OHOS_POST_URL
++  void PostURL(const CefString& url,
++               const std::vector<char>& post_data) override;
++#endif  // defined(OHOS_POST_URL)
++
+  private:
+   // Execute an action on the associated WebLocalFrame. This will queue the
+   // action if the JavaScript context is not yet created.
+@@ -206,6 +211,7 @@ class CefFrameImpl
+               float height) override;
+   void GetHitData(
+       cef::mojom::RenderFrame::GetHitDataCallback callback) override;
++  void SetOverscrollMode(int mode) override;
+ #endif  // defined(OHOS_INPUT_EVENTS)
+ 
+   GURL GetAbsoluteUrl(const blink::WebNode& node,
+diff --git a/src/cef/libcef/renderer/javascript/oh_gin_javascript_bridge_dispatcher.cc b/src/cef/libcef/renderer/javascript/oh_gin_javascript_bridge_dispatcher.cc
+index 5fa52a93e22e0..1176d1c43e1ff
+--- a/src/cef/libcef/renderer/javascript/oh_gin_javascript_bridge_dispatcher.cc
++++ b/src/cef/libcef/renderer/javascript/oh_gin_javascript_bridge_dispatcher.cc
+@@ -9,15 +9,34 @@
+ #include "cef/libcef/renderer/javascript/oh_gin_javascript_bridge_object.h"
+ #include "content/public/renderer/render_frame.h"
+ 
++#include "third_party/blink/public/web/blink.h"
+ #include "third_party/blink/public/web/web_local_frame.h"
+ #include "third_party/blink/public/web/web_view.h"
++
++#include "libcef/common/javascript/oh_gin_javascript_bridge_value.h"
++#include "libcef/renderer/javascript/oh_gin_javascript_bridge_value_converter.h"
++
++#include "v8/include/v8-container.h"
++#include "v8/include/v8-exception.h"
++#include "v8/include/v8-function.h"
++#include "v8/include/v8-isolate.h"
++#include "v8/include/v8-local-handle.h"
++#include "v8/include/v8-object.h"
++#include "v8/include/v8-script.h"
++
+ namespace NWEB {
+ OhGinJavascriptBridgeDispatcher::OhGinJavascriptBridgeDispatcher(
+     content::RenderFrame* render_frame)
+     : content::RenderFrameObserver(render_frame),
+-      inside_did_clear_window_object_(false) {}
++      inside_did_clear_window_object_(false),
++      converter_(new OhGinJavascriptBridgeValueConverter(AsWeakPtr())) {}
+ 
+-OhGinJavascriptBridgeDispatcher::~OhGinJavascriptBridgeDispatcher() {}
++OhGinJavascriptBridgeDispatcher::~OhGinJavascriptBridgeDispatcher() {
++  for (auto item : h5_object_map_) {
++    item.second->Reset();
++    delete (item.second);
++  }
++}
+ 
+ bool OhGinJavascriptBridgeDispatcher::OnMessageReceived(
+     const IPC::Message& msg) {
+@@ -27,6 +46,8 @@ bool OhGinJavascriptBridgeDispatcher::OnMessageReceived(
+                         OnAddNamedObject)
+     IPC_MESSAGE_HANDLER(OhGinJavascriptBridgeMsg_RemoveNamedObject,
+                         OnRemoveNamedObject)
++    IPC_MESSAGE_HANDLER(OhGinJavascriptBridgeMsg_DoCallH5Function,
++                        OnDoCallH5Function)
+     IPC_MESSAGE_UNHANDLED(handled = false)
+   IPC_END_MESSAGE_MAP()
+   return handled;
+@@ -50,6 +71,8 @@ void OhGinJavascriptBridgeDispatcher::DidClearWindowObject() {
+     if (object) {
+       objects_.AddWithID(object, iter->second);
+     } else {
++      LOG(DEBUG) << "OhGinJavascriptBridgeDispatcher::DidClearWindowObject "
++                    "ObjectWrapperDeleted called";
+       // Inform the host about wrapper creation failure.
+       render_frame()->Send(
+           new OhGinJavascriptBridgeHostMsg_ObjectWrapperDeleted(routing_id(),
+@@ -60,8 +83,6 @@ void OhGinJavascriptBridgeDispatcher::DidClearWindowObject() {
+ 
+ void OhGinJavascriptBridgeDispatcher::OnAddNamedObject(const std::string& name,
+                                                        ObjectID object_id) {
+-  LOG(INFO) << "OnAddNamedObject name : " << name
+-            << " object_id : " << object_id;
+   named_objects_.insert(std::make_pair(name, object_id));
+ }
+ 
+@@ -86,7 +107,6 @@ void OhGinJavascriptBridgeDispatcher::GetJavascriptMethods(
+ bool OhGinJavascriptBridgeDispatcher::HasJavascriptMethod(
+     ObjectID object_id,
+     const std::string& method_name) {
+-  LOG(INFO) << "HasJavascriptMethod";
+   bool result;
+   render_frame()->Send(new OhGinJavascriptBridgeHostMsg_HasMethod(
+       routing_id(), object_id, method_name, &result));
+@@ -110,7 +130,6 @@ OhGinJavascriptBridgeDispatcher::InvokeJavascriptMethod(
+ 
+ OhGinJavascriptBridgeObject* OhGinJavascriptBridgeDispatcher::GetObject(
+     const ObjectID object_id) {
+-  LOG(INFO) << "GetObject";
+   OhGinJavascriptBridgeObject* result = objects_.Lookup(object_id);
+   if (!result) {
+     result =
+@@ -125,10 +144,18 @@ OhGinJavascriptBridgeObject* OhGinJavascriptBridgeDispatcher::GetObject(
+ void OhGinJavascriptBridgeDispatcher::OnOhGinJavascriptBridgeObjectDeleted(
+     const OhGinJavascriptBridgeObject* object) {
+   int object_id = object->object_id();
++  LOG(DEBUG) << "OhGinJavascriptBridgeDispatcher::"
++                "OnOhGinJavascriptBridgeObjectDeleted called, object_id = "
++             << object_id;
+   // Ignore cleaning up of old object wrappers.
+   if (objects_.Lookup(object_id) != object) {
+     return;
+   }
++  LOG(DEBUG)
++      << "OhGinJavascriptBridgeDispatcher::"
++         "OnOhGinJavascriptBridgeObjectDeleted called, object_id = "
++      << object_id
++      << " ,new OhGinJavascriptBridgeHostMsg_ObjectWrapperDeleted called";
+   objects_.Remove(object_id);
+   render_frame()->Send(new OhGinJavascriptBridgeHostMsg_ObjectWrapperDeleted(
+       routing_id(), object_id));
+@@ -137,4 +164,458 @@ void OhGinJavascriptBridgeDispatcher::OnOhGinJavascriptBridgeObjectDeleted(
+ void OhGinJavascriptBridgeDispatcher::OnDestruct() {
+   delete this;
+ }
++
++OhGinJavascriptBridgeDispatcher::H5ObjectID
++OhGinJavascriptBridgeDispatcher::AddH5Object(v8::Local<v8::Object>& value) {
++  LOG(DEBUG) << "OhGinJavascriptBridgeDispatcher::AddH5Object called";
++  v8::Isolate* isolate = blink::MainThreadIsolate();
++  v8::HandleScope handle_scope(isolate);
++
++  v8::Persistent<v8::Value>* persistent =
++      new v8::Persistent<v8::Value>(isolate, value);
++
++  H5ObjectID object_id;
++  {
++    base::AutoLock locker(h5_objects_lock_);
++    object_id = next_h5_object_id_++;
++    h5_object_map_[object_id] = persistent;
++  }
++
++  return object_id;
++}
++
++std::vector<std::string>
++OhGinJavascriptBridgeDispatcher::GetH5ObjectMethodNames(
++    v8::Local<v8::Object> object,
++    int h5_object_id) {
++  v8::Isolate* isolate = blink::MainThreadIsolate();
++  v8::HandleScope handle_scope(isolate);
++
++  if (!render_frame() || !render_frame()->GetWebFrame()) {
++    LOG(ERROR)
++        << "OhGinJavascriptBridgeDispatcher::GetH5ObjectMethodNames frame null";
++    return std::vector<std::string>();
++  }
++
++  v8::Local<v8::Context> context =
++      render_frame()->GetWebFrame()->MainWorldScriptContext();
++
++  if (context.IsEmpty()) {
++    LOG(ERROR) << "OhGinJavascriptBridgeDispatcher::GetH5ObjectMethodNames "
++                  "context empty";
++    return std::vector<std::string>();
++  }
++
++  v8::Context::Scope context_scope(context);
++  v8::Local<v8::Array> keys;
++  v8::Local<v8::Value> key, value;
++
++  if (!object
++           ->GetPropertyNames(context,
++                              v8::KeyCollectionMode::kIncludePrototypes,
++                              v8::PropertyFilter::ALL_PROPERTIES,
++                              v8::IndexFilter::kIncludeIndices)
++           .ToLocal(&keys)) {
++    return std::vector<std::string>();
++  }
++  LOG(DEBUG)
++      << "OhGinJavascriptBridgeDispatcher::GetH5ObjectMethodNames called";
++  for (uint32_t i = 0; i < keys->Length(); ++i) {
++    if (!keys->Get(context, i).ToLocal(&key)) {
++      LOG(DEBUG) << "OhGinJavascriptBridgeDispatcher::GetH5ObjectMethodNames "
++                    "key error";
++      continue;
++    }
++
++    v8::TryCatch try_catch(isolate);
++    v8::MaybeLocal<v8::Value> maybe_value = object->Get(context, key);
++    if (try_catch.HasCaught() || !maybe_value.ToLocal(&value)) {
++      LOG(WARNING) << "OhGinJavascriptBridgeDispatcher::GetH5ObjectMethodNames "
++                      "Getter property fail";
++      continue;
++    }
++
++    if (!value->IsFunction()) {
++      continue;
++    }
++
++    int len = key.As<v8::String>()->Utf8Length(isolate);
++    if (len == 0) {
++      LOG(DEBUG) << "OhGinJavascriptBridgeDispatcher::GetH5ObjectMethodNames "
++                    "key len error";
++      continue;
++    }
++
++    char* buf = new char[len];
++    key.As<v8::String>()->WriteUtf8(isolate, buf, len, nullptr,
++                                    v8::String::REPLACE_INVALID_UTF8);
++    std::string method_name(buf, len);
++    LOG(DEBUG) << "OhGinJavascriptBridgeDispatcher::GetH5ObjectMethodNames "
++                  "method_name = "
++               << method_name;
++    H5ObjectMethodsMap_[h5_object_id].push_back(method_name);
++    delete[] buf;
++  }
++
++  return H5ObjectMethodsMap_[h5_object_id];
++}
++
++bool OhGinJavascriptBridgeDispatcher::HasH5ObjectMethod(
++    v8::Local<v8::Object> object) {
++  v8::Isolate* isolate = blink::MainThreadIsolate();
++  v8::HandleScope handle_scope(isolate);
++  if (!render_frame() || !render_frame()->GetWebFrame()) {
++    LOG(ERROR)
++        << "OhGinJavascriptBridgeDispatcher::HasH5ObjectMethod frame null";
++    return false;
++  }
++
++  v8::Local<v8::Context> context =
++      render_frame()->GetWebFrame()->MainWorldScriptContext();
++  if (context.IsEmpty()) {
++    LOG(ERROR)
++        << "OhGinJavascriptBridgeDispatcher::HasH5ObjectMethod context empty";
++    return false;
++  }
++  v8::Context::Scope context_scope(context);
++
++  v8::Local<v8::Array> keys;
++  v8::Local<v8::Value> key, value;
++  LOG(DEBUG) << "OhGinJavascriptBridgeDispatcher::HasH5ObjectMethod called";
++  if (!object->GetOwnPropertyNames(context).ToLocal(&keys)) {
++    LOG(ERROR) << "OhGinJavascriptBridgeDispatcher::HasH5ObjectMethod "
++                  "GetOwnPropertyNames fail";
++    return false;
++  }
++
++  for (uint32_t i = 0; i < keys->Length(); ++i) {
++    if (!keys->Get(context, i).ToLocal(&key)) {
++      LOG(DEBUG) << "OhGinJavascriptBridgeDispatcher::GetH5ObjectMethodNames "
++                    "key error";
++      continue;
++    }
++
++    if (!key->IsString() && !key->IsNumber()) {
++      continue;
++    }
++
++    v8::String::Utf8Value name_utf8(isolate, key);
++    v8::TryCatch try_catch(isolate);
++    v8::MaybeLocal<v8::Value> maybe_value = object->Get(context, key);
++    if (try_catch.HasCaught() || !maybe_value.ToLocal(&value)) {
++      LOG(WARNING) << "OhGinJavascriptBridgeDispatcher::HasH5ObjectMethod "
++                      "Getter for property "
++                   << *name_utf8 << " threw an exception.";
++      continue;
++    }
++
++    if (value->IsFunction()) {
++      LOG(DEBUG)
++          << "OhGinJavascriptBridgeDispatcher::HasH5ObjectMethod return true";
++      return true;
++    }
++  }
++  LOG(DEBUG)
++      << "OhGinJavascriptBridgeDispatcher::HasH5ObjectMethod return false";
++  return false;
++}
++
++bool OhGinJavascriptBridgeDispatcher::HasH5ObjectMethod(
++    int h5_object_id,
++    const std::string& method_name) {
++  if (H5ObjectMethodsMap_.find(h5_object_id) == H5ObjectMethodsMap_.end()) {
++    return false;
++  }
++
++  for (std::vector<std::string>::iterator iter =
++           H5ObjectMethodsMap_[h5_object_id].begin();
++       iter != H5ObjectMethodsMap_[h5_object_id].end(); ++iter) {
++    if (*iter == method_name) {
++      LOG(DEBUG)
++          << "OhGinJavascriptBridgeDispatcher::HasH5ObjectMethod return true";
++      return true;
++    }
++  }
++  LOG(DEBUG)
++      << "OhGinJavascriptBridgeDispatcher::HasH5ObjectMethod return false";
++  return false;
++}
++
++void OhGinJavascriptBridgeDispatcher::OnDoCallAnonymousH5Function(
++    int32_t h5_object_id,
++    const base::Value::List& args) {
++  std::map<H5ObjectID, v8::Persistent<v8::Value>*>::iterator iter;
++  {
++    base::AutoLock locker(h5_objects_lock_);
++    iter = h5_object_map_.find(h5_object_id);
++    if (iter == h5_object_map_.end() || !(iter->second)) {
++      LOG(DEBUG) << "OhGinJavascriptBridgeDispatcher::"
++                    "OnDoCallAnonymousH5Function obj id not found";
++      return;
++    }
++  }
++
++  v8::Isolate* isolate = blink::MainThreadIsolate();
++  v8::HandleScope handle_scope(isolate);
++
++  if (!render_frame() || !render_frame()->GetWebFrame()) {
++    LOG(ERROR) << "OhGinJavascriptBridgeDispatcher::"
++                  "OnDoCallAnonymousH5Function frame null";
++    return;
++  }
++
++  v8::Local<v8::Context> context =
++      render_frame()->GetWebFrame()->MainWorldScriptContext();
++  if (context.IsEmpty()) {
++    LOG(ERROR) << "OhGinJavascriptBridgeDispatcher::"
++                  "OnDoCallAnonymousH5Function context empty";
++    return;
++  }
++  v8::Context::Scope context_scope(context);
++
++  v8::Local<v8::Object> object = v8::Local<v8::Object>::New(
++      isolate, *reinterpret_cast<v8::Persistent<v8::Object>*>(iter->second));
++
++  v8::Local<v8::Value>* v8_args = nullptr;
++  int size = args.size();
++  if (size > 0) {
++    LOG(DEBUG) << "OhGinJavascriptBridgeDispatcher::"
++                  "OnDoCallAnonymousH5Function args size = "
++               << size;
++    v8_args = new v8::Local<v8::Value>[size];
++  }
++
++  for (int i = 0; i < size; ++i) {
++    const base::Value& base_arg = args[i];
++    if (!base_arg.is_blob()) {
++      LOG(DEBUG) << "OhGinJavascriptBridgeDispatcher::"
++                    "OnDoCallAnonymousH5Function not blob";
++      v8_args[i] = converter_->ToV8Value(&base_arg, context);
++      continue;
++    }
++
++    std::unique_ptr<const OhGinJavascriptBridgeValue> gin_value =
++        OhGinJavascriptBridgeValue::FromValue(&base_arg);
++    if (gin_value->IsType(OhGinJavascriptBridgeValue::TYPE_OBJECT_ID)) {
++      OhGinJavascriptBridgeObject* object_result = NULL;
++      OhGinJavascriptBridgeDispatcher::ObjectID object_id;
++      if (gin_value->GetAsObjectID(&object_id)) {
++        LOG(DEBUG) << "OhGinJavascriptBridgeDispatcher::"
++                      "OnDoCallAnonymousH5Function blob";
++        object_result = GetObject(object_id);
++      }
++      if (object_result) {
++        LOG(DEBUG) << "OhGinJavascriptBridgeDispatcher::"
++                      "OnDoCallAnonymousH5Function object_result ok";
++        gin::Handle<OhGinJavascriptBridgeObject> controller =
++            gin::CreateHandle(isolate, object_result);
++        if (controller.IsEmpty()) {
++          LOG(DEBUG) << "OhGinJavascriptBridgeDispatcher::"
++                        "OnDoCallAnonymousH5Function controller empty";
++          v8_args[i] = v8::Undefined(isolate);
++          continue;
++        }
++        v8_args[i] = controller.ToV8();
++        continue;
++      }
++    } else if (gin_value->IsType(OhGinJavascriptBridgeValue::TYPE_NONFINITE)) {
++      float float_value;
++      gin_value->GetAsNonFinite(&float_value);
++      v8_args[i] = v8::Number::New(isolate, float_value);
++      continue;
++    }
++    v8_args[i] = v8::Undefined(isolate);
++  }
++
++  v8::Local<v8::Function> func = v8::Local<v8::Function>::Cast(object);
++  v8::MaybeLocal<v8::Value> function_call_result =
++      func->Call(context, context->Global(), size, v8_args);
++  LOG(DEBUG) << "OhGinJavascriptBridgeDispatcher::OnDoCallAnonymousH5Function "
++                "func call end";
++  if (!function_call_result.IsEmpty()) {
++    function_call_result.ToLocalChecked();
++  }
++
++  if (v8_args != nullptr) {
++    delete[] v8_args;
++  }
++}
++
++void OhGinJavascriptBridgeDispatcher::convertToV8Value(
++    const base::Value::List& base_value,
++    v8::Local<v8::Value>*& v8_value) {
++  v8::Isolate* isolate = blink::MainThreadIsolate();
++  v8::HandleScope handle_scope(isolate);
++
++  if (!v8_value || !render_frame() || !render_frame()->GetWebFrame()) {
++    return;
++  }
++
++  v8::Local<v8::Context> context =
++      render_frame()->GetWebFrame()->MainWorldScriptContext();
++  if (context.IsEmpty()) {
++    return;
++  }
++  v8::Context::Scope context_scope(context);
++
++  int size = base_value.size();
++  for (int i = 0; i < size; ++i) {
++    const base::Value& base_arg = base_value[i];
++    if (!base_arg.is_blob()) {
++      v8_value[i] = converter_->ToV8Value(&base_arg, context);
++      continue;
++    }
++
++    std::unique_ptr<const OhGinJavascriptBridgeValue> gin_value =
++        OhGinJavascriptBridgeValue::FromValue(&base_arg);
++    if (gin_value->IsType(OhGinJavascriptBridgeValue::TYPE_OBJECT_ID)) {
++      OhGinJavascriptBridgeObject* object_result = NULL;
++      OhGinJavascriptBridgeDispatcher::ObjectID object_id;
++      if (gin_value->GetAsObjectID(&object_id)) {
++        object_result = GetObject(object_id);
++      }
++      if (object_result) {
++        gin::Handle<OhGinJavascriptBridgeObject> controller =
++            gin::CreateHandle(isolate, object_result);
++        if (controller.IsEmpty()) {
++          v8_value[i] = v8::Undefined(isolate);
++          continue;
++        }
++        v8_value[i] = controller.ToV8();
++        continue;
++      }
++    } else if (gin_value->IsType(OhGinJavascriptBridgeValue::TYPE_NONFINITE)) {
++      float float_value;
++      gin_value->GetAsNonFinite(&float_value);
++      v8_value[i] = v8::Number::New(isolate, float_value);
++      continue;
++    }
++    v8_value[i] = v8::Undefined(isolate);
++  }
++}
++
++void OhGinJavascriptBridgeDispatcher::OnDoCallH5Function(
++    int32_t frame_routing_id,
++    int32_t h5_object_id,
++    const std::string& method_name,
++    const base::Value::List& args) {
++  if (frame_routing_id != routing_id()) {
++    return;
++  }
++
++  std::map<H5ObjectID, v8::Persistent<v8::Value>*>::iterator iter;
++  {
++    base::AutoLock locker(h5_objects_lock_);
++    iter = h5_object_map_.find(h5_object_id);
++    if (iter == h5_object_map_.end() || !(iter->second)) {
++      LOG(DEBUG) << "OhGinJavascriptBridgeDispatcher::OnDoCallH5Function obj "
++                    "id not found";
++      return;
++    }
++  }
++
++  if (method_name
++          .empty()) {  // IF h5_method_name empty, call anonymous function
++    OnDoCallAnonymousH5Function(h5_object_id, args);
++  }
++
++  v8::Isolate* isolate = blink::MainThreadIsolate();
++  v8::HandleScope handle_scope(isolate);
++
++  if (!render_frame() || !render_frame()->GetWebFrame()) {
++    LOG(ERROR)
++        << "OhGinJavascriptBridgeDispatcher::OnDoCallH5Function frame null";
++    return;
++  }
++
++  v8::Local<v8::Context> context =
++      render_frame()->GetWebFrame()->MainWorldScriptContext();
++
++  if (context.IsEmpty()) {
++    LOG(ERROR)
++        << "OhGinJavascriptBridgeDispatcher::OnDoCallH5Function context empty";
++    return;
++  }
++  v8::Context::Scope context_scope(context);
++
++  if (!HasH5ObjectMethod(h5_object_id, method_name)) {
++    return;
++  }
++
++  v8::Local<v8::Object> object = v8::Local<v8::Object>::New(
++      isolate, *reinterpret_cast<v8::Persistent<v8::Object>*>(iter->second));
++  v8::Local<v8::Value> key =
++      v8::String::NewFromUtf8(isolate, method_name.c_str()).ToLocalChecked();
++
++  v8::Local<v8::Value>* v8_args = nullptr;
++  int size = args.size();
++  if (size > 0) {
++    LOG(DEBUG)
++        << "OhGinJavascriptBridgeDispatcher::OnDoCallH5Function args size = "
++        << size;
++    v8_args = new v8::Local<v8::Value>[size];
++  }
++
++  for (int i = 0; i < size; ++i) {
++    const base::Value& base_arg = args[i];
++    if (!base_arg.is_blob()) {
++      LOG(DEBUG)
++          << "OhGinJavascriptBridgeDispatcher::OnDoCallH5Function not blob";
++      v8_args[i] = converter_->ToV8Value(&base_arg, context);
++      continue;
++    }
++
++    std::unique_ptr<const OhGinJavascriptBridgeValue> gin_value =
++        OhGinJavascriptBridgeValue::FromValue(&base_arg);
++    if (gin_value->IsType(OhGinJavascriptBridgeValue::TYPE_OBJECT_ID)) {
++      OhGinJavascriptBridgeObject* object_result = NULL;
++      OhGinJavascriptBridgeDispatcher::ObjectID object_id;
++      if (gin_value->GetAsObjectID(&object_id)) {
++        LOG(DEBUG)
++            << "OhGinJavascriptBridgeDispatcher::OnDoCallH5Function blob";
++        object_result = GetObject(object_id);
++      }
++      if (object_result) {
++        LOG(DEBUG) << "OhGinJavascriptBridgeDispatcher::OnDoCallH5Function "
++                      "object_result ok";
++        gin::Handle<OhGinJavascriptBridgeObject> controller =
++            gin::CreateHandle(isolate, object_result);
++        if (controller.IsEmpty()) {
++          LOG(DEBUG) << "OhGinJavascriptBridgeDispatcher::OnDoCallH5Function "
++                        "controller empty";
++          v8_args[i] = v8::Undefined(isolate);
++          continue;
++        }
++        v8_args[i] = controller.ToV8();
++        continue;
++      }
++    } else if (gin_value->IsType(OhGinJavascriptBridgeValue::TYPE_NONFINITE)) {
++      float float_value;
++      gin_value->GetAsNonFinite(&float_value);
++      v8_args[i] = v8::Number::New(isolate, float_value);
++      continue;
++    }
++    v8_args[i] = v8::Undefined(isolate);
++  }
++
++  v8::TryCatch try_catch(isolate);
++  v8::MaybeLocal<v8::Value> result_value = object->Get(context, key);
++
++  if (!try_catch.HasCaught() && !result_value.IsEmpty()) {
++    v8::Local<v8::Value> value = result_value.ToLocalChecked();
++    v8::Local<v8::Function> func = v8::Local<v8::Function>::Cast(value);
++    v8::MaybeLocal<v8::Value> function_call_result =
++        func->Call(context, object, size, v8_args);
++    LOG(DEBUG)
++        << "OhGinJavascriptBridgeDispatcher::OnDoCallH5Function func call end";
++    if (!function_call_result.IsEmpty()) {
++      function_call_result.ToLocalChecked();
++    }
++  }
++
++  if (v8_args != nullptr) {
++    delete[] v8_args;
++  }
++}
++
+ }  // namespace NWEB
+diff --git a/src/cef/libcef/renderer/javascript/oh_gin_javascript_bridge_dispatcher.h b/src/cef/libcef/renderer/javascript/oh_gin_javascript_bridge_dispatcher.h
+index b00b5a94cdf24..72f5b49a819f7
+--- a/src/cef/libcef/renderer/javascript/oh_gin_javascript_bridge_dispatcher.h
++++ b/src/cef/libcef/renderer/javascript/oh_gin_javascript_bridge_dispatcher.h
+@@ -14,9 +14,12 @@
+ #include "base/values.h"
+ #include "cef/libcef/common/javascript/oh_gin_javascript_bridge_errors.h"
+ #include "content/public/renderer/render_frame_observer.h"
++#include "content/public/renderer/v8_value_converter.h"
+ 
+ namespace NWEB {
+ class OhGinJavascriptBridgeObject;
++class OhGinJavascriptBridgeValueConverter;
++
+ class OhGinJavascriptBridgeDispatcher
+     : public base::SupportsWeakPtr<OhGinJavascriptBridgeDispatcher>,
+       public content::RenderFrameObserver {
+@@ -28,6 +31,7 @@ class OhGinJavascriptBridgeDispatcher
+ 
+   using ObjectMap = base::IDMap<OhGinJavascriptBridgeObject*>;
+   using ObjectID = ObjectMap::KeyType;
++  typedef int32_t H5ObjectID;
+ 
+   explicit OhGinJavascriptBridgeDispatcher(content::RenderFrame* render_frame);
+ 
+@@ -50,16 +54,43 @@ class OhGinJavascriptBridgeDispatcher
+   void OnOhGinJavascriptBridgeObjectDeleted(
+       const OhGinJavascriptBridgeObject* object);
+ 
++  H5ObjectID AddH5Object(v8::Local<v8::Object>& value);
++
++  bool HasH5ObjectMethod(v8::Local<v8::Object> object);
++
++  std::vector<std::string> GetH5ObjectMethodNames(v8::Local<v8::Object> object,
++                                                  int h5_object_id);
++
+  private:
+   // RenderFrameObserver implementation.
+   void OnDestruct() override;
+   void OnAddNamedObject(const std::string& name, ObjectID object_id);
+   void OnRemoveNamedObject(const std::string& name);
+ 
++  bool HasH5ObjectMethod(int h5_object_id, const std::string& method_name);
++
++  void convertToV8Value(const base::Value::List& base_value,
++                        v8::Local<v8::Value>*& v8_value);
++
++  void OnDoCallAnonymousH5Function(int32_t h5_object_id,
++                                   const base::Value::List& args);
++
++  void OnDoCallH5Function(int32_t frame_routing_id,
++                          int32_t h5_object_id,
++                          const std::string& method_name,
++                          const base::Value::List& args);
++
+   typedef std::map<std::string, ObjectID> NamedObjectMap;
+   NamedObjectMap named_objects_;
+   ObjectMap objects_;
+   bool inside_did_clear_window_object_;
++
++  H5ObjectID next_h5_object_id_ = 1;
++  std::map<H5ObjectID, v8::Persistent<v8::Value>*> h5_object_map_
++      GUARDED_BY(h5_objects_lock_);
++  std::map<H5ObjectID, std::vector<std::string>> H5ObjectMethodsMap_;
++  std::unique_ptr<OhGinJavascriptBridgeValueConverter> converter_;
++  base::Lock h5_objects_lock_;
+ };
+ }  // namespace NWEB
+ #endif
+diff --git a/src/cef/libcef/renderer/javascript/oh_gin_javascript_bridge_object.cc b/src/cef/libcef/renderer/javascript/oh_gin_javascript_bridge_object.cc
+index f43bac352990f..2466cef209838
+--- a/src/cef/libcef/renderer/javascript/oh_gin_javascript_bridge_object.cc
++++ b/src/cef/libcef/renderer/javascript/oh_gin_javascript_bridge_object.cc
+@@ -71,8 +71,12 @@ OhGinJavascriptBridgeObject::OhGinJavascriptBridgeObject(
+ 
+ OhGinJavascriptBridgeObject::~OhGinJavascriptBridgeObject() {
+   if (dispatcher_) {
++    LOG(DEBUG)
++        << "OhGinJavascriptBridgeObject::~OhGinJavascriptBridgeObject called";
+     dispatcher_->OnOhGinJavascriptBridgeObjectDeleted(this);
+   } else {
++    LOG(DEBUG)
++        << "OhGinJavascriptBridgeObject::~OhGinJavascriptBridgeObject called";
+     // A wrapper can outlive a render frame, and thus the dispatcher.
+     // Note that we intercept GinJavaBridgeHostMsg messages in a browser filter
+     // thus it's OK to send the message with a routing id of a ceased frame.
+@@ -122,7 +126,6 @@ std::vector<std::string> OhGinJavascriptBridgeObject::EnumerateNamedProperties(
+ v8::Local<v8::FunctionTemplate>
+ OhGinJavascriptBridgeObject::GetFunctionTemplate(v8::Isolate* isolate,
+                                                  const std::string& name) {
+-  LOG(INFO) << "GetFunctionTemplate name : " << name.c_str();
+   v8::Local<v8::FunctionTemplate> function_template = template_cache_.Get(name);
+   if (!function_template.IsEmpty()) {
+     return function_template;
+diff --git a/src/cef/libcef/renderer/javascript/oh_gin_javascript_bridge_value_converter.cc b/src/cef/libcef/renderer/javascript/oh_gin_javascript_bridge_value_converter.cc
+index 1529f48e47a89..74fd00788e90f
+--- a/src/cef/libcef/renderer/javascript/oh_gin_javascript_bridge_value_converter.cc
++++ b/src/cef/libcef/renderer/javascript/oh_gin_javascript_bridge_value_converter.cc
+@@ -18,11 +18,22 @@
+ #include "v8/include/v8-typed-array.h"
+ 
+ namespace NWEB {
++OhGinJavascriptBridgeValueConverter::OhGinJavascriptBridgeValueConverter(
++    const base::WeakPtr<OhGinJavascriptBridgeDispatcher>& dispatcher)
++    : converter_(content::V8ValueConverter::Create()), dispatcher_(dispatcher) {
++  converter_->SetDateAllowed(false);
++  converter_->SetRegExpAllowed(false);
++  converter_->SetFunctionAllowed(true);
++  converter_->SetPromiseAllowed(true);
++  converter_->SetStrategy(this);
++}
++
+ OhGinJavascriptBridgeValueConverter::OhGinJavascriptBridgeValueConverter()
+     : converter_(content::V8ValueConverter::Create()) {
+   converter_->SetDateAllowed(false);
+   converter_->SetRegExpAllowed(false);
+   converter_->SetFunctionAllowed(true);
++  converter_->SetPromiseAllowed(true);
+   converter_->SetStrategy(this);
+ }
+ 
+@@ -45,11 +56,84 @@ bool OhGinJavascriptBridgeValueConverter::FromV8Object(
+     std::unique_ptr<base::Value>* out,
+     v8::Isolate* isolate) {
+   OhGinJavascriptBridgeObject* unwrapped;
+-  if (!gin::ConvertFromV8(isolate, value, &unwrapped)) {
++  v8::HandleScope handle_scope(isolate);
++  if (gin::ConvertFromV8(isolate, value, &unwrapped)) {
++    LOG(DEBUG) << "OhGinJavascriptBridgeDispatcher::FromV8Object native object";
++    *out =
++        OhGinJavascriptBridgeValue::CreateObjectIDValue(unwrapped->object_id());
++  } else if (dispatcher_ && dispatcher_->HasH5ObjectMethod(value)) {
++    LOG(DEBUG) << "OhGinJavascriptBridgeDispatcher::FromV8Object "
++                  "HasH5ObjectMethod true";
++    int h5_object_id = dispatcher_->AddH5Object(value);
++    std::vector<std::string> names =
++        dispatcher_->GetH5ObjectMethodNames(value, h5_object_id);
++    std::string str = std::to_string(h5_object_id) + std::string(";");
++    for (auto name : names) {
++      str += name + std::string(";");
++    }
++    *out = OhGinJavascriptBridgeValue::CreateH5ObjectIDValueWithMdNames(str);
++  } else {
++    LOG(DEBUG) << "OhGinJavascriptBridgeDispatcher::FromV8Object return false";
+     return false;
+   }
+-  *out =
+-      OhGinJavascriptBridgeValue::CreateObjectIDValue(unwrapped->object_id());
++  LOG(DEBUG) << "OhGinJavascriptBridgeDispatcher::FromV8Object return true";
++  return true;
++}
++
++bool OhGinJavascriptBridgeValueConverter::FromV8Object(
++    v8::Local<v8::Object> value,
++    std::unique_ptr<base::Value>* out,
++    v8::Isolate* isolate,
++    bool is_function,
++    bool is_promise) {
++  OhGinJavascriptBridgeObject* unwrapped;
++  v8::HandleScope handle_scope(isolate);
++  if (gin::ConvertFromV8(isolate, value, &unwrapped)) {
++    LOG(DEBUG) << "OhGinJavascriptBridgeDispatcher::FromV8Object native object";
++    *out =
++        OhGinJavascriptBridgeValue::CreateObjectIDValue(unwrapped->object_id());
++  } else {
++    if (!dispatcher_) {
++      LOG(DEBUG)
++          << "OhGinJavascriptBridgeDispatcher::FromV8Object dispatcher_ null";
++      return false;
++    }
++
++    if (is_function) {
++      LOG(DEBUG)
++          << "OhGinJavascriptBridgeDispatcher::FromV8Object function true";
++      int h5_function_id = dispatcher_->AddH5Object(value);
++      *out =
++          OhGinJavascriptBridgeValue::CreateH5FunctionIDValue(h5_function_id);
++    } else if (is_promise) {
++      LOG(DEBUG)
++          << "OhGinJavascriptBridgeDispatcher::FromV8Object promise true";
++      int h5_object_id = dispatcher_->AddH5Object(value);
++      std::vector<std::string> names =
++          dispatcher_->GetH5ObjectMethodNames(value, h5_object_id);
++      std::string str = std::to_string(h5_object_id) + std::string(";");
++      for (auto name : names) {
++        str += name + std::string(";");
++      }
++      *out = OhGinJavascriptBridgeValue::CreateH5ObjectIDValueWithMdNames(str);
++    } else if (dispatcher_ && dispatcher_->HasH5ObjectMethod(value)) {
++      LOG(DEBUG) << "OhGinJavascriptBridgeDispatcher::FromV8Object "
++                    "HasH5ObjectMethod true";
++      int h5_object_id = dispatcher_->AddH5Object(value);
++      std::vector<std::string> names =
++          dispatcher_->GetH5ObjectMethodNames(value, h5_object_id);
++      std::string str = std::to_string(h5_object_id) + std::string(";");
++      for (auto name : names) {
++        str += name + std::string(";");
++      }
++      *out = OhGinJavascriptBridgeValue::CreateH5ObjectIDValueWithMdNames(str);
++    } else {
++      LOG(DEBUG)
++          << "OhGinJavascriptBridgeDispatcher::FromV8Object return false";
++      return false;
++    }
++  }
++  LOG(DEBUG) << "OhGinJavascriptBridgeDispatcher::FromV8Object return true";
+   return true;
+ }
+ 
+diff --git a/src/cef/libcef/renderer/javascript/oh_gin_javascript_bridge_value_converter.h b/src/cef/libcef/renderer/javascript/oh_gin_javascript_bridge_value_converter.h
+index 8795c124efc27..3ae366612d2cd
+--- a/src/cef/libcef/renderer/javascript/oh_gin_javascript_bridge_value_converter.h
++++ b/src/cef/libcef/renderer/javascript/oh_gin_javascript_bridge_value_converter.h
+@@ -8,12 +8,16 @@
+ 
+ #include <memory>
+ 
++#include "cef/libcef/renderer/javascript/oh_gin_javascript_bridge_dispatcher.h"
+ #include "content/public/renderer/v8_value_converter.h"
+ 
+ namespace NWEB {
+ class OhGinJavascriptBridgeValueConverter
+     : public content::V8ValueConverter::Strategy {
+  public:
++  OhGinJavascriptBridgeValueConverter(
++      const base::WeakPtr<OhGinJavascriptBridgeDispatcher>& dispatcher);
++
+   OhGinJavascriptBridgeValueConverter();
+ 
+   OhGinJavascriptBridgeValueConverter(
+@@ -33,6 +37,11 @@ class OhGinJavascriptBridgeValueConverter
+   bool FromV8Object(v8::Local<v8::Object> value,
+                     std::unique_ptr<base::Value>* out,
+                     v8::Isolate* isolate) override;
++  bool FromV8Object(v8::Local<v8::Object> value,
++                    std::unique_ptr<base::Value>* out,
++                    v8::Isolate* isolate,
++                    bool is_function,
++                    bool is_promise) override;
+   bool FromV8ArrayBuffer(v8::Local<v8::Object> value,
+                          std::unique_ptr<base::Value>* out,
+                          v8::Isolate* isolate) override;
+@@ -42,6 +51,7 @@ class OhGinJavascriptBridgeValueConverter
+ 
+  private:
+   std::unique_ptr<content::V8ValueConverter> converter_;
++  base::WeakPtr<OhGinJavascriptBridgeDispatcher> dispatcher_;
+ };
+ }  // namespace NWEB
+ #endif
+diff --git a/src/cef/libcef/renderer/javascript/oh_gin_javascript_function_invocation_helper.cc b/src/cef/libcef/renderer/javascript/oh_gin_javascript_function_invocation_helper.cc
+index 3916ef5815054..a178d96460f5a
+--- a/src/cef/libcef/renderer/javascript/oh_gin_javascript_function_invocation_helper.cc
++++ b/src/cef/libcef/renderer/javascript/oh_gin_javascript_function_invocation_helper.cc
+@@ -33,14 +33,13 @@ OhGinJavascriptFunctionInvocationHelper::
+         const base::WeakPtr<OhGinJavascriptBridgeDispatcher>& dispatcher)
+     : method_name_(method_name),
+       dispatcher_(dispatcher),
+-      converter_(new OhGinJavascriptBridgeValueConverter()) {}
++      converter_(new OhGinJavascriptBridgeValueConverter(dispatcher)) {}
+ 
+ OhGinJavascriptFunctionInvocationHelper::
+     ~OhGinJavascriptFunctionInvocationHelper() {}
+ 
+ v8::Local<v8::Value> OhGinJavascriptFunctionInvocationHelper::Invoke(
+     gin::Arguments* args) {
+-  LOG(INFO) << "OhGinJavascriptFunctionInvocationHelper Invoke";
+   if (!dispatcher_) {
+     args->isolate()->ThrowException(v8::Exception::Error(
+         gin::StringToV8(args->isolate(), kMethodInvocationErrorMessage)));
+@@ -67,6 +66,8 @@ v8::Local<v8::Value> OhGinJavascriptFunctionInvocationHelper::Invoke(
+     v8::Local<v8::Value> val;
+     while (args->GetNext(&val)) {
+       std::unique_ptr<base::Value> arg(converter_->FromV8Value(val, context));
++      LOG(DEBUG) << "OhGinJavascriptFunctionInvocationHelper::Invoke call "
++                    "FromV8Value end";
+       if (arg.get()) {
+         arguments.Append(base::Value::FromUniquePtrValue(std::move(arg)));
+       } else {
+@@ -79,12 +80,18 @@ v8::Local<v8::Value> OhGinJavascriptFunctionInvocationHelper::Invoke(
+   OhGinJavascriptBridgeError error;
+   std::unique_ptr<base::Value> result = dispatcher_->InvokeJavascriptMethod(
+       object->object_id(), method_name_, arguments, &error);
++  LOG(DEBUG) << "OhGinJavascriptFunctionInvocationHelper::Invoke call "
++                "InvokeJavascriptMethod end";
+   if (!result.get()) {
++    LOG(DEBUG)
++        << "OhGinJavascriptFunctionInvocationHelper::Invoke result is null";
+     args->isolate()->ThrowException(v8::Exception::Error(gin::StringToV8(
+         args->isolate(), OhGinJavascriptBridgeErrorToString(error))));
+     return v8::Undefined(args->isolate());
+   }
+   if (!result->is_blob()) {
++    LOG(DEBUG)
++        << "OhGinJavascriptFunctionInvocationHelper::Invoke result is not blob";
+     return converter_->ToV8Value(result.get(),
+                                  args->isolate()->GetCurrentContext());
+   }
+@@ -98,6 +105,9 @@ v8::Local<v8::Value> OhGinJavascriptFunctionInvocationHelper::Invoke(
+       object_result = dispatcher_->GetObject(object_id);
+     }
+     if (object_result) {
++      LOG(DEBUG) << "OhGinJavascriptFunctionInvocationHelper::Invoke result is "
++                    "blob, object_id = "
++                 << (uint32_t)object_id;
+       gin::Handle<OhGinJavascriptBridgeObject> controller =
+           gin::CreateHandle(args->isolate(), object_result);
+       if (controller.IsEmpty()) {
+diff --git a/src/cef/libcef_dll/cpptoc/browser_cpptoc.cc b/src/cef/libcef_dll/cpptoc/browser_cpptoc.cc
+index e9b6e1345f444..9c9534951a9ec
+--- a/src/cef/libcef_dll/cpptoc/browser_cpptoc.cc
++++ b/src/cef/libcef_dll/cpptoc/browser_cpptoc.cc
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=8ba319ac14de31847ba42d1d01d6a9254e52582e$
++// $hash=5d1772acbeb7824b8bf964a632d8292b1bb2eb3f$
+ //
+ 
+ #include "libcef_dll/cpptoc/browser_cpptoc.h"
+@@ -547,6 +547,43 @@ browser_password_suggestion_selected(struct _cef_browser_t* self,
+   CefBrowserCppToC::Get(self)->PasswordSuggestionSelected(list_index);
+ }
+ 
++void CEF_CALLBACK
++browser_update_browser_controls_state(struct _cef_browser_t* self,
++                                      int constraints,
++                                      int current,
++                                      int animate) {
++  shutdown_checker::AssertNotShutdown();
++
++  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
++
++  DCHECK(self);
++  if (!self) {
++    return;
++  }
++
++  // Execute
++  CefBrowserCppToC::Get(self)->UpdateBrowserControlsState(
++      constraints, current, animate ? true : false);
++}
++
++void CEF_CALLBACK
++browser_update_browser_controls_height(struct _cef_browser_t* self,
++                                       int height,
++                                       int animate) {
++  shutdown_checker::AssertNotShutdown();
++
++  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
++
++  DCHECK(self);
++  if (!self) {
++    return;
++  }
++
++  // Execute
++  CefBrowserCppToC::Get(self)->UpdateBrowserControlsHeight(
++      height, animate ? true : false);
++}
++
+ void CEF_CALLBACK browser_prefetch_page(struct _cef_browser_t* self,
+                                         cef_string_t* url,
+                                         cef_string_t* additionalHttpHeaders) {
+@@ -816,6 +853,10 @@ CefBrowserCppToC::CefBrowserCppToC() {
+   GetStruct()->should_show_free_copy = browser_should_show_free_copy;
+   GetStruct()->password_suggestion_selected =
+       browser_password_suggestion_selected;
++  GetStruct()->update_browser_controls_state =
++      browser_update_browser_controls_state;
++  GetStruct()->update_browser_controls_height =
++      browser_update_browser_controls_height;
+   GetStruct()->prefetch_page = browser_prefetch_page;
+   GetStruct()->reload_original_url = browser_reload_original_url;
+   GetStruct()->set_browser_user_agent_string =
+diff --git a/src/cef/libcef_dll/cpptoc/browser_host_cpptoc.cc b/src/cef/libcef_dll/cpptoc/browser_host_cpptoc.cc
+index 8ab75afc4eddd..01195d16ad9c1
+--- a/src/cef/libcef_dll/cpptoc/browser_host_cpptoc.cc
++++ b/src/cef/libcef_dll/cpptoc/browser_host_cpptoc.cc
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=dc53c042f9653d10f724c471f3ee8cab576c547f$
++// $hash=12cbbe92481ddbd5ee5e70e50b52dacc15fc0a3a$
+ //
+ 
+ #include "libcef_dll/cpptoc/browser_host_cpptoc.h"
+@@ -1303,6 +1303,28 @@ browser_host_set_accessibility_state(struct _cef_browser_host_t* self,
+   CefBrowserHostCppToC::Get(self)->SetAccessibilityState(accessibility_state);
+ }
+ 
++void CEF_CALLBACK browser_host_get_or_create_root_browser_accessibility_manager(
++    struct _cef_browser_host_t* self,
++    void** manager) {
++  shutdown_checker::AssertNotShutdown();
++
++  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
++
++  DCHECK(self);
++  if (!self) {
++    return;
++  }
++  // Verify param: manager; type: simple_byaddr
++  DCHECK(manager);
++  if (!manager) {
++    return;
++  }
++
++  // Execute
++  CefBrowserHostCppToC::Get(self)->GetOrCreateRootBrowserAccessibilityManager(
++      manager);
++}
++
+ void CEF_CALLBACK
+ browser_host_set_auto_resize_enabled(struct _cef_browser_host_t* self,
+                                      int enabled,
+@@ -1752,7 +1774,8 @@ browser_host_set_background_color(struct _cef_browser_host_t* self, int color) {
+ void CEF_CALLBACK
+ browser_host_register_ark_jsfunction(struct _cef_browser_host_t* self,
+                                      const cef_string_t* object_name,
+-                                     cef_string_list_t method_list) {
++                                     cef_string_list_t method_list,
++                                     int32_t object_id) {
+   shutdown_checker::AssertNotShutdown();
+ 
+   // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
+@@ -1777,8 +1800,8 @@ browser_host_register_ark_jsfunction(struct _cef_browser_host_t* self,
+   transfer_string_list_contents(method_list, method_listList);
+ 
+   // Execute
+-  CefBrowserHostCppToC::Get(self)->RegisterArkJSfunction(CefString(object_name),
+-                                                         method_listList);
++  CefBrowserHostCppToC::Get(self)->RegisterArkJSfunction(
++      CefString(object_name), method_listList, object_id);
+ }
+ 
+ void CEF_CALLBACK
+@@ -1809,6 +1832,46 @@ browser_host_unregister_ark_jsfunction(struct _cef_browser_host_t* self,
+       CefString(object_name), method_listList);
+ }
+ 
++void CEF_CALLBACK
++browser_host_call_h5function(struct _cef_browser_host_t* self,
++                             int32_t routing_id,
++                             int32_t h5_object_id,
++                             const cef_string_t* h5_method_name,
++                             size_t argsCount,
++                             struct _cef_value_t* const* args) {
++  shutdown_checker::AssertNotShutdown();
++
++  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
++
++  DCHECK(self);
++  if (!self) {
++    return;
++  }
++  // Verify param: h5_method_name; type: string_byref_const
++  DCHECK(h5_method_name);
++  if (!h5_method_name) {
++    return;
++  }
++  // Verify param: args; type: refptr_vec_same_byref_const
++  DCHECK(argsCount == 0 || args);
++  if (argsCount > 0 && !args) {
++    return;
++  }
++
++  // Translate param: args; type: refptr_vec_same_byref_const
++  std::vector<CefRefPtr<CefValue>> argsList;
++  if (argsCount > 0) {
++    for (size_t i = 0; i < argsCount; ++i) {
++      CefRefPtr<CefValue> argsVal = CefValueCppToC::Unwrap(args[i]);
++      argsList.push_back(argsVal);
++    }
++  }
++
++  // Execute
++  CefBrowserHostCppToC::Get(self)->CallH5Function(
++      routing_id, h5_object_id, CefString(h5_method_name), argsList);
++}
++
+ void CEF_CALLBACK browser_host_store_web_archive(
+     struct _cef_browser_host_t* self,
+     const cef_string_t* base_name,
+@@ -2514,6 +2577,217 @@ void CEF_CALLBACK browser_host_set_token(struct _cef_browser_host_t* self,
+   CefBrowserHostCppToC::Get(self)->SetToken(token);
+ }
+ 
++void CEF_CALLBACK
++browser_host_set_virtual_key_board_arg(struct _cef_browser_host_t* self,
++                                       int32_t width,
++                                       int32_t height,
++                                       double keyboard) {
++  shutdown_checker::AssertNotShutdown();
++
++  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
++
++  DCHECK(self);
++  if (!self) {
++    return;
++  }
++
++  // Execute
++  CefBrowserHostCppToC::Get(self)->SetVirtualKeyBoardArg(width, height,
++                                                         keyboard);
++}
++
++int CEF_CALLBACK
++browser_host_should_virtual_keyboard_overlay(struct _cef_browser_host_t* self) {
++  shutdown_checker::AssertNotShutdown();
++
++  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
++
++  DCHECK(self);
++  if (!self) {
++    return 0;
++  }
++
++  // Execute
++  bool _retval =
++      CefBrowserHostCppToC::Get(self)->ShouldVirtualKeyboardOverlay();
++
++  // Return type: bool
++  return _retval;
++}
++
++void CEF_CALLBACK
++browser_host_java_script_on_document_start(struct _cef_browser_host_t* self,
++                                           const cef_string_t* script,
++                                           cef_string_list_t script_rules) {
++  shutdown_checker::AssertNotShutdown();
++
++  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
++
++  DCHECK(self);
++  if (!self) {
++    return;
++  }
++  // Verify param: script; type: string_byref_const
++  DCHECK(script);
++  if (!script) {
++    return;
++  }
++  // Verify param: script_rules; type: string_vec_byref_const
++  DCHECK(script_rules);
++  if (!script_rules) {
++    return;
++  }
++
++  // Translate param: script_rules; type: string_vec_byref_const
++  std::vector<CefString> script_rulesList;
++  transfer_string_list_contents(script_rules, script_rulesList);
++
++  // Execute
++  CefBrowserHostCppToC::Get(self)->JavaScriptOnDocumentStart(CefString(script),
++                                                             script_rulesList);
++}
++
++void CEF_CALLBACK browser_host_remove_java_script_on_document_start(
++    struct _cef_browser_host_t* self) {
++  shutdown_checker::AssertNotShutdown();
++
++  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
++
++  DCHECK(self);
++  if (!self) {
++    return;
++  }
++
++  // Execute
++  CefBrowserHostCppToC::Get(self)->RemoveJavaScriptOnDocumentStart();
++}
++
++void CEF_CALLBACK browser_host_set_draw_rect(struct _cef_browser_host_t* self,
++                                             int x,
++                                             int y,
++                                             int width,
++                                             int height) {
++  shutdown_checker::AssertNotShutdown();
++
++  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
++
++  DCHECK(self);
++  if (!self) {
++    return;
++  }
++
++  // Execute
++  CefBrowserHostCppToC::Get(self)->SetDrawRect(x, y, width, height);
++}
++
++void CEF_CALLBACK browser_host_set_draw_mode(struct _cef_browser_host_t* self,
++                                             int mode) {
++  shutdown_checker::AssertNotShutdown();
++
++  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
++
++  DCHECK(self);
++  if (!self) {
++    return;
++  }
++
++  // Execute
++  CefBrowserHostCppToC::Get(self)->SetDrawMode(mode);
++}
++
++void CEF_CALLBACK
++browser_host_create_web_print_document_adapter(struct _cef_browser_host_t* self,
++                                               const cef_string_t* jobName,
++                                               void** webPrintDocumentAdapter) {
++  shutdown_checker::AssertNotShutdown();
++
++  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
++
++  DCHECK(self);
++  if (!self) {
++    return;
++  }
++  // Verify param: jobName; type: string_byref_const
++  DCHECK(jobName);
++  if (!jobName) {
++    return;
++  }
++  // Verify param: webPrintDocumentAdapter; type: simple_byaddr
++  DCHECK(webPrintDocumentAdapter);
++  if (!webPrintDocumentAdapter) {
++    return;
++  }
++
++  // Execute
++  CefBrowserHostCppToC::Get(self)->CreateWebPrintDocumentAdapter(
++      CefString(jobName), webPrintDocumentAdapter);
++}
++
++void CEF_CALLBACK
++browser_host_set_overscroll_mode(struct _cef_browser_host_t* self, int mode) {
++  shutdown_checker::AssertNotShutdown();
++
++  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
++
++  DCHECK(self);
++  if (!self) {
++    return;
++  }
++
++  // Execute
++  CefBrowserHostCppToC::Get(self)->SetOverscrollMode(mode);
++}
++
++int CEF_CALLBACK browser_host_discard(struct _cef_browser_host_t* self) {
++  shutdown_checker::AssertNotShutdown();
++
++  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
++
++  DCHECK(self);
++  if (!self) {
++    return 0;
++  }
++
++  // Execute
++  bool _retval = CefBrowserHostCppToC::Get(self)->Discard();
++
++  // Return type: bool
++  return _retval;
++}
++
++int CEF_CALLBACK browser_host_restore(struct _cef_browser_host_t* self) {
++  shutdown_checker::AssertNotShutdown();
++
++  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
++
++  DCHECK(self);
++  if (!self) {
++    return 0;
++  }
++
++  // Execute
++  bool _retval = CefBrowserHostCppToC::Get(self)->Restore();
++
++  // Return type: bool
++  return _retval;
++}
++
++void CEF_CALLBACK
++browser_host_set_browser_zoom_level(struct _cef_browser_host_t* self,
++                                    double zoomFactor) {
++  shutdown_checker::AssertNotShutdown();
++
++  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
++
++  DCHECK(self);
++  if (!self) {
++    return;
++  }
++
++  // Execute
++  CefBrowserHostCppToC::Get(self)->SetBrowserZoomLevel(zoomFactor);
++}
++
+ }  // namespace
+ 
+ // CONSTRUCTOR - Do not edit by hand.
+@@ -2584,6 +2858,8 @@ CefBrowserHostCppToC::CefBrowserHostCppToC() {
+   GetStruct()->get_visible_navigation_entry =
+       browser_host_get_visible_navigation_entry;
+   GetStruct()->set_accessibility_state = browser_host_set_accessibility_state;
++  GetStruct()->get_or_create_root_browser_accessibility_manager =
++      browser_host_get_or_create_root_browser_accessibility_manager;
+   GetStruct()->set_auto_resize_enabled = browser_host_set_auto_resize_enabled;
+   GetStruct()->get_extension = browser_host_get_extension;
+   GetStruct()->is_background_host = browser_host_is_background_host;
+@@ -2611,6 +2887,7 @@ CefBrowserHostCppToC::CefBrowserHostCppToC() {
+   GetStruct()->register_ark_jsfunction = browser_host_register_ark_jsfunction;
+   GetStruct()->unregister_ark_jsfunction =
+       browser_host_unregister_ark_jsfunction;
++  GetStruct()->call_h5function = browser_host_call_h5function;
+   GetStruct()->store_web_archive = browser_host_store_web_archive;
+   GetStruct()->was_keyboard_resized = browser_host_was_keyboard_resized;
+   GetStruct()->set_enable_lower_frame_rate =
+@@ -2650,6 +2927,22 @@ CefBrowserHostCppToC::CefBrowserHostCppToC() {
+   GetStruct()->zoom_by = browser_host_zoom_by;
+   GetStruct()->set_window_id = browser_host_set_window_id;
+   GetStruct()->set_token = browser_host_set_token;
++  GetStruct()->set_virtual_key_board_arg =
++      browser_host_set_virtual_key_board_arg;
++  GetStruct()->should_virtual_keyboard_overlay =
++      browser_host_should_virtual_keyboard_overlay;
++  GetStruct()->java_script_on_document_start =
++      browser_host_java_script_on_document_start;
++  GetStruct()->remove_java_script_on_document_start =
++      browser_host_remove_java_script_on_document_start;
++  GetStruct()->set_draw_rect = browser_host_set_draw_rect;
++  GetStruct()->set_draw_mode = browser_host_set_draw_mode;
++  GetStruct()->create_web_print_document_adapter =
++      browser_host_create_web_print_document_adapter;
++  GetStruct()->set_overscroll_mode = browser_host_set_overscroll_mode;
++  GetStruct()->discard = browser_host_discard;
++  GetStruct()->restore = browser_host_restore;
++  GetStruct()->set_browser_zoom_level = browser_host_set_browser_zoom_level;
+ }
+ 
+ // DESTRUCTOR - Do not edit by hand.
+diff --git a/src/cef/libcef_dll/cpptoc/client_cpptoc.cc b/src/cef/libcef_dll/cpptoc/client_cpptoc.cc
+index 7d439a6b708f6..62b9b0a30ff65
+--- a/src/cef/libcef_dll/cpptoc/client_cpptoc.cc
++++ b/src/cef/libcef_dll/cpptoc/client_cpptoc.cc
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=2a2f24633a556fdc1c99519caafe0c880c6f02ad$
++// $hash=b8345073459cc202d98bf18e2e59067b8df79c69$
+ //
+ 
+ #include "libcef_dll/cpptoc/client_cpptoc.h"
+@@ -38,6 +38,7 @@
+ #include "libcef_dll/ctocpp/frame_ctocpp.h"
+ #include "libcef_dll/ctocpp/list_value_ctocpp.h"
+ #include "libcef_dll/ctocpp/process_message_ctocpp.h"
++#include "libcef_dll/ctocpp/value_ctocpp.h"
+ 
+ namespace {
+ 
+@@ -425,7 +426,9 @@ client_notify_java_script_result(struct _cef_client_t* self,
+                                  struct _cef_list_value_t* args,
+                                  const cef_string_t* method,
+                                  const cef_string_t* object_name,
+-                                 struct _cef_list_value_t* result) {
++                                 struct _cef_list_value_t* result,
++                                 int32_t routing_id,
++                                 int32_t object_id) {
+   // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
+ 
+   DCHECK(self);
+@@ -456,12 +459,85 @@ client_notify_java_script_result(struct _cef_client_t* self,
+   // Execute
+   int _retval = CefClientCppToC::Get(self)->NotifyJavaScriptResult(
+       CefListValueCToCpp::Wrap(args), CefString(method), CefString(object_name),
+-      CefListValueCToCpp::Wrap(result));
++      CefListValueCToCpp::Wrap(result), routing_id, object_id);
+ 
+   // Return type: simple
+   return _retval;
+ }
+ 
++int CEF_CALLBACK
++client_has_java_script_object_methods(struct _cef_client_t* self,
++                                      int32_t object_id,
++                                      const cef_string_t* method_name) {
++  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
++
++  DCHECK(self);
++  if (!self) {
++    return 0;
++  }
++  // Verify param: method_name; type: string_byref_const
++  DCHECK(method_name);
++  if (!method_name) {
++    return 0;
++  }
++
++  // Execute
++  bool _retval = CefClientCppToC::Get(self)->HasJavaScriptObjectMethods(
++      object_id, CefString(method_name));
++
++  // Return type: bool
++  return _retval;
++}
++
++void CEF_CALLBACK client_get_java_script_object_methods(
++    struct _cef_client_t* self,
++    int32_t object_id,
++    struct _cef_value_t* returned_method_names) {
++  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
++
++  DCHECK(self);
++  if (!self) {
++    return;
++  }
++  // Verify param: returned_method_names; type: refptr_diff
++  DCHECK(returned_method_names);
++  if (!returned_method_names) {
++    return;
++  }
++
++  // Execute
++  CefClientCppToC::Get(self)->GetJavaScriptObjectMethods(
++      object_id, CefValueCToCpp::Wrap(returned_method_names));
++}
++
++void CEF_CALLBACK
++client_remove_java_script_object_holder(struct _cef_client_t* self,
++                                        int32_t holder,
++                                        int32_t object_id) {
++  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
++
++  DCHECK(self);
++  if (!self) {
++    return;
++  }
++
++  // Execute
++  CefClientCppToC::Get(self)->RemoveJavaScriptObjectHolder(holder, object_id);
++}
++
++void CEF_CALLBACK
++client_remove_transient_java_script_object(struct _cef_client_t* self) {
++  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
++
++  DCHECK(self);
++  if (!self) {
++    return;
++  }
++
++  // Execute
++  CefClientCppToC::Get(self)->RemoveTransientJavaScriptObject();
++}
++
+ struct _cef_form_handler_t* CEF_CALLBACK
+ client_get_form_handler(struct _cef_client_t* self) {
+   // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
+@@ -479,6 +555,53 @@ client_get_form_handler(struct _cef_client_t* self) {
+   return CefFormHandlerCppToC::Wrap(_retval);
+ }
+ 
++void CEF_CALLBACK client_on_top_controls_changed(struct _cef_client_t* self,
++                                                 float top_controls_offset,
++                                                 float top_content_offset) {
++  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
++
++  DCHECK(self);
++  if (!self) {
++    return;
++  }
++
++  // Execute
++  CefClientCppToC::Get(self)->OnTopControlsChanged(top_controls_offset,
++                                                   top_content_offset);
++}
++
++int CEF_CALLBACK client_on_get_top_controls_height(struct _cef_client_t* self) {
++  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
++
++  DCHECK(self);
++  if (!self) {
++    return 0;
++  }
++
++  // Execute
++  int _retval = CefClientCppToC::Get(self)->OnGetTopControlsHeight();
++
++  // Return type: simple
++  return _retval;
++}
++
++int CEF_CALLBACK
++client_do_browser_controls_shrink_renderer_size(struct _cef_client_t* self) {
++  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
++
++  DCHECK(self);
++  if (!self) {
++    return 0;
++  }
++
++  // Execute
++  bool _retval =
++      CefClientCppToC::Get(self)->DoBrowserControlsShrinkRendererSize();
++
++  // Return type: bool
++  return _retval;
++}
++
+ }  // namespace
+ 
+ // CONSTRUCTOR - Do not edit by hand.
+@@ -506,7 +629,19 @@ CefClientCppToC::CefClientCppToC() {
+   GetStruct()->get_permission_request = client_get_permission_request;
+   GetStruct()->get_media_handler = client_get_media_handler;
+   GetStruct()->notify_java_script_result = client_notify_java_script_result;
++  GetStruct()->has_java_script_object_methods =
++      client_has_java_script_object_methods;
++  GetStruct()->get_java_script_object_methods =
++      client_get_java_script_object_methods;
++  GetStruct()->remove_java_script_object_holder =
++      client_remove_java_script_object_holder;
++  GetStruct()->remove_transient_java_script_object =
++      client_remove_transient_java_script_object;
+   GetStruct()->get_form_handler = client_get_form_handler;
++  GetStruct()->on_top_controls_changed = client_on_top_controls_changed;
++  GetStruct()->on_get_top_controls_height = client_on_get_top_controls_height;
++  GetStruct()->do_browser_controls_shrink_renderer_size =
++      client_do_browser_controls_shrink_renderer_size;
+ }
+ 
+ // DESTRUCTOR - Do not edit by hand.
+diff --git a/src/cef/libcef_dll/cpptoc/cookie_manager_cpptoc.cc b/src/cef/libcef_dll/cpptoc/cookie_manager_cpptoc.cc
+index 563b22d68330c..a58fb969a29c9
+--- a/src/cef/libcef_dll/cpptoc/cookie_manager_cpptoc.cc
++++ b/src/cef/libcef_dll/cpptoc/cookie_manager_cpptoc.cc
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=9ea3fda71ef22ad84ebd1773a4be6f4b5d9fc42f$
++// $hash=5b06383d5d7c493d11c6f00ee953216d043995bb$
+ //
+ 
+ #include "libcef_dll/cpptoc/cookie_manager_cpptoc.h"
+@@ -145,7 +145,8 @@ cookie_manager_set_cookie(struct _cef_cookie_manager_t* self,
+                           const cef_string_t* url,
+                           const struct _cef_cookie_t* cookie,
+                           struct _cef_set_cookie_callback_t* callback,
+-                          int is_sync) {
++                          int is_sync,
++                          const cef_string_t* str_cookie) {
+   // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
+ 
+   DCHECK(self);
+@@ -166,6 +167,11 @@ cookie_manager_set_cookie(struct _cef_cookie_manager_t* self,
+     DCHECK(false) << "invalid cookie->[base.]size";
+     return 0;
+   }
++  // Verify param: str_cookie; type: string_byref_const
++  DCHECK(str_cookie);
++  if (!str_cookie) {
++    return 0;
++  }
+   // Unverified params: callback
+ 
+   // Translate param: cookie; type: struct_byref_const
+@@ -177,7 +183,7 @@ cookie_manager_set_cookie(struct _cef_cookie_manager_t* self,
+   // Execute
+   bool _retval = CefCookieManagerCppToC::Get(self)->SetCookie(
+       CefString(url), cookieObj, CefSetCookieCallbackCToCpp::Wrap(callback),
+-      is_sync ? true : false);
++      is_sync ? true : false, CefString(str_cookie));
+ 
+   // Return type: bool
+   return _retval;
+diff --git a/src/cef/libcef_dll/cpptoc/display_handler_cpptoc.cc b/src/cef/libcef_dll/cpptoc/display_handler_cpptoc.cc
+index 513181bba975a..51993a5243123
+--- a/src/cef/libcef_dll/cpptoc/display_handler_cpptoc.cc
++++ b/src/cef/libcef_dll/cpptoc/display_handler_cpptoc.cc
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=7f431bd32d9908a4e1e2ac2fca6d0bdf6196892e$
++// $hash=5fd828fae057aa3e5414fc1cbe9e1685a1350cf7$
+ //
+ 
+ #include "libcef_dll/cpptoc/display_handler_cpptoc.h"
+@@ -448,6 +448,24 @@ display_handler_on_scale_changed(struct _cef_display_handler_t* self,
+       new_page_scale_factor);
+ }
+ 
++void CEF_CALLBACK display_handler_on_contents_browser_zoom_change(
++    struct _cef_display_handler_t* self,
++    double zoom_factor,
++    int can_show_bubble) {
++  shutdown_checker::AssertNotShutdown();
++
++  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
++
++  DCHECK(self);
++  if (!self) {
++    return;
++  }
++
++  // Execute
++  CefDisplayHandlerCppToC::Get(self)->OnContentsBrowserZoomChange(
++      zoom_factor, can_show_bubble ? true : false);
++}
++
+ }  // namespace
+ 
+ // CONSTRUCTOR - Do not edit by hand.
+@@ -471,6 +489,8 @@ CefDisplayHandlerCppToC::CefDisplayHandlerCppToC() {
+   GetStruct()->on_received_icon = display_handler_on_received_icon;
+   GetStruct()->on_received_icon_url = display_handler_on_received_icon_url;
+   GetStruct()->on_scale_changed = display_handler_on_scale_changed;
++  GetStruct()->on_contents_browser_zoom_change =
++      display_handler_on_contents_browser_zoom_change;
+ }
+ 
+ // DESTRUCTOR - Do not edit by hand.
