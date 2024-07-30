@@ -8509,3 +8509,1756 @@ index e0c6b790c72ef..7d2a1bddcfabb
    // We keep track of the RenderWidgetHost from which the current drag started,
    // in order to properly route the drag end message to it.
    base::WeakPtr<content::RenderWidgetHostImpl> drag_start_rwh_;
+diff --git a/src/cef/libcef/browser/osr/render_widget_host_view_osr.cc b/src/cef/libcef/browser/osr/render_widget_host_view_osr.cc
+index 4b1603359731b..1a17961a57fc2
+--- a/src/cef/libcef/browser/osr/render_widget_host_view_osr.cc
++++ b/src/cef/libcef/browser/osr/render_widget_host_view_osr.cc
+@@ -32,6 +32,7 @@
+ #include "content/browser/renderer_host/cursor_manager.h"
+ #include "content/browser/renderer_host/delegated_frame_host.h"
+ #include "content/browser/renderer_host/dip_util.h"
++#include "content/browser/renderer_host/frame_tree.h"
+ #include "content/browser/renderer_host/input/motion_event_web.h"
+ #include "content/browser/renderer_host/input/synthetic_gesture_target_base.h"
+ #include "content/browser/renderer_host/render_widget_host_delegate.h"
+@@ -54,7 +55,12 @@
+ #include "ui/gfx/geometry/size_conversions.h"
+ #include "ui/touch_selection/touch_selection_controller.h"
+ 
++#ifdef OHOS_EX_TOPCONTROLS
++#include "content/browser/renderer_host/render_view_host_delegate_view.h"
++#endif
++
+ #if BUILDFLAG(IS_OHOS)
++#include "content/browser/renderer_host/render_view_host_delegate_view.h"
+ #include "services/device/public/mojom/screen_orientation.mojom.h"
+ 
+ // static
+@@ -257,6 +263,11 @@ CefRenderWidgetHostViewOSR::CefRenderWidgetHostViewOSR(
+   DCHECK(render_widget_host_);
+   DCHECK(!render_widget_host_->GetView());
+ 
++#ifdef OHOS_EX_TOPCONTROLS
++  for_browser_ =
++      base::CommandLine::ForCurrentProcess()->HasSwitch(switches::kForBrowser);
++#endif
++
+   if (parent_host_view_) {
+     browser_impl_ = parent_host_view_->browser_impl();
+     DCHECK(browser_impl_);
+@@ -528,7 +539,13 @@ void CefRenderWidgetHostViewOSR::ShowWithVisibility(
+ #else
+     delegated_frame_host_->AttachToCompositor(compositor);
+ #endif
+-    delegated_frame_host_->WasShown(GetLocalSurfaceId(), GetViewBounds().size(),
++
++    delegated_frame_host_->WasShown(GetLocalSurfaceId(),
++#ifdef OHOS_EX_TOPCONTROLS
++                                    GetPhysicalViewBounds().size(),
++#else
++                                    GetViewBounds().size(),
++#endif
+                                     /*record_tab_switch_time_request=*/{});
+   }
+ 
+@@ -610,6 +627,25 @@ CefRenderWidgetHostViewOSR::GetTouchSelectionControllerClientManager() {
+   return selection_controller_client_.get();
+ }
+ 
++#ifdef OHOS_EX_TOPCONTROLS
++gfx::Rect CefRenderWidgetHostViewOSR::GetPhysicalViewBounds() {
++  // the physical view bounds means the size and position information
++  // of the device, utilized for the root layer and surface.
++  if (IsPopupWidget()) {
++    return popup_position_;
++  }
++
++  return current_view_bounds_;
++}
++
++gfx::Rect CefRenderWidgetHostViewOSR::GetViewBounds() {
++  // the view bounds refers to the size of the viewport
++  // area where the webpage is drawn and rendered.
++  gfx::Rect bounds = GetPhysicalViewBounds();
++  bounds.set_height(bounds.height() - GetShrinkViewportHeight());
++  return bounds;
++}
++#else
+ gfx::Rect CefRenderWidgetHostViewOSR::GetViewBounds() {
+   if (IsPopupWidget()) {
+     return popup_position_;
+@@ -617,6 +653,7 @@ gfx::Rect CefRenderWidgetHostViewOSR::GetViewBounds() {
+ 
+   return current_view_bounds_;
+ }
++#endif
+ 
+ void CefRenderWidgetHostViewOSR::SetBackgroundColor(SkColor color) {
+   // The renderer will feed its color back to us with the first CompositorFrame.
+@@ -893,8 +930,13 @@ void CefRenderWidgetHostViewOSR::UpdateTooltipUnderCursor(
+ }
+ 
+ gfx::Size CefRenderWidgetHostViewOSR::GetCompositorViewportPixelSize() {
++#ifdef OHOS_EX_TOPCONTROLS
++  return gfx::ScaleToCeiledSize(GetPhysicalViewBounds().size(),
++                                GetDeviceScaleFactor());
++#else
+   return gfx::ScaleToCeiledSize(GetRequestedRendererSize(),
+                                 GetDeviceScaleFactor());
++#endif
+ }
+ 
+ uint32_t CefRenderWidgetHostViewOSR::GetCaptureSequenceNumber() const {
+@@ -960,7 +1002,11 @@ display::ScreenInfos CefRenderWidgetHostViewOSR::GetNewScreenInfosForUpdate() {
+ }
+ 
+ void CefRenderWidgetHostViewOSR::TransformPointToRootSurface(
+-    gfx::PointF* point) {}
++    gfx::PointF* point) {
++#ifdef OHOS_EX_TOPCONTROLS
++  *point += gfx::Vector2d(0, GetShrinkViewportHeight());
++#endif
++}
+ 
+ gfx::Rect CefRenderWidgetHostViewOSR::GetBoundsInRootWindow() {
+   if (!browser_impl_.get()) {
+@@ -985,6 +1031,20 @@ void CefRenderWidgetHostViewOSR::SendInternalBeginFrame() {
+     compositor->SendInternalBeginFrame();
+   }
+ }
++
++void CefRenderWidgetHostViewOSR::SetDrawRect(const gfx::Rect& rect) {
++  if (auto compositor = CefRenderWidgetHostViewOSR::GetCompositor(
++            browser_impl_->GetAcceleratedWidget())) {
++    compositor->SetDrawRect(rect);
++  }
++}
++
++void CefRenderWidgetHostViewOSR::SetDrawMode(int mode) {
++  if (auto compositor = CefRenderWidgetHostViewOSR::GetCompositor(
++            browser_impl_->GetAcceleratedWidget())) {
++    compositor->SetDrawMode(mode);
++  }
++}
+ #endif
+ 
+ #if !BUILDFLAG(IS_MAC)
+@@ -1205,6 +1265,25 @@ void CefRenderWidgetHostViewOSR::OnFrameComplete(
+   begin_frame_pending_ = false;
+ }
+ 
++#ifdef OHOS_EX_TOPCONTROLS
++void CefRenderWidgetHostViewOSR::OnRenderFrameMetadataChangedBeforeActivation(
++    const cc::RenderFrameMetadata& metadata) {
++  float top_content_offset = metadata.top_controls_height *
++                             metadata.top_controls_shown_ratio /
++                             metadata.device_scale_factor;
++  float top_controls_offset =
++      top_content_offset -
++      metadata.top_controls_height / metadata.device_scale_factor;
++
++  if (top_content_offset != prev_top_content_offset_ ||
++      top_controls_offset != prev_top_controls_offset_) {
++    prev_top_content_offset_ = top_content_offset;
++    prev_top_controls_offset_ = top_controls_offset;
++    OnTopControlsChanged(prev_top_controls_offset_, prev_top_content_offset_);
++  }
++}
++#endif
++
+ void CefRenderWidgetHostViewOSR::OnRenderFrameMetadataChangedAfterActivation(
+     base::TimeTicks activation_time) {
+   auto metadata =
+@@ -1257,12 +1336,16 @@ void CefRenderWidgetHostViewOSR::OnRenderFrameMetadataChangedAfterActivation(
+   }
+ 
+   gfx::Size viewport_size_in_pixels = metadata.viewport_size_in_pixels;
+-  if (viewport_size_in_pixels != viewport_size_in_pixels_) {
+-    TRACE_EVENT1("cef",
++  float device_scale_factor = metadata.device_scale_factor;
++  if (viewport_size_in_pixels != viewport_size_in_pixels_ ||
++      device_scale_factor != device_scale_factor_) {
++    TRACE_EVENT2("cef",
+                  "CefRenderWidgetHostViewOSR::"
+                  "OnRenderFrameMetadataChangedAfterActivation",
+-                 "viewport_size_in_pixels", viewport_size_in_pixels.ToString());
++                 "viewport_size_in_pixels", viewport_size_in_pixels.ToString(),
++                 "device_scale_factor", device_scale_factor);
+     viewport_size_in_pixels_ = viewport_size_in_pixels;
++    device_scale_factor_ = device_scale_factor;
+     CEF_POST_TASK(CEF_UIT,
+                   base::BindOnce(&CefRenderWidgetHostViewOSR::ReleaseResizeHold,
+                                  weak_ptr_factory_.GetWeakPtr()));
+@@ -1292,6 +1375,20 @@ void CefRenderWidgetHostViewOSR::OnRenderFrameMetadataChangedAfterActivation(
+     selection_controller_client_->UpdateClientSelectionBounds(selection_start_,
+                                                               selection_end_);
+   }
++
++#ifdef OHOS_EX_TOPCONTROLS
++  if (for_browser_) {
++    // Set parameters for adaptive handle orientation.
++    gfx::SizeF viewport_size(metadata.scrollable_viewport_size);
++    viewport_size.Scale(page_scale_factor_);
++    gfx::RectF viewport_rect(0.0f,
++                             metadata.top_controls_height *
++                                 metadata.top_controls_shown_ratio /
++                                 metadata.device_scale_factor,
++                             viewport_size.width(), viewport_size.height());
++    selection_controller_->OnViewportChanged(viewport_rect);
++  }
++#endif
+ }
+ 
+ std::unique_ptr<viz::HostDisplayClient>
+@@ -1358,11 +1455,40 @@ void CefRenderWidgetHostViewOSR::SetShouldFrameSubmissionBeforeDraw(
+       "base", "CefRenderWidgetHostViewOSR::SetShouldFrameSubmissionBeforeDraw");
+   should_wait_ = should;
+ }
++
++void CefRenderWidgetHostViewOSR::WasKeyboardResized() {
++  UpdateEditBounds();
++  if (is_select_text_) {
++    auto processedOffset = HandleCursorOffset();
++    CefRefPtr<CefRenderHandler> handler =
++        browser_impl_->GetClient()->GetRenderHandler();
++    CHECK(handler);
++    handler->OnCursorUpdate(
++        browser_impl_->GetBrowser(),
++        CefRect(processedOffset.first, processedOffset.second,
++                focus_rect_width_, focus_rect_height_));
++  }
++  // Only one resize will be in-flight at a time.
++  if (hold_resize_) {
++    if (!pending_resize_)
++      pending_resize_ = true;
++    return;
++  }
++ 
++  bool isKeyboardResized = true;
++  SynchronizeVisualProperties(cc::DeadlinePolicy::UseExistingDeadline(),
++                              absl::nullopt, isKeyboardResized);
++}
+ #endif  // defined(OHOS_COMPOSITE_RENDER)
+ 
+ void CefRenderWidgetHostViewOSR::SynchronizeVisualProperties(
+     const cc::DeadlinePolicy& deadline_policy,
++#if defined(OHOS_COMPOSITE_RENDER)
++    const absl::optional<viz::LocalSurfaceId>& child_local_surface_id,
++    bool isKeyboard) {
++#else
+     const absl::optional<viz::LocalSurfaceId>& child_local_surface_id) {
++#endif  // defined(OHOS_COMPOSITE_RENDER)
+   SetFrameRate();
+ 
+   const bool resized = ResizeRootLayer();
+@@ -1391,13 +1517,25 @@ void CefRenderWidgetHostViewOSR::SynchronizeVisualProperties(
+   }
+ 
+   if (surface_id_updated) {
++#ifdef OHOS_EX_TOPCONTROLS
++    delegated_frame_host_->EmbedSurface(GetCurrentLocalSurfaceId(),
++                                        GetPhysicalViewBounds().size(),
++                                        deadline_policy);
++#else
+     delegated_frame_host_->EmbedSurface(
+         GetCurrentLocalSurfaceId(), GetViewBounds().size(), deadline_policy);
+-
++#endif
+     // |render_widget_host_| will retrieve resize parameters from the
+     // DelegatedFrameHost and this view, so SynchronizeVisualProperties must be
+     // called last.
+     if (render_widget_host_) {
++#if defined(OHOS_COMPOSITE_RENDER)
++      if (isKeyboard) {
++        LOG(INFO) << "scroll focused node into view";
++        render_widget_host_->SynchronizeVisualProperties(isKeyboard);
++        return;
++      }
++#endif  // defined(OHOS_COMPOSITE_RENDER)
+       render_widget_host_->SynchronizeVisualProperties();
+     }
+   }
+@@ -1703,6 +1841,7 @@ void CefRenderWidgetHostViewOSR::SendTouchEvent(const CefTouchEvent& event) {
+ 
+   // Update the touch event first.
+ #ifdef OHOS_CLIPBOARD
++  bool had_no_pointer = !pointer_state_.GetPointerCount();
+   pointer_state_.SetFromOverlay(event.from_overlay);
+ #endif  // #ifdef OHOS_CLIPBOARD
+   if (!pointer_state_.OnTouch(event)) {
+@@ -1722,6 +1861,16 @@ void CefRenderWidgetHostViewOSR::SendTouchEvent(const CefTouchEvent& event) {
+ 
+   pointer_state_.CleanupRemovedTouchPoints(event);
+ 
++#ifdef OHOS_CLIPBOARD
++  if (had_no_pointer && !event.from_overlay) {
++    selection_controller_client_->OnTouchDown();
++  }
++ 
++  if (!pointer_state_.GetPointerCount() && !event.from_overlay) {
++    selection_controller_client_->OnTouchUp();
++  }
++#endif  // #ifdef OHOS_CLIPBOARD
++
+   // Set unchanged touch point to StateStationary for touchmove and
+   // touchcancel to make sure only send one ack per WebTouchEvent.
+   if (!result.succeeded) {
+@@ -1814,7 +1963,6 @@ void CefRenderWidgetHostViewOSR::OnUpdateTextInputStateCalled(
+       browser_impl_->GetClient()->GetRenderHandler();
+   CHECK(handler);
+ 
+-  InitHideKeyboardFlag();
+   if (state && state->type != ui::TEXT_INPUT_TYPE_NONE) {
+     static_assert(
+         static_cast<int>(CEF_TEXT_INPUT_MODE_MAX) ==
+@@ -1823,8 +1971,6 @@ void CefRenderWidgetHostViewOSR::OnUpdateTextInputStateCalled(
+     mode = static_cast<CefRenderHandler::TextInputMode>(state->mode);
+     type = static_cast<CefRenderHandler::TextInputType>(state->type);
+     show_keyboard = state->show_ime_if_needed;
+-    is_need_hide_keyboard_ = false;
+-    lastHideKeyboardTime_ = std::chrono::high_resolution_clock::now();
+   }
+   if (state && !state->show_ime_if_needed && did_update_state) {
+     LOG(INFO) << "Autofocus requires a keyboard to be bound, "
+@@ -1847,13 +1993,10 @@ void CefRenderWidgetHostViewOSR::OnUpdateTextInputStateCalled(
+     // TODO(OHOS) Specific implementation needs to be completed
+     handler->OnVirtualKeyboardRequested(browser_impl_->GetBrowser(), mode, type,
+                                         show_keyboard);
+-  } else if (!state || mode == CEF_TEXT_INPUT_MODE_NONE) {
+-    CEF_POST_DELAYED_TASK(
+-      CEF_UIT,
+-      base::BindOnce(
+-          &CefRenderWidgetHostViewOSR::HideVirtualKeyboardRequested,
+-          weak_ptr_factory_.GetWeakPtr()),
+-      20);
++  } else if ((!state || mode == CEF_TEXT_INPUT_MODE_NONE) && !is_editable_node_) {
++    handler->OnVirtualKeyboardRequested(browser_impl_->GetBrowser(),
++                                        CEF_TEXT_INPUT_MODE_NONE,
++                                        CEF_TEXT_INPUT_TYPE_NONE, false);
+   }
+ #else
+   const auto state = text_input_manager->GetTextInputState();
+@@ -1878,30 +2021,6 @@ void CefRenderWidgetHostViewOSR::OnUpdateTextInputStateCalled(
+ #endif  // defined(OHOS_INPUT_EVENTS)
+ }
+ 
+-#if defined(OHOS_INPUT_EVENTS)
+-void CefRenderWidgetHostViewOSR::HideVirtualKeyboardRequested() {
+-  if (is_need_hide_keyboard_) {
+-    CefRefPtr<CefRenderHandler> handler =
+-    browser_impl_->GetClient()->GetRenderHandler();
+-    CHECK(handler);
+-    handler->OnVirtualKeyboardRequested(browser_impl_->GetBrowser(),
+-                                        CEF_TEXT_INPUT_MODE_NONE,
+-                                        CEF_TEXT_INPUT_TYPE_NONE, false);
+-  }
+-  is_need_hide_keyboard_ = true;
+-}
+-
+-void CefRenderWidgetHostViewOSR::InitHideKeyboardFlag() {
+-  auto nowTime = std::chrono::high_resolution_clock::now();
+-    std::chrono::duration<double, std::milli> diff =
+-        std::chrono::duration_cast<std::chrono::milliseconds>(
+-            nowTime - lastHideKeyboardTime_);
+-  if (diff.count() >= 20) {
+-    is_need_hide_keyboard_ = true;
+-  }
+-}
+-#endif  // defined(OHOS_INPUT_EVENTS)
+-
+ void CefRenderWidgetHostViewOSR::ProcessAckedTouchEvent(
+     const content::TouchEventWithLatencyInfo& touch,
+     blink::mojom::InputEventResultState ack_result) {
+@@ -1936,7 +2055,9 @@ void CefRenderWidgetHostViewOSR::OnGestureEvent(
+       !pinch_zoom_enabled_) {
+     return;
+   }
+-
++#if defined(OHOS_INPUT_EVENTS)
++  FilterScrollEventImpl(gesture);
++#endif
+ #if BUILDFLAG(IS_OHOS) && defined(OHOS_PERFORMANCE_JITTER)
+   if (gesture.type() == ui::ET_GESTURE_SCROLL_BEGIN) {
+     gesture_update_count_ = 0;
+@@ -1989,7 +2110,12 @@ void CefRenderWidgetHostViewOSR::UpdateFrameRate() {
+ }
+ 
+ gfx::Size CefRenderWidgetHostViewOSR::SizeInPixels() {
++#ifdef OHOS_EX_TOPCONTROLS
++  return gfx::ScaleToCeiledSize(GetPhysicalViewBounds().size(),
++                                GetDeviceScaleFactor());
++#else
+   return gfx::ScaleToCeiledSize(GetViewBounds().size(), GetDeviceScaleFactor());
++#endif
+ }
+ 
+ #if BUILDFLAG(IS_MAC)
+@@ -2050,8 +2176,13 @@ void CefRenderWidgetHostViewOSR::OnPaint(const gfx::Rect& damage_rect,
+   // Release the resize hold when we reach the desired size.
+   if (hold_resize_) {
+     DCHECK_GT(cached_scale_factor_, 0);
++#ifdef OHOS_EX_TOPCONTROLS
++    gfx::Size expected_size = gfx::ScaleToCeiledSize(
++        GetPhysicalViewBounds().size(), cached_scale_factor_);
++#else
+     gfx::Size expected_size =
+         gfx::ScaleToCeiledSize(GetViewBounds().size(), cached_scale_factor_);
++#endif
+     if (pixel_size == expected_size) {
+       ReleaseResizeHold();
+     }
+@@ -2162,7 +2293,11 @@ bool CefRenderWidgetHostViewOSR::SetRootLayerSize(bool force) {
+     return false;
+   }
+ 
++#ifdef OHOS_EX_TOPCONTROLS
++  GetRootLayer()->SetBounds(gfx::Rect(GetPhysicalViewBounds().size()));
++#else
+   GetRootLayer()->SetBounds(gfx::Rect(GetViewBounds().size()));
++#endif
+ 
+ #ifdef DISABLE_GPU
+   if (compositor_) {
+@@ -2366,6 +2501,12 @@ std::u16string CefRenderWidgetHostViewOSR::GetSelectedText() {
+   }
+   return std::u16string();
+ }
++
++std::u16string CefRenderWidgetHostViewOSR::GetText() {
++  if (text_input_manager_)
++    return text_input_manager_->GetTextSelection(this)->text();
++  return std::u16string();
++}
+ #endif  // #ifdef OHOS_CLIPBOARD
+ 
+ #if BUILDFLAG(IS_OHOS)
+@@ -2449,9 +2590,6 @@ void CefRenderWidgetHostViewOSR::SelectionBoundsChanged(
+     base::i18n::TextDirection focus_dir,
+     const gfx::Rect& bounding_box,
+     bool is_anchor_first) {
+-  if (last_key_code_ != ui::VKEY_RETURN) {
+-    is_editable_node_ = true;
+-  }
+   if (!browser_impl_) {
+     LOG(ERROR) << "browser_impl_ is nullptr";
+     return;
+@@ -2537,6 +2675,10 @@ void CefRenderWidgetHostViewOSR::DidOverscroll(
+       fling_velocity_y = y;
+       is_fling = false;
+     }
++    fling_velocity_x =
++        params.accumulated_overscroll.x() == 0 ? 0 : fling_velocity_x;
++    fling_velocity_y =
++        params.accumulated_overscroll.y() == 0 ? 0 : fling_velocity_y;
+     handler->OnOverScrollFlingVelocity(browser_impl_.get(), fling_velocity_x,
+                                        fling_velocity_y, is_fling);
+   }
+@@ -2556,24 +2698,137 @@ blink::mojom::InputEventResultState
+ CefRenderWidgetHostViewOSR::FilterInputEvent(
+     const blink::WebInputEvent& input_event) {
+   LOG(DEBUG) << "CefRenderWidgetHostViewOSR::FilterInputEvent";
++
+   if (input_event.GetType() ==
+-      blink::WebInputEvent::Type::kGestureScrollBegin) {
+-    LOG(INFO) << "blink::WebInputEvent::Type::kGestureScrollBegin";
+-    OnScrollState(true);
+-  } else if (input_event.GetType() ==
+-             blink::WebInputEvent::Type::kGestureScrollEnd) {
+-    LOG(INFO) << "blink::WebInputEvent::Type::kGestureScrollEnd";
+-    OnScrollState(false);
++        blink::WebInputEvent::Type::kMouseWheel) {
++    is_mouse_wheel_scroll_ = true;
+   }
+-  return blink::mojom::InputEventResultState::kNotConsumed;
+-}
+ 
+-void CefRenderWidgetHostViewOSR::OnScrollState(bool scroll_state) {
+-  if (browser_impl_.get()) {
++  if (browser_impl_.get() && input_event.IsGestureScroll()) {
+     CefRefPtr<CefRenderHandler> handler =
+         browser_impl_->client()->GetRenderHandler();
+     CHECK(handler);
+-    handler->OnScrollState(browser_impl_.get(), scroll_state);
++    blink::WebGestureEvent gesture_event =
++        static_cast<const blink::WebGestureEvent&>(input_event);
++    if (input_event.GetType() ==
++        blink::WebInputEvent::Type::kGestureScrollBegin) {
++      is_scroll_consumed_ = false;
++      handler->OnScrollState(browser_impl_.get(), true);
++    } else if (input_event.GetType() ==
++               blink::WebInputEvent::Type::kGestureScrollEnd) {
++      is_scroll_consumed_ = false;
++      handler->OnScrollState(browser_impl_.get(), false);
++    } else if (input_event.GetType() ==
++               blink::WebInputEvent::Type::kGestureScrollUpdate &&
++               is_mouse_wheel_scroll_) {
++      is_scroll_consumed_ =
++        handler->FilterScrollEvent(browser_impl_.get(),
++                                  gesture_event.data.scroll_update.delta_x,
++                                  gesture_event.data.scroll_update.delta_y, 0, 0);
++      is_mouse_wheel_scroll_ = false;
++    }
++    return is_scroll_consumed_ ? blink::mojom::InputEventResultState::kConsumed
++                               : blink::mojom::InputEventResultState::kNotConsumed;
++  }
++
++  return blink::mojom::InputEventResultState::kNotConsumed;
++}
++
++void CefRenderWidgetHostViewOSR::FilterScrollEventImpl(
++  const ui::GestureEventData& gesture) {
++  blink::WebGestureEvent web_event =
++    ui::CreateWebGestureEventFromGestureEventData(gesture);
++  if (!browser_impl_.get()) {
++    LOG(ERROR) << "FilterScrollEventImpl get browser_impl_ is nullptr.";
++    return;
++  }
++  CefRefPtr<CefRenderHandler> handler =
++    browser_impl_->client()->GetRenderHandler();
++  if (!handler) {
++    LOG(ERROR) << "FilterScrollEventImpl get handler is nullptr.";
++    return;
++  }
++  if (web_event.GetType() ==
++      blink::WebInputEvent::Type::kGestureScrollUpdate) {
++    is_scroll_consumed_ =
++      handler->FilterScrollEvent(browser_impl_.get(),
++                                  web_event.data.scroll_update.delta_x,
++                                  web_event.data.scroll_update.delta_y, 0, 0);
++  } else if (web_event.GetType() ==
++              blink::WebInputEvent::Type::kGestureFlingStart) {
++    is_scroll_consumed_ =
++      handler->FilterScrollEvent(browser_impl_.get(),
++                                  0, 0, web_event.data.fling_start.velocity_x,
++                                  web_event.data.fling_start.velocity_y);
+   }
+ }
+ #endif  // defined(OHOS_INPUT_EVENTS)
++
++#ifdef OHOS_EX_TOPCONTROLS
++int CefRenderWidgetHostViewOSR::GetShrinkViewportHeight() {
++  int shrink_viewport_height = 0;
++  if (!for_browser_ || !host()->delegate()) {
++    return shrink_viewport_height;
++  }
++
++  auto rvh_delegate_view = host()->delegate()->GetDelegateView();
++  if (rvh_delegate_view->DoBrowserControlsShrinkRendererSize()) {
++    gfx::Size shrink_size(0, rvh_delegate_view->GetTopControlsHeight());
++    shrink_viewport_height =
++        gfx::ScaleToFlooredSize(shrink_size, 1.f / GetDeviceScaleFactor())
++            .height();
++  }
++
++  return shrink_viewport_height;
++}
++
++void CefRenderWidgetHostViewOSR::OnTopControlsChanged(
++    float top_controls_offset,
++    float top_content_offset) {
++  if (!for_browser_ || !browser_impl_.get() ||
++      !browser_impl_->GetClient().get()) {
++    return;
++  }
++  browser_impl_->GetClient()->OnTopControlsChanged(top_controls_offset,
++                                                   top_content_offset);
++
++  OnScreenInfoChanged();
++  gfx::Transform root_layer_transform;
++  root_layer_transform.Translate(gfx::Vector2dF(0, top_content_offset));
++  GetRootLayer()->SetTransform(root_layer_transform);
++}
++#endif  // defined(OHOS_EX_TOPCONTROLS)
++
++#if defined(OHOS_INPUT_EVENTS)
++void CefRenderWidgetHostViewOSR::NotifyVirtualKeyboardOverlayRect(
++    const gfx::Rect& keyboard_rect) {
++  content::RenderFrameHostImpl* frame_host = render_widget_host()->frame_tree()->GetMainFrame();
++  if(!frame_host){
++    return;
++  }
++  frame_host->GetPage().NotifyVirtualKeyboardOverlayRect(keyboard_rect);
++}
++
++ui::mojom::VirtualKeyboardMode
++CefRenderWidgetHostViewOSR::GetVirtualKeyboardMode() {
++  // overlaycontent flag can only be set from main frame.
++  content::RenderFrameHostImpl* frame_host = render_widget_host()->frame_tree()->GetMainFrame();
++  if (!frame_host)
++    return ui::mojom::VirtualKeyboardMode::kUnset;
++
++  return frame_host->GetPage().virtual_keyboard_mode();
++}
++
++void CefRenderWidgetHostViewOSR::SetVirtualKeyBoardArg(int32_t width, int32_t height, double keyboard) {
++  LOG(DEBUG) << "CefRenderWidgetHostViewOSR::SetVirtualKeyBoardArg ; width = "
++             << width << "height = " << height << "keyboard = " << keyboard;
++  gfx::Rect keyboard_rect;
++  keyboard_rect.set_x(0);
++  keyboard_rect.set_y(0);
++  keyboard_rect.set_width(width);
++  keyboard_rect.set_height(keyboard);
++  if(GetVirtualKeyboardMode() == ui::mojom::VirtualKeyboardMode::kOverlaysContent){
++    NotifyVirtualKeyboardOverlayRect(keyboard_rect);
++  }
++}
++#endif
+diff --git a/src/cef/libcef/browser/osr/render_widget_host_view_osr.h b/src/cef/libcef/browser/osr/render_widget_host_view_osr.h
+index b66fd6e53b733..a3b13f7ed9528
+--- a/src/cef/libcef/browser/osr/render_widget_host_view_osr.h
++++ b/src/cef/libcef/browser/osr/render_widget_host_view_osr.h
+@@ -11,7 +11,6 @@
+ #include <set>
+ #include <string>
+ #include <vector>
+-#include <chrono>
+ 
+ #include "include/cef_base.h"
+ #include "include/cef_browser.h"
+@@ -134,6 +133,11 @@ class CefRenderWidgetHostViewOSR
+   void WasOccluded() override;
+   void SetEnableLowerFrameRate(bool enabled);
+ #endif
++#ifdef OHOS_EX_TOPCONTROLS
++  gfx::Rect GetPhysicalViewBounds();
++  int GetShrinkViewportHeight();
++#endif
++
+   void EnsureSurfaceSynchronizedForWebTest() override;
+   content::TouchSelectionControllerClientManager*
+   GetTouchSelectionControllerClientManager() override;
+@@ -192,8 +196,17 @@ class CefRenderWidgetHostViewOSR
+       const cc::RenderFrameMetadata& metadata) override;
+ #endif
+ 
++#if defined(OHOS_INPUT_EVENTS)
++  void NotifyVirtualKeyboardOverlayRect(const gfx::Rect& keyboard_rect) override;
++  ui::mojom::VirtualKeyboardMode GetVirtualKeyboardMode() override;
++  void SetVirtualKeyBoardArg(int32_t width, int32_t height, double keyboard);
++#endif
++
+ #if defined(OHOS_COMPOSITE_RENDER)
+   void SetShouldFrameSubmissionBeforeDraw(bool should);
++  void WasKeyboardResized();
++  void SetDrawMode(int mode);
++  void SetDrawRect(const gfx::Rect& rect);
+ #endif  // defined(OHOS_COMPOSITE_RENDER)
+ 
+   viz::SurfaceId GetCurrentSurfaceId() const override;
+@@ -224,8 +237,14 @@ class CefRenderWidgetHostViewOSR
+   void OnFrameComplete(const viz::BeginFrameAck& ack);
+ 
+   // RenderFrameMetadataProvider::Observer implementation.
++
++#ifdef OHOS_EX_TOPCONTROLS
++  void OnRenderFrameMetadataChangedBeforeActivation(
++      const cc::RenderFrameMetadata& metadata) override;
++#else
+   void OnRenderFrameMetadataChangedBeforeActivation(
+       const cc::RenderFrameMetadata& metadata) override {}
++#endif
+   void OnRenderFrameMetadataChangedAfterActivation(
+       base::TimeTicks activation_time) override;
+   void OnRenderFrameSubmission() override {}
+@@ -273,7 +292,12 @@ class CefRenderWidgetHostViewOSR
+   void WasResized();
+   void SynchronizeVisualProperties(
+       const cc::DeadlinePolicy& deadline_policy,
++#if defined(OHOS_COMPOSITE_RENDER)
++      const absl::optional<viz::LocalSurfaceId>& child_local_surface_id,
++      bool isKeyboard = false);
++#else
+       const absl::optional<viz::LocalSurfaceId>& child_local_surface_id);
++#endif  // defined(OHOS_COMPOSITE_RENDER)
+   void OnScreenInfoChanged();
+   void Invalidate(CefBrowserHost::PaintElementType type);
+   void SendExternalBeginFrame();
+@@ -369,6 +393,7 @@ class CefRenderWidgetHostViewOSR
+ 
+ #ifdef OHOS_CLIPBOARD
+   std::u16string GetSelectedText() override;
++  std::u16string GetText();
+ #endif  // #ifdef OHOS_CLIPBOARD
+ 
+  private:
+@@ -391,9 +416,12 @@ class CefRenderWidgetHostViewOSR
+ #if defined(OHOS_INPUT_EVENTS)
+   void UpdateEditBounds();
+   std::pair<int, int> HandleCursorOffset();
+-  void OnScrollState(bool scroll_state);
++  void FilterScrollEventImpl(const ui::GestureEventData& gesture);
+ #endif  // defined(OHOS_INPUT_EVENTS)
+-
++#ifdef OHOS_EX_TOPCONTROLS
++  void OnTopControlsChanged(float top_controls_offset,
++                            float top_content_offset);
++#endif
+   void AddGuestHostView(CefRenderWidgetHostViewOSR* guest_host);
+   void RemoveGuestHostView(CefRenderWidgetHostViewOSR* guest_host);
+ 
+@@ -441,10 +469,6 @@ class CefRenderWidgetHostViewOSR
+ #endif
+   void OnScaleChanged(float old_page_scale_factor, float nwe_page_scale_factor);
+ #endif
+-#if defined(OHOS_INPUT_EVENTS)
+-  void HideVirtualKeyboardRequested();
+-  void InitHideKeyboardFlag();
+-#endif  // defined(OHOS_INPUT_EVENTS)
+ 
+   // The last selection bounds reported to the view.
+   gfx::SelectionBound selection_start_;
+@@ -566,10 +590,16 @@ class CefRenderWidgetHostViewOSR
+   bool is_select_text_ = false;
+   bool is_editable_node_ = false;
+   gfx::Size viewport_size_in_pixels_;
+-  bool is_need_hide_keyboard_ = true;
+-  std::chrono::high_resolution_clock::time_point lastHideKeyboardTime_;
++  bool is_scroll_consumed_ = false;
++  bool is_mouse_wheel_scroll_ = false;
++  float device_scale_factor_ = 1.0f;
+ #endif  // defined(OHOS_INPUT_EVENTS)
+ 
++#ifdef OHOS_EX_TOPCONTROLS
++  float prev_top_controls_offset_ = 0.f;
++  float prev_top_content_offset_ = 0.f;
++  bool for_browser_ = false;
++#endif
+   base::WeakPtrFactory<CefRenderWidgetHostViewOSR> weak_ptr_factory_;
+ };
+ 
+diff --git a/src/cef/libcef/browser/osr/touch_selection_controller_client_osr.cc b/src/cef/libcef/browser/osr/touch_selection_controller_client_osr.cc
+index afffaa3e070c8..c94f927f4fd54
+--- a/src/cef/libcef/browser/osr/touch_selection_controller_client_osr.cc
++++ b/src/cef/libcef/browser/osr/touch_selection_controller_client_osr.cc
+@@ -111,7 +111,12 @@ void ConvertTouchHandleState(const std::unique_ptr<ui::TouchHandle>& handle,
+   }
+ 
+   state.enabled = handle->GetEnabled();
++#ifdef OHOS_EX_TOPCONTROLS
++  state.origin = {handle->focus_bottom().x() + handle->viewport().x(),
++                  handle->focus_bottom().y() + handle->viewport().y()};
++#else
+   state.origin = {handle->focus_bottom().x(), handle->focus_bottom().y()};
++#endif
+   state.edge_height = handle->focus_bottom().y() - handle->focus_top().y();
+   state.alpha = handle->alpha();
+ 
+@@ -193,6 +198,11 @@ void CefTouchSelectionControllerClientOSR::OnTouchDown() {
+ 
+ void CefTouchSelectionControllerClientOSR::OnTouchUp() {
+   touch_down_ = false;
++#ifdef OHOS_CLIPBOARD
++  if (quick_menu_running_) {
++    return;
++  }
++#endif
+   UpdateQuickMenu();
+ }
+ 
+@@ -609,6 +619,9 @@ bool CefTouchSelectionControllerClientOSR::IsCommandIdEnabled(
+   bool editable = rwhv_->GetTextInputType() != ui::TEXT_INPUT_TYPE_NONE;
+   bool readable = rwhv_->GetTextInputType() != ui::TEXT_INPUT_TYPE_PASSWORD;
+   bool has_selection = !rwhv_->GetSelectedText().empty();
++#ifdef OHOS_CLIPBOARD
++  bool has_text = !rwhv_->GetText().empty();
++#endif  // OHOS_CLIPBOARD
+ #if defined(OHOS_EX_FREE_COPY)
+   if (base::CommandLine::ForCurrentProcess()->HasSwitch(
+           switches::kForBrowser)) {
+@@ -656,7 +669,13 @@ bool CefTouchSelectionControllerClientOSR::IsCommandIdEnabled(
+     }
+ #ifdef OHOS_CLIPBOARD
+     case QM_EDITFLAG_CAN_SELECT_ALL:
+-      return editable || readable;
++      if (!editable && readable) {
++        return true;
++      }
++      if (editable && has_text) {
++        return true;
++      }
++      return false;
+ #endif  // #ifdef OHOS_CLIPBOARD
+     default:
+       return false;
+diff --git a/src/cef/libcef/browser/osr/web_contents_view_osr.cc b/src/cef/libcef/browser/osr/web_contents_view_osr.cc
+index 934ff7af2b4ac..e522adae22d12
+--- a/src/cef/libcef/browser/osr/web_contents_view_osr.cc
++++ b/src/cef/libcef/browser/osr/web_contents_view_osr.cc
+@@ -18,6 +18,11 @@
+ #include "components/performance_manager/embedder/performance_manager_registry.h"
+ #endif
+ 
++#ifdef OHOS_EX_TOPCONTROLS
++#include "base/command_line.h"
++#include "content/public/common/content_switches.h"
++#endif
++
+ CefWebContentsViewOSR::CefWebContentsViewOSR(SkColor background_color,
+                                              bool use_shared_texture,
+                                              bool use_external_begin_frame)
+@@ -254,3 +259,52 @@ void CefWebContentsViewOSR::ShowPopupMenu(
+ #endif  // #ifdef OHOS_HTML_SELECT
+ }
+ #endif
++
++#ifdef OHOS_EX_TOPCONTROLS
++int CefWebContentsViewOSR::GetTopControlsHeight() {
++  if (!base::CommandLine::ForCurrentProcess()->HasSwitch(
++          switches::kForBrowser)) {
++    return 0;
++  }
++
++  int top_controls_height = top_controls_height_;
++
++  CefRefPtr<AlloyBrowserHostImpl> browser = GetBrowser();
++  if (browser.get() && browser->GetClient().get()) {
++    top_controls_height = browser->GetClient()->OnGetTopControlsHeight();
++  }
++  if (top_controls_height != top_controls_height_) {
++    LOG(INFO) << "browser controls height changed:" << top_controls_height_
++              << "->" << top_controls_height;
++    top_controls_height_ = top_controls_height;
++  }
++
++  return top_controls_height_;
++}
++
++bool CefWebContentsViewOSR::DoBrowserControlsShrinkRendererSize() const {
++  CefRefPtr<AlloyBrowserHostImpl> browser = GetBrowser();
++  if (browser.get() && browser->GetClient().get()) {
++    return browser->GetClient()->DoBrowserControlsShrinkRendererSize();
++  }
++  return false;
++}
++
++void CefWebContentsViewOSR::UpdateBrowserControlsHeight(int height,
++                                                        bool animate) {
++  if (!base::CommandLine::ForCurrentProcess()->HasSwitch(
++          switches::kForBrowser) ||
++      height == top_controls_height_) {
++    return;
++  }
++
++  LOG(INFO) << "browser controls height changed:" << top_controls_height_
++            << "->" << height;
++  top_controls_height_ = height;
++
++  if (CefRenderWidgetHostViewOSR* view = GetView()) {
++    view->SynchronizeVisualProperties(cc::DeadlinePolicy::UseDefaultDeadline(),
++                                      absl::nullopt);
++  }
++}
++#endif  // OHOS_EX_TOPCONTROLS
+diff --git a/src/cef/libcef/browser/osr/web_contents_view_osr.h b/src/cef/libcef/browser/osr/web_contents_view_osr.h
+index 829d89c2992b6..6693b89729c6b
+--- a/src/cef/libcef/browser/osr/web_contents_view_osr.h
++++ b/src/cef/libcef/browser/osr/web_contents_view_osr.h
+@@ -99,6 +99,13 @@ class CefWebContentsViewOSR : public content::WebContentsView,
+       bool allow_multiple_selection) override;
+ #endif
+   // endif // #ifdef OHOS_HTML_SELECT
++
++#ifdef OHOS_EX_TOPCONTROLS
++  int GetTopControlsHeight() override;
++  bool DoBrowserControlsShrinkRendererSize() const override;
++  void UpdateBrowserControlsHeight(int height, bool animate) override;
++#endif
++
+  private:
+   CefRenderWidgetHostViewOSR* GetView() const;
+   AlloyBrowserHostImpl* GetBrowser() const;
+@@ -109,6 +116,9 @@ class CefWebContentsViewOSR : public content::WebContentsView,
+   const bool use_external_begin_frame_;
+ 
+   content::WebContents* web_contents_;
++#ifdef OHOS_EX_TOPCONTROLS
++  int top_controls_height_ = 0;
++#endif
+ };
+ 
+ #endif  // CEF_LIBCEF_BROWSER_OSR_WEB_CONTENTS_VIEW_OSR_H_
+diff --git a/src/cef/libcef/browser/permission/alloy_access_request.cc b/src/cef/libcef/browser/permission/alloy_access_request.cc
+index febd92ae36650..211eb10716db1
+--- a/src/cef/libcef/browser/permission/alloy_access_request.cc
++++ b/src/cef/libcef/browser/permission/alloy_access_request.cc
+@@ -45,9 +45,10 @@ void AlloyAccessRequest::ReportRequestResult(bool allowed) {
+ }
+ 
+ #if defined(OHOS_WEBRTC)
+-AlloyMediaAccessRequest::AlloyMediaAccessRequest(const content::MediaStreamRequest& request,
++AlloyMediaAccessRequest::AlloyMediaAccessRequest(CefBrowserHostBase* const browser,
++                                                 const content::MediaStreamRequest& request,
+                                                  content::MediaResponseCallback callback)
+-    : request_(request), callback_(std::move(callback)) {}
++    : browser_(browser), request_(request), callback_(std::move(callback)) {}
+ 
+ AlloyMediaAccessRequest::~AlloyMediaAccessRequest() {
+   if (!callback_.is_null()) {
+@@ -116,13 +117,18 @@ void AlloyMediaAccessRequest::ReportRequestResult(bool allowed) {
+       result = blink::mojom::MediaStreamRequestResult::OK;
+     }
+   }
+-
+-  std::move(callback_).Run(devices_set, result, std::unique_ptr<content::MediaStreamUI>());
++  bool has_video = stream_devices.video_device.has_value();
++  bool has_audio = stream_devices.audio_device.has_value();
++  auto media_stream_ui =
++      browser_->GetMediaStreamRegistrar()->MaybeCreateMediaStreamUI(has_video, has_audio);
++  std::move(callback_).Run(devices_set, result, std::move(media_stream_ui));
+ }
+ 
+-AlloyScreenCaptureAccessRequest::AlloyScreenCaptureAccessRequest(const content::MediaStreamRequest& request,
++AlloyScreenCaptureAccessRequest::AlloyScreenCaptureAccessRequest(CefBrowserHostBase* const browser,
++                                                                 const content::MediaStreamRequest& request,
+                                                                  content::MediaResponseCallback callback)
+-    : request_(request), callback_(std::move(callback)), mode_(cef_screen_capture_mode_t::CAPTURE_INVAILD_MODE), sourceId_(-1) {}
++    : browser_(browser), request_(request),
++      callback_(std::move(callback)), mode_(cef_screen_capture_mode_t::CAPTURE_INVAILD_MODE), sourceId_(-1) {}
+ 
+ AlloyScreenCaptureAccessRequest::~AlloyScreenCaptureAccessRequest() {
+   if (!callback_.is_null()) {
+@@ -193,11 +199,11 @@ void AlloyScreenCaptureAccessRequest::ReportRequestResult(bool allowed) {
+         content::DesktopMediaID::Parse(request_.requested_video_device_id);
+   }
+   stream_devices.video_device = blink::MediaStreamDevice(request_.video_type, media_id.ToString(), "Screen");
+-
++  bool has_audio = stream_devices.audio_device.has_value();
++  auto media_stream_ui =
++      browser_->GetMediaStreamRegistrar()->MaybeCreateMediaStreamUI(true, has_audio);
+   std::move(callback_).Run(
+-      devices_set,
+-      blink::mojom::MediaStreamRequestResult::OK,
+-      std::unique_ptr<content::MediaStreamUI>());
+-  }
++      devices_set, blink::mojom::MediaStreamRequestResult::OK, std::move(media_stream_ui));
++}
+ #endif // defined(OHOS_WEBRTC)
+ 
+diff --git a/src/cef/libcef/browser/permission/alloy_access_request.h b/src/cef/libcef/browser/permission/alloy_access_request.h
+index 95a00d3f737c5..df6e9a145e8b0
+--- a/src/cef/libcef/browser/permission/alloy_access_request.h
++++ b/src/cef/libcef/browser/permission/alloy_access_request.h
+@@ -10,6 +10,7 @@
+ #include "include/cef_permission_request.h"
+ 
+ #if defined(OHOS_WEBRTC)
++#include "cef/libcef/browser/browser_host_base.h"
+ #include "content/public/browser/media_stream_request.h"
+ #include "third_party/blink/public/common/mediastream/media_stream_request.h"
+ #endif // defined(OHOS_WEBRTC)
+@@ -53,7 +54,8 @@ class AlloyAccessRequest : public CefAccessRequest {
+ #if defined(OHOS_WEBRTC)
+ class AlloyMediaAccessRequest : public CefAccessRequest {
+ public:
+-  AlloyMediaAccessRequest(const content::MediaStreamRequest& request,
++  AlloyMediaAccessRequest(CefBrowserHostBase* const browser,
++                          const content::MediaStreamRequest& request,
+                           content::MediaResponseCallback callback);
+ 
+   AlloyMediaAccessRequest(const AlloyMediaAccessRequest&) = delete;
+@@ -67,6 +69,7 @@ public:
+   void ReportRequestResult(bool allowed) override;
+ 
+ private:
++  CefRefPtr<CefBrowserHostBase> browser_;
+   const content::MediaStreamRequest request_;
+   content::MediaResponseCallback callback_;
+ 
+@@ -75,7 +78,8 @@ private:
+ 
+ class AlloyScreenCaptureAccessRequest : public CefScreenCaptureAccessRequest {
+ public:
+-  AlloyScreenCaptureAccessRequest(const content::MediaStreamRequest& request,
++  AlloyScreenCaptureAccessRequest(CefBrowserHostBase* const browser,
++                                  const content::MediaStreamRequest& request,
+                                   content::MediaResponseCallback callback);
+ 
+   AlloyScreenCaptureAccessRequest(const AlloyScreenCaptureAccessRequest&) = delete;
+@@ -89,6 +93,7 @@ public:
+   void SetCaptureSourceId(int32_t sourceId) override;
+   void ReportRequestResult(bool allowed) override;
+ private:
++  CefRefPtr<CefBrowserHostBase> browser_;
+   const content::MediaStreamRequest request_;
+   content::MediaResponseCallback callback_;
+   int32_t mode_;
+diff --git a/src/cef/libcef/browser/prefs/browser_prefs.cc b/src/cef/libcef/browser/prefs/browser_prefs.cc
+index a514ea2167a9e..e019bb8e6ac3d
+--- a/src/cef/libcef/browser/prefs/browser_prefs.cc
++++ b/src/cef/libcef/browser/prefs/browser_prefs.cc
+@@ -91,7 +91,14 @@
+ #include "components/prefs/segregated_pref_store.h"
+ #include "libcef/browser/predictors/predictor_database.h"
+ #endif  // defined(OHOS_NO_STATE_PREFETCH)
+-
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++#include "chrome/browser/devtools/devtools_window.h"
++#include "chrome/browser/extensions/api/commands/command_service.h"
++#include "chrome/browser/extensions/extension_web_ui.h"
++#include "chrome/browser/extensions/preinstalled_apps.h"
++#include "chrome/browser/ui/webui/extensions/extensions_ui.h"
++#include "extensions/browser/permissions_manager.h"
++#endif
+ namespace browser_prefs {
+ 
+ namespace {
+@@ -303,6 +310,14 @@ std::unique_ptr<PrefService> CreatePrefService(Profile* profile,
+     // Default profile preferences.
+     AccessibilityUIMessageHandler::RegisterProfilePrefs(registry.get());
+     extensions::ExtensionPrefs::RegisterProfilePrefs(registry.get());
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++    extensions::ExtensionsUI::RegisterProfilePrefs(registry.get());
++    DevToolsWindow::RegisterProfilePrefs(registry.get());
++    extensions::CommandService::RegisterProfilePrefs(registry.get());
++    extensions::PermissionsManager::RegisterProfilePrefs(registry.get());
++    ExtensionWebUI::RegisterProfilePrefs(registry.get());
++    preinstalled_apps::RegisterProfilePrefs(registry.get());
++#endif
+     HostContentSettingsMap::RegisterProfilePrefs(registry.get());
+     language::LanguagePrefs::RegisterProfilePrefs(registry.get());
+     media_router::RegisterProfilePrefs(registry.get());
+diff --git a/src/cef/libcef/browser/printing/ohos_print_manager.cc b/src/cef/libcef/browser/printing/ohos_print_manager.cc
+index 0e134bb62be50..64d71b50f7419
+--- a/src/cef/libcef/browser/printing/ohos_print_manager.cc
++++ b/src/cef/libcef/browser/printing/ohos_print_manager.cc
+@@ -49,7 +49,6 @@ namespace {
+ 
+ constexpr int PRINT_JOB_CREATE_FILE_COMPLETED_SUCCESS = 28;
+ constexpr int PRINT_JOB_CREATE_FILE_COMPLETED_FAILED = 29;
+-constexpr int PRINT_JOB_COMPLETED_CANCELLED = 2;
+ const std::string PROTOCOL_PATH = "://";
+ 
+ uint32_t SaveDataToFd(int fd,
+@@ -92,20 +91,67 @@ class PrintDocumentAdapterImpl
+     printAttrs.writeResultCallback = writeResultCallback;
+     if (ohosPrintManager_) {
+       ohosPrintManager_->SetPrintAttrs(printAttrs);
+-      ohosPrintManager_->PrintPage();
++      ohosPrintManager_->PrintPage(false);
+     }
+   }
+ 
+   void OnJobStateChanged(const std::string& jobId, uint32_t state) override {
+     LOG(INFO) << "OhosPrintManager onJobStateChanged.";
+     state_ = state;
+-    if (ohosPrintManager_ && state == PRINT_JOB_COMPLETED_CANCELLED) {
++    if (ohosPrintManager_ && !isCalledOnJobStateChanged) {
++      isCalledOnJobStateChanged = true;
+       ohosPrintManager_->RunPrintRequestedCallback(jobId);
+     }
+   }
+ 
+  private:
+   uint32_t state_ = 0;
++  bool isCalledOnJobStateChanged = false;
++  OhosPrintManager* ohosPrintManager_;
++};
++
++class ApplicationPrintDocumentAdapterImpl
++    : public OHOS::NWeb::PrintDocumentAdapterAdapter {
++ public:
++  ApplicationPrintDocumentAdapterImpl(OhosPrintManager* ohosPrintManager)
++      : ohosPrintManager_(ohosPrintManager) {}
++  ~ApplicationPrintDocumentAdapterImpl() = default;
++ 
++  void OnStartLayoutWrite(
++      const std::string& jobId,
++      const OHOS::NWeb::PrintAttributesAdapter& oldAttrs,
++      const OHOS::NWeb::PrintAttributesAdapter& newAttrs,
++      uint32_t fd,
++      std::function<void(std::string, uint32_t)> writeResultCallback) override {
++    LOG(INFO) << "Application OhosPrintManager onStartLayoutWrite.";
++    PrintAttrs printAttrs;
++    printAttrs.jobId = jobId;
++    printAttrs.attrs = newAttrs;
++    printAttrs.fd = fd;
++    printAttrs.writeResultCallback = writeResultCallback;
++    if (ohosPrintManager_) {
++      if (!isCalledBeforeEvent) {
++        isCalledBeforeEvent = true;
++        ohosPrintManager_->DidDispatchPrintEvent(true);
++      }
++      ohosPrintManager_->SetPrintAttrs(printAttrs);
++      ohosPrintManager_->PrintPage(true);
++    }
++  }
++ 
++  void OnJobStateChanged(const std::string& jobId, uint32_t state) override {
++    LOG(INFO) << "Application OhosPrintManager onJobStateChanged.";
++    state_ = state;
++    if (ohosPrintManager_ && !isCalledOnJobStateChanged) {
++      isCalledOnJobStateChanged = true;
++      ohosPrintManager_->DidDispatchPrintEvent(false);
++    }
++  }
++ 
++ private:
++  uint32_t state_ = 0;
++  bool isCalledBeforeEvent = false;
++  bool isCalledOnJobStateChanged = false;
+   OhosPrintManager* ohosPrintManager_;
+ };
+ 
+@@ -165,10 +211,10 @@ bool OhosPrintManager::PrintNow() {
+   return true;
+ }
+ 
+-void OhosPrintManager::PrintPage() {
+-  LOG(INFO) << "OhosPrintManager::PrintPage";
++void OhosPrintManager::DidDispatchPrintEvent(bool isBefore) {
++  LOG(INFO) << "OhosPrintManager::DidDispatchPrintEvent isBefore = " << isBefore;
+   DCHECK_CURRENTLY_ON(content::BrowserThread::UI);
+-
++ 
+   auto main_task_runner = content::GetUIThreadTaskRunner({});
+   if (!main_task_runner) {
+     LOG(ERROR) << "main_task_runner is nullptr";
+@@ -176,10 +222,33 @@ void OhosPrintManager::PrintPage() {
+   }
+   main_task_runner->PostTask(
+       FROM_HERE,
+-      base::BindOnce(&OhosPrintManager::PrintPageImpl, base::Unretained(this)));
++      base::BindOnce(&OhosPrintManager::DidDispatchPrintEventImpl, base::Unretained(this), isBefore));
+ }
+-
+-void OhosPrintManager::PrintPageImpl() {
++ 
++void OhosPrintManager::DidDispatchPrintEventImpl(bool isBefore) {
++  auto* rfh = web_contents()->GetPrimaryMainFrame();
++  if (!rfh || !rfh->IsRenderFrameLive()) {
++    LOG(ERROR) << "rfh is nullptr.";
++    return;
++  }
++  GetPrintRenderFrame(rfh)->DidDispatchPrintEvent(isBefore);
++}
++ 
++void OhosPrintManager::PrintPage(bool isApplication) {
++  LOG(INFO) << "OhosPrintManager::PrintPage isApplication = " << isApplication;
++  DCHECK_CURRENTLY_ON(content::BrowserThread::UI);
++ 
++  auto main_task_runner = content::GetUIThreadTaskRunner({});
++  if (!main_task_runner) {
++    LOG(ERROR) << "main_task_runner is nullptr";
++    return;
++  }
++  main_task_runner->PostTask(
++      FROM_HERE,
++      base::BindOnce(&OhosPrintManager::PrintPageImpl, base::Unretained(this), isApplication));
++}
++ 
++void OhosPrintManager::PrintPageImpl(bool isApplication) {
+   auto* rfh = web_contents()->GetPrimaryMainFrame();
+   if (!rfh || !rfh->IsRenderFrameLive()) {
+     LOG(ERROR) << "rfh is nullptr.";
+@@ -190,7 +259,11 @@ void OhosPrintManager::PrintPageImpl() {
+     }
+     return;
+   }
+-  GetPrintRenderFrame(rfh)->PrintRequestedPages();
++  if (isApplication) {
++    GetPrintRenderFrame(rfh)->ApplicationPrintRequestedPages();
++  } else {
++    GetPrintRenderFrame(rfh)->PrintRequestedPages();
++  }
+ }
+ 
+ void OhosPrintManager::DidShowPrintDialog() {
+@@ -400,6 +473,11 @@ void OhosPrintManager::SetToken(void* token) {
+   token_ = token;
+ }
+ 
++void OhosPrintManager::CreateWebPrintDocumentAdapter(
++    const CefString& jobName, void** webPrintDocumentAdapter) {
++  *webPrintDocumentAdapter = static_cast<void*>(new ApplicationPrintDocumentAdapterImpl(this));
++}
++
+ void OhosPrintManager::CheckForCancel(int32_t preview_ui_id,
+                                       int32_t request_id,
+                                       CheckForCancelCallback callback) {
+diff --git a/src/cef/libcef/browser/printing/ohos_print_manager.h b/src/cef/libcef/browser/printing/ohos_print_manager.h
+index 7c53241213193..306ebaa2e7566
+--- a/src/cef/libcef/browser/printing/ohos_print_manager.h
++++ b/src/cef/libcef/browser/printing/ohos_print_manager.h
+@@ -22,6 +22,7 @@
+ #include "components/printing/browser/print_manager.h"
+ #include "components/printing/common/print.mojom-forward.h"
+ #include "content/public/browser/web_contents_user_data.h"
++#include "include/cef_base.h"
+ #include "ohos_adapter_helper.h"
+ #include "printing/print_settings.h"
+ 
+@@ -61,12 +62,15 @@ class OhosPrintManager : public printing::PrintManager,
+                    int file_descriptor,
+                    PdfWritingDoneCallback callback);
+   bool PrintNow();
+-  void PrintPage();
+-  void PrintPageImpl();
++  void PrintPage(bool isApplication);
++  void PrintPageImpl(bool isApplication);
++  void DidDispatchPrintEvent(bool isBefore);
++  void DidDispatchPrintEventImpl(bool isBefore);
+   void SetPrintAttrs(const PrintAttrs printAttrs);
+   void RunPrintRequestedCallback(const std::string& jobId);
+   void SetToken(void* token);
+-
++  void CreateWebPrintDocumentAdapter(const CefString& jobName,
++                                     void** webPrintDocumentAdapter);
+   void CheckForCancel(int32_t preview_ui_id,
+                       int32_t request_id,
+                       CheckForCancelCallback callback) override;
+diff --git a/src/cef/libcef/browser/request_context_impl.cc b/src/cef/libcef/browser/request_context_impl.cc
+index 1be4e82f5b2b4..bb06ddad0b0c6
+--- a/src/cef/libcef/browser/request_context_impl.cc
++++ b/src/cef/libcef/browser/request_context_impl.cc
+@@ -331,7 +331,11 @@ CefString CefRequestContextImpl::GetCachePath() {
+ 
+ CefRefPtr<CefCookieManager> CefRequestContextImpl::GetCookieManager(
+     CefRefPtr<CefCompletionCallback> callback) {
++#if defined(OHOS_COOKIE)
++  CefRefPtr<CefCookieManagerImpl> cookie_manager = CefCookieManagerImpl::GetInstance();
++#else
+   CefRefPtr<CefCookieManagerImpl> cookie_manager = new CefCookieManagerImpl();
++#endif // defined(OHOS_COOKIE)
+   InitializeCookieManagerInternal(cookie_manager, callback);
+   return cookie_manager.get();
+ }
+diff --git a/src/cef/libcef/common/alloy/alloy_content_client.cc b/src/cef/libcef/common/alloy/alloy_content_client.cc
+index c8c8fbd862f1d..b13637216f8fd
+--- a/src/cef/libcef/common/alloy/alloy_content_client.cc
++++ b/src/cef/libcef/common/alloy/alloy_content_client.cc
+@@ -33,6 +33,9 @@
+ #include "content/public/common/content_constants.h"
+ #include "content/public/common/content_plugin_info.h"
+ #include "content/public/common/content_switches.h"
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++#include "extensions/common/constants.h"
++#endif
+ #include "media/media_buildflags.h"
+ #include "ppapi/shared_impl/ppapi_permissions.h"
+ #include "third_party/widevine/cdm/buildflags.h"
+@@ -101,6 +104,30 @@ void AlloyContentClient::AddContentDecryptionModules(
+ }
+ 
+ void AlloyContentClient::AddAdditionalSchemes(Schemes* schemes) {
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++  schemes->standard_schemes.push_back(extensions::kExtensionScheme);
++
++  schemes->extension_schemes.push_back(extensions::kExtensionScheme);
++
++  schemes->savable_schemes.push_back(extensions::kExtensionScheme);
++
++  // Treat extensions as secure because communication with them is entirely in
++  // the browser, so there is no danger of manipulation or eavesdropping on
++  // communication with them by third parties.
++  schemes->secure_schemes.push_back(extensions::kExtensionScheme);
++
++  schemes->service_worker_schemes.push_back(extensions::kExtensionScheme);
++  schemes->service_worker_schemes.push_back(url::kFileScheme);
++
++  // As far as Blink is concerned, they should be allowed to receive CORS
++  // requests. At the Extensions layer, requests will actually be blocked unless
++  // overridden by the web_accessible_resources manifest key.
++  // TODO(kalman): See what happens with a service worker.
++  schemes->cors_enabled_schemes.push_back(extensions::kExtensionScheme);
++
++  schemes->csp_bypassing_schemes.push_back(extensions::kExtensionScheme);
++#endif
++
+   CefAppManager::Get()->AddAdditionalSchemes(schemes);
+ }
+ 
+diff --git a/src/cef/libcef/common/alloy/alloy_main_delegate.cc b/src/cef/libcef/common/alloy/alloy_main_delegate.cc
+index 22af47cb485bd..915e1176f05b0
+--- a/src/cef/libcef/common/alloy/alloy_main_delegate.cc
++++ b/src/cef/libcef/common/alloy/alloy_main_delegate.cc
+@@ -270,6 +270,7 @@ absl::optional<int> AlloyMainDelegate::BasicStartupComplete() {
+     }
+ #endif  // BUILDFLAG(IS_WIN)
+ 
++#if !BUILDFLAG(IS_OHOS)
+     if (features::kBackForwardCache.default_state ==
+         base::FEATURE_ENABLED_BY_DEFAULT) {
+       // Disable BackForwardCache globally so that
+@@ -277,6 +278,7 @@ absl::optional<int> AlloyMainDelegate::BasicStartupComplete() {
+       // correct value in the renderer process (see issue #3374).
+       disable_features.push_back(features::kBackForwardCache.name);
+     }
++#endif
+ 
+     if (!disable_features.empty()) {
+       DCHECK(!base::FeatureList::GetInstance());
+diff --git a/src/cef/libcef/common/extensions/api/_api_features.json b/src/cef/libcef/common/extensions/api/_api_features.json
+index db253cfaa1970..7f44cd43ffa93
+--- a/src/cef/libcef/common/extensions/api/_api_features.json
++++ b/src/cef/libcef/common/extensions/api/_api_features.json
+@@ -42,5 +42,17 @@
+     "extension_types": ["extension", "legacy_packaged_app"],
+     "contexts": ["blessed_extension"],
+     "disallow_for_service_workers": false
+-  }
++  },
++    // OHOS_ARKWEB_EXTENSIONS
++    "developerPrivate": [{
++    "dependencies": ["permission:developerPrivate", "permission:management"],
++    "contexts": ["blessed_extension"]
++  }, {
++    "channel": "stable",
++    "contexts": ["webui"],
++    "matches": [
++       "chrome://extensions/*",
++       "arkweb://extensions/*"
++      ]
++  }]
+ }
+diff --git a/src/cef/libcef/common/extensions/api/_permission_features.json b/src/cef/libcef/common/extensions/api/_permission_features.json
+index 96013adad84b4..34480c1a75ef6
+--- a/src/cef/libcef/common/extensions/api/_permission_features.json
++++ b/src/cef/libcef/common/extensions/api/_permission_features.json
+@@ -39,5 +39,10 @@
+       "channel": "stable",
+       "extension_types": ["platform_app"]
+     }
+-  ]
++  ],
++   // OHOS_ARKWEB_EXTENSIONS
++   "developerPrivate": {
++    "channel": "stable",
++    "extension_types": ["platform_app"]
++  }
+ }
+diff --git a/src/cef/libcef/common/extensions/extensions_client.cc b/src/cef/libcef/common/extensions/extensions_client.cc
+index dfac52255d061..b7cf4e7595561
+--- a/src/cef/libcef/common/extensions/extensions_client.cc
++++ b/src/cef/libcef/common/extensions/extensions_client.cc
+@@ -21,6 +21,14 @@ namespace extensions {
+ 
+ namespace {
+ 
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++// TODO(battre): Delete the HTTP URL once the blocklist is downloaded via HTTPS.
++const char kExtensionBlocklistUrlPrefix[] =
++    "http://www.gstatic.com/chrome/extensions/blocklist";
++const char kExtensionBlocklistHttpsUrlPrefix[] =
++    "https://www.gstatic.com/chrome/extensions/blocklist";
++#endif
++
+ template <class FeatureClass>
+ SimpleFeature* CreateFeature() {
+   return new FeatureClass;
+@@ -94,9 +102,18 @@ const GURL& CefExtensionsClient::GetWebstoreUpdateURL() const {
+ }
+ 
+ bool CefExtensionsClient::IsBlocklistUpdateURL(const GURL& url) const {
+-  // TODO(rockot): Maybe we want to do something else here. For now we accept
+-  // any URL as a blocklist URL because we don't really care.
+-  return true;
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++  // The extension blocklist URL is returned from the update service and
++  // therefore not determined by Chromium. If the location of the blocklist file
++  // ever changes, we need to update this function. A DCHECK in the
++  // ExtensionUpdater ensures that we notice a change. This is the full URL
++  // of a blocklist:
++  // http://www.gstatic.com/chrome/extensions/blocklist/l_0_0_0_7.txt
++  return base::StartsWith(url.spec(), kExtensionBlocklistUrlPrefix,
++                          base::CompareCase::SENSITIVE) ||
++         base::StartsWith(url.spec(), kExtensionBlocklistHttpsUrlPrefix,
++                          base::CompareCase::SENSITIVE);
++#endif
+ }
+ 
+ }  // namespace extensions
+diff --git a/src/cef/libcef/common/javascript/oh_gin_javascript_bridge_messages.h b/src/cef/libcef/common/javascript/oh_gin_javascript_bridge_messages.h
+index 98d7525842dd9..d4d16ddb20684
+--- a/src/cef/libcef/common/javascript/oh_gin_javascript_bridge_messages.h
++++ b/src/cef/libcef/common/javascript/oh_gin_javascript_bridge_messages.h
+@@ -27,6 +27,12 @@ IPC_MESSAGE_ROUTED2(OhGinJavascriptBridgeMsg_AddNamedObject,
+ IPC_MESSAGE_ROUTED1(OhGinJavascriptBridgeMsg_RemoveNamedObject,
+                     std::string /* name */)
+ 
++IPC_MESSAGE_ROUTED4(OhGinJavascriptBridgeMsg_DoCallH5Function,
++                    int32_t /* routing_id */,
++                    int32_t /* h5_object_id */,
++                    std::string /* method_name */,
++                    base::Value::List /* args */)
++
+ IPC_SYNC_MESSAGE_ROUTED1_1(OhGinJavascriptBridgeHostMsg_GetMethods,
+                            int32_t /* object_id */,
+                            std::set<std::string> /* returned_method_names */)
+diff --git a/src/cef/libcef/common/javascript/oh_gin_javascript_bridge_value.cc b/src/cef/libcef/common/javascript/oh_gin_javascript_bridge_value.cc
+index 1208481b11da7..5b634635de3ff
+--- a/src/cef/libcef/common/javascript/oh_gin_javascript_bridge_value.cc
++++ b/src/cef/libcef/common/javascript/oh_gin_javascript_bridge_value.cc
+@@ -56,6 +56,23 @@ std::unique_ptr<base::Value> OhGinJavascriptBridgeValue ::CreateObjectIDValue(
+   return gin_value.SerializeToBinaryValue();
+ }
+ 
++// static
++std::unique_ptr<base::Value>
++OhGinJavascriptBridgeValue ::CreateH5FunctionIDValue(int32_t in_value) {
++  OhGinJavascriptBridgeValue gin_value(TYPE_H5_FUNCTION_ID);
++  gin_value.pickle_.WriteInt(in_value);
++  return gin_value.SerializeToBinaryValue();
++}
++
++// static
++std::unique_ptr<base::Value>
++OhGinJavascriptBridgeValue ::CreateH5ObjectIDValueWithMdNames(
++    std::string in_value) {
++  OhGinJavascriptBridgeValue gin_value(TYPE_H5_OBJECT_ID);
++  gin_value.pickle_.WriteData(in_value.c_str(), in_value.size());
++  return gin_value.SerializeToBinaryValue();
++}
++
+ // static
+ std::unique_ptr<base::Value> OhGinJavascriptBridgeValue ::CreateUInt32Value(
+     uint32_t in_value) {
+@@ -112,7 +129,7 @@ bool OhGinJavascriptBridgeValue ::GetAsNonFinite(float* out_value) const {
+ }
+ 
+ bool OhGinJavascriptBridgeValue ::GetAsObjectID(int32_t* out_object_id) const {
+-  if (GetType() == TYPE_OBJECT_ID) {
++  if (GetType() == TYPE_OBJECT_ID || GetType() == TYPE_H5_FUNCTION_ID) {
+     base::PickleIterator iter(pickle_);
+     return iter.ReadInt(out_object_id);
+   } else {
+@@ -120,6 +137,16 @@ bool OhGinJavascriptBridgeValue ::GetAsObjectID(int32_t* out_object_id) const {
+   }
+ }
+ 
++bool OhGinJavascriptBridgeValue::GetAsObjectIDWithMdNames(
++    std::string* out_object_id) const {
++  if (GetType() == TYPE_H5_OBJECT_ID) {
++    base::PickleIterator iter(pickle_);
++    return iter.ReadString(out_object_id);
++  } else {
++    return false;
++  }
++}
++
+ bool OhGinJavascriptBridgeValue ::GetAsUInt32(uint32_t* out_value) const {
+   if (GetType() == TYPE_UINT32) {
+     base::PickleIterator iter(pickle_);
+diff --git a/src/cef/libcef/common/javascript/oh_gin_javascript_bridge_value.h b/src/cef/libcef/common/javascript/oh_gin_javascript_bridge_value.h
+index c0078299f38b6..b771544ddcd57
+--- a/src/cef/libcef/common/javascript/oh_gin_javascript_bridge_value.h
++++ b/src/cef/libcef/common/javascript/oh_gin_javascript_bridge_value.h
+@@ -27,6 +27,10 @@ class OhGinJavascriptBridgeValue {
+     TYPE_NONFINITE,
+     // Bridge Object ID
+     TYPE_OBJECT_ID,
++    // Bridge H5 Object ID
++    TYPE_H5_OBJECT_ID,
++    // Bridge H5 Function ID
++    TYPE_H5_FUNCTION_ID,
+     // Uint32 type
+     TYPE_UINT32,
+     TYPE_LAST_VALUE
+@@ -41,6 +45,9 @@ class OhGinJavascriptBridgeValue {
+   static std::unique_ptr<base::Value> CreateNonFiniteValue(float in_value);
+   static std::unique_ptr<base::Value> CreateNonFiniteValue(double in_value);
+   static std::unique_ptr<base::Value> CreateObjectIDValue(int32_t in_value);
++  static std::unique_ptr<base::Value> CreateH5FunctionIDValue(int32_t in_value);
++  static std::unique_ptr<base::Value> CreateH5ObjectIDValueWithMdNames(
++      std::string in_value);
+   static std::unique_ptr<base::Value> CreateUInt32Value(uint32_t in_value);
+ 
+   // De-serialization
+@@ -53,6 +60,7 @@ class OhGinJavascriptBridgeValue {
+ 
+   bool GetAsNonFinite(float* out_value) const;
+   bool GetAsObjectID(int32_t* out_object_id) const;
++  bool GetAsObjectIDWithMdNames(std::string* out_object_id) const;
+   bool GetAsUInt32(uint32_t* out_value) const;
+ 
+  private:
+diff --git a/src/cef/libcef/common/mojom/cef.mojom b/src/cef/libcef/common/mojom/cef.mojom
+index 337e46821fe54..bb9c0560c3619
+--- a/src/cef/libcef/common/mojom/cef.mojom
++++ b/src/cef/libcef/common/mojom/cef.mojom
+@@ -157,6 +157,9 @@ interface RenderFrame {
+ 
+   [EnableIf=ohos_input_events, Sync]
+   GetHitData() => (int32 type, string extra_data);
++
++  [EnableIf=ohos_input_events]
++  SetOverscrollMode(int32 mode);
+   // #endif  // defined(OHOS_INPUT_EVENTS)
+ };
+ 
+diff --git a/src/cef/libcef/common/net/scheme_registration.cc b/src/cef/libcef/common/net/scheme_registration.cc
+index ea944d62f170c..856bd4d7d9e51
+--- a/src/cef/libcef/common/net/scheme_registration.cc
++++ b/src/cef/libcef/common/net/scheme_registration.cc
+@@ -61,27 +61,30 @@ void AddInternalSchemes(content::ContentClient::Schemes* schemes) {
+ 
+ bool IsInternalHandledScheme(const std::string& scheme) {
+   static const char* schemes[] = {
+-      url::kAboutScheme,
+-      url::kBlobScheme,
+-      content::kChromeDevToolsScheme,
+-      content::kChromeUIScheme,
+-      content::kChromeUIUntrustedScheme,
+-      url::kDataScheme,
+-      extensions::kExtensionScheme,
+-      url::kFileScheme,
+-      url::kFileSystemScheme,
+-      url::kHttpScheme,
+-      url::kHttpsScheme,
+-      url::kJavaScriptScheme,
+-      url::kWsScheme,
+-      url::kWssScheme,
++    url::kAboutScheme,
++    url::kBlobScheme,
++    content::kChromeDevToolsScheme,
++    content::kChromeUIScheme,
++    content::kChromeUIUntrustedScheme,
++    url::kDataScheme,
++    extensions::kExtensionScheme,
++    url::kFileScheme,
++    url::kFileSystemScheme,
++    url::kHttpScheme,
++    url::kHttpsScheme,
++    url::kJavaScriptScheme,
++    url::kWsScheme,
++    url::kWssScheme,
+ #ifdef OHOS_HAP_DECOMPRESSED
+-      url::kResourcesScheme,
++    url::kResourcesScheme,
+ #endif
+ #ifdef OHOS_FILE_UPLOAD
+-      url::kDataabilityScheme,
+-      url::kDatashareScheme,
++    url::kDataabilityScheme,
++    url::kDatashareScheme,
+ #endif //OHOS_FILE_UPLOAD
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++    content::kArkWebUIScheme,
++#endif
+   };
+ 
+   for (size_t i = 0; i < sizeof(schemes) / sizeof(schemes[0]); ++i) {
+diff --git a/src/cef/libcef/renderer/alloy/alloy_content_renderer_client.cc b/src/cef/libcef/renderer/alloy/alloy_content_renderer_client.cc
+index c2342f515c91c..439206145aef1
+--- a/src/cef/libcef/renderer/alloy/alloy_content_renderer_client.cc
++++ b/src/cef/libcef/renderer/alloy/alloy_content_renderer_client.cc
+@@ -117,6 +117,7 @@
+ #include "components/autofill/content/renderer/autofill_agent.h"
+ #include "components/autofill/content/renderer/password_autofill_agent.h"
+ #include "components/autofill/content/renderer/password_generation_agent.h"
++#include "components/js_injection/renderer/js_communication.h"
+ #include "libcef/renderer/alloy/alloy_content_settings_client.h"
+ #endif // BUILDFLAG(IS_OHOS)
+ 
+@@ -131,6 +132,15 @@
+ #include "components/no_state_prefetch/renderer/prerender_render_frame_observer.h"
+ #endif  // defined(OHOS_NO_STATE_PREFETCH)
+ 
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++#include "chrome/common/chrome_features.h"
++#include "extensions/common/constants.h"
++#include "extensions/common/manifest_handlers/web_accessible_resources_info.h"
++#include "extensions/renderer/dispatcher.h"
++#include "extensions/renderer/extension_web_view_helper.h"
++#include "printing/metafile_agent.h"
++#endif
++
+ AlloyContentRendererClient::AlloyContentRendererClient()
+     : main_entry_time_(base::TimeTicks::Now()),
+       render_manager_(new CefRenderManager) {
+@@ -265,9 +275,32 @@ void AlloyContentRendererClient::RenderThreadStarted() {
+ 
+   if (extensions::ExtensionsEnabled()) {
+     extensions_renderer_client_->RenderThreadStarted();
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++    blink::WebSecurityPolicy::RegisterURLSchemeAsExtension(
++        blink::WebString::FromASCII(extensions::kExtensionScheme));
++#endif
+   }
+ }
+ 
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++bool AlloyContentRendererClient::AllowPopup() {
++#if BUILDFLAG(ENABLE_EXTENSIONS)
++  return extensions_renderer_client_->AllowPopup();
++#else
++  return false;
++#endif
++}
++
++blink::ProtocolHandlerSecurityLevel
++AlloyContentRendererClient::GetProtocolHandlerSecurityLevel() {
++#if BUILDFLAG(ENABLE_EXTENSIONS)
++  return extensions_renderer_client_->GetProtocolHandlerSecurityLevel();
++#else
++  return blink::ProtocolHandlerSecurityLevel::kStrict;
++#endif
++}
++#endif
++
+ void AlloyContentRendererClient::ExposeInterfacesToBrowser(
+     mojo::BinderMap* binders) {
+   auto task_runner = base::SequencedTaskRunner::GetCurrentDefault();
+@@ -304,6 +337,7 @@ void AlloyContentRendererClient::RenderThreadConnected() {
+ void AlloyContentRendererClient::RenderFrameCreated(
+     content::RenderFrame* render_frame) {
+ #if BUILDFLAG(IS_OHOS)
++  new js_injection::JsCommunication(render_frame);
+   new AlloyContentSettingsClient(render_frame);
+ #endif
+   auto render_frame_observer = new CefRenderFrameObserver(render_frame);
+@@ -408,6 +442,10 @@ void AlloyContentRendererClient::WebViewCreated(
+ #if defined(OHOS_NO_STATE_PREFETCH)
+   new prerender::NoStatePrefetchClient(web_view);
+ #endif  // defined(OHOS_NO_STATE_PREFETCH)
++
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++  new extensions::ExtensionWebViewHelper(web_view, outermost_origin);
++#endif
+ }
+ 
+ #if defined(OHOS_NO_STATE_PREFETCH)
+@@ -534,6 +572,13 @@ void AlloyContentRendererClient::RunScriptsAtDocumentStart(
+   if (extensions::ExtensionsEnabled()) {
+     extensions_renderer_client_->RunScriptsAtDocumentStart(render_frame);
+   }
++#if BUILDFLAG(IS_OHOS)
++  js_injection::JsCommunication* communication =
++      js_injection::JsCommunication::Get(render_frame);
++  if (communication) {
++    communication->RunScriptsAtDocumentStart();
++  }
++#endif //IS_OHOS
+ }
+ 
+ void AlloyContentRendererClient::RunScriptsAtDocumentEnd(
+@@ -578,8 +623,129 @@ void AlloyContentRendererClient::DevToolsAgentDetached() {
+ 
+ void AlloyContentRendererClient::SetRuntimeFeaturesDefaultsBeforeBlinkInitialization() {
+   blink::WebRuntimeFeatures::EnablePerformanceManagerInstrumentation(true);
++
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++  // WebHID and WebUSB on service workers is only available in extensions.
++  if (CefRenderManager::IsExtensionProcess()) {
++    if (base::FeatureList::IsEnabled(
++            features::kEnableWebUsbOnExtensionServiceWorker)) {
++      blink::WebRuntimeFeatures::EnableWebUSBOnServiceWorkers(true);
++    }
++#if !BUILDFLAG(IS_ANDROID)
++    if (base::FeatureList::IsEnabled(
++            features::kEnableWebHidOnExtensionServiceWorker)) {
++      blink::WebRuntimeFeatures::EnableWebHIDOnServiceWorkers(true);
++    }
++#endif  // !BUILDFLAG(IS_ANDROID)
++  }
++#endif  // defined(OHOS_ARKWEB_EXTENSIONS)
++}
++
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++bool AlloyContentRendererClient::AllowScriptExtensionForServiceWorker(
++    const url::Origin& script_origin) {
++#if BUILDFLAG(ENABLE_EXTENSIONS)
++  return script_origin.scheme() == extensions::kExtensionScheme;
++#else
++  return false;
++#endif
++}
++
++void AlloyContentRendererClient::
++    DidInitializeServiceWorkerContextOnWorkerThread(
++        blink::WebServiceWorkerContextProxy* context_proxy,
++        const GURL& service_worker_scope,
++        const GURL& script_url) {
++#if BUILDFLAG(ENABLE_EXTENSIONS)
++  extensions_renderer_client_->GetDispatcher()
++      ->DidInitializeServiceWorkerContextOnWorkerThread(
++          context_proxy, service_worker_scope, script_url);
++#endif
++}
++void AlloyContentRendererClient::WillEvaluateServiceWorkerOnWorkerThread(
++    blink::WebServiceWorkerContextProxy* context_proxy,
++    v8::Local<v8::Context> v8_context,
++    int64_t service_worker_version_id,
++    const GURL& service_worker_scope,
++    const GURL& script_url) {
++#if BUILDFLAG(ENABLE_EXTENSIONS)
++  extensions_renderer_client_->GetDispatcher()
++      ->WillEvaluateServiceWorkerOnWorkerThread(
++          context_proxy, v8_context, service_worker_version_id,
++          service_worker_scope, script_url);
++#endif
++}
++
++void AlloyContentRendererClient::DidStartServiceWorkerContextOnWorkerThread(
++    int64_t service_worker_version_id,
++    const GURL& service_worker_scope,
++    const GURL& script_url) {
++#if BUILDFLAG(ENABLE_EXTENSIONS)
++  extensions_renderer_client_->GetDispatcher()
++      ->DidStartServiceWorkerContextOnWorkerThread(
++          service_worker_version_id, service_worker_scope, script_url);
++#endif
++}
++
++void AlloyContentRendererClient::WillDestroyServiceWorkerContextOnWorkerThread(
++    v8::Local<v8::Context> context,
++    int64_t service_worker_version_id,
++    const GURL& service_worker_scope,
++    const GURL& script_url) {
++#if BUILDFLAG(ENABLE_EXTENSIONS)
++  extensions_renderer_client_->GetDispatcher()
++      ->WillDestroyServiceWorkerContextOnWorkerThread(
++          context, service_worker_version_id, service_worker_scope, script_url);
++#endif
++}
++
++// If we're in an extension, there is no need disabling multiple routes as
++// chrome.system.network.getNetworkInterfaces provides the same
++// information. Also, the enforcement of sending and binding UDP is already done
++// by chrome extension permission model.
++bool AlloyContentRendererClient::ShouldEnforceWebRTCRoutingPreferences() {
++  return !CefRenderManager::IsExtensionProcess();
++}
++
++blink::WebFrame* AlloyContentRendererClient::FindFrame(
++    blink::WebLocalFrame* relative_to_frame,
++    const std::string& name) {
++#if BUILDFLAG(ENABLE_EXTENSIONS)
++  return extensions::CefExtensionsRendererClient::FindFrame(relative_to_frame,
++                                                            name);
++#else
++  return nullptr;
++#endif  // BUILDFLAG(ENABLE_EXTENSIONS)
+ }
+- 
++
++bool AlloyContentRendererClient::IsSafeRedirectTarget(const GURL& from_url,
++                                                      const GURL& to_url) {
++#if BUILDFLAG(ENABLE_EXTENSIONS)
++  if (to_url.SchemeIs(extensions::kExtensionScheme)) {
++    const extensions::Extension* extension =
++        extensions::RendererExtensionRegistry::Get()->GetByID(to_url.host());
++    if (!extension) {
++      return false;
++    }
++    // TODO(solomonkinard): Use initiator_origin and add tests.
++    if (extensions::WebAccessibleResourcesInfo::IsResourceWebAccessible(
++            extension, to_url.path(), absl::optional<url::Origin>())) {
++      return true;
++    }
++    return extension->guid() == from_url.host();
++  }
++#endif  // BUILDFLAG(ENABLE_EXTENSIONS)
++  return true;
++}
++
++void AlloyContentRendererClient::DidSetUserAgent(
++    const std::string& user_agent) {
++#if BUILDFLAG(ENABLE_PRINTING)
++  printing::SetAgent(user_agent);
++#endif
++}
++#endif  // defined(OHOS_ARKWEB_EXTENSIONS)
++
+ std::unique_ptr<blink::URLLoaderThrottleProvider>
+ AlloyContentRendererClient::CreateURLLoaderThrottleProvider(
+     blink::URLLoaderThrottleProviderType provider_type) {
