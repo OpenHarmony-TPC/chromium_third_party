@@ -15988,3 +15988,1903 @@ index 51986244b8960..c771f4902fff9
  }
  
  void RenderThreadImpl::RecordAction(const base::UserMetricsAction& action) {
+diff --git a/src/content/renderer/v8_value_converter_impl.cc b/src/content/renderer/v8_value_converter_impl.cc
+index 0142e5422673f..a4a78eaffe1ff
+--- a/src/content/renderer/v8_value_converter_impl.cc
++++ b/src/content/renderer/v8_value_converter_impl.cc
+@@ -38,6 +38,16 @@ bool V8ValueConverter::Strategy::FromV8Object(v8::Local<v8::Object> value,
+   return false;
+ }
+ 
++#if BUILDFLAG(IS_OHOS)
++bool V8ValueConverter::Strategy::FromV8Object(v8::Local<v8::Object> value,
++                                              std::unique_ptr<base::Value>* out,
++                                              v8::Isolate* isolate,
++                                              bool is_function,
++                                              bool is_promise) {
++  return false;
++}
++#endif
++
+ bool V8ValueConverter::Strategy::FromV8Array(v8::Local<v8::Array> value,
+                                              std::unique_ptr<base::Value>* out,
+                                              v8::Isolate* isolate) {
+@@ -189,10 +199,14 @@ V8ValueConverterImpl::V8ValueConverterImpl()
+     : date_allowed_(false),
+       reg_exp_allowed_(false),
+       function_allowed_(false),
++#if BUILDFLAG(IS_OHOS)
++      promise_allowed_(false),
++#endif
+       strip_null_from_objects_(false),
+       convert_negative_zero_to_int_(false),
+       avoid_identity_hash_for_testing_(false),
+-      strategy_(nullptr) {}
++      strategy_(nullptr) {
++}
+ 
+ void V8ValueConverterImpl::SetDateAllowed(bool val) {
+   date_allowed_ = val;
+@@ -206,6 +220,12 @@ void V8ValueConverterImpl::SetFunctionAllowed(bool val) {
+   function_allowed_ = val;
+ }
+ 
++#if BUILDFLAG(IS_OHOS)
++void V8ValueConverterImpl::SetPromiseAllowed(bool val) {
++  promise_allowed_ = val;
++}
++#endif
++
+ void V8ValueConverterImpl::SetStripNullFromObjects(bool val) {
+   strip_null_from_objects_ = val;
+ }
+@@ -246,36 +266,62 @@ v8::Local<v8::Value> V8ValueConverterImpl::ToV8ValueImpl(
+     v8::Local<v8::Object> creation_context;
+ 
+     v8::Local<v8::Value> operator()(absl::monostate value) {
++#if BUILDFLAG(IS_OHOS)
++      LOG(DEBUG) << "ToV8ValueImpl base::Value::Type::NONE";
++#endif
+       return v8::Null(isolate);
+     }
+ 
+     v8::Local<v8::Value> operator()(bool value) {
++#if BUILDFLAG(IS_OHOS)
++      LOG(DEBUG) << "ToV8ValueImpl base::Value::Type::BOOLEAN bool = " << value;
++#endif
+       return v8::Boolean::New(isolate, value);
+     }
+ 
+     v8::Local<v8::Value> operator()(int value) {
++#if BUILDFLAG(IS_OHOS)
++      LOG(DEBUG) << "ToV8ValueImpl base::Value::Type::INTEGER integer = "
++                 << value;
++#endif
+       return v8::Integer::New(isolate, value);
+     }
+ 
+     v8::Local<v8::Value> operator()(double value) {
++#if BUILDFLAG(IS_OHOS)
++      LOG(DEBUG) << "ToV8ValueImpl base::Value::Type::DOUBLE double = "
++                 << value;
++#endif
+       return v8::Number::New(isolate, value);
+     }
+ 
+     v8::Local<v8::Value> operator()(base::StringPiece value) {
++#if BUILDFLAG(IS_OHOS)
++      LOG(DEBUG) << "ToV8ValueImpl base::Value::Type::STRING";
++#endif
+       return v8::String::NewFromUtf8(isolate, value.data(),
+                                      v8::NewStringType::kNormal, value.length())
+           .ToLocalChecked();
+     }
+ 
+     v8::Local<v8::Value> operator()(const base::Value::BlobStorage& value) {
++#if BUILDFLAG(IS_OHOS)
++      LOG(DEBUG) << "ToV8ValueImpl base::Value::Type::BlobStorage";
++#endif
+       return converter->ToArrayBuffer(isolate, creation_context, value);
+     }
+ 
+     v8::Local<v8::Value> operator()(const base::Value::Dict& value) {
++#if BUILDFLAG(IS_OHOS)
++      LOG(DEBUG) << "ToV8ValueImpl base::Value::Type::Dict";
++#endif
+       return converter->ToV8Object(isolate, creation_context, value);
+     }
+ 
+     v8::Local<v8::Value> operator()(const base::Value::List& value) {
++#if BUILDFLAG(IS_OHOS)
++      LOG(DEBUG) << "ToV8ValueImpl base::Value::Type::LIST";
++#endif
+       return converter->ToV8Array(isolate, creation_context, value);
+     }
+   };
+@@ -418,21 +464,63 @@ std::unique_ptr<base::Value> V8ValueConverterImpl::FromV8ValueImpl(
+   }
+ 
+   // v8::Value doesn't have a ToArray() method for some reason.
+-  if (val->IsArray())
++  if (val->IsArray()) {
++#if BUILDFLAG(IS_OHOS)
++    LOG(DEBUG) << "FromV8ValueImpl IsArray";
++#endif
+     return FromV8Array(val.As<v8::Array>(), state, isolate);
++  }
+ 
+   if (val->IsFunction()) {
+     if (!function_allowed_)
+       // JSON.stringify refuses to convert function(){}.
+       return nullptr;
++#if BUILDFLAG(IS_OHOS)
++    LOG(DEBUG) << "FromV8ValueImpl IsFunction";
++    return FromV8Object(val.As<v8::Object>(), state, isolate, true, false);
++#else
+     return FromV8Object(val.As<v8::Object>(), state, isolate);
++#endif
+   }
+ 
++#if BUILDFLAG(IS_OHOS)
++  if (val->IsPromise()) {
++    if (!promise_allowed_)
++      return nullptr;
++    LOG(DEBUG) << "FromV8ValueImpl IsPromise";
++    return FromV8Object(val.As<v8::Object>(), state, isolate, false, true);
++  }
++#endif
+   if (val->IsArrayBuffer() || val->IsArrayBufferView())
+     return FromV8ArrayBuffer(val.As<v8::Object>(), isolate);
+ 
+-  if (val->IsObject())
++#if BUILDFLAG(IS_OHOS)
++  if (val->IsExternal())
++    LOG(DEBUG) << "FromV8ValueImpl IsExternal";
++  if (val->IsNativeError())
++    LOG(DEBUG) << "FromV8ValueImpl IsNativeError";
++  if (val->IsUint32())
++    LOG(DEBUG) << "FromV8ValueImpl IsUint32";
++  if (val->IsGeneratorObject())
++    LOG(DEBUG) << "FromV8ValueImpl IsGeneratorObject";
++  if (val->IsModuleNamespaceObject())
++    LOG(DEBUG) << "FromV8ValueImpl IsModuleNamespaceObject";
++  if (val->IsName())
++    LOG(DEBUG) << "FromV8ValueImpl IsName";
++  if (val->IsSymbol())
++    LOG(DEBUG) << "FromV8ValueImpl IsSymbol";
++  if (val->IsBigInt())
++    LOG(DEBUG) << "FromV8ValueImpl IsBigInt";
++  if (val->IsProxy())
++    LOG(DEBUG) << "FromV8ValueImpl IsProxy";
++#endif
++
++  if (val->IsObject()) {
++#if BUILDFLAG(IS_OHOS)
++    LOG(DEBUG) << "FromV8ValueImpl IsObject";
++#endif
+     return FromV8Object(val.As<v8::Object>(), state, isolate);
++  }
+ 
+   LOG(ERROR) << "Unexpected v8 value type encountered.";
+   return nullptr;
+@@ -519,6 +607,119 @@ std::unique_ptr<base::Value> V8ValueConverterImpl::FromV8ArrayBuffer(
+   return nullptr;
+ }
+ 
++#if BUILDFLAG(IS_OHOS)
++std::unique_ptr<base::Value> V8ValueConverterImpl::FromV8Object(
++    v8::Local<v8::Object> val,
++    FromV8ValueState* state,
++    v8::Isolate* isolate,
++    bool is_function,
++    bool is_promise) const {
++  ScopedUniquenessGuard uniqueness_guard(state, val);
++  if (!uniqueness_guard.is_valid())
++    return std::make_unique<base::Value>();
++
++  std::unique_ptr<v8::Context::Scope> scope;
++  // If val was created in a different context than our current one, change to
++  // that context, but change back after val is converted.
++  v8::Local<v8::Context> creation_context;
++  if (val->GetCreationContext().ToLocal(&creation_context) &&
++      creation_context != isolate->GetCurrentContext())
++    scope = std::make_unique<v8::Context::Scope>(creation_context);
++
++  if (strategy_) {
++    std::unique_ptr<base::Value> out;
++    LOG(DEBUG) << "FromV8Object is_function = " << is_function
++               << ", is_promise = " << is_promise;
++    if (strategy_->FromV8Object(val, &out, isolate, is_function, is_promise))
++      return out;
++  }
++
++  // Don't consider DOM objects. This check matches isHostObject() in Blink's
++  // bindings/v8/V8Binding.h used in structured cloning. It reads:
++  //
++  // If the object has any internal fields, then we won't be able to serialize
++  // or deserialize them; conveniently, this is also a quick way to detect DOM
++  // wrapper objects, because the mechanism for these relies on data stored in
++  // these fields.
++  //
++  // NOTE: check this after |strategy_| so that callers have a chance to
++  // do something else, such as convert to the node's name rather than NULL.
++  //
++  // ANOTHER NOTE: returning an empty dictionary here to minimise surprise.
++  // See also http://crbug.com/330559.
++  base::Value::Dict result;
++
++  if (val->InternalFieldCount())
++    return std::make_unique<base::Value>(std::move(result));
++
++  v8::Local<v8::Array> property_names;
++  if (!val->GetOwnPropertyNames(isolate->GetCurrentContext())
++           .ToLocal(&property_names)) {
++    return std::make_unique<base::Value>(std::move(result));
++  }
++
++  for (uint32_t i = 0; i < property_names->Length(); ++i) {
++    v8::Local<v8::Value> key =
++        property_names->Get(isolate->GetCurrentContext(), i).ToLocalChecked();
++
++    // Extend this test to cover more types as necessary and if sensible.
++    if (!key->IsString() && !key->IsNumber()) {
++      NOTREACHED() << "Key \"" << *v8::String::Utf8Value(isolate, key)
++                   << "\" "
++                      "is neither a string nor a number";
++      continue;
++    }
++
++    v8::String::Utf8Value name_utf8(isolate, key);
++
++    v8::TryCatch try_catch(isolate);
++    v8::Local<v8::Value> child_v8;
++    v8::MaybeLocal<v8::Value> maybe_child =
++        val->Get(isolate->GetCurrentContext(), key);
++    if (try_catch.HasCaught() || !maybe_child.ToLocal(&child_v8)) {
++      LOG(WARNING) << "Getter for property " << *name_utf8
++                   << " threw an exception.";
++      child_v8 = v8::Null(isolate);
++    }
++
++    std::unique_ptr<base::Value> child =
++        FromV8ValueImpl(state, child_v8, isolate);
++    if (!child)
++      // JSON.stringify skips properties whose values don't serialize, for
++      // example undefined and functions. Emulate that behavior.
++      continue;
++
++    // Strip null if asked (and since undefined is turned into null, undefined
++    // too). The use case for supporting this is JSON-schema support,
++    // specifically for extensions, where "optional" JSON properties may be
++    // represented as null, yet due to buggy legacy code elsewhere isn't
++    // treated as such (potentially causing crashes). For example, the
++    // "tabs.create" function takes an object as its first argument with an
++    // optional "windowId" property.
++    //
++    // Given just
++    //
++    //   tabs.create({})
++    //
++    // this will work as expected on code that only checks for the existence of
++    // a "windowId" property (such as that legacy code). However given
++    //
++    //   tabs.create({windowId: null})
++    //
++    // there *is* a "windowId" property, but since it should be an int, code
++    // on the browser which doesn't additionally check for null will fail.
++    // We can avoid all bugs related to this by stripping null.
++    if (strip_null_from_objects_ && child->is_none())
++      continue;
++
++    result.Set(std::string(*name_utf8, name_utf8.length()),
++               base::Value::FromUniquePtrValue(std::move(child)));
++  }
++
++  return std::make_unique<base::Value>(std::move(result));
++}
++#endif
++
+ std::unique_ptr<base::Value> V8ValueConverterImpl::FromV8Object(
+     v8::Local<v8::Object> val,
+     FromV8ValueState* state,
+diff --git a/src/content/renderer/v8_value_converter_impl.h b/src/content/renderer/v8_value_converter_impl.h
+index e42a0886812f7..a9aae04fed738
+--- a/src/content/renderer/v8_value_converter_impl.h
++++ b/src/content/renderer/v8_value_converter_impl.h
+@@ -24,6 +24,7 @@ class CONTENT_EXPORT V8ValueConverterImpl : public V8ValueConverter {
+   void SetDateAllowed(bool val) override;
+   void SetRegExpAllowed(bool val) override;
+   void SetFunctionAllowed(bool val) override;
++  void SetPromiseAllowed(bool val) override;
+   void SetStripNullFromObjects(bool val) override;
+   void SetConvertNegativeZeroToInt(bool val) override;
+   void SetStrategy(Strategy* strategy) override;
+@@ -69,6 +70,14 @@ class CONTENT_EXPORT V8ValueConverterImpl : public V8ValueConverter {
+                                             FromV8ValueState* state,
+                                             v8::Isolate* isolate) const;
+ 
++#if BUILDFLAG(IS_OHOS)
++  std::unique_ptr<base::Value> FromV8Object(v8::Local<v8::Object> object,
++                                            FromV8ValueState* state,
++                                            v8::Isolate* isolate,
++                                            bool is_function,
++                                            bool is_promise) const;
++#endif
++
+   // If true, we will convert Date JavaScript objects to doubles.
+   bool date_allowed_;
+ 
+@@ -78,6 +87,11 @@ class CONTENT_EXPORT V8ValueConverterImpl : public V8ValueConverter {
+   // If true, we will convert Function JavaScript objects to dictionaries.
+   bool function_allowed_;
+ 
++#if BUILDFLAG(IS_OHOS)
++  // If true, we will convert promise JavaScript objects to dictionaries.ls
++  bool promise_allowed_;
++#endif
++
+   // If true, undefined and null values are ignored when converting v8 objects
+   // into Values.
+   bool strip_null_from_objects_;
+diff --git a/src/content/renderer/web_ui_extension.cc b/src/content/renderer/web_ui_extension.cc
+index 7e31f1ae7c596..dbd2455f91921
+--- a/src/content/renderer/web_ui_extension.cc
++++ b/src/content/renderer/web_ui_extension.cc
+@@ -49,6 +49,12 @@ bool ShouldRespondToRequest(blink::WebLocalFrame** frame_ptr,
+       (frame_url.SchemeIs(kChromeUIScheme) ||
+        frame_url.SchemeIs(url::kDataScheme));
+ 
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++  webui_enabled |=
++      (render_frame->GetEnabledBindings() & BINDINGS_POLICY_WEB_UI) &&
++      frame_url.SchemeIs(kArkWebUIScheme);
++#endif
++
+   if (!webui_enabled)
+     return false;
+ 
+diff --git a/src/extensions/browser/api/management/management_api.cc b/src/extensions/browser/api/management/management_api.cc
+index 4ce2b5f47de15..26d27d6bcb367
+--- a/src/extensions/browser/api/management/management_api.cc
++++ b/src/extensions/browser/api/management/management_api.cc
+@@ -615,6 +615,9 @@ ExtensionFunction::ResponseAction ManagementUninstallFunctionBase::Uninstall(
+   if (show_confirm_dialog && !user_gesture())
+     return RespondNow(Error(keys::kGestureNeededForUninstallError));
+ 
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++  show_confirm_dialog = false;
++#endif
+   if (show_confirm_dialog) {
+     // We show the programmatic uninstall ui for extensions uninstalling
+     // other extensions.
+diff --git a/src/extensions/browser/api/web_request/web_request_api.cc b/src/extensions/browser/api/web_request/web_request_api.cc
+index 8eb641093318c..aa1a847cc1ac7
+--- a/src/extensions/browser/api/web_request/web_request_api.cc
++++ b/src/extensions/browser/api/web_request/web_request_api.cc
+@@ -114,6 +114,10 @@ namespace web_request = api::web_request;
+ 
+ namespace {
+ 
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++const char kWebRequestApiLogTag[] = "[WebRequestAPI]";
++#endif
++
+ // Describes the action taken by the Web Request API for a given stage of a web
+ // request.
+ // These values are written to logs.  New enum values can be added, but existing
+@@ -672,6 +676,13 @@ void WebRequestAPI::OnListenerRemoved(const EventListenerInfo& details) {
+   // Note that details.event_name includes the sub-event details (e.g. "/123").
+   const std::string& sub_event_name = details.event_name;
+ 
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++  LOG(INFO) << kWebRequestApiLogTag
++            << " Remove listener <sub_event_name:" << sub_event_name
++            << ", is_lazy:" << details.is_lazy
++            << "> for extension_id=" << details.extension_id;
++#endif
++
+   // The way we handle the listener removal depends on whether this was a
+   // lazy listener registration (indicated by a null browser context on
+   // `details`).
+@@ -819,8 +830,12 @@ bool WebRequestAPI::MaybeProxyAuthRequest(
+     const content::GlobalRequestID& request_id,
+     bool is_main_frame,
+     AuthRequestCallback callback) {
+-  if (!MayHaveProxies())
++  if (!MayHaveProxies()) {
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++    LOG(INFO) << kWebRequestApiLogTag << " May not be proxy auth request";
++#endif
+     return false;
++  }
+ 
+   content::GlobalRequestID proxied_request_id = request_id;
+   if (is_main_frame)
+@@ -1445,6 +1460,10 @@ ExtensionWebRequestEventRouter::OnAuthRequired(
+     blocked_request.request = request;
+     blocked_request.auth_callback = std::move(callback);
+     blocked_request.auth_credentials = credentials;
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++    LOG(INFO) << kWebRequestApiLogTag
++              << " webRequest.onAuthRequired dispatched";
++#endif
+     return AuthRequiredResponse::AUTH_REQUIRED_RESPONSE_IO_PENDING;
+   }
+   return AuthRequiredResponse::AUTH_REQUIRED_RESPONSE_NO_ACTION;
+@@ -1490,8 +1509,13 @@ void ExtensionWebRequestEventRouter::OnResponseStarted(
+     return;
+ 
+   // OnResponseStarted is even triggered, when the request was cancelled.
+-  if (net_error != net::OK)
++  if (net_error != net::OK) {
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++    LOG(INFO) << kWebRequestApiLogTag
++              << " OnResponseStarted, net_error=" << net_error;
++#endif
+     return;
++  }
+ 
+   int extra_info_spec = 0;
+   RawListeners listeners =
+@@ -1794,6 +1818,11 @@ void ExtensionWebRequestEventRouter::OnEventHandled(
+   }
+ 
+   listener->blocked_requests.erase(request_id);
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++  LOG(INFO) << kWebRequestApiLogTag
++            << " webRequest.OnEventHandled:" << event_name << " by extension:"
++            << extension_id;
++#endif
+   DecrementBlockCount(browser_context, extension_id, event_name, request_id,
+                       response, listener->extra_info_spec);
+ }
+@@ -1864,6 +1893,11 @@ bool ExtensionWebRequestEventRouter::AddEventListener(
+     is_reactivated = erased > 0u;
+   }
+ 
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++  LOG(INFO) << kWebRequestApiLogTag << " webRequest.AddListener for "
++            << event_name;
++#endif
++
+   data_[browser_context_id].active_listeners[event_name].push_back(
+       std::move(listener));
+ 
+diff --git a/src/extensions/common/api/_api_features.json b/src/extensions/common/api/_api_features.json
+index 4f018dc7902c4..a714d8d89b05d
+--- a/src/extensions/common/api/_api_features.json
++++ b/src/extensions/common/api/_api_features.json
+@@ -245,6 +245,8 @@
+         "chrome://assistant-optin/*",
+         "chrome://discards/*",
+         "chrome://extensions/*",
++        // OHOS_ARKWEB_EXTENSIONS
++        "arkweb://extensions/*",
+         "chrome://home/*",
+         "chrome://chrome-signin/*",
+         "chrome://mobilesetup/*",
+@@ -299,7 +301,9 @@
+     "contexts": ["webui"],
+     "matches": [
+       "chrome://extensions/*",
+-      "chrome://settings/*"
++      "chrome://settings/*",
++      // OHOS_ARKWEB_EXTENSIONS
++      "arkweb://extensions/*"
+     ]
+   }, {
+     "channel": "stable",
+@@ -358,6 +362,7 @@
+       "chrome://download-shelf.top-chrome/*",
+       "chrome://eche-app/*",
+       "chrome://extensions/*",
++      "arkweb://extensions/*",
+       "chrome://file-manager/*",
+       "chrome://help-app/*",
+       "chrome://history/*",
+@@ -743,6 +748,7 @@
+     "contexts": ["webui"],
+     "matches": [
+       "chrome://extensions/*",
++      "arkweb://extensions/*",
+       // System Web App version of File Manager.
+       "chrome://file-manager/*",
+       "chrome://test/*"
+diff --git a/src/extensions/renderer/script_context_set.cc b/src/extensions/renderer/script_context_set.cc
+index ef58d9e156c71..21650e7f49a28
+--- a/src/extensions/renderer/script_context_set.cc
++++ b/src/extensions/renderer/script_context_set.cc
+@@ -276,7 +276,11 @@ Feature::Context ScriptContextSet::ClassifyJavaScriptContext(
+   if (!url.is_valid())
+     return Feature::UNSPECIFIED_CONTEXT;
+ 
+-  if (url.SchemeIs(content::kChromeUIScheme))
++  if (url.SchemeIs(content::kChromeUIScheme)
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++      || url.SchemeIs(content::kArkWebUIScheme)
++#endif
++  )
+     return Feature::WEBUI_CONTEXT;
+ 
+   if (url.SchemeIs(content::kChromeUIUntrustedScheme))
+diff --git a/src/gpu/config/gpu_finch_features.cc b/src/gpu/config/gpu_finch_features.cc
+index 336f9b0460963..5bb47b45f3230
+--- a/src/gpu/config/gpu_finch_features.cc
++++ b/src/gpu/config/gpu_finch_features.cc
+@@ -151,7 +151,7 @@ BASE_FEATURE(kDefaultEnableGpuRasterization,
+ BASE_FEATURE(kCanvasOopRasterization,
+              "CanvasOopRasterization",
+ #if BUILDFLAG(IS_FUCHSIA) || BUILDFLAG(IS_IOS) || BUILDFLAG(IS_WIN) || \
+-    (BUILDFLAG(IS_MAC) && defined(ARCH_CPU_ARM64))
++    (BUILDFLAG(IS_MAC) && defined(ARCH_CPU_ARM64)) || BUILDFLAG(IS_OHOS)
+              base::FEATURE_ENABLED_BY_DEFAULT
+ #else
+              base::FEATURE_DISABLED_BY_DEFAULT
+diff --git a/src/gpu/ipc/service/BUILD.gn b/src/gpu/ipc/service/BUILD.gn
+index c431490b4e9be..2c923f37192b3
+--- a/src/gpu/ipc/service/BUILD.gn
++++ b/src/gpu/ipc/service/BUILD.gn
+@@ -144,9 +144,12 @@ component("service") {
+     ]
+     libs += [ "android" ]
+   }
+-  if (is_linux || is_chromeos || is_ohos) {
++  if (is_linux || is_chromeos) {
+     sources += [ "image_transport_surface_linux.cc" ]
+   }
++  if (is_ohos) {
++    sources += [ "image_transport_surface_ohos.cc" ]
++  }
+   if (use_ozone) {
+     sources += [
+       "gpu_memory_buffer_factory_native_pixmap.cc",
+diff --git a/src/gpu/ipc/service/gpu_init.cc b/src/gpu/ipc/service/gpu_init.cc
+index a517ef6e84e40..b805e08741825
+--- a/src/gpu/ipc/service/gpu_init.cc
++++ b/src/gpu/ipc/service/gpu_init.cc
+@@ -817,6 +817,7 @@ void GpuInit::InitializeInProcess(base::CommandLine* command_line,
+ #else
+ void GpuInit::InitializeInProcess(base::CommandLine* command_line,
+                                   const GpuPreferences& gpu_preferences) {
++  TRACE_EVENT0("startup", "GpuInit::InitializeInProcess");
+   gpu_preferences_ = gpu_preferences;
+   init_successful_ = true;
+ #if BUILDFLAG(IS_OZONE)
+diff --git a/src/gpu/ipc/service/image_transport_surface_linux.cc b/src/gpu/ipc/service/image_transport_surface_linux.cc
+index 1abfd9b913861..a02a653f9ba0e
+--- a/src/gpu/ipc/service/image_transport_surface_linux.cc
++++ b/src/gpu/ipc/service/image_transport_surface_linux.cc
+@@ -17,7 +17,7 @@ scoped_refptr<gl::Presenter> ImageTransportSurface::CreatePresenter(
+     SurfaceHandle surface_handle,
+     gl::GLSurfaceFormat format) {
+   DCHECK_NE(surface_handle, kNullSurfaceHandle);
+-#if BUILDFLAG(IS_OZONE) && !BUILDFLAG(IS_OHOS)
++#if BUILDFLAG(IS_OZONE)
+   return gl::init::CreateSurfacelessViewGLSurface(display, surface_handle);
+ #else
+   return nullptr;
+diff --git a/src/gpu/ipc/service/image_transport_surface_ohos.cc b/src/gpu/ipc/service/image_transport_surface_ohos.cc
+new file mode 100644
+index 0000000000000..0242f93b13568
+--- /dev/null
++++ b/src/gpu/ipc/service/image_transport_surface_ohos.cc
+@@ -0,0 +1,42 @@
++// Copyright 2013 The Chromium Authors
++// Use of this source code is governed by a BSD-style license that can be
++// found in the LICENSE file.
++
++#include "gpu/ipc/service/image_transport_surface.h"
++
++#include "build/build_config.h"
++#include "gpu/ipc/service/pass_through_image_transport_surface.h"
++#include "ui/gl/init/gl_factory.h"
++
++namespace gpu {
++
++// static
++scoped_refptr<gl::Presenter> ImageTransportSurface::CreatePresenter(
++    gl::GLDisplay* display,
++    base::WeakPtr<ImageTransportSurfaceDelegate> delegate,
++    SurfaceHandle surface_handle,
++    gl::GLSurfaceFormat format) {
++  DCHECK_NE(surface_handle, kNullSurfaceHandle);
++  return gl::init::CreateSurfacelessViewGLSurface(display, surface_handle);
++}
++
++// static
++scoped_refptr<gl::GLSurface> ImageTransportSurface::CreateNativeGLSurface(
++    gl::GLDisplay* display,
++    base::WeakPtr<ImageTransportSurfaceDelegate> delegate,
++    SurfaceHandle surface_handle,
++    gl::GLSurfaceFormat format) {
++  DCHECK_NE(surface_handle, kNullSurfaceHandle);
++  scoped_refptr<gl::GLSurface> surface =
++      gl::init::CreateViewGLSurface(display, surface_handle);
++  bool override_vsync_for_multi_window_swap = false;
++  if (gl::GetGLImplementation() == gl::kGLImplementationEGLANGLE) {
++    override_vsync_for_multi_window_swap = true;
++  }
++  if (!surface)
++    return surface;
++  return scoped_refptr<gl::GLSurface>(new PassThroughImageTransportSurface(
++      delegate, surface.get(), override_vsync_for_multi_window_swap));
++}
++
++}  // namespace gpu
+diff --git a/src/ipc/ipc_channel_mojo.cc b/src/ipc/ipc_channel_mojo.cc
+index 50bb176c8ad7e..9ff27177c9770
+--- a/src/ipc/ipc_channel_mojo.cc
++++ b/src/ipc/ipc_channel_mojo.cc
+@@ -111,6 +111,8 @@ base::ProcessId GetSelfPID() {
+ #endif  // BUILDFLAG(IS_LINUX) || BUILDFLAG(IS_CHROMEOS)
+ #if BUILDFLAG(IS_NACL)
+   return -1;
++#elif BUILDFLAG(IS_OHOS)
++  return base::GetCurrentRealPid();
+ #else
+   return base::GetCurrentProcId();
+ #endif  // BUILDFLAG(IS_NACL)
+diff --git a/src/media/audio/audio_device_thread.cc b/src/media/audio/audio_device_thread.cc
+index 4a057725dcf3e..756e9bd99e0b3
+--- a/src/media/audio/audio_device_thread.cc
++++ b/src/media/audio/audio_device_thread.cc
+@@ -85,9 +85,9 @@ void AudioDeviceThread::ThreadMain() {
+   callback_->InitializeOnAudioThread();
+ 
+ #if BUILDFLAG(IS_OHOS)
+-  // OHOS::NWeb::ResSchedClientAdapter::ReportAudioData(
+-  //     OHOS::NWeb::ResSchedStatusAdapter::AUDIO_STATUS_START,
+-  //     base::GetCurrentProcId(), base::PlatformThread::CurrentId());
++  OHOS::NWeb::ResSchedClientAdapter::ReportAudioData(
++      OHOS::NWeb::ResSchedStatusAdapter::AUDIO_STATUS_START,
++      base::GetCurrentProcId(), base::PlatformThread::CurrentId());
+ #endif
+ 
+   uint32_t buffer_index = 0;
+diff --git a/src/media/audio/ohos/ohos_audio_output_stream.cc b/src/media/audio/ohos/ohos_audio_output_stream.cc
+index 14569dffc47fb..4468447344e49
+--- a/src/media/audio/ohos/ohos_audio_output_stream.cc
++++ b/src/media/audio/ohos/ohos_audio_output_stream.cc
+@@ -188,6 +188,10 @@ void OHOSAudioOutputStream::Refresh() {
+   isRefreshing_ = false;
+ }
+ 
++bool OHOSAudioOutputStream::GetAudioExclusive() {
++  return audioExclusive_;
++}
++
+ void OHOSAudioOutputStream::SetInterruptMode(bool audioExclusive) {
+   LOG(INFO) << "OHOSAudioOutputStream::SetInterruptMode audioExclusive: "
+             << audioExclusive;
+@@ -197,6 +201,7 @@ void OHOSAudioOutputStream::SetInterruptMode(bool audioExclusive) {
+     return;
+   }
+   audio_renderer_->SetInterruptMode(audioExclusive);
++  audioExclusive_ = audioExclusive;
+ }
+ 
+ // This stream is always used with sub second buffer sizes, where it's
+@@ -297,8 +302,8 @@ void OHOSAudioOutputStream::Prepare(
+   if (mediaSession && !mediaSession->activeAudioStream_.empty()) {
+     for (auto stream = mediaSession->activeAudioStream_.begin();
+          stream != mediaSession->activeAudioStream_.end();) {
+-      LOG(INFO)
+-          << "OHOSAudioOutputStream::Prepare refresh other active streams";
++      LOG(INFO) << "OHOSAudioOutputStream::Prepare maybe refresh other active "
++                   "streams";
+       if (!(*stream)) {
+         LOG(ERROR)
+             << "OHOSAudioOutputStream::Prepare the active stream is null";
+@@ -307,6 +312,12 @@ void OHOSAudioOutputStream::Prepare(
+       }
+       (*stream)->SetInterruptMode(false);
+       (*stream)->Refresh();
++      if ((*stream)->GetAudioExclusive()) {
++        LOG(INFO) << "OHOSAudioOutputStream::Prepare should refresh other "
++                     "active streams";
++        (*stream)->SetInterruptMode(false);
++        (*stream)->Refresh();
++      }
+       ++stream;
+     }
+     LOG(ERROR) << "OHOSAudioOutputStream::Prepare setInterruptMode";
+diff --git a/src/media/audio/ohos/ohos_audio_output_stream.h b/src/media/audio/ohos/ohos_audio_output_stream.h
+index 2ec74f394920f..c3a03b0252c52
+--- a/src/media/audio/ohos/ohos_audio_output_stream.h
++++ b/src/media/audio/ohos/ohos_audio_output_stream.h
+@@ -58,6 +58,7 @@ class OHOSAudioOutputStream : public AudioOutputStream {
+   void Close() override;
+   void SetInterruptMode(bool audioExclusive);
+   void Refresh();
++  bool GetAudioExclusive();
+ 
+  private:
+   ~OHOSAudioOutputStream() override;
+@@ -128,6 +129,8 @@ class OHOSAudioOutputStream : public AudioOutputStream {
+ 
+   bool isCommunication_ = false;
+ 
++  bool audioExclusive_ = false;
++
+   scoped_refptr<base::SingleThreadTaskRunner> main_task_runner_;
+ };
+ 
+diff --git a/src/media/base/audio_renderer_mixer.cc b/src/media/base/audio_renderer_mixer.cc
+index bf70825f83a02..3892a8da55310
+--- a/src/media/base/audio_renderer_mixer.cc
++++ b/src/media/base/audio_renderer_mixer.cc
+@@ -48,9 +48,9 @@ AudioRendererMixer::~AudioRendererMixer() {
+   // AudioRendererSink must be stopped before mixer is destructed.
+   audio_sink_->Stop();
+ #if BUILDFLAG(IS_OHOS)
+-  // OHOS::NWeb::ResSchedClientAdapter::ReportAudioData(
+-  //     OHOS::NWeb::ResSchedStatusAdapter::AUDIO_STATUS_STOP,
+-  //     base::GetCurrentProcId(), tid_);
++  OHOS::NWeb::ResSchedClientAdapter::ReportAudioData(
++      OHOS::NWeb::ResSchedStatusAdapter::AUDIO_STATUS_STOP,
++      base::GetCurrentProcId(), tid_);
+ #endif
+ 
+   // Ensure that all mixer inputs have removed themselves prior to destruction.
+@@ -67,9 +67,9 @@ void AudioRendererMixer::AddMixerInput(const AudioParameters& input_params,
+     last_play_time_ = base::TimeTicks::Now();
+     audio_sink_->Play();
+ #if BUILDFLAG(IS_OHOS)
+-    // OHOS::NWeb::ResSchedClientAdapter::ReportAudioData(
+-    //     OHOS::NWeb::ResSchedStatusAdapter::AUDIO_STATUS_START,
+-    //     base::GetCurrentProcId(), tid_);
++    OHOS::NWeb::ResSchedClientAdapter::ReportAudioData(
++        OHOS::NWeb::ResSchedStatusAdapter::AUDIO_STATUS_START,
++        base::GetCurrentProcId(), tid_);
+ #endif
+   }
+ 
+@@ -157,9 +157,9 @@ int AudioRendererMixer::Render(base::TimeDelta delay,
+     audio_sink_->Pause();
+     playing_ = false;
+ #if BUILDFLAG(IS_OHOS)
+-    // OHOS::NWeb::ResSchedClientAdapter::ReportAudioData(
+-    //     OHOS::NWeb::ResSchedStatusAdapter::AUDIO_STATUS_STOP,
+-    //     base::GetCurrentProcId(), tid_);
++    OHOS::NWeb::ResSchedClientAdapter::ReportAudioData(
++        OHOS::NWeb::ResSchedStatusAdapter::AUDIO_STATUS_STOP,
++        base::GetCurrentProcId(), tid_);
+ #endif
+   }
+ 
+diff --git a/src/media/filters/demuxer_manager.cc b/src/media/filters/demuxer_manager.cc
+index 09ef6753ec11f..4aaaf20c9bd18
+--- a/src/media/filters/demuxer_manager.cc
++++ b/src/media/filters/demuxer_manager.cc
+@@ -29,7 +29,7 @@ namespace media {
+ 
+ namespace {
+ 
+-#if BUILDFLAG(ENABLE_HLS_DEMUXER) || BUILDFLAG(IS_ANDROID)
++#if BUILDFLAG(ENABLE_HLS_DEMUXER) || BUILDFLAG(IS_ANDROID) || BUILDFLAG(IS_OHOS)
+ 
+ // These values are persisted to logs. Entries should not be renumbered and
+ // numeric values should never be reused.
+@@ -93,6 +93,9 @@ MimeType TranslateMimeTypeToHistogramEnum(const base::StringPiece& mime_type) {
+ }
+ 
+ HlsFallbackImplementation SelectHlsFallbackImplementation() {
++#if BUILDFLAG(IS_OHOS)
++  return HlsFallbackImplementation::kMediaPlayer;
++#else
+ #if !BUILDFLAG(IS_ANDROID)
+   // TODO(crbug/1266991): This should return kBuiltinHlsPlayer when we launch
+   // on non-mobile. For now, do not support it.
+@@ -116,9 +119,10 @@ HlsFallbackImplementation SelectHlsFallbackImplementation() {
+   }
+   return kNone;
+ #endif
++#endif // BUILDFLAG(IS_OHOS)
+ }
+ 
+-#endif  // BUILDFLAG(ENABLE_HLS_DEMUXER) || BUILDFLAG(IS_ANDROID)
++#endif  // BUILDFLAG(ENABLE_HLS_DEMUXER) || BUILDFLAG(IS_ANDROID) || BUILDFLAG(IS_OHOS)
+ 
+ #if BUILDFLAG(ENABLE_FFMPEG)
+ // Returns true if `url` represents (or is likely to) a local file.
+@@ -179,7 +183,7 @@ void DemuxerManager::OnPipelineError(PipelineStatus error) {
+     return client_->OnError(std::move(error));
+   }
+ 
+-#if BUILDFLAG(ENABLE_HLS_DEMUXER) || BUILDFLAG(IS_ANDROID)
++#if BUILDFLAG(ENABLE_HLS_DEMUXER) || BUILDFLAG(IS_ANDROID) || BUILDFLAG(IS_OHOS)
+   bool can_play_hls =
+       SelectHlsFallbackImplementation() != HlsFallbackImplementation::kNone;
+   if (can_play_hls && error == DEMUXER_ERROR_DETECTED_HLS) {
+@@ -199,7 +203,7 @@ void DemuxerManager::OnPipelineError(PipelineStatus error) {
+ 
+     return;
+   }
+-#endif  // BUILDFLAG(ENABLE_HLS_DEMUXER) || BUILDFLAG(IS_ANDROID)
++#endif  // BUILDFLAG(ENABLE_HLS_DEMUXER) || BUILDFLAG(IS_ANDROID) || BUILDFLAG(IS_OHOS)
+ 
+   client_->OnError(std::move(error));
+ }
+@@ -231,7 +235,7 @@ void DemuxerManager::SetLoadedUrl(GURL url) {
+   loaded_url_ = std::move(url);
+ }
+ 
+-#if BUILDFLAG(ENABLE_HLS_DEMUXER) || BUILDFLAG(IS_ANDROID)
++#if BUILDFLAG(ENABLE_HLS_DEMUXER) || BUILDFLAG(IS_ANDROID) || BUILDFLAG(IS_OHOS)
+ 
+ void DemuxerManager::PopulateHlsHistograms(bool cryptographic_url) {
+   DCHECK(data_source_);
+@@ -304,7 +308,7 @@ PipelineStatus DemuxerManager::SelectHlsFallbackMechanism(
+   return OkStatus();
+ }
+ 
+-#endif  // BUILDFLAG(ENABLE_HLS_DEMUXER) || BUILDFLAG(IS_ANDROID)
++#endif  // BUILDFLAG(ENABLE_HLS_DEMUXER) || BUILDFLAG(IS_ANDROID) || BUILDFLAG(IS_OHOS)
+ 
+ absl::optional<double> DemuxerManager::GetDemuxerDuration() {
+   if (!demuxer_) {
+@@ -378,14 +382,9 @@ PipelineStatus DemuxerManager::CreateDemuxer(
+   }
+ 
+ #if BUILDFLAG(IS_ANDROID) || BUILDFLAG(IS_OHOS)
+-#if BUILDFLAG(IS_ANDROID)
+   const bool media_player_hls =
+       hls_fallback_ == HlsFallbackImplementation::kMediaPlayer;
+   if (media_player_hls || client_->IsMediaPlayerRendererClient()) {
+-#else
+-  const bool media_player_hls = false;
+-  if (client_->IsMediaPlayerRendererClient()) {
+-#endif
+     SetDemuxer(CreateMediaUrlDemuxer(media_player_hls));
+     return std::move(on_demuxer_created)
+         .Run(demuxer_.get(), Pipeline::StartType::kNormal,
+diff --git a/src/media/filters/demuxer_manager.h b/src/media/filters/demuxer_manager.h
+index 8a15665606842..76a2b0fb30daa
+--- a/src/media/filters/demuxer_manager.h
++++ b/src/media/filters/demuxer_manager.h
+@@ -125,10 +125,10 @@ class MEDIA_EXPORT DemuxerManager {
+ 
+   void OnPipelineError(PipelineStatus error);
+   void SetLoadedUrl(GURL url);
+-#if BUILDFLAG(ENABLE_HLS_DEMUXER) || BUILDFLAG(IS_ANDROID)
++#if BUILDFLAG(ENABLE_HLS_DEMUXER) || BUILDFLAG(IS_ANDROID) || BUILDFLAG(IS_OHOS)
+   void PopulateHlsHistograms(bool cryptographic_url);
+   PipelineStatus SelectHlsFallbackMechanism(bool cryptographic_url);
+-#endif  // BUILDFLAG(ENABLE_HLS_DEMUXER) || BUILDFLAG(IS_ANDROID)
++#endif  // BUILDFLAG(ENABLE_HLS_DEMUXER) || BUILDFLAG(IS_ANDROID) || BUILDFLAG(IS_OHOS)
+   void DisallowFallback();
+ 
+   // Methods that help manage demuxers
+diff --git a/src/media/filters/ffmpeg_demuxer.cc b/src/media/filters/ffmpeg_demuxer.cc
+index d5ab57b0b41bc..93bff4661bfa6
+--- a/src/media/filters/ffmpeg_demuxer.cc
++++ b/src/media/filters/ffmpeg_demuxer.cc
+@@ -1244,7 +1244,7 @@ void FFmpegDemuxer::OnOpenContextDone(bool result) {
+     return;
+   }
+ 
+-#if BUILDFLAG(IS_ANDROID)
++#if BUILDFLAG(IS_ANDROID) || BUILDFLAG(IS_OHOS)
+   if (glue_->detected_hls()) {
+     MEDIA_LOG(INFO, media_log_)
+         << GetDisplayName() << ": detected HLS manifest";
+diff --git a/src/media/webrtc/audio_processor.cc b/src/media/webrtc/audio_processor.cc
+index fecee4bce2b00..7ceb063fce2d8
+--- a/src/media/webrtc/audio_processor.cc
++++ b/src/media/webrtc/audio_processor.cc
+@@ -48,6 +48,8 @@ int GetCaptureBufferSize(bool need_webrtc_processing,
+   // (2*22050)/100 = 441 samples, while WebRTC processes in chunks of 22050/100
+   // = 220 samples. This leads to unnecessary rebuffering.
+   return 2 * device_format.sample_rate() / 100;
++#elif BUILDFLAG(IS_OHOS)
++  return 2 * device_format.sample_rate() / 100;
+ #else
+   const int buffer_size_10_ms = device_format.sample_rate() / 100;
+   // If audio processing is turned on, require 10ms buffers to avoid
+diff --git a/src/mojo/public/cpp/bindings/lib/interface_endpoint_client.cc b/src/mojo/public/cpp/bindings/lib/interface_endpoint_client.cc
+index b48480551c7e2..abb9cf1b7548a
+--- a/src/mojo/public/cpp/bindings/lib/interface_endpoint_client.cc
++++ b/src/mojo/public/cpp/bindings/lib/interface_endpoint_client.cc
+@@ -485,7 +485,11 @@ InterfaceEndpointClient::InterfaceEndpointClient(
+ }
+ 
+ InterfaceEndpointClient::~InterfaceEndpointClient() {
++#if defined(OHOS_BUGFIX_CRASH)
++  DCHECK_CALLED_ON_VALID_SEQUENCE(sequence_checker_);
++#else
+   CHECK(sequence_checker_.CalledOnValidSequence());
++#endif
+   if (controller_)
+     handle_.group_controller()->DetachEndpointClient(handle_);
+ }
+diff --git a/src/net/base/filename_util.cc b/src/net/base/filename_util.cc
+index 1fb7fff6ab95c..7fa243f5af028
+--- a/src/net/base/filename_util.cc
++++ b/src/net/base/filename_util.cc
+@@ -27,6 +27,12 @@ namespace net {
+ static const char kFileURLPrefix[] = "file:///";
+ 
+ GURL FilePathToFileURL(const base::FilePath& path) {
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++  if (path.IsDataShareUri()) {
++    return GURL(path.value());
++  }
++#endif
++
+   // Produce a URL like "file:///C:/foo" for a regular file, or
+   // "file://///server/path" for UNC. The URL canonicalizer will fix up the
+   // latter case to be the canonical UNC form: "file://server/path"
+@@ -62,6 +68,14 @@ bool FileURLToFilePath(const GURL& url, base::FilePath* file_path) {
+       const_cast<base::FilePath::StringType&>(file_path->value());
+   file_path_str.clear();
+ 
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++  if (base::FilePath::IsDataShareUrl(url.possibly_invalid_spec())) {
++    file_path_str.assign(url.possibly_invalid_spec());
++    return !file_path_str.empty();
++  }
++
++#endif
++
+   if (!url.is_valid())
+     return false;
+ 
+diff --git a/src/net/disk_cache/blockfile/backend_impl.cc b/src/net/disk_cache/blockfile/backend_impl.cc
+index a7382327eae37..ccd93a58d415e
+--- a/src/net/disk_cache/blockfile/backend_impl.cc
++++ b/src/net/disk_cache/blockfile/backend_impl.cc
+@@ -127,8 +127,8 @@ class CacheThread : public base::Thread {
+ #if BUILDFLAG(IS_OHOS)
+     using namespace OHOS::NWeb;
+     ResSchedClientAdapter::ReportKeyThread(
+-        ResSchedStatusAdapter::THREAD_CREATED, base::GetCurrentProcId(),
+-        GetThreadId(), ResSchedRoleAdapter::USER_INTERACT);
++        ResSchedStatusAdapter::THREAD_CREATED, base::GetCurrentRealPid(),
++        GetThreadRealId(), ResSchedRoleAdapter::USER_INTERACT);
+ #endif
+   }
+ 
+@@ -138,8 +138,8 @@ class CacheThread : public base::Thread {
+ #if BUILDFLAG(IS_OHOS)
+     using namespace OHOS::NWeb;
+     ResSchedClientAdapter::ReportKeyThread(
+-        ResSchedStatusAdapter::THREAD_DESTROYED, base::GetCurrentProcId(),
+-        GetThreadId(), ResSchedRoleAdapter::USER_INTERACT);
++        ResSchedStatusAdapter::THREAD_DESTROYED, base::GetCurrentRealPid(),
++        GetThreadRealId(), ResSchedRoleAdapter::USER_INTERACT);
+ #endif
+ 
+     Stop();
+diff --git a/src/ohos_nweb/BUILD.gn b/src/ohos_nweb/BUILD.gn
+index 52a36e6d3ebbd..956d285b82727
+--- a/src/ohos_nweb/BUILD.gn
++++ b/src/ohos_nweb/BUILD.gn
+@@ -135,6 +135,11 @@ component("cef_nweb") {
+     "src/sysevent/event_reporter.h",
+   ]
+ 
++  sources += [
++    "src/cef_delegate/nweb_value_convert.cc",
++    "src/cef_delegate/nweb_value_convert.h",
++  ]
++
+   #ifdef OHOS_HTML_SELECT
+   if (defined(ohos_html_select) && ohos_html_select) {
+     sources += [
+@@ -179,7 +184,9 @@ component("cef_nweb") {
+   if (defined(ohos_nweb_ex) && ohos_nweb_ex) {
+     deps += [ "//ohos_nweb_ex/overrides/ohos_nweb" ]
+   } else {
+-    sources += [ "src/cef_delegate/nweb_delegate_ohos.cc" ]
++    sources += [
++      "src/cef_delegate/nweb_delegate_ohos.cc",
++    ]
+   }
+ }
+ 
+@@ -254,6 +261,12 @@ component("nweb_sources") {
+     "src/nweb_web_storage_impl.h",
+   ]
+ 
++  if (!defined(ohos_nweb_ex) || !ohos_nweb_ex) {
++    sources += [
++      "src/download/web_downloader.cc"
++    ]
++  }
++
+   deps = [
+     ":cef_nweb",
+     ":nweb_hilog",
+@@ -302,11 +315,15 @@ shared_library("libnweb_render") {
+   include_dirs = [ "include" ]
+   include_dirs += ohos_src_includes
+ 
+-  sources = [ "src/nweb_render_main.cc" ]
++  sources = [
++    "src/nweb_render_main.cc",
++    "src/set_renderer_seccomp_policy.cc",
++  ]
+ 
+   deps = [
+     ":nweb_hilog",
+     "//cef:libcef_dll_wrapper",
+     "//cef:libweb_engine",
++    "//sandbox:sandbox",
+   ]
+ }
+diff --git a/src/ohos_nweb/include/nweb.h b/src/ohos_nweb/include/nweb.h
+index 83a11aade2277..c4fdd9b6eb2b1
+--- a/src/ohos_nweb/include/nweb.h
++++ b/src/ohos_nweb/include/nweb.h
+@@ -1,5 +1,5 @@
+ /*
+- * Copyright (c) 2022 Huawei Device Co., Ltd.
++ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+  * Licensed under the Apache License, Version 2.0 (the "License");
+  * you may not use this file except in compliance with the License.
+  * You may obtain a copy of the License at
+@@ -21,6 +21,8 @@
+ #include <memory>
+ #include <string>
+ 
++#include "nweb_accessibility_event_callback.h"
++#include "nweb_accessibility_node_info.h"
+ #include "nweb_download_callback.h"
+ #include "nweb_drag_data.h"
+ #include "nweb_export.h"
+@@ -35,6 +37,7 @@
+ 
+ namespace OHOS::NWeb {
+ class NWebHandler;
++class NWebValue;
+ 
+ /**
+  * @brief Describes how pixel bits encoder color data.
+@@ -132,6 +135,7 @@ enum class NestedScrollMode : int32_t {
+     PARALLEL = 3,
+ };
+ 
++using ScriptItems = std::map<std::string, std::vector<std::string>>;
+ using WebState = std::shared_ptr<std::vector<uint8_t>>;
+ using SetKeepScreenOn = std::function<void(bool)>;
+ 
+@@ -158,8 +162,8 @@ class OHOS_NWEB_EXPORT NWeb : public std::enable_shared_from_this<NWeb> {
+     virtual void OnTouchCancel() = 0;
+     virtual void OnNavigateBack() = 0;
+     virtual bool SendKeyEvent(int32_t keyCode, int32_t keyAction) = 0;
+-    virtual void SendMouseWheelEvent(double x, double y, double deltaX, double deltaY);
+-    virtual void SendMouseEvent(int x, int y, int button, int action, int count);
++    virtual void SendMouseWheelEvent(double x, double y, double deltaX, double deltaY) = 0;
++    virtual void SendMouseEvent(int x, int y, int button, int action, int count) = 0;
+ 
+     /**
+      * Loads the given URL.
+@@ -310,6 +314,23 @@ class OHOS_NWEB_EXPORT NWeb : public std::enable_shared_from_this<NWeb> {
+     virtual void PutDownloadCallback(
+             std::shared_ptr<NWebDownloadCallback> downloadListener) = 0;
+ 
++    /**
++     * Set the NWebAccessibilityEventCallback that will receive accessibility event.
++     * This will replace the current handler.
++     *
++     * @param accessibilityEventListener NWebDownloadCallback.
++     */
++    virtual void PutAccessibilityEventCallback(
++        std::shared_ptr<NWebAccessibilityEventCallback> accessibilityEventListener) = 0;
++
++     /**
++     * Set the accessibility id generator that will generate accessibility id for accessibility nodes in the web.
++     * This will replace the current handler.
++     *
++     * @param accessibilityIdGenerator Accessibility id generator.
++     */
++    virtual void PutAccessibilityIdGenerator(std::function<int32_t()> accessibilityIdGenerator) = 0;
++
+     /**
+      * Set the NWebHandler that will receive various notifications and
+      * requests. This will replace the current handler.
+@@ -412,8 +433,8 @@ class OHOS_NWEB_EXPORT NWeb : public std::enable_shared_from_this<NWeb> {
+      * @param method_list vector<String>: vector list ,method list
+      */
+     virtual void RegisterArkJSfunction(
+-            const std::string& object_name,
+-            const std::vector<std::string>& method_list) = 0;
++        const std::string& object_name,
++        const std::vector<std::string>& method_list) = 0;
+ 
+     /**
+      * UnregisterArkJSfunction
+@@ -782,6 +803,139 @@ class OHOS_NWEB_EXPORT NWeb : public std::enable_shared_from_this<NWeb> {
+      * Set enable lower the frame rate.
+      */
+     virtual void SetEnableLowerFrameRate(bool enabled) const = 0;
++
++    /**
++     * Set the property values for width, height, and keyboard height.
++     */
++    virtual void SetVirtualKeyBoardArg(int32_t width, int32_t height, double keyboard) = 0;
++
++    /**
++     * Set the virtual keyboard to override the web status.
++     */
++    virtual bool ShouldVirtualKeyboardOverlay() = 0;
++
++    /**
++     * Set draw rect.
++     *
++    */
++    virtual void SetDrawRect(int32_t x, int32_t y, int32_t width, int32_t height) = 0;
++
++    /**
++     * Set draw mode.
++     *
++    */
++    virtual void SetDrawMode(int32_t mode) = 0;
++
++    /**
++     * Create web print document adapter.
++     *
++    */
++    virtual void* CreateWebPrintDocumentAdapter(const std::string& jobName) = 0;
++
++    /**
++     * Loads the URL with postData using "POST" method into this WebView.
++     * If url is not a network URL, it will be loaded with loadUrl(String) instead.
++     *
++     * @param url String: the URL of the resource to load This value cannot be null.
++     * @param postData the data will be passed to "POST" request,
++     * whilch must be "application/x-www-form-urlencoded" encoded.
++     *
++     * @return title string for the current page.
++     */
++    virtual int PostUrl(const std::string& url, std::vector<char>& postData) = 0;
++
++    /**
++     * Inject the JavaScript before WebView load the DOM tree.
++     */
++    virtual void JavaScriptOnDocumentStart(const ScriptItems& scriptItems) = 0;
++
++        /**
++     * Execute an accessibility action on an accessibility node in the browser.
++     * @param accessibilityId The id of the accessibility node.
++     * @param action The action to be performed on the accessibility node.
++     */
++    virtual void ExecuteAction(int32_t accessibilityId, uint32_t action) const = 0;
++
++    /**
++     * Get the information of the focused accessibility node on the given accessibility node in the browser.
++     * @param accessibilityId Indicate the accessibility id of the parent node of the focused accessibility node.
++     * @param isAccessibilityFocus Indicate whether the focused accessibility node is accessibility focused or input
++     * focused.
++     * @param nodeInfo The obtained information of the accessibility node.
++     * @return true if get accessibility node info successfully, otherwise false.
++     */
++    virtual bool GetFocusedAccessibilityNodeInfo(
++        int32_t accessibilityId, bool isAccessibilityFocus, OHOS::NWeb::NWebAccessibilityNodeInfo& nodeInfo) const = 0;
++
++    /**
++     * Get the information of the accessibility node by its accessibility id in the browser.
++     * @param accessibilityId The accessibility id of the accessibility node.
++     * @param nodeInfo The obtained information of the accessibility node.
++     * @return true if get accessibility node info successfully, otherwise false.
++     */
++    virtual bool GetAccessibilityNodeInfoById(
++        int32_t accessibilityId, OHOS::NWeb::NWebAccessibilityNodeInfo& nodeInfo) const = 0;
++
++    /**
++     * Get the information of the accessibility node by focus move in the browser.
++     * @param accessibilityId The accessibility id of the original accessibility node.
++     * @param direction The focus move direction of the original accessibility node.
++     * @param nodeInfo The obtained information of the accessibility node.
++     * @return true if get accessibility node info successfully, otherwise false.
++     */
++    virtual bool GetAccessibilityNodeInfoByFocusMove(
++        int32_t accessibilityId, int32_t direction, OHOS::NWeb::NWebAccessibilityNodeInfo& nodeInfo) const = 0;
++
++    /**
++     * Set the accessibility state in the browser.
++     * @param state Indicate whether the accessibility state is enabled or disabled.
++     */
++    virtual void SetAccessibilityState(bool state) = 0;
++
++    /**
++     * RegisterArkJSfunctionExt
++     *
++     * @param object_name  String: objector name
++     * @param method_list vector<String>: vector list ,method list
++     * @param object_id int32_t: object id
++     */
++    virtual void RegisterArkJSfunctionExt(
++        const std::string& object_name,
++        const std::vector<std::string>& method_list,
++        const int32_t object_id) = 0;
++
++     /**
++     * Get whether need soft keyboard.
++     *
++     * @return true if need soft keyboard, otherwise false.
++     */
++    virtual bool NeedSoftKeyboard() const = 0;
++
++    /**
++     * Discard the webview window.
++     * @return true if the discarding success, otherwise false.
++     */
++    virtual bool Discard() = 0;
++
++    /**
++     * Reload the webview window that has been discarded before.
++     * @return true if the discarded window reload success, otherwise false.
++     */
++    virtual bool Restore() = 0;
++
++    /**
++     * CallH5Function
++     *
++     * @param routing_id       int32_t: the h5 frmae routing id
++     * @param h5_object_id     int32_t: the h5 side object id
++     * @param h5_method_name   string:  the h5 side object method name
++     * @param args             vector<shared_ptr<NWebValue>>: the call args
++     */
++    virtual void CallH5Function(
++        int32_t routing_id,
++        int32_t h5_object_id,
++        const std::string h5_method_name,
++        const std::vector<std::shared_ptr<NWebValue>>& args) = 0;
+ };
+ }  // namespace OHOS::NWeb
+ 
+diff --git a/src/ohos_nweb/include/nweb_accessibility_event_callback.h b/src/ohos_nweb/include/nweb_accessibility_event_callback.h
+new file mode 100644
+index 0000000000000..911cefab7a76a
+--- /dev/null
++++ b/src/ohos_nweb/include/nweb_accessibility_event_callback.h
+@@ -0,0 +1,34 @@
++/*
++ * Copyright (c) 2023 Huawei Device Co., Ltd.
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *     http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++
++#ifndef NWEB_ACCESSIBILITY_EVENT_CALLBACK_H
++#define NWEB_ACCESSIBILITY_EVENT_CALLBACK_H
++
++#include <string>
++
++#include "nweb_export.h"
++
++namespace OHOS::NWeb {
++class OHOS_NWEB_EXPORT NWebAccessibilityEventCallback {
++ public:
++  NWebAccessibilityEventCallback() = default;
++
++  virtual ~NWebAccessibilityEventCallback() = default;
++  virtual void OnAccessibilityEvent(int32_t accessibilityId,
++                                    uint32_t eventType) = 0;
++};
++}  // namespace OHOS::NWeb
++
++#endif  // NWEB_ACCESSIBILITY_EVENT_CALLBACK_H
+\ No newline at end of file
+diff --git a/src/ohos_nweb/include/nweb_accessibility_node_info.h b/src/ohos_nweb/include/nweb_accessibility_node_info.h
+new file mode 100644
+index 0000000000000..9980020d75095
+--- /dev/null
++++ b/src/ohos_nweb/include/nweb_accessibility_node_info.h
+@@ -0,0 +1,81 @@
++/*
++ * Copyright (c) 2023 Huawei Device Co., Ltd.
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *     http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++
++#ifndef NWEB_ACCESSIBILITY_ACCESSIBILITY_NODE_INFO_H
++#define NWEB_ACCESSIBILITY_ACCESSIBILITY_NODE_INFO_H
++
++#include <string>
++
++#include "nweb_export.h"
++
++namespace OHOS::NWeb {
++struct OHOS_NWEB_EXPORT NWebAccessibilityNodeInfo {
++ public:
++  NWebAccessibilityNodeInfo(int32_t accessibilityId)
++      : accessibilityId(accessibilityId) {}
++
++  int32_t accessibilityId = -1;
++  size_t itemCounts = 0;
++  int32_t currentIndex = 0;
++  int32_t startIndex = 0;
++  int32_t endIndex = 0;
++  int32_t selectionStart = 0;
++  int32_t selectionEnd = 0;
++  int32_t inputType = -1;
++  int32_t liveRegion = -1;
++  std::string componentType;
++  std::string hint;
++  std::string content;
++  std::string error;
++  std::string descriptionInfo;
++  std::vector<int32_t> childIds;
++  int32_t parentId = -1;
++  int32_t gridRows = -1;
++  int32_t gridColumns = -1;
++  int32_t gridSelectedMode = -1;
++  int32_t gridItemRow = -1;
++  int32_t gridItemRowSpan = -1;
++  int32_t gridItemColumn = -1;
++  int32_t gridItemColumnSpan = -1;
++  bool heading = false;
++  std::vector<uint32_t> actions;
++  int32_t pageId = -1;
++
++  size_t rectX = 0;
++  size_t rectY = 0;
++  size_t rectWidth = 0;
++  size_t rectHeight = 0;
++
++  bool checked = false;
++  bool editable : 1;
++  bool enabled : 1;
++  bool focused : 1;
++  bool selected : 1;
++  bool checkable : 1;
++  bool clickable : 1;
++  bool focusable : 1;
++  bool scrollable : 1;
++  bool password : 1;
++  bool visible : 1;
++  bool hinting : 1;
++  bool pluralLineSupported : 1;
++  bool popupSupported : 1;
++  bool contentInvalid : 1;
++  bool deletable : 1;
++  bool accessibilityFocus : 1;
++};
++}  // namespace OHOS::NWeb
++
++#endif  // NWEB_ACCESSIBILITY_ACCESSIBILITY_NODE_INFO_H
+\ No newline at end of file
+diff --git a/src/ohos_nweb/include/nweb_cookie_manager.h b/src/ohos_nweb/include/nweb_cookie_manager.h
+index 8e3aeef0374e0..afc1c5ec66951
+--- a/src/ohos_nweb/include/nweb_cookie_manager.h
++++ b/src/ohos_nweb/include/nweb_cookie_manager.h
+@@ -139,7 +139,18 @@ public:
+      * @param callback a callback to be executed when all cookies has removed.
+      */
+     virtual void DeleteCookieEntirely(std::shared_ptr<NWebValueCallback<bool>> callback) = 0;
++
++    /**
++     * @brief Configs a single cookie (key-value pair) for the given URL.
++     *
++     * @param url the URL for which the cookie is to be set.
++     * @param value the cookie as a string, using the format of the 'Set-Cookie' HTTP response header.
++     * @param callback a callback to be executed when the cookie has been set.
++     */
++    virtual void ConfigCookie(const std::string& url,
++                              const std::string& value,
++                              std::shared_ptr<NWebValueCallback<long>> callback) = 0;
+ };
+ }
+ 
+-#endif  // NWebCookieManager
+\ No newline at end of file
++#endif  // NWebCookieManager
+diff --git a/src/ohos_nweb/include/nweb_handler.h b/src/ohos_nweb/include/nweb_handler.h
+index 2b9cc943ed9fb..f76ec7c54fba5
+--- a/src/ohos_nweb/include/nweb_handler.h
++++ b/src/ohos_nweb/include/nweb_handler.h
+@@ -636,6 +636,15 @@ public:
+     virtual void OnActivityStateChanged(int state, ActivityType type) {}
+ 
+     virtual void OnScrollState(bool scrollState) {}
++
++    virtual void OnRootLayerChanged(int width, int height) {}
++
++    virtual bool FilterScrollEvent(const float x,
++                                   const float y,
++                                   const float xVelocity,
++                                   const float yVelocity) {
++        return false;
++    }
+ };
+ }  // namespace OHOS::NWeb
+ 
+diff --git a/src/ohos_nweb/include/nweb_javascript_result_callback.h b/src/ohos_nweb/include/nweb_javascript_result_callback.h
+index 96ec05f2b148b..df257245005c8
+--- a/src/ohos_nweb/include/nweb_javascript_result_callback.h
++++ b/src/ohos_nweb/include/nweb_javascript_result_callback.h
+@@ -29,9 +29,39 @@ namespace OHOS::NWeb {
+         virtual ~NWebJavaScriptResultCallBack() = default;
+ 
+         virtual std::shared_ptr<NWebValue> GetJavaScriptResult(
+-                std::vector<std::shared_ptr<NWebValue>> args,
+-                const std::string &method,
+-                const std::string &object_name) = 0;
++            std::vector<std::shared_ptr<NWebValue>> args,
++            const std::string& method,
++            const std::string& object_name,
++            int32_t routing_id,
++            int32_t object_id) = 0;
++
++        /* HasJavaScriptObjectMethods
++         *
++         * @param object_id: means the JavaScript object id
++         * @param object_id: means the method name
++         */
++        virtual bool HasJavaScriptObjectMethods(
++            int32_t object_id,
++            const std::string& method_name) = 0;
++
++        /* GetJavaScriptObjectMethods
++         *
++         * @param object_id: means the JavaScript object id
++         */
++        virtual std::shared_ptr<NWebValue> GetJavaScriptObjectMethods(
++            int32_t object_id) = 0;
++
++        /* RemoveJavaScriptObjectHolder
++         *
++         * @param holder: means the JavaScript object is holded by
++         * it(routing_id)
++         * @param object_id: means the JavaScript object id
++         */
++        virtual void RemoveJavaScriptObjectHolder(int32_t holder,
++                                                  int32_t object_id) = 0;
++
++        // Remove Transient JavaScript Object
++        virtual void RemoveTransientJavaScriptObject() = 0;
+     };
+ }
+ #endif
+\ No newline at end of file
+diff --git a/src/ohos_nweb/include/nweb_preference.h b/src/ohos_nweb/include/nweb_preference.h
+index 94d609e2b062d..24a3c5d9078a8
+--- a/src/ohos_nweb/include/nweb_preference.h
++++ b/src/ohos_nweb/include/nweb_preference.h
+@@ -566,6 +566,18 @@ public:
+      * Put the UX color of scrollbar.
+      */
+     virtual void PutScrollBarColor(uint32_t colorValue) = 0;
++     
++    /**
++     * Get over-scroll Mode.
++     *
++     * @see PutScrollbarColor
++     */
++    virtual int GetOverscrollMode() = 0;
++ 
++    /**
++     * Put over-scroll Mode.
++     */
++    virtual void PutOverscrollMode(int overScrollMode) = 0;
+ };
+ }  // namespace OHOS::NWeb
+ #endif  // NWEB_PREFERENCE_H
+diff --git a/src/ohos_nweb/include/nweb_value.h b/src/ohos_nweb/include/nweb_value.h
+index 9852198dd2a32..ec4f9e1bee93a
+--- a/src/ohos_nweb/include/nweb_value.h
++++ b/src/ohos_nweb/include/nweb_value.h
+@@ -17,69 +17,366 @@
+ #define NWEB_VALUE_H_
+ 
+ #include <iostream>
++#include <set>
++#include <sstream>
+ #include <string>
++#include <map>
++#include <vector>
+ #include "nweb_export.h"
+ 
+ namespace OHOS::NWeb {
+-    union data_union {
+-        int n;
+-        double f;
+-        bool b;
+-    };
++union data_union {
++  int n;
++  double f;
++  bool b;
++  data_union() {}
++  data_union(int value) : n(value) {}
++  data_union(double value) : f(value) {}
++  data_union(bool value) : b(value) {}
++};
+ 
+ class OHOS_NWEB_EXPORT NWebValue {
+ public:
+-    enum class Type : unsigned char {
+-        NONE = 0,
+-        BOOLEAN,
+-        INTEGER,
+-        DOUBLE,
+-        STRING,
+-        BINARY,
+-        DICTIONARY,
+-        LIST,
+-        ERROR,
+-        STRINGARRAY,
+-        BOOLEANARRAY,
+-        DOUBLEARRAY,
+-        INT64ARRAY
+-    };
++ enum class Type : unsigned char {
++   NONE = 0,
++   BOOLEAN,
++   INTEGER,
++   DOUBLE,
++   STRING,
++   BINARY,
++   DICTIONARY,
++   LIST,
++   ERROR,
++   STRINGARRAY,
++   BOOLEANARRAY,
++   DOUBLEARRAY,
++   INT64ARRAY
++ };
++
++ NWebValue() {}
++ explicit NWebValue(Type type) : type_(type) {}
++ explicit NWebValue(const int& value) : type_(Type::INTEGER), data_(value) {}
++ explicit NWebValue(const double& value) : type_(Type::DOUBLE), data_(value) {}
++ explicit NWebValue(const bool& value) : type_(Type::BOOLEAN), data_(value) {}
++ explicit NWebValue(const std::string& value)
++     : type_(Type::STRING), str_(value) {}
++ NWebValue(const char* data, size_t len)
++     : type_(Type::BINARY), str_(data, len) {}
++ explicit NWebValue(const std::vector<NWebValue>& value)
++     : type_(Type::LIST), list_value_(value.begin(), value.end()) {}
++ explicit NWebValue(const std::map<std::string, NWebValue>& value)
++     : type_(Type::DICTIONARY), dictionary_value_(value) {}
++
++ explicit NWebValue(const NWebValue& value) : type_(value.type_) {
++   switch (type_) {
++     case Type::NONE:
++       break;
++     case Type::BOOLEAN:
++       data_.b = value.data_.b;
++       break;
++     case Type::INTEGER:
++       data_.n = value.data_.n;
++       break;
++     case Type::DOUBLE:
++       data_.f = value.data_.f;
++       break;
++     case Type::STRING:
++       str_ = value.str_;
++       break;
++     case Type::BINARY:
++       str_ = value.str_;
++       break;
++     case Type::LIST:
++       list_value_ = value.list_value_;
++       break;
++     case Type::DICTIONARY:
++       dictionary_value_ = value.dictionary_value_;
++       break;
++     default:
++       break;
++   }
++ }
++
++ NWebValue(std::vector<NWebValue>&& value) : type_(Type::LIST) {
++   std::swap(list_value_, value);
++ }
++ NWebValue(std::map<std::string, NWebValue>&& value)
++     : type_(Type::DICTIONARY) {
++   std::swap(dictionary_value_, value);
++ }
++ NWebValue(NWebValue&& value) { *this = std::move(value); }
++
++ ~NWebValue() = default;
++
++ NWebValue& operator=(const NWebValue& value) {
++   SetType(value.type_);
++   switch (type_) {
++     case Type::NONE:
++       break;
++     case Type::BOOLEAN:
++       data_.b = value.data_.b;
++       break;
++     case Type::INTEGER:
++       data_.n = value.data_.n;
++       break;
++     case Type::DOUBLE:
++       data_.f = value.data_.f;
++       break;
++     case Type::STRING:
++       str_ = value.str_;
++       break;
++     case Type::BINARY:
++       str_ = value.str_;
++       break;
++     case Type::LIST:
++       list_value_ = value.list_value_;
++       break;
++     case Type::DICTIONARY:
++       dictionary_value_ = value.dictionary_value_;
++       break;
++     default:
++       std::cout << "error: Invalid type" << std::endl;
++       break;
++   }
++   return *this;
++ }
++
++ NWebValue& operator=(NWebValue&& value) {
++   std::swap(type_, value.type_);
++   switch (type_) {
++     case Type::NONE:
++       break;
++     case Type::BOOLEAN:
++       std::swap(data_.b, value.data_.b);
++       break;
++     case Type::INTEGER:
++       std::swap(data_.n, value.data_.n);
++       break;
++     case Type::DOUBLE:
++       std::swap(data_.f, value.data_.f);
++       break;
++     case Type::STRING:
++       std::swap(str_, value.str_);
++       break;
++     case Type::BINARY:
++       std::swap(str_, value.str_);
++       break;
++     case Type::LIST:
++       std::swap(list_value_, value.list_value_);
++       break;
++     case Type::DICTIONARY:
++       std::swap(dictionary_value_, value.dictionary_value_);
++       break;
++     default:
++       std::cout << "error: Invalid type" << std::endl;
++       break;
++   }
++   return *this;
++ }
++
++ bool operator==(NWebValue& oVal) {
++   if (type_ != oVal.type_)
++     return false;
++   switch (type_) {
++     case Type::NONE:
++       return false;
++     case Type::BOOLEAN:
++       return data_.b == oVal.data_.b;
++     case Type::INTEGER:
++       return data_.n == oVal.data_.n;
++     case Type::DOUBLE:
++       return data_.f == oVal.data_.f;
++     case Type::STRING:
++       return str_ == oVal.str_;
++     case Type::LIST:
++       if ((*this).list_value_.size() != oVal.list_value_.size())
++         return false;
++       for (size_t i = 0; i < list_value_.size(); ++i) {
++         NWebValue& lVal = oVal.list_value_[i];
++         NWebValue& rVal = (*this).list_value_[i];
++         if (!(lVal == rVal)) {
++           return false;
++         }
++       }
++       return true;
++     case Type::DICTIONARY:
++       if ((*this).dictionary_value_.size() != oVal.dictionary_value_.size())
++         return false;
++       for (auto item : dictionary_value_) {
++         NWebValue& lVal = oVal.dictionary_value_[item.first];
++         NWebValue& rVal = (*this).dictionary_value_[item.first];
++         if (!(lVal == rVal)) {
++           return false;
++         }
++       }
++       return true;
++     case Type::BINARY:
++       return str_ == oVal.str_;
++     default:
++       std::cout << "error: Invalid type" << std::endl;
++       return false;
++   }
++   return false;
++ }
++
++ bool IsNone() { return GetType() == Type::NONE; }
++
++ bool IsBoolean() { return GetType() == Type::BOOLEAN; }
++
++ bool IsString() { return GetType() == Type::STRING; }
++
++ bool IsDouble() { return GetType() == Type::DOUBLE; }
++
++ bool IsINTEGER() { return GetType() == Type::INTEGER; }
++
++ bool IsList() { return GetType() == Type::LIST; }
++
++ bool IsDictionary() { return GetType() == Type::DICTIONARY; }
++
++ bool IsBinary() { return GetType() == Type::BINARY; }
++
++ bool GetBoolean() {
++   validateType(Type::BOOLEAN);
++   return data_.b;
++ }
++
++ void SetBoolean(bool b) {
++   validateType(Type::BOOLEAN);
++   data_.b = b;
++ }
++
++ void SetString(std::string str) {
++   validateType(Type::STRING);
++   str_ = str;
++ }
++
++ std::string GetString() {
++   validateType(Type::STRING);
++   return str_;
++ }
++
++ void SetDouble(double dou) {
++   validateType(Type::DOUBLE);
++   data_.f = dou;
++ }
++
++ double GetDouble() {
++   validateType(Type::DOUBLE);
++   return data_.f;
++ }
++
++ void SetInt(int num) {
++   validateType(Type::INTEGER);
++   data_.n = num;
++ }
++
++ int GetInt() {
++   validateType(Type::INTEGER);
++   return data_.n;
++ }
++
++ size_t GetListValueSize() {
++   validateType(Type::LIST);
++   return list_value_.size();
++ }
++
++ std::vector<NWebValue> GetListValue() {
++   validateType(Type::LIST);
++   return list_value_;
++ }
++
++ NWebValue& GetListValue(unsigned int index) {
++   validateType(Type::LIST);
++   if (index >= list_value_.size()) {
++     std::cout << "error: index larger than size()" << std::endl;
++   }
++   return list_value_[index];
++ }
++
++ void AddListValue(const NWebValue& value) {
++   validateType(Type::LIST);
++   SetType(Type::LIST);
++   list_value_.push_back(value);
++ }
++
++ void deleteListValue() {
++   validateType(Type::LIST);
++   SetType(Type::LIST);
++   list_value_.pop_back();
++ }
+ 
+-    explicit NWebValue(Type type) : type_(type) {}
++ size_t GetDictionaryValueSize() {
++   validateType(Type::DICTIONARY);
++   return dictionary_value_.size();
++ }
+ 
+-    ~NWebValue() = default;
++ std::vector<std::string> GetDictionaryValueKeys() {
++   validateType(Type::DICTIONARY);
++   std::vector<std::string> ret;
++   for (auto& item : dictionary_value_) {
++     ret.push_back(item.first);
++   }
++   return ret;
++ }
+ 
+-    bool GetBoolean() { return data_.b; }
++ bool HasDictionaryValueKey(std::string& key) {
++   validateType(Type::DICTIONARY);
++   return dictionary_value_.count(key) == 1;
++ }
+ 
+-    void SetBoolean(bool b) { data_.b = b; }
++ std::map<std::string, NWebValue> GetDictionaryValue() {
++   validateType(Type::DICTIONARY);
++   return dictionary_value_;
++ }
+ 
+-    void SetString(std::string str) { str_ = str; }
++ NWebValue& GetDictionaryValue(std::string& key) {
++   validateType(Type::DICTIONARY);
++   return dictionary_value_[key];
++ }
+ 
+-    std::string GetString() { return str_; }
++ void AddDictionaryValue(std::string key, NWebValue& value) {
++   validateType(Type::DICTIONARY);
++   dictionary_value_[key] = value;
++ }
+ 
+-    void SetDouble(double dou) { data_.f = dou; }
++ void DeleteDictionaryValue(std::string& key) {
++   validateType(Type::DICTIONARY);
++   dictionary_value_.erase(key);
++ }
+ 
+-    double GetDouble() { return data_.f; }
++ size_t GetBinaryValueSize() {
++   validateType(Type::BINARY);
++   return str_.size();
++ }
+ 
+-    void SetInt(int num) { data_.n = num; }
++ const char* GetBinaryValue() {
++   validateType(Type::BINARY);
++   return (const char*)str_.c_str();
++ }
+ 
+-    int GetInt() { return data_.n; }
++ void SetJsonString(std::string json_string) { str_json_ = json_string; }
+ 
+-    void SetJsonString(std::string json_string) { str_json_ = json_string; }
++ std::string GetJsonString() { return str_json_; }
+ 
+-    std::string GetJsonString() { return str_json_; }
++ Type GetType() { return type_; }
+ 
+-    Type GetType() { return type_; }
++ void SetType(Type type) { type_ = type; }
+ 
+-    void SetType(Type type) { type_ = type; }
++ void validateType(Type type) const {
++   if (type_ != Type::NONE && type_ != type) {
++     std::cout << "error: Invalid type" << std::endl;
++   }
++ }
+ 
+-    int error_ = 0;
++ int error_ = 0;
+ 
+ private:
+-    Type type_ = Type::NONE;
+-    data_union data_;
+-    std::string str_;
+-    std::string str_json_;
++ Type type_ = Type::NONE;
++ data_union data_;
++ std::string str_;
++ std::string str_json_;
++ std::map<std::string, NWebValue> dictionary_value_;
++ std::vector<NWebValue> list_value_;
+ };
+ }
