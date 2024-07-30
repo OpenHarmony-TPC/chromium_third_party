@@ -156,6 +156,7 @@
 #endif
 
 #if BUILDFLAG(IS_OHOS)
+#include "base/ohos/ltpo/include/touch_observer.h"
 #include "third_party/blink/renderer/core/html/html_image_loader.h"
 #include "third_party/blink/renderer/core/html/html_plugin_element.h"
 #endif
@@ -2696,6 +2697,11 @@ WebInputEventResult WebFrameWidgetImpl::HandleInputEvent(
                WebInputEvent::GetName(input_event.GetType()));
   DCHECK(!WebInputEvent::IsTouchEventType(input_event.GetType()));
   CHECK(LocalRootImpl());
+
+  if (input_event.GetType() == WebInputEvent::Type::kPointerUp) {
+    base::ohos::TouchObserver::GetInstance().
+      SetTouchUpTime(::base::subtle::TimeTicksNowIgnoringOverride().since_origin().InNanoseconds());
+  }
 
   // Clients shouldn't be dispatching events to a provisional frame but this
   // can happen. Ensure that event handling can assume we're in a committed
