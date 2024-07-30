@@ -21343,3 +21343,1673 @@ index 72d505e7792f0..ee74bf5f6d4af
  }
  
  if (is_android) {
+diff --git a/src/sandbox/linux/seccomp-bpf-helpers/baseline_policy_ohos.cc b/src/sandbox/linux/seccomp-bpf-helpers/baseline_policy_ohos.cc
+new file mode 100644
+index 0000000000000..7af024178a329
+--- /dev/null
++++ b/src/sandbox/linux/seccomp-bpf-helpers/baseline_policy_ohos.cc
+@@ -0,0 +1,263 @@
++#include "sandbox/linux/seccomp-bpf-helpers/baseline_policy_ohos.h"
++#include "sandbox/linux/seccomp-bpf-helpers/syscall_parameters_restrictions.h"
++#include <sys/socket.h>
++#include "sandbox/linux/bpf_dsl/bpf_dsl.h"
++#include "sandbox/linux/system_headers/linux_syscalls.h"
++#include "sandbox/linux/seccomp-bpf-helpers/sigsys_handlers.h"
++
++
++using sandbox::bpf_dsl::AllOf;
++using sandbox::bpf_dsl::Allow;
++using sandbox::bpf_dsl::AnyOf;
++using sandbox::bpf_dsl::Arg;
++using sandbox::bpf_dsl::BoolExpr;
++using sandbox::bpf_dsl::If;
++using sandbox::bpf_dsl::Error;
++using sandbox::bpf_dsl::ResultExpr;
++
++namespace sandbox {
++
++#ifndef SOCK_CLOEXEC
++#define SOCK_CLOEXEC O_CLOEXEC
++#endif
++
++#ifndef SOCK_NONBLOCK
++#define SOCK_NONBLOCK O_NONBLOCK
++#endif
++
++#define CASES SANDBOX_BPF_DSL_CASES
++
++namespace {
++
++#if !defined(__i386__) || defined(__x86_64__)
++// Restricts the arguments to sys_socket() to AF_UNIX. Returns a BoolExpr that
++// evaluates to true if the syscall should be allowed.
++BoolExpr RestrictSocketArguments(const Arg<int>& domain,
++                                 const Arg<int>& type,
++                                 const Arg<int>& protocol) {
++  const int kSockFlags = SOCK_CLOEXEC | SOCK_NONBLOCK;
++  return AllOf(domain == AF_UNIX,
++               AnyOf((type & ~kSockFlags) == SOCK_DGRAM,
++                     (type & ~kSockFlags) == SOCK_STREAM),
++               protocol == 0);
++}
++#endif  // !defined(__i386__)
++
++}  // namespace
++
++BaselinePolicyOhos::BaselinePolicyOhos()
++    : BaselinePolicy() {}
++
++BaselinePolicyOhos::~BaselinePolicyOhos() {}
++
++ResultExpr BaselinePolicyOhos::EvaluateSyscall(int sysno) const {
++    bool override_and_allow = false;
++    bool override_and_trap = false;
++
++    switch (sysno) {
++#if defined(__arm__) || defined(__aarch64__)
++    case __NR_fdatasync:
++    case __NR_fsync:
++    case __NR_ftruncate:
++    case __NR_mremap:
++    case __NR_pwrite64:
++    case __NR_getpriority:
++    case __NR_setpriority:
++    case __NR_sysinfo:
++    case __NR_uname:
++    case __NR_sigaltstack:
++    case __NR_brk:
++    case __NR_mlock:
++    case __NR_munlock:
++    case __NR_munmap:
++    case __NR_sched_yield:
++    case __NR_nanosleep:
++    case __NR_epoll_pwait:
++    case __NR_epoll_create1:
++    case __NR_epoll_ctl:
++    case __NR_lseek:
++    case __NR_eventfd2:
++    case __NR_fstat:
++    case __NR_ppoll:
++    case __NR_pselect6:
++    case __NR_read:
++    case __NR_readv:
++    case __NR_pread64:
++    case __NR_recvfrom:
++    case __NR_recvmsg:
++    case __NR_sendto:
++    case __NR_write:
++    case __NR_writev:
++    case __NR_pipe2:
++    case __NR_gettimeofday:
++    case __NR_exit:
++    case __NR_exit_group:
++    case __NR_wait4:
++    case __NR_waitid:
++    case __NR_rt_sigaction:
++    case __NR_rt_sigprocmask:
++    case __NR_rt_sigreturn:
++    case __NR_rt_sigtimedwait:
++    case __NR_capget:
++    case __NR_getegid:
++    case __NR_geteuid:
++    case __NR_getgid:
++    case __NR_getgroups:
++    case __NR_getpid:
++    case __NR_getppid:
++    case __NR_getresgid:
++    case __NR_getsid:
++    case __NR_gettid:
++    case __NR_getuid:
++    case __NR_getresuid:
++    case __NR_restart_syscall:
++    case __NR_close:
++    case __NR_dup:
++    case __NR_dup3:
++    case __NR_shutdown:
++    case __NR_mincore:
++    case __NR_memfd_create:
++    case __NR_faccessat:
++    case __NR_prctl:
++    case __NR_fcntl:
++    case __NR_clone:
++    case __NR_capset:
++    case __NR_openat:
++    case __NR_connect:
++    case __NR_readlinkat:
++    case __NR_ioctl:
++    case __NR_mkdirat:
++    case __NR_set_tid_address:
++    case __NR_getdents64:
++    case __NR_madvise:
++    case __NR_getrandom:
++    case __NR_prlimit64:
++    case __NR_sched_setscheduler:
++    case __NR_sched_getscheduler:
++    case __NR_setsid:
++    case __NR_ptrace:
++    case __NR_membarrier:
++    case __NR_setitimer:
++    case __NR_execve:
++    case __NR_msync:
++    case __NR_statx:
++    case __NR_set_robust_list:
++    case __NR_sched_getparam:
++#endif
++#if defined(__arm__)
++    case __NR_sched_getaffinity:
++    case __NR_ftruncate64:
++    case __NR_ugetrlimit:
++    case __NR_pause:
++    case __NR_epoll_create:
++    case __NR_epoll_wait:
++    case __NR_eventfd:
++    case __NR_fstat64:
++    case __NR__llseek:
++    case __NR_poll:
++    case __NR__newselect:
++    case __NR_send:
++    case __NR_pipe:
++    case __NR_getegid32:
++    case __NR_geteuid32:
++    case __NR_getgid32:
++    case __NR_getgroups32:
++    case __NR_getresgid32:
++    case __NR_getuid32:
++    case __NR_getresuid32:
++    case __NR_dup2:
++    case __NR_open:
++    case __NR_readlink:
++    case __ARM_NR_cacheflush:
++    case __ARM_NR_set_tls:
++    case __NR_mkdir:
++    case __NR_sigreturn:
++    case __NR_fork:
++    case __NR_fcntl64:
++    case __NR_access:
++#endif
++#if defined(__aarch64__)
++    case __NR_getrlimit:
++    case __NR_newfstatat:
++    case __NR_fstatfs:
++    case __NR_mmap:
++#endif
++
++    override_and_allow = true;
++    break;
++    }
++
++#if defined(__arm__) || defined(__aarch64__)
++    if (sysno == __NR_socket) {
++        const Arg<int> domain(0);
++        const Arg<int> type(1);
++        const Arg<int> protocol(2);
++        return If(RestrictSocketArguments(domain, type, protocol), Allow())
++                .Else(Error(EPERM));
++    }
++
++    if (sysno == __NR_setsockopt) {
++    const Arg<int> level(1);
++    const Arg<int> option(2);
++    return If(AllOf(level == SOL_SOCKET,
++                    AnyOf(option == SO_SNDTIMEO,
++                          option == SO_RCVTIMEO,
++                          option == SO_SNDBUF,
++                          option == SO_REUSEADDR,
++                          option == SO_PASSCRED)),
++              Allow())
++           .Else(BaselinePolicy::EvaluateSyscall(sysno));
++    }
++
++    if (sysno == __NR_clock_getres) {
++        return RestrictClockID();
++    }
++#endif
++
++    switch(sysno) {
++#if defined(__arm__) || defined(__aarch64__)
++    case __NR_setrlimit:
++    case __NR_sched_get_priority_max:
++    case __NR_sched_get_priority_min:
++    case __NR_times:
++    case __NR_get_robust_list:
++    case __NR_setresuid:
++    case __NR_unlinkat:
++    case __NR_flock:
++    case __NR_sched_setaffinity:
++    case __NR_getrusage:
++    case __NR_getsockopt:
++    case __NR_process_vm_readv:
++    case __NR_pkey_free:
++    case __NR_pkey_mprotect:
++    case __NR_pkey_alloc:
++#endif
++#if defined(__arm__)
++    case __NR_sigaction:
++    case __NR_futex_time64:
++    case __NR_setresuid32:
++    case __NR_recv:
++    case __NR_getdents:
++    case __NR_unlink:
++    case __NR_sigprocmask:
++    case __NR_rt_sigtimedwait_time64:
++    case __NR_ppoll_time64:
++    case __NR_pselect6_time64:
++    case __NR_fstatat64:
++    case __NR_fstatfs64:
++#endif
++    override_and_trap = true;
++    break;
++    }
++
++    if (override_and_trap)
++        return CrashSIGSYS();
++
++    if (override_and_allow)
++        return Allow();
++
++    return BaselinePolicy::EvaluateSyscall(sysno);
++}
++
++
++} // namespace sandbox
+\ No newline at end of file
+diff --git a/src/sandbox/linux/seccomp-bpf-helpers/baseline_policy_ohos.h b/src/sandbox/linux/seccomp-bpf-helpers/baseline_policy_ohos.h
+new file mode 100644
+index 0000000000000..37303a0b71d19
+--- /dev/null
++++ b/src/sandbox/linux/seccomp-bpf-helpers/baseline_policy_ohos.h
+@@ -0,0 +1,31 @@
++#ifndef SANDBOX_LINUX_SECCOMP_BPF_HELPERS_BASELINE_POLICY_OHOS_H_
++#define SANDBOX_LINUX_SECCOMP_BPF_HELPERS_BASELINE_POLICY_OHOS_H_
++
++#include <sys/types.h>
++
++#include "sandbox/linux/seccomp-bpf-helpers/baseline_policy.h"
++#include "sandbox/sandbox_export.h"
++
++namespace sandbox {
++
++class SANDBOX_EXPORT BaselinePolicyOhos : public BaselinePolicy {
++ public:
++  BaselinePolicyOhos();
++  explicit BaselinePolicyOhos(bool allow_sched_affinity);
++
++  BaselinePolicyOhos(const BaselinePolicyOhos&) = delete;
++  BaselinePolicyOhos& operator=(const BaselinePolicyOhos&) = delete;
++
++  ~BaselinePolicyOhos() override;
++
++  // sandbox::BaselinePolicy:
++  sandbox::bpf_dsl::ResultExpr EvaluateSyscall(
++      int system_call_number) const override;
++
++ private:
++
++};
++
++}  // namespace sandbox
++
++#endif  // SANDBOX_LINUX_SECCOMP_BPF_HELPERS_BASELINE_POLICY_OHOS_H_
+\ No newline at end of file
+diff --git a/src/sandbox/linux/seccomp-bpf-helpers/seccomp_starter_ohos.cc b/src/sandbox/linux/seccomp-bpf-helpers/seccomp_starter_ohos.cc
+new file mode 100644
+index 0000000000000..5aed88d9cf96d
+--- /dev/null
++++ b/src/sandbox/linux/seccomp-bpf-helpers/seccomp_starter_ohos.cc
+@@ -0,0 +1,28 @@
++#include "sandbox/linux/seccomp-bpf-helpers/seccomp_starter_ohos.h"
++#include <signal.h>
++#include "base/logging.h"
++#include "sandbox/linux/seccomp-bpf/sandbox_bpf.h"
++
++namespace sandbox {
++
++SeccompStarterOhos::SeccompStarterOhos() {}
++
++SeccompStarterOhos::~SeccompStarterOhos() = default;
++
++bool SeccompStarterOhos::StartSandbox() {
++  // Do run-time detection to ensure that support is present.
++  if (!SandboxBPF::SupportsSeccompSandbox(
++          SandboxBPF::SeccompLevel::MULTI_THREADED)) {
++    status_ = SeccompSandboxStatus::DETECTION_FAILED;
++    LOG(WARNING) << "Seccomp support should be present, but detection "
++                 << "failed. Continuing without Seccomp-BPF.";
++    return false;
++  }
++
++  SandboxBPF sandbox(std::move(policy_));
++  CHECK(sandbox.StartSandbox(SandboxBPF::SeccompLevel::MULTI_THREADED));
++  status_ = SeccompSandboxStatus::ENGAGED;
++  return true;
++}
++
++}  // namespace sandbox
+\ No newline at end of file
+diff --git a/src/sandbox/linux/seccomp-bpf-helpers/seccomp_starter_ohos.h b/src/sandbox/linux/seccomp-bpf-helpers/seccomp_starter_ohos.h
+new file mode 100644
+index 0000000000000..0d34b6bbbc9ea
+--- /dev/null
++++ b/src/sandbox/linux/seccomp-bpf-helpers/seccomp_starter_ohos.h
+@@ -0,0 +1,43 @@
++#ifndef SANDBOX_LINUX_SECCOMP_BPF_HELPERS_SECCOMP_STARTER_OHOS_H_
++#define SANDBOX_LINUX_SECCOMP_BPF_HELPERS_SECCOMP_STARTER_OHOS_H_
++
++#include "sandbox/sandbox_buildflags.h"
++#include "sandbox/sandbox_export.h"
++#include <memory>
++#include "sandbox/linux/bpf_dsl/policy.h"
++
++
++namespace sandbox {
++
++namespace bpf_dsl {
++class Policy;
++}
++
++enum class SeccompSandboxStatus {
++  NOT_SUPPORTED = 0,  // Seccomp is not supported.
++  DETECTION_FAILED,   // Run-time detection of Seccomp+TSYNC failed.
++  ENGAGED             // Sandbox was enabled and successfully turned on.
++};
++
++class SANDBOX_EXPORT SeccompStarterOhos {
++ public:
++  explicit SeccompStarterOhos();
++
++  ~SeccompStarterOhos();
++
++  void set_policy(std::unique_ptr<bpf_dsl::Policy> policy) {
++    policy_ = std::move(policy);
++  }
++
++  bool StartSandbox();
++
++  SeccompSandboxStatus status() const { return status_; }
++
++ private:
++  SeccompSandboxStatus status_ = SeccompSandboxStatus::NOT_SUPPORTED;
++  std::unique_ptr<bpf_dsl::Policy> policy_;
++};
++
++}  // namespace sandbox
++
++#endif  // SANDBOX_LINUX_SECCOMP_BPF_HELPERS_SECCOMP_STARTER_OHOS_H_
+\ No newline at end of file
+diff --git a/src/sandbox/linux/seccomp-bpf-helpers/syscall_parameters_restrictions.cc b/src/sandbox/linux/seccomp-bpf-helpers/syscall_parameters_restrictions.cc
+index 33b2bda7886e2..03264c2116f25
+--- a/src/sandbox/linux/seccomp-bpf-helpers/syscall_parameters_restrictions.cc
++++ b/src/sandbox/linux/seccomp-bpf-helpers/syscall_parameters_restrictions.cc
+@@ -447,7 +447,7 @@ ResultExpr RestrictPtrace() {
+   return Switch(request)
+       .Cases({
+ #if !defined(__aarch64__)
+-                 PTRACE_GETREGS, PTRACE_GETFPREGS, PTRACE_GET_THREAD_AREA,
++                 PTRACE_GETREGS, PTRACE_GETFPREGS,
+                  PTRACE_GETREGSET,
+ #endif
+ #if defined(__arm__)
+diff --git a/src/sandbox/linux/seccomp-bpf/sandbox_bpf.cc b/src/sandbox/linux/seccomp-bpf/sandbox_bpf.cc
+index 9a2daf0212224..8c8226a24d62b
+--- a/src/sandbox/linux/seccomp-bpf/sandbox_bpf.cc
++++ b/src/sandbox/linux/seccomp-bpf/sandbox_bpf.cc
+@@ -254,7 +254,10 @@ void SandboxBPF::InstallFilter(bool must_sync_threads, bool enable_ibpb) {
+   // necessary or SECCOMP_FILTER_FLAG_SPEC_ALLOW is supported, then the kernel
+   // has the seccomp system call. Otherwise, fall back on prctl, which requires
+   // the process to be single-threaded.
+-  unsigned int seccomp_filter_flags = 0;
++  // SECCOMP_FILTER_FLAG_LOG can be used. When the return value is
++  // SECCOMP_RET_TRAP, related audit logs are generated in the kernel, and
++  // auxiliary debugging information is added.
++  unsigned int seccomp_filter_flags = SECCOMP_FILTER_FLAG_LOG;
+   if (must_sync_threads) {
+     seccomp_filter_flags |= SECCOMP_FILTER_FLAG_TSYNC;
+ #if BUILDFLAG(DISABLE_SECCOMP_SSBD)
+diff --git a/src/sandbox/linux/system_headers/linux_seccomp.h b/src/sandbox/linux/system_headers/linux_seccomp.h
+index 8690a96eb01b1..f968387cf3513
+--- a/src/sandbox/linux/system_headers/linux_seccomp.h
++++ b/src/sandbox/linux/system_headers/linux_seccomp.h
+@@ -126,6 +126,10 @@
+ #define SECCOMP_FILTER_FLAG_TSYNC 1
+ #endif
+ 
++#ifndef SECCOMP_FILTER_FLAG_LOG
++#define SECCOMP_FILTER_FLAG_LOG (1UL << 1)
++#endif
++
+ #ifndef SECCOMP_FILTER_FLAG_SPEC_ALLOW
+ #define SECCOMP_FILTER_FLAG_SPEC_ALLOW (1UL << 2)
+ #endif
+diff --git a/src/services/network/network_context.cc b/src/services/network/network_context.cc
+index bf9cbcfa3ff48..2e8b5ca30bb8b
+--- a/src/services/network/network_context.cc
++++ b/src/services/network/network_context.cc
+@@ -563,10 +563,10 @@ NetworkContext::NetworkContext(
+   sct_auditing_handler()->SetMode(params_->sct_auditing_mode);
+ #endif  // BUILDFLAG(IS_CT_SUPPORTED)
+ 
+-#if BUILDFLAG(IS_ANDROID)
++#if BUILDFLAG(IS_ANDROID) || defined(OHOS_COOKIE)
+   if (params_->cookie_manager)
+     GetCookieManager(std::move(params_->cookie_manager));
+-#endif  // BUILDFLAG(IS_ANDROID)
++#endif  // BUILDFLAG(IS_ANDROID) || defined(OHOS_COOKIE)
+ 
+   CreateURLLoaderFactoryForCertNetFetcher(
+       std::move(url_loader_factory_for_cert_net_fetcher_receiver));
+diff --git a/src/services/network/public/mojom/BUILD.gn b/src/services/network/public/mojom/BUILD.gn
+index 47c774313f710..b8cc8fdb7c5a6
+--- a/src/services/network/public/mojom/BUILD.gn
++++ b/src/services/network/public/mojom/BUILD.gn
+@@ -1346,6 +1346,12 @@ mojom("mojom") {
+ 
+   enabled_features = []
+ 
++  #ifdef OHOS_COOKIE
++  if (is_android || (defined(ohos_cookie) && ohos_cookie)) {
++    enabled_features += [ "is_android_or_ohos_cookie" ]
++  }
++  #endif
++
+   # TODO(crbug/598073): When moving the service implementation to
+   # //services/network, add the correct values for export_class_attribute /
+   # export_define / export_header here. Context in https://crrev.com/2225673002.
+diff --git a/src/services/network/public/mojom/network_context.mojom b/src/services/network/public/mojom/network_context.mojom
+index 14d7b8988e2c9..ec2748e463e9b
+--- a/src/services/network/public/mojom/network_context.mojom
++++ b/src/services/network/public/mojom/network_context.mojom
+@@ -477,8 +477,10 @@ struct NetworkContextParams {
+ 
+   // Binds to the cookie manager associated with this network context, which
+   // should only be handed out to trusted processes.
+-  [EnableIf=is_android]
++  // #ifdef OHOS_COOKIE
++  [EnableIf=is_android_or_ohos_cookie]
+   pending_receiver<CookieManager>? cookie_manager;
++  // #endif
+ 
+   // Whether to enable Domain Reliability.
+   bool enable_domain_reliability = false;
+diff --git a/src/services/viz/privileged/mojom/compositing/display_private.mojom b/src/services/viz/privileged/mojom/compositing/display_private.mojom
+index 3b31f20fcc607..bbb3ef86f5516
+--- a/src/services/viz/privileged/mojom/compositing/display_private.mojom
++++ b/src/services/viz/privileged/mojom/compositing/display_private.mojom
+@@ -31,6 +31,12 @@ interface DisplayPrivate {
+   [EnableIf=ohos_composite_render, Sync]
+   SetShouldFrameSubmissionBeforeDraw(bool should) => ();
+ 
++  [EnableIf=is_ohos]
++  SetDrawRect(gfx.mojom.Rect rect);
++
++  [EnableIf=is_ohos]
++  SetDrawMode(int32 mode);
++
+   // Resizes the display.
+   Resize(gfx.mojom.Size size);
+ 
+diff --git a/src/third_party/blink/common/features.cc b/src/third_party/blink/common/features.cc
+index 124fd7e83dd03..cac5d59793686
+--- a/src/third_party/blink/common/features.cc
++++ b/src/third_party/blink/common/features.cc
+@@ -818,9 +818,15 @@ BASE_FEATURE(kInputTargetClientHighPriority,
+              base::FEATURE_ENABLED_BY_DEFAULT);
+ 
+ #if BUILDFLAG(IS_OHOS) && defined(OHOS_PERFORMANCE_JITTER)
++#if defined(__arch64__) || defined(_LP64)
++BASE_FEATURE(kResamplingScrollEvents,
++             "ResamplingScrollEvents",
++             base::FEATURE_ENABLED_BY_DEFAULT);
++#else
+ BASE_FEATURE(kResamplingScrollEvents,
+              "ResamplingScrollEvents",
+              base::FEATURE_DISABLED_BY_DEFAULT);
++#endif /* __arch64__ */
+ #else
+ BASE_FEATURE(kResamplingScrollEvents,
+              "ResamplingScrollEvents",
+diff --git a/src/third_party/blink/common/web_preferences/web_preferences.cc b/src/third_party/blink/common/web_preferences/web_preferences.cc
+index c5558715c52aa..3d4750b99f298
+--- a/src/third_party/blink/common/web_preferences/web_preferences.cc
++++ b/src/third_party/blink/common/web_preferences/web_preferences.cc
+@@ -175,12 +175,8 @@ WebPreferences::WebPreferences()
+       fullscreen_supported(true),
+ #if !BUILDFLAG(IS_ANDROID) && !BUILDFLAG(IS_OHOS)
+       text_autosizing_enabled(false),
+-#else
+-#if BUILDFLAG(IS_OHOS)
+-      text_autosizing_enabled(false),
+ #else
+       text_autosizing_enabled(true),
+-#endif
+       font_scale_factor(1.0f),
+       device_scale_adjustment(1.0f),
+       force_enable_zoom(false),
+diff --git a/src/third_party/blink/public/common/input/web_gesture_event.h b/src/third_party/blink/public/common/input/web_gesture_event.h
+index 889e607792a4a..d9f2add41578e
+--- a/src/third_party/blink/public/common/input/web_gesture_event.h
++++ b/src/third_party/blink/public/common/input/web_gesture_event.h
+@@ -272,6 +272,9 @@ class BLINK_COMMON_EXPORT WebGestureEvent : public WebInputEvent {
+       case Type::kGestureTwoFingerTap:
+       case Type::kGestureShortPress:
+       case Type::kGestureLongPress:
++#ifdef OHOS_DRAG_DROP
++      case Type::kGestureDragLongPress:
++#endif
+       case Type::kGestureLongTap:
+         return false;
+       default:
+diff --git a/src/third_party/blink/public/web/web_frame_widget.h b/src/third_party/blink/public/web/web_frame_widget.h
+index d1835d629132b..0b89a9552a8b2
+--- a/src/third_party/blink/public/web/web_frame_widget.h
++++ b/src/third_party/blink/public/web/web_frame_widget.h
+@@ -80,6 +80,7 @@ class WebFrameWidget : public WebWidget {
+ 
+ #if BUILDFLAG(IS_OHOS)
+   virtual void SetZoomLevel(float magnify_delta, const gfx::Point& anchor) {}
++  virtual void SetOverscrollMode(int mode) {}
+ #endif  // BUILDFLAG(IS_OHOS)
+ 
+   // Returns the local root of this WebFrameWidget.
+diff --git a/src/third_party/blink/renderer/core/css/css_math_expression_node.cc b/src/third_party/blink/renderer/core/css/css_math_expression_node.cc
+index 7353441fec92e..b1f67a1401289
+--- a/src/third_party/blink/renderer/core/css/css_math_expression_node.cc
++++ b/src/third_party/blink/renderer/core/css/css_math_expression_node.cc
+@@ -607,6 +607,15 @@ static double ResolveAtan2(const CSSMathExpressionNode* y_node,
+   }
+   CSSPrimitiveValue::UnitType y_type = y_node->ResolvedUnitType();
+   CSSPrimitiveValue::UnitType x_type = x_node->ResolvedUnitType();
++
++  // TODO(crbug.com/1392594): We ignore parameters in complex relative units
++  // (e.g., 1rem + 1px) until they can be supported.
++  if (y_type == CSSPrimitiveValue::UnitType::kUnknown ||
++      x_type == CSSPrimitiveValue::UnitType::kUnknown) {
++    error = true;
++    return 0;
++  }
++
+   if (IsRelativeLength(y_type) || IsRelativeLength(x_type)) {
+     // TODO(crbug.com/1392594): Relative length units are currently hard
+     // to resolve. We ignore the units for now, so that
+@@ -1338,6 +1347,11 @@ String CSSMathExpressionOperation::CustomCSSText() const {
+     case CSSMathOperator::kRoundToZero: {
+       StringBuilder result;
+       result.Append(ToString(operator_));
++#if BUILDFLAG(IS_OHOS)
++      if (operands_.empty() || operands_.size() < 2) {
++        return result.ReleaseString();
++      }
++#endif
+       result.Append(operands_.front()->CustomCSSText());
+       for (const CSSMathExpressionNode* operand : SecondToLastOperands()) {
+         result.Append(", ");
+diff --git a/src/third_party/blink/renderer/core/frame/settings.h b/src/third_party/blink/renderer/core/frame/settings.h
+index 430b4e481be5f..cdbfbb8c7c41b
+--- a/src/third_party/blink/renderer/core/frame/settings.h
++++ b/src/third_party/blink/renderer/core/frame/settings.h
+@@ -82,6 +82,12 @@ class CORE_EXPORT Settings {
+   }
+   bool GetVerticalHideScrollbars() { return hide_vertical_scrollbars_; }
+   bool GetHorizontalHideScrollbars() { return hide_horizontal_scrollbars_; }
++  void SetOverscrollMode(int overscrollMode) {
++    overscroll_mode_ = overscrollMode;
++  }
++  int GetOverscrollMode() {
++    return overscroll_mode_;
++  }
+ #endif  // defined(OHOS_INPUT_EVENTS)
+ 
+ #ifdef OHOS_SCROLLBAR
+@@ -124,6 +130,7 @@ class CORE_EXPORT Settings {
+ #if defined(OHOS_INPUT_EVENTS)
+   bool hide_vertical_scrollbars_ = true;
+   bool hide_horizontal_scrollbars_ = true;
++  int overscroll_mode_ = 0;
+ #endif  // defined(OHOS_INPUT_EVENTS)
+ 
+ #ifdef OHOS_SCROLLBAR
+diff --git a/src/third_party/blink/renderer/core/frame/web_frame_widget_impl.cc b/src/third_party/blink/renderer/core/frame/web_frame_widget_impl.cc
+index 16db62dd4a61b..12a42e710316c
+--- a/src/third_party/blink/renderer/core/frame/web_frame_widget_impl.cc
++++ b/src/third_party/blink/renderer/core/frame/web_frame_widget_impl.cc
+@@ -1683,12 +1683,8 @@ void WebFrameWidgetImpl::UpdateVisualProperties(
+   // TODO(crbug.com/939118): This code path where scroll_focused_node_into_view
+   // is set is used only for WebView, crbug 939118 tracks fixing webviews to
+   // not use scroll_focused_node_into_view.
+-#if BUILDFLAG(IS_OHOS)
+-  ScrollFocusedEditableElementIntoView();
+-#else
+   if (visual_properties.scroll_focused_node_into_view)
+     ScrollFocusedEditableElementIntoView();
+-#endif
+ }
+ 
+ void WebFrameWidgetImpl::ApplyVisualPropertiesSizing(
+@@ -4690,6 +4686,13 @@ void WebFrameWidgetImpl::SetZoomLevel(float magnify_delta,
+   }
+   widget_base_->SetZoomLevel(magnify_delta, anchor);
+ }
++
++void WebFrameWidgetImpl::SetOverscrollMode(int mode) {
++  if (!widget_base_) {
++    return;
++  }
++  widget_base_->SetOverscrollMode(mode);
++}
+ #endif  // defined(OHOS_INPUT_EVENTS)
+ 
+ #ifdef OHOS_EX_FREE_COPY
+diff --git a/src/third_party/blink/renderer/core/frame/web_frame_widget_impl.h b/src/third_party/blink/renderer/core/frame/web_frame_widget_impl.h
+index 085c1c9855870..6e1a7484ad0e4
+--- a/src/third_party/blink/renderer/core/frame/web_frame_widget_impl.h
++++ b/src/third_party/blink/renderer/core/frame/web_frame_widget_impl.h
+@@ -835,6 +835,7 @@ class CORE_EXPORT WebFrameWidgetImpl
+ 
+ #if defined(OHOS_INPUT_EVENTS)
+   void SetZoomLevel(float magnify_delta, const gfx::Point& anchor) override;
++  void SetOverscrollMode(int mode) override;
+ #endif  // defined(OHOS_INPUT_EVENTS)
+ 
+   // PageWidgetEventHandler overrides:
+diff --git a/src/third_party/blink/renderer/core/input/widget_event_handler.cc b/src/third_party/blink/renderer/core/input/widget_event_handler.cc
+index efde854351f9b..daa349567634e
+--- a/src/third_party/blink/renderer/core/input/widget_event_handler.cc
++++ b/src/third_party/blink/renderer/core/input/widget_event_handler.cc
+@@ -103,6 +103,9 @@ WebInputEventResult WidgetEventHandler::HandleInputEvent(
+     case WebInputEvent::Type::kGestureShortPress:
+     case WebInputEvent::Type::kGestureLongPress:
+     case WebInputEvent::Type::kGestureLongTap:
++#if BUILDFLAG(IS_OHOS)
++    case WebInputEvent::Type::kGestureDragLongPress:
++#endif
+       return HandleGestureEvent(static_cast<const WebGestureEvent&>(event));
+ 
+     case WebInputEvent::Type::kPointerDown:
+diff --git a/src/third_party/blink/renderer/core/layout/layout_view.cc b/src/third_party/blink/renderer/core/layout/layout_view.cc
+index e659175a6b490..af52b3c2d3b22
+--- a/src/third_party/blink/renderer/core/layout/layout_view.cc
++++ b/src/third_party/blink/renderer/core/layout/layout_view.cc
+@@ -713,6 +713,11 @@ void LayoutView::CalculateScrollbarModes(
+         frame->IsMainFrame())
+       should_ignore_overflow_hidden = true;
+   }
++#ifdef OHOS_SCROLLBAR
++  if (Layer()->IsRootLayer()) {
++    should_ignore_overflow_hidden = true;
++  }
++#endif// OHOS_SCROLLBAR
+   if (!should_ignore_overflow_hidden) {
+     if (overflow_x == EOverflow::kHidden || overflow_x == EOverflow::kClip)
+       h_mode = mojom::blink::ScrollbarMode::kAlwaysOff;
+diff --git a/src/third_party/blink/renderer/core/paint/highlight_painting_utils.cc b/src/third_party/blink/renderer/core/paint/highlight_painting_utils.cc
+index 5aba477554cc2..2153f14fb2306
+--- a/src/third_party/blink/renderer/core/paint/highlight_painting_utils.cc
++++ b/src/third_party/blink/renderer/core/paint/highlight_painting_utils.cc
+@@ -35,55 +35,12 @@
+ namespace blink {
+ 
+ namespace {
+-#ifdef HW_BUILD_DARK_MODE
+-// constexpr RGBA32 kTextDarkColorInDragging = 0xFFA9A9A9;
+-// constexpr RGBA32 kForegroundDarkColorInDragImage = 0xFFFFFFFF;
+-#endif
+-
+-#ifdef OHOS_DRAG_DROP
+-// constexpr RGBA32 kTextColorInDragging = 0xFFC0C0C0; // gray
+-// constexpr RGBA32 kBackgroundColorInDragging = 0x00FFFFFF; // white, alpha channel set to zero
+-// constexpr RGBA32 kForegroundColorInDragImage = 0xFF000000; // black
+-#endif
+-
+ #ifdef OHOS_DRAG_DROP
+-// Color DraggingTextColor(mojom::blink::ColorScheme color_scheme) {
+-// #ifdef HW_BUILD_DARK_MODE
+-//   if (color_scheme == mojom::blink::ColorScheme::kDark) {
+-//     return kTextDarkColorInDragging;
+-//   }
+-// #endif
+-//   return kTextColorInDragging;
+-// }
+-
+-// bool InSelectionDragging(const Document& document) {
+-//   // Select range and dragging it
+-//   // document.GetPage()->GetDragController().IsInTextDraging();
+-//   return document.GetSettings() && !document.Printing();
+-// }
+-
+-// bool InPaintingDragImage(
+-//     const Document& document, PaintFlags paint_flags) {
+-//   return document.GetSettings() &&
+-//       // document.GetSettings()->ImageDragEnabled() &&
+-//       (paint_flags & PaintFlag::kGlobalPaintDragSelection) &&
+-//       !document.Printing();
+-// }
+-
+-// Color TextColorOnDragShadowImage(const Document& document, Color& fg_color) {
+-//   // This text color is for selection text painting on drag-shadow image.
+-// #if defined(HW_BUILD_THEME_MODE) || defined(HW_BUILD_DARK_MODE)
+-//   if (const auto* settings = document.GetSettings()) {
+-//     return (settings->GetThemeModeEnabled() ||
+-//             settings->GetHwForceDarkModeEnabled())
+-//                ? Color(kForegroundDarkColorInDragImage)
+-//                : fg_color;
+-//   }
+-// #endif
+-
+-//   fg_color.SetRGB(kForegroundColorInDragImage);
+-//   return fg_color;
+-// }
++constexpr RGBA32 kBackgroundColorInDragging = 0x00FFFFFF; // white, alpha channel set to zero
++bool InSelectionDragging(const Document& document) {
++  // Select range and dragging it
++  return document.GetPage() && document.GetPage()->IsInTextDraging() && !document.Printing();
++}
+ #endif
+ 
+ bool NodeIsReplaced(Node* node) {
+@@ -187,17 +144,13 @@ absl::optional<Color> DefaultForegroundColor(
+       RuntimeEnabledFeatures::HighlightOverlayPaintingEnabled()
+           ? absl::nullopt
+           : absl::make_optional(Color::kTransparent);
+-// huawei(todo):need Check
+-// #if BUILDFLAG(IS_OHOS)
+-//   if (InSelectionDragging(document)) { // kTextColorInDragging
+-//     return DraggingTextColor(style.UsedColorScheme());
+-//   }
+-
+-//   if (InPaintingDragImage(document, paint_flags)) {
+-//     // DTS2019120603659 & DTS2019121806287
+-//     return TextColorOnDragShadowImage(document, fg_color);
+-//   }
+-// #endif
++
++#ifdef OHOS_DRAG_DROP
++  if (InSelectionDragging(document)) {
++    return Color::kLightGray;
++  }
++#endif
++
+   switch (pseudo) {
+     case kPseudoIdSelection:
+       if (!LayoutTheme::GetTheme().SupportsSelectionForegroundColors())
+@@ -425,6 +378,12 @@ Color HighlightPaintingUtils::HighlightBackgroundColor(
+     // images.
+     return result.BlendWithWhite();
+   }
++#ifdef OHOS_DRAG_DROP
++  if (InSelectionDragging(document)) {
++    return Color::FromRGBA32(kBackgroundColorInDragging);
++  }
++#endif
++
+   return result;
+ }
+ 
+diff --git a/src/third_party/blink/renderer/platform/media/web_media_player_impl.cc b/src/third_party/blink/renderer/platform/media/web_media_player_impl.cc
+index 6c39a72f07130..305adc9dff077
+--- a/src/third_party/blink/renderer/platform/media/web_media_player_impl.cc
++++ b/src/third_party/blink/renderer/platform/media/web_media_player_impl.cc
+@@ -1839,6 +1839,9 @@ void WebMediaPlayerImpl::RestartForHls() {
+ #elif BUILDFLAG(IS_ANDROID)
+   renderer_factory_selector_->SetBaseRendererType(
+       media::RendererType::kMediaPlayer);
++#elif BUILDFLAG(IS_OHOS)
++  renderer_factory_selector_->SetBaseRendererType(
++      media::RendererType::kOHOSMediaPlayer);
+ #else
+   // Shouldn't be reachable from desktop where hls is not enabled.
+   NOTREACHED();
+@@ -2860,16 +2863,6 @@ media::PipelineStatus WebMediaPlayerImpl::OnDemuxerCreated(
+ }
+ 
+ void WebMediaPlayerImpl::StartPipeline() {
+-#if BUILDFLAG(IS_OHOS)
+-  KURL loaded_kurl(loaded_url_);
+-  if (HTMLMediaElement::IsHLSURL(loaded_kurl) && !loaded_kurl.IsLocalFile()) {
+-    DVLOG(1) << __func__ << "set kOHOSMediaPlayer for kLoadTypeURL";
+-    if (load_type_ == kLoadTypeURL) {
+-      renderer_factory_selector_->SetBaseRendererType(
+-          media::RendererType::kOHOSMediaPlayer);
+-    }
+-  }
+-#endif
+   DCHECK(main_task_runner_->BelongsToCurrentThread());
+ 
+   vfc_task_runner_->PostTask(
+diff --git a/src/third_party/blink/renderer/platform/weborigin/security_origin.cc b/src/third_party/blink/renderer/platform/weborigin/security_origin.cc
+index 93912a10ba65c..26dafa2e68692
+--- a/src/third_party/blink/renderer/platform/weborigin/security_origin.cc
++++ b/src/third_party/blink/renderer/platform/weborigin/security_origin.cc
+@@ -410,7 +410,13 @@ bool SecurityOrigin::CanDisplay(const KURL& url) const {
+ 
+   if (SchemeRegistry::ShouldTreatURLSchemeAsDisplayIsolated(protocol)) {
+     return protocol_ == protocol ||
+-           SecurityPolicy::IsOriginAccessToURLAllowed(this, url);
++           SecurityPolicy::IsOriginAccessToURLAllowed(this, url)
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++           ||
++           // TODO: If chrome:// -> arkweb:// replaced completely, remove it
++           base::Contains(url::GetCorsEnabledSchemes(), url.Protocol().Ascii())
++#endif
++        ;
+   }
+ 
+   if (base::Contains(url::GetLocalSchemes(), protocol.Ascii())) {
+diff --git a/src/third_party/blink/renderer/platform/widget/compositing/layer_tree_settings.cc b/src/third_party/blink/renderer/platform/widget/compositing/layer_tree_settings.cc
+index 13d74165dc61f..7ad51848f7cc6
+--- a/src/third_party/blink/renderer/platform/widget/compositing/layer_tree_settings.cc
++++ b/src/third_party/blink/renderer/platform/widget/compositing/layer_tree_settings.cc
+@@ -337,7 +337,11 @@ cc::LayerTreeSettings GenerateLayerTreeSettings(
+   settings.use_partial_raster = !cmd.HasSwitch(switches::kDisablePartialRaster);
+   // Partial raster is not supported with RawDraw
+   settings.use_partial_raster &= !::features::IsUsingRawDraw();
++#if defined(OHOS_INPUT_EVENTS)
++  settings.enable_elastic_overscroll = true;
++#else
+   settings.enable_elastic_overscroll = platform->IsElasticOverscrollEnabled();
++#endif
+   settings.resource_settings.use_gpu_memory_buffer_resources =
+       cmd.HasSwitch(switches::kEnableGpuMemoryBufferCompositorResources);
+   settings.use_painted_device_scale_factor = true;
+@@ -508,7 +512,7 @@ cc::LayerTreeSettings GenerateLayerTreeSettings(
+     settings.scrollbar_fade_duration = ui::kOverlayScrollbarFadeDuration;
+     settings.scrollbar_thinning_duration =
+         ui::kOverlayScrollbarThinningDuration;
+-    settings.scrollbar_flash_after_any_scroll_update = true;
++    settings.scrollbar_flash_after_any_scroll_update = false;
+   }
+ 
+   // TODO(danakj): Only do this on low end devices.
+diff --git a/src/third_party/blink/renderer/platform/widget/input/elastic_overscroll_controller.cc b/src/third_party/blink/renderer/platform/widget/input/elastic_overscroll_controller.cc
+index 29eb158398dc5..395f1f56bfb7f
+--- a/src/third_party/blink/renderer/platform/widget/input/elastic_overscroll_controller.cc
++++ b/src/third_party/blink/renderer/platform/widget/input/elastic_overscroll_controller.cc
+@@ -52,6 +52,10 @@ constexpr double kRubberbandMinimumRequiredDeltaBeforeStretch = 10;
+ // On android, overscroll should not occur if the scroller is not scrollable in
+ // the overscrolled direction.
+ constexpr bool kOverscrollNonScrollableDirection = false;
++#elif defined(OHOS_INPUT_EVENTS)
++// On OHOS, overscroll should not occur if the scroller is not scrollable in
++// the overscrolled direction.
++constexpr bool kOverscrollNonScrollableDirection = false;
+ #else   // BUILDFLAG(IS_ANDROID)
+ // On other platforms, overscroll can occur even if the scroller is not
+ // scrollable.
+@@ -72,6 +76,8 @@ ElasticOverscrollController::Create(cc::ScrollElasticityHelper* helper) {
+   return base::FeatureList::IsEnabled(features::kElasticOverscroll)
+              ? std::make_unique<ElasticOverscrollControllerBezier>(helper)
+              : nullptr;
++#elif defined(OHOS_INPUT_EVENTS)
++  return std::make_unique<ElasticOverscrollControllerBezier>(helper);
+ #else
+   return std::make_unique<ElasticOverscrollControllerExponential>(helper);
+ #endif
+@@ -179,8 +185,20 @@ void ElasticOverscrollController::UpdateVelocity(
+   last_scroll_event_timestamp_ = event_timestamp;
+ }
+ 
++#if defined(OHOS_INPUT_EVENTS)
++void ElasticOverscrollController::SetOverscrollMode(int mode) {
++  //The mode value NEVER is 0 and ALWAYS is 1.
++  overscroll_mode_ = mode;
++}
++
++#endif 
+ void ElasticOverscrollController::Overscroll(
+     const gfx::Vector2dF& overscroll_delta) {
++#if defined(OHOS_INPUT_EVENTS)
++  if (!overscroll_mode_) {
++    return;
++  }
++#endif
+   gfx::Vector2dF adjusted_overscroll_delta = overscroll_delta;
+ 
+   // The effect can be dynamically disabled by setting styles to disallow user
+@@ -210,8 +228,13 @@ void ElasticOverscrollController::Overscroll(
+     // is not.
+     if (!CanScrollHorizontally())
+       adjusted_overscroll_delta.set_x(0);
++#if defined(OHOS_INPUT_EVENTS)
++    if (!CanScrollVertically() && CanScrollHorizontally())
++#else    
+     if (!CanScrollVertically())
++#endif
+       adjusted_overscroll_delta.set_y(0);
++
+   }
+ 
+   // Don't allow overscrolling in a direction where scrolling is possible.
+@@ -304,14 +327,27 @@ void ElasticOverscrollController::Animate(base::TimeTicks time) {
+ 
+   // If the new stretch amount is near zero, set it directly to zero and enter
+   // the inactive state.
+-  const gfx::Vector2dF new_stretch_amount = StretchAmountForTimeDelta(
++#if defined(OHOS_INPUT_EVENTS)
++  gfx::Vector2dF new_stretch_amount = StretchAmountForTimeDelta(
+       std::max(time - momentum_animation_start_time_, base::TimeDelta()));
++#else
++  const gfx::Vector2dF new_stretch_amount = StretchAmountForTimeDelta(
++  std::max(time - momentum_animation_start_time_, base::TimeDelta()));   
++#endif
+   if (fabs(new_stretch_amount.x()) < 1 && fabs(new_stretch_amount.y()) < 1) {
+     helper_->SetStretchAmount(gfx::Vector2dF());
+     EnterStateInactive();
+     return;
+   }
+-
++#if defined(OHOS_INPUT_EVENTS)
++  if (!CanScrollHorizontally()) {
++    new_stretch_amount.set_x(0);
++  }
++ 
++  if (!CanScrollVertically()) {
++    new_stretch_amount.set_y(0);
++  }
++#endif
+   stretch_scroll_force_ =
+       AccumulatedOverscrollForStretchAmount(new_stretch_amount);
+   helper_->SetStretchAmount(new_stretch_amount);
+diff --git a/src/third_party/blink/renderer/platform/widget/input/elastic_overscroll_controller.h b/src/third_party/blink/renderer/platform/widget/input/elastic_overscroll_controller.h
+index e6cb4b5f2093c..02e988dde78e4
+--- a/src/third_party/blink/renderer/platform/widget/input/elastic_overscroll_controller.h
++++ b/src/third_party/blink/renderer/platform/widget/input/elastic_overscroll_controller.h
+@@ -76,6 +76,9 @@ class PLATFORM_EXPORT ElasticOverscrollController {
+   void ReconcileStretchAndScroll();
+   static std::unique_ptr<ElasticOverscrollController> Create(
+       cc::ScrollElasticityHelper* helper);
++#if defined(OHOS_INPUT_EVENTS)
++  void SetOverscrollMode(int mode);
++#endif
+ 
+  protected:
+   virtual void DidEnterMomentumAnimatedState() = 0;
+@@ -184,6 +187,9 @@ class PLATFORM_EXPORT ElasticOverscrollController {
+ 
+   bool received_overscroll_update_;
+   cc::OverscrollBehavior overscroll_behavior_;
++#if defined(OHOS_INPUT_EVENTS)
++  int overscroll_mode_ = 0;
++#endif
+ };
+ 
+ }  // namespace blink
+diff --git a/src/third_party/blink/renderer/platform/widget/input/elastic_overscroll_controller_bezier.cc b/src/third_party/blink/renderer/platform/widget/input/elastic_overscroll_controller_bezier.cc
+index 315a5431ce6d4..2a987b56244a4
+--- a/src/third_party/blink/renderer/platform/widget/input/elastic_overscroll_controller_bezier.cc
++++ b/src/third_party/blink/renderer/platform/widget/input/elastic_overscroll_controller_bezier.cc
+@@ -10,11 +10,19 @@ namespace blink {
+ namespace {
+ // The following constants are determined experimentally.
+ 
++#if defined(OHOS_INPUT_EVENTS)
++// Used to determine how far the scroller is allowed to stretch.
++constexpr double kOverscrollBoundaryMultiplier = 0.3f;
++
++// Maximum duration for the bounce back animation.
++constexpr double kBounceBackMaxDurationMilliseconds = 500.0;
++#else
+ // Used to determine how far the scroller is allowed to stretch.
+ constexpr double kOverscrollBoundaryMultiplier = 0.1f;
+ 
+ // Maximum duration for the bounce back animation.
+ constexpr double kBounceBackMaxDurationMilliseconds = 300.0;
++#endif
+ 
+ // Time taken by the bounce back animation (in milliseconds) to scroll 1 px.
+ constexpr double kBounceBackMillisecondsPerPixel = 15.0;
+@@ -27,7 +35,11 @@ constexpr double kIgnoreForwardBounceVelocityThreshold = 200;
+ 
+ constexpr double kOverbounceMaxDurationMilliseconds = 150.0;
+ constexpr double kOverbounceMillisecondsPerPixel = 2.5;
++#if defined(OHOS_INPUT_EVENTS)
++constexpr double kOverbounceDistanceMultiplier = 55.f;
++#else
+ constexpr double kOverbounceDistanceMultiplier = 35.f;
++#endif
+ 
+ // Control points for the bounce forward Cubic Bezier curve.
+ constexpr double kBounceForwardsX1 = 0.25;
+diff --git a/src/third_party/blink/renderer/platform/widget/input/input_handler_proxy.cc b/src/third_party/blink/renderer/platform/widget/input/input_handler_proxy.cc
+index 5c8c604f2cfd4..db4fe503cd7df
+--- a/src/third_party/blink/renderer/platform/widget/input/input_handler_proxy.cc
++++ b/src/third_party/blink/renderer/platform/widget/input/input_handler_proxy.cc
+@@ -570,6 +570,16 @@ void InputHandlerProxy::UpdateElasticOverscroll() {
+   }
+ }
+ 
++#if defined(OHOS_INPUT_EVENTS)
++void InputHandlerProxy::SetOverscrollMode(int mode) {
++  if (!elastic_overscroll_controller_) {
++    LOG(ERROR) << "Error:Overscroll controller is not initialized";
++    return;
++  }
++  elastic_overscroll_controller_->SetOverscrollMode(mode);
++}
++
++#endif
+ void InputHandlerProxy::InjectScrollbarGestureScroll(
+     const WebInputEvent::Type type,
+     const gfx::PointF& position_in_widget,
+diff --git a/src/third_party/blink/renderer/platform/widget/input/input_handler_proxy.h b/src/third_party/blink/renderer/platform/widget/input/input_handler_proxy.h
+index 8b96d9885467c..eff3075be8f64
+--- a/src/third_party/blink/renderer/platform/widget/input/input_handler_proxy.h
++++ b/src/third_party/blink/renderer/platform/widget/input/input_handler_proxy.h
+@@ -228,7 +228,10 @@ class PLATFORM_EXPORT InputHandlerProxy : public cc::InputHandlerClient,
+   void WillHandleScrollUpdateForInternalBeginFrame(const viz::BeginFrameArgs& args) override {
+     current_internal_begin_frame_args_ = args;
+     need_flush_scroll_update_gesture_ = true;
+-  };
++  }
++#endif
++#if defined(OHOS_INPUT_EVENTS)
++  void SetOverscrollMode(int mode);
+ #endif
+ 
+   // SnapFlingClient implementation.
+diff --git a/src/third_party/blink/renderer/platform/widget/input/widget_input_handler_manager.cc b/src/third_party/blink/renderer/platform/widget/input/widget_input_handler_manager.cc
+index 888c0da3e6c35..3752cebf61895
+--- a/src/third_party/blink/renderer/platform/widget/input/widget_input_handler_manager.cc
++++ b/src/third_party/blink/renderer/platform/widget/input/widget_input_handler_manager.cc
+@@ -1148,6 +1148,13 @@ void WidgetInputHandlerManager::AsyncSetZoomLevel(float magnify_delta,
+       FROM_HERE, base::BindOnce(&WidgetInputHandlerManager::SetZoomLevel,
+                                 AsWeakPtr(), magnify_delta, anchor));
+ }
++
++void WidgetInputHandlerManager::SetOverscrollMode(int mode) {
++  if (!input_handler_proxy_) {
++    return;
++  }
++  input_handler_proxy_->SetOverscrollMode(mode);
++} 
+ #endif  // defined(OHOS_INPUT_EVENTS)
+ 
+ }  // namespace blink
+diff --git a/src/third_party/blink/renderer/platform/widget/input/widget_input_handler_manager.h b/src/third_party/blink/renderer/platform/widget/input/widget_input_handler_manager.h
+index 317e533949da5..f1df1398a7555
+--- a/src/third_party/blink/renderer/platform/widget/input/widget_input_handler_manager.h
++++ b/src/third_party/blink/renderer/platform/widget/input/widget_input_handler_manager.h
+@@ -195,6 +195,7 @@ class PLATFORM_EXPORT WidgetInputHandlerManager final
+   void SetZoomLevel(float magnify_delta, const gfx::Point& anchor);
+ 
+   void AsyncSetZoomLevel(float magnify_delta, const gfx::Point& anchor);
++  void SetOverscrollMode(int mode);
+ #endif  // defined(OHOS_INPUT_EVENTS)
+ 
+  protected:
+diff --git a/src/third_party/blink/renderer/platform/widget/widget_base.cc b/src/third_party/blink/renderer/platform/widget/widget_base.cc
+index 4351c6040716a..1e7a3d0d04694
+--- a/src/third_party/blink/renderer/platform/widget/widget_base.cc
++++ b/src/third_party/blink/renderer/platform/widget/widget_base.cc
+@@ -1734,6 +1734,13 @@ void WidgetBase::SetZoomLevel(float magnify_delta, const gfx::Point& anchor) {
+   }
+   widget_input_handler_manager_->AsyncSetZoomLevel(magnify_delta, anchor);
+ }
++
++void WidgetBase::SetOverscrollMode(int mode) {
++  if (!widget_input_handler_manager_) {
++    return;
++  }
++  widget_input_handler_manager_->SetOverscrollMode(mode);
++}
+ #endif  // defined(OHOS_INPUT_EVENTS)
+ 
+ }  // namespace blink
+diff --git a/src/third_party/blink/renderer/platform/widget/widget_base.h b/src/third_party/blink/renderer/platform/widget/widget_base.h
+index 2dff7de8ec668..8b0cb74df7331
+--- a/src/third_party/blink/renderer/platform/widget/widget_base.h
++++ b/src/third_party/blink/renderer/platform/widget/widget_base.h
+@@ -385,6 +385,7 @@ class PLATFORM_EXPORT WidgetBase : public mojom::blink::Widget,
+ 
+ #if defined(OHOS_INPUT_EVENTS)
+   void SetZoomLevel(float magnify_delta, const gfx::Point& anchor);
++  void SetOverscrollMode(int mode);
+ #endif  // defined(OHOS_INPUT_EVENTS)
+ 
+  private:
+diff --git a/src/third_party/boringssl/BUILD.gn b/src/third_party/boringssl/BUILD.gn
+index 6fb13437c6bcc..84b667fbb6be6
+--- a/src/third_party/boringssl/BUILD.gn
++++ b/src/third_party/boringssl/BUILD.gn
+@@ -117,7 +117,7 @@ if (is_win && !is_msan && current_cpu != "arm64") {
+     } else if (current_cpu == "x64") {
+       if (is_apple) {
+         sources += crypto_sources_apple_x86_64
+-      } else if (is_linux || is_chromeos || is_android) {
++      } else if (is_linux || is_chromeos || is_android || is_ohos) {
+         sources += crypto_sources_linux_x86_64
+       } else {
+         public_configs = [ ":no_asm_config" ]
+@@ -125,13 +125,13 @@ if (is_win && !is_msan && current_cpu != "arm64") {
+     } else if (current_cpu == "x86") {
+       if (is_apple) {
+         sources += crypto_sources_apple_x86
+-      } else if (is_linux || is_chromeos || is_android) {
++      } else if (is_linux || is_chromeos || is_android || is_ohos) {
+         sources += crypto_sources_linux_x86
+       } else {
+         public_configs = [ ":no_asm_config" ]
+       }
+     } else if (current_cpu == "arm") {
+-      if (is_linux || is_chromeos || is_android) {
++      if (is_linux || is_chromeos || is_android || is_ohos) {
+         sources += crypto_sources_linux_arm
+       } else if (is_apple) {
+         sources += crypto_sources_apple_arm
+@@ -139,7 +139,7 @@ if (is_win && !is_msan && current_cpu != "arm64") {
+         public_configs = [ ":no_asm_config" ]
+       }
+     } else if (current_cpu == "arm64") {
+-      if (is_linux || is_chromeos || is_android) {
++      if (is_linux || is_chromeos || is_android || is_ohos) {
+         sources += crypto_sources_linux_aarch64
+       } else if (is_apple) {
+         sources += crypto_sources_apple_aarch64
+diff --git a/src/third_party/crashpad/crashpad/util/linux/ptracer.cc b/src/third_party/crashpad/crashpad/util/linux/ptracer.cc
+index 25c89ea95c645..2330c546ec650
+--- a/src/third_party/crashpad/crashpad/util/linux/ptracer.cc
++++ b/src/third_party/crashpad/crashpad/util/linux/ptracer.cc
+@@ -70,7 +70,7 @@ bool GetThreadArea32(pid_t tid,
+   size_t index = (context.t32.xgs & 0xffff) >> 3;
+   user_desc desc;
+   if (ptrace(
+-          PTRACE_GET_THREAD_AREA, tid, reinterpret_cast<void*>(index), &desc) !=
++          tid, reinterpret_cast<void*>(index), &desc) !=
+       0) {
+     PLOG_IF(ERROR, can_log) << "ptrace";
+     return false;
+diff --git a/src/third_party/ffmpeg/ffmpeg_generated.gni b/src/third_party/ffmpeg/ffmpeg_generated.gni
+index fa1d74d4e3c78..5ab97225ca584
+--- a/src/third_party/ffmpeg/ffmpeg_generated.gni
++++ b/src/third_party/ffmpeg/ffmpeg_generated.gni
+@@ -14,7 +14,7 @@ ffmpeg_asm_sources = []
+ 
+ use_linux_config = is_linux || is_chromeos || is_fuchsia || is_ohos
+ 
+-if ((use_linux_config && current_cpu == "arm" && arm_use_neon && ffmpeg_branding == "Chrome") || (use_linux_config && current_cpu == "arm64" && ffmpeg_branding == "Chrome")) {
++if ((use_linux_config && current_cpu == "arm" && arm_use_neon && ffmpeg_branding == "Chrome") || (use_linux_config && (current_cpu == "arm64" || current_cpu == "x64") && ffmpeg_branding == "Chrome")) {
+   ffmpeg_c_sources += [
+     "libavcodec/aac_ac3_parser.c",
+     "libavcodec/aac_parser.c",
+@@ -266,6 +266,90 @@ if ((use_linux_config && current_cpu == "arm" && arm_use_neon && ffmpeg_branding
+   ]
+ }
+ 
++if (use_linux_config && current_cpu == "x64") {
++  ffmpeg_c_sources += [
++    "libavcodec/x86/aacpsdsp_init.c",
++    "libavcodec/x86/autorename_libavcodec_x86_videodsp_init.c",
++    "libavcodec/x86/autorename_libavcodec_x86_vorbisdsp_init.c",
++    "libavcodec/x86/blockdsp_init.c",
++    "libavcodec/x86/constants.c",
++    "libavcodec/x86/dct_init.c",
++    "libavcodec/x86/fdct.c",
++    "libavcodec/x86/fdctdsp_init.c",
++    "libavcodec/x86/fft_init.c",
++    "libavcodec/x86/flacdsp_init.c",
++    "libavcodec/x86/h263dsp_init.c",
++    "libavcodec/x86/h264_intrapred_init.c",
++    "libavcodec/x86/h264_qpel.c",
++    "libavcodec/x86/h264chroma_init.c",
++    "libavcodec/x86/h264dsp_init.c",
++    "libavcodec/x86/hpeldsp_init.c",
++    "libavcodec/x86/hpeldsp_vp3_init.c",
++    "libavcodec/x86/idctdsp_init.c",
++    "libavcodec/x86/mpegaudiodsp_x86.c",
++    "libavcodec/x86/me_cmp_init.c",
++    "libavcodec/x86/mpegvideo.c",
++    "libavcodec/x86/pixblockdsp_init.c",
++    "libavcodec/x86/qpeldsp_init.c",
++    "libavcodec/x86/sbrdsp_init.c",
++    "libavcodec/x86/vp3dsp_init.c",
++    "libavcodec/x86/vp8dsp_init.c",
++    "libavcodec/x86/xvididct_init.c",
++    "libavutil/x86/autorename_libavutil_x86_cpu.c",
++    "libavutil/x86/autorename_libavutil_x86_float_dsp_init.c",
++    "libavutil/x86/fixed_dsp_init.c",
++    "libavutil/x86/imgutils_init.c",
++    "libavutil/x86/lls_init.c",
++    "compat/strtod.c",
++    "libavutil/x86/tx_float_init.c",
++  ]
++
++    ffmpeg_asm_sources += [
++    "libavcodec/x86/aacpsdsp.asm",
++    "libavcodec/x86/autorename_libavcodec_x86_videodsp.asm",
++    "libavcodec/x86/dct32.asm",
++    "libavcodec/x86/fft.asm",
++    "libavcodec/x86/flacdsp.asm",
++    "libavcodec/x86/fpel.asm",
++    "libavcodec/x86/imdct36.asm",
++    "libavcodec/x86/hpeldsp.asm",
++    "libavcodec/x86/hpeldsp_vp3.asm",
++    "libavcodec/x86/sbrdsp.asm",
++    "libavcodec/x86/h263_loopfilter.asm",
++    "libavcodec/x86/h264_chromamc.asm",
++    "libavcodec/x86/h264_chromamc_10bit.asm",
++    "libavcodec/x86/h264_deblock.asm",
++    "libavcodec/x86/h264_deblock_10bit.asm",
++    "libavcodec/x86/h264_idct.asm",
++    "libavcodec/x86/h264_idct_10bit.asm",
++    "libavcodec/x86/h264_intrapred.asm",
++    "libavcodec/x86/h264_intrapred_10bit.asm",
++    "libavcodec/x86/h264_qpel_10bit.asm",
++    "libavcodec/x86/h264_qpel_8bit.asm",
++    "libavcodec/x86/h264_weight.asm",
++    "libavcodec/x86/h264_weight_10bit.asm",
++    "libavcodec/x86/qpel.asm",
++    "libavcodec/x86/blockdsp.asm",
++    "libavcodec/x86/idctdsp.asm",
++    "libavcodec/x86/me_cmp.asm",
++    "libavcodec/x86/pixblockdsp.asm",
++    "libavcodec/x86/qpeldsp.asm",
++    "libavcodec/x86/simple_idct.asm",
++    "libavcodec/x86/simple_idct10.asm",
++    "libavcodec/x86/vorbisdsp.asm",
++    "libavcodec/x86/vp3dsp.asm",
++    "libavcodec/x86/vp8dsp.asm",
++    "libavcodec/x86/vp8dsp_loopfilter.asm",
++    "libavcodec/x86/xvididct.asm",
++    "libavutil/x86/cpuid.asm",
++    "libavutil/x86/fixed_dsp.asm",
++    "libavutil/x86/float_dsp.asm",
++    "libavutil/x86/imgutils.asm",
++    "libavutil/x86/lls.asm",
++    "libavutil/x86/tx_float.asm"
++  ]
++}
++
+ if (use_linux_config && current_cpu == "arm" && arm_use_neon && ffmpeg_branding == "Chrome") {
+   ffmpeg_c_sources += [
+     "libavcodec/arm/aacpsdsp_init_arm.c",
+diff --git a/src/third_party/ffmpeg/ffmpeg_options.gni b/src/third_party/ffmpeg/ffmpeg_options.gni
+index 1f07d037a9bd4..cf5f981fd984e
+--- a/src/third_party/ffmpeg/ffmpeg_options.gni
++++ b/src/third_party/ffmpeg/ffmpeg_options.gni
+@@ -71,4 +71,6 @@ if ((is_linux || is_chromeos) && is_msan) {
+   os_config = "win-msvc"
+ } else if (is_ohos) {
+   os_config = "linux"
++} else if (is_ohos && !use_musl) {
++  os_config = "linux"
+ }
+diff --git a/src/third_party/ffmpeg/libavcodec/x86/mpegaudiodsp.c b/src/third_party/ffmpeg/libavcodec/x86/mpegaudiodsp_x86.c
+similarity index 100%
+rename from src/third_party/ffmpeg/libavcodec/x86/mpegaudiodsp.c
+rename to src/third_party/ffmpeg/libavcodec/x86/mpegaudiodsp_x86.c
+diff --git a/src/third_party/perfetto/protos/third_party/chromium/chrome_track_event.proto b/src/third_party/perfetto/protos/third_party/chromium/chrome_track_event.proto
+index b7e866466db56..3f75254230974
+--- a/src/third_party/perfetto/protos/third_party/chromium/chrome_track_event.proto
++++ b/src/third_party/perfetto/protos/third_party/chromium/chrome_track_event.proto
+@@ -781,6 +781,7 @@ message EventLatency {
+     GESTURE_PINCH_END = 24;
+     GESTURE_PINCH_UPDATE = 25;
+     INERTIAL_GESTURE_SCROLL_UPDATE = 26;
++    GESTURE_DRAG_LONG_PRESS = 27;
+   }
+ 
+   optional EventType event_type = 1;
+diff --git a/src/third_party/webrtc/modules/video_coding/codecs/h264/h264_encoder_impl.cc b/src/third_party/webrtc/modules/video_coding/codecs/h264/h264_encoder_impl.cc
+index b6023ac5025af..5e2707f314bd4
+--- a/src/third_party/webrtc/modules/video_coding/codecs/h264/h264_encoder_impl.cc
++++ b/src/third_party/webrtc/modules/video_coding/codecs/h264/h264_encoder_impl.cc
+@@ -39,6 +39,11 @@
+ #include "third_party/openh264/src/codec/api/wels/codec_def.h"
+ #include "third_party/openh264/src/codec/api/wels/codec_ver.h"
+ 
++#if defined(OHOS_WEBRTC)
++// Only needed in OHOS.
++#include "build/build_config.h"
++#endif
++
+ namespace webrtc {
+ 
+ namespace {
+@@ -275,7 +280,11 @@ int32_t H264EncoderImpl::InitEncode(const VideoCodec* inst,
+     configurations_[i].height = codec_.simulcastStream[idx].height;
+     configurations_[i].max_frame_rate = static_cast<float>(codec_.maxFramerate);
+     configurations_[i].frame_dropping_on = codec_.GetFrameDropEnabled();
++#if defined(OHOS_WEBRTC)
++    configurations_[i].key_frame_interval = 1;
++#else
+     configurations_[i].key_frame_interval = codec_.H264()->keyFrameInterval;
++#endif
+     configurations_[i].num_temporal_layers =
+         std::max(codec_.H264()->numberOfTemporalLayers,
+                  codec_.simulcastStream[idx].numberOfTemporalLayers);
+diff --git a/src/tools/polymer/css_to_wrapper.gni b/src/tools/polymer/css_to_wrapper.gni
+index 0d7c0ff2c18e0..0a6c04b696a35
+--- a/src/tools/polymer/css_to_wrapper.gni
++++ b/src/tools/polymer/css_to_wrapper.gni
+@@ -59,5 +59,9 @@ template("css_to_wrapper") {
+       # Declare additional dependency.
+       inputs += [ "//tools/polymer/html_minifier.js" ]
+     }
++    # OHOS_ARKWEB_EXTENSIONS
++    if (defined(invoker.arkweb_as_default_scheme) && invoker.arkweb_as_default_scheme) {
++      args += [ "--arkweb_as_default_scheme" ]
++    }
+   }
+ }
+diff --git a/src/tools/polymer/css_to_wrapper.py b/src/tools/polymer/css_to_wrapper.py
+index 5ce4c75d657cd..e48976cc86011
+--- a/src/tools/polymer/css_to_wrapper.py
++++ b/src/tools/polymer/css_to_wrapper.py
+@@ -136,7 +136,7 @@ def _extract_metadata(css_file):
+           scheme_match = re.search(_SCHEME_REGEX, line)
+           if scheme_match:
+             scheme = line[scheme_match.end():]
+-            assert scheme in ['chrome', 'relative']
++            assert scheme in ['chrome', 'relative', 'arkweb']
+             metadata['scheme'] = scheme
+ 
+         if _METADATA_END_REGEX in line:
+@@ -158,6 +158,7 @@ def main(argv):
+   parser.add_argument('--in_files', required=True, nargs="*")
+   parser.add_argument('--minify', action='store_true')
+   parser.add_argument('--use_js', action='store_true')
++  parser.add_argument('--arkweb_as_default_scheme', action='store_true')
+   args = parser.parse_args(argv)
+ 
+   in_folder = path.normpath(path.join(_CWD, args.in_folder))
+@@ -209,6 +210,8 @@ def main(argv):
+       scheme = 'chrome:'
+     elif metadata['scheme'] == 'relative':
+       scheme = ''
++    if args.arkweb_as_default_scheme and  metadata['scheme'] == 'default':
++      scheme = 'arkweb:'
+ 
+     wrapper = None
+     if metadata['type'] == 'style':
+diff --git a/src/tools/typescript/ts_library.py b/src/tools/typescript/ts_library.py
+index b1d00b039187c..763907b03b1ba
+--- a/src/tools/typescript/ts_library.py
++++ b/src/tools/typescript/ts_library.py
+@@ -181,6 +181,7 @@ def main(argv):
+       for (url, dir) in mappings:
+         path_mappings[url].append(os.path.join('./', dir))
+         path_mappings['chrome:' + url].append(os.path.join('./', dir))
++        path_mappings['arkweb:' + url].append(os.path.join('./', dir))
+ 
+   if args.path_mappings is not None:
+     for m in args.path_mappings:
+diff --git a/src/ui/base/clipboard/ohos/clipboard_ohos_read_data.cc b/src/ui/base/clipboard/ohos/clipboard_ohos_read_data.cc
+index 7b17e36da94ab..89964fd4d3f34
+--- a/src/ui/base/clipboard/ohos/clipboard_ohos_read_data.cc
++++ b/src/ui/base/clipboard/ohos/clipboard_ohos_read_data.cc
+@@ -19,8 +19,22 @@ ClipboardOhosReadData::ClipboardOhosReadData(PasteRecordList& record_list)
+     : record_list_(record_list) {
+   is_in_app_ = OhosAdapterHelper::GetInstance().GetPasteBoard().IsLocalPaste();
+   token_id_ = OhosAdapterHelper::GetInstance().GetPasteBoard().GetTokenId();
+-  html_ = record_list_[0]->GetHtmlText();
+-  text_ = record_list_[0]->GetPlainText();
++  std::string htmlString;
++  std::string textString;
++
++  for (auto& recordList : record_list_) {
++    if (!recordList) {
++      continue;
++    }
++    if (recordList->GetHtmlText()) {
++      htmlString.append(*(recordList->GetHtmlText()));
++    }
++    if (recordList->GetPlainText()) {
++      textString.append(*(recordList->GetPlainText()));
++    }
++  }
++  html_ = std::make_shared<std::string>(htmlString.c_str());
++  text_ = std::make_shared<std::string>(textString.c_str());
+ }
+ 
+ std::shared_ptr<std::string> ClipboardOhosReadData::ReadHtml() {
+diff --git a/src/ui/compositor/compositor.cc b/src/ui/compositor/compositor.cc
+index d63c3255825d0..c8c7b78785529
+--- a/src/ui/compositor/compositor.cc
++++ b/src/ui/compositor/compositor.cc
+@@ -464,6 +464,22 @@ void Compositor::SetShouldFrameSubmissionBeforeDraw(bool should) {
+     display_private_->SetShouldFrameSubmissionBeforeDraw(should);
+   }
+ }
++
++void Compositor::SetDrawRect(const gfx::Rect& new_rect) {
++  if (display_private_) {
++    TRACE_EVENT0("viz", "Compositor::SetDrawRect");
++    mojo::SyncCallRestrictions::ScopedAllowSyncCall scoped_allow_sync_call;
++    display_private_->SetDrawRect(new_rect);
++  }
++}
++
++void Compositor::SetDrawMode(const int32_t& mode) {
++  if (display_private_) {
++    TRACE_EVENT0("viz", "Compositor::SetDrawMode");
++    mojo::SyncCallRestrictions::ScopedAllowSyncCall scoped_allow_sync_call;
++    display_private_->SetDrawMode(mode);
++  }
++}
+ #endif  // defined(OHOS_COMPOSITE_RENDER)
+ 
+ void Compositor::SetScaleAndSize(float scale,
+diff --git a/src/ui/compositor/compositor.h b/src/ui/compositor/compositor.h
+index 2c2455002e5e1..c192a95e9429c
+--- a/src/ui/compositor/compositor.h
++++ b/src/ui/compositor/compositor.h
+@@ -257,6 +257,8 @@ class COMPOSITOR_EXPORT Compositor : public base::PowerSuspendObserver,
+ 
+ #if defined(OHOS_COMPOSITE_RENDER)
+   void SetShouldFrameSubmissionBeforeDraw(bool should);
++  void SetDrawRect(const gfx::Rect& new_rect);
++  void SetDrawMode(const int32_t& mode);
+ #endif  // defined(OHOS_COMPOSITE_RENDER)
+ 
+   // Sets the compositor's device scale factor and size.
+diff --git a/src/ui/events/BUILD.gn b/src/ui/events/BUILD.gn
+index 1051720dd40b3..d778dc8a7a40c
+--- a/src/ui/events/BUILD.gn
++++ b/src/ui/events/BUILD.gn
+@@ -117,6 +117,8 @@ component("events_base") {
+     "keycodes/keyboard_codes.h",
+     "mobile_scroller.cc",
+     "mobile_scroller.h",
++    "native_scroller_ohos.cc",
++    "native_scroller_ohos.h",
+     "pointer_details.cc",
+     "pointer_details.h",
+   ]
+diff --git a/src/ui/events/gesture_detection/gesture_configuration.h b/src/ui/events/gesture_detection/gesture_configuration.h
+index ba915a7eec085..e4c361a399580
+--- a/src/ui/events/gesture_detection/gesture_configuration.h
++++ b/src/ui/events/gesture_detection/gesture_configuration.h
+@@ -187,6 +187,9 @@ class GESTURE_DETECTION_EXPORT GestureConfiguration {
+     velocity_tracker_strategy_ = val;
+   }
+ 
++  void set_virtual_pixel_ratio(float ratio) { virtual_pixel_ratio_ = ratio; }
++  float virtual_pixel_ratio() const { return virtual_pixel_ratio_; }
++
+  protected:
+   GestureConfiguration();
+   virtual ~GestureConfiguration();
+@@ -289,6 +292,7 @@ class GESTURE_DETECTION_EXPORT GestureConfiguration {
+   bool two_finger_tap_enabled_ = false;
+   VelocityTracker::Strategy velocity_tracker_strategy_ =
+       VelocityTracker::Strategy::STRATEGY_DEFAULT;
++  float virtual_pixel_ratio_;
+ };
+ 
+ }  // namespace ui
+diff --git a/src/ui/events/gestures/blink/BUILD.gn b/src/ui/events/gestures/blink/BUILD.gn
+index 4a9291b3a4a6f..e67da9c2ffd3f
+--- a/src/ui/events/gestures/blink/BUILD.gn
++++ b/src/ui/events/gestures/blink/BUILD.gn
+@@ -14,6 +14,10 @@ source_set("blink") {
+     defines = [ "USE_MOBILE_FLING_CURVE" ]
+   }
+ 
++  if (is_ohos) {
++    defines = [ "USE_NATIVE_FLING_CURVE" ]
++  }
++
+   deps = [
+     "//base",
+     "//third_party/blink/public:blink_headers",
+diff --git a/src/ui/events/gestures/blink/web_gesture_curve_impl.cc b/src/ui/events/gestures/blink/web_gesture_curve_impl.cc
+index 5c047e0150d7e..67c87cd9b2a63
+--- a/src/ui/events/gestures/blink/web_gesture_curve_impl.cc
++++ b/src/ui/events/gestures/blink/web_gesture_curve_impl.cc
+@@ -5,6 +5,9 @@
+ #include "ui/events/gestures/blink/web_gesture_curve_impl.h"
+ 
+ #include <limits.h>
++#include <list>
++#include <tuple>
++#include <sstream>
+ 
+ #include <utility>
+ 
+@@ -15,6 +18,7 @@
+ #include "ui/events/gestures/fling_curve.h"
+ #include "ui/events/gestures/physics_based_fling_curve.h"
+ #include "ui/events/mobile_scroller.h"
++#include "ui/events/native_scroller_ohos.h"
+ 
+ #if BUILDFLAG(IS_WIN)
+ #include "ui/display/win/screen_win.h"
+@@ -38,6 +42,19 @@ std::unique_ptr<GestureCurve> CreateDefaultPlatformCurve(
+                                                 base::TimeTicks());
+   }
+ 
++  bool use_native_fling_curve = false;
++#ifdef USE_NATIVE_FLING_CURVE
++  use_native_fling_curve = true;
++#endif
++  if (use_native_fling_curve) {
++    LOG(DEBUG) << "WebGestureCurveImpl DUMP_FLING_CURVE initial_velocity: " << initial_velocity.y();
++    auto scroller = std::make_unique<NativeScrollerOhos>();
++    scroller->Fling(0, 0, initial_velocity.x(), initial_velocity.y(), INT_MIN,
++                    static_cast<float>(INT_MAX), INT_MIN,
++                    static_cast<float>(INT_MAX), base::TimeTicks());
++    return std::move(scroller);
++  }
++
+ #ifdef USE_MOBILE_FLING_CURVE
+   use_mobile_fling_curve = true;
+ #endif
+@@ -131,6 +148,9 @@ bool WebGestureCurveImpl::Advance(double time,
+   gfx::Vector2dF offset;
+   bool still_active =
+       curve_->ComputeScrollOffset(time_ticks, &offset, &out_current_velocity);
++  
++  // dump curve
++  LOG(DEBUG) << "WebGestureCurveImpl::Advance DUMP_FLING_CURVE time = " << time << " offset = " << offset.y() << " velocity = " << out_current_velocity.y();
+ 
+   out_delta_to_scroll = offset - last_offset_;
+   last_offset_ = offset;
+diff --git a/src/ui/events/native_scroller_ohos.cc b/src/ui/events/native_scroller_ohos.cc
+new file mode 100644
+index 0000000000000..b7919312cd484
+--- /dev/null
++++ b/src/ui/events/native_scroller_ohos.cc
+@@ -0,0 +1,105 @@
++#include "ui/events/native_scroller_ohos.h"
++#include <cmath>
++#include "base/logging.h"
++#include "ui/events/gesture_detection/gesture_configuration.h"
++
++namespace ui {
++namespace {
++constexpr float kDefaultFriction = 0.6f;
++constexpr float kFrictionScale = -4.2f;
++constexpr float kDefaultThreshold = 0.75f;
++constexpr float kDefaultMultiplier = 60.0f;
++constexpr float kThresholdForFlingEnd = 1.0f;
++constexpr double Epsilon = 0.001f;
++constexpr double kFriction = kDefaultFriction * kFrictionScale;
++
++inline bool NearEqual(const double left,
++                      const double right) {
++    return (std::abs(left - right) <= Epsilon);
++}
++
++inline bool NearZero(const double left) {
++    return NearEqual(left, 0.0);
++}
++
++inline bool GreatNotEqual(double left, double right) {
++    return (left - right) > Epsilon;
++}
++} // namespace
++
++void NativeScrollerOhos::Fling(float start_x,
++                               float start_y,
++                               float velocity_x,
++                               float velocity_y,
++                               float min_x,
++                               float max_x,
++                               float min_y,
++                               float max_y,
++                               base::TimeTicks start_time) {
++    curr_time_ = start_time;
++    start_time_ = start_time;
++    friction_ = kFriction;
++
++    // currently only vertical fling is supported
++    init_velocity_y_ = std::abs(velocity_y);
++    init_y_ = start_y;
++
++    float pixel_ratio = ui::GestureConfiguration::GetInstance()->virtual_pixel_ratio();
++    value_threshold_ = kDefaultThreshold;
++    velocity_threshold_ = NearZero(pixel_ratio) ? (value_threshold_ * kDefaultMultiplier) : ((value_threshold_ * kDefaultMultiplier) / pixel_ratio);
++
++    float diff_time = 0;
++    if (NearZero(init_velocity_y_)) {
++        signum_ = 0;
++        diff_time = 0.0;
++    } else {
++        signum_ = GreatNotEqual(velocity_y, 0.0) ? 1.0 : -1.0;
++        diff_time = std::log(velocity_threshold_ / init_velocity_y_) / friction_;
++    }
++    final_y_ = GetPosition(diff_time);
++    finisheed_ = false;
++}
++
++bool NativeScrollerOhos::ComputeScrollOffset(base::TimeTicks time,
++                                             gfx::Vector2dF* offset,
++                                             gfx::Vector2dF* velocity) {
++    if (finisheed_) {
++        *offset = gfx::Vector2dF(0, final_y_);
++        *velocity = gfx::Vector2dF();
++        return false;
++    }
++
++    float diff_time = (time - start_time_).InSecondsF();
++    last_y_ = curr_y_;
++    curr_y_ = GetPosition(diff_time);
++    curr_velocity_y_ = GetVelocity(diff_time);
++
++    *offset = gfx::Vector2dF(0, curr_y_);
++    *velocity = gfx::Vector2dF(0, curr_velocity_y_);
++
++    if (ShouldAbortAnimation()) {
++        AbortAnimation();
++    }
++    return !finisheed_;
++}
++
++bool NativeScrollerOhos::ShouldAbortAnimation() {
++    return std::abs(curr_y_ - final_y_) < kThresholdForFlingEnd || 
++           std::abs(curr_velocity_y_) <= velocity_threshold_;
++}
++
++double NativeScrollerOhos::GetPosition(float offsetTime /*second*/) {
++    double position = init_y_ + signum_ * (init_velocity_y_ / friction_) * std::expm1(friction_ * offsetTime);
++    return position;
++}
++
++double NativeScrollerOhos::GetVelocity(float offsetTime /*second*/) {
++    auto velocity = signum_ * init_velocity_y_ * std::exp(friction_ * offsetTime);
++    return velocity;
++}
++
++void NativeScrollerOhos::AbortAnimation() {
++    finisheed_ = true;
++}
++
++}
+\ No newline at end of file
