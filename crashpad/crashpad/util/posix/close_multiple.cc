@@ -35,6 +35,10 @@
 #include <sys/sysctl.h>
 #endif
 
+#if BUILDFLAG(IS_OHOS)
+#include <syscall.h>
+#endif
+
 // Everything in this file is expected to execute between fork() and exec(),
 // so everything called here must be acceptable in this context. However,
 // logging code that is not expected to execute under normal circumstances is
@@ -61,7 +65,11 @@ void CloseNowOrOnExec(int fd, bool ebadf_ok) {
   PLOG(WARNING) << "fcntl";
 #endif
 
+#if BUILDFLAG(IS_OHOS)
+  rv = IGNORE_EINTR(syscall(SYS_close, fd));
+#else
   rv = IGNORE_EINTR(close(fd));
+#endif
   if (rv != 0 && !(ebadf_ok && errno == EBADF)) {
     PLOG(WARNING) << "close";
   }
