@@ -14065,3 +14065,1926 @@ index 5ee9f75402053..b4d0f6b59bd9c
  
  import {navigation, Page} from './navigation_helper.js';
  import {getTemplate} from './options_dialog.html.js';
+diff --git a/src/chrome/browser/resources/extensions/pack_dialog.ts b/src/chrome/browser/resources/extensions/pack_dialog.ts
+index f5a83e135d1d3..18a0d5a2b977a
+--- a/src/chrome/browser/resources/extensions/pack_dialog.ts
++++ b/src/chrome/browser/resources/extensions/pack_dialog.ts
+@@ -2,17 +2,17 @@
+ // Use of this source code is governed by a BSD-style license that can be
+ // found in the LICENSE file.
+ 
+-import 'chrome://resources/cr_elements/cr_button/cr_button.js';
+-import 'chrome://resources/cr_elements/cr_dialog/cr_dialog.js';
+-import 'chrome://resources/cr_elements/cr_input/cr_input.js';
+-import 'chrome://resources/cr_elements/cr_shared_style.css.js';
+-import 'chrome://resources/cr_elements/cr_shared_vars.css.js';
++import 'arkweb://resources/cr_elements/cr_button/cr_button.js';
++import 'arkweb://resources/cr_elements/cr_dialog/cr_dialog.js';
++import 'arkweb://resources/cr_elements/cr_input/cr_input.js';
++import 'arkweb://resources/cr_elements/cr_shared_style.css.js';
++import 'arkweb://resources/cr_elements/cr_shared_vars.css.js';
+ import './pack_dialog_alert.js';
+ import './strings.m.js';
+ 
+-import {CrDialogElement} from 'chrome://resources/cr_elements/cr_dialog/cr_dialog.js';
+-import {CrInputElement} from 'chrome://resources/cr_elements/cr_input/cr_input.js';
+-import {PolymerElement} from 'chrome://resources/polymer/v3_0/polymer/polymer_bundled.min.js';
++import {CrDialogElement} from 'arkweb://resources/cr_elements/cr_dialog/cr_dialog.js';
++import {CrInputElement} from 'arkweb://resources/cr_elements/cr_input/cr_input.js';
++import {PolymerElement} from 'arkweb://resources/polymer/v3_0/polymer/polymer_bundled.min.js';
+ 
+ import {getTemplate} from './pack_dialog.html.js';
+ 
+diff --git a/src/chrome/browser/resources/extensions/pack_dialog_alert.ts b/src/chrome/browser/resources/extensions/pack_dialog_alert.ts
+index 1b2f902793c4b..eb0dfea19fa11
+--- a/src/chrome/browser/resources/extensions/pack_dialog_alert.ts
++++ b/src/chrome/browser/resources/extensions/pack_dialog_alert.ts
+@@ -2,14 +2,14 @@
+ // Use of this source code is governed by a BSD-style license that can be
+ // found in the LICENSE file.
+ 
+-import 'chrome://resources/cr_elements/cr_button/cr_button.js';
+-import 'chrome://resources/cr_elements/cr_dialog/cr_dialog.js';
+-import 'chrome://resources/cr_elements/cr_shared_style.css.js';
+-
+-import {CrDialogElement} from 'chrome://resources/cr_elements/cr_dialog/cr_dialog.js';
+-import {assert, assertNotReached} from 'chrome://resources/js/assert_ts.js';
+-import {loadTimeData} from 'chrome://resources/js/load_time_data.js';
+-import {PolymerElement} from 'chrome://resources/polymer/v3_0/polymer/polymer_bundled.min.js';
++import 'arkweb://resources/cr_elements/cr_button/cr_button.js';
++import 'arkweb://resources/cr_elements/cr_dialog/cr_dialog.js';
++import 'arkweb://resources/cr_elements/cr_shared_style.css.js';
++
++import {CrDialogElement} from 'arkweb://resources/cr_elements/cr_dialog/cr_dialog.js';
++import {assert, assertNotReached} from 'arkweb://resources/js/assert_ts.js';
++import {loadTimeData} from 'arkweb://resources/js/load_time_data.js';
++import {PolymerElement} from 'arkweb://resources/polymer/v3_0/polymer/polymer_bundled.min.js';
+ 
+ import {getTemplate} from './pack_dialog_alert.html.js';
+ 
+diff --git a/src/chrome/browser/resources/extensions/restricted_sites_dialog.ts b/src/chrome/browser/resources/extensions/restricted_sites_dialog.ts
+index 71c88cf5e22c8..0d1abaf5776e1
+--- a/src/chrome/browser/resources/extensions/restricted_sites_dialog.ts
++++ b/src/chrome/browser/resources/extensions/restricted_sites_dialog.ts
+@@ -2,17 +2,17 @@
+ // Use of this source code is governed by a BSD-style license that can be
+ // found in the LICENSE file.
+ 
+-import 'chrome://resources/cr_elements/cr_button/cr_button.js';
+-import 'chrome://resources/cr_elements/cr_dialog/cr_dialog.js';
+-import 'chrome://resources/cr_elements/cr_shared_style.css.js';
+-import 'chrome://resources/cr_elements/cr_shared_vars.css.js';
+-import 'chrome://resources/polymer/v3_0/iron-icon/iron-icon.js';
++import 'arkweb://resources/cr_elements/cr_button/cr_button.js';
++import 'arkweb://resources/cr_elements/cr_dialog/cr_dialog.js';
++import 'arkweb://resources/cr_elements/cr_shared_style.css.js';
++import 'arkweb://resources/cr_elements/cr_shared_vars.css.js';
++import 'arkweb://resources/polymer/v3_0/iron-icon/iron-icon.js';
+ import './strings.m.js';
+ import './shared_style.css.js';
+ 
+-import {CrDialogElement} from 'chrome://resources/cr_elements/cr_dialog/cr_dialog.js';
+-import {I18nMixin} from 'chrome://resources/cr_elements/i18n_mixin.js';
+-import {PolymerElement} from 'chrome://resources/polymer/v3_0/polymer/polymer_bundled.min.js';
++import {CrDialogElement} from 'arkweb://resources/cr_elements/cr_dialog/cr_dialog.js';
++import {I18nMixin} from 'arkweb://resources/cr_elements/i18n_mixin.js';
++import {PolymerElement} from 'arkweb://resources/polymer/v3_0/polymer/polymer_bundled.min.js';
+ 
+ import {getTemplate} from './restricted_sites_dialog.html.js';
+ 
+diff --git a/src/chrome/browser/resources/extensions/runtime_host_permissions.ts b/src/chrome/browser/resources/extensions/runtime_host_permissions.ts
+index 0d0fa2d9ed2b4..1862615b042d3
+--- a/src/chrome/browser/resources/extensions/runtime_host_permissions.ts
++++ b/src/chrome/browser/resources/extensions/runtime_host_permissions.ts
+@@ -2,28 +2,28 @@
+ // Use of this source code is governed by a BSD-style license that can be
+ // found in the LICENSE file.
+ 
+-import 'chrome://resources/cr_elements/cr_action_menu/cr_action_menu.js';
+-import 'chrome://resources/cr_elements/cr_button/cr_button.js';
+-import 'chrome://resources/cr_elements/cr_dialog/cr_dialog.js';
+-import 'chrome://resources/cr_elements/cr_icon_button/cr_icon_button.js';
+-import 'chrome://resources/cr_elements/cr_radio_group/cr_radio_group.js';
+-import 'chrome://resources/cr_elements/cr_radio_button/cr_radio_button.js';
+-import 'chrome://resources/cr_elements/icons.html.js';
+-import 'chrome://resources/cr_elements/cr_shared_style.css.js';
+-import 'chrome://resources/cr_elements/cr_shared_vars.css.js';
+-import 'chrome://resources/js/action_link.js';
+-import 'chrome://resources/cr_elements/action_link.css.js';
+-import 'chrome://resources/cr_elements/md_select.css.js';
+-import 'chrome://resources/polymer/v3_0/iron-icon/iron-icon.js';
++import 'arkweb://resources/cr_elements/cr_action_menu/cr_action_menu.js';
++import 'arkweb://resources/cr_elements/cr_button/cr_button.js';
++import 'arkweb://resources/cr_elements/cr_dialog/cr_dialog.js';
++import 'arkweb://resources/cr_elements/cr_icon_button/cr_icon_button.js';
++import 'arkweb://resources/cr_elements/cr_radio_group/cr_radio_group.js';
++import 'arkweb://resources/cr_elements/cr_radio_button/cr_radio_button.js';
++import 'arkweb://resources/cr_elements/icons.html.js';
++import 'arkweb://resources/cr_elements/cr_shared_style.css.js';
++import 'arkweb://resources/cr_elements/cr_shared_vars.css.js';
++import 'arkweb://resources/js/action_link.js';
++import 'arkweb://resources/cr_elements/action_link.css.js';
++import 'arkweb://resources/cr_elements/md_select.css.js';
++import 'arkweb://resources/polymer/v3_0/iron-icon/iron-icon.js';
+ import './runtime_hosts_dialog.js';
+ import './shared_style.css.js';
+ import './strings.m.js';
+ 
+-import {CrActionMenuElement} from 'chrome://resources/cr_elements/cr_action_menu/cr_action_menu.js';
+-import {CrDialogElement} from 'chrome://resources/cr_elements/cr_dialog/cr_dialog.js';
+-import {assert} from 'chrome://resources/js/assert_ts.js';
+-import {focusWithoutInk} from 'chrome://resources/js/focus_without_ink.js';
+-import {DomRepeatEvent, PolymerElement} from 'chrome://resources/polymer/v3_0/polymer/polymer_bundled.min.js';
++import {CrActionMenuElement} from 'arkweb://resources/cr_elements/cr_action_menu/cr_action_menu.js';
++import {CrDialogElement} from 'arkweb://resources/cr_elements/cr_dialog/cr_dialog.js';
++import {assert} from 'arkweb://resources/js/assert_ts.js';
++import {focusWithoutInk} from 'arkweb://resources/js/focus_without_ink.js';
++import {DomRepeatEvent, PolymerElement} from 'arkweb://resources/polymer/v3_0/polymer/polymer_bundled.min.js';
+ 
+ import {ItemDelegate} from './item.js';
+ import {getTemplate} from './runtime_host_permissions.html.js';
+diff --git a/src/chrome/browser/resources/extensions/runtime_hosts_dialog.ts b/src/chrome/browser/resources/extensions/runtime_hosts_dialog.ts
+index 8ffc28b354d95..19affcd42db54
+--- a/src/chrome/browser/resources/extensions/runtime_hosts_dialog.ts
++++ b/src/chrome/browser/resources/extensions/runtime_hosts_dialog.ts
+@@ -2,21 +2,21 @@
+ // Use of this source code is governed by a BSD-style license that can be
+ // found in the LICENSE file.
+ 
+-import 'chrome://resources/cr_elements/cr_button/cr_button.js';
+-import 'chrome://resources/cr_elements/cr_dialog/cr_dialog.js';
+-import 'chrome://resources/cr_elements/cr_input/cr_input.js';
+-import 'chrome://resources/cr_elements/icons.html.js';
+-import 'chrome://resources/cr_elements/cr_shared_style.css.js';
+-import 'chrome://resources/polymer/v3_0/iron-icon/iron-icon.js';
++import 'arkweb://resources/cr_elements/cr_button/cr_button.js';
++import 'arkweb://resources/cr_elements/cr_dialog/cr_dialog.js';
++import 'arkweb://resources/cr_elements/cr_input/cr_input.js';
++import 'arkweb://resources/cr_elements/icons.html.js';
++import 'arkweb://resources/cr_elements/cr_shared_style.css.js';
++import 'arkweb://resources/polymer/v3_0/iron-icon/iron-icon.js';
+ import './strings.m.js';
+ import './shared_vars.css.js';
+ 
+-import {CrButtonElement} from 'chrome://resources/cr_elements/cr_button/cr_button.js';
+-import {CrDialogElement} from 'chrome://resources/cr_elements/cr_dialog/cr_dialog.js';
+-import {assert} from 'chrome://resources/js/assert_ts.js';
+-import {I18nMixin} from 'chrome://resources/cr_elements/i18n_mixin.js';
+-import {loadTimeData} from 'chrome://resources/js/load_time_data.js';
+-import {PolymerElement} from 'chrome://resources/polymer/v3_0/polymer/polymer_bundled.min.js';
++import {CrButtonElement} from 'arkweb://resources/cr_elements/cr_button/cr_button.js';
++import {CrDialogElement} from 'arkweb://resources/cr_elements/cr_dialog/cr_dialog.js';
++import {I18nMixin} from 'arkweb://resources/cr_elements/i18n_mixin.js';
++import {assert} from 'arkweb://resources/js/assert_ts.js';
++import {loadTimeData} from 'arkweb://resources/js/load_time_data.js';
++import {PolymerElement} from 'arkweb://resources/polymer/v3_0/polymer/polymer_bundled.min.js';
+ 
+ import {getTemplate} from './runtime_hosts_dialog.html.js';
+ import {sitePermissionsPatternRegExp} from './site_permissions_edit_url_dialog.js';
+diff --git a/src/chrome/browser/resources/extensions/service.ts b/src/chrome/browser/resources/extensions/service.ts
+index 1081d384b412d..bb78a59b80786
+--- a/src/chrome/browser/resources/extensions/service.ts
++++ b/src/chrome/browser/resources/extensions/service.ts
+@@ -3,7 +3,7 @@
+ // found in the LICENSE file.
+ 
+ import {ChromeEvent} from '/tools/typescript/definitions/chrome_event.js';
+-import {assert} from 'chrome://resources/js/assert_ts.js';
++import {assert} from 'arkweb://resources/js/assert_ts.js';
+ 
+ import {ActivityLogDelegate} from './activity_log/activity_log_history.js';
+ import {ActivityLogEventDelegate} from './activity_log/activity_log_stream.js';
+diff --git a/src/chrome/browser/resources/extensions/shared_style.css b/src/chrome/browser/resources/extensions/shared_style.css
+index 1d00f9111a459..91c60ba729e65
+--- a/src/chrome/browser/resources/extensions/shared_style.css
++++ b/src/chrome/browser/resources/extensions/shared_style.css
+@@ -4,8 +4,8 @@
+ 
+ /* #css_wrapper_metadata_start
+  * #type=style
+- * #import=chrome://resources/cr_elements/cr_shared_style.css.js
+- * #import=chrome://resources/cr_elements/cr_shared_vars.css.js
++ * #import=arkweb://resources/cr_elements/cr_shared_style.css.js
++ * #import=arkweb://resources/cr_elements/cr_shared_vars.css.js
+  * #import=./shared_vars.css.js
+  * #include=cr-shared-style
+  * #css_wrapper_metadata_end */
+diff --git a/src/chrome/browser/resources/extensions/shared_vars.css b/src/chrome/browser/resources/extensions/shared_vars.css
+index 7c3c0106eefed..8756eeec1752f
+--- a/src/chrome/browser/resources/extensions/shared_vars.css
++++ b/src/chrome/browser/resources/extensions/shared_vars.css
+@@ -4,8 +4,8 @@
+ 
+ /* #css_wrapper_metadata_start
+  * #type=vars
+- * #import=chrome://resources/cr_elements/cr_shared_vars.css.js
+- * #import=chrome://resources/polymer/v3_0/paper-styles/color.js
++ * #import=arkweb://resources/cr_elements/cr_shared_vars.css.js
++ * #import=arkweb://resources/polymer/v3_0/paper-styles/color.js
+  * #css_wrapper_metadata_end */
+ 
+ html {
+diff --git a/src/chrome/browser/resources/extensions/shortcut_input.ts b/src/chrome/browser/resources/extensions/shortcut_input.ts
+index 28aa6bc54a9a8..a25169a415b6b
+--- a/src/chrome/browser/resources/extensions/shortcut_input.ts
++++ b/src/chrome/browser/resources/extensions/shortcut_input.ts
+@@ -2,17 +2,17 @@
+ // Use of this source code is governed by a BSD-style license that can be
+ // found in the LICENSE file.
+ 
+-import 'chrome://resources/cr_elements/cr_icon_button/cr_icon_button.js';
+-import 'chrome://resources/cr_elements/cr_icons.css.js';
+-import 'chrome://resources/cr_elements/cr_input/cr_input.js';
+-import 'chrome://resources/cr_elements/cr_hidden_style.css.js';
+-import 'chrome://resources/polymer/v3_0/paper-styles/color.js';
+-
+-import {CrInputElement} from 'chrome://resources/cr_elements/cr_input/cr_input.js';
+-import {assert} from 'chrome://resources/js/assert_ts.js';
+-import {I18nMixin} from 'chrome://resources/cr_elements/i18n_mixin.js';
+-import {IronA11yAnnouncer} from 'chrome://resources/polymer/v3_0/iron-a11y-announcer/iron-a11y-announcer.js';
+-import {PolymerElement} from 'chrome://resources/polymer/v3_0/polymer/polymer_bundled.min.js';
++import 'arkweb://resources/cr_elements/cr_icon_button/cr_icon_button.js';
++import 'arkweb://resources/cr_elements/cr_icons.css.js';
++import 'arkweb://resources/cr_elements/cr_input/cr_input.js';
++import 'arkweb://resources/cr_elements/cr_hidden_style.css.js';
++import 'arkweb://resources/polymer/v3_0/paper-styles/color.js';
++
++import {CrInputElement} from 'arkweb://resources/cr_elements/cr_input/cr_input.js';
++import {I18nMixin} from 'arkweb://resources/cr_elements/i18n_mixin.js';
++import {assert} from 'arkweb://resources/js/assert_ts.js';
++import {IronA11yAnnouncer} from 'arkweb://resources/polymer/v3_0/iron-a11y-announcer/iron-a11y-announcer.js';
++import {PolymerElement} from 'arkweb://resources/polymer/v3_0/polymer/polymer_bundled.min.js';
+ 
+ import {KeyboardShortcutDelegate} from './keyboard_shortcut_delegate.js';
+ import {getTemplate} from './shortcut_input.html.js';
+diff --git a/src/chrome/browser/resources/extensions/shortcut_util.ts b/src/chrome/browser/resources/extensions/shortcut_util.ts
+index 5a392fd7eb70c..510a684b11e51
+--- a/src/chrome/browser/resources/extensions/shortcut_util.ts
++++ b/src/chrome/browser/resources/extensions/shortcut_util.ts
+@@ -2,8 +2,8 @@
+ // Use of this source code is governed by a BSD-style license that can be
+ // found in the LICENSE file.
+ 
+-import {assertNotReached} from 'chrome://resources/js/assert_ts.js';
+-import {isChromeOS, isMac} from 'chrome://resources/js/platform.js';
++import {assertNotReached} from 'arkweb://resources/js/assert_ts.js';
++import {isChromeOS, isMac} from 'arkweb://resources/js/platform.js';
+ 
+ 
+ export enum Key {
+diff --git a/src/chrome/browser/resources/extensions/sidebar.html b/src/chrome/browser/resources/extensions/sidebar.html
+index 1fe5404d33afc..b29b8a636e990
+--- a/src/chrome/browser/resources/extensions/sidebar.html
++++ b/src/chrome/browser/resources/extensions/sidebar.html
+@@ -78,7 +78,7 @@
+ </iron-selector>
+ <div>
+   <div class="separator"></div>
+-  <a class="section-item" id="more-extensions" target="_blank"
++  <a class="section-item" id="more-extensions" hidden=true target="_blank"
+       href="$i18n{getMoreExtensionsUrl}" on-click="onMoreExtensionsClick_">
+     <span>$i18n{openChromeWebStore}</span>
+     <div class="cr-icon icon-external"></div>
+diff --git a/src/chrome/browser/resources/extensions/sidebar.ts b/src/chrome/browser/resources/extensions/sidebar.ts
+index 9096e7095326a..304468c6afae7
+--- a/src/chrome/browser/resources/extensions/sidebar.ts
++++ b/src/chrome/browser/resources/extensions/sidebar.ts
+@@ -1,14 +1,14 @@
+ // Copyright 2015 The Chromium Authors
+ // Use of this source code is governed by a BSD-style license that can be
+ // found in the LICENSE file.
+-import 'chrome://resources/cr_elements/cr_icons.css.js';
+-import 'chrome://resources/cr_elements/cr_hidden_style.css.js';
+-import 'chrome://resources/polymer/v3_0/iron-selector/iron-selector.js';
+-import 'chrome://resources/polymer/v3_0/paper-ripple/paper-ripple.js';
+-import 'chrome://resources/polymer/v3_0/paper-styles/color.js';
++import 'arkweb://resources/cr_elements/cr_icons.css.js';
++import 'arkweb://resources/cr_elements/cr_hidden_style.css.js';
++import 'arkweb://resources/polymer/v3_0/iron-selector/iron-selector.js';
++import 'arkweb://resources/polymer/v3_0/paper-ripple/paper-ripple.js';
++import 'arkweb://resources/polymer/v3_0/paper-styles/color.js';
+ 
+-import {IronSelectorElement} from 'chrome://resources/polymer/v3_0/iron-selector/iron-selector.js';
+-import {PolymerElement} from 'chrome://resources/polymer/v3_0/polymer/polymer_bundled.min.js';
++import {IronSelectorElement} from 'arkweb://resources/polymer/v3_0/iron-selector/iron-selector.js';
++import {PolymerElement} from 'arkweb://resources/polymer/v3_0/polymer/polymer_bundled.min.js';
+ 
+ import {navigation, Page} from './navigation_helper.js';
+ import {getTemplate} from './sidebar.html.js';
+diff --git a/src/chrome/browser/resources/extensions/site_permissions.ts b/src/chrome/browser/resources/extensions/site_permissions.ts
+index cd22e5697ed12..d5c37218935fb
+--- a/src/chrome/browser/resources/extensions/site_permissions.ts
++++ b/src/chrome/browser/resources/extensions/site_permissions.ts
+@@ -2,17 +2,17 @@
+ // Use of this source code is governed by a BSD-style license that can be
+ // found in the LICENSE file.
+ 
+-import 'chrome://resources/cr_elements/cr_link_row/cr_link_row.js';
+-import 'chrome://resources/cr_elements/cr_shared_style.css.js';
+-import 'chrome://resources/cr_elements/cr_shared_vars.css.js';
++import 'arkweb://resources/cr_elements/cr_link_row/cr_link_row.js';
++import 'arkweb://resources/cr_elements/cr_shared_style.css.js';
++import 'arkweb://resources/cr_elements/cr_shared_vars.css.js';
+ import './strings.m.js';
+ import './shared_style.css.js';
+ import './shared_vars.css.js';
+ import './site_permissions_list.js';
+ 
+-import {CrLinkRowElement} from 'chrome://resources/cr_elements/cr_link_row/cr_link_row.js';
+-import {loadTimeData} from 'chrome://resources/js/load_time_data.js';
+-import {PolymerElement} from 'chrome://resources/polymer/v3_0/polymer/polymer_bundled.min.js';
++import {CrLinkRowElement} from 'arkweb://resources/cr_elements/cr_link_row/cr_link_row.js';
++import {loadTimeData} from 'arkweb://resources/js/load_time_data.js';
++import {PolymerElement} from 'arkweb://resources/polymer/v3_0/polymer/polymer_bundled.min.js';
+ 
+ import {navigation, Page} from './navigation_helper.js';
+ import {getTemplate} from './site_permissions.html.js';
+diff --git a/src/chrome/browser/resources/extensions/site_permissions_by_site.ts b/src/chrome/browser/resources/extensions/site_permissions_by_site.ts
+index 4d96a668daace..432ce3bb6c5cc
+--- a/src/chrome/browser/resources/extensions/site_permissions_by_site.ts
++++ b/src/chrome/browser/resources/extensions/site_permissions_by_site.ts
+@@ -2,14 +2,14 @@
+ // Use of this source code is governed by a BSD-style license that can be
+ // found in the LICENSE file.
+ 
+-import 'chrome://resources/cr_elements/cr_icon_button/cr_icon_button.js';
+-import 'chrome://resources/cr_elements/cr_shared_style.css.js';
++import 'arkweb://resources/cr_elements/cr_icon_button/cr_icon_button.js';
++import 'arkweb://resources/cr_elements/cr_shared_style.css.js';
+ import './shared_style.css.js';
+ import './shared_vars.css.js';
+ import './site_permissions_site_group.js';
+ 
+-import {CrIconButtonElement} from 'chrome://resources/cr_elements/cr_icon_button/cr_icon_button.js';
+-import {PolymerElement} from 'chrome://resources/polymer/v3_0/polymer/polymer_bundled.min.js';
++import {CrIconButtonElement} from 'arkweb://resources/cr_elements/cr_icon_button/cr_icon_button.js';
++import {PolymerElement} from 'arkweb://resources/polymer/v3_0/polymer/polymer_bundled.min.js';
+ 
+ import {ItemDelegate} from './item.js';
+ import {navigation, Page} from './navigation_helper.js';
+diff --git a/src/chrome/browser/resources/extensions/site_permissions_edit_permissions_dialog.ts b/src/chrome/browser/resources/extensions/site_permissions_edit_permissions_dialog.ts
+index 8d825677d9508..1701cae4a15a8
+--- a/src/chrome/browser/resources/extensions/site_permissions_edit_permissions_dialog.ts
++++ b/src/chrome/browser/resources/extensions/site_permissions_edit_permissions_dialog.ts
+@@ -2,20 +2,20 @@
+ // Use of this source code is governed by a BSD-style license that can be
+ // found in the LICENSE file.
+ 
+-import 'chrome://resources/cr_elements/cr_button/cr_button.js';
+-import 'chrome://resources/cr_elements/cr_dialog/cr_dialog.js';
+-import 'chrome://resources/cr_elements/cr_radio_button/cr_radio_button.js';
+-import 'chrome://resources/cr_elements/cr_radio_group/cr_radio_group.js';
+-import 'chrome://resources/cr_elements/cr_shared_style.css.js';
+-import 'chrome://resources/cr_elements/md_select.css.js';
++import 'arkweb://resources/cr_elements/cr_button/cr_button.js';
++import 'arkweb://resources/cr_elements/cr_dialog/cr_dialog.js';
++import 'arkweb://resources/cr_elements/cr_radio_button/cr_radio_button.js';
++import 'arkweb://resources/cr_elements/cr_radio_group/cr_radio_group.js';
++import 'arkweb://resources/cr_elements/cr_shared_style.css.js';
++import 'arkweb://resources/cr_elements/md_select.css.js';
+ import './strings.m.js';
+ 
+-import {CrButtonElement} from 'chrome://resources/cr_elements/cr_button/cr_button.js';
+-import {CrDialogElement} from 'chrome://resources/cr_elements/cr_dialog/cr_dialog.js';
+-import {I18nMixin} from 'chrome://resources/cr_elements/i18n_mixin.js';
+-import {assert} from 'chrome://resources/js/assert_ts.js';
+-import {loadTimeData} from 'chrome://resources/js/load_time_data.js';
+-import {DomRepeatEvent, PolymerElement} from 'chrome://resources/polymer/v3_0/polymer/polymer_bundled.min.js';
++import {CrButtonElement} from 'arkweb://resources/cr_elements/cr_button/cr_button.js';
++import {CrDialogElement} from 'arkweb://resources/cr_elements/cr_dialog/cr_dialog.js';
++import {I18nMixin} from 'arkweb://resources/cr_elements/i18n_mixin.js';
++import {assert} from 'arkweb://resources/js/assert_ts.js';
++import {loadTimeData} from 'arkweb://resources/js/load_time_data.js';
++import {DomRepeatEvent, PolymerElement} from 'arkweb://resources/polymer/v3_0/polymer/polymer_bundled.min.js';
+ 
+ import {getTemplate} from './site_permissions_edit_permissions_dialog.html.js';
+ import {SiteSettingsDelegate} from './site_settings_mixin.js';
+diff --git a/src/chrome/browser/resources/extensions/site_permissions_edit_url_dialog.ts b/src/chrome/browser/resources/extensions/site_permissions_edit_url_dialog.ts
+index e02992fbd7e83..092ad47e81f2a
+--- a/src/chrome/browser/resources/extensions/site_permissions_edit_url_dialog.ts
++++ b/src/chrome/browser/resources/extensions/site_permissions_edit_url_dialog.ts
+@@ -2,17 +2,17 @@
+ // Use of this source code is governed by a BSD-style license that can be
+ // found in the LICENSE file.
+ 
+-import 'chrome://resources/cr_elements/cr_button/cr_button.js';
+-import 'chrome://resources/cr_elements/cr_dialog/cr_dialog.js';
+-import 'chrome://resources/cr_elements/cr_input/cr_input.js';
+-import 'chrome://resources/cr_elements/cr_shared_style.css.js';
++import 'arkweb://resources/cr_elements/cr_button/cr_button.js';
++import 'arkweb://resources/cr_elements/cr_dialog/cr_dialog.js';
++import 'arkweb://resources/cr_elements/cr_input/cr_input.js';
++import 'arkweb://resources/cr_elements/cr_shared_style.css.js';
+ import './strings.m.js';
+ 
+-import {CrButtonElement} from 'chrome://resources/cr_elements/cr_button/cr_button.js';
+-import {CrDialogElement} from 'chrome://resources/cr_elements/cr_dialog/cr_dialog.js';
+-import {assert} from 'chrome://resources/js/assert_ts.js';
+-import {loadTimeData} from 'chrome://resources/js/load_time_data.js';
+-import {PolymerElement} from 'chrome://resources/polymer/v3_0/polymer/polymer_bundled.min.js';
++import {CrButtonElement} from 'arkweb://resources/cr_elements/cr_button/cr_button.js';
++import {CrDialogElement} from 'arkweb://resources/cr_elements/cr_dialog/cr_dialog.js';
++import {assert} from 'arkweb://resources/js/assert_ts.js';
++import {loadTimeData} from 'arkweb://resources/js/load_time_data.js';
++import {PolymerElement} from 'arkweb://resources/polymer/v3_0/polymer/polymer_bundled.min.js';
+ 
+ import {getTemplate} from './site_permissions_edit_url_dialog.html.js';
+ import {SiteSettingsDelegate} from './site_settings_mixin.js';
+diff --git a/src/chrome/browser/resources/extensions/site_permissions_list.ts b/src/chrome/browser/resources/extensions/site_permissions_list.ts
+index c44c961242291..7bcafa036e14d
+--- a/src/chrome/browser/resources/extensions/site_permissions_list.ts
++++ b/src/chrome/browser/resources/extensions/site_permissions_list.ts
+@@ -2,22 +2,22 @@
+ // Use of this source code is governed by a BSD-style license that can be
+ // found in the LICENSE file.
+ 
+-import 'chrome://resources/cr_elements/cr_action_menu/cr_action_menu.js';
+-import 'chrome://resources/cr_elements/cr_button/cr_button.js';
+-import 'chrome://resources/cr_elements/cr_icon_button/cr_icon_button.js';
+-import 'chrome://resources/cr_elements/cr_shared_style.css.js';
+-import 'chrome://resources/cr_elements/cr_shared_vars.css.js';
++import 'arkweb://resources/cr_elements/cr_action_menu/cr_action_menu.js';
++import 'arkweb://resources/cr_elements/cr_button/cr_button.js';
++import 'arkweb://resources/cr_elements/cr_icon_button/cr_icon_button.js';
++import 'arkweb://resources/cr_elements/cr_shared_style.css.js';
++import 'arkweb://resources/cr_elements/cr_shared_vars.css.js';
+ import './strings.m.js';
+ import './shared_style.css.js';
+ import './shared_vars.css.js';
+ import './site_permissions_edit_permissions_dialog.js';
+ import './site_permissions_edit_url_dialog.js';
+ 
+-import {CrActionMenuElement} from 'chrome://resources/cr_elements/cr_action_menu/cr_action_menu.js';
+-import {CrButtonElement} from 'chrome://resources/cr_elements/cr_button/cr_button.js';
+-import {assert} from 'chrome://resources/js/assert_ts.js';
+-import {focusWithoutInk} from 'chrome://resources/js/focus_without_ink.js';
+-import {DomRepeatEvent, PolymerElement} from 'chrome://resources/polymer/v3_0/polymer/polymer_bundled.min.js';
++import {CrActionMenuElement} from 'arkweb://resources/cr_elements/cr_action_menu/cr_action_menu.js';
++import {CrButtonElement} from 'arkweb://resources/cr_elements/cr_button/cr_button.js';
++import {assert} from 'arkweb://resources/js/assert_ts.js';
++import {focusWithoutInk} from 'arkweb://resources/js/focus_without_ink.js';
++import {DomRepeatEvent, PolymerElement} from 'arkweb://resources/polymer/v3_0/polymer/polymer_bundled.min.js';
+ 
+ import {getTemplate} from './site_permissions_list.html.js';
+ import {SiteSettingsDelegate} from './site_settings_mixin.js';
+diff --git a/src/chrome/browser/resources/extensions/site_permissions_site_group.ts b/src/chrome/browser/resources/extensions/site_permissions_site_group.ts
+index 85e34b1478ff3..e16ffe64f8602
+--- a/src/chrome/browser/resources/extensions/site_permissions_site_group.ts
++++ b/src/chrome/browser/resources/extensions/site_permissions_site_group.ts
+@@ -2,18 +2,18 @@
+ // Use of this source code is governed by a BSD-style license that can be
+ // found in the LICENSE file.
+ 
+-import 'chrome://resources/cr_elements/cr_expand_button/cr_expand_button.js';
+-import 'chrome://resources/cr_elements/cr_icon_button/cr_icon_button.js';
+-import 'chrome://resources/cr_elements/cr_shared_style.css.js';
+-import 'chrome://resources/cr_elements/cr_shared_vars.css.js';
++import 'arkweb://resources/cr_elements/cr_expand_button/cr_expand_button.js';
++import 'arkweb://resources/cr_elements/cr_icon_button/cr_icon_button.js';
++import 'arkweb://resources/cr_elements/cr_shared_style.css.js';
++import 'arkweb://resources/cr_elements/cr_shared_vars.css.js';
+ import './strings.m.js';
+ import './shared_style.css.js';
+ import './shared_vars.css.js';
+ import './site_permissions_edit_permissions_dialog.js';
+ 
+-import {assert} from 'chrome://resources/js/assert_ts.js';
+-import {loadTimeData} from 'chrome://resources/js/load_time_data.js';
+-import {DomRepeatEvent, PolymerElement} from 'chrome://resources/polymer/v3_0/polymer/polymer_bundled.min.js';
++import {assert} from 'arkweb://resources/js/assert_ts.js';
++import {loadTimeData} from 'arkweb://resources/js/load_time_data.js';
++import {DomRepeatEvent, PolymerElement} from 'arkweb://resources/polymer/v3_0/polymer/polymer_bundled.min.js';
+ 
+ import {getTemplate} from './site_permissions_site_group.html.js';
+ import {SiteSettingsDelegate} from './site_settings_mixin.js';
+diff --git a/src/chrome/browser/resources/extensions/site_settings_mixin.ts b/src/chrome/browser/resources/extensions/site_settings_mixin.ts
+index 8f1a08bd8dc17..b659a1231fc6c
+--- a/src/chrome/browser/resources/extensions/site_settings_mixin.ts
++++ b/src/chrome/browser/resources/extensions/site_settings_mixin.ts
+@@ -9,7 +9,7 @@
+  */
+ 
+ import {ChromeEvent} from '/tools/typescript/definitions/chrome_event.js';
+-import {dedupingMixin, PolymerElement} from 'chrome://resources/polymer/v3_0/polymer/polymer_bundled.min.js';
++import {dedupingMixin, PolymerElement} from 'arkweb://resources/polymer/v3_0/polymer/polymer_bundled.min.js';
+ 
+ import {ItemDelegate} from './item.js';
+ 
+diff --git a/src/chrome/browser/resources/extensions/toggle_row.ts b/src/chrome/browser/resources/extensions/toggle_row.ts
+index 5276e6bc387d1..33bc06b04b5b1
+--- a/src/chrome/browser/resources/extensions/toggle_row.ts
++++ b/src/chrome/browser/resources/extensions/toggle_row.ts
+@@ -2,11 +2,11 @@
+ // Use of this source code is governed by a BSD-style license that can be
+ // found in the LICENSE file.
+ 
+-import 'chrome://resources/cr_elements/cr_toggle/cr_toggle.js';
+-import 'chrome://resources/cr_elements/cr_shared_style.css.js';
++import 'arkweb://resources/cr_elements/cr_toggle/cr_toggle.js';
++import 'arkweb://resources/cr_elements/cr_shared_style.css.js';
+ 
+-import {CrToggleElement} from 'chrome://resources/cr_elements/cr_toggle/cr_toggle.js';
+-import {PolymerElement} from 'chrome://resources/polymer/v3_0/polymer/polymer_bundled.min.js';
++import {CrToggleElement} from 'arkweb://resources/cr_elements/cr_toggle/cr_toggle.js';
++import {PolymerElement} from 'arkweb://resources/polymer/v3_0/polymer/polymer_bundled.min.js';
+ 
+ import {getTemplate} from './toggle_row.html.js';
+ 
+diff --git a/src/chrome/browser/resources/extensions/toolbar.html b/src/chrome/browser/resources/extensions/toolbar.html
+index f633b878d95c3..2a432564d90ad
+--- a/src/chrome/browser/resources/extensions/toolbar.html
++++ b/src/chrome/browser/resources/extensions/toolbar.html
+@@ -98,10 +98,10 @@
+         on-click="onLoadUnpackedClick_">
+       $i18n{toolbarLoadUnpacked}
+     </cr-button>
+-    <cr-button id="packExtensions" on-click="onPackClick_">
++    <cr-button id="packExtensions" hidden=true on-click="onPackClick_">
+       $i18n{toolbarPack}
+     </cr-button>
+-    <cr-button id="updateNow" on-click="onUpdateNowClick_"
++    <cr-button id="updateNow" hidden=true on-click="onUpdateNowClick_"
+         title="$i18n{toolbarUpdateNowTooltip}">
+       $i18n{toolbarUpdateNow}
+     </cr-button>
+diff --git a/src/chrome/browser/resources/extensions/toolbar.ts b/src/chrome/browser/resources/extensions/toolbar.ts
+index d0c94f52e5995..27e446e866a9a
+--- a/src/chrome/browser/resources/extensions/toolbar.ts
++++ b/src/chrome/browser/resources/extensions/toolbar.ts
+@@ -2,20 +2,20 @@
+ // Use of this source code is governed by a BSD-style license that can be
+ // found in the LICENSE file.
+ 
+-import 'chrome://resources/cr_elements/cr_button/cr_button.js';
+-import 'chrome://resources/cr_elements/cr_toggle/cr_toggle.js';
+-import 'chrome://resources/cr_elements/cr_toolbar/cr_toolbar.js';
+-import 'chrome://resources/cr_elements/cr_hidden_style.css.js';
+-import 'chrome://resources/cr_elements/policy/cr_tooltip_icon.js';
+-import 'chrome://resources/cr_elements/cr_shared_vars.css.js';
+-import 'chrome://resources/polymer/v3_0/paper-styles/color.js';
++import 'arkweb://resources/cr_elements/cr_button/cr_button.js';
++import 'arkweb://resources/cr_elements/cr_toggle/cr_toggle.js';
++import 'arkweb://resources/cr_elements/cr_toolbar/cr_toolbar.js';
++import 'arkweb://resources/cr_elements/cr_hidden_style.css.js';
++import 'arkweb://resources/cr_elements/policy/cr_tooltip_icon.js';
++import 'arkweb://resources/cr_elements/cr_shared_vars.css.js';
++import 'arkweb://resources/polymer/v3_0/paper-styles/color.js';
+ import './pack_dialog.js';
+ 
+-import {getToastManager} from 'chrome://resources/cr_elements/cr_toast/cr_toast_manager.js';
+-import {CrToggleElement} from 'chrome://resources/cr_elements/cr_toggle/cr_toggle.js';
+-import {I18nMixin} from 'chrome://resources/cr_elements/i18n_mixin.js';
+-import {listenOnce} from 'chrome://resources/js/util_ts.js';
+-import {PolymerElement} from 'chrome://resources/polymer/v3_0/polymer/polymer_bundled.min.js';
++import {getToastManager} from 'arkweb://resources/cr_elements/cr_toast/cr_toast_manager.js';
++import {CrToggleElement} from 'arkweb://resources/cr_elements/cr_toggle/cr_toggle.js';
++import {I18nMixin} from 'arkweb://resources/cr_elements/i18n_mixin.js';
++import {listenOnce} from 'arkweb://resources/js/util_ts.js';
++import {PolymerElement} from 'arkweb://resources/polymer/v3_0/polymer/polymer_bundled.min.js';
+ 
+ import {getTemplate} from './toolbar.html.js';
+ 
+diff --git a/src/chrome/browser/resources/extensions/url_util.ts b/src/chrome/browser/resources/extensions/url_util.ts
+index 4b8cdcb1de25f..9de2a1e63e04c
+--- a/src/chrome/browser/resources/extensions/url_util.ts
++++ b/src/chrome/browser/resources/extensions/url_util.ts
+@@ -2,7 +2,7 @@
+ // Use of this source code is governed by a BSD-style license that can be
+ // found in the LICENSE file.
+ 
+-import {getFaviconForPageURL} from 'chrome://resources/js/icon.js';
++import {getFaviconForPageURL} from 'arkweb://resources/js/icon.js';
+ 
+ export const SUBDOMAIN_SPECIFIER = '*.';
+ 
+diff --git a/src/chrome/browser/ui/webui/extensions/extensions_ui.cc b/src/chrome/browser/ui/webui/extensions/extensions_ui.cc
+index df0c1982de2e0..c418e21e5232b
+--- a/src/chrome/browser/ui/webui/extensions/extensions_ui.cc
++++ b/src/chrome/browser/ui/webui/extensions/extensions_ui.cc
+@@ -440,6 +440,19 @@ ExtensionsUI::ExtensionsUI(content::WebUI* web_ui)
+   source->OverrideContentSecurityPolicy(
+       network::mojom::CSPDirectiveName::ObjectSrc, "object-src 'self';");
+ 
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++  // TODO: If chrome:// -> arkweb:// replaced completely, remove it
++  source->OverrideContentSecurityPolicy(
++      network::mojom::CSPDirectiveName::DefaultSrc,
++      "default-src 'self' 'unsafe-inline' arkweb://resources "
++      "arkweb://extensions  chrome://resources chrome://extensions "
++      "chrome://theme data:;");
++
++  source->OverrideContentSecurityPolicy(
++      network::mojom::CSPDirectiveName::ScriptSrc,
++      "script-src 'self' 'unsafe-inline'  arkweb://resources "
++      "arkweb://extensions  chrome://resources chrome://extensions;");
++#endif
+   content::URLDataSource::Add(
+       profile, std::make_unique<FaviconSource>(
+                    profile, chrome::FaviconUrlFormat::kFavicon2));
+diff --git a/src/chrome/common/extensions/api/_api_features.json b/src/chrome/common/extensions/api/_api_features.json
+index e526c6b35c7f1..a29cb4c015c21
+--- a/src/chrome/common/extensions/api/_api_features.json
++++ b/src/chrome/common/extensions/api/_api_features.json
+@@ -82,7 +82,9 @@
+     "channel": "stable",
+     "contexts": ["webui"],
+     "matches": [
+-      "chrome://extensions/*"
++      "chrome://extensions/*",
++       // OHOS_ARKWEB_EXTENSIONS
++      "arkweb://extensions/*"
+     ]
+   }],
+   "app": {
+@@ -326,7 +328,11 @@
+   }, {
+     "channel": "stable",
+     "contexts": ["webui"],
+-    "matches": ["chrome://extensions/*"]
++    "matches": [
++      "chrome://extensions/*",
++      // OHOS_ARKWEB_EXTENSIONS
++      "arkweb://extensions/*"
++     ]
+   }],
+   // All devtools APIs are implemented by hand, so don't compile them.
+   "devtools.inspectedWindow": {
+@@ -478,7 +484,10 @@
+     "internal": true,
+     "channel": "stable",
+     "contexts": ["webui"],
+-    "matches": ["chrome://extensions/*"]
++    "matches": ["chrome://extensions/*", 
++     //OHOS_ARKWEB_EXTENSIONS
++     "arkweb://extensions/*"
++    ]
+   },
+   // This is not a real API, only here for documentation purposes.
+   // See http://crbug.com/275944 for background.
+diff --git a/src/components/download/internal/common/download_utils.cc b/src/components/download/internal/common/download_utils.cc
+index 6a687981de960..d9ca545635c15
+--- a/src/components/download/internal/common/download_utils.cc
++++ b/src/components/download/internal/common/download_utils.cc
+@@ -624,6 +624,9 @@ ResumeMode GetDownloadResumeMode(const GURL& url,
+ 
+     case DOWNLOAD_INTERRUPT_REASON_NETWORK_FAILED:
+ #if defined(OHOS_EX_DOWNLOAD)
++      if (restart_required) {
++        user_action_required = true;
++      }
+       // Auto resume if network failed.
+       break;
+ #endif
+diff --git a/src/components/no_state_prefetch/browser/no_state_prefetch_manager.cc b/src/components/no_state_prefetch/browser/no_state_prefetch_manager.cc
+index 2bbd27f85f60a..feed6121db5b5
+--- a/src/components/no_state_prefetch/browser/no_state_prefetch_manager.cc
++++ b/src/components/no_state_prefetch/browser/no_state_prefetch_manager.cc
+@@ -19,6 +19,7 @@
+ #include "base/functional/bind.h"
+ #include "base/functional/callback_helpers.h"
+ #include "base/location.h"
++#include "base/logging.h"
+ #include "base/memory/ptr_util.h"
+ #include "base/memory/raw_ptr.h"
+ #include "base/metrics/field_trial.h"
+@@ -275,6 +276,11 @@ NoStatePrefetchManager::StartOhPrefetchingFromOmnibox(
+     const gfx::Size& size,
+     PreloadingAttempt* attempt,
+     const std::string& extra_headers) {
++#if BUILDFLAG(IS_OHOS)
++  if (!url.is_empty() && url.is_valid()) {
++    oh_prefetch_urls.insert(url);
++  }
++#endif
+   return StartPrefetchingWithPreconnectFallback(
+       ORIGIN_OMNIBOX, url, content::Referrer(), absl::nullopt, gfx::Rect(size),
+       session_storage_namespace, attempt ? attempt->GetWeakPtr() : nullptr,
+@@ -716,6 +722,20 @@ NoStatePrefetchManager::StartPrefetchingWithPreconnectFallback(
+   if (content::RenderProcessHost::ShouldTryToUseExistingProcessHost(
+           browser_context_, url) &&
+       !content::RenderProcessHost::run_renderer_in_process()) {
++#if BUILDFLAG(IS_OHOS)
++    auto it = oh_prefetch_urls.find(url);
++    if (it == oh_prefetch_urls.end()) {
++      SkipNoStatePrefetchContentsAndMaybePreconnect(
++          url, origin, FINAL_STATUS_TOO_MANY_PROCESSES);
++      if (attempt) {
++        attempt->SetFailureReason(
++            ToPreloadingFailureReason(FINAL_STATUS_TOO_MANY_PROCESSES));
++      }
++      return nullptr;
++    }
++    LOG(DEBUG) << "Prefetch url in single-process mode.";
++    oh_prefetch_urls.erase(it);
++#else
+     SkipNoStatePrefetchContentsAndMaybePreconnect(
+         url, origin, FINAL_STATUS_TOO_MANY_PROCESSES);
+     // Since it is possible that the NSP enabled group uses more processes, we
+@@ -727,6 +747,7 @@ NoStatePrefetchManager::StartPrefetchingWithPreconnectFallback(
+           ToPreloadingFailureReason(FINAL_STATUS_TOO_MANY_PROCESSES));
+     }
+     return nullptr;
++#endif
+   }
+ 
+   // Record the URL in the prefetch list, even when in full prerender mode, to
+diff --git a/src/components/no_state_prefetch/browser/no_state_prefetch_manager.h b/src/components/no_state_prefetch/browser/no_state_prefetch_manager.h
+index 502bf0ff89b49..1643460f1503f
+--- a/src/components/no_state_prefetch/browser/no_state_prefetch_manager.h
++++ b/src/components/no_state_prefetch/browser/no_state_prefetch_manager.h
+@@ -543,6 +543,9 @@ class NoStatePrefetchManager : public content::RenderProcessHostObserver,
+   std::vector<std::unique_ptr<NoStatePrefetchManagerObserver>> observers_;
+ 
+   base::WeakPtrFactory<NoStatePrefetchManager> weak_factory_{this};
++#if BUILDFLAG(IS_OHOS)
++  std::set<GURL> oh_prefetch_urls;
++#endif
+ };
+ 
+ }  // namespace prerender
+diff --git a/src/components/os_crypt/sync/os_crypt_linux.cc b/src/components/os_crypt/sync/os_crypt_linux.cc
+index 9a2cfd056f7f6..7f1b09e30dfc2
+--- a/src/components/os_crypt/sync/os_crypt_linux.cc
++++ b/src/components/os_crypt/sync/os_crypt_linux.cc
+@@ -387,6 +387,11 @@ crypto::SymmetricKey* OSCryptImpl::GetPasswordV10() {
+ crypto::SymmetricKey* OSCryptImpl::GetPasswordV11() {
+   base::AutoLock auto_lock(OSCryptImpl::GetLock());
+   if (!is_password_v11_cached_) {
++#if defined(OHOS_COOKIE)
++    if (!config_) {
++      return nullptr;
++    }
++#endif // defined(OHOS_COOKIE)
+     std::unique_ptr<KeyStorageLinux> key_storage =
+         std::move(storage_provider_factory_).Run();
+     if (key_storage) {
+diff --git a/src/components/performance_manager/graph/frame_node_impl.cc b/src/components/performance_manager/graph/frame_node_impl.cc
+index 15edb069b9244..ad259605dd94a
+--- a/src/components/performance_manager/graph/frame_node_impl.cc
++++ b/src/components/performance_manager/graph/frame_node_impl.cc
+@@ -100,10 +100,17 @@ void FrameNodeImpl::SetHadUserEdits() {
+ 
+ #if BUILDFLAG(IS_OHOS)
+ void FrameNodeImpl::OnFormEditingStateChanged(uint64_t form_id, bool did_submit) {
+-  content::GlobalRenderFrameHostId global_frame_routing_id = render_frame_host_proxy().global_frame_routing_id();
+-  content::WebContents* web_contents = content::WebContentsImpl::FromRenderFrameHostID(global_frame_routing_id);
+-  if (web_contents) {
+-    web_contents->OnFormEditingStateChanged(form_id, did_submit);
++  if (!content::BrowserThread::CurrentlyOn(content::BrowserThread::UI)) {
++    content::GetUIThreadTaskRunner({})->PostTask(
++        FROM_HERE, base::BindOnce(&FrameNodeImpl::OnFormEditingStateChanged,
++                                  weak_this_, form_id, did_submit));
++  } else {
++    LOG(INFO) << "FrameNodeImpl::OnFormEditingStateChanged id: " << form_id << "did submit: " << did_submit;
++    content::GlobalRenderFrameHostId global_frame_routing_id = render_frame_host_proxy().global_frame_routing_id();
++    content::WebContents* web_contents = content::WebContentsImpl::FromRenderFrameHostID(global_frame_routing_id);
++    if (web_contents) {
++      web_contents->OnFormEditingStateChanged(form_id, did_submit);
++    }
+   }
+ }
+ #endif
+diff --git a/src/components/policy/core/common/policy_loader_ohos.cc b/src/components/policy/core/common/policy_loader_ohos.cc
+index 276b466ead5cb..e2b3fb32546ad
+--- a/src/components/policy/core/common/policy_loader_ohos.cc
++++ b/src/components/policy/core/common/policy_loader_ohos.cc
+@@ -20,10 +20,20 @@ PolicyLoaderOhos::PolicyLoaderOhos(
+     scoped_refptr<base::SequencedTaskRunner> task_runner)
+     : AsyncPolicyLoader(task_runner, /*periodic_updates*/ false) {}
+ 
+-PolicyLoaderOhos::~PolicyLoaderOhos() {}
++PolicyLoaderOhos::~PolicyLoaderOhos() {
++    std::ignore = OHOS::NWeb::OhosAdapterHelper::GetInstance()
++        .GetEnterpriseDeviceManagementInstance().StopObservePolicyChange();
++}
+ 
+ void PolicyLoaderOhos::InitOnBackgroundThread() {
+-  // 目前未对鸿蒙policy进行后台扫描监控，暂时为空实现
++    OHOS::NWeb::OhosAdapterHelper::GetInstance()
++        .GetEnterpriseDeviceManagementInstance()
++        .RegistPolicyChangeEventCallback([this]() {
++            LOG(INFO) << "Recv edm policy change event and reload policy.";
++            Reload(true);
++        });
++    std::ignore = OHOS::NWeb::OhosAdapterHelper::GetInstance()
++        .GetEnterpriseDeviceManagementInstance().StartObservePolicyChange();
+ }
+ 
+ PolicyBundle PolicyLoaderOhos::Load() {
+diff --git a/src/components/printing/common/print.mojom b/src/components/printing/common/print.mojom
+index d697b4d4768b3..cd9bd74a75438
+--- a/src/components/printing/common/print.mojom
++++ b/src/components/printing/common/print.mojom
+@@ -354,6 +354,12 @@ interface PrintRenderFrame {
+   [EnableIf=enable_print_content_analysis]
+   SnapshotForContentAnalysis()
+       => (DidPrintDocumentParams? params);
++
++  [EnableIf=is_ohos]
++  DidDispatchPrintEvent(bool isBefore);
++ 
++  [EnableIf=is_ohos]
++  ApplicationPrintRequestedPages();
+ };
+ 
+ // Browser process interface exposed to the renderer to handle the general
+diff --git a/src/components/printing/renderer/print_render_frame_helper.cc b/src/components/printing/renderer/print_render_frame_helper.cc
+index e16e16fdc3129..8ee1db7f91e30
+--- a/src/components/printing/renderer/print_render_frame_helper.cc
++++ b/src/components/printing/renderer/print_render_frame_helper.cc
+@@ -1753,6 +1753,36 @@ void PrintRenderFrameHelper::SnapshotForContentAnalysis(
+ }
+ #endif  // BUILDFLAG(ENABLE_PRINT_CONTENT_ANALYSIS)
+ 
++#if defined(OHOS_PRINT)
++void PrintRenderFrameHelper::DidDispatchPrintEvent(bool isBefore) {
++  blink::WebLocalFrame* web_frame = render_frame()->GetWebFrame();
++  if (!web_frame) {
++    return;
++  }
++  if (isBefore) {
++    web_frame->DispatchBeforePrintEvent(/*print_client=*/nullptr);
++  } else {
++    web_frame->DispatchAfterPrintEvent();
++  }
++}
++ 
++void PrintRenderFrameHelper::ApplicationPrintRequestedPages() {
++  ScopedIPC scoped_ipc(weak_ptr_factory_.GetWeakPtr());
++  if (ipc_nesting_level_ > kAllowedIpcDepthForPrint)
++    return;
++  blink::WebLocalFrame* frame = render_frame()->GetWebFrame();
++  // Don't print if the RenderFrame is gone.
++  if (render_frame_gone_)
++    return;
++ 
++  // If we are printing a frame with an internal PDF plugin element, find the
++  // plugin node and print that instead.
++  auto plugin = delegate_->GetPdfElement(frame);
++ 
++  Print(frame, plugin, PrintRequestType::kRegular);
++}
++#endif  // OHOS_PRINT
++
+ void PrintRenderFrameHelper::GetPageSizeAndContentAreaFromPageLayout(
+     const mojom::PageSizeMargins& page_layout_in_points,
+     gfx::Size* page_size,
+diff --git a/src/components/printing/renderer/print_render_frame_helper.h b/src/components/printing/renderer/print_render_frame_helper.h
+index bf47e08227754..2c52af877ae33
+--- a/src/components/printing/renderer/print_render_frame_helper.h
++++ b/src/components/printing/renderer/print_render_frame_helper.h
+@@ -283,7 +283,10 @@ class PrintRenderFrameHelper
+   void SnapshotForContentAnalysis(
+       SnapshotForContentAnalysisCallback callback) override;
+ #endif  // BUILDFLAG(ENABLE_PRINT_CONTENT_ANALYSIS)
+-
++#if defined(OHOS_PRINT)
++  void DidDispatchPrintEvent(bool isBefore) override;
++  void ApplicationPrintRequestedPages() override;
++#endif  // OHOS_PRINT
+   // Get |page_size| and |content_area| information from
+   // |page_layout_in_points|.
+   void GetPageSizeAndContentAreaFromPageLayout(
+diff --git a/src/components/viz/service/display/display.cc b/src/components/viz/service/display/display.cc
+index 7356221f2f204..10f42299e9f46
+--- a/src/components/viz/service/display/display.cc
++++ b/src/components/viz/service/display/display.cc
+@@ -72,6 +72,7 @@
+ namespace viz {
+ 
+ namespace {
++const int MAX_SURFACE_SIZE = 8000;
+ 
+ const DrawQuad::Material kNonSplittableMaterials[] = {
+     // Exclude debug quads from quad splitting
+@@ -446,6 +447,14 @@ void Display::SetVisible(bool visible) {
+ void Display::Resize(const gfx::Size& size) {
+   disable_swap_until_resize_ = false;
+ 
++  gfx::Size newSize = size;
++  if (newSize.width() > MAX_SURFACE_SIZE) {
++    newSize.set_width(MAX_SURFACE_SIZE);
++  }
++  if (newSize.height() > MAX_SURFACE_SIZE) {
++    newSize.set_height(MAX_SURFACE_SIZE);
++  }
++  LOG(INFO) << "Display::Resize newSize = " << newSize.ToString();
+   if (size == current_surface_size_)
+     return;
+ 
+@@ -456,7 +465,7 @@ void Display::Resize(const gfx::Size& size) {
+   TRACE_EVENT0("viz", "Display::Resize");
+ 
+   swapped_since_resize_ = false;
+-  current_surface_size_ = size;
++  current_surface_size_ = newSize;
+ 
+   damage_tracker_->DisplayResized();
+ }
+@@ -496,6 +505,25 @@ void Display::DisableSwapUntilResize(
+ void Display::SetShouldFrameSubmissionBeforeDraw(bool should) {
+   scheduler_->SetShouldFrameSubmissionBeforeDraw(should);
+ }
++
++void Display::SetDrawRect(const gfx::Rect& new_rect)
++{
++  if ((draw_rect_ == new_rect) || (draw_mode_ == 0)) {
++    LOG(ERROR) << "draw_mode =" << draw_mode_;
++    return;
++  }
++  TRACE_EVENT1("viz", "Display::SetDrawRect", "new_rect", new_rect.ToString());
++  draw_rect_ = new_rect;
++  current_surface_size_ = draw_rect_.size();
++  scheduler_->SetNeedsOneBeginFrame(true);
++  LOG(INFO) << "SetDrawRect new_rect=" << new_rect.ToString();
++}
++
++void Display::SetDrawMode(const int32_t mode)
++{
++  LOG(INFO) << "SetDrawMode mode=" << mode;
++  draw_mode_ = mode;
++}
+ #endif  // defined(OHOS_COMPOSITE_RENDER)
+ 
+ void Display::SetColorMatrix(const SkM44& matrix) {
+@@ -839,6 +867,23 @@ bool Display::DrawAndSwap(const DrawAndSwapParams& params) {
+       cc::MathUtil::MapEnclosedRectWith2dAxisAlignedTransform(
+           display_transform, gfx::Rect(current_surface_size_))
+           .size();
++#if BUILDFLAG(IS_OHOS)
++  if (draw_mode_ || (settings_.auto_resize_output_surface &&
++      last_render_pass.output_rect.size() != current_surface_size &&
++      last_render_pass.damage_rect == last_render_pass.output_rect &&
++      !current_surface_size.IsEmpty())) {
++      LOG(INFO) << "resize_output_surface = " << current_surface_size.ToString();
++      LOG(INFO) << "output_rect = " <<  last_render_pass.output_rect.ToString();
++    // Resize the |output_rect| to the |current_surface_size| so that we won't
++    // skip the draw and so that the GL swap won't stretch the output.
++    last_render_pass.output_rect.set_size(current_surface_size);
++    last_render_pass.output_rect.set_y(draw_rect_.y());
++    last_render_pass.output_rect.set_x(draw_rect_.x());
++    last_render_pass.damage_rect = last_render_pass.output_rect;
++    frame.surface_damage_rect_list_.push_back(last_render_pass.damage_rect);
++    LOG(INFO) << "output_rect modify = " <<  last_render_pass.output_rect.ToString();
++  }
++#else
+   if (settings_.auto_resize_output_surface &&
+       last_render_pass.output_rect.size() != current_surface_size &&
+       last_render_pass.damage_rect == last_render_pass.output_rect &&
+@@ -849,6 +894,7 @@ bool Display::DrawAndSwap(const DrawAndSwapParams& params) {
+     last_render_pass.damage_rect = last_render_pass.output_rect;
+     frame.surface_damage_rect_list_.push_back(last_render_pass.damage_rect);
+   }
++#endif
+   surface_size = last_render_pass.output_rect.size();
+   have_damage = !last_render_pass.damage_rect.size().IsEmpty();
+ 
+diff --git a/src/components/viz/service/display/display.h b/src/components/viz/service/display/display.h
+index 25974a8cc84b1..4904c59d6f392
+--- a/src/components/viz/service/display/display.h
++++ b/src/components/viz/service/display/display.h
+@@ -142,6 +142,8 @@ class VIZ_SERVICE_EXPORT Display : public DisplaySchedulerClient,
+ 
+ #if defined(OHOS_COMPOSITE_RENDER)
+   void SetShouldFrameSubmissionBeforeDraw(bool should);
++  void SetDrawRect(const gfx::Rect& new_rect);
++  void SetDrawMode(const int32_t mode);
+ #endif  // defined(OHOS_COMPOSITE_RENDER)
+ 
+   // Sets the color matrix that will be used to transform the output of this
+@@ -278,6 +280,10 @@ class VIZ_SERVICE_EXPORT Display : public DisplaySchedulerClient,
+   bool visible_ = false;
+   bool swapped_since_resize_ = false;
+   bool output_is_secure_ = false;
++#if BUILDFLAG(IS_OHOS)
++  gfx::Rect draw_rect_;
++  int32_t draw_mode_ = 0;
++#endif
+ 
+ #if DCHECK_IS_ON()
+   std::unique_ptr<gpu::ScopedAllowScheduleGpuTask>
+diff --git a/src/components/viz/service/frame_sinks/root_compositor_frame_sink_impl.cc b/src/components/viz/service/frame_sinks/root_compositor_frame_sink_impl.cc
+index e96ce6b81e9a2..733f8ee6c649c
+--- a/src/components/viz/service/frame_sinks/root_compositor_frame_sink_impl.cc
++++ b/src/components/viz/service/frame_sinks/root_compositor_frame_sink_impl.cc
+@@ -279,6 +279,17 @@ void RootCompositorFrameSinkImpl::SetShouldFrameSubmissionBeforeDraw(
+   if (callback)
+     std::move(callback).Run();
+ }
++
++void RootCompositorFrameSinkImpl::SetDrawRect(const gfx::Rect& new_rect)
++{
++   display_->SetDrawRect(new_rect);
++}
++
++void RootCompositorFrameSinkImpl::SetDrawMode(int32_t mode)
++{
++   LOG(INFO) << "ootCompositorFrameSinkImpl::SetDrawMode";
++   display_->SetDrawMode(mode);
++}
+ #endif  // defined(OHOS_COMPOSITE_RENDER)
+ 
+ void RootCompositorFrameSinkImpl::Resize(const gfx::Size& size) {
+diff --git a/src/components/viz/service/frame_sinks/root_compositor_frame_sink_impl.h b/src/components/viz/service/frame_sinks/root_compositor_frame_sink_impl.h
+index ffe1591ddfdb0..90417296e727e
+--- a/src/components/viz/service/frame_sinks/root_compositor_frame_sink_impl.h
++++ b/src/components/viz/service/frame_sinks/root_compositor_frame_sink_impl.h
+@@ -76,6 +76,8 @@ class VIZ_SERVICE_EXPORT RootCompositorFrameSinkImpl
+   void SetShouldFrameSubmissionBeforeDraw(
+       bool should,
+       SetShouldFrameSubmissionBeforeDrawCallback callback) override;
++  void SetDrawRect(const gfx::Rect& new_rect) override;
++  void SetDrawMode(int32_t mode) override;
+ #endif  // defined(OHOS_COMPOSITE_RENDER)
+   void Resize(const gfx::Size& size) override;
+   void SetDisplayColorMatrix(const gfx::Transform& color_matrix) override;
+diff --git a/src/components/zoom/page_zoom.cc b/src/components/zoom/page_zoom.cc
+index 1dde9dcec7baf..9cd9ad739b750
+--- a/src/components/zoom/page_zoom.cc
++++ b/src/components/zoom/page_zoom.cc
+@@ -53,7 +53,7 @@ std::vector<double> PresetZoomValues(PageZoomValueType value_type,
+   return zoom_values;
+ }
+ 
+-}  // namespace anonymous
++}  // namespace
+ 
+ namespace zoom {
+ 
+diff --git a/src/content/browser/browser_process_io_thread.cc b/src/content/browser/browser_process_io_thread.cc
+index 00d49ad0dbcba..941b669c051bf
+--- a/src/content/browser/browser_process_io_thread.cc
++++ b/src/content/browser/browser_process_io_thread.cc
+@@ -48,8 +48,8 @@ BrowserProcessIOThread::~BrowserProcessIOThread() {
+ #if BUILDFLAG(IS_OHOS)
+   using namespace OHOS::NWeb;
+   ResSchedClientAdapter::ReportKeyThread(
+-      ResSchedStatusAdapter::THREAD_DESTROYED, base::GetCurrentProcId(),
+-      GetThreadId(), ResSchedRoleAdapter::USER_INTERACT);
++      ResSchedStatusAdapter::THREAD_DESTROYED, base::GetCurrentRealPid(),
++      GetThreadRealId(), ResSchedRoleAdapter::USER_INTERACT);
+ #endif
+   Stop();
+ }
+@@ -101,8 +101,8 @@ void BrowserProcessIOThread::Run(base::RunLoop* run_loop) {
+ #if BUILDFLAG(IS_OHOS)
+   using namespace OHOS::NWeb;
+   ResSchedClientAdapter::ReportKeyThread(
+-      ResSchedStatusAdapter::THREAD_CREATED, base::GetCurrentProcId(),
+-      GetThreadId(), ResSchedRoleAdapter::USER_INTERACT);
++      ResSchedStatusAdapter::THREAD_CREATED, base::GetCurrentRealPid(),
++      GetThreadRealId(), ResSchedRoleAdapter::USER_INTERACT);
+ #endif
+ 
+   IOThreadRun(run_loop);
+diff --git a/src/content/browser/browser_url_handler_impl.cc b/src/content/browser/browser_url_handler_impl.cc
+index cbade5333defc..fe6ccf6bbd55c
+--- a/src/content/browser/browser_url_handler_impl.cc
++++ b/src/content/browser/browser_url_handler_impl.cc
+@@ -28,15 +28,19 @@ static bool HandleViewSource(GURL* url, BrowserContext* browser_context) {
+     // Bug 26129: limit view-source to view the content and not any
+     // other kind of 'active' url scheme like 'javascript' or 'data'.
+     static const char* const default_allowed_sub_schemes[] = {
+-      url::kHttpScheme,      
+-      url::kHttpsScheme,    
++      url::kHttpScheme,
++      url::kHttpsScheme,
+       kChromeUIScheme,
+       url::kFileScheme,
+ #ifdef OHOS_HAP_DECOMPRESSED
+-      url::kFileSystemScheme, 
++      url::kFileSystemScheme,
+       url::kResourcesScheme
+ #else
+       url::kFileSystemScheme
++#endif
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++      ,
++      kArkWebUIScheme
+ #endif
+     };
+ 
+diff --git a/src/content/browser/find_request_manager.cc b/src/content/browser/find_request_manager.cc
+index 02b4a23f2d998..5c83434976344
+--- a/src/content/browser/find_request_manager.cc
++++ b/src/content/browser/find_request_manager.cc
+@@ -411,7 +411,9 @@ void FindRequestManager::StopFinding(StopFindAction action) {
+         // TODO(dcheng): Use typemapping or use the Mojo enum directly.
+         static_cast<blink::mojom::StopFindAction>(action));
+   });
+-
++#if BUILDFLAG(IS_OHOS)
++  delayed_find_task_.Cancel();
++#endif
+   current_session_id_ = kInvalidId;
+ #if BUILDFLAG(IS_ANDROID)
+   // It is important that these pending replies are cleared whenever a find
+diff --git a/src/content/browser/loader/file_url_loader_factory.cc b/src/content/browser/loader/file_url_loader_factory.cc
+index 4c2be06e79e89..7b6d5c88db375
+--- a/src/content/browser/loader/file_url_loader_factory.cc
++++ b/src/content/browser/loader/file_url_loader_factory.cc
+@@ -10,6 +10,9 @@
+ #include <vector>
+ 
+ #include "base/command_line.h"
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++#include "base/datashare_uri_utils.h"
++#endif
+ #include "base/files/file.h"
+ #include "base/files/file_path.h"
+ #include "base/files/file_util.h"
+@@ -904,8 +907,19 @@ class FileURLLoader : public network::mojom::URLLoader {
+     if (observer)
+       observer->OnStart();
+ 
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++    std::unique_ptr<mojo::FileDataSource> file_data_source;
++    if (path.IsDataShareUri()) {
++      file_data_source = std::make_unique<mojo::FileDataSource>(
++          base::OpenDatashareUriForRead(path));
++    } else {
++      file_data_source = std::make_unique<mojo::FileDataSource>(
++          base::File(path, base::File::FLAG_OPEN | base::File::FLAG_READ));
++    }
++#else
+     auto file_data_source = std::make_unique<mojo::FileDataSource>(
+         base::File(path, base::File::FLAG_OPEN | base::File::FLAG_READ));
++#endif
+     mojo::DataPipeProducer::DataSource* data_source = file_data_source.get();
+ 
+     std::vector<char> initial_read_buffer(net::kMaxBytesToSniff);
+diff --git a/src/content/browser/network_service_instance_impl.cc b/src/content/browser/network_service_instance_impl.cc
+index 87f48a06890b5..e18e8dc12342e
+--- a/src/content/browser/network_service_instance_impl.cc
++++ b/src/content/browser/network_service_instance_impl.cc
+@@ -363,8 +363,8 @@ void CreateInProcessNetworkService(
+ #if BUILDFLAG(IS_OHOS)
+     using namespace OHOS::NWeb;
+     ResSchedClientAdapter::ReportKeyThread(
+-        ResSchedStatusAdapter::THREAD_CREATED, base::GetCurrentProcId(),
+-        GetNetworkServiceDedicatedThread().GetThreadId(),
++        ResSchedStatusAdapter::THREAD_CREATED, base::GetCurrentRealPid(),
++        GetNetworkServiceDedicatedThread().GetThreadRealId(),
+         ResSchedRoleAdapter::USER_INTERACT);
+ #endif
+   } else {
+@@ -940,7 +940,7 @@ void CreateNetworkContextInNetworkService(
+   GrantSandboxAccessOnThreadPool(
+       std::move(params),
+       base::BindOnce(&CreateNetworkContextInternal, std::move(context)));
+-#endif  // BUILDFLAG(IS_ANDROID)
++#endif  // BUILDFLAG(IS_ANDROID) || defined(OHOS_COOKIE)
+ }
+ 
+ }  // namespace content
+diff --git a/src/content/browser/renderer_host/frame_tree.cc b/src/content/browser/renderer_host/frame_tree.cc
+index b2d960998c0f7..1770b5335c0b3
+--- a/src/content/browser/renderer_host/frame_tree.cc
++++ b/src/content/browser/renderer_host/frame_tree.cc
+@@ -926,7 +926,12 @@ void FrameTree::NodeLoadingStateChanged(
+                                          LoadingState::NONE);
+   delegate_->LoadingStateChanged(new_frame_tree_loading_state);
+   if (previous_frame_tree_loading_state == LoadingState::NONE) {
++#ifdef OHOS_EX_TOPCONTROLS
++    delegate_->DidStartLoading(&node, new_frame_tree_loading_state ==
++                                          LoadingState::LOADING_UI_REQUESTED);
++#else
+     delegate_->DidStartLoading(&node);
++#endif
+   } else if (new_frame_tree_loading_state == LoadingState::NONE) {
+     delegate_->DidStopLoading();
+   }
+diff --git a/src/content/browser/renderer_host/frame_tree.h b/src/content/browser/renderer_host/frame_tree.h
+index a26e26dece5fc..6570190df815f
+--- a/src/content/browser/renderer_host/frame_tree.h
++++ b/src/content/browser/renderer_host/frame_tree.h
+@@ -150,6 +150,10 @@ class CONTENT_EXPORT FrameTree {
+     // loading. If a second FrameTreeNode begins loading, a new DidStartLoading
+     // message will not be sent.
+     virtual void DidStartLoading(FrameTreeNode* frame_tree_node) = 0;
++#ifdef OHOS_EX_TOPCONTROLS
++    virtual void DidStartLoading(FrameTreeNode* frame_tree_node,
++                                 bool should_show_loading_ui) {}
++#endif
+ 
+     // The FrameTree has stopped loading. Sent only when all FrameTreeNodes have
+     // stopped loading.
+diff --git a/src/content/browser/renderer_host/input/fling_controller.cc b/src/content/browser/renderer_host/input/fling_controller.cc
+index 1845ee18ad19a..b0ae18f108002
+--- a/src/content/browser/renderer_host/input/fling_controller.cc
++++ b/src/content/browser/renderer_host/input/fling_controller.cc
+@@ -13,6 +13,7 @@
+ #include "ui/events/gestures/blink/web_gesture_curve_impl.h"
+ #if BUILDFLAG(IS_OHOS)
+ #include "base/report_loss_frame.h"
++#include "hitrace_adapter_impl.h"
+ #endif
+ 
+ using blink::WebInputEvent;
+@@ -142,6 +143,7 @@ bool FlingController::ObserveAndMaybeConsumeGestureEvent(
+     ProcessGestureFlingStart(gesture_event);
+ #if BUILDFLAG(IS_OHOS)
+   ReportLossFrame::GetInstance()->SetScrollState(ScrollMode::START);
++  OHOS::NWeb::HiTraceAdapterImpl::GetInstance().StartAsyncTrace("WEB_LIST_FLING", 0);
+ #endif
+     return true;
+   }
+@@ -371,6 +373,7 @@ void FlingController::EndCurrentFling(base::TimeTicks current_time) {
+ #if BUILDFLAG(IS_OHOS)
+   ReportLossFrame::GetInstance()->SetScrollState(ScrollMode::STOP);
+   ReportLossFrame::GetInstance()->Report();
++  OHOS::NWeb::HiTraceAdapterImpl::GetInstance().FinishAsyncTrace("WEB_LIST_FLING", 0);
+ #endif
+   current_fling_parameters_ = ActiveFlingParameters();
+ 
+diff --git a/src/content/browser/renderer_host/input/input_router_impl.cc b/src/content/browser/renderer_host/input/input_router_impl.cc
+index 842e064657fd0..2aa91d0e3942c
+--- a/src/content/browser/renderer_host/input/input_router_impl.cc
++++ b/src/content/browser/renderer_host/input/input_router_impl.cc
+@@ -36,7 +36,7 @@
+ #include "ui/events/blink/web_input_event_traits.h"
+ #include "ui/events/event.h"
+ #include "ui/events/keycodes/keyboard_codes.h"
+-
++#include "ohos_adapter_helper.h"
+ namespace content {
+ 
+ using blink::WebGestureEvent;
+@@ -75,6 +75,7 @@ std::unique_ptr<blink::WebCoalescedInputEvent> ScaleEvent(
+ }
+ #if BUILDFLAG(IS_OHOS)
+ constexpr uint64_t GESTURE_MOVE_PERIOD = 250000000;
++const int SOC_PERF_SLIDE_NORMAL_CONFIG_ID = 10025;
+ #endif
+ }  // namespace
+ 
+@@ -146,16 +147,23 @@ void InputRouterImpl::SendGestureEvent(
+   GestureEventWithLatencyInfo gesture_event(original_gesture_event);
+ #if BUILDFLAG(IS_OHOS)
+   timeStamp_ = ::base::subtle::TimeTicksNowIgnoringOverride().since_origin().InNanoseconds();
+-  if (gesture_event.event.GetType() == WebInputEvent::Type::kGestureScrollUpdate &&
+-      timeStamp_ - prePerfTimeStamp_ > GESTURE_MOVE_PERIOD) {
++  if ((gesture_event.event.GetType() == WebInputEvent::Type::kGestureScrollUpdate &&
++      timeStamp_ - prePerfTimeStamp_ > GESTURE_MOVE_PERIOD) ||
++      gesture_event.event.GetType() == WebInputEvent::Type::kGestureScrollBegin) {
+ #if defined(OHOS_PERFORMANCE_INC_FREQ)
+     prePerfTimeStamp_ = timeStamp_;
+     LOG(INFO) << "InputRouterImpl::SendGestureEvent type=kGestureScrollUpdate success";
+     client_->GetWidgetInputHandler()->TryStartFling();
++    OHOS::NWeb::OhosAdapterHelper::GetInstance()
++      .CreateSocPerfClientAdapter()
++      ->ApplySocPerfConfigByIdEx(SOC_PERF_SLIDE_NORMAL_CONFIG_ID, true);
+   } else if (gesture_event.event.GetType() ==
+              WebInputEvent::Type::kGestureScrollEnd) {
+     LOG(INFO) << "InputRouterImpl::SendGestureEvent type=kGestureScrollEnd";
+     client_->GetWidgetInputHandler()->TryFinishFling();
++    OHOS::NWeb::OhosAdapterHelper::GetInstance()
++      .CreateSocPerfClientAdapter()
++      ->ApplySocPerfConfigByIdEx(SOC_PERF_SLIDE_NORMAL_CONFIG_ID, false);
+     prePerfTimeStamp_ = 0;
+ #endif
+   }
+diff --git a/src/content/browser/renderer_host/navigation_entry_impl.cc b/src/content/browser/renderer_host/navigation_entry_impl.cc
+index ab6e19a7da893..5919183ef7e84
+--- a/src/content/browser/renderer_host/navigation_entry_impl.cc
++++ b/src/content/browser/renderer_host/navigation_entry_impl.cc
+@@ -42,6 +42,11 @@
+ #include "base/android/content_uri_utils.h"
+ #endif
+ 
++#ifdef OHOS_HAP_DECOMPRESSED
++#include <locale>
++#include <codecvt>
++#endif
++
+ using base::UTF16ToUTF8;
+ 
+ namespace content {
+@@ -629,6 +634,18 @@ const std::u16string& NavigationEntryImpl::GetTitleForDisplay() {
+   }
+ #endif
+ 
++#ifdef OHOS_HAP_DECOMPRESSED
++if (GetURL().SchemeIs(url::kResourcesScheme)) {
++    std::string fileName = GetURL().ExtractFileName();
++    if (fileName == "") {
++      title = u"";
++    } else {
++      std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> converter;
++      title = converter.from_bytes(fileName);
++    }
++  }
++#endif
++
+   gfx::ElideString(title, blink::mojom::kMaxTitleChars, &cached_display_title_);
+   return cached_display_title_;
+ }
+diff --git a/src/content/browser/renderer_host/render_view_host_delegate_view.cc b/src/content/browser/renderer_host/render_view_host_delegate_view.cc
+index 22dbc1e1a750e..bf67538fc9a6f
+--- a/src/content/browser/renderer_host/render_view_host_delegate_view.cc
++++ b/src/content/browser/renderer_host/render_view_host_delegate_view.cc
+@@ -15,7 +15,11 @@ content::RenderViewHostDelegateView::GetOverscrollRefreshHandler() const {
+ }
+ #endif
+ 
++#ifdef OHOS_EX_TOPCONTROLS
++int RenderViewHostDelegateView::GetTopControlsHeight() {
++#else
+ int RenderViewHostDelegateView::GetTopControlsHeight() const {
++#endif
+   return 0;
+ }
+ 
+diff --git a/src/content/browser/renderer_host/render_view_host_delegate_view.h b/src/content/browser/renderer_host/render_view_host_delegate_view.h
+index 8cd69d5f5ebb1..05337176d817a
+--- a/src/content/browser/renderer_host/render_view_host_delegate_view.h
++++ b/src/content/browser/renderer_host/render_view_host_delegate_view.h
+@@ -103,8 +103,11 @@ class CONTENT_EXPORT RenderViewHostDelegateView {
+   virtual void TakeFocus(bool reverse) {}
+ 
+   // Returns the height of the top controls in DIP.
++#ifdef OHOS_EX_TOPCONTROLS
++  virtual int GetTopControlsHeight();
++#else
+   virtual int GetTopControlsHeight() const;
+-
++#endif
+   // Returns the minimum visible height the top controls can have in DIP.
+   virtual int GetTopControlsMinHeight() const;
+ 
+diff --git a/src/content/browser/service_worker/service_worker_new_script_fetcher.cc b/src/content/browser/service_worker/service_worker_new_script_fetcher.cc
+index 8e2e452107753..93f81be4e1ddb
+--- a/src/content/browser/service_worker/service_worker_new_script_fetcher.cc
++++ b/src/content/browser/service_worker/service_worker_new_script_fetcher.cc
+@@ -172,6 +172,10 @@ void ServiceWorkerNewScriptFetcher::OnComplete(
+     // Do not continue with further script processing, but let the |callback_|
+     // hang. This renderer process would be killed soon anyways.
+     return;
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++  } else {
++    LOG(INFO) << "OnComplete, status.error_code=" << status.error_code;
++#endif
+   }
+   std::move(callback_).Run(/*main_script_load_params=*/nullptr);
+ }
+diff --git a/src/content/browser/service_worker/service_worker_version.cc b/src/content/browser/service_worker/service_worker_version.cc
+index 2876f311cbb04..32550a5b76526
+--- a/src/content/browser/service_worker/service_worker_version.cc
++++ b/src/content/browser/service_worker/service_worker_version.cc
+@@ -548,6 +548,10 @@ void ServiceWorkerVersion::StartWorker(ServiceWorkerMetrics::EventType purpose,
+     return;
+   }
+ 
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++  LOG(INFO) << "Try to start service worker...";
++#endif
++
+   // Ensure the live registration during starting worker so that the worker can
+   // get associated with it in
+   // ServiceWorkerHost::CompleteStartWorkerPreparation.
+diff --git a/src/content/browser/storage_partition_impl.h b/src/content/browser/storage_partition_impl.h
+index 91b6f07272df9..8a7def660ae2d
+--- a/src/content/browser/storage_partition_impl.h
++++ b/src/content/browser/storage_partition_impl.h
+@@ -612,10 +612,6 @@ class CONTENT_EXPORT StoragePartitionImpl
+       const url::Origin& origin,
+       const base::UnguessableToken* nonce);
+ 
+-#if BUILDFLAG(IS_OHOS)
+-  void GetCookieManagerForOhosInternal();
+-#endif
+-
+   // Raw pointer that should always be valid. The BrowserContext owns the
+   // StoragePartitionImplMap which then owns StoragePartitionImpl. When the
+   // BrowserContext is destroyed, `this` will be destroyed too.
+diff --git a/src/content/browser/web_contents/web_contents_impl.cc b/src/content/browser/web_contents/web_contents_impl.cc
+index 96296835105e2..bb83a64b5b4dd
+--- a/src/content/browser/web_contents/web_contents_impl.cc
++++ b/src/content/browser/web_contents/web_contents_impl.cc
+@@ -1487,6 +1487,32 @@ void WebContentsImpl::ForEachRenderFrameHostWithAction(
+       [on_frame](RenderFrameHostImpl* rfh) { return on_frame(rfh); });
+ }
+ 
++#if BUILDFLAG(IS_OHOS)
++RenderFrameHost* WebContentsImpl::GetTargetFramesIncludingPending(
++    int routing_id) {
++  std::vector<RenderFrameHost*> frame_hosts;
++  for (FrameTreeNode* node : primary_frame_tree_.Nodes()) {
++    frame_hosts.push_back(node->current_frame_host());
++    RenderFrameHostImpl* pending_frame_host =
++        node->render_manager()->speculative_frame_host();
++    if (pending_frame_host) {
++      frame_hosts.push_back(pending_frame_host);
++    }
++  }
++
++  for (RenderFrameHost* rfh : frame_hosts) {
++    if (!rfh || !rfh->IsRenderFrameLive()) {
++      continue;
++    }
++    if (routing_id == rfh->GetRoutingID()) {
++      return rfh;
++    }
++  }
++
++  return nullptr;
++}
++#endif
++
+ void WebContentsImpl::ForEachRenderFrameHost(
+     base::FunctionRef<void(RenderFrameHost*)> on_frame) {
+   ForEachRenderFrameHost(
+@@ -1919,21 +1945,17 @@ void WebContentsImpl::SetUserAgentOverride(
+     return;
+   }
+ 
+-#if defined(OHOS_EX_UA)
+-  const base::CommandLine& command_line =
+-      *base::CommandLine::ForCurrentProcess();
+-  if (command_line.HasSwitch(switches::kForBrowser)) {
+-    user_agent_ = ua_override.ua_string_override;
+-    UpdateOverridingUserAgent();
+-
+-    // DTS2023022711784
+-    // 子进程打开新窗口时，会先创建delayed_load_url_params_，等到加载url时直接使用
+-    // delayed_load_url_params_的值创建NavigationRequest。其override_user_agent默认值是
+-    // UA_OVERRIDE_FALSE，故这里也要更新。
+-    if (delayed_load_url_params_) {
+-      delayed_load_url_params_->override_user_agent =
+-          NavigationController::UA_OVERRIDE_TRUE;
+-    }
++#if defined(OHOS_USERAGENT) || defined(OHOS_EX_UA)
++  user_agent_ = ua_override.ua_string_override;
++  UpdateOverridingUserAgent();
++
++  // DTS2023022711784
++  // 子进程打开新窗口时，会先创建delayed_load_url_params_，等到加载url时直接使用
++  // delayed_load_url_params_的值创建NavigationRequest。其override_user_agent默认值是
++  // UA_OVERRIDE_FALSE，故这里也要更新。
++  if (delayed_load_url_params_) {
++    delayed_load_url_params_->override_user_agent =
++        NavigationController::UA_OVERRIDE_TRUE;
+   }
+ #endif
+ 
+@@ -3072,12 +3094,10 @@ const blink::web_pref::WebPreferences WebContentsImpl::ComputeWebPreferences() {
+     prefs.hide_scrollbars = true;
+ 
+   GetContentClient()->browser()->OverrideWebkitPrefs(this, &prefs);
+-#if defined(OHOS_EX_UA)
+-  if (command_line.HasSwitch(switches::kForBrowser)) {
+-    bool is_win = (user_agent_.find("Windows NT") != std::string::npos) &&
+-                  (user_agent_.find("Win64") != std::string::npos ||
+-                   user_agent_.find("WOW64") != std::string::npos);
+-    prefs.viewport_meta_enabled = !is_win;
++#if defined(OHOS_USERAGENT) || defined(OHOS_EX_UA)
++  if (!user_agent_.empty()) {
++    bool is_desktop = (user_agent_.find("Mobile") == std::string::npos);
++    prefs.viewport_meta_enabled = !is_desktop;
+   }
+ #endif
+   return prefs;
+@@ -7636,6 +7656,14 @@ void WebContentsImpl::RenderViewReady(RenderViewHost* rvh) {
+     observers_.NotifyObservers(&WebContentsObserver::RenderViewReady);
+   }
+   view_->RenderViewReady();
++
++#ifdef OHOS_EX_TOPCONTROLS
++  if (base::CommandLine::ForCurrentProcess()->HasSwitch(
++          switches::kForBrowser)) {
++    UpdateBrowserControlsState(browser_controls_state_,
++                               cc::BrowserControlsState::kShown, false);
++  }
++#endif
+ }
+ 
+ void WebContentsImpl::RenderViewTerminated(RenderViewHost* rvh,
+@@ -7798,7 +7826,18 @@ PrerenderHostRegistry* WebContentsImpl::GetPrerenderHostRegistry() {
+   return prerender_host_registry_.get();
+ }
+ 
++#ifdef OHOS_EX_TOPCONTROLS
++void WebContentsImpl::DidStartLoading(FrameTreeNode* frame_tree_node) {
++  DidStartLoading(frame_tree_node, false);
++}
++#endif
++
++#ifdef OHOS_EX_TOPCONTROLS
++void WebContentsImpl::DidStartLoading(FrameTreeNode* frame_tree_node,
++                                      bool should_show_loading_ui) {
++#else
+ void WebContentsImpl::DidStartLoading(FrameTreeNode* frame_tree_node) {
++#endif
+   OPTIONAL_TRACE_EVENT1("content", "WebContentsImpl::DidStartLoading",
+                         "frame_tree_node", frame_tree_node);
+ 
+@@ -7807,6 +7846,18 @@ void WebContentsImpl::DidStartLoading(FrameTreeNode* frame_tree_node) {
+       "Primary Main FrameTreeNode id",
+       GetPrimaryFrameTree().root()->frame_tree_node_id());
+   SCOPED_UMA_HISTOGRAM_TIMER("WebContentsObserver.DidStartLoading");
++
++#ifdef OHOS_EX_TOPCONTROLS
++  if (frame_tree_node->IsMainFrame()) {
++    if (base::CommandLine::ForCurrentProcess()->HasSwitch(
++            switches::kForBrowser) &&
++        should_show_loading_ui) {
++      UpdateBrowserControlsState(browser_controls_state_,
++                                 cc::BrowserControlsState::kShown, false);
++    }
++  }
++#endif
++
+   observers_.NotifyObservers(&WebContentsObserver::DidStartLoading);
+ 
+   // TODO(avi): Remove. http://crbug.com/170921
+@@ -9813,11 +9864,22 @@ void WebContentsImpl::UpdateBrowserControlsState(
+     cc::BrowserControlsState constraints,
+     cc::BrowserControlsState current,
+     bool animate) {
++#ifdef OHOS_EX_TOPCONTROLS
++  browser_controls_state_ = constraints;
++#endif
+   // Browser controls should be synchronised with the scroll state. Therefore,
+   // they are controlled from the renderer by the main RenderFrame(Host).
+   GetPrimaryPage().UpdateBrowserControlsState(constraints, current, animate);
+ }
+ 
++#ifdef OHOS_EX_TOPCONTROLS
++void WebContentsImpl::UpdateBrowserControlsHeight(int height, bool animate) {
++  if (view_) {
++    view_->UpdateBrowserControlsHeight(height, animate);
++  }
++}
++#endif
++
+ void WebContentsImpl::SetTabSwitchStartTime(base::TimeTicks start_time,
+                                             bool destination_is_loaded) {
+   GetVisibleTimeRequestTrigger().UpdateRequest(
+diff --git a/src/content/browser/web_contents/web_contents_impl.h b/src/content/browser/web_contents/web_contents_impl.h
+index 1eea3fd4f7bd3..0d8a191ae9141
+--- a/src/content/browser/web_contents/web_contents_impl.h
++++ b/src/content/browser/web_contents/web_contents_impl.h
+@@ -449,6 +449,10 @@ class CONTENT_EXPORT WebContentsImpl : public WebContents,
+   }
+ #endif
+ 
++#ifdef OHOS_EX_TOPCONTROLS
++  void UpdateBrowserControlsHeight(int height, bool animate) override;
++#endif
++
+   void UpdateTitleForEntry(NavigationEntry* entry,
+                            const std::u16string& title) override;
+   SiteInstanceImpl* GetSiteInstance() override;
+@@ -1112,6 +1116,10 @@ class CONTENT_EXPORT WebContentsImpl : public WebContents,
+ 
+   void LoadingStateChanged(LoadingState new_state) override;
+   void DidStartLoading(FrameTreeNode* frame_tree_node) override;
++#ifdef OHOS_EX_TOPCONTROLS
++  void DidStartLoading(FrameTreeNode* frame_tree_node,
++                       bool should_show_loading_ui) override;
++#endif
+   void DidStopLoading() override;
+   bool IsHidden() override;
+   int GetOuterDelegateFrameTreeNodeId() override;
+@@ -1362,7 +1370,9 @@ class CONTENT_EXPORT WebContentsImpl : public WebContents,
+   // A render view-originated drag has ended. Informs the render view host and
+   // WebContentsDelegate.
+   void SystemDragEnded(RenderWidgetHost* source_rwh);
+-
++#if BUILDFLAG(IS_OHOS)
++  RenderFrameHost* GetTargetFramesIncludingPending(int routing_id);
++#endif
+   // These are the content internal equivalents of
+   // |WebContents::ForEachRenderFrameHost| whose comment can be referred to
+   // for details. Content internals can also access speculative
+@@ -2448,7 +2458,7 @@ class CONTENT_EXPORT WebContentsImpl : public WebContents,
+ 
+   VisibleTimeRequestTrigger visible_time_request_trigger_;
+ 
+-#if defined(OHOS_EX_UA)
++#if defined(OHOS_USERAGENT) || defined(OHOS_EX_UA)
+   std::string user_agent_{""};
+ #endif  // OHOS_EX_UA
+ #if defined(OHOS_EX_PASSWORD)
+@@ -2467,6 +2477,12 @@ class CONTENT_EXPORT WebContentsImpl : public WebContents,
+ #ifdef OHOS_EX_BLANK_TARGET_POPUP_INTERCEPT
+   bool enable_blank_target_popup_intercept_ = true;
+ #endif
++
++#ifdef OHOS_EX_TOPCONTROLS
++  cc::BrowserControlsState browser_controls_state_ =
++      cc::BrowserControlsState::kBoth;
++#endif
++
+   // Stores the information whether last navigation was prerender activation for
+   // DevTools. Set when a prerender activation completes, and cleared when
+   // either DevTools is opened and consults this value or when a non-prerendered
+diff --git a/src/content/browser/web_contents/web_contents_view.h b/src/content/browser/web_contents/web_contents_view.h
+index fe64fa31a7a85..e2660823e83a1
+--- a/src/content/browser/web_contents/web_contents_view.h
++++ b/src/content/browser/web_contents/web_contents_view.h
+@@ -119,6 +119,10 @@ class CONTENT_EXPORT WebContentsView {
+   // this informs the view of which area at the top of the view is available for
+   // web contents.
+   virtual void UpdateWindowControlsOverlay(const gfx::Rect& bounding_rect) = 0;
++
++#if defined(OHOS_EX_TOPCONTROLS)
++  virtual void UpdateBrowserControlsHeight(int, bool) {}
++#endif
+ };
+ 
+ // Factory function to create `WebContentsView`s. Implemented in the platform
+diff --git a/src/content/browser/web_contents/web_contents_view_aura.cc b/src/content/browser/web_contents/web_contents_view_aura.cc
+index d85232514f1a2..f317780c6eda3
+--- a/src/content/browser/web_contents/web_contents_view_aura.cc
++++ b/src/content/browser/web_contents/web_contents_view_aura.cc
+@@ -1815,7 +1815,11 @@ void WebContentsViewAura::OnGotVirtualFilesAsTempFiles(
+ }
+ #endif
+ 
++#ifdef OHOS_EX_TOPCONTROLS
++int WebContentsViewAura::GetTopControlsHeight() {
++#else
+ int WebContentsViewAura::GetTopControlsHeight() const {
++#endif
+   WebContentsDelegate* delegate = web_contents_->GetDelegate();
+   if (!delegate)
+     return 0;
+diff --git a/src/content/browser/web_contents/web_contents_view_aura.h b/src/content/browser/web_contents/web_contents_view_aura.h
+index 5953773889c1c..f8f5bf1de3c90
+--- a/src/content/browser/web_contents/web_contents_view_aura.h
++++ b/src/content/browser/web_contents/web_contents_view_aura.h
+@@ -215,7 +215,11 @@ class CONTENT_EXPORT WebContentsViewAura
+   void GotFocus(RenderWidgetHostImpl* render_widget_host) override;
+   void LostFocus(RenderWidgetHostImpl* render_widget_host) override;
+   void TakeFocus(bool reverse) override;
++#ifdef OHOS_EX_TOPCONTROLS
++  int GetTopControlsHeight() override;
++#else
+   int GetTopControlsHeight() const override;
++#endif
+   int GetBottomControlsHeight() const override;
+   bool DoBrowserControlsShrinkRendererSize() const override;
+ #if BUILDFLAG(USE_EXTERNAL_POPUP_MENU)
+diff --git a/src/content/browser/webui/web_ui_url_loader_factory.cc b/src/content/browser/webui/web_ui_url_loader_factory.cc
+index 0f189ba45ed2d..217bf0c03adac
+--- a/src/content/browser/webui/web_ui_url_loader_factory.cc
++++ b/src/content/browser/webui/web_ui_url_loader_factory.cc
+@@ -338,7 +338,15 @@ class WebUIURLLoaderFactory : public network::SelfDeletingURLLoaderFactory {
+       return;
+     }
+ 
+-    if (request.url.scheme() != scheme_) {
++    if (request.url.scheme() != scheme_
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++        // TODO: If chrome:// -> arkweb:// replaced completely, remove it
++        &&
++
++        request.url.scheme() != kChromeUIScheme &&
++        request.url.scheme() != kArkWebUIScheme
++#endif
++    ) {
+       DVLOG(1) << "Bad scheme: " << request.url.scheme();
+       SCOPED_CRASH_KEY_STRING32("WebUI", "actual_scheme", request.url.scheme());
+       SCOPED_CRASH_KEY_STRING32("WebUI", "expected_scheme", scheme_);
+diff --git a/src/content/common/url_schemes.cc b/src/content/common/url_schemes.cc
+index f6adf77ed5c00..04361db853631
+--- a/src/content/common/url_schemes.cc
++++ b/src/content/common/url_schemes.cc
+@@ -23,17 +23,20 @@ namespace {
+ 
+ bool g_registered_url_schemes = false;
+ 
+-const char* const kDefaultSavableSchemes[] = {
+-  url::kHttpScheme,
+-  url::kHttpsScheme,
+-  url::kFileScheme,
+-  url::kFileSystemScheme,
+-  kChromeDevToolsScheme,
+-  kChromeUIScheme,
+-  url::kDataScheme
++const char* const kDefaultSavableSchemes[] = {url::kHttpScheme,
++                                              url::kHttpsScheme,
++                                              url::kFileScheme,
++                                              url::kFileSystemScheme,
++                                              kChromeDevToolsScheme,
++                                              kChromeUIScheme,
++                                              url::kDataScheme
+ #ifdef OHOS_HAP_DECOMPRESSED
+-  ,
+-  url::kResourcesScheme
++                                              ,
++                                              url::kResourcesScheme
++#endif
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++                                              ,
++                                              kArkWebUIScheme
+ #endif
+ };
+ 
+@@ -66,6 +69,9 @@ void RegisterContentSchemes(bool should_lock_registry) {
+   url::AddStandardScheme(kChromeUIScheme, url::SCHEME_WITH_HOST);
+   url::AddStandardScheme(kChromeUIUntrustedScheme, url::SCHEME_WITH_HOST);
+   url::AddStandardScheme(kChromeErrorScheme, url::SCHEME_WITH_HOST);
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++  url::AddStandardScheme(kArkWebUIScheme, url::SCHEME_WITH_HOST);
++#endif
+   for (auto& scheme : schemes.standard_schemes)
+     url::AddStandardScheme(scheme.c_str(), url::SCHEME_WITH_HOST);
+ 
+@@ -76,6 +82,9 @@ void RegisterContentSchemes(bool should_lock_registry) {
+   schemes.secure_schemes.push_back(kChromeUIScheme);
+   schemes.secure_schemes.push_back(kChromeUIUntrustedScheme);
+   schemes.secure_schemes.push_back(kChromeErrorScheme);
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++  schemes.secure_schemes.push_back(kArkWebUIScheme);
++#endif
+   for (auto& scheme : schemes.secure_schemes)
+     url::AddSecureScheme(scheme.c_str());
+ 
+@@ -91,6 +100,9 @@ void RegisterContentSchemes(bool should_lock_registry) {
+ 
+   schemes.cors_enabled_schemes.push_back(kChromeUIScheme);
+   schemes.cors_enabled_schemes.push_back(kChromeUIUntrustedScheme);
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++  schemes.cors_enabled_schemes.push_back(kArkWebUIScheme);
++#endif
+   for (auto& scheme : schemes.cors_enabled_schemes)
+     url::AddCorsEnabledScheme(scheme.c_str());
+ 
+diff --git a/src/content/public/browser/url_data_source.cc b/src/content/public/browser/url_data_source.cc
+index 56c622745d864..2e6b52835d1f7
+--- a/src/content/public/browser/url_data_source.cc
++++ b/src/content/public/browser/url_data_source.cc
+@@ -138,7 +138,11 @@ bool URLDataSource::ShouldServiceRequest(const GURL& url,
+                                          BrowserContext* browser_context,
+                                          int render_process_id) {
+   return url.SchemeIs(kChromeDevToolsScheme) || url.SchemeIs(kChromeUIScheme) ||
+-         url.SchemeIs(kChromeUIUntrustedScheme);
++         url.SchemeIs(kChromeUIUntrustedScheme)
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++         || url.SchemeIs(kArkWebUIScheme)
++#endif
++      ;
+ }
+ 
+ bool URLDataSource::ShouldServeMimeTypeAsContentTypeHeader() {
+diff --git a/src/content/public/browser/web_contents.h b/src/content/public/browser/web_contents.h
+index 88f12da8ea983..143b8efe38961
+--- a/src/content/public/browser/web_contents.h
++++ b/src/content/public/browser/web_contents.h
+@@ -665,6 +665,10 @@ class WebContents : public PageNavigator,
+   virtual bool GetEnableBlankTargetPopupIntercept() = 0;
+ #endif
+ 
++#ifdef OHOS_EX_TOPCONTROLS
++  virtual void UpdateBrowserControlsHeight(int, bool) = 0;
++#endif
++
+   // Saves the given title to the navigation entry and does associated work. It
+   // will update history and the view with the new title, and also synthesize
+   // titles for file URLs that have none. Thus |entry| must have a URL set.
+diff --git a/src/content/public/common/url_constants.cc b/src/content/public/common/url_constants.cc
+index c96f670dcccd5..d2f9997ec633f
+--- a/src/content/public/common/url_constants.cc
++++ b/src/content/public/common/url_constants.cc
+@@ -51,5 +51,8 @@ const char kChromeUIWebRTCInternalsHost[] = "webrtc-internals";
+ const char kUnreachableWebDataURL[] = "chrome-error://chromewebdata/";
+ 
+ const char kBlockedURL[] = "about:blank#blocked";
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++const char kArkWebUIScheme[] = "arkweb";
++#endif
+ 
+ }  // namespace content
+diff --git a/src/content/public/common/url_constants.h b/src/content/public/common/url_constants.h
+index 3f331e9162c82..1faf6ef3d0392
+--- a/src/content/public/common/url_constants.h
++++ b/src/content/public/common/url_constants.h
+@@ -61,7 +61,9 @@ CONTENT_EXPORT extern const char kUnreachableWebDataURL[];
+ // Special URL used to rewrite URLs coming from untrusted processes, when the
+ // source process is not allowed access to the initially requested URL.
+ CONTENT_EXPORT extern const char kBlockedURL[];
+-
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++CONTENT_EXPORT extern const char kArkWebUIScheme[];
++#endif
+ }  // namespace content
+ 
+ #endif  // CONTENT_PUBLIC_COMMON_URL_CONSTANTS_H_
+diff --git a/src/content/public/common/url_utils.cc b/src/content/public/common/url_utils.cc
+index 249d69b4031af..0a26857f9ab6d
+--- a/src/content/public/common/url_utils.cc
++++ b/src/content/public/common/url_utils.cc
+@@ -28,7 +28,11 @@ bool HasWebUIScheme(const GURL& url) {
+ bool HasWebUIOrigin(const url::Origin& origin) {
+   return origin.scheme() == content::kChromeUIScheme ||
+          origin.scheme() == content::kChromeUIUntrustedScheme ||
+-         origin.scheme() == content::kChromeDevToolsScheme;
++         origin.scheme() == content::kChromeDevToolsScheme
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++         || origin.scheme() == content::kArkWebUIScheme
++#endif
++      ;
+ }
+ 
+ bool IsSavableURL(const GURL& url) {
+diff --git a/src/content/public/renderer/render_frame.h b/src/content/public/renderer/render_frame.h
+index d9995609388b8..49622f9a832b3
+--- a/src/content/public/renderer/render_frame.h
++++ b/src/content/public/renderer/render_frame.h
+@@ -100,6 +100,7 @@ class CONTENT_EXPORT RenderFrame : public IPC::Listener,
+ 
+ #if defined(OHOS_INPUT_EVENTS)
+   virtual void SetZoomLevel(float magnify_delta, const gfx::Point& anchor) {}
++  virtual void SetOverscrollMode(int mode) {}
+ #endif  // defined(OHOS_INPUT_EVENTS)
+ 
+   // Returns the RenderFrame associated with the main frame of the WebView.
+diff --git a/src/content/public/renderer/v8_value_converter.h b/src/content/public/renderer/v8_value_converter.h
+index a91f840c6ce11..0fc139b8225e0
+--- a/src/content/public/renderer/v8_value_converter.h
++++ b/src/content/public/renderer/v8_value_converter.h
+@@ -42,6 +42,18 @@ class CONTENT_EXPORT V8ValueConverter : public blink::WebV8ValueConverter {
+                               std::unique_ptr<base::Value>* out,
+                               v8::Isolate* isolate);
+ 
++#if BUILDFLAG(IS_OHOS)
++    // If false is returned, V8ValueConverter proceeds with the default
++    // behavior.
++    // Use |callback| to convert any child values, as this will retain
++    // the ValueConverter's internal checks for depth and cycles.
++    virtual bool FromV8Object(v8::Local<v8::Object> value,
++                              std::unique_ptr<base::Value>* out,
++                              v8::Isolate* isolate,
++                              bool is_function,
++                              bool is_promise);
++#endif
++
+     // If false is returned, V8ValueConverter proceeds with the default
+     // behavior.
+     // Use |callback| to convert any child values, as this will retain
+@@ -92,6 +104,14 @@ class CONTENT_EXPORT V8ValueConverter : public blink::WebV8ValueConverter {
+   // Otherwise they are treated as unsupported, see FromV8Value.
+   virtual void SetFunctionAllowed(bool val) = 0;
+ 
++#if BUILDFLAG(IS_OHOS)
++  // If true, promise objects are converted into DictionaryValues with whatever
++  // additional properties has been set on them.
++  //
++  // Otherwise they are treated as unsupported, see FromV8Value.
++  virtual void SetPromiseAllowed(bool val) = 0;
++#endif
++
+   // If true, null values are stripped from objects. This is often useful when
+   // converting arguments to extension APIs.
+   virtual void SetStripNullFromObjects(bool val) = 0;
+diff --git a/src/content/renderer/render_frame_impl.cc b/src/content/renderer/render_frame_impl.cc
+index 20ed276f2be61..89803b81d86b0
+--- a/src/content/renderer/render_frame_impl.cc
++++ b/src/content/renderer/render_frame_impl.cc
+@@ -6480,6 +6480,14 @@ void RenderFrameImpl::SetZoomLevel(float magnify_delta,
+   }
+   web_frame_widget->SetZoomLevel(magnify_delta, anchor);
+ }
++
++void RenderFrameImpl::SetOverscrollMode(int mode) {
++  auto web_frame_widget = GetLocalRootWebFrameWidget();
++  if (!web_frame_widget) {
++    return;
++  }
++  web_frame_widget->SetOverscrollMode(mode);
++}
+ #endif  // defined(OHOS_INPUT_EVENTS)
+ 
+ }  // namespace content
+diff --git a/src/content/renderer/render_frame_impl.h b/src/content/renderer/render_frame_impl.h
+index bd66c4ff46972..263cc97f235a2
+--- a/src/content/renderer/render_frame_impl.h
++++ b/src/content/renderer/render_frame_impl.h
+@@ -405,6 +405,7 @@ class CONTENT_EXPORT RenderFrameImpl
+ 
+ #if defined(OHOS_INPUT_EVENTS)
+   void SetZoomLevel(float magnify_delta, const gfx::Point& anchor) override;
++  void SetOverscrollMode(int mode) override;
+ #endif  // defined(OHOS_INPUT_EVENTS)
+ 
+   // blink::mojom::AutoplayConfigurationClient implementation:
+diff --git a/src/content/renderer/render_thread_impl.cc b/src/content/renderer/render_thread_impl.cc
+index 51986244b8960..c771f4902fff9
+--- a/src/content/renderer/render_thread_impl.cc
++++ b/src/content/renderer/render_thread_impl.cc
+@@ -1006,6 +1006,13 @@ void RenderThreadImpl::RegisterSchemes() {
+   // googlechrome:
+   WebString google_chrome_scheme(WebString::FromASCII(kGoogleChromeScheme));
+   WebSecurityPolicy::RegisterURLSchemeAsDisplayIsolated(google_chrome_scheme);
++
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++  WebString arkweb_scheme(WebString::FromASCII(kArkWebUIScheme));
++  WebSecurityPolicy::RegisterURLSchemeAsDisplayIsolated(arkweb_scheme);
++  WebSecurityPolicy::RegisterURLSchemeAsNotAllowingJavascriptURLs(
++      arkweb_scheme);
++#endif
+ }
+ 
+ void RenderThreadImpl::RecordAction(const base::UserMetricsAction& action) {
