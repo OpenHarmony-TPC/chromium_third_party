@@ -3674,3 +3674,1753 @@ index 8ba70f9c61428..157e9128251fc
 +  }
 +}
 +#endif
+diff --git a/src/cef/libcef/browser/alloy/alloy_browser_host_impl.h b/src/cef/libcef/browser/alloy/alloy_browser_host_impl.h
+index 978df0a372415..238aec22fe04f
+--- a/src/cef/libcef/browser/alloy/alloy_browser_host_impl.h
++++ b/src/cef/libcef/browser/alloy/alloy_browser_host_impl.h
+@@ -36,6 +36,11 @@
+ #include "components/autofill/core/browser/ui/suggestion.h"
+ #endif
+ 
++#ifdef OHOS_EX_GET_ZOOM_LEVEL
++#include "components/zoom/zoom_controller.h"
++#include "components/zoom/zoom_observer.h"
++#endif
++
+ class CefAudioCapturer;
+ class CefBrowserInfo;
+ class SiteInstance;
+@@ -57,7 +62,11 @@ class SiteInstance;
+ // WebContentsObserver::routing_id() when sending IPC messages.
+ class AlloyBrowserHostImpl : public CefBrowserHostBase,
+                              public content::WebContentsDelegate,
+-                             public content::WebContentsObserver {
++                             public content::WebContentsObserver
++#ifdef OHOS_EX_GET_ZOOM_LEVEL
++                             , public zoom::ZoomObserver
++#endif
++ {
+  public:
+   // Used for handling the response to command messages.
+   class CommandResponseHandler : public virtual CefBaseRefCounted {
+@@ -91,6 +100,7 @@ class AlloyBrowserHostImpl : public CefBrowserHostBase,
+   CefWindowHandle GetOpenerWindowHandle() override;
+   double GetZoomLevel() override;
+   void SetZoomLevel(double zoomLevel) override;
++  void SetBrowserZoomLevel(double zoom_factor) override;
+   void Find(const CefString& searchText,
+             bool forward,
+             bool matchCase,
+@@ -195,11 +205,30 @@ class AlloyBrowserHostImpl : public CefBrowserHostBase,
+   void OnSetFocus(cef_focus_source_t source) override;
+ 
+   bool ShowContextMenu(const content::ContextMenuParams& params);
++  
++  bool Discard() override;
++  
++  bool Restore() override;
++
++#if defined(OHOS_COMPOSITE_RENDER)
++  void WasKeyboardResized() override;
++#endif  // defined(OHOS_COMPOSITE_RENDER)
+ 
+ #if defined(OHOS_PRINT)
+   void SetToken(void* token) override;
++  void CreateWebPrintDocumentAdapter(const CefString& jobName,
++                                     void** webPrintDocumentAdapter) override;
+ #endif // defined(OHOS_PRINT)
+ 
++#if defined(OHOS_INPUT_EVENTS)
++  void ContentsZoomChange(bool zoom_in) override;
++#endif
++
++#if defined(OHOS_INPUT_EVENTS)
++  void SetVirtualKeyBoardArg(int32_t width, int32_t height, double keyboard) override;
++  bool ShouldVirtualKeyboardOverlay() override;
++#endif
++
+   enum DestructionState {
+     DESTRUCTION_STATE_NONE = 0,
+     DESTRUCTION_STATE_PENDING,
+@@ -372,6 +401,14 @@ class AlloyBrowserHostImpl : public CefBrowserHostBase,
+   void OnHideAutofillPopup() override;
+ #endif
+ 
++#ifdef OHOS_EX_GET_ZOOM_LEVEL
++  void OnZoomChanged(
++      const zoom::ZoomController::ZoomChangedEventData& data) override;
++  void OnZoomControllerDestroyed(
++      zoom::ZoomController* zoom_controller) override {}
++
++#endif
++
+  private:
+   friend class CefBrowserPlatformDelegateAlloy;
+ 
+@@ -413,6 +450,8 @@ class AlloyBrowserHostImpl : public CefBrowserHostBase,
+ 
+ #if defined(OHOS_COMPOSITE_RENDER)
+   void SetShouldFrameSubmissionBeforeDraw(bool should) override;
++  void SetDrawRect(int x, int y, int width, int height) override;
++  void SetDrawMode(int mode) override;
+ #endif  // defined(OHOS_COMPOSITE_RENDER)
+ 
+   CefWindowHandle opener_;
+@@ -454,6 +493,7 @@ class AlloyBrowserHostImpl : public CefBrowserHostBase,
+   bool is_hidden_ = false;
+ #endif
+   bool start_play_ = false;
++
+ };
+ 
+ #endif  // CEF_LIBCEF_BROWSER_ALLOY_ALLOY_BROWSER_HOST_IMPL_H_
+diff --git a/src/cef/libcef/browser/alloy/alloy_content_browser_client.cc b/src/cef/libcef/browser/alloy/alloy_content_browser_client.cc
+index 276eba61fa4f3..6c93bd6fe81fb
+--- a/src/cef/libcef/browser/alloy/alloy_content_browser_client.cc
++++ b/src/cef/libcef/browser/alloy/alloy_content_browser_client.cc
+@@ -85,12 +85,12 @@
+ #include "components/content_settings/core/browser/cookie_settings.h"
+ #include "components/embedder_support/switches.h"
+ #include "components/embedder_support/user_agent_utils.h"
+-#include "components/performance_manager/embedder/binders.h"
+-#include "components/performance_manager/public/mojom/coordination_unit.mojom.h"
+ #include "components/pdf/browser/pdf_navigation_throttle.h"
+ #include "components/pdf/browser/pdf_url_loader_request_interceptor.h"
+ #include "components/pdf/browser/pdf_web_contents_helper.h"
+ #include "components/pdf/common/internal_plugin_helpers.h"
++#include "components/performance_manager/embedder/binders.h"
++#include "components/performance_manager/public/mojom/coordination_unit.mojom.h"
+ #include "components/policy/core/common/policy_pref_names.h"
+ #include "components/spellcheck/common/spellcheck.mojom.h"
+ #include "components/version_info/version_info.h"
+@@ -239,6 +239,35 @@ constexpr int32_t APPLICATION_API_10 = 10;
+ #include "libcef/browser/predictors/predictor_database.h"
+ #endif  // defined(OHOS_NO_STATE_PREFETCH)
+ 
++#if defined(OHOS_COOKIE)
++#include "libcef/browser/net_service/cookie_manager_ohos_impl.h"
++#endif  // defined(OHOS_COOKIE)
++
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++#include "chrome/browser/extensions/chrome_extension_cookies.h"
++#include "chrome/browser/extensions/user_script_listener.h"
++#include "chrome/browser/web_applications/isolated_web_apps/isolated_web_app_url_info.h"
++#include "chrome/common/url_constants.h"
++#include "components/embedder_support/content_settings_utils.h"
++#include "content/public/browser/allow_service_worker_result.h"
++#include "content/public/browser/site_isolation_policy.h"
++#include "extensions/browser/api/web_request/web_request_api.h"
++#include "extensions/browser/api/web_request/web_request_proxying_webtransport.h"
++#include "extensions/browser/extension_navigation_throttle.h"
++#include "extensions/browser/extension_util.h"
++#include "extensions/browser/service_worker/service_worker_host.h"
++#include "services/network/public/cpp/self_deleting_url_loader_factory.h"
++#include "services/network/public/mojom/web_transport.mojom.h"
++#endif
++
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++using extensions::APIPermission;
++using extensions::ChromeContentBrowserClientExtensionsPart;
++using extensions::Extension;
++using extensions::Manifest;
++using extensions::mojom::APIPermissionID;
++#endif
++
+ namespace {
+ #if BUILDFLAG(IS_OHOS)
+ void TransferVector(const std::vector<std::string>& source,
+@@ -256,6 +285,95 @@ void TransferVector(const std::vector<std::string>& source,
+ }
+ #endif
+ 
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++// The SpecialAccessFileURLLoaderFactory provided to the extension background
++// pages.  Checks with the ChildProcessSecurityPolicy to validate the file
++// access.
++class SpecialAccessFileURLLoaderFactory
++    : public network::SelfDeletingURLLoaderFactory {
++ public:
++  // Returns mojo::PendingRemote to a newly constructed
++  // SpecialAccessFileURLLoaderFactory.  The factory is self-owned - it will
++  // delete itself once there are no more receivers (including the receiver
++  // associated with the returned mojo::PendingRemote and the receivers bound by
++  // the Clone method).
++  static mojo::PendingRemote<network::mojom::URLLoaderFactory> Create(
++      int child_id) {
++    mojo::PendingRemote<network::mojom::URLLoaderFactory> pending_remote;
++
++    // The SpecialAccessFileURLLoaderFactory will delete itself when there are
++    // no more receivers - see the
++    // network::SelfDeletingURLLoaderFactory::OnDisconnect method.
++    new SpecialAccessFileURLLoaderFactory(
++        child_id, pending_remote.InitWithNewPipeAndPassReceiver());
++
++    return pending_remote;
++  }
++
++  SpecialAccessFileURLLoaderFactory(const SpecialAccessFileURLLoaderFactory&) =
++      delete;
++  SpecialAccessFileURLLoaderFactory& operator=(
++      const SpecialAccessFileURLLoaderFactory&) = delete;
++
++ private:
++  explicit SpecialAccessFileURLLoaderFactory(
++      int child_id,
++      mojo::PendingReceiver<network::mojom::URLLoaderFactory> factory_receiver)
++      : network::SelfDeletingURLLoaderFactory(std::move(factory_receiver)),
++        child_id_(child_id) {}
++
++  // network::mojom::URLLoaderFactory:
++  void CreateLoaderAndStart(
++      mojo::PendingReceiver<network::mojom::URLLoader> loader,
++      int32_t request_id,
++      uint32_t options,
++      const network::ResourceRequest& request,
++      mojo::PendingRemote<network::mojom::URLLoaderClient> client,
++      const net::MutableNetworkTrafficAnnotationTag& traffic_annotation)
++      override {
++    if (!content::ChildProcessSecurityPolicy::GetInstance()->CanRequestURL(
++            child_id_, request.url)) {
++      mojo::Remote<network::mojom::URLLoaderClient>(std::move(client))
++          ->OnComplete(
++              network::URLLoaderCompletionStatus(net::ERR_ACCESS_DENIED));
++      return;
++    }
++    content::CreateFileURLLoaderBypassingSecurityChecks(
++        request, std::move(loader), std::move(client),
++        /*observer=*/nullptr,
++        /* allow_directory_listing */ true);
++  }
++
++  int child_id_;
++};
++
++void InitializeFileURLLoaderFactoryForExtension(
++    int render_process_id,
++    content::BrowserContext* browser_context,
++    const extensions::Extension* extension,
++    AlloyContentBrowserClient::NonNetworkURLLoaderFactoryMap* factories) {
++  // Extensions with the necessary permissions get access to file:// URLs that
++  // gets approval from ChildProcessSecurityPolicy. Keep this logic in sync with
++  // ExtensionWebContentsObserver::RenderFrameCreated.
++  Manifest::Type type = extension->GetType();
++  if ((type == Manifest::TYPE_EXTENSION ||
++       type == Manifest::TYPE_LEGACY_PACKAGED_APP) &&
++      extensions::util::AllowFileAccess(extension->id(), browser_context)) {
++    factories->emplace(
++        url::kFileScheme,
++        SpecialAccessFileURLLoaderFactory::Create(render_process_id));
++  }
++}
++
++void MaybeAddThrottle(
++    std::unique_ptr<content::NavigationThrottle> maybe_throttle,
++    std::vector<std::unique_ptr<content::NavigationThrottle>>* throttles) {
++  if (maybe_throttle) {
++    throttles->push_back(std::move(maybe_throttle));
++  }
++}
++#endif
++
+ class CefSelectClientCertificateCallbackImpl
+     : public CefSelectClientCertificateCallback {
+  public:
+@@ -1015,6 +1133,9 @@ void AlloyContentBrowserClient::GetAdditionalWebUISchemes(
+   // Any schemes listed here are treated as WebUI schemes but do not get WebUI
+   // bindings. Also, view-source is allowed for these schemes. WebUI schemes
+   // will not be passed to HandleExternalProtocol.
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++  additional_schemes->push_back(content::kArkWebUIScheme);
++#endif
+ }
+ 
+ void AlloyContentBrowserClient::GetAdditionalViewSourceSchemes(
+@@ -1022,6 +1143,9 @@ void AlloyContentBrowserClient::GetAdditionalViewSourceSchemes(
+   GetAdditionalWebUISchemes(additional_schemes);
+ 
+   additional_schemes->push_back(extensions::kExtensionScheme);
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++  additional_schemes->push_back(content::kArkWebUIScheme);
++#endif
+ }
+ 
+ std::unique_ptr<ui::SelectFilePolicy>
+@@ -1037,6 +1161,9 @@ void AlloyContentBrowserClient::GetAdditionalAllowedSchemesForFileSystem(
+   additional_allowed_schemes->push_back(content::kChromeDevToolsScheme);
+   additional_allowed_schemes->push_back(content::kChromeUIScheme);
+   additional_allowed_schemes->push_back(content::kChromeUIUntrustedScheme);
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++  additional_allowed_schemes->push_back(content::kArkWebUIScheme);
++#endif
+ }
+ 
+ bool AlloyContentBrowserClient::IsWebUIAllowedToMakeNetworkRequests(
+@@ -1184,6 +1311,15 @@ void AlloyContentBrowserClient::AppendExtraCommandLineSwitches(
+       network::switches::kUnsafelyTreatInsecureOriginAsSecure,
+ #if BUILDFLAG(IS_OHOS)
+       switches::kUserDataDir,
++#endif
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++      extensions::switches::kAllowHTTPBackgroundPage,
++      extensions::switches::kAllowLegacyExtensionManifests,
++      extensions::switches::kDisableExtensionsHttpThrottling,
++      extensions::switches::kEnableExperimentalExtensionApis,
++      extensions::switches::kExtensionsOnChromeURLs,
++      extensions::switches::kSetExtensionThrottleTestParams,  // For tests only.
++      extensions::switches::kAllowlistedExtensionID,
+ #endif
+     };
+     command_line->CopySwitchesFrom(*browser_cmd, kSwitchNames,
+@@ -1661,6 +1797,16 @@ AlloyContentBrowserClient::CreateThrottlesForNavigation(
+   }
+ #endif
+ 
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++  throttles.push_back(std::make_unique<extensions::ExtensionNavigationThrottle>(
++      navigation_handle));
++
++  MaybeAddThrottle(extensions::ExtensionsBrowserClient::Get()
++                       ->GetUserScriptListener()
++                       ->CreateNavigationThrottle(navigation_handle),
++                   &throttles);
++#endif
++
+   throttle::CreateThrottlesForNavigation(navigation_handle, throttles);
+ 
+   return throttles;
+@@ -1776,6 +1922,11 @@ void AlloyContentBrowserClient::ExposeInterfacesToRenderer(
+     associated_registry->AddInterface<extensions::mojom::RendererHost>(
+         base::BindRepeating(&extensions::RendererStartupHelper::BindForRenderer,
+                             host->GetID()));
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++    associated_registry->AddInterface<extensions::mojom::ServiceWorkerHost>(
++        base::BindRepeating(&extensions::ServiceWorkerHost::BindReceiver,
++                            host->GetID()));
++#endif
+   }
+ 
+   CefBrowserManager::ExposeInterfacesToRenderer(registry, associated_registry,
+@@ -1811,9 +1962,16 @@ AlloyContentBrowserClient::CreateLoginDelegate(
+     scoped_refptr<net::HttpResponseHeaders> response_headers,
+     bool first_auth_attempt,
+     LoginAuthRequiredCallback auth_required_callback) {
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++  return std::make_unique<net_service::LoginDelegate>(
++      auth_info, web_contents, request_id, is_request_for_main_frame, url,
++      response_headers, std::move(auth_required_callback));
++#else
+   return std::make_unique<net_service::LoginDelegate>(
+       auth_info, web_contents, request_id, url,
+       std::move(auth_required_callback));
++
++#endif
+ }
+ 
+ void AlloyContentBrowserClient::RegisterNonNetworkNavigationURLLoaderFactories(
+@@ -1900,6 +2058,18 @@ void AlloyContentBrowserClient::RegisterNonNetworkSubresourceURLLoaderFactories(
+     return;
+   }
+ 
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++  // For service worker contexts, we only allow file access. The remainder of
++  // this code is used to allow extensions to access chrome:-scheme
++  // resources, which we are moving away from.
++  // TODO(crbug.com/1280411) Factories should not be created for unloaded
++  // extensions.
++  if (extension) {
++    InitializeFileURLLoaderFactoryForExtension(
++        render_process_id, browser_context, extension, factories);
++  }
++#endif
++
+   std::vector<std::string> allowed_webui_hosts;
+   // Support for chrome:// scheme if appropriate.
+   if ((extension->is_extension() || extension->is_platform_app()) &&
+@@ -1918,6 +2088,46 @@ void AlloyContentBrowserClient::RegisterNonNetworkSubresourceURLLoaderFactories(
+   }
+ }
+ 
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++void AlloyContentBrowserClient::
++    RegisterNonNetworkWorkerMainResourceURLLoaderFactories(
++        content::BrowserContext* browser_context,
++        NonNetworkURLLoaderFactoryMap* factories) {
++  DCHECK(browser_context);
++  DCHECK(factories);
++
++#if BUILDFLAG(ENABLE_EXTENSIONS)
++  DCHECK(!extensions::ChromeContentBrowserClientExtensionsPart::
++             AreExtensionsDisabledForProfile(browser_context));
++
++  factories->emplace(
++      extensions::kExtensionScheme,
++      extensions::CreateExtensionWorkerMainResourceURLLoaderFactory(
++          browser_context));
++#endif  // BUILDFLAG(ENABLE_EXTENSIONS)
++}
++
++void AlloyContentBrowserClient::
++    RegisterNonNetworkServiceWorkerUpdateURLLoaderFactories(
++        content::BrowserContext* browser_context,
++        NonNetworkURLLoaderFactoryMap* factories) {
++  DCHECK(browser_context);
++  DCHECK(factories);
++
++#if BUILDFLAG(ENABLE_EXTENSIONS)
++  if (extensions::ChromeContentBrowserClientExtensionsPart::
++          AreExtensionsDisabledForProfile(browser_context)) {
++    return;
++  }
++
++  factories->emplace(
++      extensions::kExtensionScheme,
++      extensions::CreateExtensionServiceWorkerScriptURLLoaderFactory(
++          browser_context));
++#endif  // BUILDFLAG(ENABLE_EXTENSIONS)
++}
++#endif  // defined(OHOS_ARKWEB_EXTENSIONS)
++
+ bool AlloyContentBrowserClient::WillCreateURLLoaderFactory(
+     content::BrowserContext* browser_context,
+     content::RenderFrameHost* frame,
+@@ -1937,12 +2147,419 @@ bool AlloyContentBrowserClient::WillCreateURLLoaderFactory(
+       type == URLLoaderFactoryType::kNavigation,
+       type == URLLoaderFactoryType::kDownload, request_initiator);
+ 
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++  auto* web_request_api =
++      extensions::BrowserContextKeyedAPIFactory<extensions::WebRequestAPI>::Get(
++          browser_context);
++
++  // NOTE: Some unit test environments do not initialize
++  // BrowserContextKeyedAPI factories for e.g. WebRequest.
++  if (web_request_api) {
++    bool use_proxy_for_web_request =
++        web_request_api->MaybeProxyURLLoaderFactory(
++            browser_context, frame, render_process_id, type,
++            std::move(navigation_id), ukm_source_id, factory_receiver,
++            header_client, request_initiator);
++    if (bypass_redirect_checks) {
++      *bypass_redirect_checks = use_proxy_for_web_request;
++    }
++  }
++#endif
++
+   net_service::ProxyURLLoaderFactory::CreateProxy(
+       browser_context, factory_receiver, header_client,
+       std::move(request_handler));
+   return true;
+ }
+ 
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++bool AlloyContentBrowserClient::WillInterceptWebSocket(
++    content::RenderFrameHost* frame) {
++#if BUILDFLAG(ENABLE_EXTENSIONS)
++  if (!frame) {
++    return false;
++  }
++  const auto* web_request_api =
++      extensions::BrowserContextKeyedAPIFactory<extensions::WebRequestAPI>::Get(
++          frame->GetBrowserContext());
++
++  // NOTE: Some unit test environments do not initialize
++  // BrowserContextKeyedAPI factories for e.g. WebRequest.
++  if (!web_request_api) {
++    return false;
++  }
++  return (web_request_api->MayHaveProxies() ||
++          web_request_api->MayHaveWebsocketProxiesForExtensionTelemetry());
++#else
++  return false;
++#endif
++}
++
++void AlloyContentBrowserClient::CreateWebSocket(
++    content::RenderFrameHost* frame,
++    WebSocketFactory factory,
++    const GURL& url,
++    const net::SiteForCookies& site_for_cookies,
++    const absl::optional<std::string>& user_agent,
++    mojo::PendingRemote<network::mojom::WebSocketHandshakeClient>
++        handshake_client) {
++#if BUILDFLAG(ENABLE_EXTENSIONS)
++  // TODO(crbug.com/1243518): Request w/o a frame also should be proxied.
++  if (!frame) {
++    return;
++  }
++  auto* web_request_api =
++      extensions::BrowserContextKeyedAPIFactory<extensions::WebRequestAPI>::Get(
++          frame->GetBrowserContext());
++
++  DCHECK(web_request_api);
++  web_request_api->ProxyWebSocket(frame, std::move(factory), url,
++                                  site_for_cookies, user_agent,
++                                  std::move(handshake_client));
++#endif
++}
++
++void AlloyContentBrowserClient::WillCreateWebTransport(
++    int process_id,
++    int frame_routing_id,
++    const GURL& url,
++    const url::Origin& initiator_origin,
++    mojo::PendingRemote<network::mojom::WebTransportHandshakeClient>
++        handshake_client,
++    WillCreateWebTransportCallback callback) {
++  MaybeInterceptWebTransport(process_id, frame_routing_id, url,
++                             initiator_origin, std::move(handshake_client),
++                             std::move(callback));
++}
++
++void AlloyContentBrowserClient::MaybeInterceptWebTransport(
++    int process_id,
++    int frame_routing_id,
++    const GURL& url,
++    const url::Origin& initiator_origin,
++    mojo::PendingRemote<network::mojom::WebTransportHandshakeClient>
++        handshake_client,
++    WillCreateWebTransportCallback callback) {
++#if BUILDFLAG(ENABLE_EXTENSIONS)
++  DCHECK_CURRENTLY_ON(content::BrowserThread::UI);
++  // TODO(1243518): Add a unit test which calls
++  // ChromeContentBrowserClient::WillCreateWebTransport() with invalid process
++  // id and routing id.
++  auto* render_process_host = content::RenderProcessHost::FromID(process_id);
++  if (!render_process_host) {
++    std::move(callback).Run(std::move(handshake_client), absl::nullopt);
++    return;
++  }
++  content::BrowserContext* browser_context =
++      render_process_host->GetBrowserContext();
++  auto* web_request_api =
++      extensions::BrowserContextKeyedAPIFactory<extensions::WebRequestAPI>::Get(
++          browser_context);
++  // NOTE: Some unit test environments do not initialize BrowserContextKeyedAPI
++  // factories like WebRequestAPI.
++  if (!web_request_api) {
++    std::move(callback).Run(std::move(handshake_client), absl::nullopt);
++    return;
++  }
++  web_request_api->ProxyWebTransport(
++      *render_process_host, frame_routing_id, url, initiator_origin,
++      std::move(handshake_client), std::move(callback));
++#else
++  std::move(callback).Run(std::move(handshake_client), absl::nullopt);
++#endif
++}
++
++bool AlloyContentBrowserClient::ShouldPreconnectNavigation(
++    content::BrowserContext* browser_context) {
++#if BUILDFLAG(ENABLE_EXTENSIONS)
++  // An extension could be blocking connections for privacy reasons, so skip
++  // optimization if there are any extensions with WebRequest permissions.
++  const auto* web_request_api =
++      extensions::BrowserContextKeyedAPIFactory<extensions::WebRequestAPI>::Get(
++          browser_context);
++  if (!web_request_api || web_request_api->MayHaveProxies()) {
++    return false;
++  }
++#endif
++  return true;
++}
++
++content::AllowServiceWorkerResult AlloyContentBrowserClient::AllowServiceWorker(
++    const GURL& scope,
++    const net::SiteForCookies& site_for_cookies,
++    const absl::optional<url::Origin>& top_frame_origin,
++    const GURL& script_url,
++    content::BrowserContext* context) {
++  DCHECK(context);
++  DCHECK_CURRENTLY_ON(content::BrowserThread::UI);
++  GURL first_party_url = top_frame_origin ? top_frame_origin->GetURL() : GURL();
++
++#if BUILDFLAG(ENABLE_EXTENSIONS)
++  // Check if this is an extension-related service worker, and, if so, if it's
++  // allowed (this can return false if, e.g., the extension is disabled).
++  // If it's not allowed, return immediately. We deliberately do *not* report
++  // to the PageSpecificContentSettings, since the service worker is blocked
++  // because of the extension, rather than because of the user's content
++  // settings.
++  if (extensions::ExtensionsEnabled()) {
++    if (!extensions::ChromeContentBrowserClientExtensionsPart::
++            AllowServiceWorker(scope, first_party_url, script_url, context)) {
++      return content::AllowServiceWorkerResult::No();
++    }
++  }
++#endif
++
++  Profile* profile = Profile::FromBrowserContext(context);
++  return embedder_support::AllowServiceWorker(
++      scope, site_for_cookies, top_frame_origin,
++      CookieSettingsFactory::GetForProfile(profile).get(),
++      HostContentSettingsMapFactory::GetForProfile(profile));
++}
++
++bool AlloyContentBrowserClient::MayDeleteServiceWorkerRegistration(
++    const GURL& scope,
++    content::BrowserContext* browser_context) {
++  DCHECK(browser_context);
++  DCHECK_CURRENTLY_ON(content::BrowserThread::UI);
++
++#if BUILDFLAG(ENABLE_EXTENSIONS)
++  if (!extensions::ChromeContentBrowserClientExtensionsPart::
++          MayDeleteServiceWorkerRegistration(scope, browser_context)) {
++    return false;
++  }
++#endif
++
++  return true;
++}
++
++content::StoragePartitionConfig
++AlloyContentBrowserClient::GetStoragePartitionConfigForSite(
++    content::BrowserContext* browser_context,
++    const GURL& site) {
++  // Default to the browser-wide storage partition and override based on |site|
++  // below.
++  content::StoragePartitionConfig default_storage_partition_config =
++      content::StoragePartitionConfig::CreateDefault(browser_context);
++
++  // A non-default storage partition is used in the following situations:
++  // - To enforce process isolation between a more-trusted content (Chrome Apps,
++  // Extensions, and Isolated Web Apps) and regular web content.
++  // - For the <webview> tag, which Chrome Apps, Isolated Web Apps and WebUI use
++  // to create temporary storage buckets for loading various kinds of web
++  // content.
++  //
++  // In general, those use cases aren't considered part of the user's normal
++  // browsing activity.
++#if BUILDFLAG(ENABLE_EXTENSIONS)
++  if (site.SchemeIs(extensions::kExtensionScheme)) {
++    // The host in an extension site URL is the extension_id.
++    CHECK(site.has_host());
++    return extensions::util::GetStoragePartitionConfigForExtensionId(
++        site.host(), browser_context);
++  }
++
++  if (content::SiteIsolationPolicy::ShouldUrlUseApplicationIsolationLevel(
++          browser_context, site)) {
++    CHECK(site.SchemeIs(chrome::kIsolatedAppScheme));
++    const base::expected<web_app::IsolatedWebAppUrlInfo, std::string>
++        iwa_url_info = web_app::IsolatedWebAppUrlInfo::Create(site);
++    if (!iwa_url_info.has_value()) {
++      LOG(ERROR) << "Invalid isolated-app URL: " << site;
++      return default_storage_partition_config;
++    }
++    return iwa_url_info->storage_partition_config(browser_context);
++  }
++#endif
++
++  return default_storage_partition_config;
++}
++
++GURL AlloyContentBrowserClient::GetEffectiveURL(
++    content::BrowserContext* browser_context,
++    const GURL& url) {
++  Profile* profile = Profile::FromBrowserContext(browser_context);
++  if (!profile) {
++    return url;
++  }
++
++#if BUILDFLAG(ENABLE_EXTENSIONS)
++  if (extensions::ChromeContentBrowserClientExtensionsPart::
++          AreExtensionsDisabledForProfile(profile)) {
++    return url;
++  }
++
++  return extensions::ChromeContentBrowserClientExtensionsPart::GetEffectiveURL(
++      profile, url);
++#else
++  return url;
++#endif
++}
++
++bool AlloyContentBrowserClient::
++    ShouldCompareEffectiveURLsForSiteInstanceSelection(
++        content::BrowserContext* browser_context,
++        content::SiteInstance* candidate_site_instance,
++        bool is_outermost_main_frame,
++        const GURL& candidate_url,
++        const GURL& destination_url) {
++  DCHECK(browser_context);
++  DCHECK(candidate_site_instance);
++#if BUILDFLAG(ENABLE_EXTENSIONS)
++  if (extensions::ChromeContentBrowserClientExtensionsPart::
++          AreExtensionsDisabledForProfile(browser_context)) {
++    return true;
++  }
++
++  return extensions::ChromeContentBrowserClientExtensionsPart::
++      ShouldCompareEffectiveURLsForSiteInstanceSelection(
++          browser_context, candidate_site_instance, is_outermost_main_frame,
++          candidate_url, destination_url);
++#else
++  return true;
++#endif
++}
++
++// TODO(crbug.com/1087559): This is based on SubframeTask::GetTitle()
++// implementation. Find a general solution to avoid code duplication.
++std::string AlloyContentBrowserClient::GetSiteDisplayNameForCdmProcess(
++    content::BrowserContext* browser_context,
++    const GURL& site_url) {
++  // By default, use the |site_url| spec as the display name.
++  std::string name = site_url.spec();
++
++#if BUILDFLAG(ENABLE_EXTENSIONS)
++  // If |site_url| wraps a chrome extension ID, we can display the extension
++  // name instead, which is more human-readable.
++  if (site_url.SchemeIs(extensions::kExtensionScheme)) {
++    const extensions::Extension* extension =
++        extensions::ExtensionRegistry::Get(browser_context)
++            ->enabled_extensions()
++            .GetExtensionOrAppByURL(site_url);
++    if (extension) {
++      name = extension->name();
++    }
++  }
++#endif  // BUILDFLAG(ENABLE_EXTENSIONS)
++
++  return name;
++}
++
++network::mojom::IPAddressSpace
++AlloyContentBrowserClient::DetermineAddressSpaceFromURL(const GURL& url) {
++#if BUILDFLAG(ENABLE_EXTENSIONS)
++  if (url.SchemeIs(extensions::kExtensionScheme)) {
++    return network::mojom::IPAddressSpace::kLoopback;
++  }
++#endif
++
++  return network::mojom::IPAddressSpace::kUnknown;
++}
++
++bool AlloyContentBrowserClient::DoesSchemeAllowCrossOriginSharedWorker(
++    const std::string& scheme) {
++#if BUILDFLAG(ENABLE_EXTENSIONS)
++  // Extensions are allowed to start cross-origin shared workers.
++  if (scheme == extensions::kExtensionScheme) {
++    return true;
++  }
++#endif
++
++  return false;
++}
++
++bool AlloyContentBrowserClient::ShouldForceDownloadResource(
++    const GURL& url,
++    const std::string& mime_type) {
++#if BUILDFLAG(ENABLE_EXTENSIONS)
++  // Special-case user scripts to get downloaded instead of viewed.
++  return extensions::UserScript::IsURLUserScript(url, mime_type);
++#else
++  return false;
++#endif
++}
++
++bool AlloyContentBrowserClient::IsBuiltinComponent(
++    content::BrowserContext* browser_context,
++    const url::Origin& origin) {
++#if BUILDFLAG(ENABLE_EXTENSIONS)
++  return extensions::ChromeContentBrowserClientExtensionsPart::
++      IsBuiltinComponent(browser_context, origin);
++#else
++  return false;
++#endif
++}
++
++bool AlloyContentBrowserClient::
++    ShouldInheritCrossOriginEmbedderPolicyImplicitly(const GURL& url) {
++#if BUILDFLAG(ENABLE_EXTENSIONS)
++  return url.SchemeIs(extensions::kExtensionScheme);
++#else
++  return false;
++#endif
++}
++
++bool AlloyContentBrowserClient::
++    ShouldServiceWorkerInheritPolicyContainerFromCreator(const GURL& url) {
++  if (url.SchemeIsLocal()) {
++    return true;
++  }
++#if BUILDFLAG(ENABLE_EXTENSIONS)
++  return url.SchemeIs(extensions::kExtensionScheme);
++#else
++  return false;
++#endif
++}
++
++bool AlloyContentBrowserClient::ShouldSendOutermostOriginToRenderer(
++    const url::Origin& outermost_origin) {
++#if BUILDFLAG(ENABLE_EXTENSIONS)
++  // We only want to send the outermost origin if it is an extension scheme.
++  // We do not send the outermost origin to every renderer to avoid leaking
++  // additional information into the renderer about the embedder. For
++  // extensions though this is required for the way content injection API
++  // works. We do not want one extension injecting content into the context
++  // of another extension.
++  return outermost_origin.scheme() == extensions::kExtensionScheme;
++#else
++  return false;
++#endif
++}
++
++bool AlloyContentBrowserClient::IsFileSystemURLNavigationAllowed(
++    content::BrowserContext* browser_context,
++    const GURL& url) {
++#if BUILDFLAG(ENABLE_EXTENSIONS)
++  // filesystem: URLs for Chrome Apps are in the following format:
++  // `filesystem:chrome-extension://<extension-id>/...`
++  if (!url.SchemeIsFileSystem()) {
++    return false;
++  }
++  // Once converted into an origin, we expect the following:
++  // scheme() is chrome-extension: (filesystem: is automatically discarded)
++  // host() is the extension-id
++  const url::Origin origin = url::Origin::Create(url);
++  if (origin.scheme() == extensions::kExtensionScheme) {
++    const Extension* extension =
++        extensions::ExtensionRegistry::Get(browser_context)
++            ->enabled_extensions()
++            .GetByID(origin.host());
++    DCHECK(extension);
++    return extension->is_platform_app();
++  }
++#endif  // BUILDFLAG(ENABLE_EXTENSIONS)
++  return false;
++}
++
++bool AlloyContentBrowserClient::ShouldUseFirstPartyStorageKey(
++    const url::Origin& origin) {
++#if BUILDFLAG(ENABLE_EXTENSIONS)
++  return origin.scheme() == extensions::kExtensionScheme;
++#else
++  return false;
++#endif  // BUILDFLAG(ENABLE_EXTENSIONS)
++}
++#endif  // defined(OHOS_ARKWEB_EXTENSIONS)
++
+ void AlloyContentBrowserClient::OnNetworkServiceCreated(
+     network::mojom::NetworkService* network_service) {
+   DCHECK(g_browser_process);
+@@ -1992,6 +2609,10 @@ void AlloyContentBrowserClient::OnNetworkServiceCreated(
+         GURL(url), ohos_predictors::HintOrigin::OMNIBOX, true);
+   }
+ #endif
++
++#ifdef OHOS_EX_NETWORK_CONNECTION
++  network_service->SetConnectTimeout(net_service::NetHelpers::connection_timeout);
++#endif
+ }
+ 
+ bool AlloyContentBrowserClient::ConfigureNetworkContextParams(
+@@ -2065,6 +2686,17 @@ bool AlloyContentBrowserClient::ConfigureNetworkContextParams(
+   network_context_params->initial_ssl_config = network::mojom::SSLConfig::New();
+ #endif
+ 
++#if defined(OHOS_COOKIE)
++  mojo::PendingRemote<network::mojom::CookieManager> cookie_manager_remote;
++  network_context_params->cookie_manager =
++      cookie_manager_remote.InitWithNewPipeAndPassReceiver();
++  CefRefPtr<CefCookieManager> cookie_manager = CefCookieManager::GetGlobalManager(nullptr);
++  if (cookie_manager) {
++    reinterpret_cast<CefCookieManagerImpl *>(cookie_manager.get())
++        ->SetNetWorkCookieManager(std::move(cookie_manager_remote));
++  }
++#endif  // defined(OHOS_COOKIE)
++
+ #ifdef OHOS_NETWORK_PROXY
+   // Add proxy settings
+   NWEB::ProxyConfigMonitor::GetInstance()->AddProxyToNetworkContextParams(
+@@ -2399,6 +3031,17 @@ bool AlloyContentBrowserClient::WillCreateRestrictedCookieManager(
+     int process_id,
+     int routing_id,
+     mojo::PendingReceiver<network::mojom::RestrictedCookieManager>* receiver) {
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++  DCHECK_CURRENTLY_ON(content::BrowserThread::UI);
++  if (origin.scheme() == extensions::kExtensionScheme) {
++    DCHECK_EQ(network::mojom::RestrictedCookieManagerRole::SCRIPT, role);
++    extensions::ChromeExtensionCookies::Get(browser_context)
++        ->CreateRestrictedCookieManager(origin, isolation_info,
++                                        std::move(*receiver));
++    return true;
++  }
++#endif
++
+   mojo::PendingReceiver<network::mojom::RestrictedCookieManager> orig_receiver =
+       std::move(*receiver);
+ 
+diff --git a/src/cef/libcef/browser/alloy/alloy_content_browser_client.h b/src/cef/libcef/browser/alloy/alloy_content_browser_client.h
+index 0cb566ec4f19a..2aacb3d323ca2
+--- a/src/cef/libcef/browser/alloy/alloy_content_browser_client.h
++++ b/src/cef/libcef/browser/alloy/alloy_content_browser_client.h
+@@ -174,6 +174,14 @@ class AlloyContentBrowserClient : public content::ContentBrowserClient {
+       int frame_tree_node_id,
+       ukm::SourceIdObj ukm_source_id,
+       NonNetworkURLLoaderFactoryMap* factories) override;
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++  void RegisterNonNetworkWorkerMainResourceURLLoaderFactories(
++      content::BrowserContext* browser_context,
++      NonNetworkURLLoaderFactoryMap* factories) override;
++  void RegisterNonNetworkServiceWorkerUpdateURLLoaderFactories(
++      content::BrowserContext* browser_context,
++      NonNetworkURLLoaderFactoryMap* factories) override;
++#endif
+   void RegisterNonNetworkSubresourceURLLoaderFactories(
+       int render_process_id,
+       int render_frame_id,
+@@ -285,6 +293,87 @@ class AlloyContentBrowserClient : public content::ContentBrowserClient {
+   base::FilePath GetGrShaderDiskCacheDirectory() override;
+ #endif
+ 
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++  bool WillInterceptWebSocket(content::RenderFrameHost* frame) override;
++
++  void CreateWebSocket(
++      content::RenderFrameHost* frame,
++      WebSocketFactory factory,
++      const GURL& url,
++      const net::SiteForCookies& site_for_cookies,
++      const absl::optional<std::string>& user_agent,
++      mojo::PendingRemote<network::mojom::WebSocketHandshakeClient>
++          handshake_client) override;
++
++  void WillCreateWebTransport(
++      int process_id,
++      int frame_routing_id,
++      const GURL& url,
++      const url::Origin& initiator_origin,
++      mojo::PendingRemote<network::mojom::WebTransportHandshakeClient>
++          handshake_client,
++      WillCreateWebTransportCallback callback) override;
++
++  bool ShouldPreconnectNavigation(
++      content::BrowserContext* browser_context) override;
++
++  content::AllowServiceWorkerResult AllowServiceWorker(
++      const GURL& scope,
++      const net::SiteForCookies& site_for_cookies,
++      const absl::optional<url::Origin>& top_frame_origin,
++      const GURL& script_url,
++      content::BrowserContext* context) override;
++
++  bool MayDeleteServiceWorkerRegistration(
++      const GURL& scope,
++      content::BrowserContext* browser_context) override;
++
++  content::StoragePartitionConfig GetStoragePartitionConfigForSite(
++      content::BrowserContext* browser_context,
++      const GURL& site) override;
++
++  GURL GetEffectiveURL(content::BrowserContext* browser_context,
++                       const GURL& url) override;
++
++  bool ShouldCompareEffectiveURLsForSiteInstanceSelection(
++      content::BrowserContext* browser_context,
++      content::SiteInstance* candidate_site_instance,
++      bool is_outermost_main_frame,
++      const GURL& candidate_url,
++      const GURL& destination_url) override;
++
++  std::string GetSiteDisplayNameForCdmProcess(
++      content::BrowserContext* browser_context,
++      const GURL& site_url) override;
++
++  network::mojom::IPAddressSpace DetermineAddressSpaceFromURL(
++      const GURL& url) override;
++
++  bool DoesSchemeAllowCrossOriginSharedWorker(
++      const std::string& scheme) override;
++
++  bool ShouldForceDownloadResource(const GURL& url,
++                                   const std::string& mime_type) override;
++
++  bool IsBuiltinComponent(content::BrowserContext* browser_context,
++                          const url::Origin& origin) override;
++
++  bool ShouldInheritCrossOriginEmbedderPolicyImplicitly(
++      const GURL& url) override;
++
++  bool ShouldServiceWorkerInheritPolicyContainerFromCreator(
++      const GURL& url) override;
++
++  bool ShouldSendOutermostOriginToRenderer(
++      const url::Origin& outermost_origin) override;
++
++  bool IsFileSystemURLNavigationAllowed(
++      content::BrowserContext* browser_context,
++      const GURL& url) override;
++
++  bool ShouldUseFirstPartyStorageKey(const url::Origin& origin) override;
++#endif // defined(OHOS_ARKWEB_EXTENSIONS)
++
+   CefRefPtr<CefRequestContextImpl> request_context() const;
+   CefDevToolsDelegate* devtools_delegate() const;
+ 
+@@ -297,6 +386,17 @@ class AlloyContentBrowserClient : public content::ContentBrowserClient {
+   const extensions::Extension* GetExtension(
+       content::SiteInstance* site_instance);
+ 
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++  void MaybeInterceptWebTransport(
++      int process_id,
++      int frame_routing_id,
++      const GURL& url,
++      const url::Origin& initiator_origin,
++      mojo::PendingRemote<network::mojom::WebTransportHandshakeClient>
++          handshake_client,
++      WillCreateWebTransportCallback callback);
++#endif
++
+   AlloyBrowserMainParts* browser_main_parts_ = nullptr;
+ };
+ 
+diff --git a/src/cef/libcef/browser/alloy/browser_platform_delegate_alloy.cc b/src/cef/libcef/browser/alloy/browser_platform_delegate_alloy.cc
+index 1b608e5ad655b..527f2008b705a
+--- a/src/cef/libcef/browser/alloy/browser_platform_delegate_alloy.cc
++++ b/src/cef/libcef/browser/alloy/browser_platform_delegate_alloy.cc
+@@ -163,6 +163,35 @@ void CefBrowserPlatformDelegateAlloy::AddNewContents(
+   }
+ }
+ 
++#if BUILDFLAG(IS_OHOS)
++void CefBrowserPlatformDelegateAlloy::WebContentsDestroyed(
++    content::WebContents* web_contents) {
++  DCHECK(web_contents_ && web_contents_ == web_contents);
++  if (!web_contents) {
++    LOG(ERROR)
++        << "CefBrowserPlatformDelegateAlloy WebContentsDestroyed is null. ";
++    return;
++  }
++
++#if defined(OHOS_EX_GET_ZOOM_LEVEL)
++  if (base::CommandLine::ForCurrentProcess()->HasSwitch(
++          switches::kForBrowser)) {
++    if (!browser_) {
++      return;
++    }
++    AlloyBrowserHostImpl* delegate =
++        static_cast<AlloyBrowserHostImpl*>(browser_);
++    zoom::ZoomController* zoom_controller =
++        zoom::ZoomController::FromWebContents(web_contents);
++    if (zoom_controller && delegate) {
++      zoom_controller->RemoveObserver(delegate);
++    }
++  }
++#endif
++  CefBrowserPlatformDelegate::WebContentsDestroyed(web_contents);
++}
++#endif
++
+ bool CefBrowserPlatformDelegateAlloy::
+     ShouldAllowRendererInitiatedCrossProcessNavigation(
+         bool is_main_frame_navigation) {
+@@ -216,6 +245,16 @@ void CefBrowserPlatformDelegateAlloy::BrowserCreated(
+     OhPasswordManagerClient::CreateForWebContentsWithAutofillClient(
+         web_contents_,
+         autofill::OhAutofillClient::FromWebContents(web_contents_));
++
++#ifdef OHOS_EX_GET_ZOOM_LEVEL
++    // Add observer for zoomcontroller.
++    AlloyBrowserHostImpl* delegate = static_cast<AlloyBrowserHostImpl*>(browser);
++    zoom::ZoomController* zoom_controller =
++        zoom::ZoomController::FromWebContents(web_contents_);
++    if (zoom_controller && delegate) {
++      zoom_controller->AddObserver(delegate);
++    }
++#endif
+   }
+ #endif  // OHOS_EX_PASSWORD
+ #endif
+@@ -507,10 +546,15 @@ void CefBrowserPlatformDelegateAlloy::SendTouchEventToRender(
+   if (!browser_) {
+     return;
+   }
++  float ratio = browser_->GetVirtualPixelRatio();
++  if (ratio <= 0) {
++    LOG(ERROR) << "get ratio invalid: " << ratio;
++    return;
++  }
+   auto frame = browser_->GetMainFrame();
+   if (frame && frame->IsValid()) {
+     static_cast<CefFrameHostImpl*>(frame.get())
+-        ->SendHitEvent(event.x, event.y, event.radius_x, event.radius_y);
++        ->SendHitEvent(event.x * ratio, event.y * ratio, event.radius_x * ratio, event.radius_y * ratio);
+   }
+ }
+ #endif
+@@ -531,4 +575,21 @@ void CefBrowserPlatformDelegateAlloy::SendTouchEventToRender(
+ 
+     ohos_print_manager->SetToken(token);
+   }
++  void CefBrowserPlatformDelegateAlloy::CreateWebPrintDocumentAdapter(
++      const CefString& jobName, void** webPrintDocumentAdapter) {
++    REQUIRE_ALLOY_RUNTIME();
++    content::RenderFrameHost* rfh_to_use = printing::GetFrameToPrint(web_contents_);
++    if (!rfh_to_use) {
++      LOG(ERROR) << "rfh_to_use is nullptr";
++      return;
++    }
++    auto* ohos_print_manager = printing::OhosPrintManager::FromWebContents(
++      content::WebContents::FromRenderFrameHost(rfh_to_use));
++    if (!ohos_print_manager) {
++      LOG(ERROR) << "ohos_print_manager is nullptr";
++      return;
++    }
++
++    ohos_print_manager->CreateWebPrintDocumentAdapter(jobName, webPrintDocumentAdapter);
++  }
+ #endif // defined(OHOS_PRINT)
+diff --git a/src/cef/libcef/browser/alloy/browser_platform_delegate_alloy.h b/src/cef/libcef/browser/alloy/browser_platform_delegate_alloy.h
+index 943673c923170..d698442b79d45
+--- a/src/cef/libcef/browser/alloy/browser_platform_delegate_alloy.h
++++ b/src/cef/libcef/browser/alloy/browser_platform_delegate_alloy.h
+@@ -80,9 +80,12 @@ class CefBrowserPlatformDelegateAlloy : public CefBrowserPlatformDelegate {
+ 
+ #if BUILDFLAG(IS_OHOS)
+   void SendTouchEventToRender(const CefTouchEvent& event);
++  void WebContentsDestroyed(content::WebContents* web_contents) override;
+ #endif
+ #if defined(OHOS_PRINT)
+ void SetToken(void* token) override;
++void CreateWebPrintDocumentAdapter(const CefString& jobName,
++                                   void** webPrintDocumentAdapter) override;
+ #endif // defined(OHOS_PRINT)
+ 
+ 
+diff --git a/src/cef/libcef/browser/browser_contents_delegate.cc b/src/cef/libcef/browser/browser_contents_delegate.cc
+index 905f68fefc610..0c353884323be
+--- a/src/cef/libcef/browser/browser_contents_delegate.cc
++++ b/src/cef/libcef/browser/browser_contents_delegate.cc
+@@ -33,6 +33,13 @@
+ #include "ui/events/keycodes/keyboard_codes_posix.h"
+ #endif
+ 
++#ifdef OHOS_EX_UA
++#include "base/command_line.h"
++#include "content/browser/renderer_host/navigation_request.h"
++#include "content/public/common/content_switches.h"
++#include "ohos_nweb_ex/overrides/cef/libcef/browser/alloy/alloy_browser_ua_config.h"
++#endif
++
+ using content::KeyboardEventProcessingResult;
+ 
+ namespace {
+@@ -43,6 +50,47 @@ constexpr base::TimeDelta kEffectiveUserEscapeDuration =
+     base::Milliseconds(1250);
+ #endif
+ 
++#ifdef OHOS_EX_UA
++void MaybeSetUserAgentOverrideForMainFrame(
++    content::NavigationHandle* navigation) {
++  if (!base::CommandLine::ForCurrentProcess()->HasSwitch(
++          switches::kForBrowser) ||
++      !navigation) {
++    return;
++  }
++
++  // UserAgent won't be added when the navigation_request created by renderer
++  // process.
++  if (content::NavigationRequest::From(navigation)
++          ->is_synchronous_renderer_commit()) {
++    return;
++  }
++
++  const GURL& url = navigation->GetURL();
++  if (url.is_empty() || !url.is_valid() || !url.has_host()) {
++    return;
++  }
++
++  std::string final_ua =
++      nweb_ex::AlloyBrowserUAConfig::GetInstance()->GetUserAgentForHost(
++          url.host());
++  LOG(INFO) << "DidStartNavigation, url " << url.spec() << ", final_ua "
++            << final_ua;
++
++  navigation->SetRequestHeader(net::HttpRequestHeaders::kUserAgent, final_ua);
++  if (!navigation->IsInMainFrame()) {
++    return;
++  }
++
++  content::WebContents* web_contents = navigation->GetWebContents();
++  if (!web_contents) {
++    return;
++  }
++  web_contents->SetUserAgentOverride(
++      blink::UserAgentOverride::UserAgentOnly(final_ua), true);
++}
++#endif  // OHOS_EX_UA
++
+ class CefWidgetHostInterceptor
+     : public blink::mojom::WidgetHostInterceptorForTesting,
+       public content::RenderWidgetHostObserver {
+@@ -633,6 +681,11 @@ void CefBrowserContentsDelegate::DidStartNavigation(
+       icon_helper_->SetMainFrameDocumentOnLoadCompleted(false);
+     }
+ #endif  // defined(OHOS_FAVICON)
++
++#ifdef OHOS_EX_UA
++    // |final_ua| may be added to the navigation of the mainframe and iframe.
++    MaybeSetUserAgentOverrideForMainFrame(navigation);
++#endif  // OHOS_EX_UA
+   }
+ }
+ #endif  // defined(OHOS_WPT)
+diff --git a/src/cef/libcef/browser/browser_context_keyed_service_factories.cc b/src/cef/libcef/browser/browser_context_keyed_service_factories.cc
+index 1c4e140055d1a..5739cde36eadc
+--- a/src/cef/libcef/browser/browser_context_keyed_service_factories.cc
++++ b/src/cef/libcef/browser/browser_context_keyed_service_factories.cc
+@@ -17,9 +17,15 @@
+ #include "components/permissions/features.h"
+ #include "extensions/browser/api/alarms/alarm_manager.h"
+ #include "extensions/browser/api/storage/storage_frontend.h"
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++#include "extensions/browser/api/web_request/web_request_api.h"
++#endif
+ #include "extensions/browser/renderer_startup_helper.h"
+ #include "services/network/public/cpp/features.h"
+-
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++#include "chrome/browser/extensions/api/developer_private/developer_private_api.h"
++#include "extensions/browser/api/management/management_api.h"
++#endif
+ namespace cef {
+ 
+ void EnsureBrowserContextKeyedServiceFactoriesBuilt() {
+@@ -35,6 +41,11 @@ void EnsureBrowserContextKeyedServiceFactoriesBuilt() {
+     extensions::AlarmManager::GetFactoryInstance();
+     extensions::RendererStartupHelperFactory::GetInstance();
+     extensions::StorageFrontend::GetFactoryInstance();
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++    extensions::DeveloperPrivateAPI::GetFactoryInstance();
++    extensions::ManagementAPI::GetFactoryInstance();
++    extensions::WebRequestAPI::GetFactoryInstance();
++#endif
+   }
+ 
+   if (base::FeatureList::IsEnabled(network::features::kReduceAcceptLanguage)) {
+diff --git a/src/cef/libcef/browser/browser_host_base.cc b/src/cef/libcef/browser/browser_host_base.cc
+index b4c742d567880..3fafe76f42088
+--- a/src/cef/libcef/browser/browser_host_base.cc
++++ b/src/cef/libcef/browser/browser_host_base.cc
+@@ -78,6 +78,10 @@
+ #include "libcef/browser/received_slice_helper.h"
+ #endif
+ 
++#if defined(OHOS_EX_TOPCONTROLS)
++#include "cc/input/browser_controls_state.h"
++#endif
++
+ namespace {
+ 
+ #if defined(OHOS_INPUT_EVENTS)
+@@ -869,14 +873,21 @@ CefString CefBrowserHostBase::DefaultUserAgent() {
+ 
+ void CefBrowserHostBase::RegisterArkJSfunction(
+     const CefString& object_name,
+-    const std::vector<CefString>& method_list) {
++    const std::vector<CefString>& method_list,
++    const int32_t object_id) {
+   OhJavascriptInjector* javascriptInjector =
+       OhJavascriptInjector::FromWebContents(GetWebContents());
+   std::vector<std::string> method_vector;
+   for (CefString method : method_list) {
+     method_vector.push_back(method.ToString());
+   }
+-  javascriptInjector->AddInterface(object_name.ToString(), method_vector);
++  if (!javascriptInjector) {
++    LOG(ERROR) << "CefBrowserHostBase::RegisterArkJSfunction "
++                  "javascriptInjector is null";
++    return;
++  }
++  javascriptInjector->AddInterface(object_name.ToString(), method_vector,
++                                   object_id);
+ }
+ 
+ void CefBrowserHostBase::UnregisterArkJSfunction(
+@@ -890,6 +901,62 @@ void CefBrowserHostBase::UnregisterArkJSfunction(
+   }
+   javascriptInjector->RemoveInterface(object_name.ToString(), method_vector);
+ }
++
++js_injection::JsCommunicationHost* CefBrowserHostBase::GetJsCommunicationHost() {
++  DCHECK_CURRENTLY_ON(content::BrowserThread::UI);
++  if (!js_communication_host_.get()) {
++    js_communication_host_ =
++        std::make_unique<js_injection::JsCommunicationHost>(GetWebContents());
++  }
++  return js_communication_host_.get();
++}
++ 
++void CefBrowserHostBase::JavaScriptOnDocumentStart(
++    const CefString& script,
++    const std::vector<CefString>& script_rules) {
++  DCHECK_CURRENTLY_ON(content::BrowserThread::UI);
++  auto* host = GetJsCommunicationHost();
++  if (host) {
++    std::string stdScript = script.ToString();
++    std::vector<std::string> scriptRules;
++    for (CefString rule: script_rules) {
++      scriptRules.push_back(rule.ToString());
++    }
++    js_injection::JsCommunicationHost::AddScriptResult result =
++      host->AddDocumentStartJavaScript(script, scriptRules);
++    if (result.script_id.has_value()) {
++      script_result_map_.emplace(std::make_pair(stdScript, result.script_id.value()));
++    }
++  }
++}
++ 
++void CefBrowserHostBase::RemoveJavaScriptOnDocumentStart() {
++  DCHECK_CURRENTLY_ON(content::BrowserThread::UI);
++  auto* host = GetJsCommunicationHost();
++  if (host) {
++    for (auto iter: script_result_map_) {
++      host->RemoveDocumentStartJavaScript(iter.second);
++    }
++  }
++}
++
++void CefBrowserHostBase::CallH5Function(
++    int32_t routing_id,
++    int32_t h5_object_id,
++    const CefString& h5_method_name,
++    const std::vector<CefRefPtr<CefValue>>& args) {
++  OhJavascriptInjector* javascriptInjector =
++      OhJavascriptInjector::FromWebContents(GetWebContents());
++  if (!javascriptInjector || h5_object_id <= 0) {
++    LOG(ERROR) << "CefBrowserHostBase::GetH5ObjectMethods "
++                  "javascriptInjector is null or h5_object_id = "
++               << h5_object_id;
++    return;
++  }
++
++  std::string name = h5_method_name.ToString();
++  javascriptInjector->DoCallH5Function(routing_id, h5_object_id, name, args);
++}
+ #endif
+ 
+ void CefBrowserHostBase::ReplaceMisspelling(const CefString& word) {
+@@ -965,10 +1032,15 @@ void CefBrowserHostBase::SendMouseClickEvent(const CefMouseEvent& event,
+   if (mouseUp)
+     return;
+ 
++  float ratio = GetVirtualPixelRatio();
++  if (ratio <= 0) {
++    LOG(ERROR) << "get ratio invalid: " << ratio;
++    return;
++  }
+   auto frame = GetMainFrame();
+   if (frame && frame->IsValid()) {
+     static_cast<CefFrameHostImpl*>(frame.get())
+-        ->SendHitEvent(event.x, event.y, 0, 0);
++        ->SendHitEvent(event.x * ratio, event.y * ratio, 0, 0);
+   }
+ #endif  // defined(OHOS_INPUT_EVENTS)
+ }
+@@ -1320,6 +1392,70 @@ void CefBrowserHostBase::RemoveCache(bool include_disk_files) {
+     return;
+   }
+ }
++
++void CefBrowserHostBase::UpdateBrowserControlsState(int constraints,
++                                                    int current,
++                                                    bool animate) {
++#if defined(OHOS_EX_TOPCONTROLS)
++  if (!GetWebContents()) {
++    return;
++  }
++ 
++  cc::BrowserControlsState constraints_state =
++      static_cast<cc::BrowserControlsState>(constraints);
++  cc::BrowserControlsState current_state =
++      static_cast<cc::BrowserControlsState>(current);
++ 
++  GetWebContents()->UpdateBrowserControlsState(constraints_state, current_state,
++                                               animate);
++#endif
++}
++
++void CefBrowserHostBase::UpdateBrowserControlsHeight(int height, bool animate) {
++#if defined(OHOS_EX_TOPCONTROLS)
++  if (!GetWebContents()) {
++    return;
++  }
++ 
++  GetWebContents()->UpdateBrowserControlsHeight(height, animate);
++#endif
++}
++
++void CefBrowserHostBase::GetOrCreateRootBrowserAccessibilityManager(
++    void** manager) {
++  // todo(ohos):impl this function then remove todo
++}
++
++void CefBrowserHostBase::SetVirtualKeyBoardArg(int32_t width,
++                                               int32_t height,
++                                               double keyboard) {
++  // todo(ohos):impl this function then remove todo
++}
++
++bool CefBrowserHostBase::ShouldVirtualKeyboardOverlay() {
++  // todo(ohos):impl this function then remove todo
++  return false;
++}
++
++void CefBrowserHostBase::SetDrawRect(int x, int y, int width, int height) {
++  // todo(ohos):impl this function then remove todo
++}
++
++void CefBrowserHostBase::SetDrawMode(int mode) {
++  // todo(ohos):impl this function then remove todo
++}
++
++void CefBrowserHostBase::SetZoomLevel(double zoomLevel) {
++  // todo(ohos):impl this function then remove todo
++}
++double CefBrowserHostBase::GetZoomLevel() {
++  // todo(ohos):impl this function then remove todo
++  return 0;
++}
++
++void CefBrowserHostBase::SetBrowserZoomLevel(double zoom_factor) {
++  // todo(ohos):impl this function then remove todo
++}
+ #endif  // IS_OHOS
+ 
+ void CefBrowserHostBase::StopLoad() {
+@@ -1642,8 +1778,18 @@ bool CefBrowserHostBase::Navigate(const content::OpenURLParams& params) {
+       return false;
+     }
+ 
+-    web_contents->GetController().LoadURL(
++#ifdef OHOS_POST_URL
++    if (params.post_data) {
++      content::NavigationController::LoadURLParams LoadURLParams(params);
++      web_contents->GetController().LoadURLWithParams(LoadURLParams);
++    } else {
++      web_contents->GetController().LoadURL(
+         gurl, params.referrer, params.transition, params.extra_headers);
++    }
++#else
++      web_contents->GetController().LoadURL(
++        gurl, params.referrer, params.transition, params.extra_headers);
++#endif
+     return true;
+   }
+   return false;
+@@ -2659,6 +2805,10 @@ void CefBrowserHostBase::SetAudioExclusive(bool audioExclusive) {
+   // TODO(ohos): please impl the function and remove this comment.
+  }
+ 
++ void CefBrowserHostBase::CreateWebPrintDocumentAdapter(
++    const CefString& jobName, void** webPrintDocumentAdapter) {
++  // TODO(ohos): please impl the function and remove this comment.
++ }
+ void CefBrowserHostBase::SetEnableLowerFrameRate(bool enabled) {
+ // TODO(ohos): please impl the function and remove this comment.
+ }
+@@ -2734,6 +2884,14 @@ void CefBrowserHostBase::ZoomBy(float delta, float width, float height) {
+   }
+ }
+ 
++void CefBrowserHostBase::SetOverscrollMode(int overscrollMode) {
++  auto frame = GetMainFrame();
++  if (frame && frame->IsValid()) {
++    static_cast<CefFrameHostImpl*>(frame.get())
++        ->SetOverscrollMode(overscrollMode);
++  }
++}
++
+ void CefBrowserHostBase::GetHitData(int& type, CefString& extra_data) {
+   auto frame = GetMainFrame();
+   if (frame && frame->IsValid()) {
+diff --git a/src/cef/libcef/browser/browser_host_base.h b/src/cef/libcef/browser/browser_host_base.h
+index ab61a39d00871..d98742db4da3f
+--- a/src/cef/libcef/browser/browser_host_base.h
++++ b/src/cef/libcef/browser/browser_host_base.h
+@@ -35,6 +35,10 @@
+ 
+ #include "components/download/public/common/download_item.h"
+ 
++#if BUILDFLAG(IS_OHOS)
++#include "components/js_injection/browser/js_communication_host.h"
++#endif //IS_OHOS
++
+ namespace extensions {
+ class Extension;
+ }
+@@ -255,12 +259,16 @@ class CefBrowserHostBase : public CefBrowserHost,
+   void PutUserAgent(const CefString& ua) override;
+   CefString DefaultUserAgent() override;
+   void UpdateBrowserSettings(const CefBrowserSettings& browser_settings);
+-  void RegisterArkJSfunction(
+-      const CefString& object_name,
+-      const std::vector<CefString>& method_list) override;
++  void RegisterArkJSfunction(const CefString& object_name,
++                             const std::vector<CefString>& method_list,
++                             const int32_t object_id) override;
+   void UnregisterArkJSfunction(
+       const CefString& object_name,
+       const std::vector<CefString>& method_list) override;
++  void CallH5Function(int32_t routing_id,
++                      int32_t h5_object_id,
++                      const CefString& h5_method_name,
++                      const std::vector<CefRefPtr<CefValue>>& args) override;
+   void OnWebPreferencesChanged();
+   void ReloadOriginalUrl() override;
+   void StoreWebArchive(
+@@ -280,6 +288,24 @@ class CefBrowserHostBase : public CefBrowserHost,
+ #endif
+   void RemoveCache(bool include_disk_files) override;
+ 
++  void GetOrCreateRootBrowserAccessibilityManager(void** manager) override;
++  void SetVirtualKeyBoardArg(int32_t width,
++                             int32_t height,
++                             double keyboard) override;
++  bool ShouldVirtualKeyboardOverlay() override;
++  void JavaScriptOnDocumentStart(
++      const CefString& script,
++      const std::vector<CefString>& script_rules) override;
++  void RemoveJavaScriptOnDocumentStart() override;
++  void SetDrawRect(int x, int y, int width, int height) override;
++  void SetDrawMode(int mode) override;
++  void SetZoomLevel(double zoomLevel) override;
++  double GetZoomLevel() override;
++  void SetBrowserZoomLevel(double zoom_factor) override;
++  void UpdateBrowserControlsState(int constraints,
++                                  int current,
++                                  bool animate) override;
++  void UpdateBrowserControlsHeight(int height, bool animate) override;
+   /* ohos webview end */
+ #endif
+ #ifdef OHOS_NAVIGATION
+@@ -350,6 +376,8 @@ class CefBrowserHostBase : public CefBrowserHost,
+   void WasKeyboardResized() override;
+   void SetWindowId(int window_id, int nweb_id) override;
+   void SetToken(void* token) override;
++  void CreateWebPrintDocumentAdapter(const CefString& jobName,
++                                     void** webPrintDocumentAdapter) override;
+   void SetEnableLowerFrameRate(bool enabled) override;
+   void SetAudioResumeInterval(int resumeInterval) override;
+   void SetAudioExclusive(bool audioExclusive) override;
+@@ -363,6 +391,7 @@ class CefBrowserHostBase : public CefBrowserHost,
+   void ZoomBy(float delta, float width, float height) override;
+   void GetHitData(int& type, CefString& extra_data) override;
+   uint64_t GetCurrentTimestamp();
++  void SetOverscrollMode(int overScrollMode) override;
+ #endif  // defined(OHOS_INPUT_EVENTS)
+ #ifdef OHOS_NETWORK_CONNINFO
+   void SetFileAccess(bool falg) override;
+@@ -370,7 +399,8 @@ class CefBrowserHostBase : public CefBrowserHost,
+   void SetCacheMode(int falg) override;
+ #endif
+   void SetShouldFrameSubmissionBeforeDraw(bool should) override;
+-
++  bool Discard() override { return false; }
++  bool Restore() override { return false; }
+   // #ifdef OHOS_EX_FREE_COPY
+   void SelectAndCopy() override;
+   bool ShouldShowFreeCopy() override;
+@@ -612,6 +642,7 @@ class CefBrowserHostBase : public CefBrowserHost,
+ 
+  private:
+ #if BUILDFLAG(IS_OHOS)
++  js_injection::JsCommunicationHost* GetJsCommunicationHost();
+   void StoreWebArchiveInternal(
+       CefRefPtr<CefStoreWebArchiveResultCallback> callback,
+       const CefString& path);
+@@ -653,6 +684,8 @@ class CefBrowserHostBase : public CefBrowserHost,
+   bool is_web_debugging_access_ = false;
+   float virtual_pixel_ratio_ = 2.0;
+   base::WeakPtrFactory<CefBrowserHostBase> weak_ptr_factory_;
++  std::unique_ptr<js_injection::JsCommunicationHost> js_communication_host_;
++  std::map<std::string, int> script_result_map_;
+ #endif  // IS_OHOS
+   IMPLEMENT_REFCOUNTING(CefBrowserHostBase);
+ };
+diff --git a/src/cef/libcef/browser/browser_info_manager.cc b/src/cef/libcef/browser/browser_info_manager.cc
+index 122e98daff605..48e680b9811ce
+--- a/src/cef/libcef/browser/browser_info_manager.cc
++++ b/src/cef/libcef/browser/browser_info_manager.cc
+@@ -182,6 +182,9 @@ bool CefBrowserInfoManager::CanCreateWindow(
+   // Start with the current browser's settings.
+   pending_popup->client = client;
+   pending_popup->settings = browser->settings();
++#ifdef OHOS_EX_DOWNLOAD
++  pending_popup->extra_info = CefDictionaryValue::Create();
++#endif
+ 
+   // With the Chrome runtime, we want to use default popup Browser creation
+   // for document picture-in-picture.
+diff --git a/src/cef/libcef/browser/browser_platform_delegate.cc b/src/cef/libcef/browser/browser_platform_delegate.cc
+index 8d91c506bfc61..80e1e02c5cafa
+--- a/src/cef/libcef/browser/browser_platform_delegate.cc
++++ b/src/cef/libcef/browser/browser_platform_delegate.cc
+@@ -447,12 +447,6 @@ void CefBrowserPlatformDelegate::ShowPasswordDialog(bool is_update,
+ }
+ #endif
+ 
+-#if BUILDFLAG(IS_OHOS)
+-  void CefBrowserPlatformDelegate::SetToken(void* token) {
+-    NOTIMPLEMENTED();
+-  }
+-#endif
+-
+ // static
+ int CefBrowserPlatformDelegate::TranslateWebEventModifiers(
+     uint32 cef_modifiers) {
+diff --git a/src/cef/libcef/browser/browser_platform_delegate.h b/src/cef/libcef/browser/browser_platform_delegate.h
+index 6e599a5e3d1ce..0a774cb7d996c
+--- a/src/cef/libcef/browser/browser_platform_delegate.h
++++ b/src/cef/libcef/browser/browser_platform_delegate.h
+@@ -393,6 +393,9 @@ class CefBrowserPlatformDelegate {
+ 
+ #if defined(OHOS_COMPOSITE_RENDER)
+   virtual void SetShouldFrameSubmissionBeforeDraw(bool should) {}
++  virtual void WasKeyboardResized() {}
++  virtual void SetDrawRect(int x, int y, int width, int height) {}
++  virtual void SetDrawMode(int mode) {}
+ #endif  // defined(OHOS_COMPOSITE_RENDER)
+ 
+ #ifdef OHOS_HTML_SELECT
+@@ -417,8 +420,15 @@ class CefBrowserPlatformDelegate {
+ #endif  // OHOS_EX_PASSWORD
+ 
+ #if defined(OHOS_PRINT)
+-  virtual void SetToken(void* token);
++  virtual void SetToken(void* token) {}
++  virtual void CreateWebPrintDocumentAdapter(const CefString& jobName,
++                                             void** webPrintDocumentAdapter) {}
+ #endif // defined(OHOS_PRINT)
++
++#if defined(OHOS_INPUT_EVENTS)
++  virtual void SetVirtualKeyBoardArg(int32_t width, int32_t height, double keyboard) {}
++  virtual bool ShouldVirtualKeyboardOverlay() { return false; }
++#endif 
+  protected:
+   // Allow deletion via std::unique_ptr only.
+   friend std::default_delete<CefBrowserPlatformDelegate>;
+diff --git a/src/cef/libcef/browser/chrome/chrome_content_browser_client_cef.cc b/src/cef/libcef/browser/chrome/chrome_content_browser_client_cef.cc
+index d87fead842c5b..018e0a8b15c8d
+--- a/src/cef/libcef/browser/chrome/chrome_content_browser_client_cef.cc
++++ b/src/cef/libcef/browser/chrome/chrome_content_browser_client_cef.cc
+@@ -438,10 +438,17 @@ ChromeContentBrowserClientCef::CreateLoginDelegate(
+   // |web_contents| is nullptr for CefURLRequests without an associated frame.
+   if (!web_contents || base::CommandLine::ForCurrentProcess()->HasSwitch(
+                            switches::kDisableChromeLoginPrompt)) {
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++    // Delegate auth callbacks to GetAuthCredentials.
++    return std::make_unique<net_service::LoginDelegate>(
++        auth_info, web_contents, request_id, is_request_for_main_frame, url,
++        response_headers, std::move(auth_required_callback));
++#else
+     // Delegate auth callbacks to GetAuthCredentials.
+     return std::make_unique<net_service::LoginDelegate>(
+         auth_info, web_contents, request_id, url,
+         std::move(auth_required_callback));
++#endif
+   }
+ 
+   return ChromeContentBrowserClient::CreateLoginDelegate(
+diff --git a/src/cef/libcef/browser/context.cc b/src/cef/libcef/browser/context.cc
+index 5a62989446932..fd2c508034f03
+--- a/src/cef/libcef/browser/context.cc
++++ b/src/cef/libcef/browser/context.cc
+@@ -728,4 +728,3 @@ void CefContext::FinalizeShutdown() {
+   browser_info_manager_.reset(nullptr);
+   application_ = nullptr;
+ }
+- 
+\ No newline at end of file
+diff --git a/src/cef/libcef/browser/extensions/chrome_api_registration.cc b/src/cef/libcef/browser/extensions/chrome_api_registration.cc
+index 60c6153d37183..f3853f3e74395
+--- a/src/cef/libcef/browser/extensions/chrome_api_registration.cc
++++ b/src/cef/libcef/browser/extensions/chrome_api_registration.cc
+@@ -17,6 +17,9 @@
+ #include "extensions/browser/api/alarms/alarms_api.h"
+ #include "extensions/browser/api/storage/storage_api.h"
+ #include "extensions/browser/extension_function_registry.h"
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++#include "chrome/browser/extensions/api/developer_private/developer_private_api.h"
++#endif
+ 
+ namespace extensions {
+ namespace api {
+@@ -63,6 +66,28 @@ const char* const kSupportedAPIs[] = {
+     EXTENSION_FUNCTION_NAME(cefimpl::TabsGetZoomFunction),
+     EXTENSION_FUNCTION_NAME(cefimpl::TabsSetZoomSettingsFunction),
+     EXTENSION_FUNCTION_NAME(cefimpl::TabsGetZoomSettingsFunction),
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++    "developerPrivate",
++    EXTENSION_FUNCTION_NAME(DeveloperPrivateGetExtensionsInfoFunction),
++    EXTENSION_FUNCTION_NAME(DeveloperPrivateGetExtensionSizeFunction),
++    EXTENSION_FUNCTION_NAME(DeveloperPrivateGetItemsInfoFunction),
++    EXTENSION_FUNCTION_NAME(DeveloperPrivateGetProfileConfigurationFunction),
++    EXTENSION_FUNCTION_NAME(DeveloperPrivateUpdateProfileConfigurationFunction),
++    EXTENSION_FUNCTION_NAME(DeveloperPrivateShowPermissionsDialogFunction),
++    EXTENSION_FUNCTION_NAME(DeveloperPrivateReloadFunction),
++    EXTENSION_FUNCTION_NAME(
++        DeveloperPrivateUpdateExtensionConfigurationFunction),
++    EXTENSION_FUNCTION_NAME(DeveloperPrivateLoadUnpackedFunction),
++    EXTENSION_FUNCTION_NAME(DeveloperPrivateInstallDroppedFileFunction),
++    EXTENSION_FUNCTION_NAME(
++        DeveloperPrivateNotifyDragInstallInProgressFunction),
++    EXTENSION_FUNCTION_NAME(DeveloperPrivateLoadDirectoryFunction),
++    EXTENSION_FUNCTION_NAME(DeveloperPrivateChoosePathFunction),
++    EXTENSION_FUNCTION_NAME(DeveloperPrivatePackDirectoryFunction),
++    EXTENSION_FUNCTION_NAME(DeveloperPrivateIsProfileManagedFunction),
++    EXTENSION_FUNCTION_NAME(DeveloperPrivateRequestFileSourceFunction),
++    EXTENSION_FUNCTION_NAME(DeveloperPrivateOpenDevToolsFunction),
++#endif
+     nullptr,  // Indicates end of array.
+ };
+ 
+@@ -109,6 +134,26 @@ void ChromeFunctionRegistry::RegisterAll(ExtensionFunctionRegistry* registry) {
+   registry->RegisterFunction<cefimpl::TabsGetZoomFunction>();
+   registry->RegisterFunction<cefimpl::TabsSetZoomSettingsFunction>();
+   registry->RegisterFunction<cefimpl::TabsGetZoomSettingsFunction>();
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++  registry->RegisterFunction<DeveloperPrivateGetExtensionsInfoFunction>();
++  registry->RegisterFunction<DeveloperPrivateGetExtensionSizeFunction>();
++  registry->RegisterFunction<DeveloperPrivateGetItemsInfoFunction>();
++  registry->RegisterFunction<DeveloperPrivateGetProfileConfigurationFunction>();
++  registry
++      ->RegisterFunction<DeveloperPrivateUpdateProfileConfigurationFunction>();
++  registry->RegisterFunction<DeveloperPrivateShowPermissionsDialogFunction>();
++  registry->RegisterFunction<DeveloperPrivateReloadFunction>();
++  registry->RegisterFunction<DeveloperPrivateLoadUnpackedFunction>();
++  registry->RegisterFunction<DeveloperPrivateInstallDroppedFileFunction>();
++  registry
++      ->RegisterFunction<DeveloperPrivateNotifyDragInstallInProgressFunction>();
++  registry->RegisterFunction<DeveloperPrivateLoadDirectoryFunction>();
++  registry->RegisterFunction<DeveloperPrivateChoosePathFunction>();
++  registry->RegisterFunction<DeveloperPrivatePackDirectoryFunction>();
++  registry->RegisterFunction<DeveloperPrivateIsProfileManagedFunction>();
++  registry->RegisterFunction<DeveloperPrivateRequestFileSourceFunction>();
++  registry->RegisterFunction<DeveloperPrivateOpenDevToolsFunction>();
++#endif
+ }
+ 
+ }  // namespace cef
+diff --git a/src/cef/libcef/browser/extensions/component_extension_resource_manager.cc b/src/cef/libcef/browser/extensions/component_extension_resource_manager.cc
+index c7a3af0411d28..a971f90336f36
+--- a/src/cef/libcef/browser/extensions/component_extension_resource_manager.cc
++++ b/src/cef/libcef/browser/extensions/component_extension_resource_manager.cc
+@@ -42,10 +42,17 @@ bool CefComponentExtensionResourceManager::IsComponentExtensionResource(
+   base::FilePath directory_path = extension_path;
+   base::FilePath resources_dir;
+   base::FilePath relative_path;
++
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++  if (!base::PathService::Get(base::DIR_OHOS_APP_INSTALLATION,
++                              &resources_dir) ||
++#else
+   if (!base::PathService::Get(chrome::DIR_RESOURCES, &resources_dir) ||
++#endif
+       !resources_dir.AppendRelativePath(directory_path, &relative_path)) {
+     return false;
+   }
++
+   relative_path = relative_path.Append(resource_path);
+   relative_path = relative_path.NormalizePathSeparators();
