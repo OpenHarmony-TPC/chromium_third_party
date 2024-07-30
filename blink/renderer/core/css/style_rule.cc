@@ -605,7 +605,8 @@ void StyleRuleScope::SetPreludeText(const ExecutionContext* execution_context,
                                     String value) {
   auto* parser_context =
       MakeGarbageCollected<CSSParserContext>(*execution_context);
-  Vector<CSSParserToken, 32> tokens = CSSTokenizer(value).TokenizeToEOF();
+  CSSTokenizer tokenizer(value);
+  Vector<CSSParserToken, 32> tokens = tokenizer.TokenizeToEOF();
 
   StyleRule* old_parent = style_scope_->RuleForNesting();
   // Note that we do not need to explicitly reparent <scope-end>
