@@ -1833,3 +1833,1844 @@ index 2af7eae2c8d2a..09e32f29f5d22
 +#endif
    DCHECK_NE(kInvalidThreadId, id_);
    id_event_.Signal();
+ 
+diff --git a/src/base/threading/thread.h b/src/base/threading/thread.h
+index 06dd7028b5e70..986a24f4f6540
+--- a/src/base/threading/thread.h
++++ b/src/base/threading/thread.h
+@@ -257,6 +257,11 @@ class BASE_EXPORT Thread : PlatformThread::Delegate {
+   // This method is thread-safe.
+   PlatformThreadId GetThreadId() const;
+ 
++#if BUILDFLAG(IS_OHOS)
++  // This method is thread-safe.
++  PlatformThreadId GetThreadRealId() const;
++#endif
++
+   // Returns true if the thread has been started, and not yet stopped.
+   bool IsRunning() const;
+ 
+@@ -316,6 +321,12 @@ class BASE_EXPORT Thread : PlatformThread::Delegate {
+ 
+   // The thread's id once it has started.
+   PlatformThreadId id_ = kInvalidThreadId;
++
++#if BUILDFLAG(IS_OHOS)
++  // The thread's global id once it has started.
++  PlatformThreadId real_id_ = kInvalidThreadId;
++#endif
++
+   // Protects |id_| which must only be read while it's signaled.
+   mutable WaitableEvent id_event_;
+ 
+diff --git a/src/base/threading/thread_restrictions.h b/src/base/threading/thread_restrictions.h
+index 4c9ff4452fa14..054d8d3a15f6d
+--- a/src/base/threading/thread_restrictions.h
++++ b/src/base/threading/thread_restrictions.h
+@@ -140,6 +140,10 @@ class GaiaConfig;
+ class WebEngineBrowserMainParts;
+ class ScopedAllowBlockingForProfile;
+ 
++#if defined(OHOS_COOKIE)
++class CefCookieManagerImpl;
++#endif // defined(OHOS_COOKIE)
++
+ namespace base {
+ class File;
+ class FilePath;
+@@ -825,6 +829,9 @@ class BASE_EXPORT
+   friend class android_webview::
+       AwFormDatabaseService;  // http://crbug.com/904431
+   friend class android_webview::CookieManager;
++#if defined(OHOS_COOKIE)
++  friend class ::CefCookieManagerImpl;
++#endif // defined(OHOS_COOKIE)
+   friend class android_webview::VizCompositorThreadRunnerWebView;
+   friend class audio::OutputDevice;
+   friend class base::FileDescriptorWatcher;
+diff --git a/src/base/trace_event/builtin_categories.h b/src/base/trace_event/builtin_categories.h
+index 0d744c7b1c27d..a25275a849309
+--- a/src/base/trace_event/builtin_categories.h
++++ b/src/base/trace_event/builtin_categories.h
+@@ -126,6 +126,7 @@
+   X("navigation")                                                        \
+   X("net")                                                               \
+   X("netlog")                                                            \
++  X("NWebImpl")                                                          \
+   X("offline_pages")                                                     \
+   X("omnibox")                                                           \
+   X("oobe")                                                              \
+diff --git a/src/base/trace_event/common/trace_event_common.h b/src/base/trace_event/common/trace_event_common.h
+index f67de75a1ed1c..9203a4dae0b90
+--- a/src/base/trace_event/common/trace_event_common.h
++++ b/src/base/trace_event/common/trace_event_common.h
+@@ -304,29 +304,33 @@ struct BASE_EXPORT TraceTimestampTraits<::base::TimeTicks> {
+ 
+ #if defined(OS_OHOS)
+ #define TRACE_EVENT0(category_group, name) \
+-  (void)(category_group);                  \
+-  BYTRACE_SCOPED(name);
++  BYTRACE_SCOPED(name);                    \
++  INTERNAL_TRACE_EVENT_ADD_SCOPED(category_group, name)
+ #define TRACE_EVENT1(category_group, name, arg1_name, arg1_val) \
+-  TRACE_EVENT0(category_group, GetStringFromArgs(name, arg1_name, arg1_val));
++  BYTRACE_SCOPED(GetStringFromArgs(name, arg1_name, arg1_val));               \
++  INTERNAL_TRACE_EVENT_ADD_SCOPED(category_group, name, arg1_name, arg1_val)
+ #define TRACE_EVENT2(category_group, name, arg1_name, arg1_val, arg2_name,  \
+                      arg2_val)                                              \
+-  TRACE_EVENT0(category_group, GetStringFromArgs(name, arg1_name, arg1_val, \
+-                                                 arg2_name, arg2_val));
++  BYTRACE_SCOPED(GetStringFromArgs(name, arg1_name, arg1_val, \
++                                                 arg2_name, arg2_val));      \
++  INTERNAL_TRACE_EVENT_ADD_SCOPED(category_group, name, arg1_name, arg1_val, \
++                                  arg2_name, arg2_val)
+ #define TRACE_EVENT_WITH_FLOW0(category_group, name, bind_id, flow_flags) \
+-  (void)(category_group);                                                 \
+-  (void)(bind_id);                                                        \
+-  (void)(flow_flags);                                                     \
+-  BYTRACE_SCOPED(name);
++  BYTRACE_SCOPED(name);                                                   \
++  INTERNAL_TRACE_EVENT_ADD_SCOPED_WITH_FLOW(category_group, name, bind_id,\
++                                            flow_flags)
+ #define TRACE_EVENT_WITH_FLOW1(category_group, name, bind_id, flow_flags, \
+                                arg1_name, arg1_val)                       \
+-  TRACE_EVENT_WITH_FLOW0(category_group,                                  \
+-                         GetStringFromArgs(name, arg1_name, arg1_val),    \
+-                         bind_id, flow_flags);
++  BYTRACE_SCOPED(GetStringFromArgs(name, arg1_name, arg1_val));           \
++  INTERNAL_TRACE_EVENT_ADD_SCOPED_WITH_FLOW(category_group, name, bind_id,\
++                                            flow_flags, arg1_name, arg1_val)
+ #define TRACE_EVENT_WITH_FLOW2(category_group, name, bind_id, flow_flags, \
+                                arg1_name, arg1_val, arg2_name, arg2_val)  \
+-  TRACE_EVENT_WITH_FLOW0(category_group,                                  \
+-      GetStringFromArgs(name, arg1_name, arg1_val, arg2_name, arg2_val),  \
+-                        bind_id, flow_flags);
++ BYTRACE_SCOPED(GetStringFromArgs(name, arg1_name, arg1_val, \
++                                                 arg2_name, arg2_val));     \
++  INTERNAL_TRACE_EVENT_ADD_SCOPED_WITH_FLOW(category_group, name, bind_id,  \
++                                            flow_flags, arg1_name, arg1_val, \
++                                            arg2_name, arg2_val)
+ #else
+ // Records a pair of begin and end events called "name" for the current
+ // scope, with 0, 1 or 2 associated arguments. If the category is not
+@@ -405,27 +409,33 @@ struct BASE_EXPORT TraceTimestampTraits<::base::TimeTicks> {
+ 
+ #if defined(OS_OHOS)
+ #define TRACE_EVENT_BEGIN0(category_group, name) \
+-  (void)(category_group);                        \
+-  StartBytrace(name)
++  StartBytrace(name);                             \
++  INTERNAL_TRACE_EVENT_ADD(TRACE_EVENT_PHASE_BEGIN, category_group, name, \
++                           TRACE_EVENT_FLAG_NONE);
+ #define TRACE_EVENT_BEGIN1(category_group, name, arg1_name, arg1_val) \
+-  TRACE_EVENT_BEGIN0(category_group,                                  \
+-                     GetStringFromArgs(name, arg1_name, arg1_val))
++  StartBytrace(GetStringFromArgs(name, arg1_name, arg1_val));         \
++  INTERNAL_TRACE_EVENT_ADD(TRACE_EVENT_PHASE_BEGIN, category_group, name, \
++                           TRACE_EVENT_FLAG_NONE, arg1_name, arg1_val)
+ #define TRACE_EVENT_BEGIN2(category_group, name, arg1_name, arg1_val, \
+                            arg2_name, arg2_val)                       \
+-  TRACE_EVENT_BEGIN0(                                                 \
+-      category_group,                                                 \
+-      GetStringFromArgs(name, arg1_name, arg1_val, arg2_name, arg2_val))
++  StartBytrace(GetStringFromArgs(name, arg1_name, arg1_val, arg2_name, arg2_val)); \
++  INTERNAL_TRACE_EVENT_ADD(TRACE_EVENT_PHASE_BEGIN, category_group, name, \
++                           TRACE_EVENT_FLAG_NONE, arg1_name, arg1_val,    \
++                           arg2_name, arg2_val)
+ #define TRACE_EVENT_BEGIN_WITH_FLAGS0(category_group, name, flags) \
+-  (void)(flags);                                 \
+-  TRACE_EVENT_BEGIN0(category_group, name)
++  StartBytrace(name);              \
++  INTERNAL_TRACE_EVENT_ADD(TRACE_EVENT_PHASE_BEGIN, category_group, name, flags)
+ #define TRACE_EVENT_BEGIN_WITH_FLAGS1(category_group, name, flags, arg1_name, \
+                                       arg1_val)                               \
+-  (void)(flags);                                 \
+-  TRACE_EVENT_BEGIN1(category_group, name, arg1_name, arg1_name)
++  StartBytrace(GetStringFromArgs(name, arg1_name, arg1_val));  \
++  INTERNAL_TRACE_EVENT_ADD(TRACE_EVENT_PHASE_BEGIN, category_group, name,     \
++                           flags, arg1_name, arg1_val)
+ #define TRACE_EVENT_COPY_BEGIN2(category_group, name, arg1_name, arg1_val, \
+                                 arg2_name, arg2_val)                       \
+-  TRACE_EVENT_BEGIN2(category_group, name, arg1_name, arg1_name,           \
+-                     arg2_name, arg2_val)
++  StartBytrace(GetStringFromArgs(name, arg1_name, arg1_val, arg2_name, arg2_val)); \
++  INTERNAL_TRACE_EVENT_ADD(TRACE_EVENT_PHASE_BEGIN, category_group, name,  \
++                           TRACE_EVENT_FLAG_COPY, arg1_name, arg1_val,     \
++                           arg2_name, arg2_val)
+ #else
+ // Records a single BEGIN event called "name" immediately, with 0, 1 or 2
+ // associated arguments. If the category is not enabled, then this
+@@ -494,36 +504,34 @@ struct BASE_EXPORT TraceTimestampTraits<::base::TimeTicks> {
+ 
+ #if defined(OS_OHOS)
+ #define TRACE_EVENT_END0(category_group, name) \
+-  (void)(category_group);                      \
+-  (void)(name);                                \
+-  FinishBytrace()
++  FinishBytrace();                             \
++  INTERNAL_TRACE_EVENT_ADD(TRACE_EVENT_PHASE_END, category_group, name, \
++                           TRACE_EVENT_FLAG_NONE)
+ #define TRACE_EVENT_END1(category_group, name, arg1_name, arg1_val) \
+-  (void)(arg1_name);                                                \
+-  (void)(arg1_val);                                                 \
+-  TRACE_EVENT_END0(category_group, name)
++  FinishBytrace();                             \
++  INTERNAL_TRACE_EVENT_ADD(TRACE_EVENT_PHASE_END, category_group, name, \
++                           TRACE_EVENT_FLAG_NONE, arg1_name, arg1_val)
+ #define TRACE_EVENT_END2(category_group, name, arg1_name, arg1_val, arg2_name, \
+                          arg2_val)                                             \
+-  (void)(arg1_name);                                                           \
+-  (void)(arg1_val);                                                            \
+-  (void)(arg2_name);                                                           \
+-  (void)(arg2_val);                                                            \
+-  TRACE_EVENT_END0(category_group, name)
++  FinishBytrace();                             \
++  INTERNAL_TRACE_EVENT_ADD(TRACE_EVENT_PHASE_END, category_group, name,        \
++                           TRACE_EVENT_FLAG_NONE, arg1_name, arg1_val,         \
++                           arg2_name, arg2_val)
+ #define TRACE_EVENT_END_WITH_FLAGS0(category_group, name, flags) \
+-  (void)(flags);                                                 \
+-  TRACE_EVENT_END0(category_group, name)
++  FinishBytrace();                             \
++  INTERNAL_TRACE_EVENT_ADD(TRACE_EVENT_PHASE_END, category_group, name, flags)
+ #define TRACE_EVENT_END_WITH_FLAGS1(category_group, name, flags, arg1_name,  \
+                                     arg1_val)                                \
+-  (void)(flags);                                                 \
+-  (void)(arg1_name);                                             \
+-  (void)(arg1_val);                                              \
+-  TRACE_EVENT_END0(category_group, name)
++  FinishBytrace();                             \
++  INTERNAL_TRACE_EVENT_ADD(TRACE_EVENT_PHASE_END, category_group, name, flags, \
++                           arg1_name, arg1_val)
+ #define TRACE_EVENT_COPY_END2(category_group, name, arg1_name, arg1_val,  \
+                               arg2_name, arg2_val)                        \
+-  (void)(arg1_name);                                                      \
+-  (void)(arg1_val);                                                       \
+-  (void)(arg2_name);                                                      \
+-  (void)(arg2_val);                                                       \
+-  TRACE_EVENT_END0(category_group, name)
++  FinishBytrace();                             \
++  INTERNAL_TRACE_EVENT_ADD(TRACE_EVENT_PHASE_END, category_group, name,  \
++                           TRACE_EVENT_FLAG_COPY, arg1_name, arg1_val,   \
++                           arg2_name, arg2_val)
++
+ #else
+ // Records a single END event for "name" immediately. If the category
+ // is not enabled, then this does nothing.
+@@ -555,26 +563,37 @@ struct BASE_EXPORT TraceTimestampTraits<::base::TimeTicks> {
+ 
+ #if defined(OS_OHOS)
+ #define TRACE_EVENT_MARK_WITH_TIMESTAMP0(category_group, name, timestamp) \
+-  (void)(timestamp);                                                      \
+-  TRACE_EVENT0(category_group, name);
++  BYTRACE_SCOPED(name);                    \
++  INTERNAL_TRACE_EVENT_ADD_WITH_TIMESTAMP(                                \
++      TRACE_EVENT_PHASE_MARK, category_group, name, timestamp,            \
++      TRACE_EVENT_FLAG_NONE)
+ #define TRACE_EVENT_MARK_WITH_TIMESTAMP1(category_group, name, timestamp, \
+                                          arg1_name, arg1_val)             \
+-  (void)(timestamp);                                                      \
+-  TRACE_EVENT1(category_group, name, arg1_name, arg1_val);
++  BYTRACE_SCOPED(GetStringFromArgs(name, arg1_name, arg1_val));           \
++  INTERNAL_TRACE_EVENT_ADD_WITH_TIMESTAMP(                                \
++      TRACE_EVENT_PHASE_MARK, category_group, name, timestamp,            \
++      TRACE_EVENT_FLAG_NONE)
+ 
+ #define TRACE_EVENT_MARK_WITH_TIMESTAMP2(                                      \
+     category_group, name, timestamp, arg1_name, arg1_val, arg2_name, arg2_val) \
+-  (void)(timestamp);                                                           \
+-  TRACE_EVENT2(category_group, name, arg1_name, arg1_val, arg2_name, arg2_val);
++  BYTRACE_SCOPED(GetStringFromArgs(name, arg1_name, arg1_val, \
++                                                 arg2_name, arg2_val));      \
++  INTERNAL_TRACE_EVENT_ADD_WITH_TIMESTAMP(                                     \
++      TRACE_EVENT_PHASE_MARK, category_group, name, timestamp,                 \
++      TRACE_EVENT_FLAG_NONE, arg1_name, arg1_val, arg2_name, arg2_val)
+ #define TRACE_EVENT_COPY_MARK(category_group, name) \
+-  TRACE_EVENT0(category_group, name);
+-
++  BYTRACE_SCOPED(name);  \
++  INTERNAL_TRACE_EVENT_ADD(TRACE_EVENT_PHASE_MARK, category_group, name, \
++                           TRACE_EVENT_FLAG_COPY)
+ #define TRACE_EVENT_COPY_MARK1(category_group, name, arg1_name, arg1_val) \
+-  TRACE_EVENT1(category_group, name, arg1_name, arg1_val);
+-
++  BYTRACE_SCOPED(GetStringFromArgs(name, arg1_name, arg1_val));           \
++  INTERNAL_TRACE_EVENT_ADD(TRACE_EVENT_PHASE_MARK, category_group, name,  \
++                           TRACE_EVENT_FLAG_COPY, arg1_name, arg1_val)
+ #define TRACE_EVENT_COPY_MARK_WITH_TIMESTAMP(category_group, name, timestamp) \
+-  (void)(timestamp);                                                          \
+-  TRACE_EVENT_COPY_MARK(category_group, name);
++  BYTRACE_SCOPED(name);  \
++  INTERNAL_TRACE_EVENT_ADD_WITH_TIMESTAMP(                                    \
++      TRACE_EVENT_PHASE_MARK, category_group, name, timestamp,                \
++      TRACE_EVENT_FLAG_COPY)
+ #else
+ // Adds a trace event with the given |name| and |timestamp|. |timestamp| must be
+ // non-null or it crashes. Use DCHECK(timestamp) before calling this to detect
+@@ -645,15 +664,19 @@ struct BASE_EXPORT TraceTimestampTraits<::base::TimeTicks> {
+ 
+ #if defined(OS_OHOS)
+ #define TRACE_COUNTER1(category_group, name, value)                         \
+-  (void)(category_group);                                                   \
+-  CountBytrace(name, value);
++  CountBytrace(name, value);                                                \
++  INTERNAL_TRACE_EVENT_ADD(TRACE_EVENT_PHASE_COUNTER, category_group, name, \
++                           TRACE_EVENT_FLAG_NONE, "value",                  \
++                           static_cast<int>(value))
+ #define TRACE_COUNTER_WITH_FLAG1(category_group, name, flag, value)         \
+-  (void)(category_group);                                                   \
+-  (void)(flag);                                                             \
+-  CountBytrace(name, value);
++  CountBytrace(name, value);                                                \
++  INTERNAL_TRACE_EVENT_ADD(TRACE_EVENT_PHASE_COUNTER, category_group, name, \
++                           flag, "value", static_cast<int>(value))
+ #define TRACE_COPY_COUNTER1(category_group, name, value)                    \
+-  (void)(category_group);                                                   \
+-  CountBytrace(name, static_cast<int>(value));
++  CountBytrace(name, static_cast<int>(value));                              \
++  INTERNAL_TRACE_EVENT_ADD(TRACE_EVENT_PHASE_COUNTER, category_group, name, \
++                           TRACE_EVENT_FLAG_COPY, "value",                  \
++                           static_cast<int>(value))
+ #else
+ // Records the value of a counter called "name" immediately. Value
+ // must be representable as a 32 bit integer.
+@@ -692,8 +715,10 @@ struct BASE_EXPORT TraceTimestampTraits<::base::TimeTicks> {
+ 
+ #if defined(OS_OHOS)
+ #define TRACE_COUNTER_WITH_TIMESTAMP1(category_group, name, timestamp, value) \
+-  (void)(timestamp);                                                          \
+-  TRACE_COUNTER1(category_group, name, value);
++   CountBytrace(name, value);                                                \
++   INTERNAL_TRACE_EVENT_ADD_WITH_TIMESTAMP(                                   \
++      TRACE_EVENT_PHASE_COUNTER, category_group, name, timestamp,             \
++      TRACE_EVENT_FLAG_NONE, "value", static_cast<int>(value))
+ #else
+ // Similar to TRACE_COUNTERx, but with a custom |timestamp| provided.
+ // - |timestamp| must be non-null or it crashes. Use DCHECK(timestamp) before
+diff --git a/src/build/config/ohos/BUILD.gn b/src/build/config/ohos/BUILD.gn
+index 3715466372386..4feebd935cedc
+--- a/src/build/config/ohos/BUILD.gn
++++ b/src/build/config/ohos/BUILD.gn
+@@ -16,6 +16,7 @@ config("compiler") {
+   cflags = [
+     "-ffunction-sections",
+     "-fno-short-enums",
++    "-funwind-tables",
+   ]
+   defines = [
+     "OSOHOS",
+@@ -80,8 +81,7 @@ config("compiler") {
+       compile_api_level = arm64_ndk_api_level
+     }
+   } else if (current_cpu == "x64") {
+-    abi_target = ""
+-    compile_api_level = ""
++    abi_target = "x86_64-linux-ohos"
+   } else {
+     assert(false, "Architecture not supported")
+   }
+@@ -168,6 +168,21 @@ config("runtime_library") {
+       libclang_rt_file = "$ohos_toolchain_root/lib/clang/current/lib/aarch64-linux-ohos/libclang_rt.builtins.a"
+     }
+ 
++    if (current_cpu == "x64") {
++      ldflags += [ "-Wl,-z,max-page-size=4096" ]
++      ldflags += [ "-Wl,--hash-style=gnu" ]
++      ldflags += [ "-L" + rebase_path("$ohos_sysroot/usr/lib/x86_64-linux-ohos",
++                                      root_build_dir) ]
++      ldflags +=
++          [ "-L" + rebase_path("$ohos_toolchain_root/lib/x86_64-linux-ohos",
++                               root_build_dir) ]
++      ldflags +=
++          [ "-L" + rebase_path(
++                "$ohos_toolchain_root/lib/clang/current/lib/x86_64-linux-ohos",
++                root_build_dir) ]
++      libclang_rt_file = "$ohos_toolchain_root/lib/clang/current/lib/x86_64-linux-ohos/libclang_rt.builtins.a"
++    }
++
+     ldflags += [ "-Wl,--dynamic-linker,$dynamic_linker" ]
+     libs += [
+       rebase_path(libclang_rt_file),
+diff --git a/src/build/config/ohos/config.gni b/src/build/config/ohos/config.gni
+index 976340419b6ae..3c202ad9c03a3
+--- a/src/build/config/ohos/config.gni
++++ b/src/build/config/ohos/config.gni
+@@ -90,10 +90,17 @@ if (is_ohos) {
+     ]
+   } else {
+     if (use_musl) {
+-      ohos_build_root = "//ohos_ndk"
+-      ohos_ndk_root = "//ohos_ndk"
+-      ohos_toolchain_root = "$ohos_ndk_root/toolchains/llvm"
+-      ohos_sysroot = "$ohos_ndk_root/sysroot"
++      if (current_cpu == "x64") {
++        ohos_build_root = "//ohos_ndk"
++        ohos_ndk_root = "//ohos_ndk"
++        ohos_toolchain_root = "$ohos_ndk_root/toolchains/llvm"
++        ohos_sysroot = "$ohos_ndk_root/sysroot_x86"
++      } else {
++        ohos_build_root = "//ohos_ndk"
++        ohos_ndk_root = "//ohos_ndk"
++        ohos_toolchain_root = "$ohos_ndk_root/toolchains/llvm"
++        ohos_sysroot = "$ohos_ndk_root/sysroot"
++        }
+     } else {
+       ohos_build_root = "//ohos_ndk_aosp"
+       ohos_ndk_root = "//ohos_ndk_aosp"
+@@ -120,6 +127,8 @@ if (is_ohos) {
+       ohos_libs_dir = [ "$ohos_build_root/libs" ]
+     } else if (current_cpu == "arm64") {
+       ohos_libs_dir = [ "$ohos_build_root/libs64" ]
++    } else if (current_cpu == "x64") {
++      ohos_libs_dir = [ "$ohos_build_root/libs_x86" ]
+     }
+   }
+ }
+diff --git a/src/build/toolchain/ohos/BUILD.gn b/src/build/toolchain/ohos/BUILD.gn
+index 2046bc1321ac8..dba7c0bc26334
+--- a/src/build/toolchain/ohos/BUILD.gn
++++ b/src/build/toolchain/ohos/BUILD.gn
+@@ -61,3 +61,9 @@ ohos_clang_toolchain("ohos_clang_arm64") {
+     current_cpu = "arm64"
+   }
+ }
++
++ohos_clang_toolchain("ohos_clang_x64") {
++  toolchain_args = {
++    current_cpu = "x64"
++  }
++}
+\ No newline at end of file
+diff --git a/src/cc/input/browser_controls_offset_manager.cc b/src/cc/input/browser_controls_offset_manager.cc
+index 643aa1058df3b..44215ae22ac55
+--- a/src/cc/input/browser_controls_offset_manager.cc
++++ b/src/cc/input/browser_controls_offset_manager.cc
+@@ -18,6 +18,11 @@
+ #include "ui/gfx/geometry/transform.h"
+ #include "ui/gfx/geometry/vector2d_f.h"
+ 
++#ifdef OHOS_EX_TOPCONTROLS
++#include "base/command_line.h"
++#include "content/public/common/content_switches.h"
++#endif
++
+ namespace cc {
+ namespace {
+ // These constants were chosen empirically for their visually pleasant behavior.
+@@ -206,6 +211,14 @@ void BrowserControlsOffsetManager::UpdateBrowserControlsState(
+   else
+     client_->SetCurrentBrowserControlsShownRatio(final_top_shown_ratio,
+                                                  final_bottom_shown_ratio);
++
++#ifdef OHOS_EX_TOPCONTROLS
++  if (base::CommandLine::ForCurrentProcess()->HasSwitch(
++          switches::kForBrowser) &&
++      !animate) {
++    client_->SetupScrollBy();
++  }
++#endif
+ }
+ 
+ BrowserControlsState BrowserControlsOffsetManager::PullConstraintForMainThread(
+diff --git a/src/cc/input/browser_controls_offset_manager_client.h b/src/cc/input/browser_controls_offset_manager_client.h
+index 0cc3f8f9c20c5..17c651011b06b
+--- a/src/cc/input/browser_controls_offset_manager_client.h
++++ b/src/cc/input/browser_controls_offset_manager_client.h
+@@ -26,7 +26,9 @@ class CC_EXPORT BrowserControlsOffsetManagerClient {
+   virtual bool OnlyExpandTopControlsAtPageTop() const = 0;
+   virtual bool HaveRootScrollNode() const = 0;
+   virtual void SetNeedsCommit() = 0;
+-
++#ifdef OHOS_EX_TOPCONTROLS
++  virtual void SetupScrollBy() = 0;
++#endif
+  protected:
+   virtual ~BrowserControlsOffsetManagerClient() {}
+ };
+diff --git a/src/cc/layers/painted_overlay_scrollbar_layer.cc b/src/cc/layers/painted_overlay_scrollbar_layer.cc
+index 74c60a0611a65..4cdae259ac85b
+--- a/src/cc/layers/painted_overlay_scrollbar_layer.cc
++++ b/src/cc/layers/painted_overlay_scrollbar_layer.cc
+@@ -171,6 +171,9 @@ bool PaintedOverlayScrollbarLayer::PaintThumbIfNeeded() {
+ }
+ 
+ bool PaintedOverlayScrollbarLayer::PaintTickmarks() {
++#if BUILDFLAG(IS_OHOS)
++  return false;
++#else
+   if (!scrollbar_.Read(*this)->HasTickmarks()) {
+     if (!track_resource_.Read(*this)) {
+       return false;
+@@ -201,6 +204,7 @@ bool PaintedOverlayScrollbarLayer::PaintTickmarks() {
+ 
+   SetNeedsPushProperties();
+   return true;
++#endif
+ }
+ 
+ ScrollbarLayerBase::ScrollbarLayerType
+diff --git a/src/cc/mojom/render_frame_metadata.mojom b/src/cc/mojom/render_frame_metadata.mojom
+index 433e634643394..d4f4a5c0d36cc
+--- a/src/cc/mojom/render_frame_metadata.mojom
++++ b/src/cc/mojom/render_frame_metadata.mojom
+@@ -112,7 +112,7 @@ struct RenderFrameMetadata {
+   [EnableIf=is_android]
+   bool root_overflow_y_hidden;
+ 
+-  [EnableIf=is_android]
++  [EnableIf=is_android_or_ohos]
+   gfx.mojom.SizeF scrollable_viewport_size;
+ 
+   [EnableIf=is_android_or_ohos]
+diff --git a/src/cc/mojom/render_frame_metadata_mojom_traits.cc b/src/cc/mojom/render_frame_metadata_mojom_traits.cc
+index ddf5186801a33..bf8da81d5f64e
+--- a/src/cc/mojom/render_frame_metadata_mojom_traits.cc
++++ b/src/cc/mojom/render_frame_metadata_mojom_traits.cc
+@@ -54,6 +54,7 @@ bool StructTraits<
+          data.ReadRootLayerSize(&out->root_layer_size) &&
+ #endif
+ #if BUILDFLAG(IS_OHOS)
++         data.ReadScrollableViewportSize(&out->scrollable_viewport_size) &&
+          data.ReadRootLayerSize(&out->root_layer_size) &&
+ #endif
+          data.ReadViewportSizeInPixels(&out->viewport_size_in_pixels) &&
+diff --git a/src/cc/mojom/render_frame_metadata_mojom_traits.h b/src/cc/mojom/render_frame_metadata_mojom_traits.h
+index 06706bd4cb320..478f574e1d2a8
+--- a/src/cc/mojom/render_frame_metadata_mojom_traits.h
++++ b/src/cc/mojom/render_frame_metadata_mojom_traits.h
+@@ -157,6 +157,11 @@ struct COMPONENT_EXPORT(CC_SHARED_MOJOM_TRAITS)
+ #endif
+ 
+ #if BUILDFLAG(IS_OHOS)
++  static const gfx::SizeF& scrollable_viewport_size(
++      const cc::RenderFrameMetadata& metadata) {
++    return metadata.scrollable_viewport_size;
++  }
++
+   static const gfx::SizeF& root_layer_size(
+       const cc::RenderFrameMetadata& metadata) {
+     return metadata.root_layer_size;
+diff --git a/src/cc/trees/layer_tree_host_impl.cc b/src/cc/trees/layer_tree_host_impl.cc
+index d364a67983bef..16131a85ac284
+--- a/src/cc/trees/layer_tree_host_impl.cc
++++ b/src/cc/trees/layer_tree_host_impl.cc
+@@ -2436,6 +2436,7 @@ RenderFrameMetadata LayerTreeHostImpl::MakeRenderFrameMetadata(
+ #endif
+ 
+ #if BUILDFLAG(IS_OHOS)
++  metadata.scrollable_viewport_size = active_tree_->ScrollableViewportSize();
+   metadata.root_layer_size = active_tree_->ScrollableSize();
+ #endif
+ 
+@@ -5319,4 +5320,24 @@ std::string LayerTreeHostImpl::GetHungCommitDebugInfo() const {
+          tile_manager_.GetHungCommitDebugInfo();
+ }
+ 
++#ifdef OHOS_NWEB_EX
++void LayerTreeHostImpl::SetupScrollBy() {
++  if (!input_delegate_) {
++    return;
++  }
++
++  gfx::Vector2dF scroll_delta(
++      0.f, browser_controls_offset_manager_->ContentTopOffset());
++  // This counter-scrolls the page to keep the appearance of the page content
++  // being fixed while the browser controls animate.
++  viewport().ScrollBy(scroll_delta,
++                      /*viewport_point=*/gfx::Point(),
++                      /*is_wheel_scroll=*/false,
++                      /*affect_browser_controls=*/false,
++                      /*scroll_outer_viewport=*/true);
++  client_->SetNeedsCommitOnImplThread();
++  client_->RenewTreePriority();
++}
++#endif
++
+ }  // namespace cc
+diff --git a/src/cc/trees/layer_tree_host_impl.h b/src/cc/trees/layer_tree_host_impl.h
+index 6cdb686b179a4..36ff754c0999a
+--- a/src/cc/trees/layer_tree_host_impl.h
++++ b/src/cc/trees/layer_tree_host_impl.h
+@@ -926,6 +926,10 @@ class CC_EXPORT LayerTreeHostImpl : public TileManagerClient,
+ 
+   std::string GetHungCommitDebugInfo() const;
+ 
++#ifdef OHOS_EX_TOPCONTROLS
++  void SetupScrollBy() override;
++#endif
++
+  protected:
+   LayerTreeHostImpl(
+       const LayerTreeSettings& settings,
+diff --git a/src/cc/trees/render_frame_metadata.cc b/src/cc/trees/render_frame_metadata.cc
+index 0151d1105d5b9..1165c89083c0d
+--- a/src/cc/trees/render_frame_metadata.cc
++++ b/src/cc/trees/render_frame_metadata.cc
+@@ -41,6 +41,7 @@ bool RenderFrameMetadata::operator==(const RenderFrameMetadata& other) const {
+          current_surface_visual_update_duration ==
+              other.current_surface_visual_update_duration &&
+ #if BUILDFLAG(IS_OHOS)
++         scrollable_viewport_size == other.scrollable_viewport_size &&
+          root_layer_size == other.root_layer_size &&
+ #endif
+ #if BUILDFLAG(IS_ANDROID)
+diff --git a/src/cc/trees/render_frame_metadata.h b/src/cc/trees/render_frame_metadata.h
+index cf3c48768de6d..3edb3bc9511e1
+--- a/src/cc/trees/render_frame_metadata.h
++++ b/src/cc/trees/render_frame_metadata.h
+@@ -124,6 +124,7 @@ class CC_EXPORT RenderFrameMetadata {
+   base::TimeDelta current_surface_visual_update_duration;
+ 
+ #if BUILDFLAG(IS_OHOS)
++  gfx::SizeF scrollable_viewport_size;
+   gfx::SizeF root_layer_size;
+ #endif
+ 
+diff --git a/src/cef/BUILD.gn b/src/cef/BUILD.gn
+index d3e626f7b7994..eba6f53521b89
+--- a/src/cef/BUILD.gn
++++ b/src/cef/BUILD.gn
+@@ -682,8 +682,6 @@ source_set("libcef_static") {
+               "libcef/browser/net_service/browser_urlrequest_impl.h",
+               "libcef/browser/net_service/cookie_helper.cc",
+               "libcef/browser/net_service/cookie_helper.h",
+-              "libcef/browser/net_service/cookie_manager_impl.cc",
+-              "libcef/browser/net_service/cookie_manager_impl.h",
+               "libcef/browser/net_service/login_delegate.cc",
+               "libcef/browser/net_service/login_delegate.h",
+               "libcef/browser/net_service/net_helpers.cc",
+@@ -1019,6 +1017,20 @@ source_set("libcef_static") {
+     ]
+   }
+ 
++  #ifdef OHOS_COOKIE
++  if (defined(ohos_cookie) && ohos_cookie) {
++    sources += [
++      "libcef/browser/net_service/cookie_manager_ohos_impl.cc",
++      "libcef/browser/net_service/cookie_manager_ohos_impl.h",
++    ]
++  } else {
++    sources += [
++      "libcef/browser/net_service/cookie_manager_impl.cc",
++      "libcef/browser/net_service/cookie_manager_impl.h",
++    ]
++  }
++  #endif
++
+   #ifdef OHOS_EX_PASSWORD
+   if (defined(ohos_ex_password) && ohos_ex_password) {
+     sources += [
+@@ -1318,6 +1330,8 @@ source_set("libcef_static") {
+     ]
+ 
+     deps += [
++      "//components/js_injection/browser",
++      "//components/js_injection/renderer",
+       "//ui/events",
+       "//ui/strings",
+       "//ui/views",
+diff --git a/src/cef/include/capi/cef_browser_capi.h b/src/cef/include/capi/cef_browser_capi.h
+index e72645699c3dc..5e56c6b84b4fc
+--- a/src/cef/include/capi/cef_browser_capi.h
++++ b/src/cef/include/capi/cef_browser_capi.h
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=f776dd1d025f4faa179776083e01e25f6d568d08$
++// $hash=9c50de764d8c4b541095fa44fab23156efbd233b$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_CEF_BROWSER_CAPI_H_
+@@ -297,6 +297,22 @@ typedef struct _cef_browser_t {
+   void(CEF_CALLBACK* password_suggestion_selected)(struct _cef_browser_t* self,
+                                                    int list_index);
+ 
++  ///
++  /// Update browser controls state.
++  ///
++  void(CEF_CALLBACK* update_browser_controls_state)(struct _cef_browser_t* self,
++                                                    int constraints,
++                                                    int current,
++                                                    int animate);
++
++  ///
++  /// Update browser controls height.
++  ///
++  void(CEF_CALLBACK* update_browser_controls_height)(
++      struct _cef_browser_t* self,
++      int height,
++      int animate);
++
+   ///
+   /// Prefetch the resources required by the page, but will not execute js or
+   /// render the page.
+@@ -1065,6 +1081,13 @@ typedef struct _cef_browser_host_t {
+   void(CEF_CALLBACK* set_accessibility_state)(struct _cef_browser_host_t* self,
+                                               cef_state_t accessibility_state);
+ 
++  ///
++  /// GetOrCreateRootBrowserAccessibilityManager
++  ///
++  void(CEF_CALLBACK* get_or_create_root_browser_accessibility_manager)(
++      struct _cef_browser_host_t* self,
++      void** manager);
++
+   ///
+   /// Enable notifications of auto resize via
+   /// cef_display_handler_t::OnAutoResize. Notifications are disabled by
+@@ -1220,7 +1243,8 @@ typedef struct _cef_browser_host_t {
+   ///
+   void(CEF_CALLBACK* register_ark_jsfunction)(struct _cef_browser_host_t* self,
+                                               const cef_string_t* object_name,
+-                                              cef_string_list_t method_list);
++                                              cef_string_list_t method_list,
++                                              int32_t object_id);
+ 
+   ///
+   /// UnregisterArkJSfunction
+@@ -1230,6 +1254,16 @@ typedef struct _cef_browser_host_t {
+       const cef_string_t* object_name,
+       cef_string_list_t method_list);
+ 
++  ///
++  /// CallH5Function
++  ///
++  void(CEF_CALLBACK* call_h5function)(struct _cef_browser_host_t* self,
++                                      int32_t routing_id,
++                                      int32_t h5_object_id,
++                                      const cef_string_t* h5_method_name,
++                                      size_t argsCount,
++                                      struct _cef_value_t* const* args);
++
+   ///
+   /// Saves the current view as a web archive.
+   ///
+@@ -1465,6 +1499,81 @@ typedef struct _cef_browser_host_t {
+   /// Set the token of the UI framework
+   ///
+   void(CEF_CALLBACK* set_token)(struct _cef_browser_host_t* self, void* token);
++
++  ///
++  /// Set the property values for width, height, and keyboard height
++  ///
++  void(CEF_CALLBACK* set_virtual_key_board_arg)(
++      struct _cef_browser_host_t* self,
++      int32_t width,
++      int32_t height,
++      double keyboard);
++
++  ///
++  /// Set the virtual keyboard to override the web status
++  ///
++  int(CEF_CALLBACK* should_virtual_keyboard_overlay)(
++      struct _cef_browser_host_t* self);
++
++  ///
++  /// JavaScriptOnDocumentStart
++  ///
++  void(CEF_CALLBACK* java_script_on_document_start)(
++      struct _cef_browser_host_t* self,
++      const cef_string_t* script,
++      cef_string_list_t script_rules);
++
++  ///
++  /// RemoveJavaScriptOnDocumentStart
++  ///
++  void(CEF_CALLBACK* remove_java_script_on_document_start)(
++      struct _cef_browser_host_t* self);
++
++  ///
++  /// Set the draw rect
++  ///
++  void(CEF_CALLBACK* set_draw_rect)(struct _cef_browser_host_t* self,
++                                    int x,
++                                    int y,
++                                    int width,
++                                    int height);
++
++  ///
++  /// Set the draw mode
++  ///
++  void(CEF_CALLBACK* set_draw_mode)(struct _cef_browser_host_t* self, int mode);
++
++  ///
++  /// Create the Web print document adapter of the UI framework
++  ///
++  void(CEF_CALLBACK* create_web_print_document_adapter)(
++      struct _cef_browser_host_t* self,
++      const cef_string_t* jobName,
++      void** webPrintDocumentAdapter);
++
++  ///
++  /// Set the over-scroll mode of web
++  ///
++  void(CEF_CALLBACK* set_overscroll_mode)(struct _cef_browser_host_t* self,
++                                          int mode);
++
++  ///
++  /// Discard a webview window
++  ///
++  int(CEF_CALLBACK* discard)(struct _cef_browser_host_t* self);
++
++  ///
++  /// Restore the discarded webview window
++  ///
++  int(CEF_CALLBACK* restore)(struct _cef_browser_host_t* self);
++
++  ///
++  /// Change the zoom factor for browser zoom. If called on the UI thread the
++  /// change will be applied immediately. Otherwise, the change will be applied
++  /// asynchronously on the UI thread.
++  ///
++  void(CEF_CALLBACK* set_browser_zoom_level)(struct _cef_browser_host_t* self,
++                                             double zoomFactor);
+ } cef_browser_host_t;
+ 
+ ///
+diff --git a/src/cef/include/capi/cef_client_capi.h b/src/cef/include/capi/cef_client_capi.h
+index 13212ed481fdb..d69b6ecc62d6a
+--- a/src/cef/include/capi/cef_client_capi.h
++++ b/src/cef/include/capi/cef_client_capi.h
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=dcc37570651f7810bf30168a0033c0cf79f30209$
++// $hash=9aac900f55bcf971cef9f34938e29b7b3e7605ca$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_CEF_CLIENT_CAPI_H_
+@@ -220,18 +220,67 @@ typedef struct _cef_client_t {
+   ///
+   /// Returns the list of arguments NotifyJavaScriptResult.
+   ///
+-  int(CEF_CALLBACK* notify_java_script_result)(
++  int(CEF_CALLBACK* notify_java_script_result)(struct _cef_client_t* self,
++                                               struct _cef_list_value_t* args,
++                                               const cef_string_t* method,
++                                               const cef_string_t* object_name,
++                                               struct _cef_list_value_t* result,
++                                               int32_t routing_id,
++                                               int32_t object_id);
++
++  ///
++  /// has javaScript object function.
++  ///
++  int(CEF_CALLBACK* has_java_script_object_methods)(
++      struct _cef_client_t* self,
++      int32_t object_id,
++      const cef_string_t* method_name);
++
++  ///
++  /// get javaScript object functions.
++  ///
++  void(CEF_CALLBACK* get_java_script_object_methods)(
+       struct _cef_client_t* self,
+-      struct _cef_list_value_t* args,
+-      const cef_string_t* method,
+-      const cef_string_t* object_name,
+-      struct _cef_list_value_t* result);
++      int32_t object_id,
++      struct _cef_value_t* returned_method_names);
++
++  ///
++  /// remove javaScript object holder.
++  ///
++  void(CEF_CALLBACK* remove_java_script_object_holder)(
++      struct _cef_client_t* self,
++      int32_t holder,
++      int32_t object_id);
++
++  ///
++  /// remove transient javaScript object holder.
++  ///
++  void(CEF_CALLBACK* remove_transient_java_script_object)(
++      struct _cef_client_t* self);
+ 
+   ///
+   /// Return the handler for browser form events.
+   ///
+   struct _cef_form_handler_t*(CEF_CALLBACK* get_form_handler)(
+       struct _cef_client_t* self);
++
++  ///
++  /// Called when top controls offset has been changed.
++  ///
++  void(CEF_CALLBACK* on_top_controls_changed)(struct _cef_client_t* self,
++                                              float top_controls_offset,
++                                              float top_content_offset);
++
++  ///
++  /// Return the height of top controls.
++  ///
++  int(CEF_CALLBACK* on_get_top_controls_height)(struct _cef_client_t* self);
++
++  ///
++  /// Return the shrink renderer size of top controls.
++  ///
++  int(CEF_CALLBACK* do_browser_controls_shrink_renderer_size)(
++      struct _cef_client_t* self);
+ } cef_client_t;
+ 
+ #ifdef __cplusplus
+diff --git a/src/cef/include/capi/cef_cookie_capi.h b/src/cef/include/capi/cef_cookie_capi.h
+index 93b2bf954f459..7c832908e51ce
+--- a/src/cef/include/capi/cef_cookie_capi.h
++++ b/src/cef/include/capi/cef_cookie_capi.h
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=080f381be76fa35512d0e20ac96049ba4e73ea12$
++// $hash=c88bf529e8ceb9d78b37299e4498f8977723526f$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_CEF_COOKIE_CAPI_H_
+@@ -96,7 +96,8 @@ typedef struct _cef_cookie_manager_t {
+                                 const cef_string_t* url,
+                                 const struct _cef_cookie_t* cookie,
+                                 struct _cef_set_cookie_callback_t* callback,
+-                                int is_sync);
++                                int is_sync,
++                                const cef_string_t* str_cookie);
+ 
+   ///
+   /// Delete all cookies that match the specified parameters. If both |url| and
+diff --git a/src/cef/include/capi/cef_display_handler_capi.h b/src/cef/include/capi/cef_display_handler_capi.h
+index 8df4aa22f496d..2988865faa8ae
+--- a/src/cef/include/capi/cef_display_handler_capi.h
++++ b/src/cef/include/capi/cef_display_handler_capi.h
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=8093ffaeeffcabff78e5265a2315bae10d4012d8$
++// $hash=83a8c43db6e5cbea858773928abf39dbbeacc6d4$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_CEF_DISPLAY_HANDLER_CAPI_H_
+@@ -202,6 +202,14 @@ typedef struct _cef_display_handler_t {
+                                        struct _cef_browser_t* browser,
+                                        float old_page_scale_factor,
+                                        float new_page_scale_factor);
++
++  ///
++  /// Called when the page browser zoom has changed.
++  ///
++  void(CEF_CALLBACK* on_contents_browser_zoom_change)(
++      struct _cef_display_handler_t* self,
++      double zoom_factor,
++      int can_show_bubble);
+ } cef_display_handler_t;
+ 
+ #ifdef __cplusplus
+diff --git a/src/cef/include/capi/cef_frame_capi.h b/src/cef/include/capi/cef_frame_capi.h
+index e8c08d6e90033..5b74f0856ac77
+--- a/src/cef/include/capi/cef_frame_capi.h
++++ b/src/cef/include/capi/cef_frame_capi.h
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=3e33c08f4c6aab4d3898c4eff30c1088938847ce$
++// $hash=9a3012fbf1745fa5b371149c00375f2201a4d44e$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_CEF_FRAME_CAPI_H_
+@@ -282,6 +282,14 @@ typedef struct _cef_frame_t {
+   ///
+   void(CEF_CALLBACK* get_images)(struct _cef_frame_t* self,
+                                  struct _cef_get_images_callback_t* callback);
++
++  ///
++  /// PostUrl
++  ///
++  void(CEF_CALLBACK* post_url)(struct _cef_frame_t* self,
++                               const cef_string_t* url,
++                               size_t post_dataCount,
++                               char const* post_data);
+ } cef_frame_t;
+ 
+ #ifdef __cplusplus
+diff --git a/src/cef/include/capi/cef_render_handler_capi.h b/src/cef/include/capi/cef_render_handler_capi.h
+index 797cc8d50ae4f..2ee2a46c9a7fc
+--- a/src/cef/include/capi/cef_render_handler_capi.h
++++ b/src/cef/include/capi/cef_render_handler_capi.h
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=95646f6abf1bc9aa217347a937d914f1fe9fe6bf$
++// $hash=788abccf459ebec37b8fe4d24d65b2ed303cfd66$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_CEF_RENDER_HANDLER_CAPI_H_
+@@ -340,6 +340,16 @@ typedef struct _cef_render_handler_t {
+   void(CEF_CALLBACK* on_scroll_state)(struct _cef_render_handler_t* self,
+                                       struct _cef_browser_t* browser,
+                                       int scroll_state);
++
++  ///
++  /// Called when scroll.
++  ///
++  int(CEF_CALLBACK* filter_scroll_event)(struct _cef_render_handler_t* self,
++                                         struct _cef_browser_t* browser,
++                                         const float x,
++                                         const float y,
++                                         const float fling_x,
++                                         const float fling_y);
+ } cef_render_handler_t;
+ 
+ #ifdef __cplusplus
+diff --git a/src/cef/include/cef_api_hash.h b/src/cef/include/cef_api_hash.h
+index 4fa501f6b6f5b..180a06d5fd5a6
+--- a/src/cef/include/cef_api_hash.h
++++ b/src/cef/include/cef_api_hash.h
+@@ -42,15 +42,15 @@
+ // way that may cause binary incompatibility with other builds. The universal
+ // hash value will change if any platform is affected whereas the platform hash
+ // values will change only if that particular platform is affected.
+-#define CEF_API_HASH_UNIVERSAL "de082992d15af97dc8aae9cfb0c5cea54caaa82d"
++#define CEF_API_HASH_UNIVERSAL "16b47b03cdbfbf50683057f7cd587f5c447d90f8"
+ #if defined(OS_WIN)
+-#define CEF_API_HASH_PLATFORM "20aa77cdbd0ca9b6d084ff58cebe743a8784e694"
++#define CEF_API_HASH_PLATFORM "7786e402ba0b47bfecca2cee15e1bb23fa7e154d"
+ #elif defined(OS_MAC)
+-#define CEF_API_HASH_PLATFORM "832c89422cc6010913c4c5233eeb3365829bda01"
++#define CEF_API_HASH_PLATFORM "f3aea79b2f54d620d7f2a4f6f278f4dc4a50e78c"
+ #elif defined(OS_LINUX)
+-#define CEF_API_HASH_PLATFORM "50873f75e52e0c4c0134b2286372b583d3b423d5"
++#define CEF_API_HASH_PLATFORM "86d6f4b1d26a5afede75bc35d0c053e78549140e"
+ #elif defined(OS_OHOS)
+-#define CEF_API_HASH_PLATFORM "50873f75e52e0c4c0134b2286372b583d3b423d5"
++#define CEF_API_HASH_PLATFORM "86d6f4b1d26a5afede75bc35d0c053e78549140e"
+ #endif
+ 
+ #ifdef __cplusplus
+diff --git a/src/cef/include/cef_browser.h b/src/cef/include/cef_browser.h
+index f5564d01e073b..af27823f0a90b
+--- a/src/cef/include/cef_browser.h
++++ b/src/cef/include/cef_browser.h
+@@ -300,6 +300,19 @@ class CefBrowser : public virtual CefBaseRefCounted {
+   /*--cef()--*/
+   virtual void PasswordSuggestionSelected(int list_index) = 0;
+ 
++  ///
++  /// Update browser controls state.
++  ///
++  /*--cef()--*/
++  virtual void UpdateBrowserControlsState(int constraints,
++                                          int current,
++                                          bool animate) = 0;
++
++  ///
++  /// Update browser controls height.
++  ///
++  /*--cef()--*/
++  virtual void UpdateBrowserControlsHeight(int height, bool animate) = 0;
+   ///
+   /// Prefetch the resources required by the page, but will not execute js or
+   /// render the page.
+@@ -381,6 +394,7 @@ class CefBrowser : public virtual CefBaseRefCounted {
+   ///
+   /*--cef()--*/
+   virtual void SetSavePassword(bool enable) = 0;
++
+   /* ---------- ohos_nweb_ex add end --------- */
+ #endif  // BUILDFLAG(IS_OHOS)
+ };
+@@ -1100,6 +1114,12 @@ class CefBrowserHost : public virtual CefBaseRefCounted {
+   /*--cef()--*/
+   virtual void SetAccessibilityState(cef_state_t accessibility_state) = 0;
+ 
++  ///
++  /// GetOrCreateRootBrowserAccessibilityManager
++  ///
++  /*--cef()--*/
++  virtual void GetOrCreateRootBrowserAccessibilityManager(void** manager) = 0;
++
+   ///
+   /// Enable notifications of auto resize via CefDisplayHandler::OnAutoResize.
+   /// Notifications are disabled by default. |min_size| and |max_size| define
+@@ -1257,9 +1277,9 @@ class CefBrowserHost : public virtual CefBaseRefCounted {
+   /// RegisterArkJSfunction
+   ///
+   /*--cef()--*/
+-  virtual void RegisterArkJSfunction(
+-      const CefString& object_name,
+-      const std::vector<CefString>& method_list) = 0;
++  virtual void RegisterArkJSfunction(const CefString& object_name,
++                                     const std::vector<CefString>& method_list,
++                                     const int32_t object_id) = 0;
+ 
+   ///
+   /// UnregisterArkJSfunction
+@@ -1269,6 +1289,15 @@ class CefBrowserHost : public virtual CefBaseRefCounted {
+       const CefString& object_name,
+       const std::vector<CefString>& method_list) = 0;
+ 
++  ///
++  /// CallH5Function
++  ///
++  /*--cef()--*/
++  virtual void CallH5Function(int32_t routing_id,
++                              int32_t h5_object_id,
++                              const CefString& h5_method_name,
++                              const std::vector<CefRefPtr<CefValue>>& args) = 0;
++
+   ///
+   /// Saves the current view as a web archive.
+   ///
+@@ -1498,6 +1527,80 @@ class CefBrowserHost : public virtual CefBaseRefCounted {
+   ///
+   /*--cef()--*/
+   virtual void SetToken(void* token) = 0;
++
++  ///
++  /// Set the property values for width, height, and keyboard height
++  ///
++  /*--cef()--*/
++  virtual void SetVirtualKeyBoardArg(int32_t width,
++                                     int32_t height,
++                                     double keyboard) = 0;
++
++  ///
++  /// Set the virtual keyboard to override the web status
++  ///
++  /*--cef()--*/
++  virtual bool ShouldVirtualKeyboardOverlay() = 0;
++
++  ///
++  /// JavaScriptOnDocumentStart
++  ///
++  /*--cef()--*/
++  virtual void JavaScriptOnDocumentStart(
++      const CefString& script,
++      const std::vector<CefString>& script_rules) = 0;
++
++  ///
++  /// RemoveJavaScriptOnDocumentStart
++  ///
++  /*--cef()--*/
++  virtual void RemoveJavaScriptOnDocumentStart() = 0;
++
++  ///
++  /// Set the draw rect
++  ///
++  /*--cef()--*/
++  virtual void SetDrawRect(int x, int y, int width, int height) = 0;
++
++  ///
++  /// Set the draw mode
++  ///
++  /*--cef()--*/
++  virtual void SetDrawMode(int mode) = 0;
++
++  ///
++  /// Create the Web print document adapter of the UI framework
++  ///
++  /*--cef()--*/
++  virtual void CreateWebPrintDocumentAdapter(
++      const CefString& jobName,
++      void** webPrintDocumentAdapter) = 0;
++
++  ///
++  /// Set the over-scroll mode of web
++  ///
++  /*--cef()--*/
++  virtual void SetOverscrollMode(int mode) = 0;
++
++  ///
++  /// Discard a webview window
++  ///
++  /*--cef()--*/
++  virtual bool Discard() = 0;
++
++  ///
++  /// Restore the discarded webview window
++  ///
++  /*--cef()--*/
++  virtual bool Restore() = 0;
++
++  ///
++  /// Change the zoom factor for browser zoom.
++  /// If called on the UI thread the change will be applied immediately.
++  /// Otherwise, the change will be applied asynchronously on the UI thread.
++  ///
++  /*--cef()--*/
++  virtual void SetBrowserZoomLevel(double zoomFactor) = 0;
+ #endif  // BUILDFLAG(IS_OHOS)
+ };
+ #endif  // CEF_INCLUDE_CEF_BROWSER_H_
+diff --git a/src/cef/include/cef_client.h b/src/cef/include/cef_client.h
+index b756b7b08c215..45a8708c6a195
+--- a/src/cef/include/cef_client.h
++++ b/src/cef/include/cef_client.h
+@@ -226,15 +226,66 @@ class CefClient : public virtual CefBaseRefCounted {
+   virtual int NotifyJavaScriptResult(CefRefPtr<CefListValue> args,
+                                      const CefString& method,
+                                      const CefString& object_name,
+-                                     CefRefPtr<CefListValue> result) {
++                                     CefRefPtr<CefListValue> result,
++                                     int32_t routing_id,
++                                     int32_t object_id) {
+     return 0;
+   }
+ 
++  ///
++  /// has javaScript object method.
++  ///
++  /*--cef()--*/
++  virtual bool HasJavaScriptObjectMethods(int32_t object_id,
++                                          const CefString& method_name) {
++    return false;
++  }
++
++  ///
++  /// get javaScript object methods.
++  ///
++  /*--cef()--*/
++  virtual void GetJavaScriptObjectMethods(
++      int32_t object_id,
++      CefRefPtr<CefValue> returned_method_names) {}
++
++  ///
++  /// remove javaScript object holder.
++  ///
++  /*--cef()--*/
++  virtual void RemoveJavaScriptObjectHolder(int32_t holder, int32_t object_id) {
++  }
++
++  ///
++  /// remove transient javaScript object holder.
++  ///
++  /*--cef()--*/
++  virtual void RemoveTransientJavaScriptObject() {}
++
+   ///
+   /// Return the handler for browser form events.
+   ///
+   /*--cef()--*/
+   virtual CefRefPtr<CefFormHandler> GetFormHandler() { return nullptr; }
++
++  ///
++  /// Called when top controls offset has been changed.
++  ///
++  /*--cef()--*/
++  virtual void OnTopControlsChanged(float top_controls_offset,
++                                    float top_content_offset) {}
++
++  ///
++  /// Return the height of top controls.
++  ///
++  /*--cef()--*/
++  virtual int OnGetTopControlsHeight() { return 0; }
++
++  ///
++  /// Return the shrink renderer size of top controls.
++  ///
++  /*--cef()--*/
++  virtual bool DoBrowserControlsShrinkRendererSize() { return false; }
+ #endif
+ };
+ 
+diff --git a/src/cef/include/cef_cookie.h b/src/cef/include/cef_cookie.h
+index 562d23b870bad..4ae0ac2ceb063
+--- a/src/cef/include/cef_cookie.h
++++ b/src/cef/include/cef_cookie.h
+@@ -101,7 +101,8 @@ class CefCookieManager : public virtual CefBaseRefCounted {
+   virtual bool SetCookie(const CefString& url,
+                          const CefCookie& cookie,
+                          CefRefPtr<CefSetCookieCallback> callback,
+-                         bool is_sync) = 0;
++                         bool is_sync,
++                         const CefString& str_cookie) = 0;
+ 
+   ///
+   /// Delete all cookies that match the specified parameters. If both |url| and
+diff --git a/src/cef/include/cef_display_handler.h b/src/cef/include/cef_display_handler.h
+index dd6eb53c90654..3e04f06f35a0a
+--- a/src/cef/include/cef_display_handler.h
++++ b/src/cef/include/cef_display_handler.h
+@@ -196,6 +196,12 @@ class CefDisplayHandler : public virtual CefBaseRefCounted {
+   virtual void OnScaleChanged(CefRefPtr<CefBrowser> browser,
+                               float old_page_scale_factor,
+                               float new_page_scale_factor) {}
++  ///
++  /// Called when the page browser zoom has changed.
++  ///
++  /*--cef()--*/
++  virtual void OnContentsBrowserZoomChange(double zoom_factor,
++                                           bool can_show_bubble) {}
+ #endif
+ };
+ 
+diff --git a/src/cef/include/cef_frame.h b/src/cef/include/cef_frame.h
+index 359a62618ac35..44f69c9b97d80
+--- a/src/cef/include/cef_frame.h
++++ b/src/cef/include/cef_frame.h
+@@ -286,6 +286,13 @@ class CefFrame : public virtual CefBaseRefCounted {
+   ///
+   /*--cef()--*/
+   virtual void GetImages(CefRefPtr<CefGetImagesCallback> callback) = 0;
++
++  ///
++  /// PostUrl
++  ///
++  /*--cef(optional_param=post_data)--*/
++  virtual void PostURL(const CefString& url,
++                       const std::vector<char>& post_data) = 0;
+ #endif
+ };
+ #endif  // CEF_INCLUDE_CEF_FRAME_H_
+diff --git a/src/cef/include/cef_render_handler.h b/src/cef/include/cef_render_handler.h
+index 984000d09ab7f..82cd93c37609f
+--- a/src/cef/include/cef_render_handler.h
++++ b/src/cef/include/cef_render_handler.h
+@@ -339,6 +339,18 @@ class CefRenderHandler : public virtual CefBaseRefCounted {
+   /*--cef()--*/
+   virtual void OnScrollState(CefRefPtr<CefBrowser> browser,
+                              bool scroll_state) {}
++
++  ///
++  /// Called when scroll.
++  ///
++  /*--cef()--*/
++  virtual bool FilterScrollEvent(CefRefPtr<CefBrowser> browser,
++                                 const float x,
++                                 const float y,
++                                 const float fling_x,
++                                 const float fling_y) {
++    return false;
++  }
+ #endif  // BUILDFLAG(IS_OHOS)
+ };
+ 
+diff --git a/src/cef/include/cef_request_handler.h b/src/cef/include/cef_request_handler.h
+index 96aaeff7253c3..2d636717bd657
+--- a/src/cef/include/cef_request_handler.h
++++ b/src/cef/include/cef_request_handler.h
+@@ -50,24 +50,6 @@
+ #include "include/cef_ssl_info.h"
+ #include "include/cef_x509_certificate.h"
+ 
+-// TODO(ohos): Adaptor CefSelectClientCertificateCallback, see:
+-// cef/include/cef_callback.h
+-// ///
+-// /// Callback interface used to select a client certificate for
+-// authentication.
+-// ///
+-// /*--cef(source=library)--*/
+-// class CefSelectClientCertificateCallback : public virtual CefBaseRefCounted {
+-//  public:
+-//   ///
+-//   /// Chooses the specified certificate for client certificate
+-//   authentication.
+-//   /// NULL value means that no client certificate should be used.
+-//   ///
+-//   /*--cef(optional_param=cert)--*/
+-//   virtual void Select(CefRefPtr<CefX509Certificate> cert) = 0;
+-// };
+-
+ ///
+ /// Implement this interface to handle events related to browser requests. The
+ /// methods of this class will be called on the thread indicated.
+diff --git a/src/cef/libcef/browser/alloy/alloy_browser_context.cc b/src/cef/libcef/browser/alloy/alloy_browser_context.cc
+index c9409feea2261..41eb2b17b3bbe
+--- a/src/cef/libcef/browser/alloy/alloy_browser_context.cc
++++ b/src/cef/libcef/browser/alloy/alloy_browser_context.cc
+@@ -54,6 +54,24 @@
+ #include "libcef/browser/permission/alloy_permission_manager.h"
+ #endif
+ 
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++#include "base/trace_event/trace_event.h"
++#include "base/trace_event/traced_value.h"
++#include "chrome/browser/browser_process.h"
++#include "chrome/browser/content_settings/cookie_settings_factory.h"
++#include "chrome/browser/extensions/extension_special_storage_policy.h"
++#include "chrome/browser/policy/chrome_browser_policy_connector.h"
++#include "chrome/browser/policy/profile_policy_connector.h"
++#include "chrome/browser/policy/profile_policy_connector_builder.h"
++#include "chrome/browser/policy/schema_registry_service.h"
++#include "chrome/browser/policy/schema_registry_service_builder.h"
++#include "components/content_settings/core/browser/cookie_settings.h"
++#include "components/policy/core/common/cloud/user_cloud_policy_manager.h"
++#include "components/policy/core/common/cloud/user_cloud_policy_store.h"
++#include "content/public/browser/network_service_instance.h"
++#include "extensions/browser/browser_context_keyed_service_factories.h"
++#endif
++
+ using content::BrowserThread;
+ 
+ // Creates and manages VisitedLinkEventListener objects for each
+@@ -146,6 +164,13 @@ void AlloyBrowserContext::Initialize() {
+   pref_service_ = browser_prefs::CreatePrefService(
+       this, cache_path_, !!settings_.persist_user_preferences);
+ 
++  // Spell checking support and possibly other subsystems retrieve the
++  // PrefService associated with a BrowserContext via UserPrefs::Get().
++  PrefService* pref_service = GetPrefs();
++  DCHECK(pref_service);
++  user_prefs::UserPrefs::Set(this, pref_service);
++  key_->SetPrefs(pref_service);
++
+   // This must be called before creating any services to avoid hitting
+   // DependencyManager::AssertContextWasntDestroyed when creating/destroying
+   // multiple browser contexts (due to pointer address reuse).
+@@ -156,10 +181,37 @@ void AlloyBrowserContext::Initialize() {
+   if (extensions_enabled) {
+     // Create the custom ExtensionSystem first because other KeyedServices
+     // depend on it.
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++    policy::ChromeBrowserPolicyConnector* connector =
++        g_browser_process->browser_policy_connector();
++    schema_registry_service_ = BuildSchemaRegistryServiceForProfile(
++        this, connector->GetChromeSchema(), connector->GetSchemaRegistry());
++
++    // If we are creating the profile synchronously, then we should load the
++    // policy data immediately.
++    bool force_immediate_policy_load = false;  //! async_prefs;
++
++    policy::UserCloudPolicyManager* user_cloud_policy_manager;
++    policy::ConfigurationPolicyProvider* policy_provider;
++    {
++      user_cloud_policy_manager_ = policy::UserCloudPolicyManager::Create(
++          GetPath(), GetPolicySchemaRegistryService()->registry(),
++          force_immediate_policy_load, content::GetIOThreadTaskRunner({}),
++          base::BindRepeating(&content::GetNetworkConnectionTracker));
++      user_cloud_policy_manager = user_cloud_policy_manager_.get();
++      policy_provider = user_cloud_policy_manager;
++    }
++
++    profile_policy_connector_ =
++        policy::CreateProfilePolicyConnectorForBrowserContext(
++            schema_registry_service_->registry(), user_cloud_policy_manager,
++            policy_provider, g_browser_process->browser_policy_connector(),
++            force_immediate_policy_load, this);
++#endif
+     extension_system_ = static_cast<extensions::CefExtensionSystem*>(
+         extensions::ExtensionSystem::Get(this));
+-    extension_system_->InitForRegularProfile(true);
+ 
++    extension_system_->InitForRegularProfile(true);
+     // Make sure the ProcessManager is created so that it receives extension
+     // load notifications. This is necessary for the proper initialization of
+     // background/event pages.
+@@ -182,13 +234,6 @@ void AlloyBrowserContext::Initialize() {
+   pref_proxy_config_tracker_.reset(new PrefProxyConfigTrackerImpl(
+       GetPrefs(), content::GetIOThreadTaskRunner({})));
+ 
+-  // Spell checking support and possibly other subsystems retrieve the
+-  // PrefService associated with a BrowserContext via UserPrefs::Get().
+-  PrefService* pref_service = GetPrefs();
+-  DCHECK(pref_service);
+-  user_prefs::UserPrefs::Set(this, pref_service);
+-  key_->SetPrefs(pref_service);
+-
+   if (extensions_enabled) {
+     extension_system_->Init();
+   }
+@@ -451,14 +496,22 @@ ProfileKey* AlloyBrowserContext::GetProfileKey() const {
+ 
+ policy::SchemaRegistryService*
+ AlloyBrowserContext::GetPolicySchemaRegistryService() {
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++  return schema_registry_service_.get();
++#else
+   DCHECK(false);
+   return nullptr;
++#endif
+ }
+ 
+ policy::UserCloudPolicyManager*
+ AlloyBrowserContext::GetUserCloudPolicyManager() {
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++  return user_cloud_policy_manager_.get();
++#else
+   DCHECK(false);
+   return nullptr;
++#endif
+ }
+ 
+ policy::ProfileCloudPolicyManager*
+@@ -469,14 +522,22 @@ AlloyBrowserContext::GetProfileCloudPolicyManager() {
+ 
+ policy::ProfilePolicyConnector*
+ AlloyBrowserContext::GetProfilePolicyConnector() {
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++  return profile_policy_connector_.get();
++#else
+   DCHECK(false);
+   return nullptr;
++#endif
+ }
+ 
+ const policy::ProfilePolicyConnector*
+ AlloyBrowserContext::GetProfilePolicyConnector() const {
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++  return profile_policy_connector_.get();
++#else
+   DCHECK(false);
+   return nullptr;
++#endif
+ }
+ 
+ bool AlloyBrowserContext::IsNewProfile() const {
+@@ -501,3 +562,20 @@ DownloadPrefs* AlloyBrowserContext::GetDownloadPrefs() {
+ void AlloyBrowserContext::AddVisitedURLs(const std::vector<GURL>& urls) {
+   visitedlink_master_->AddURLs(urls);
+ }
++
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++ExtensionSpecialStoragePolicy*
++AlloyBrowserContext::GetExtensionSpecialStoragePolicy() {
++#if BUILDFLAG(ENABLE_EXTENSIONS)
++  if (!extension_special_storage_policy_.get()) {
++    TRACE_EVENT0("browser", "ProfileImpl::GetExtensionSpecialStoragePolicy");
++    extension_special_storage_policy_ =
++        base::MakeRefCounted<ExtensionSpecialStoragePolicy>(
++            CookieSettingsFactory::GetForProfile(this).get());
++  }
++  return extension_special_storage_policy_.get();
++#else
++  return NULL;
++#endif
++}
++#endif
+diff --git a/src/cef/libcef/browser/alloy/alloy_browser_context.h b/src/cef/libcef/browser/alloy/alloy_browser_context.h
+index c44741c127b92..d0725aae8f2ea
+--- a/src/cef/libcef/browser/alloy/alloy_browser_context.h
++++ b/src/cef/libcef/browser/alloy/alloy_browser_context.h
+@@ -20,7 +20,10 @@ class CefSSLHostStateDelegate;
+ class CefVisitedLinkListener;
+ class MediaDeviceIDSalt;
+ class PrefService;
+-
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++class ProfilePolicyConnector;
++class ExtensionSpecialStoragePolicy;
++#endif
+ namespace extensions {
+ class CefExtensionSystem;
+ }
+@@ -124,6 +127,9 @@ class AlloyBrowserContext : public ChromeProfileAlloy,
+   // Called from DownloadPrefs::FromBrowserContext.
+   DownloadPrefs* GetDownloadPrefs();
+ 
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++  ExtensionSpecialStoragePolicy* GetExtensionSpecialStoragePolicy() override;
++#endif
+  private:
+   ~AlloyBrowserContext() override;
+ 
+@@ -152,6 +158,14 @@ class AlloyBrowserContext : public ChromeProfileAlloy,
+ #if BUILDFLAG(IS_OHOS)
+   std::unique_ptr<content::PermissionControllerDelegate> permission_manager_;
+ #endif
++
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++  std::unique_ptr<policy::SchemaRegistryService> schema_registry_service_;
++  std::unique_ptr<policy::UserCloudPolicyManager> user_cloud_policy_manager_;
++  std::unique_ptr<policy::ProfilePolicyConnector> profile_policy_connector_;
++  scoped_refptr<ExtensionSpecialStoragePolicy>
++      extension_special_storage_policy_;
++#endif
+ };
+ 
+ #endif  // CEF_LIBCEF_BROWSER_ALLOY_ALLOY_BROWSER_CONTEXT_H_
+diff --git a/src/cef/libcef/browser/alloy/alloy_browser_host_impl.cc b/src/cef/libcef/browser/alloy/alloy_browser_host_impl.cc
+index 8ba70f9c61428..157e9128251fc
+--- a/src/cef/libcef/browser/alloy/alloy_browser_host_impl.cc
++++ b/src/cef/libcef/browser/alloy/alloy_browser_host_impl.cc
+@@ -69,6 +69,20 @@
+ #include "content/browser/ohos/date_time_chooser_ohos.h"
+ #endif  // OHOS_CSS_INPUT_TIME
+ 
++#if defined(OHOS_WEBRTC)
++#include "cef/libcef/browser/permission/alloy_access_request.h"
++#include "third_party/blink/public/mojom/mediastream/media_stream.mojom.h"
++#endif
++
++#ifdef OHOS_EX_GET_ZOOM_LEVEL
++#include "base/command_line.h"
++#include "net/base/url_util.h"
++#include "content/public/common/content_switches.h"
++#include "third_party/blink/public/common/page/page_zoom.h"
++#include "components/zoom/page_zoom.h"
++#include "components/prefs/pref_service.h"
++#endif
++
+ using content::KeyboardEventProcessingResult;
+ 
+ namespace {
+@@ -416,6 +430,28 @@ void AlloyBrowserHostImpl::SetZoomLevel(double zoomLevel) {
+   }
+ }
+ 
++void AlloyBrowserHostImpl::SetBrowserZoomLevel(double zoom_factor) {
++#ifdef OHOS_EX_GET_ZOOM_LEVEL
++  if (CEF_CURRENTLY_ON_UIT()) {
++    if (base::CommandLine::ForCurrentProcess()->HasSwitch(
++            switches::kForBrowser) &&
++        web_contents()) {
++      zoom::ZoomController* zoom_controller =
++          zoom::ZoomController::FromWebContents(web_contents());
++      if (!zoom_controller) {
++        LOG(ERROR) << "SetBrowserZoomLevel has no zoom controller.";
++        return;
++      }
++      zoom_controller->SetZoomLevel(
++          blink::PageZoomFactorToZoomLevel(zoom_factor));
++    }
++  } else {
++    CEF_POST_TASK(CEF_UIT,
++                  base::BindOnce(&AlloyBrowserHostImpl::SetBrowserZoomLevel,
++                                 this, zoom_factor));
++  }
++#endif
++}
+ void AlloyBrowserHostImpl::Find(const CefString& searchText,
+                                 bool forward,
+                                 bool matchCase,
+@@ -783,6 +819,17 @@ void AlloyBrowserHostImpl::DestroyBrowser() {
+   // If the WebContents still exists at this point, signal destruction before
+   // browser destruction.
+   if (web_contents()) {
++#if defined(OHOS_EX_GET_ZOOM_LEVEL)
++    if (base::CommandLine::ForCurrentProcess()->HasSwitch(
++          switches::kForBrowser)) {
++      AlloyBrowserContext* browser_context =
++          static_cast<AlloyBrowserContext*>(web_contents()->GetBrowserContext());
++      if (browser_context) {
++        DCHECK(browser_context->GetPrefs());
++        browser_context->GetPrefs()->CommitPendingWrite();
++      }
++    }
++#endif
+     WebContentsDestroyed();
+   }
+ 
+@@ -1454,10 +1501,44 @@ void AlloyBrowserHostImpl::RequestMediaAccessPermission(
+     content::WebContents* web_contents,
+     const content::MediaStreamRequest& request,
+     content::MediaResponseCallback callback) {
++#if defined(OHOS_WEBRTC)
++  if (!base::CommandLine::ForCurrentProcess()->HasSwitch(switches::kEnableMediaStream)) {
++    // Cancel the request.
++    std::move(callback).Run(blink::mojom::StreamDevicesSet(),
++                            blink::mojom::MediaStreamRequestResult::PERMISSION_DENIED,
++                            std::unique_ptr<content::MediaStreamUI>());
++    return;
++  }
++
++  bool microphone_requested =
++      (request.audio_type ==
++       blink::mojom::MediaStreamType::DEVICE_AUDIO_CAPTURE);
++  bool webcam_requested = (request.video_type ==
++                           blink::mojom::MediaStreamType::DEVICE_VIDEO_CAPTURE);
++  bool screen_requested = (request.video_type ==
++                           blink::mojom::MediaStreamType::GUM_DESKTOP_VIDEO_CAPTURE) ||
++                          (request.video_type ==
++                           blink::mojom::MediaStreamType::DISPLAY_VIDEO_CAPTURE);
++  LOG(INFO) << "RequestMediaAccessPermission screen_requested: " << screen_requested;
++  AlloyPermissionRequestHandler* permission_handler = GetPermissionRequestHandler();
++  if (!permission_handler) {
++    // Cancel the request.
++    std::move(callback).Run(blink::mojom::StreamDevicesSet(),
++                            blink::mojom::MediaStreamRequestResult::PERMISSION_DENIED,
++                            std::unique_ptr<content::MediaStreamUI>());
++    return;
++  }
++  if (!screen_requested && (microphone_requested || webcam_requested)) {
++    permission_handler->SendRequest(new AlloyMediaAccessRequest(this, request, std::move(callback)));
++  } else {
++    permission_handler->SendScreenCaptureRequest(new AlloyScreenCaptureAccessRequest(this, request, std::move(callback)));
++  }
++#else
+   auto returned_callback = media_access_query::RequestMediaAccessPermission(
+       this, request, std::move(callback), /*default_disallow=*/true);
+   // Callback should not be returned.
+   DCHECK(returned_callback.is_null());
++#endif // defined(OHOS_WEBRTC)
+ }
+ 
+ bool AlloyBrowserHostImpl::CheckMediaAccessPermission(
+@@ -1489,8 +1570,14 @@ void AlloyBrowserHostImpl::ExitPictureInPicture() {
+ }
+ 
+ bool AlloyBrowserHostImpl::IsBackForwardCacheSupported() {
++#if BUILDFLAG(IS_OHOS)
++  // Turn this switch on and see if there's anything wrong,
++  // issue #3237 not reproduced, maybe had been fixed.
++  return true;
++#else
+   // Disabled due to issue #3237.
+   return false;
++#endif
+ }
+ 
+ content::PreloadingEligibility AlloyBrowserHostImpl::IsPrerender2Supported(
+@@ -1736,6 +1823,13 @@ AlloyBrowserHostImpl::AlloyBrowserHostImpl(
+ 
+   // Make sure RenderFrameCreated is called at least one time.
+   RenderFrameCreated(web_contents->GetPrimaryMainFrame());
++
++#ifdef OHOS_EX_GET_ZOOM_LEVEL
++  if (base::CommandLine::ForCurrentProcess()->HasSwitch(
++            switches::kForBrowser)) {
++    zoom::ZoomController::CreateForWebContents(web_contents);
++  }
++#endif
+ }
+ 
+ bool AlloyBrowserHostImpl::CreateHostWindow() {
+@@ -1859,6 +1953,57 @@ void AlloyBrowserHostImpl::ShowPopupMenu(
+ }
+ #endif  // #ifdef OHOS_HTML_SELECT
+ 
++#if defined(OHOS_COMPOSITE_RENDER)
++void AlloyBrowserHostImpl::WasKeyboardResized() {
++  if (!CEF_CURRENTLY_ON_UIT()) {
++    CEF_POST_TASK(
++        CEF_UIT,
++        base::BindOnce(&AlloyBrowserHostImpl::WasKeyboardResized, this));
++    return;
++  }
++ 
++  if (platform_delegate_)
++    platform_delegate_->WasKeyboardResized();
++}
++#endif  // defined(OHOS_COMPOSITE_RENDER)
++
++#if defined(OHOS_INPUT_EVENTS)
++void AlloyBrowserHostImpl::SetVirtualKeyBoardArg(int32_t width, int32_t height, double keyboard) {
++  if (platform_delegate_) {
++    platform_delegate_->SetVirtualKeyBoardArg(width, height, keyboard);
++  }
++}
++ 
++bool AlloyBrowserHostImpl::ShouldVirtualKeyboardOverlay() {
++  if (platform_delegate_) {
++    return platform_delegate_->ShouldVirtualKeyboardOverlay();
++  }
++  return false;
++}
++#endif
++
++#if defined(OHOS_INPUT_EVENTS)
++void AlloyBrowserHostImpl::ContentsZoomChange(bool zoom_in) {
++#ifdef OHOS_NWEB_EX
++  if (base::CommandLine::ForCurrentProcess()->HasSwitch(
++          switches::kForBrowser)) {
++    content::PageZoom zoomType = zoom_in ? content::PageZoom::PAGE_ZOOM_IN
++                                         : content::PageZoom::PAGE_ZOOM_OUT;
++    zoom::PageZoom::Zoom(web_contents(), zoomType);
++    return;
++  }
++#endif
++
++  double curFactor = GetZoomLevel();
++  double tempZoomFactor = zoom_in ? curFactor + 2.0 : curFactor - 2.0;
++  if (tempZoomFactor > 10.0 || tempZoomFactor < -10.0) {
++    LOG(ERROR) << "The mouse wheel event can no longer be zoomed in or out.";
++    return;
++  }
++  SetZoomLevel(tempZoomFactor);
++}
++#endif
++
+ #ifdef OHOS_CSS_INPUT_TIME
+ void AlloyBrowserHostImpl::OpenDateTimeChooser() {
+   content::DateTimeChooserOHOS* date_time_chooser =
+@@ -1934,6 +2079,16 @@ void AlloyBrowserHostImpl::OnHideAutofillPopup() {
+ #endif
+ 
+ #if defined(OHOS_COMPOSITE_RENDER)
++void AlloyBrowserHostImpl::SetDrawRect(int x, int y, int width, int height) {
++  if (platform_delegate_)
++    platform_delegate_->SetDrawRect(x, y, width, height);
++}
++
++void AlloyBrowserHostImpl::SetDrawMode(int mode) {
++  if (platform_delegate_)
++    platform_delegate_->SetDrawMode(mode);
++}
++
+ void AlloyBrowserHostImpl::SetShouldFrameSubmissionBeforeDraw(bool should) {
+   if (!CEF_CURRENTLY_ON_UIT()) {
+     CEF_POST_TASK(CEF_UIT,
+@@ -1953,5 +2108,71 @@ void AlloyBrowserHostImpl::SetToken(void* token) {
+   if (platform_delegate_) {
+     platform_delegate_->SetToken(token);
+   }
+-};
++}
++
++void AlloyBrowserHostImpl::CreateWebPrintDocumentAdapter(const CefString& jobName,
++                                                         void** webPrintDocumentAdapter) {
++  if (platform_delegate_) {
++    platform_delegate_->CreateWebPrintDocumentAdapter(jobName, webPrintDocumentAdapter);
++  }
++}
+ #endif // defined(OHOS_PRINT)
++
++ 
++bool AlloyBrowserHostImpl::Discard() {
++  if (!CEF_CURRENTLY_ON_UIT()) {
++    LOG(ERROR) << "AlloyBrowserHostImpl::Discard failed, called on invalid thread";
++    return false;
++  }
++  if (!web_contents()) {
++    LOG(ERROR) << "AlloyBrowserHostImpl::Discard failed, WebContents is nullptr";
++    return false;
++  }
++ 
++  content::RenderFrameHost* main_frame = web_contents()->GetPrimaryMainFrame();
++  content::RenderProcessHost* render_process = main_frame->GetProcess();
++  if (!render_process) {
++    LOG(ERROR) << "AlloyBrowserHostImpl::Discard failed, RenderProcessHost is nullptr";
++    return false;
++  }
++ 
++  bool fast_shutdown_success = render_process->FastShutdownIfPossible(1u, true);
++  if (fast_shutdown_success) {
++    web_contents()->SetWasDiscarded(true);
++  }
++ 
++  return fast_shutdown_success;
++}
++ 
++bool AlloyBrowserHostImpl::Restore() {
++  if (!CEF_CURRENTLY_ON_UIT()) {
++    LOG(ERROR) << "AlloyBrowserHostImpl::Restore failed, called on invalid thread";
++    return false;
++  }
++  if (!web_contents()) {
++    LOG(ERROR) << "AlloyBrowserHostImpl::Restore failed, WebContents is nullptr";
++    return false;
++  }
++  
++  web_contents()->GetController().SetNeedsReload();
++  web_contents()->GetController().LoadIfNecessary();
++  web_contents()->Focus();
++  return true;
++}
++
++#ifdef OHOS_EX_GET_ZOOM_LEVEL
++void AlloyBrowserHostImpl::OnZoomChanged(
++    const zoom::ZoomController::ZoomChangedEventData& data) {
++  if (data.web_contents != web_contents()) {
++    return;
++  }
++  if (client_) {
++    CefRefPtr<CefDisplayHandler> handler = client_->GetDisplayHandler();
++    if (handler) {
++      handler->OnContentsBrowserZoomChange(
++          blink::PageZoomLevelToZoomFactor(data.new_zoom_level),
++          data.can_show_bubble);
++    }
++  }
++}
++#endif
