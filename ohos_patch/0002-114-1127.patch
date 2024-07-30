@@ -23013,3 +23013,542 @@ index 0000000000000..b7919312cd484
 +
 +}
 \ No newline at end of file
+diff --git a/src/ui/events/native_scroller_ohos.h b/src/ui/events/native_scroller_ohos.h
+new file mode 100644
+index 0000000000000..47b55133cd358
+--- /dev/null
++++ b/src/ui/events/native_scroller_ohos.h
+@@ -0,0 +1,58 @@
++#ifndef UI_EVENTS_NATIVE_SCROLLER_OHOS_H_
++#define UI_EVENTS_NATIVE_SCROLLER_OHOS_H_
++
++#include "base/time/time.h"
++#include "ui/events/events_base_export.h"
++#include "ui/events/gesture_curve.h"
++#include "ui/gfx/geometry/vector2d.h"
++
++namespace ui {
++class EVENTS_BASE_EXPORT NativeScrollerOhos : public GestureCurve {
++ public:
++    NativeScrollerOhos() = default;
++    ~NativeScrollerOhos() override {}
++
++    // Initialize fling state according to velocity and time at end of scorlling
++    void Fling(float start_x,
++               float start_y,
++               float velocity_x,
++               float velocity_y,
++               float min_x,
++               float max_x,
++               float min_y,
++               float max_y,
++               base::TimeTicks start_time);
++    
++    // GestureCurve implementation
++    bool ComputeScrollOffset(base::TimeTicks time,
++                             gfx::Vector2dF* offset,
++                             gfx::Vector2dF* velocity) override;
++
++ private:
++    double GetPosition(float offsetTime /*second*/);
++    double GetVelocity(float offsetTime /*second*/);
++
++    bool ShouldAbortAnimation();
++    void AbortAnimation();
++
++ private:
++    bool finisheed_{true};
++    base::TimeTicks start_time_;
++    base::TimeTicks curr_time_;
++    base::TimeTicks final_time_;
++
++    float friction_{0.0};
++    float init_velocity_y_{0.0};
++    float curr_velocity_y_{0.0};
++    
++    float init_y_{0.0};
++    float curr_y_{0.0};
++    float last_y_{0.0};
++    float final_y_{0.0};
++
++    float value_threshold_{0.0};
++    float velocity_threshold_{0.0};
++    float signum_{0.0};
++};
++} // namespace ui
++#endif
+\ No newline at end of file
+diff --git a/src/ui/gl/init/BUILD.gn b/src/ui/gl/init/BUILD.gn
+index af80148c71372..5d7f9b95f2e51
+--- a/src/ui/gl/init/BUILD.gn
++++ b/src/ui/gl/init/BUILD.gn
+@@ -43,7 +43,7 @@ component("init") {
+   if (is_ohos) {
+     sources += [
+       "gl_factory_ohos.cc",
+-      "gl_factory_ohos.h",
++      "gl_initializer_ohos.cc",
+     ]
+   }
+ 
+@@ -73,8 +73,6 @@ component("init") {
+     sources += [
+       "gl_display_egl_util_ozone.cc",
+       "gl_display_egl_util_ozone.h",
+-      "gl_factory_ozone.cc",
+-      "gl_initializer_ozone.cc",
+       "ozone_util.h",
+     ]
+ 
+diff --git a/src/ui/gl/init/gl_factory_ohos.cc b/src/ui/gl/init/gl_factory_ohos.cc
+index b9594841c2abf..18cafb6b47127
+--- a/src/ui/gl/init/gl_factory_ohos.cc
++++ b/src/ui/gl/init/gl_factory_ohos.cc
+@@ -2,18 +2,153 @@
+ // Use of this source code is governed by a BSD-style license that can be
+ // found in the LICENSE file.
+ 
+-#include "ui/gl/init/gl_factory_ohos.h"
++#include "ui/gl/init/gl_factory.h"
+ 
+-namespace gl {
++#include "base/check.h"
++#include "base/notreached.h"
++#include "base/trace_event/trace_event.h"
++#include "ui/gl/gl_context.h"
++#include "ui/gl/gl_context_stub.h"
++#include "ui/gl/gl_context_egl.h"
++#include "ui/gl/gl_egl_api_implementation.h"
++#include "ui/gl/gl_implementation.h"
++#include "ui/gl/gl_share_group.h"
++#include "ui/gl/gl_surface.h"
++#include "ui/gl/gl_surface_egl_ohos.h"
++#include "ui/gl/gl_surface_stub.h"
++#include "ui/gl/init/ozone_util.h"
++#include "ui/gl/presenter.h"
+ 
++namespace gl {
+ namespace init {
+ 
+-scoped_refptr<GLSurface> CreateViewGLSurfaceOhos(
++std::vector<GLImplementationParts> GetAllowedGLImplementations() {
++  return std::vector<gl::GLImplementationParts>{
++      gl::GLImplementationParts(gl::kGLImplementationEGLGLES2),
++      gl::GLImplementationParts(gl::kGLImplementationEGLANGLE),
++  };
++}
++ 
++bool GetGLWindowSystemBindingInfo(const GLVersionInfo& gl_info,
++                                  GLWindowSystemBindingInfo* info) {
++  switch (GetGLImplementation()) {
++    case kGLImplementationEGLGLES2:
++    default:
++      return false;
++  }
++}
++ 
++scoped_refptr<GLContext> CreateGLContext(GLShareGroup* share_group,
++                                         GLSurface* compatible_surface,
++                                         const GLContextAttribs& attribs) {
++  TRACE_EVENT0("gpu", "gl::init::CreateGLContext");
++  switch (GetGLImplementation()) {
++    case kGLImplementationMockGL:
++      return scoped_refptr<GLContext>(new GLContextStub(share_group));
++    case kGLImplementationStubGL: {
++      scoped_refptr<GLContextStub> stub_context =
++          new GLContextStub(share_group);
++      stub_context->SetUseStubApi(true);
++      return stub_context;
++    }
++    case kGLImplementationDisabled:
++      NOTREACHED();
++      return nullptr;
++    default:
++      if (compatible_surface->GetHandle() ||
++          compatible_surface->IsSurfaceless()) {
++        return InitializeGLContext(new GLContextEGL(share_group),
++                                   compatible_surface, attribs);
++      }
++  }
++  return nullptr;
++}
++ 
++scoped_refptr<GLSurface> CreateViewGLSurface(GLDisplay* display,
++                                             gfx::AcceleratedWidget window) {
++  TRACE_EVENT0("gpu", "gl::init::CreateViewGLSurface");
++  switch (GetGLImplementation()) {
++    case kGLImplementationEGLGLES2:
++    case kGLImplementationEGLANGLE:
++      if (window != gfx::kNullAcceleratedWidget) {
++        return InitializeGLSurface(
++            NativeViewGLSurfaceEGLOhos::CreateNativeViewGLSurfaceEGLOhos(
++                display, window));
++      } else {
++        return InitializeGLSurface(new GLSurfaceStub());
++      }
++    default:
++      NOTREACHED();
++      return nullptr;
++  }
++}
++ 
++scoped_refptr<Presenter> CreateSurfacelessViewGLSurface(
+     GLDisplay* display,
+     gfx::AcceleratedWidget window) {
+-  return InitializeGLSurface(
+-      NativeViewGLSurfaceEGLOhos::CreateNativeViewGLSurfaceEGLOhos(display,
+-                                                                   window));
++  NOTREACHED() << "OHOS CreateSurfacelessViewGLSurface";
++  return nullptr;
++}
++ 
++scoped_refptr<GLSurface> CreateOffscreenGLSurfaceWithFormat(
++    GLDisplay* display,
++    const gfx::Size& size,
++    GLSurfaceFormat format) {
++  TRACE_EVENT0("gpu", "gl::init::CreateOffscreenGLSurfaceWithFormat");
++  CHECK_NE(kGLImplementationNone, GetGLImplementation());
++  switch (GetGLImplementation()) {
++    case kGLImplementationEGLGLES2:
++    case kGLImplementationEGLANGLE: {
++      GLDisplayEGL* display_egl = display->GetAs<gl::GLDisplayEGL>();
++      if (display_egl->IsEGLSurfacelessContextSupported() &&
++          (size.width() == 0 && size.height() == 0)) {
++        return InitializeGLSurfaceWithFormat(
++            new SurfacelessEGL(display_egl, size), format);
++      } else {
++        return InitializeGLSurfaceWithFormat(
++            new PbufferGLSurfaceEGL(display_egl, size), format);
++      }
++    }
++    case kGLImplementationMockGL:
++    case kGLImplementationStubGL:
++      return new GLSurfaceStub;
++    default:
++      NOTREACHED();
++      return nullptr;
++  }
++}
++ 
++void SetDisabledExtensionsPlatform(const std::string& disabled_extensions) {
++  GLImplementation implementation = GetGLImplementation();
++  DCHECK_NE(kGLImplementationNone, implementation);
++  switch (implementation) {
++    case kGLImplementationEGLGLES2:
++    case kGLImplementationEGLANGLE:
++      SetDisabledExtensionsEGL(disabled_extensions);
++      break;
++    case kGLImplementationMockGL:
++    case kGLImplementationStubGL:
++      break;
++    default:
++      NOTREACHED();
++  }
++}
++ 
++bool InitializeExtensionSettingsOneOffPlatform(GLDisplay* display) {
++  GLImplementation implementation = GetGLImplementation();
++  DCHECK_NE(kGLImplementationNone, implementation);
++  switch (implementation) {
++    case kGLImplementationEGLGLES2:
++    case kGLImplementationEGLANGLE:
++      return InitializeExtensionSettingsOneOffEGL(
++          static_cast<GLDisplayEGL*>(display));
++    case kGLImplementationMockGL:
++    case kGLImplementationStubGL:
++      return true;
++    default:
++      NOTREACHED();
++      return false;
++  }
+ }
+ 
+ }  // namespace init
+diff --git a/src/ui/gl/init/gl_factory_ohos.h b/src/ui/gl/init/gl_factory_ohos.h
+deleted file mode 100644
+index d44feb8f74c0c..0000000000000
+--- a/src/ui/gl/init/gl_factory_ohos.h
++++ /dev/null
+@@ -1,26 +0,0 @@
+-// Copyright (c) 2022 Huawei Device Co., Ltd. All rights reserved.
+-// Use of this source code is governed by a BSD-style license that can be
+-// found in the LICENSE file.
+-
+-#ifndef UI_GL_INIT_GL_FACTORY_OHOS_H_
+-#define UI_GL_INIT_GL_FACTORY_OHOS_H_
+-
+-#include "base/memory/ref_counted.h"
+-#include "ui/gl/gl_display.h"
+-#include "ui/gl/gl_surface_egl_ohos.h"
+-
+-namespace gl {
+-
+-class GLSurface;
+-
+-namespace init {
+-
+-// Creates a GL surface that renders directly to a view.
+-scoped_refptr<GLSurface> CreateViewGLSurfaceOhos(GLDisplay* display,
+-                                                 gfx::AcceleratedWidget window);
+-
+-}  // namespace init
+-
+-}  // namespace gl
+-
+-#endif  // UI_GL_INIT_GL_FACTORY_OHOS_H_
+diff --git a/src/ui/gl/init/gl_factory_ozone.cc b/src/ui/gl/init/gl_factory_ozone.cc
+index 842e4172e5728..0c01aea56e187
+--- a/src/ui/gl/init/gl_factory_ozone.cc
++++ b/src/ui/gl/init/gl_factory_ozone.cc
+@@ -17,10 +17,6 @@
+ #include "ui/gl/init/ozone_util.h"
+ #include "ui/gl/presenter.h"
+ 
+-#if BUILDFLAG(IS_OHOS)
+-#include "ui/gl/init/gl_factory_ohos.h"
+-#endif
+-
+ namespace gl {
+ namespace init {
+ 
+@@ -65,9 +61,6 @@ scoped_refptr<GLContext> CreateGLContext(GLShareGroup* share_group,
+ 
+ scoped_refptr<GLSurface> CreateViewGLSurface(GLDisplay* display,
+                                              gfx::AcceleratedWidget window) {
+-#if BUILDFLAG(IS_OHOS)
+-  return gl::init::CreateViewGLSurfaceOhos(display, window);
+-#endif
+   TRACE_EVENT0("gpu", "gl::init::CreateViewGLSurface");
+ 
+   if (HasGLOzone())
+diff --git a/src/ui/gl/init/gl_initializer_ohos.cc b/src/ui/gl/init/gl_initializer_ohos.cc
+new file mode 100644
+index 0000000000000..1c52f73713347
+--- /dev/null
++++ b/src/ui/gl/init/gl_initializer_ohos.cc
+@@ -0,0 +1,125 @@
++// Copyright (c) 2022 Huawei Device Co., Ltd. All rights reserved.
++// Use of this source code is governed by a BSD-style license that can be
++// found in the LICENSE file.
++ 
++#include "ui/gl/init/gl_initializer.h"
++ 
++#include "base/base_paths.h"
++#include "base/command_line.h"
++#include "base/files/file_path.h"
++#include "base/logging.h"
++#include "base/native_library.h"
++#include "base/trace_event/trace_event.h"
++#include "ui/gl/gl_bindings.h"
++#include "ui/gl/gl_display.h"
++#include "ui/gl/gl_egl_api_implementation.h"
++#include "ui/gl/gl_gl_api_implementation.h"
++#include "ui/gl/gl_surface_egl.h"
++#include "ui/gl/gl_utils.h"
++#include "ui/gl/init/gl_display_initializer.h"
++#include "ui/gl/init/gl_initializer.h"
++ 
++namespace gl {
++namespace init {
++ 
++namespace {
++ 
++bool InitializeStaticNativeEGLInternal() {
++  base::NativeLibrary gles_library = LoadLibraryAndPrintError("libGLESv3.so");
++  if (!gles_library)
++    return false;
++  base::NativeLibrary egl_library = LoadLibraryAndPrintError("libEGL.so");
++  if (!egl_library) {
++    base::UnloadNativeLibrary(gles_library);
++    return false;
++  }
++ 
++  GLGetProcAddressProc get_proc_address =
++      reinterpret_cast<GLGetProcAddressProc>(
++          base::GetFunctionPointerFromNativeLibrary(egl_library,
++                                                    "eglGetProcAddress"));
++  if (!get_proc_address) {
++    LOG(ERROR) << "eglGetProcAddress not found.";
++    base::UnloadNativeLibrary(egl_library);
++    base::UnloadNativeLibrary(gles_library);
++    return false;
++  }
++ 
++  SetGLGetProcAddressProc(get_proc_address);
++  AddGLNativeLibrary(egl_library);
++  AddGLNativeLibrary(gles_library);
++ 
++  return true;
++}
++ 
++bool InitializeStaticEGLInternal(GLImplementationParts implementation) {
++  bool initialized = false;
++ 
++  if (!initialized) {
++    initialized = InitializeStaticNativeEGLInternal();
++  }
++ 
++  if (!initialized) {
++    return false;
++  }
++ 
++  SetGLImplementationParts(implementation);
++ 
++  InitializeStaticGLBindingsGL();
++  InitializeStaticGLBindingsEGL();
++ 
++  return true;
++}
++ 
++}  // namespace
++ 
++GLDisplay* InitializeGLOneOffPlatform(gl::GpuPreference gpu_preference) {
++  TRACE_EVENT0("gpu", "gl::init::InitializeGLOneOffPlatformohos"); 
++  GLDisplayEGL* display = GetDisplayEGL(gpu_preference);
++  switch (GetGLImplementation()) {
++    case kGLImplementationEGLGLES2:
++    case kGLImplementationEGLANGLE:
++      if (!InitializeDisplay(display,
++                             EGLDisplayPlatform(EGL_DEFAULT_DISPLAY))) {
++        LOG(ERROR) << "GLDisplayEGL::Initialize failed.";
++        return nullptr;
++      }
++      break;
++    default:
++      break;
++  }
++  return display;
++}
++ 
++bool InitializeStaticGLBindings(GLImplementationParts implementation) {
++  TRACE_EVENT0("gpu", "gl::init::InitializeStaticGLBindingsohos");  
++  // Prevent reinitialization with a different implementation. Once the gpu
++  // unit tests have initialized with kGLImplementationMock, we don't want to
++  // later switch to another GL implementation.
++  DCHECK_EQ(kGLImplementationNone, GetGLImplementation());
++ 
++  switch (implementation.gl) {
++    case kGLImplementationEGLGLES2:
++    case kGLImplementationEGLANGLE:
++      return InitializeStaticEGLInternal(implementation);
++    case kGLImplementationMockGL:
++    case kGLImplementationStubGL:
++      SetGLImplementationParts(implementation);
++      InitializeStaticGLBindingsGL();
++      return true;
++    default:
++      NOTREACHED();
++  }
++ 
++  return false;
++}
++ 
++void ShutdownGLPlatform(GLDisplay* display) {
++  if (display)
++    display->Shutdown();
++  ClearBindingsEGL();
++  ClearBindingsGL();
++}
++ 
++}  // namespace init
++}  // namespace gl
+diff --git a/src/ui/ozone/platform/headless/headless_surface_factory.cc b/src/ui/ozone/platform/headless/headless_surface_factory.cc
+index b96cef7c3beac..890742144b28c
+--- a/src/ui/ozone/platform/headless/headless_surface_factory.cc
++++ b/src/ui/ozone/platform/headless/headless_surface_factory.cc
+@@ -231,17 +231,10 @@ HeadlessSurfaceFactory::~HeadlessSurfaceFactory() = default;
+ 
+ std::vector<gl::GLImplementationParts>
+ HeadlessSurfaceFactory::GetAllowedGLImplementations() {
+-#if BUILDFLAG(IS_OHOS)
+-  return std::vector<gl::GLImplementationParts>{
+-      gl::GLImplementationParts(gl::kGLImplementationEGLGLES2),
+-      gl::GLImplementationParts(gl::kGLImplementationEGLANGLE),
+-  };
+-#else
+   return std::vector<gl::GLImplementationParts>{
+       gl::GLImplementationParts(gl::kGLImplementationEGLANGLE),
+       gl::GLImplementationParts(gl::kGLImplementationEGLGLES2),
+   };
+-#endif
+ }
+ 
+ GLOzone* HeadlessSurfaceFactory::GetGLOzone(
+diff --git a/src/ui/touch_selection/touch_handle.h b/src/ui/touch_selection/touch_handle.h
+index b805ec76d8aee..99b9592778e0b
+--- a/src/ui/touch_selection/touch_handle.h
++++ b/src/ui/touch_selection/touch_handle.h
+@@ -142,6 +142,10 @@ class UI_TOUCH_SELECTION_EXPORT TouchHandle : public TouchSelectionDraggable {
+   bool GetEnabled() const { return enabled_; }
+ #endif
+ 
++#ifdef OHOS_EX_TOPCONTROLS
++  const gfx::RectF& viewport() const { return viewport_rect_; }
++#endif
++
+  private:
+   gfx::PointF ComputeHandleOrigin() const;
+   void BeginDrag();
+diff --git a/src/ui/touch_selection/touch_selection_controller.cc b/src/ui/touch_selection/touch_selection_controller.cc
+index d14e2a43ba460..d5bddf45914ac
+--- a/src/ui/touch_selection/touch_selection_controller.cc
++++ b/src/ui/touch_selection/touch_selection_controller.cc
+@@ -167,8 +167,12 @@ void TouchSelectionController::OnViewportChanged(
+     end_selection_handle_->SetViewportRect(viewport_rect);
+   }
+ 
++#ifdef OHOS_EX_TOPCONTROLS
++  OnSelectionChanged();
++#else
+   // Update handle layout after setting the new Viewport size.
+   UpdateHandleLayoutIfNecessary();
++#endif
+ }
+ 
+ bool TouchSelectionController::WillHandleTouchEvent(const MotionEvent& event) {
+diff --git a/src/ui/webui/resources/tools/build_webui.gni b/src/ui/webui/resources/tools/build_webui.gni
+index 3b3b1902d5c8f..9f53aedab2704
+--- a/src/ui/webui/resources/tools/build_webui.gni
++++ b/src/ui/webui/resources/tools/build_webui.gni
+@@ -256,6 +256,9 @@ template("build_webui") {
+       out_folder = preprocess_dir
+       in_files = invoker.css_files
+       minify = optimize
++      if (defined(ohos_arkweb_extensions) && ohos_arkweb_extensions) {
++        arkweb_as_default_scheme = true
++      }
+     }
+   }
+ 
+diff --git a/src/ui/webui/resources/tools/optimize_webui.gni b/src/ui/webui/resources/tools/optimize_webui.gni
+index f2c99eef5a44b..ff0cb5da07018
+--- a/src/ui/webui/resources/tools/optimize_webui.gni
++++ b/src/ui/webui/resources/tools/optimize_webui.gni
+@@ -66,9 +66,10 @@ template("optimize_webui") {
+     }
+ 
+     external_paths += [
++      "arkweb://resources/polymer/v3_0/|$polymer_path",
++      "arkweb://resources/|$resources_path",
+       "chrome://resources/polymer/v3_0/|$polymer_path",
+       "chrome://resources/|$resources_path",
+-
+       # Scheme relative versions to work with chrome-untrusted://
+       "//resources/polymer/v3_0/|$polymer_path",
+       "//resources/|$resources_path",
+diff --git a/src/url/url_util.cc b/src/url/url_util.cc
+index e455e41677b8c..881ead7639c3e
+--- a/src/url/url_util.cc
++++ b/src/url/url_util.cc
+@@ -600,7 +600,11 @@ void EnableNonStandardSchemesForAndroidWebView() {
+ }
+ 
+ bool AllowNonStandardSchemesForAndroidWebView() {
++#ifdef OHOS_NETWORK_LOAD
++  return true;
++#else
+   return GetSchemeRegistry().allow_non_standard_schemes;
++#endif
+ }
+ 
+ void AddStandardScheme(const char* new_scheme, SchemeType type) {
