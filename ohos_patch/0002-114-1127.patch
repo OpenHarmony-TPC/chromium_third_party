@@ -12132,3 +12132,1936 @@ index 513181bba975a..51993a5243123
  }
  
  // DESTRUCTOR - Do not edit by hand.
+diff --git a/src/cef/libcef_dll/cpptoc/frame_cpptoc.cc b/src/cef/libcef_dll/cpptoc/frame_cpptoc.cc
+index cc9fee28c002d..eee0a999a79b6
+--- a/src/cef/libcef_dll/cpptoc/frame_cpptoc.cc
++++ b/src/cef/libcef_dll/cpptoc/frame_cpptoc.cc
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=985168005ae909d84943c3d71906d617b1598239$
++// $hash=eabf5a0cf6034cffa6d83aab9cd050607a37a3be$
+ //
+ 
+ #include "libcef_dll/cpptoc/frame_cpptoc.h"
+@@ -514,6 +514,38 @@ void CEF_CALLBACK frame_get_images(struct _cef_frame_t* self,
+       CefGetImagesCallbackCToCpp::Wrap(callback));
+ }
+ 
++void CEF_CALLBACK frame_post_url(struct _cef_frame_t* self,
++                                 const cef_string_t* url,
++                                 size_t post_dataCount,
++                                 char const* post_data) {
++  shutdown_checker::AssertNotShutdown();
++
++  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
++
++  DCHECK(self);
++  if (!self) {
++    return;
++  }
++  // Verify param: url; type: string_byref_const
++  DCHECK(url);
++  if (!url) {
++    return;
++  }
++  // Unverified params: post_data
++
++  // Translate param: post_data; type: simple_vec_byref_const
++  std::vector<char> post_dataList;
++  if (post_dataCount > 0) {
++    for (size_t i = 0; i < post_dataCount; ++i) {
++      char post_dataVal = post_data[i];
++      post_dataList.push_back(post_dataVal);
++    }
++  }
++
++  // Execute
++  CefFrameCppToC::Get(self)->PostURL(CefString(url), post_dataList);
++}
++
+ }  // namespace
+ 
+ // CONSTRUCTOR - Do not edit by hand.
+@@ -546,6 +578,7 @@ CefFrameCppToC::CefFrameCppToC() {
+   GetStruct()->send_process_message = frame_send_process_message;
+   GetStruct()->load_header_url = frame_load_header_url;
+   GetStruct()->get_images = frame_get_images;
++  GetStruct()->post_url = frame_post_url;
+ }
+ 
+ // DESTRUCTOR - Do not edit by hand.
+diff --git a/src/cef/libcef_dll/cpptoc/render_handler_cpptoc.cc b/src/cef/libcef_dll/cpptoc/render_handler_cpptoc.cc
+index fb17974c3820d..995f609318d41
+--- a/src/cef/libcef_dll/cpptoc/render_handler_cpptoc.cc
++++ b/src/cef/libcef_dll/cpptoc/render_handler_cpptoc.cc
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=f3e7a7d391abb74fe026387d1072ed3195fb9711$
++// $hash=8c69fd34199048b7ebb03c8eb94fe1ad0d863734$
+ //
+ 
+ #include "libcef_dll/cpptoc/render_handler_cpptoc.h"
+@@ -881,6 +881,35 @@ render_handler_on_scroll_state(struct _cef_render_handler_t* self,
+       CefBrowserCToCpp::Wrap(browser), scroll_state ? true : false);
+ }
+ 
++int CEF_CALLBACK
++render_handler_filter_scroll_event(struct _cef_render_handler_t* self,
++                                   cef_browser_t* browser,
++                                   const float x,
++                                   const float y,
++                                   const float fling_x,
++                                   const float fling_y) {
++  shutdown_checker::AssertNotShutdown();
++
++  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
++
++  DCHECK(self);
++  if (!self) {
++    return 0;
++  }
++  // Verify param: browser; type: refptr_diff
++  DCHECK(browser);
++  if (!browser) {
++    return 0;
++  }
++
++  // Execute
++  bool _retval = CefRenderHandlerCppToC::Get(self)->FilterScrollEvent(
++      CefBrowserCToCpp::Wrap(browser), x, y, fling_x, fling_y);
++
++  // Return type: bool
++  return _retval;
++}
++
+ }  // namespace
+ 
+ // CONSTRUCTOR - Do not edit by hand.
+@@ -924,6 +953,7 @@ CefRenderHandlerCppToC::CefRenderHandlerCppToC() {
+   GetStruct()->on_over_scroll_fling_end =
+       render_handler_on_over_scroll_fling_end;
+   GetStruct()->on_scroll_state = render_handler_on_scroll_state;
++  GetStruct()->filter_scroll_event = render_handler_filter_scroll_event;
+ }
+ 
+ // DESTRUCTOR - Do not edit by hand.
+diff --git a/src/cef/libcef_dll/ctocpp/browser_ctocpp.cc b/src/cef/libcef_dll/ctocpp/browser_ctocpp.cc
+index b3235765cbe8b..d3ce5af0f3b9c
+--- a/src/cef/libcef_dll/ctocpp/browser_ctocpp.cc
++++ b/src/cef/libcef_dll/ctocpp/browser_ctocpp.cc
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=af4952eacb8a4a1c796f008484a36c44ee4e7d6b$
++// $hash=3375888cde653e8e1d38f6e336911e398a11ee9c$
+ //
+ 
+ #include "libcef_dll/ctocpp/browser_ctocpp.h"
+@@ -544,6 +544,39 @@ void CefBrowserCToCpp::PasswordSuggestionSelected(int list_index) {
+   _struct->password_suggestion_selected(_struct, list_index);
+ }
+ 
++NO_SANITIZE("cfi-icall")
++void CefBrowserCToCpp::UpdateBrowserControlsState(int constraints,
++                                                  int current,
++                                                  bool animate) {
++  shutdown_checker::AssertNotShutdown();
++
++  cef_browser_t* _struct = GetStruct();
++  if (CEF_MEMBER_MISSING(_struct, update_browser_controls_state)) {
++    return;
++  }
++
++  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
++
++  // Execute
++  _struct->update_browser_controls_state(_struct, constraints, current,
++                                         animate);
++}
++
++NO_SANITIZE("cfi-icall")
++void CefBrowserCToCpp::UpdateBrowserControlsHeight(int height, bool animate) {
++  shutdown_checker::AssertNotShutdown();
++
++  cef_browser_t* _struct = GetStruct();
++  if (CEF_MEMBER_MISSING(_struct, update_browser_controls_height)) {
++    return;
++  }
++
++  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
++
++  // Execute
++  _struct->update_browser_controls_height(_struct, height, animate);
++}
++
+ NO_SANITIZE("cfi-icall")
+ void CefBrowserCToCpp::PrefetchPage(CefString& url,
+                                     CefString& additionalHttpHeaders) {
+diff --git a/src/cef/libcef_dll/ctocpp/browser_ctocpp.h b/src/cef/libcef_dll/ctocpp/browser_ctocpp.h
+index 06777dcf6bd54..281a9dfbe5706
+--- a/src/cef/libcef_dll/ctocpp/browser_ctocpp.h
++++ b/src/cef/libcef_dll/ctocpp/browser_ctocpp.h
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=94c9e5d66361da6402c7aae2362694ae3713574e$
++// $hash=6cb0f7e66915d0928de4baeb6ffc0f9d68859e75$
+ //
+ 
+ #ifndef CEF_LIBCEF_DLL_CTOCPP_BROWSER_CTOCPP_H_
+@@ -66,6 +66,10 @@ class CefBrowserCToCpp
+   void SelectAndCopy() override;
+   bool ShouldShowFreeCopy() override;
+   void PasswordSuggestionSelected(int list_index) override;
++  void UpdateBrowserControlsState(int constraints,
++                                  int current,
++                                  bool animate) override;
++  void UpdateBrowserControlsHeight(int height, bool animate) override;
+   void PrefetchPage(CefString& url, CefString& additionalHttpHeaders) override;
+   void ReloadOriginalUrl() override;
+   void SetBrowserUserAgentString(const CefString& user_agent) override;
+diff --git a/src/cef/libcef_dll/ctocpp/browser_host_ctocpp.cc b/src/cef/libcef_dll/ctocpp/browser_host_ctocpp.cc
+index daa43c07f2b0c..b7308805bd3fa
+--- a/src/cef/libcef_dll/ctocpp/browser_host_ctocpp.cc
++++ b/src/cef/libcef_dll/ctocpp/browser_host_ctocpp.cc
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=7327f16e9a3da31a80023c2c05da95fa62409f51$
++// $hash=69884552a03ca3b242a58cc3bfc6e52485470426$
+ //
+ 
+ #include "libcef_dll/ctocpp/browser_host_ctocpp.h"
+@@ -1118,6 +1118,29 @@ void CefBrowserHostCToCpp::SetAccessibilityState(
+   _struct->set_accessibility_state(_struct, accessibility_state);
+ }
+ 
++NO_SANITIZE("cfi-icall")
++void CefBrowserHostCToCpp::GetOrCreateRootBrowserAccessibilityManager(
++    void** manager) {
++  shutdown_checker::AssertNotShutdown();
++
++  cef_browser_host_t* _struct = GetStruct();
++  if (CEF_MEMBER_MISSING(_struct,
++                         get_or_create_root_browser_accessibility_manager)) {
++    return;
++  }
++
++  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
++
++  // Verify param: manager; type: simple_byaddr
++  DCHECK(manager);
++  if (!manager) {
++    return;
++  }
++
++  // Execute
++  _struct->get_or_create_root_browser_accessibility_manager(_struct, manager);
++}
++
+ NO_SANITIZE("cfi-icall")
+ void CefBrowserHostCToCpp::SetAutoResizeEnabled(bool enabled,
+                                                 const CefSize& min_size,
+@@ -1525,7 +1548,8 @@ void CefBrowserHostCToCpp::SetBackgroundColor(int color) {
+ NO_SANITIZE("cfi-icall")
+ void CefBrowserHostCToCpp::RegisterArkJSfunction(
+     const CefString& object_name,
+-    const std::vector<CefString>& method_list) {
++    const std::vector<CefString>& method_list,
++    const int32_t object_id) {
+   shutdown_checker::AssertNotShutdown();
+ 
+   cef_browser_host_t* _struct = GetStruct();
+@@ -1550,7 +1574,7 @@ void CefBrowserHostCToCpp::RegisterArkJSfunction(
+ 
+   // Execute
+   _struct->register_ark_jsfunction(_struct, object_name.GetStruct(),
+-                                   method_listList);
++                                   method_listList, object_id);
+ 
+   // Restore param:method_list; type: string_vec_byref_const
+   if (method_listList) {
+@@ -1595,6 +1619,50 @@ void CefBrowserHostCToCpp::UnregisterArkJSfunction(
+   }
+ }
+ 
++NO_SANITIZE("cfi-icall")
++void CefBrowserHostCToCpp::CallH5Function(
++    int32_t routing_id,
++    int32_t h5_object_id,
++    const CefString& h5_method_name,
++    const std::vector<CefRefPtr<CefValue>>& args) {
++  shutdown_checker::AssertNotShutdown();
++
++  cef_browser_host_t* _struct = GetStruct();
++  if (CEF_MEMBER_MISSING(_struct, call_h5function)) {
++    return;
++  }
++
++  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
++
++  // Verify param: h5_method_name; type: string_byref_const
++  DCHECK(!h5_method_name.empty());
++  if (h5_method_name.empty()) {
++    return;
++  }
++
++  // Translate param: args; type: refptr_vec_same_byref_const
++  const size_t argsCount = args.size();
++  cef_value_t** argsList = NULL;
++  if (argsCount > 0) {
++    argsList = new cef_value_t*[argsCount];
++    DCHECK(argsList);
++    if (argsList) {
++      for (size_t i = 0; i < argsCount; ++i) {
++        argsList[i] = CefValueCToCpp::Unwrap(args[i]);
++      }
++    }
++  }
++
++  // Execute
++  _struct->call_h5function(_struct, routing_id, h5_object_id,
++                           h5_method_name.GetStruct(), argsCount, argsList);
++
++  // Restore param:args; type: refptr_vec_same_byref_const
++  if (argsList) {
++    delete[] argsList;
++  }
++}
++
+ NO_SANITIZE("cfi-icall")
+ void CefBrowserHostCToCpp::StoreWebArchive(
+     const CefString& base_name,
+@@ -2235,6 +2303,214 @@ NO_SANITIZE("cfi-icall") void CefBrowserHostCToCpp::SetToken(void* token) {
+   _struct->set_token(_struct, token);
+ }
+ 
++NO_SANITIZE("cfi-icall")
++void CefBrowserHostCToCpp::SetVirtualKeyBoardArg(int32_t width,
++                                                 int32_t height,
++                                                 double keyboard) {
++  shutdown_checker::AssertNotShutdown();
++
++  cef_browser_host_t* _struct = GetStruct();
++  if (CEF_MEMBER_MISSING(_struct, set_virtual_key_board_arg)) {
++    return;
++  }
++
++  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
++
++  // Execute
++  _struct->set_virtual_key_board_arg(_struct, width, height, keyboard);
++}
++
++NO_SANITIZE("cfi-icall")
++bool CefBrowserHostCToCpp::ShouldVirtualKeyboardOverlay() {
++  shutdown_checker::AssertNotShutdown();
++
++  cef_browser_host_t* _struct = GetStruct();
++  if (CEF_MEMBER_MISSING(_struct, should_virtual_keyboard_overlay)) {
++    return false;
++  }
++
++  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
++
++  // Execute
++  int _retval = _struct->should_virtual_keyboard_overlay(_struct);
++
++  // Return type: bool
++  return _retval ? true : false;
++}
++
++NO_SANITIZE("cfi-icall")
++void CefBrowserHostCToCpp::JavaScriptOnDocumentStart(
++    const CefString& script,
++    const std::vector<CefString>& script_rules) {
++  shutdown_checker::AssertNotShutdown();
++
++  cef_browser_host_t* _struct = GetStruct();
++  if (CEF_MEMBER_MISSING(_struct, java_script_on_document_start)) {
++    return;
++  }
++
++  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
++
++  // Verify param: script; type: string_byref_const
++  DCHECK(!script.empty());
++  if (script.empty()) {
++    return;
++  }
++
++  // Translate param: script_rules; type: string_vec_byref_const
++  cef_string_list_t script_rulesList = cef_string_list_alloc();
++  DCHECK(script_rulesList);
++  if (script_rulesList) {
++    transfer_string_list_contents(script_rules, script_rulesList);
++  }
++
++  // Execute
++  _struct->java_script_on_document_start(_struct, script.GetStruct(),
++                                         script_rulesList);
++
++  // Restore param:script_rules; type: string_vec_byref_const
++  if (script_rulesList) {
++    cef_string_list_free(script_rulesList);
++  }
++}
++
++NO_SANITIZE("cfi-icall")
++void CefBrowserHostCToCpp::RemoveJavaScriptOnDocumentStart() {
++  shutdown_checker::AssertNotShutdown();
++
++  cef_browser_host_t* _struct = GetStruct();
++  if (CEF_MEMBER_MISSING(_struct, remove_java_script_on_document_start)) {
++    return;
++  }
++
++  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
++
++  // Execute
++  _struct->remove_java_script_on_document_start(_struct);
++}
++
++NO_SANITIZE("cfi-icall")
++void CefBrowserHostCToCpp::SetDrawRect(int x, int y, int width, int height) {
++  shutdown_checker::AssertNotShutdown();
++
++  cef_browser_host_t* _struct = GetStruct();
++  if (CEF_MEMBER_MISSING(_struct, set_draw_rect)) {
++    return;
++  }
++
++  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
++
++  // Execute
++  _struct->set_draw_rect(_struct, x, y, width, height);
++}
++
++NO_SANITIZE("cfi-icall") void CefBrowserHostCToCpp::SetDrawMode(int mode) {
++  shutdown_checker::AssertNotShutdown();
++
++  cef_browser_host_t* _struct = GetStruct();
++  if (CEF_MEMBER_MISSING(_struct, set_draw_mode)) {
++    return;
++  }
++
++  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
++
++  // Execute
++  _struct->set_draw_mode(_struct, mode);
++}
++
++NO_SANITIZE("cfi-icall")
++void CefBrowserHostCToCpp::CreateWebPrintDocumentAdapter(
++    const CefString& jobName,
++    void** webPrintDocumentAdapter) {
++  shutdown_checker::AssertNotShutdown();
++
++  cef_browser_host_t* _struct = GetStruct();
++  if (CEF_MEMBER_MISSING(_struct, create_web_print_document_adapter)) {
++    return;
++  }
++
++  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
++
++  // Verify param: jobName; type: string_byref_const
++  DCHECK(!jobName.empty());
++  if (jobName.empty()) {
++    return;
++  }
++  // Verify param: webPrintDocumentAdapter; type: simple_byaddr
++  DCHECK(webPrintDocumentAdapter);
++  if (!webPrintDocumentAdapter) {
++    return;
++  }
++
++  // Execute
++  _struct->create_web_print_document_adapter(_struct, jobName.GetStruct(),
++                                             webPrintDocumentAdapter);
++}
++
++NO_SANITIZE("cfi-icall")
++void CefBrowserHostCToCpp::SetOverscrollMode(int mode) {
++  shutdown_checker::AssertNotShutdown();
++
++  cef_browser_host_t* _struct = GetStruct();
++  if (CEF_MEMBER_MISSING(_struct, set_overscroll_mode)) {
++    return;
++  }
++
++  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
++
++  // Execute
++  _struct->set_overscroll_mode(_struct, mode);
++}
++
++NO_SANITIZE("cfi-icall") bool CefBrowserHostCToCpp::Discard() {
++  shutdown_checker::AssertNotShutdown();
++
++  cef_browser_host_t* _struct = GetStruct();
++  if (CEF_MEMBER_MISSING(_struct, discard)) {
++    return false;
++  }
++
++  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
++
++  // Execute
++  int _retval = _struct->discard(_struct);
++
++  // Return type: bool
++  return _retval ? true : false;
++}
++
++NO_SANITIZE("cfi-icall") bool CefBrowserHostCToCpp::Restore() {
++  shutdown_checker::AssertNotShutdown();
++
++  cef_browser_host_t* _struct = GetStruct();
++  if (CEF_MEMBER_MISSING(_struct, restore)) {
++    return false;
++  }
++
++  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
++
++  // Execute
++  int _retval = _struct->restore(_struct);
++
++  // Return type: bool
++  return _retval ? true : false;
++}
++
++NO_SANITIZE("cfi-icall")
++void CefBrowserHostCToCpp::SetBrowserZoomLevel(double zoomFactor) {
++  shutdown_checker::AssertNotShutdown();
++
++  cef_browser_host_t* _struct = GetStruct();
++  if (CEF_MEMBER_MISSING(_struct, set_browser_zoom_level)) {
++    return;
++  }
++
++  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
++
++  // Execute
++  _struct->set_browser_zoom_level(_struct, zoomFactor);
++}
++
+ // CONSTRUCTOR - Do not edit by hand.
+ 
+ CefBrowserHostCToCpp::CefBrowserHostCToCpp() {}
+diff --git a/src/cef/libcef_dll/ctocpp/browser_host_ctocpp.h b/src/cef/libcef_dll/ctocpp/browser_host_ctocpp.h
+index 80a8c8d6e01b7..ff5a06e8e281b
+--- a/src/cef/libcef_dll/ctocpp/browser_host_ctocpp.h
++++ b/src/cef/libcef_dll/ctocpp/browser_host_ctocpp.h
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=2eb01256fb1be89e3551a1a57ccd64abdfdab1e7$
++// $hash=24b0ab8e70461dfecb6d1e27ccc7dbed7b770818$
+ //
+ 
+ #ifndef CEF_LIBCEF_DLL_CTOCPP_BROWSER_HOST_CTOCPP_H_
+@@ -126,6 +126,7 @@ class CefBrowserHostCToCpp : public CefCToCppRefCounted<CefBrowserHostCToCpp,
+   void DragSourceSystemDragEnded() override;
+   CefRefPtr<CefNavigationEntry> GetVisibleNavigationEntry() override;
+   void SetAccessibilityState(cef_state_t accessibility_state) override;
++  void GetOrCreateRootBrowserAccessibilityManager(void** manager) override;
+   void SetAutoResizeEnabled(bool enabled,
+                             const CefSize& min_size,
+                             const CefSize& max_size) override;
+@@ -153,12 +154,16 @@ class CefBrowserHostCToCpp : public CefCToCppRefCounted<CefBrowserHostCToCpp,
+   void PutUserAgent(const CefString& ua) override;
+   CefString DefaultUserAgent() override;
+   void SetBackgroundColor(int color) override;
+-  void RegisterArkJSfunction(
+-      const CefString& object_name,
+-      const std::vector<CefString>& method_list) override;
++  void RegisterArkJSfunction(const CefString& object_name,
++                             const std::vector<CefString>& method_list,
++                             const int32_t object_id) override;
+   void UnregisterArkJSfunction(
+       const CefString& object_name,
+       const std::vector<CefString>& method_list) override;
++  void CallH5Function(int32_t routing_id,
++                      int32_t h5_object_id,
++                      const CefString& h5_method_name,
++                      const std::vector<CefRefPtr<CefValue>>& args) override;
+   void StoreWebArchive(
+       const CefString& base_name,
+       bool auto_name,
+@@ -213,6 +218,22 @@ class CefBrowserHostCToCpp : public CefCToCppRefCounted<CefBrowserHostCToCpp,
+   void ZoomBy(float delta, float width, float height) override;
+   void SetWindowId(int window_id, int nweb_id) override;
+   void SetToken(void* token) override;
++  void SetVirtualKeyBoardArg(int32_t width,
++                             int32_t height,
++                             double keyboard) override;
++  bool ShouldVirtualKeyboardOverlay() override;
++  void JavaScriptOnDocumentStart(
++      const CefString& script,
++      const std::vector<CefString>& script_rules) override;
++  void RemoveJavaScriptOnDocumentStart() override;
++  void SetDrawRect(int x, int y, int width, int height) override;
++  void SetDrawMode(int mode) override;
++  void CreateWebPrintDocumentAdapter(const CefString& jobName,
++                                     void** webPrintDocumentAdapter) override;
++  void SetOverscrollMode(int mode) override;
++  bool Discard() override;
++  bool Restore() override;
++  void SetBrowserZoomLevel(double zoomFactor) override;
+ };
+ 
+ #endif  // CEF_LIBCEF_DLL_CTOCPP_BROWSER_HOST_CTOCPP_H_
+diff --git a/src/cef/libcef_dll/ctocpp/client_ctocpp.cc b/src/cef/libcef_dll/ctocpp/client_ctocpp.cc
+index fdb2d33820e52..b487f7834a7d1
+--- a/src/cef/libcef_dll/ctocpp/client_ctocpp.cc
++++ b/src/cef/libcef_dll/ctocpp/client_ctocpp.cc
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=77f339fe16650000e18b0a86c9c43ac4ef35a819$
++// $hash=436a0caddb3462984212dac75c032567a9ed3b8f$
+ //
+ 
+ #include "libcef_dll/ctocpp/client_ctocpp.h"
+@@ -17,6 +17,7 @@
+ #include "libcef_dll/cpptoc/frame_cpptoc.h"
+ #include "libcef_dll/cpptoc/list_value_cpptoc.h"
+ #include "libcef_dll/cpptoc/process_message_cpptoc.h"
++#include "libcef_dll/cpptoc/value_cpptoc.h"
+ #include "libcef_dll/ctocpp/audio_handler_ctocpp.h"
+ #include "libcef_dll/ctocpp/command_handler_ctocpp.h"
+ #include "libcef_dll/ctocpp/context_menu_handler_ctocpp.h"
+@@ -404,7 +405,9 @@ NO_SANITIZE("cfi-icall")
+ int CefClientCToCpp::NotifyJavaScriptResult(CefRefPtr<CefListValue> args,
+                                             const CefString& method,
+                                             const CefString& object_name,
+-                                            CefRefPtr<CefListValue> result) {
++                                            CefRefPtr<CefListValue> result,
++                                            int32_t routing_id,
++                                            int32_t object_id) {
+   cef_client_t* _struct = GetStruct();
+   if (CEF_MEMBER_MISSING(_struct, notify_java_script_result)) {
+     return 0;
+@@ -436,12 +439,86 @@ int CefClientCToCpp::NotifyJavaScriptResult(CefRefPtr<CefListValue> args,
+   // Execute
+   int _retval = _struct->notify_java_script_result(
+       _struct, CefListValueCppToC::Wrap(args), method.GetStruct(),
+-      object_name.GetStruct(), CefListValueCppToC::Wrap(result));
++      object_name.GetStruct(), CefListValueCppToC::Wrap(result), routing_id,
++      object_id);
+ 
+   // Return type: simple
+   return _retval;
+ }
+ 
++NO_SANITIZE("cfi-icall")
++bool CefClientCToCpp::HasJavaScriptObjectMethods(int32_t object_id,
++                                                 const CefString& method_name) {
++  cef_client_t* _struct = GetStruct();
++  if (CEF_MEMBER_MISSING(_struct, has_java_script_object_methods)) {
++    return false;
++  }
++
++  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
++
++  // Verify param: method_name; type: string_byref_const
++  DCHECK(!method_name.empty());
++  if (method_name.empty()) {
++    return false;
++  }
++
++  // Execute
++  int _retval = _struct->has_java_script_object_methods(
++      _struct, object_id, method_name.GetStruct());
++
++  // Return type: bool
++  return _retval ? true : false;
++}
++
++NO_SANITIZE("cfi-icall")
++void CefClientCToCpp::GetJavaScriptObjectMethods(
++    int32_t object_id,
++    CefRefPtr<CefValue> returned_method_names) {
++  cef_client_t* _struct = GetStruct();
++  if (CEF_MEMBER_MISSING(_struct, get_java_script_object_methods)) {
++    return;
++  }
++
++  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
++
++  // Verify param: returned_method_names; type: refptr_diff
++  DCHECK(returned_method_names.get());
++  if (!returned_method_names.get()) {
++    return;
++  }
++
++  // Execute
++  _struct->get_java_script_object_methods(
++      _struct, object_id, CefValueCppToC::Wrap(returned_method_names));
++}
++
++NO_SANITIZE("cfi-icall")
++void CefClientCToCpp::RemoveJavaScriptObjectHolder(int32_t holder,
++                                                   int32_t object_id) {
++  cef_client_t* _struct = GetStruct();
++  if (CEF_MEMBER_MISSING(_struct, remove_java_script_object_holder)) {
++    return;
++  }
++
++  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
++
++  // Execute
++  _struct->remove_java_script_object_holder(_struct, holder, object_id);
++}
++
++NO_SANITIZE("cfi-icall")
++void CefClientCToCpp::RemoveTransientJavaScriptObject() {
++  cef_client_t* _struct = GetStruct();
++  if (CEF_MEMBER_MISSING(_struct, remove_transient_java_script_object)) {
++    return;
++  }
++
++  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
++
++  // Execute
++  _struct->remove_transient_java_script_object(_struct);
++}
++
+ NO_SANITIZE("cfi-icall")
+ CefRefPtr<CefFormHandler> CefClientCToCpp::GetFormHandler() {
+   cef_client_t* _struct = GetStruct();
+@@ -458,6 +535,52 @@ CefRefPtr<CefFormHandler> CefClientCToCpp::GetFormHandler() {
+   return CefFormHandlerCToCpp::Wrap(_retval);
+ }
+ 
++NO_SANITIZE("cfi-icall")
++void CefClientCToCpp::OnTopControlsChanged(float top_controls_offset,
++                                           float top_content_offset) {
++  cef_client_t* _struct = GetStruct();
++  if (CEF_MEMBER_MISSING(_struct, on_top_controls_changed)) {
++    return;
++  }
++
++  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
++
++  // Execute
++  _struct->on_top_controls_changed(_struct, top_controls_offset,
++                                   top_content_offset);
++}
++
++NO_SANITIZE("cfi-icall") int CefClientCToCpp::OnGetTopControlsHeight() {
++  cef_client_t* _struct = GetStruct();
++  if (CEF_MEMBER_MISSING(_struct, on_get_top_controls_height)) {
++    return 0;
++  }
++
++  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
++
++  // Execute
++  int _retval = _struct->on_get_top_controls_height(_struct);
++
++  // Return type: simple
++  return _retval;
++}
++
++NO_SANITIZE("cfi-icall")
++bool CefClientCToCpp::DoBrowserControlsShrinkRendererSize() {
++  cef_client_t* _struct = GetStruct();
++  if (CEF_MEMBER_MISSING(_struct, do_browser_controls_shrink_renderer_size)) {
++    return false;
++  }
++
++  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
++
++  // Execute
++  int _retval = _struct->do_browser_controls_shrink_renderer_size(_struct);
++
++  // Return type: bool
++  return _retval ? true : false;
++}
++
+ // CONSTRUCTOR - Do not edit by hand.
+ 
+ CefClientCToCpp::CefClientCToCpp() {}
+diff --git a/src/cef/libcef_dll/ctocpp/client_ctocpp.h b/src/cef/libcef_dll/ctocpp/client_ctocpp.h
+index 2fdfc105cc6b9..f11c286ed2866
+--- a/src/cef/libcef_dll/ctocpp/client_ctocpp.h
++++ b/src/cef/libcef_dll/ctocpp/client_ctocpp.h
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=7ad460aa9a4d1a096ea8bb2ade1b00233670381f$
++// $hash=54d655f962cd0456df1e5b9cbdff3379bc1b48d3$
+ //
+ 
+ #ifndef CEF_LIBCEF_DLL_CTOCPP_CLIENT_CTOCPP_H_
+@@ -60,8 +60,21 @@ class CefClientCToCpp
+   int NotifyJavaScriptResult(CefRefPtr<CefListValue> args,
+                              const CefString& method,
+                              const CefString& object_name,
+-                             CefRefPtr<CefListValue> result) override;
++                             CefRefPtr<CefListValue> result,
++                             int32_t routing_id,
++                             int32_t object_id) override;
++  bool HasJavaScriptObjectMethods(int32_t object_id,
++                                  const CefString& method_name) override;
++  void GetJavaScriptObjectMethods(
++      int32_t object_id,
++      CefRefPtr<CefValue> returned_method_names) override;
++  void RemoveJavaScriptObjectHolder(int32_t holder, int32_t object_id) override;
++  void RemoveTransientJavaScriptObject() override;
+   CefRefPtr<CefFormHandler> GetFormHandler() override;
++  void OnTopControlsChanged(float top_controls_offset,
++                            float top_content_offset) override;
++  int OnGetTopControlsHeight() override;
++  bool DoBrowserControlsShrinkRendererSize() override;
+ };
+ 
+ #endif  // CEF_LIBCEF_DLL_CTOCPP_CLIENT_CTOCPP_H_
+diff --git a/src/cef/libcef_dll/ctocpp/cookie_manager_ctocpp.cc b/src/cef/libcef_dll/ctocpp/cookie_manager_ctocpp.cc
+index c03d23b330529..058efd9c5b8f5
+--- a/src/cef/libcef_dll/ctocpp/cookie_manager_ctocpp.cc
++++ b/src/cef/libcef_dll/ctocpp/cookie_manager_ctocpp.cc
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=f62b05eb0b3c33fd4e60d5eae72e2ed4a4221fe3$
++// $hash=ba753b1b2191bdc2a16fd6e6e71f1d7efbb04948$
+ //
+ 
+ #include "libcef_dll/ctocpp/cookie_manager_ctocpp.h"
+@@ -124,7 +124,8 @@ NO_SANITIZE("cfi-icall")
+ bool CefCookieManagerCToCpp::SetCookie(const CefString& url,
+                                        const CefCookie& cookie,
+                                        CefRefPtr<CefSetCookieCallback> callback,
+-                                       bool is_sync) {
++                                       bool is_sync,
++                                       const CefString& str_cookie) {
+   cef_cookie_manager_t* _struct = GetStruct();
+   if (CEF_MEMBER_MISSING(_struct, set_cookie)) {
+     return false;
+@@ -137,12 +138,17 @@ bool CefCookieManagerCToCpp::SetCookie(const CefString& url,
+   if (url.empty()) {
+     return false;
+   }
++  // Verify param: str_cookie; type: string_byref_const
++  DCHECK(!str_cookie.empty());
++  if (str_cookie.empty()) {
++    return false;
++  }
+   // Unverified params: callback
+ 
+   // Execute
+-  int _retval =
+-      _struct->set_cookie(_struct, url.GetStruct(), &cookie,
+-                          CefSetCookieCallbackCppToC::Wrap(callback), is_sync);
++  int _retval = _struct->set_cookie(_struct, url.GetStruct(), &cookie,
++                                    CefSetCookieCallbackCppToC::Wrap(callback),
++                                    is_sync, str_cookie.GetStruct());
+ 
+   // Return type: bool
+   return _retval ? true : false;
+diff --git a/src/cef/libcef_dll/ctocpp/cookie_manager_ctocpp.h b/src/cef/libcef_dll/ctocpp/cookie_manager_ctocpp.h
+index feb7dbcb13002..83ea0ddb0ebff
+--- a/src/cef/libcef_dll/ctocpp/cookie_manager_ctocpp.h
++++ b/src/cef/libcef_dll/ctocpp/cookie_manager_ctocpp.h
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=8bd9e871fa207e2b1399d9f34ee10860bb7ce147$
++// $hash=9ad5d0d492dbc63debd4d4d6e55ff983a87797a7$
+ //
+ 
+ #ifndef CEF_LIBCEF_DLL_CTOCPP_COOKIE_MANAGER_CTOCPP_H_
+@@ -44,7 +44,8 @@ class CefCookieManagerCToCpp
+   bool SetCookie(const CefString& url,
+                  const CefCookie& cookie,
+                  CefRefPtr<CefSetCookieCallback> callback,
+-                 bool is_sync) override;
++                 bool is_sync,
++                 const CefString& str_cookie) override;
+   bool DeleteCookies(const CefString& url,
+                      const CefString& cookie_name,
+                      bool is_session,
+diff --git a/src/cef/libcef_dll/ctocpp/display_handler_ctocpp.cc b/src/cef/libcef_dll/ctocpp/display_handler_ctocpp.cc
+index 02c3da7fc0730..f08a4d848e7ac
+--- a/src/cef/libcef_dll/ctocpp/display_handler_ctocpp.cc
++++ b/src/cef/libcef_dll/ctocpp/display_handler_ctocpp.cc
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=f10eaa384355db4699d9f4ed8f983bb59d0aabf5$
++// $hash=842714129b39201a2620d17edf9af2428a7df49a$
+ //
+ 
+ #include "libcef_dll/ctocpp/display_handler_ctocpp.h"
+@@ -437,6 +437,24 @@ void CefDisplayHandlerCToCpp::OnScaleChanged(CefRefPtr<CefBrowser> browser,
+                             old_page_scale_factor, new_page_scale_factor);
+ }
+ 
++NO_SANITIZE("cfi-icall")
++void CefDisplayHandlerCToCpp::OnContentsBrowserZoomChange(
++    double zoom_factor,
++    bool can_show_bubble) {
++  shutdown_checker::AssertNotShutdown();
++
++  cef_display_handler_t* _struct = GetStruct();
++  if (CEF_MEMBER_MISSING(_struct, on_contents_browser_zoom_change)) {
++    return;
++  }
++
++  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
++
++  // Execute
++  _struct->on_contents_browser_zoom_change(_struct, zoom_factor,
++                                           can_show_bubble);
++}
++
+ // CONSTRUCTOR - Do not edit by hand.
+ 
+ CefDisplayHandlerCToCpp::CefDisplayHandlerCToCpp() {}
+diff --git a/src/cef/libcef_dll/ctocpp/display_handler_ctocpp.h b/src/cef/libcef_dll/ctocpp/display_handler_ctocpp.h
+index c07fa11720de1..5c5238b11d897
+--- a/src/cef/libcef_dll/ctocpp/display_handler_ctocpp.h
++++ b/src/cef/libcef_dll/ctocpp/display_handler_ctocpp.h
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=ac26e8fb01db2815f5e1af6e4549e8265bc71f2f$
++// $hash=ae90186e679c04322d7184491accc9dc41977a9c$
+ //
+ 
+ #ifndef CEF_LIBCEF_DLL_CTOCPP_DISPLAY_HANDLER_CTOCPP_H_
+@@ -81,6 +81,8 @@ class CefDisplayHandlerCToCpp
+   void OnScaleChanged(CefRefPtr<CefBrowser> browser,
+                       float old_page_scale_factor,
+                       float new_page_scale_factor) override;
++  void OnContentsBrowserZoomChange(double zoom_factor,
++                                   bool can_show_bubble) override;
+ };
+ 
+ #endif  // CEF_LIBCEF_DLL_CTOCPP_DISPLAY_HANDLER_CTOCPP_H_
+diff --git a/src/cef/libcef_dll/ctocpp/frame_ctocpp.cc b/src/cef/libcef_dll/ctocpp/frame_ctocpp.cc
+index 40f5acb04a70b..0a0c5d7317d73
+--- a/src/cef/libcef_dll/ctocpp/frame_ctocpp.cc
++++ b/src/cef/libcef_dll/ctocpp/frame_ctocpp.cc
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=6d1d757af9e1b23dc609a61ae9c6072d9ce79ee1$
++// $hash=1963cfe31522bbf3ee2d582c26757940e334085e$
+ //
+ 
+ #include "libcef_dll/ctocpp/frame_ctocpp.h"
+@@ -521,6 +521,47 @@ void CefFrameCToCpp::GetImages(CefRefPtr<CefGetImagesCallback> callback) {
+   _struct->get_images(_struct, CefGetImagesCallbackCppToC::Wrap(callback));
+ }
+ 
++NO_SANITIZE("cfi-icall")
++void CefFrameCToCpp::PostURL(const CefString& url,
++                             const std::vector<char>& post_data) {
++  shutdown_checker::AssertNotShutdown();
++
++  cef_frame_t* _struct = GetStruct();
++  if (CEF_MEMBER_MISSING(_struct, post_url)) {
++    return;
++  }
++
++  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
++
++  // Verify param: url; type: string_byref_const
++  DCHECK(!url.empty());
++  if (url.empty()) {
++    return;
++  }
++  // Unverified params: post_data
++
++  // Translate param: post_data; type: simple_vec_byref_const
++  const size_t post_dataCount = post_data.size();
++  char* post_dataList = NULL;
++  if (post_dataCount > 0) {
++    post_dataList = new char[post_dataCount];
++    DCHECK(post_dataList);
++    if (post_dataList) {
++      for (size_t i = 0; i < post_dataCount; ++i) {
++        post_dataList[i] = post_data[i];
++      }
++    }
++  }
++
++  // Execute
++  _struct->post_url(_struct, url.GetStruct(), post_dataCount, post_dataList);
++
++  // Restore param:post_data; type: simple_vec_byref_const
++  if (post_dataList) {
++    delete[] post_dataList;
++  }
++}
++
+ // CONSTRUCTOR - Do not edit by hand.
+ 
+ CefFrameCToCpp::CefFrameCToCpp() {}
+diff --git a/src/cef/libcef_dll/ctocpp/frame_ctocpp.h b/src/cef/libcef_dll/ctocpp/frame_ctocpp.h
+index 29dc7b181e44a..e4b93e08a7280
+--- a/src/cef/libcef_dll/ctocpp/frame_ctocpp.h
++++ b/src/cef/libcef_dll/ctocpp/frame_ctocpp.h
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=8ba8fb7f5f4dd6b2a5882fc21f023da08cdf0cc5$
++// $hash=8a723c664b1e7ee8e158c4bba18d5e8055a5c899$
+ //
+ 
+ #ifndef CEF_LIBCEF_DLL_CTOCPP_FRAME_CTOCPP_H_
+@@ -20,6 +20,7 @@
+ #error This file can be included wrapper-side only
+ #endif
+ 
++#include <vector>
+ #include "include/capi/cef_browser_capi.h"
+ #include "include/capi/cef_frame_capi.h"
+ #include "include/capi/cef_urlrequest_capi.h"
+@@ -72,6 +73,8 @@ class CefFrameCToCpp
+   void LoadHeaderUrl(const CefString& url,
+                      const CefString& additionalHttpHeaders) override;
+   void GetImages(CefRefPtr<CefGetImagesCallback> callback) override;
++  void PostURL(const CefString& url,
++               const std::vector<char>& post_data) override;
+ };
+ 
+ #endif  // CEF_LIBCEF_DLL_CTOCPP_FRAME_CTOCPP_H_
+diff --git a/src/cef/libcef_dll/ctocpp/render_handler_ctocpp.cc b/src/cef/libcef_dll/ctocpp/render_handler_ctocpp.cc
+index 88af1418f099d..6f79f0a85d155
+--- a/src/cef/libcef_dll/ctocpp/render_handler_ctocpp.cc
++++ b/src/cef/libcef_dll/ctocpp/render_handler_ctocpp.cc
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=75103c9f032e31a2273f30452353be4b682a8a26$
++// $hash=ebfe1c40727eccbdb24068e1cf26dee203ae9c1c$
+ //
+ 
+ #include "libcef_dll/ctocpp/render_handler_ctocpp.h"
+@@ -755,6 +755,35 @@ void CefRenderHandlerCToCpp::OnScrollState(CefRefPtr<CefBrowser> browser,
+                            scroll_state);
+ }
+ 
++NO_SANITIZE("cfi-icall")
++bool CefRenderHandlerCToCpp::FilterScrollEvent(CefRefPtr<CefBrowser> browser,
++                                               const float x,
++                                               const float y,
++                                               const float fling_x,
++                                               const float fling_y) {
++  shutdown_checker::AssertNotShutdown();
++
++  cef_render_handler_t* _struct = GetStruct();
++  if (CEF_MEMBER_MISSING(_struct, filter_scroll_event)) {
++    return false;
++  }
++
++  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
++
++  // Verify param: browser; type: refptr_diff
++  DCHECK(browser.get());
++  if (!browser.get()) {
++    return false;
++  }
++
++  // Execute
++  int _retval = _struct->filter_scroll_event(
++      _struct, CefBrowserCppToC::Wrap(browser), x, y, fling_x, fling_y);
++
++  // Return type: bool
++  return _retval ? true : false;
++}
++
+ // CONSTRUCTOR - Do not edit by hand.
+ 
+ CefRenderHandlerCToCpp::CefRenderHandlerCToCpp() {}
+diff --git a/src/cef/libcef_dll/ctocpp/render_handler_ctocpp.h b/src/cef/libcef_dll/ctocpp/render_handler_ctocpp.h
+index 52608f1716740..6ec79cd12cbe7
+--- a/src/cef/libcef_dll/ctocpp/render_handler_ctocpp.h
++++ b/src/cef/libcef_dll/ctocpp/render_handler_ctocpp.h
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=fcab4493e42413fdcb77dde6eecc284e082c9346$
++// $hash=2a4ab48451075e2a96fdf8467eb3fddaf2daa4a9$
+ //
+ 
+ #ifndef CEF_LIBCEF_DLL_CTOCPP_RENDER_HANDLER_CTOCPP_H_
+@@ -108,6 +108,11 @@ class CefRenderHandlerCToCpp
+                                  bool is_fling) override;
+   void OnOverScrollFlingEnd(CefRefPtr<CefBrowser> browser) override;
+   void OnScrollState(CefRefPtr<CefBrowser> browser, bool scroll_state) override;
++  bool FilterScrollEvent(CefRefPtr<CefBrowser> browser,
++                         const float x,
++                         const float y,
++                         const float fling_x,
++                         const float fling_y) override;
+ };
+ 
+ #endif  // CEF_LIBCEF_DLL_CTOCPP_RENDER_HANDLER_CTOCPP_H_
+diff --git a/src/chrome/browser/extensions/api/developer_private/entry_picker.cc b/src/chrome/browser/extensions/api/developer_private/entry_picker.cc
+index 915a8d9591e1b..aebfab58abc7e
+--- a/src/chrome/browser/extensions/api/developer_private/entry_picker.cc
++++ b/src/chrome/browser/extensions/api/developer_private/entry_picker.cc
+@@ -14,6 +14,10 @@
+ #include "content/public/browser/browser_thread.h"
+ #include "content/public/browser/web_contents.h"
+ #include "ui/shell_dialogs/select_file_dialog.h"
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++#include "base/datashare_uri_utils.h"
++#include "chrome/browser/extensions/api/file_system/file_entry_picker.h"
++#endif
+ 
+ namespace {
+ 
+@@ -50,6 +54,15 @@ EntryPicker::EntryPicker(EntryPickerClient* client,
+     return;
+   }
+ 
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++  const base::FilePath default_path;
++  new FileEntryPicker(
++      web_contents, default_path, info, picker_type,
++      base::BindOnce(&EntryPicker::FileSelectedFromPicker,
++                     base::Unretained(this)),
++      base::BindOnce(&EntryPicker::FileSelectionCanceledFromPicker,
++                     base::Unretained(this)));
++#else
+   select_file_dialog_ = ui::SelectFileDialog::Create(
+       this, std::make_unique<ChromeSelectFilePolicy>(web_contents));
+ 
+@@ -65,6 +78,7 @@ EntryPicker::EntryPicker(EntryPickerClient* client,
+                                   base::FilePath::StringType(),
+                                   owning_window,
+                                   nullptr);
++#endif
+ }
+ 
+ EntryPicker::~EntryPicker() {}
+@@ -88,6 +102,22 @@ void EntryPicker::MultiFilesSelected(const std::vector<base::FilePath>& files,
+   delete this;
+ }
+ 
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++void EntryPicker::FileSelectedFromPicker(
++    const std::vector<base::FilePath>& paths) {
++  if (paths.empty()) {
++    return;
++  }
++  client_->FileSelected(paths[0].DirName());
++  delete this;
++}
++
++void EntryPicker::FileSelectionCanceledFromPicker() {
++  client_->FileSelectionCanceled();
++  delete this;
++}
++#endif
++
+ // static
+ void EntryPicker::SkipPickerAndAlwaysSelectPathForTest(
+     base::FilePath* path) {
+diff --git a/src/chrome/browser/extensions/api/developer_private/entry_picker.h b/src/chrome/browser/extensions/api/developer_private/entry_picker.h
+index cce72a194c561..b506d98bc36e3
+--- a/src/chrome/browser/extensions/api/developer_private/entry_picker.h
++++ b/src/chrome/browser/extensions/api/developer_private/entry_picker.h
+@@ -53,7 +53,10 @@ class EntryPicker : public ui::SelectFileDialog::Listener {
+   void FileSelectionCanceled(void* params) override;
+   void MultiFilesSelected(const std::vector<base::FilePath>& files,
+                           void* params) override;
+-
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++  void FileSelectionCanceledFromPicker();
++  void FileSelectedFromPicker(const std::vector<base::FilePath>& paths);
++#endif
+   scoped_refptr<ui::SelectFileDialog> select_file_dialog_;
+   raw_ptr<EntryPickerClient> client_;
+ };
+diff --git a/src/chrome/browser/extensions/component_loader.cc b/src/chrome/browser/extensions/component_loader.cc
+index 0238edde3cfc2..9335dcb6b35be
+--- a/src/chrome/browser/extensions/component_loader.cc
++++ b/src/chrome/browser/extensions/component_loader.cc
+@@ -85,6 +85,11 @@
+ #include "chrome/browser/defaults.h"
+ #endif
+ 
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++#include "base/base_switches.h"
++#include "base/command_line.h"
++#endif
++
+ using content::BrowserThread;
+ 
+ namespace extensions {
+@@ -148,8 +153,13 @@ ComponentLoader::ComponentExtensionInfo::ComponentExtensionInfo(
+     const base::FilePath& directory)
+     : manifest(std::move(manifest_param)), root_directory(directory) {
+   if (!root_directory.IsAbsolute()) {
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++    root_directory = base::CommandLine::ForCurrentProcess()->GetSwitchValuePath(
++        ::switches::kBundleInstallationDir);
++#else
+     CHECK(base::PathService::Get(chrome::DIR_RESOURCES, &root_directory));
+     root_directory = root_directory.Append(directory);
++#endif
+   }
+   extension_id = GenerateId(manifest, root_directory);
+ }
+diff --git a/src/chrome/browser/preloading/prefetch/no_state_prefetch/chrome_no_state_prefetch_contents_delegate.cc b/src/chrome/browser/preloading/prefetch/no_state_prefetch/chrome_no_state_prefetch_contents_delegate.cc
+index 24645f01eb077..1e37303170767
+--- a/src/chrome/browser/preloading/prefetch/no_state_prefetch/chrome_no_state_prefetch_contents_delegate.cc
++++ b/src/chrome/browser/preloading/prefetch/no_state_prefetch/chrome_no_state_prefetch_contents_delegate.cc
+@@ -29,12 +29,14 @@ NoStatePrefetchContents* ChromeNoStatePrefetchContentsDelegate::FromWebContents(
+ 
+ void ChromeNoStatePrefetchContentsDelegate::OnNoStatePrefetchContentsCreated(
+     content::WebContents* web_contents) {
++#ifndef BUILDFLAG(OHOS_NO_STATE_PREFETCH)
+   DCHECK(web_contents);
+   TabHelpers::AttachTabHelpers(web_contents);
+ 
+   // Tag the NoStatePrefetch contents with the task manager specific prerender
+   // tag, so that it shows up in the task manager.
+   task_manager::WebContentsTags::CreateForNoStatePrefetchContents(web_contents);
++#endif
+ }
+ 
+ void ChromeNoStatePrefetchContentsDelegate::ReleaseNoStatePrefetchContents(
+diff --git a/src/chrome/browser/resources/extensions/activity_log/activity_log.ts b/src/chrome/browser/resources/extensions/activity_log/activity_log.ts
+index c40b8b810ae4a..5e1fff82dd7ed
+--- a/src/chrome/browser/resources/extensions/activity_log/activity_log.ts
++++ b/src/chrome/browser/resources/extensions/activity_log/activity_log.ts
+@@ -2,23 +2,23 @@
+ // Use of this source code is governed by a BSD-style license that can be
+ // found in the LICENSE file.
+ 
+-import 'chrome://resources/cr_elements/cr_icon_button/cr_icon_button.js';
+-import 'chrome://resources/cr_elements/cr_icons.css.js';
+-import 'chrome://resources/cr_elements/cr_tabs/cr_tabs.js';
+-import 'chrome://resources/cr_elements/cr_shared_style.css.js';
+-import 'chrome://resources/cr_elements/cr_shared_vars.css.js';
+-import 'chrome://resources/polymer/v3_0/iron-pages/iron-pages.js';
++import 'arkweb://resources/cr_elements/cr_icon_button/cr_icon_button.js';
++import 'arkweb://resources/cr_elements/cr_icons.css.js';
++import 'arkweb://resources/cr_elements/cr_tabs/cr_tabs.js';
++import 'arkweb://resources/cr_elements/cr_shared_style.css.js';
++import 'arkweb://resources/cr_elements/cr_shared_vars.css.js';
++import 'arkweb://resources/polymer/v3_0/iron-pages/iron-pages.js';
+ import './activity_log_stream.js';
+ import './activity_log_history.js';
+ import '../strings.m.js';
+ import '../shared_style.css.js';
+ import '../shared_vars.css.js';
+ 
+-import {CrContainerShadowMixin} from 'chrome://resources/cr_elements/cr_container_shadow_mixin.js';
+-import {focusWithoutInk} from 'chrome://resources/js/focus_without_ink.js';
+-import {I18nMixin} from 'chrome://resources/cr_elements/i18n_mixin.js';
+-import {loadTimeData} from 'chrome://resources/js/load_time_data.js';
+-import {afterNextRender, PolymerElement} from 'chrome://resources/polymer/v3_0/polymer/polymer_bundled.min.js';
++import {CrContainerShadowMixin} from 'arkweb://resources/cr_elements/cr_container_shadow_mixin.js';
++import {I18nMixin} from 'arkweb://resources/cr_elements/i18n_mixin.js';
++import {focusWithoutInk} from 'arkweb://resources/js/focus_without_ink.js';
++import {loadTimeData} from 'arkweb://resources/js/load_time_data.js';
++import {afterNextRender, PolymerElement} from 'arkweb://resources/polymer/v3_0/polymer/polymer_bundled.min.js';
+ 
+ import {navigation, Page} from '../navigation_helper.js';
+ 
+diff --git a/src/chrome/browser/resources/extensions/activity_log/activity_log_history.ts b/src/chrome/browser/resources/extensions/activity_log/activity_log_history.ts
+index 7f49b3ecd5a32..9f2ef3592dcdb
+--- a/src/chrome/browser/resources/extensions/activity_log/activity_log_history.ts
++++ b/src/chrome/browser/resources/extensions/activity_log/activity_log_history.ts
+@@ -2,16 +2,16 @@
+ // Use of this source code is governed by a BSD-style license that can be
+ // found in the LICENSE file.
+ 
+-import 'chrome://resources/cr_elements/cr_action_menu/cr_action_menu.js';
+-import 'chrome://resources/cr_elements/cr_button/cr_button.js';
+-import 'chrome://resources/cr_elements/cr_icon_button/cr_icon_button.js';
+-import 'chrome://resources/cr_elements/cr_search_field/cr_search_field.js';
++import 'arkweb://resources/cr_elements/cr_action_menu/cr_action_menu.js';
++import 'arkweb://resources/cr_elements/cr_button/cr_button.js';
++import 'arkweb://resources/cr_elements/cr_icon_button/cr_icon_button.js';
++import 'arkweb://resources/cr_elements/cr_search_field/cr_search_field.js';
+ import '../shared_style.css.js';
+ import './activity_log_history_item.js';
+ 
+-import {assert} from 'chrome://resources/js/assert_ts.js';
+-import {PromiseResolver} from 'chrome://resources/js/promise_resolver.js';
+-import {PolymerElement} from 'chrome://resources/polymer/v3_0/polymer/polymer_bundled.min.js';
++import {assert} from 'arkweb://resources/js/assert_ts.js';
++import {PromiseResolver} from 'arkweb://resources/js/promise_resolver.js';
++import {PolymerElement} from 'arkweb://resources/polymer/v3_0/polymer/polymer_bundled.min.js';
+ 
+ import {getTemplate} from './activity_log_history.html.js';
+ import {ActivityGroup} from './activity_log_history_item.js';
+diff --git a/src/chrome/browser/resources/extensions/activity_log/activity_log_history_item.ts b/src/chrome/browser/resources/extensions/activity_log/activity_log_history_item.ts
+index 86010bb311cbf..cc714a9118fb6
+--- a/src/chrome/browser/resources/extensions/activity_log/activity_log_history_item.ts
++++ b/src/chrome/browser/resources/extensions/activity_log/activity_log_history_item.ts
+@@ -2,14 +2,14 @@
+ // Use of this source code is governed by a BSD-style license that can be
+ // found in the LICENSE file.
+ 
+-import 'chrome://resources/cr_elements/cr_expand_button/cr_expand_button.js';
+-import 'chrome://resources/cr_elements/cr_icon_button/cr_icon_button.js';
+-import 'chrome://resources/cr_elements/cr_icons.css.js';
+-import 'chrome://resources/cr_elements/cr_shared_vars.css.js';
++import 'arkweb://resources/cr_elements/cr_expand_button/cr_expand_button.js';
++import 'arkweb://resources/cr_elements/cr_icon_button/cr_icon_button.js';
++import 'arkweb://resources/cr_elements/cr_icons.css.js';
++import 'arkweb://resources/cr_elements/cr_shared_vars.css.js';
+ import '../shared_style.css.js';
+ import '../shared_vars.css.js';
+ 
+-import {PolymerElement} from 'chrome://resources/polymer/v3_0/polymer/polymer_bundled.min.js';
++import {PolymerElement} from 'arkweb://resources/polymer/v3_0/polymer/polymer_bundled.min.js';
+ 
+ import {getTemplate} from './activity_log_history_item.html.js';
+ 
+diff --git a/src/chrome/browser/resources/extensions/activity_log/activity_log_stream.ts b/src/chrome/browser/resources/extensions/activity_log/activity_log_stream.ts
+index 888a7785d5517..600609e7c1baa
+--- a/src/chrome/browser/resources/extensions/activity_log/activity_log_stream.ts
++++ b/src/chrome/browser/resources/extensions/activity_log/activity_log_stream.ts
+@@ -2,15 +2,15 @@
+ // Use of this source code is governed by a BSD-style license that can be
+ // found in the LICENSE file.
+ 
+-import 'chrome://resources/cr_elements/cr_button/cr_button.js';
+-import 'chrome://resources/cr_elements/cr_search_field/cr_search_field.js';
+-import 'chrome://resources/polymer/v3_0/iron-list/iron-list.js';
++import 'arkweb://resources/cr_elements/cr_button/cr_button.js';
++import 'arkweb://resources/cr_elements/cr_search_field/cr_search_field.js';
++import 'arkweb://resources/polymer/v3_0/iron-list/iron-list.js';
+ import '../shared_style.css.js';
+ import './activity_log_stream_item.js';
+ 
+ import {ChromeEvent} from '/tools/typescript/definitions/chrome_event.js';
+-import {assert} from 'chrome://resources/js/assert_ts.js';
+-import {PolymerElement} from 'chrome://resources/polymer/v3_0/polymer/polymer_bundled.min.js';
++import {assert} from 'arkweb://resources/js/assert_ts.js';
++import {PolymerElement} from 'arkweb://resources/polymer/v3_0/polymer/polymer_bundled.min.js';
+ 
+ import {getTemplate} from './activity_log_stream.html.js';
+ import {StreamItem} from './activity_log_stream_item.js';
+diff --git a/src/chrome/browser/resources/extensions/activity_log/activity_log_stream_item.ts b/src/chrome/browser/resources/extensions/activity_log/activity_log_stream_item.ts
+index 742f32d3f6ae9..beab188560b55
+--- a/src/chrome/browser/resources/extensions/activity_log/activity_log_stream_item.ts
++++ b/src/chrome/browser/resources/extensions/activity_log/activity_log_stream_item.ts
+@@ -2,13 +2,13 @@
+ // Use of this source code is governed by a BSD-style license that can be
+ // found in the LICENSE file.
+ 
+-import 'chrome://resources/cr_elements/cr_expand_button/cr_expand_button.js';
+-import 'chrome://resources/cr_elements/cr_icons.css.js';
+-import 'chrome://resources/cr_elements/cr_shared_vars.css.js';
++import 'arkweb://resources/cr_elements/cr_expand_button/cr_expand_button.js';
++import 'arkweb://resources/cr_elements/cr_icons.css.js';
++import 'arkweb://resources/cr_elements/cr_shared_vars.css.js';
+ import '../shared_style.css.js';
+ import '../shared_vars.css.js';
+ 
+-import {PolymerElement} from 'chrome://resources/polymer/v3_0/polymer/polymer_bundled.min.js';
++import {PolymerElement} from 'arkweb://resources/polymer/v3_0/polymer/polymer_bundled.min.js';
+ 
+ import {getTemplate} from './activity_log_stream_item.html.js';
+ 
+diff --git a/src/chrome/browser/resources/extensions/code_section.ts b/src/chrome/browser/resources/extensions/code_section.ts
+index 4576891a5d212..b4e1e1fb932fc
+--- a/src/chrome/browser/resources/extensions/code_section.ts
++++ b/src/chrome/browser/resources/extensions/code_section.ts
+@@ -2,14 +2,14 @@
+ // Use of this source code is governed by a BSD-style license that can be
+ // found in the LICENSE file.
+ 
+-import 'chrome://resources/cr_elements/cr_hidden_style.css.js';
+-import 'chrome://resources/cr_elements/cr_shared_vars.css.js';
+-import 'chrome://resources/polymer/v3_0/paper-styles/color.js';
++import 'arkweb://resources/cr_elements/cr_hidden_style.css.js';
++import 'arkweb://resources/cr_elements/cr_shared_vars.css.js';
++import 'arkweb://resources/polymer/v3_0/paper-styles/color.js';
+ import './strings.m.js';
+ 
+-import {I18nMixin} from 'chrome://resources/cr_elements/i18n_mixin.js';
+-import {loadTimeData} from 'chrome://resources/js/load_time_data.js';
+-import {PolymerElement} from 'chrome://resources/polymer/v3_0/polymer/polymer_bundled.min.js';
++import {I18nMixin} from 'arkweb://resources/cr_elements/i18n_mixin.js';
++import {loadTimeData} from 'arkweb://resources/js/load_time_data.js';
++import {PolymerElement} from 'arkweb://resources/polymer/v3_0/polymer/polymer_bundled.min.js';
+ 
+ import {getTemplate} from './code_section.html.js';
+ 
+diff --git a/src/chrome/browser/resources/extensions/detail_view.ts b/src/chrome/browser/resources/extensions/detail_view.ts
+index bcd393c4444c1..b10a6182ba46c
+--- a/src/chrome/browser/resources/extensions/detail_view.ts
++++ b/src/chrome/browser/resources/extensions/detail_view.ts
+@@ -2,21 +2,21 @@
+ // Use of this source code is governed by a BSD-style license that can be
+ // found in the LICENSE file.
+ 
+-import 'chrome://resources/cr_elements/cr_button/cr_button.js';
+-import 'chrome://resources/cr_elements/cr_icon_button/cr_icon_button.js';
+-import 'chrome://resources/cr_elements/cr_icons.css.js';
+-import 'chrome://resources/cr_elements/cr_link_row/cr_link_row.js';
+-import 'chrome://resources/cr_elements/cr_toggle/cr_toggle.js';
+-import 'chrome://resources/cr_elements/icons.html.js';
+-import 'chrome://resources/cr_elements/policy/cr_tooltip_icon.js';
+-import 'chrome://resources/cr_elements/cr_shared_style.css.js';
+-import 'chrome://resources/cr_elements/cr_shared_vars.css.js';
+-import 'chrome://resources/js/action_link.js';
+-import 'chrome://resources/cr_elements/action_link.css.js';
+-import 'chrome://resources/polymer/v3_0/iron-flex-layout/iron-flex-layout-classes.js';
+-import 'chrome://resources/polymer/v3_0/iron-icon/iron-icon.js';
+-import 'chrome://resources/polymer/v3_0/paper-spinner/paper-spinner-lite.js';
+-import 'chrome://resources/polymer/v3_0/paper-styles/color.js';
++import 'arkweb://resources/cr_elements/cr_button/cr_button.js';
++import 'arkweb://resources/cr_elements/cr_icon_button/cr_icon_button.js';
++import 'arkweb://resources/cr_elements/cr_icons.css.js';
++import 'arkweb://resources/cr_elements/cr_link_row/cr_link_row.js';
++import 'arkweb://resources/cr_elements/cr_toggle/cr_toggle.js';
++import 'arkweb://resources/cr_elements/icons.html.js';
++import 'arkweb://resources/cr_elements/policy/cr_tooltip_icon.js';
++import 'arkweb://resources/cr_elements/cr_shared_style.css.js';
++import 'arkweb://resources/cr_elements/cr_shared_vars.css.js';
++import 'arkweb://resources/js/action_link.js';
++import 'arkweb://resources/cr_elements/action_link.css.js';
++import 'arkweb://resources/polymer/v3_0/iron-flex-layout/iron-flex-layout-classes.js';
++import 'arkweb://resources/polymer/v3_0/iron-icon/iron-icon.js';
++import 'arkweb://resources/polymer/v3_0/paper-spinner/paper-spinner-lite.js';
++import 'arkweb://resources/polymer/v3_0/paper-styles/color.js';
+ import './host_permissions_toggle_list.js';
+ import './runtime_host_permissions.js';
+ import './shared_style.css.js';
+@@ -24,13 +24,13 @@ import './shared_vars.css.js';
+ import './strings.m.js';
+ import './toggle_row.js';
+ 
+-import {CrLinkRowElement} from 'chrome://resources/cr_elements/cr_link_row/cr_link_row.js';
+-import {CrToggleElement} from 'chrome://resources/cr_elements/cr_toggle/cr_toggle.js';
+-import {CrTooltipIconElement} from 'chrome://resources/cr_elements/policy/cr_tooltip_icon.js';
+-import {assert} from 'chrome://resources/js/assert_ts.js';
+-import {focusWithoutInk} from 'chrome://resources/js/focus_without_ink.js';
+-import {loadTimeData} from 'chrome://resources/js/load_time_data.js';
+-import {afterNextRender, DomRepeatEvent, PolymerElement} from 'chrome://resources/polymer/v3_0/polymer/polymer_bundled.min.js';
++import {CrLinkRowElement} from 'arkweb://resources/cr_elements/cr_link_row/cr_link_row.js';
++import {CrToggleElement} from 'arkweb://resources/cr_elements/cr_toggle/cr_toggle.js';
++import {CrTooltipIconElement} from 'arkweb://resources/cr_elements/policy/cr_tooltip_icon.js';
++import {assert} from 'arkweb://resources/js/assert_ts.js';
++import {focusWithoutInk} from 'arkweb://resources/js/focus_without_ink.js';
++import {loadTimeData} from 'arkweb://resources/js/load_time_data.js';
++import {afterNextRender, DomRepeatEvent, PolymerElement} from 'arkweb://resources/polymer/v3_0/polymer/polymer_bundled.min.js';
+ 
+ import {getTemplate} from './detail_view.html.js';
+ import {ItemDelegate} from './item.js';
+@@ -285,7 +285,7 @@ export class ExtensionsDetailViewElement extends
+ 
+   private onSiteSettingsClick_() {
+     this.delegate.openUrl(
+-        `chrome://settings/content/siteDetails?site=chrome-extension://${
++        `arkweb://settings/content/siteDetails?site=chrome-extension://${
+             this.data.id}`);
+   }
+ 
+diff --git a/src/chrome/browser/resources/extensions/drag_and_drop_handler.ts b/src/chrome/browser/resources/extensions/drag_and_drop_handler.ts
+index 312188cb2910d..ffb68176b8a9a
+--- a/src/chrome/browser/resources/extensions/drag_and_drop_handler.ts
++++ b/src/chrome/browser/resources/extensions/drag_and_drop_handler.ts
+@@ -2,7 +2,7 @@
+ // Use of this source code is governed by a BSD-style license that can be
+ // found in the LICENSE file.
+ 
+-import {DragWrapperDelegate} from 'chrome://resources/js/drag_wrapper.js';
++import {DragWrapperDelegate} from 'arkweb://resources/js/drag_wrapper.js';
+ 
+ import {Service} from './service.js';
+ 
+diff --git a/src/chrome/browser/resources/extensions/drop_overlay.ts b/src/chrome/browser/resources/extensions/drop_overlay.ts
+index fc800e74b6a6a..eb8fd38aa2741
+--- a/src/chrome/browser/resources/extensions/drop_overlay.ts
++++ b/src/chrome/browser/resources/extensions/drop_overlay.ts
+@@ -2,13 +2,13 @@
+ // Use of this source code is governed by a BSD-style license that can be
+ // found in the LICENSE file.
+ 
+-import 'chrome://resources/cr_elements/cr_hidden_style.css.js';
+-import 'chrome://resources/cr_elements/icons.html.js';
+-import 'chrome://resources/cr_elements/cr_shared_vars.css.js';
+-import 'chrome://resources/polymer/v3_0/iron-icon/iron-icon.js';
++import 'arkweb://resources/cr_elements/cr_hidden_style.css.js';
++import 'arkweb://resources/cr_elements/icons.html.js';
++import 'arkweb://resources/cr_elements/cr_shared_vars.css.js';
++import 'arkweb://resources/polymer/v3_0/iron-icon/iron-icon.js';
+ 
+-import {DragWrapper} from 'chrome://resources/js/drag_wrapper.js';
+-import {PolymerElement} from 'chrome://resources/polymer/v3_0/polymer/polymer_bundled.min.js';
++import {DragWrapper} from 'arkweb://resources/js/drag_wrapper.js';
++import {PolymerElement} from 'arkweb://resources/polymer/v3_0/polymer/polymer_bundled.min.js';
+ 
+ import {DragAndDropHandler} from './drag_and_drop_handler.js';
+ import {getTemplate} from './drop_overlay.html.js';
+diff --git a/src/chrome/browser/resources/extensions/error_page.ts b/src/chrome/browser/resources/extensions/error_page.ts
+index 3b5bdf48066b1..5ac5bc520951e
+--- a/src/chrome/browser/resources/extensions/error_page.ts
++++ b/src/chrome/browser/resources/extensions/error_page.ts
+@@ -2,24 +2,24 @@
+ // Use of this source code is governed by a BSD-style license that can be
+ // found in the LICENSE file.
+ 
+-import 'chrome://resources/cr_elements/cr_button/cr_button.js';
+-import 'chrome://resources/cr_elements/cr_icon_button/cr_icon_button.js';
+-import 'chrome://resources/cr_elements/cr_icons.css.js';
+-import 'chrome://resources/cr_elements/icons.html.js';
+-import 'chrome://resources/cr_elements/cr_shared_style.css.js';
+-import 'chrome://resources/cr_elements/cr_shared_vars.css.js';
+-import 'chrome://resources/polymer/v3_0/iron-collapse/iron-collapse.js';
+-import 'chrome://resources/polymer/v3_0/iron-icon/iron-icon.js';
+-import 'chrome://resources/polymer/v3_0/paper-styles/color.js';
++import 'arkweb://resources/cr_elements/cr_button/cr_button.js';
++import 'arkweb://resources/cr_elements/cr_icon_button/cr_icon_button.js';
++import 'arkweb://resources/cr_elements/cr_icons.css.js';
++import 'arkweb://resources/cr_elements/icons.html.js';
++import 'arkweb://resources/cr_elements/cr_shared_style.css.js';
++import 'arkweb://resources/cr_elements/cr_shared_vars.css.js';
++import 'arkweb://resources/polymer/v3_0/iron-collapse/iron-collapse.js';
++import 'arkweb://resources/polymer/v3_0/iron-icon/iron-icon.js';
++import 'arkweb://resources/polymer/v3_0/paper-styles/color.js';
+ import './code_section.js';
+ import './shared_style.css.js';
+ 
+-import {CrContainerShadowMixin} from 'chrome://resources/cr_elements/cr_container_shadow_mixin.js';
+-import {assert, assertNotReached} from 'chrome://resources/js/assert_ts.js';
+-import {FocusOutlineManager} from 'chrome://resources/js/focus_outline_manager.js';
+-import {focusWithoutInk} from 'chrome://resources/js/focus_without_ink.js';
+-import {loadTimeData} from 'chrome://resources/js/load_time_data.js';
+-import {afterNextRender, DomRepeatEvent, PolymerElement} from 'chrome://resources/polymer/v3_0/polymer/polymer_bundled.min.js';
++import {CrContainerShadowMixin} from 'arkweb://resources/cr_elements/cr_container_shadow_mixin.js';
++import {assert, assertNotReached} from 'arkweb://resources/js/assert_ts.js';
++import {FocusOutlineManager} from 'arkweb://resources/js/focus_outline_manager.js';
++import {focusWithoutInk} from 'arkweb://resources/js/focus_without_ink.js';
++import {loadTimeData} from 'arkweb://resources/js/load_time_data.js';
++import {afterNextRender, DomRepeatEvent, PolymerElement} from 'arkweb://resources/polymer/v3_0/polymer/polymer_bundled.min.js';
+ 
+ import {getTemplate} from './error_page.html.js';
+ import {navigation, Page} from './navigation_helper.js';
+diff --git a/src/chrome/browser/resources/extensions/extensions.html b/src/chrome/browser/resources/extensions/extensions.html
+index 37865c83d1042..8fccaf6118ee2
+--- a/src/chrome/browser/resources/extensions/extensions.html
++++ b/src/chrome/browser/resources/extensions/extensions.html
+@@ -5,8 +5,8 @@
+   <meta charset="utf8">
+   <meta name="color-scheme" content="light dark">
+   <title>$i18n{title}</title>
+-  <base href="chrome://extensions">
+-  <link rel="stylesheet" href="chrome://resources/css/md_colors.css">
++  <base href="arkweb://extensions" >
++  <link rel="stylesheet" href="arkweb://resources/css/md_colors.css">
+   <style>
+     html {
+       /* Remove 300ms delay for 'click' event, when using touch interface. */
+@@ -63,6 +63,6 @@
+ </head>
+ <body>
+   <extensions-manager></extensions-manager>
+-  <link rel="stylesheet" href="chrome://resources/css/text_defaults_md.css">
++  <link rel="stylesheet" href="arkweb://resources/css/text_defaults_md.css">
+ </body>
+ </html>
+diff --git a/src/chrome/browser/resources/extensions/extensions.ts b/src/chrome/browser/resources/extensions/extensions.ts
+index 915b5517fa2e1..13461b9a9664e
+--- a/src/chrome/browser/resources/extensions/extensions.ts
++++ b/src/chrome/browser/resources/extensions/extensions.ts
+@@ -4,9 +4,9 @@
+ 
+ import './manager.js';
+ 
+-export {CrCheckboxElement} from 'chrome://resources/cr_elements/cr_checkbox/cr_checkbox.js';
+-export {getToastManager} from 'chrome://resources/cr_elements/cr_toast/cr_toast_manager.js';
+-export {IronIconElement} from 'chrome://resources/polymer/v3_0/iron-icon/iron-icon.js';
++export {CrCheckboxElement} from 'arkweb://resources/cr_elements/cr_checkbox/cr_checkbox.js';
++export {getToastManager} from 'arkweb://resources/cr_elements/cr_toast/cr_toast_manager.js';
++export {IronIconElement} from 'arkweb://resources/polymer/v3_0/iron-icon/iron-icon.js';
+ export {ActivityLogExtensionPlaceholder, ExtensionsActivityLogElement} from './activity_log/activity_log.js';
+ export {ActivityLogHistoryElement, ActivityLogPageState} from './activity_log/activity_log_history.js';
+ export {ActivityGroup, ActivityLogHistoryItemElement} from './activity_log/activity_log_history_item.js';
+diff --git a/src/chrome/browser/resources/extensions/host_permissions_toggle_list.ts b/src/chrome/browser/resources/extensions/host_permissions_toggle_list.ts
+index 8a0822f141153..fdd0a9b1f62ee
+--- a/src/chrome/browser/resources/extensions/host_permissions_toggle_list.ts
++++ b/src/chrome/browser/resources/extensions/host_permissions_toggle_list.ts
+@@ -2,17 +2,17 @@
+ // Use of this source code is governed by a BSD-style license that can be
+ // found in the LICENSE file.
+ 
+-import 'chrome://resources/cr_elements/cr_shared_style.css.js';
+-import 'chrome://resources/cr_elements/cr_shared_vars.css.js';
+-import 'chrome://resources/cr_elements/icons.html.js';
+-import 'chrome://resources/polymer/v3_0/iron-icon/iron-icon.js';
++import 'arkweb://resources/cr_elements/cr_shared_style.css.js';
++import 'arkweb://resources/cr_elements/cr_shared_vars.css.js';
++import 'arkweb://resources/cr_elements/icons.html.js';
++import 'arkweb://resources/polymer/v3_0/iron-icon/iron-icon.js';
+ import './restricted_sites_dialog.js';
+ import './toggle_row.js';
+ import './shared_style.css.js';
+ import './strings.m.js';
+ 
+-import {assert} from 'chrome://resources/js/assert_ts.js';
+-import {PolymerElement} from 'chrome://resources/polymer/v3_0/polymer/polymer_bundled.min.js';
++import {assert} from 'arkweb://resources/js/assert_ts.js';
++import {PolymerElement} from 'arkweb://resources/polymer/v3_0/polymer/polymer_bundled.min.js';
+ 
+ import {getTemplate} from './host_permissions_toggle_list.html.js';
+ import {UserAction} from './item_util.js';
+diff --git a/src/chrome/browser/resources/extensions/install_warnings_dialog.ts b/src/chrome/browser/resources/extensions/install_warnings_dialog.ts
+index 7670d8d2c5995..462802d2fa059
+--- a/src/chrome/browser/resources/extensions/install_warnings_dialog.ts
++++ b/src/chrome/browser/resources/extensions/install_warnings_dialog.ts
+@@ -2,14 +2,14 @@
+ // Use of this source code is governed by a BSD-style license that can be
+ // found in the LICENSE file.
+ 
+-import 'chrome://resources/cr_elements/cr_button/cr_button.js';
+-import 'chrome://resources/cr_elements/cr_dialog/cr_dialog.js';
+-import 'chrome://resources/cr_elements/cr_shared_style.css.js';
+-import 'chrome://resources/polymer/v3_0/paper-styles/color.js';
++import 'arkweb://resources/cr_elements/cr_button/cr_button.js';
++import 'arkweb://resources/cr_elements/cr_dialog/cr_dialog.js';
++import 'arkweb://resources/cr_elements/cr_shared_style.css.js';
++import 'arkweb://resources/polymer/v3_0/paper-styles/color.js';
+ import './code_section.js';
+ 
+-import {CrDialogElement} from 'chrome://resources/cr_elements/cr_dialog/cr_dialog.js';
+-import {PolymerElement} from 'chrome://resources/polymer/v3_0/polymer/polymer_bundled.min.js';
++import {CrDialogElement} from 'arkweb://resources/cr_elements/cr_dialog/cr_dialog.js';
++import {PolymerElement} from 'arkweb://resources/polymer/v3_0/polymer/polymer_bundled.min.js';
+ 
+ import {getTemplate} from './install_warnings_dialog.html.js';
+ 
+diff --git a/src/chrome/browser/resources/extensions/item.ts b/src/chrome/browser/resources/extensions/item.ts
+index d0923f2466ed8..de4db097f7571
+--- a/src/chrome/browser/resources/extensions/item.ts
++++ b/src/chrome/browser/resources/extensions/item.ts
+@@ -2,30 +2,30 @@
+ // Use of this source code is governed by a BSD-style license that can be
+ // found in the LICENSE file.
+ 
+-import 'chrome://resources/cr_elements/cr_button/cr_button.js';
+-import 'chrome://resources/cr_elements/cr_icon_button/cr_icon_button.js';
+-import 'chrome://resources/cr_elements/cr_icons.css.js';
+-import 'chrome://resources/cr_elements/cr_toggle/cr_toggle.js';
+-import 'chrome://resources/cr_elements/cr_hidden_style.css.js';
+-import 'chrome://resources/cr_elements/icons.html.js';
+-import 'chrome://resources/cr_elements/cr_shared_style.css.js';
+-import 'chrome://resources/cr_elements/cr_shared_vars.css.js';
+-import 'chrome://resources/js/action_link.js';
+-import 'chrome://resources/cr_elements/action_link.css.js';
++import 'arkweb://resources/cr_elements/cr_button/cr_button.js';
++import 'arkweb://resources/cr_elements/cr_icon_button/cr_icon_button.js';
++import 'arkweb://resources/cr_elements/cr_icons.css.js';
++import 'arkweb://resources/cr_elements/cr_toggle/cr_toggle.js';
++import 'arkweb://resources/cr_elements/cr_hidden_style.css.js';
++import 'arkweb://resources/cr_elements/icons.html.js';
++import 'arkweb://resources/cr_elements/cr_shared_style.css.js';
++import 'arkweb://resources/cr_elements/cr_shared_vars.css.js';
++import 'arkweb://resources/js/action_link.js';
++import 'arkweb://resources/cr_elements/action_link.css.js';
+ import './icons.html.js';
+ import './shared_style.css.js';
+ import './shared_vars.css.js';
+ import './strings.m.js';
+-import 'chrome://resources/polymer/v3_0/iron-flex-layout/iron-flex-layout-classes.js';
+-import 'chrome://resources/polymer/v3_0/iron-icon/iron-icon.js';
+-import 'chrome://resources/polymer/v3_0/paper-tooltip/paper-tooltip.js';
++import 'arkweb://resources/polymer/v3_0/iron-flex-layout/iron-flex-layout-classes.js';
++import 'arkweb://resources/polymer/v3_0/iron-icon/iron-icon.js';
++import 'arkweb://resources/polymer/v3_0/paper-tooltip/paper-tooltip.js';
+ 
+ import {ChromeEvent} from '/tools/typescript/definitions/chrome_event.js';
+-import {getToastManager} from 'chrome://resources/cr_elements/cr_toast/cr_toast_manager.js';
+-import {CrToggleElement} from 'chrome://resources/cr_elements/cr_toggle/cr_toggle.js';
+-import {assert, assertNotReached} from 'chrome://resources/js/assert_ts.js';
+-import {I18nMixin} from 'chrome://resources/cr_elements/i18n_mixin.js';
+-import {flush, PolymerElement} from 'chrome://resources/polymer/v3_0/polymer/polymer_bundled.min.js';
++import {getToastManager} from 'arkweb://resources/cr_elements/cr_toast/cr_toast_manager.js';
++import {CrToggleElement} from 'arkweb://resources/cr_elements/cr_toggle/cr_toggle.js';
++import {I18nMixin} from 'arkweb://resources/cr_elements/i18n_mixin.js';
++import {assert, assertNotReached} from 'arkweb://resources/js/assert_ts.js';
++import {flush, PolymerElement} from 'arkweb://resources/polymer/v3_0/polymer/polymer_bundled.min.js';
+ 
+ import {getTemplate} from './item.html.js';
+ import {ItemMixin} from './item_mixin.js';
+diff --git a/src/chrome/browser/resources/extensions/item_list.ts b/src/chrome/browser/resources/extensions/item_list.ts
+index ab09b94c841ac..5e6a1757de49e
+--- a/src/chrome/browser/resources/extensions/item_list.ts
++++ b/src/chrome/browser/resources/extensions/item_list.ts
+@@ -2,14 +2,14 @@
+ // Use of this source code is governed by a BSD-style license that can be
+ // found in the LICENSE file.
+ 
+-import 'chrome://resources/cr_components/managed_footnote/managed_footnote.js';
++import 'arkweb://resources/cr_components/managed_footnote/managed_footnote.js';
+ import './item.js';
+ import './shared_style.css.js';
+ 
+-import {CrContainerShadowMixin} from 'chrome://resources/cr_elements/cr_container_shadow_mixin.js';
+-import {I18nMixin} from 'chrome://resources/cr_elements/i18n_mixin.js';
+-import {IronA11yAnnouncer} from 'chrome://resources/polymer/v3_0/iron-a11y-announcer/iron-a11y-announcer.js';
+-import {PolymerElement} from 'chrome://resources/polymer/v3_0/polymer/polymer_bundled.min.js';
++import {CrContainerShadowMixin} from 'arkweb://resources/cr_elements/cr_container_shadow_mixin.js';
++import {I18nMixin} from 'arkweb://resources/cr_elements/i18n_mixin.js';
++import {IronA11yAnnouncer} from 'arkweb://resources/polymer/v3_0/iron-a11y-announcer/iron-a11y-announcer.js';
++import {PolymerElement} from 'arkweb://resources/polymer/v3_0/polymer/polymer_bundled.min.js';
+ 
+ import {ExtensionsItemElement, ItemDelegate} from './item.js';
+ import {getTemplate} from './item_list.html.js';
+diff --git a/src/chrome/browser/resources/extensions/item_mixin.ts b/src/chrome/browser/resources/extensions/item_mixin.ts
+index 05c1de1b277d5..70fa2fb459748
+--- a/src/chrome/browser/resources/extensions/item_mixin.ts
++++ b/src/chrome/browser/resources/extensions/item_mixin.ts
+@@ -2,9 +2,9 @@
+ // Use of this source code is governed by a BSD-style license that can be
+ // found in the LICENSE file.
+ 
+-import {assertNotReached} from 'chrome://resources/js/assert_ts.js';
+-import {loadTimeData} from 'chrome://resources/js/load_time_data.js';
+-import {dedupingMixin, PolymerElement} from 'chrome://resources/polymer/v3_0/polymer/polymer_bundled.min.js';
++import {assertNotReached} from 'arkweb://resources/js/assert_ts.js';
++import {loadTimeData} from 'arkweb://resources/js/load_time_data.js';
++import {dedupingMixin, PolymerElement} from 'arkweb://resources/polymer/v3_0/polymer/polymer_bundled.min.js';
+ 
+ type Constructor<T> = new (...args: any[]) => T;
+ 
+diff --git a/src/chrome/browser/resources/extensions/item_util.ts b/src/chrome/browser/resources/extensions/item_util.ts
+index be65cf5e8c2fb..b6065ea232f6d
+--- a/src/chrome/browser/resources/extensions/item_util.ts
++++ b/src/chrome/browser/resources/extensions/item_util.ts
+@@ -4,8 +4,8 @@
+ 
+ import './strings.m.js';
+ 
+-import {assertNotReached} from 'chrome://resources/js/assert_ts.js';
+-import {loadTimeData} from 'chrome://resources/js/load_time_data.js';
++import {assertNotReached} from 'arkweb://resources/js/assert_ts.js';
++import {loadTimeData} from 'arkweb://resources/js/load_time_data.js';
+ 
+ export enum SourceType {
+   WEBSTORE = 'webstore',
+diff --git a/src/chrome/browser/resources/extensions/keyboard_shortcuts.ts b/src/chrome/browser/resources/extensions/keyboard_shortcuts.ts
+index 7bf7d0807f6e0..3a8b6b0e4ea0b
+--- a/src/chrome/browser/resources/extensions/keyboard_shortcuts.ts
++++ b/src/chrome/browser/resources/extensions/keyboard_shortcuts.ts
+@@ -2,15 +2,15 @@
+ // Use of this source code is governed by a BSD-style license that can be
+ // found in the LICENSE file.
+ 
+-import 'chrome://resources/cr_elements/cr_shared_style.css.js';
+-import 'chrome://resources/cr_elements/cr_shared_vars.css.js';
+-import 'chrome://resources/cr_elements/md_select.css.js';
+-import 'chrome://resources/polymer/v3_0/paper-styles/color.js';
++import 'arkweb://resources/cr_elements/cr_shared_style.css.js';
++import 'arkweb://resources/cr_elements/cr_shared_vars.css.js';
++import 'arkweb://resources/cr_elements/md_select.css.js';
++import 'arkweb://resources/polymer/v3_0/paper-styles/color.js';
+ import './shortcut_input.js';
+ 
+-import {CrContainerShadowMixin} from 'chrome://resources/cr_elements/cr_container_shadow_mixin.js';
+-import {I18nMixin} from 'chrome://resources/cr_elements/i18n_mixin.js';
+-import {PolymerElement} from 'chrome://resources/polymer/v3_0/polymer/polymer_bundled.min.js';
++import {CrContainerShadowMixin} from 'arkweb://resources/cr_elements/cr_container_shadow_mixin.js';
++import {I18nMixin} from 'arkweb://resources/cr_elements/i18n_mixin.js';
++import {PolymerElement} from 'arkweb://resources/polymer/v3_0/polymer/polymer_bundled.min.js';
+ 
+ import {KeyboardShortcutDelegate} from './keyboard_shortcut_delegate.js';
+ import {getTemplate} from './keyboard_shortcuts.html.js';
+diff --git a/src/chrome/browser/resources/extensions/kiosk_browser_proxy.ts b/src/chrome/browser/resources/extensions/kiosk_browser_proxy.ts
+index 82087da4f13e0..458a71baaf8ec
+--- a/src/chrome/browser/resources/extensions/kiosk_browser_proxy.ts
++++ b/src/chrome/browser/resources/extensions/kiosk_browser_proxy.ts
+@@ -7,7 +7,7 @@
+  * the browser.
+  */
+ 
+-import {sendWithPromise} from 'chrome://resources/js/cr.js';
++import {sendWithPromise} from 'arkweb://resources/js/cr.js';
+ 
+ export interface KioskSettings {
+   kioskEnabled: boolean;
+diff --git a/src/chrome/browser/resources/extensions/kiosk_dialog.ts b/src/chrome/browser/resources/extensions/kiosk_dialog.ts
+index 9b9c7fa9d74ae..31969b4c635a2
+--- a/src/chrome/browser/resources/extensions/kiosk_dialog.ts
++++ b/src/chrome/browser/resources/extensions/kiosk_dialog.ts
+@@ -2,21 +2,21 @@
+ // Use of this source code is governed by a BSD-style license that can be
+ // found in the LICENSE file.
+ 
+-import 'chrome://resources/cr_elements/cr_button/cr_button.js';
+-import 'chrome://resources/cr_elements/cr_checkbox/cr_checkbox.js';
+-import 'chrome://resources/cr_elements/cr_dialog/cr_dialog.js';
+-import 'chrome://resources/cr_elements/cr_icon_button/cr_icon_button.js';
+-import 'chrome://resources/cr_elements/cr_icons.css.js';
+-import 'chrome://resources/cr_elements/cr_input/cr_input.js';
+-import 'chrome://resources/cr_elements/cr_shared_style.css.js';
+-
+-import {CrButtonElement} from 'chrome://resources/cr_elements/cr_button/cr_button.js';
+-import {CrCheckboxElement} from 'chrome://resources/cr_elements/cr_checkbox/cr_checkbox.js';
+-import {CrDialogElement} from 'chrome://resources/cr_elements/cr_dialog/cr_dialog.js';
+-import {CrInputElement} from 'chrome://resources/cr_elements/cr_input/cr_input.js';
+-import {assert} from 'chrome://resources/js/assert_ts.js';
+-import {WebUiListenerMixin} from 'chrome://resources/cr_elements/web_ui_listener_mixin.js';
+-import {DomRepeatEvent, PolymerElement} from 'chrome://resources/polymer/v3_0/polymer/polymer_bundled.min.js';
++import 'arkweb://resources/cr_elements/cr_button/cr_button.js';
++import 'arkweb://resources/cr_elements/cr_checkbox/cr_checkbox.js';
++import 'arkweb://resources/cr_elements/cr_dialog/cr_dialog.js';
++import 'arkweb://resources/cr_elements/cr_icon_button/cr_icon_button.js';
++import 'arkweb://resources/cr_elements/cr_icons.css.js';
++import 'arkweb://resources/cr_elements/cr_input/cr_input.js';
++import 'arkweb://resources/cr_elements/cr_shared_style.css.js';
++
++import {CrButtonElement} from 'arkweb://resources/cr_elements/cr_button/cr_button.js';
++import {CrCheckboxElement} from 'arkweb://resources/cr_elements/cr_checkbox/cr_checkbox.js';
++import {CrDialogElement} from 'arkweb://resources/cr_elements/cr_dialog/cr_dialog.js';
++import {CrInputElement} from 'arkweb://resources/cr_elements/cr_input/cr_input.js';
++import {WebUiListenerMixin} from 'arkweb://resources/cr_elements/web_ui_listener_mixin.js';
++import {assert} from 'arkweb://resources/js/assert_ts.js';
++import {DomRepeatEvent, PolymerElement} from 'arkweb://resources/polymer/v3_0/polymer/polymer_bundled.min.js';
+ 
+ import {KioskApp, KioskAppSettings, KioskBrowserProxy, KioskBrowserProxyImpl} from './kiosk_browser_proxy.js';
+ import {getTemplate} from './kiosk_dialog.html.js';
+diff --git a/src/chrome/browser/resources/extensions/load_error.ts b/src/chrome/browser/resources/extensions/load_error.ts
+index e5577b1e8a6e7..fc25f3da24e2d
+--- a/src/chrome/browser/resources/extensions/load_error.ts
++++ b/src/chrome/browser/resources/extensions/load_error.ts
+@@ -2,16 +2,16 @@
+ // Use of this source code is governed by a BSD-style license that can be
+ // found in the LICENSE file.
+ 
+-import 'chrome://resources/cr_elements/cr_button/cr_button.js';
+-import 'chrome://resources/cr_elements/cr_dialog/cr_dialog.js';
+-import 'chrome://resources/cr_elements/cr_shared_style.css.js';
+-import 'chrome://resources/polymer/v3_0/paper-spinner/paper-spinner-lite.js';
++import 'arkweb://resources/cr_elements/cr_button/cr_button.js';
++import 'arkweb://resources/cr_elements/cr_dialog/cr_dialog.js';
++import 'arkweb://resources/cr_elements/cr_shared_style.css.js';
++import 'arkweb://resources/polymer/v3_0/paper-spinner/paper-spinner-lite.js';
+ import './code_section.js';
+ import './strings.m.js';
+ 
+-import {CrDialogElement} from 'chrome://resources/cr_elements/cr_dialog/cr_dialog.js';
+-import {assert} from 'chrome://resources/js/assert_ts.js';
+-import {PolymerElement} from 'chrome://resources/polymer/v3_0/polymer/polymer_bundled.min.js';
++import {CrDialogElement} from 'arkweb://resources/cr_elements/cr_dialog/cr_dialog.js';
++import {assert} from 'arkweb://resources/js/assert_ts.js';
++import {PolymerElement} from 'arkweb://resources/polymer/v3_0/polymer/polymer_bundled.min.js';
+ 
+ import {ExtensionsCodeSectionElement} from './code_section.js';
+ import {getTemplate} from './load_error.html.js';
+diff --git a/src/chrome/browser/resources/extensions/manager.ts b/src/chrome/browser/resources/extensions/manager.ts
+index 6df555b997cea..b5a566f0eb2f3
+--- a/src/chrome/browser/resources/extensions/manager.ts
++++ b/src/chrome/browser/resources/extensions/manager.ts
+@@ -2,13 +2,13 @@
+ // Use of this source code is governed by a BSD-style license that can be
+ // found in the LICENSE file.
+ 
+-import 'chrome://resources/cr_elements/cr_drawer/cr_drawer.js';
+-import 'chrome://resources/cr_elements/cr_lazy_render/cr_lazy_render.js';
+-import 'chrome://resources/cr_elements/cr_toast/cr_toast_manager.js';
+-import 'chrome://resources/cr_elements/cr_toolbar/cr_toolbar.js';
+-import 'chrome://resources/cr_elements/cr_view_manager/cr_view_manager.js';
+-import 'chrome://resources/cr_elements/cr_hidden_style.css.js';
+-import 'chrome://resources/cr_elements/cr_shared_vars.css.js';
++import 'arkweb://resources/cr_elements/cr_drawer/cr_drawer.js';
++import 'arkweb://resources/cr_elements/cr_lazy_render/cr_lazy_render.js';
++import 'arkweb://resources/cr_elements/cr_toast/cr_toast_manager.js';
++import 'arkweb://resources/cr_elements/cr_toolbar/cr_toolbar.js';
++import 'arkweb://resources/cr_elements/cr_view_manager/cr_view_manager.js';
++import 'arkweb://resources/cr_elements/cr_hidden_style.css.js';
++import 'arkweb://resources/cr_elements/cr_shared_vars.css.js';
+ import './activity_log/activity_log.js';
+ import './detail_view.js';
+ import './drop_overlay.js';
+@@ -28,11 +28,11 @@ import './kiosk_dialog.js';
+ 
+ // </if>
+ 
+-import {CrViewManagerElement} from 'chrome://resources/cr_elements/cr_view_manager/cr_view_manager.js';
+-import {assert, assertNotReached} from 'chrome://resources/js/assert_ts.js';
+-import {loadTimeData} from 'chrome://resources/js/load_time_data.js';
+-import {PromiseResolver} from 'chrome://resources/js/promise_resolver.js';
+-import {PolymerElement} from 'chrome://resources/polymer/v3_0/polymer/polymer_bundled.min.js';
++import {CrViewManagerElement} from 'arkweb://resources/cr_elements/cr_view_manager/cr_view_manager.js';
++import {assert, assertNotReached} from 'arkweb://resources/js/assert_ts.js';
++import {loadTimeData} from 'arkweb://resources/js/load_time_data.js';
++import {PromiseResolver} from 'arkweb://resources/js/promise_resolver.js';
++import {PolymerElement} from 'arkweb://resources/polymer/v3_0/polymer/polymer_bundled.min.js';
+ 
+ import {ActivityLogExtensionPlaceholder} from './activity_log/activity_log.js';
+ import {ExtensionsDetailViewElement} from './detail_view.js';
+@@ -327,7 +327,7 @@ export class ExtensionsManagerElement extends PolymerElement {
+ 
+   /**
+    * Initializes the page to reflect what's specified in the url so that if
+-   * the user visits chrome://extensions/?id=..., we land on the proper page.
++   * the user visits arkweb://extensions/?id=..., we land on the proper page.
+    */
+   private initPage_() {
+     this.didInitPage_ = true;
+@@ -411,7 +411,7 @@ export class ExtensionsManagerElement extends PolymerElement {
+       case ExtensionType.SHARED_MODULE:
+         return 'extensions_';
+       case ExtensionType.THEME:
+-        assertNotReached('Don\'t send themes to the chrome://extensions page');
++        assertNotReached('Don\'t send themes to the arkweb://extensions page');
+       default:
+         assertNotReached();
+     }
+diff --git a/src/chrome/browser/resources/extensions/navigation_helper.ts b/src/chrome/browser/resources/extensions/navigation_helper.ts
+index c6ee19e0d7cb9..6d254689f5c61
+--- a/src/chrome/browser/resources/extensions/navigation_helper.ts
++++ b/src/chrome/browser/resources/extensions/navigation_helper.ts
+@@ -2,7 +2,7 @@
+ // Use of this source code is governed by a BSD-style license that can be
+ // found in the LICENSE file.
+ 
+-import {assert} from 'chrome://resources/js/assert_ts.js';
++import {assert} from 'arkweb://resources/js/assert_ts.js';
+ 
+ 
+ /**
+diff --git a/src/chrome/browser/resources/extensions/options_dialog.ts b/src/chrome/browser/resources/extensions/options_dialog.ts
+index 5ee9f75402053..b4d0f6b59bd9c
+--- a/src/chrome/browser/resources/extensions/options_dialog.ts
++++ b/src/chrome/browser/resources/extensions/options_dialog.ts
+@@ -2,11 +2,11 @@
+ // Use of this source code is governed by a BSD-style license that can be
+ // found in the LICENSE file.
+ 
+-import 'chrome://resources/cr_elements/cr_dialog/cr_dialog.js';
++import 'arkweb://resources/cr_elements/cr_dialog/cr_dialog.js';
+ 
+-import {CrDialogElement} from 'chrome://resources/cr_elements/cr_dialog/cr_dialog.js';
+-import {EventTracker} from 'chrome://resources/js/event_tracker.js';
+-import {Debouncer, PolymerElement, timeOut} from 'chrome://resources/polymer/v3_0/polymer/polymer_bundled.min.js';
++import {CrDialogElement} from 'arkweb://resources/cr_elements/cr_dialog/cr_dialog.js';
++import {EventTracker} from 'arkweb://resources/js/event_tracker.js';
++import {Debouncer, PolymerElement, timeOut} from 'arkweb://resources/polymer/v3_0/polymer/polymer_bundled.min.js';
+ 
+ import {navigation, Page} from './navigation_helper.js';
+ import {getTemplate} from './options_dialog.html.js';
