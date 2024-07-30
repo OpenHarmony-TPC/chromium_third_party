@@ -5424,3 +5424,1708 @@ index c7a3af0411d28..a971f90336f36
 +
    relative_path = relative_path.Append(resource_path);
    relative_path = relative_path.NormalizePathSeparators();
+ 
+diff --git a/src/cef/libcef/browser/extensions/extension_system.cc b/src/cef/libcef/browser/extensions/extension_system.cc
+index 07c64c0bd36cd..c97b30502a634
+--- a/src/cef/libcef/browser/extensions/extension_system.cc
++++ b/src/cef/libcef/browser/extensions/extension_system.cc
+@@ -51,6 +51,38 @@
+ #include "extensions/common/switches.h"
+ #include "net/base/mime_util.h"
+ 
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++#include "base/base_switches.h"
++#include "base/command_line.h"
++#include "chrome/browser/extensions/chrome_app_sorting.h"
++#include "chrome/browser/extensions/chrome_content_verifier_delegate.h"
++#include "chrome/browser/extensions/component_loader.h"
++#include "chrome/browser/extensions/extension_garbage_collector.h"
++#include "chrome/browser/extensions/extension_management.h"
++#include "chrome/browser/extensions/extension_service.h"
++#include "chrome/browser/extensions/extension_sync_service.h"
++#include "chrome/browser/extensions/install_verifier.h"
++#include "chrome/browser/extensions/load_error_reporter.h"
++#include "chrome/browser/extensions/navigation_observer.h"
++#include "chrome/browser/extensions/shared_module_service.h"
++#include "chrome/browser/extensions/unpacked_installer.h"
++#include "chrome/browser/extensions/update_install_gate.h"
++#include "chrome/browser/profiles/profile.h"
++#include "chrome/browser/ui/webui/extensions/extension_icon_source.h"
++#include "chrome/browser/ui/webui/extensions/extensions_internals_source.h"
++#include "content/public/browser/url_data_source.h"
++#include "extensions/browser/content_verifier.h"
++#include "extensions/browser/management_policy.h"
++#include "extensions/browser/updater/uninstall_ping_sender.h"
++#include "extensions/browser/user_script_manager.h"
++#include "extensions/browser/lazy_background_task_queue.h"
++#include "extensions/browser/lazy_context_id.h"
++#include "extensions/browser/task_queue_util.h"
++#include "extensions/common/extension.h"
++#include "extensions/common/manifest_handlers/background_info.h"
++#include "extensions/common/permissions/permissions_data.h"
++#endif
++
+ using content::BrowserContext;
+ 
+ namespace extensions {
+@@ -124,7 +156,6 @@ void LoadExtensionWithManifest(base::WeakPtr<CefExtensionSystem> context,
+                           internal, loader_context, handler);
+ }
+ 
+-#if !BUILDFLAG(IS_OHOS)
+ void LoadExtensionFromDisk(base::WeakPtr<CefExtensionSystem> context,
+                            const base::FilePath& root_directory,
+                            bool internal,
+@@ -144,6 +175,21 @@ void LoadExtensionFromDisk(base::WeakPtr<CefExtensionSystem> context,
+   LoadExtensionWithManifest(context, manifest_contents, root_directory,
+                             internal, loader_context, handler);
+ }
++
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++// Helper to serve as an UninstallPingSender::Filter callback.
++UninstallPingSender::FilterResult ShouldSendUninstallPing(
++    Profile* profile,
++    const Extension* extension,
++    UninstallReason reason) {
++  ExtensionManagement* extension_management =
++      ExtensionManagementFactory::GetForBrowserContext(profile);
++  if (extension && (extension->from_webstore() ||
++                    extension_management->UpdatesFromWebstore(*extension))) {
++    return UninstallPingSender::SEND_PING;
++  }
++  return UninstallPingSender::DO_NOT_SEND_PING;
++}
+ #endif
+ 
+ }  // namespace
+@@ -164,6 +210,16 @@ CefExtensionSystem::~CefExtensionSystem() {}
+ void CefExtensionSystem::Init() {
+   DCHECK(!initialized_);
+ 
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++  Profile* profile = Profile::FromBrowserContext(browser_context_);
++
++  extension_service_ = std::make_unique<ExtensionService>(
++      profile, base::CommandLine::ForCurrentProcess(),
++      profile->GetPath().AppendASCII(extensions::kInstallDirectoryName),
++      profile->GetPath().AppendASCII(extensions::kUnpackedInstallDirectoryName),
++      ExtensionPrefs::Get(profile), Blocklist::Get(profile), false, true,
++      &ready_);
++#endif
+   // There's complexity here related to the ordering of message delivery. For
+   // an extension to load correctly both the ExtensionMsg_Loaded and
+   // ExtensionMsg_ActivateExtension messages must be sent. These messages are
+@@ -176,8 +232,9 @@ void CefExtensionSystem::Init() {
+   // will classify the extension incorrectly and API bindings will not be added.
+ 
+   // Inform the rest of the extensions system to start.
++#if !defined(OHOS_ARKWEB_EXTENSIONS)
+   ready_.Signal();
+-
++#endif
+   // Add the internal PDF extension. PDF loading works as follows:
+   // 1. The PDF plugin is registered in libcef/common/content_client.cc
+   //    ComputeBuiltInPlugins to handle the pdf::kInternalPluginMimeType.
+@@ -269,22 +326,51 @@ void CefExtensionSystem::Init() {
+     }
+   }
+ 
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++  TRACE_EVENT0("browser,startup", "CefExtensionSystem::Shared::Init");
++  const base::CommandLine* command_line =
++      base::CommandLine::ForCurrentProcess();
++
++  bool allow_noisy_errors =
++      !command_line->HasSwitch(::switches::kNoErrorDialogs);
++  LoadErrorReporter::Init(allow_noisy_errors);
++
++  bool skip_session_extensions = false;
++
++  extension_service_->component_loader()->AddDefaultComponentExtensions(
++      skip_session_extensions);
++  InitInstallGates();
++
++  extension_service_->Init();
++#endif
++
+   initialized_ = true;
+ }
+ 
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++void CefExtensionSystem::InitInstallGates() {
++  Profile* profile = Profile::FromBrowserContext(browser_context_);
++
++  update_install_gate_ = std::make_unique<UpdateInstallGate>(profile);
++  extension_service_->RegisterInstallGate(
++      ExtensionPrefs::DELAY_REASON_WAIT_FOR_IDLE, update_install_gate_.get());
++  extension_service_->RegisterInstallGate(
++      ExtensionPrefs::DELAY_REASON_GC, ExtensionGarbageCollector::Get(profile));
++  extension_service_->RegisterInstallGate(
++      ExtensionPrefs::DELAY_REASON_WAIT_FOR_IMPORTS,
++      extension_service_->shared_module_service());
++}
++#endif
++
+ void CefExtensionSystem::LoadExtension(
+     const base::FilePath& root_directory,
+     bool internal,
+     CefRefPtr<CefRequestContext> loader_context,
+     CefRefPtr<CefExtensionHandler> handler) {
+-#if !BUILDFLAG(IS_OHOS)
+   CEF_REQUIRE_UIT();
+   CEF_POST_USER_VISIBLE_TASK(
+       base::BindOnce(LoadExtensionFromDisk, weak_ptr_factory_.GetWeakPtr(),
+                      root_directory, internal, loader_context, handler));
+-#else
+-  LOG(INFO) << "CefExtensionSystem::LoadExtension UNIMPLEMENT for IS_OHOS";
+-#endif
+ }
+ 
+ void CefExtensionSystem::LoadExtension(
+@@ -400,21 +486,93 @@ void CefExtensionSystem::Shutdown() {
+   }
+ #endif
+   extension_map_.clear();
++
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++  if (content_verifier_.get()) {
++    content_verifier_->Shutdown();
++  }
++  if (extension_service_) {
++    extension_service_->Shutdown();
++  }
++#endif
+ }
+ 
+ void CefExtensionSystem::InitForRegularProfile(bool extensions_enabled) {
+   DCHECK(!initialized_);
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++  if (user_script_manager() || extension_service()) {
++    return;  // Already initialized.
++  }
++  Profile* profile = Profile::FromBrowserContext(browser_context_);
++
++  navigation_observer_ = std::make_unique<NavigationObserver>(profile);
++
++  content_verifier_ = new ContentVerifier(
++      profile, std::make_unique<ChromeContentVerifierDelegate>(profile));
++
++  service_worker_manager_ = std::make_unique<ServiceWorkerManager>(profile);
++
++  user_script_manager_ = std::make_unique<UserScriptManager>(profile);
++
++  uninstall_ping_sender_ = std::make_unique<UninstallPingSender>(
++      ExtensionRegistry::Get(profile),
++      base::BindRepeating(&ShouldSendUninstallPing, profile));
++
++  // These services must be registered before the ExtensionService tries to
++  // load any extensions.
++  {
++    InstallVerifier::Get(profile)->Init();
++    ChromeContentVerifierDelegate::VerifyInfo::Mode mode =
++        ChromeContentVerifierDelegate::GetDefaultMode();
++
++    if (mode >= ChromeContentVerifierDelegate::VerifyInfo::Mode::BOOTSTRAP) {
++      content_verifier_->Start();
++    }
++
++    management_policy_ = std::make_unique<ManagementPolicy>();
++    management_policy_->RegisterProviders(
++        ExtensionManagementFactory::GetForBrowserContext(profile)
++            ->GetProviders());
++
++    management_policy_->RegisterProvider(InstallVerifier::Get(profile));
++  }
++
++  // Extension API calls require QuotaService, so create it before loading any
++  // extensions.
++  quota_service_ = std::make_unique<QuotaService>();
++  app_sorting_ = std::make_unique<ChromeAppSorting>(profile);
++
++  // Make sure ExtensionSyncService is created.
++  ExtensionSyncService::Get(profile);
++
++  // Make the chrome://extension-icon/ resource available.
++  content::URLDataSource::Add(profile,
++                              std::make_unique<ExtensionIconSource>(profile));
++
++  // Register the source for the chrome://extensions-internals page.
++  content::URLDataSource::Add(
++      profile, std::make_unique<ExtensionsInternalsSource>(profile));
++#else
+   service_worker_manager_.reset(new ServiceWorkerManager(browser_context_));
+   quota_service_.reset(new QuotaService);
+   app_sorting_.reset(new NullAppSorting);
++#endif
+ }
+ 
+ ExtensionService* CefExtensionSystem::extension_service() {
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++  return extension_service_.get();
++#else
+   return nullptr;
++#endif
+ }
+ 
+ ManagementPolicy* CefExtensionSystem::management_policy() {
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++  return management_policy_.get();
++#else
+   return nullptr;
++#endif
+ }
+ 
+ ServiceWorkerManager* CefExtensionSystem::service_worker_manager() {
+@@ -422,7 +580,11 @@ ServiceWorkerManager* CefExtensionSystem::service_worker_manager() {
+ }
+ 
+ UserScriptManager* CefExtensionSystem::user_script_manager() {
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++  return user_script_manager_.get();
++#else
+   return nullptr;
++#endif
+ }
+ 
+ StateStore* CefExtensionSystem::state_store() {
+@@ -434,7 +596,11 @@ StateStore* CefExtensionSystem::rules_store() {
+ }
+ 
+ StateStore* CefExtensionSystem::dynamic_user_scripts_store() {
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++  return dynamic_user_scripts_store_.get();
++#else
+   return nullptr;
++#endif
+ }
+ 
+ scoped_refptr<value_store::ValueStoreFactory>
+@@ -459,7 +625,11 @@ bool CefExtensionSystem::is_ready() const {
+ }
+ 
+ ContentVerifier* CefExtensionSystem::content_verifier() {
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++  return content_verifier_.get();
++#else
+   return nullptr;
++#endif
+ }
+ 
+ std::unique_ptr<ExtensionSet> CefExtensionSystem::GetDependentExtensions(
+@@ -500,7 +670,14 @@ CefExtensionSystem::ComponentExtensionInfo::ComponentExtensionInfo(
+   if (!root_directory.IsAbsolute()) {
+     // This path structure is required by
+     // url_request_util::MaybeCreateURLRequestResourceBundleJob.
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++    const base::CommandLine* command_line =
++        base::CommandLine::ForCurrentProcess();
++    root_directory =
++        command_line->GetSwitchValuePath(::switches::kBundleInstallationDir);
++#else
+     CHECK(base::PathService::Get(chrome::DIR_RESOURCES, &root_directory));
++#endif
+     root_directory = root_directory.Append(directory);
+   }
+ }
+@@ -519,6 +696,10 @@ void CefExtensionSystem::InitPrefs() {
+ 
+   rules_store_ = std::make_unique<StateStore>(
+       profile, store_factory_, StateStore::BackendType::RULES, false);
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++  dynamic_user_scripts_store_ = std::make_unique<StateStore>(
++      profile, store_factory_, StateStore::BackendType::SCRIPTS, false);
++#endif
+ }
+ 
+ // Implementation based on ComponentLoader::CreateExtension.
+@@ -602,8 +783,62 @@ void CefExtensionSystem::UnloadExtension(const std::string& extension_id,
+   }
+ }
+ 
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++void CefExtensionSystem::MaybeSpinUpLazyContext(const Extension* extension,
++                                                bool is_newly_added) {
++  DCHECK(BackgroundInfo::HasLazyContext(extension));
++
++  // Reloading component extension does not trigger install, so RuntimeAPI won't
++  // be able to detect its loading. Therefore, we need to spin up its lazy
++  // background page.
++  bool is_component_extension =
++      Manifest::IsComponentLocation(extension->location());
++
++  // TODO(crbug.com/1024211): This is either a workaround or something
++  // that will be part of the permanent solution for service worker-
++  // based extensions.
++  // We spin up extensions with the webRequest permission so their
++  // listeners are reconstructed on load.
++  bool has_web_request_permission =
++      extension->permissions_data()->HasAPIPermission(
++          mojom::APIPermissionID::kWebRequest);
++  // Event page-based extension cannot have the webRequest permission.
++  DCHECK(!has_web_request_permission ||
++         BackgroundInfo::IsServiceWorkerBased(extension));
++
++  // If there aren't any special cases, we're done.
++  if (!is_component_extension && !has_web_request_permission) {
++    return;
++  }
++
++  // If the extension's not being reloaded (|is_newly_added| = true),
++  // only wake it up if it has the webRequest permission.
++  if (is_newly_added && !has_web_request_permission) {
++    return;
++  }
++
++  // Wake up the extension by posting a dummy task. In the case of a service
++  // worker-based extension with the webRequest permission that's being newly
++  // installed, this will result in a no-op task that's not necessary, since
++  // this is really only needed for a previously-installed extension. However,
++  // that cost is minimal, since the worker is already active.
++  const LazyContextId context_id(browser_context_, extension);
++  context_id.GetTaskQueue()->AddPendingTask(context_id, base::DoNothing());
++}
++#endif
++
+ // Implementation based on ExtensionService::NotifyExtensionLoaded.
+ void CefExtensionSystem::NotifyExtensionLoaded(const Extension* extension) {
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++  // Activate the extension before calling
++  // RendererStartupHelper::OnExtensionLoaded() below, so that we have
++  // activation information ready while we send ExtensionMsg_Load IPC.
++  //
++  // TODO(lazyboy): We should move all logic that is required to start up an
++  // extension to a separate class, instead of calling adhoc methods like
++  // service worker ones below.
++  ActivateTaskQueueForExtension(browser_context_, extension);
++#endif
+   // Tell renderers about the loaded extension.
+   renderer_helper_->OnExtensionLoaded(*extension);
+ 
+@@ -616,6 +851,19 @@ void CefExtensionSystem::NotifyExtensionLoaded(const Extension* extension) {
+   // know about it.
+   registry_->TriggerOnLoaded(extension);
+ 
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++  // When an extension is activated, and it is either event page-based or
++  // service worker-based, it may be necessary to spin up its context.
++  if (BackgroundInfo::HasLazyContext(extension)) {
++    MaybeSpinUpLazyContext(extension, true);
++  }
++
++  registry_->AddReady(extension);
++  if (registry_->enabled_extensions().Contains(extension->id())) {
++    registry_->TriggerOnReady(extension);
++  }
++#endif
++
+   // Register plugins included with the extension.
+   // Implementation based on PluginManager::OnExtensionLoaded.
+   const MimeTypesHandler* handler = MimeTypesHandler::GetHandler(extension);
+@@ -664,6 +912,10 @@ void CefExtensionSystem::NotifyExtensionUnloaded(
+ 
+   // Tell renderers about the unloaded extension.
+   renderer_helper_->OnExtensionUnloaded(*extension);
++
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++  DeactivateTaskQueueForExtension(browser_context_, extension);
++#endif
+ }
+ 
+ }  // namespace extensions
+diff --git a/src/cef/libcef/browser/extensions/extension_system.h b/src/cef/libcef/browser/extensions/extension_system.h
+index e1ed08c6bd04c..fc17052f9641a
+--- a/src/cef/libcef/browser/extensions/extension_system.h
++++ b/src/cef/libcef/browser/extensions/extension_system.h
+@@ -30,6 +30,12 @@ class ExtensionRegistry;
+ class ProcessManager;
+ class RendererStartupHelper;
+ 
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++class NavigationObserver;
++class UninstallPingSender;
++class InstallGate;
++#endif
++
+ // Used to manage extensions.
+ class CefExtensionSystem : public ExtensionSystem {
+  public:
+@@ -152,6 +158,10 @@ class CefExtensionSystem : public ExtensionSystem {
+   // Handles sending notification that |extension| was unloaded.
+   void NotifyExtensionUnloaded(const Extension* extension,
+                                UnloadedExtensionReason reason);
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++  void InitInstallGates();
++  void MaybeSpinUpLazyContext(const Extension* extension, bool is_newly_added);
++#endif
+ 
+   content::BrowserContext* browser_context_;  // Not owned.
+ 
+@@ -177,6 +187,20 @@ class CefExtensionSystem : public ExtensionSystem {
+ 
+   // Map of extension ID to CEF extension object.
+   ExtensionMap extension_map_;
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++  std::unique_ptr<ExtensionService> extension_service_;
++  std::unique_ptr<ManagementPolicy> management_policy_;
++
++  std::unique_ptr<StateStore> dynamic_user_scripts_store_;
++  std::unique_ptr<NavigationObserver> navigation_observer_;
++  // Shared memory region manager for scripts statically declared in extension
++  // manifests. This region is shared between all extensions.
++  std::unique_ptr<UserScriptManager> user_script_manager_;
++  std::unique_ptr<InstallGate> update_install_gate_;
++  // For verifying the contents of extensions read from disk.
++  scoped_refptr<ContentVerifier> content_verifier_;
++  std::unique_ptr<UninstallPingSender> uninstall_ping_sender_;
++#endif
+ 
+   // Must be the last member.
+   base::WeakPtrFactory<CefExtensionSystem> weak_ptr_factory_;
+diff --git a/src/cef/libcef/browser/extensions/extensions_api_client.cc b/src/cef/libcef/browser/extensions/extensions_api_client.cc
+index d5ae66d9a5083..903dfba08f36c
+--- a/src/cef/libcef/browser/extensions/extensions_api_client.cc
++++ b/src/cef/libcef/browser/extensions/extensions_api_client.cc
+@@ -25,6 +25,10 @@
+ #include "libcef/browser/printing/ohos_print_manager.h"
+ #endif // defined(OHOS_PRINT)
+ 
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++#include "chrome/browser/extensions/api/management/chrome_management_api_delegate.h"
++#endif
++
+ namespace extensions {
+ 
+ CefExtensionsAPIClient::CefExtensionsAPIClient() {}
+@@ -90,4 +94,10 @@ FileSystemDelegate* CefExtensionsAPIClient::GetFileSystemDelegate() {
+   return file_system_delegate_.get();
+ }
+ 
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++ManagementAPIDelegate* CefExtensionsAPIClient::CreateManagementAPIDelegate()
++    const {
++  return new ChromeManagementAPIDelegate;
++}
++#endif
+ }  // namespace extensions
+diff --git a/src/cef/libcef/browser/extensions/extensions_api_client.h b/src/cef/libcef/browser/extensions/extensions_api_client.h
+index f1760a376ff9c..265b79bc89ee1
+--- a/src/cef/libcef/browser/extensions/extensions_api_client.h
++++ b/src/cef/libcef/browser/extensions/extensions_api_client.h
+@@ -10,6 +10,9 @@
+ #include "extensions/browser/api/extensions_api_client.h"
+ 
+ namespace extensions {
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++class ManagementAPIDelegate;
++#endif
+ 
+ class CefExtensionsAPIClient : public ExtensionsAPIClient {
+  public:
+@@ -37,7 +40,9 @@ class CefExtensionsAPIClient : public ExtensionsAPIClient {
+       SettingsChangedCallback observer,
+       std::map<settings_namespace::Namespace, ValueStoreCache*>* caches)
+       override;
+-
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++  ManagementAPIDelegate* CreateManagementAPIDelegate() const override;
++#endif
+  private:
+   std::unique_ptr<FileSystemDelegate> file_system_delegate_;
+ };
+diff --git a/src/cef/libcef/browser/extensions/extensions_browser_client.cc b/src/cef/libcef/browser/extensions/extensions_browser_client.cc
+index caedae1916442..00f270408c3fe
+--- a/src/cef/libcef/browser/extensions/extensions_browser_client.cc
++++ b/src/cef/libcef/browser/extensions/extensions_browser_client.cc
+@@ -111,6 +111,17 @@ bool CefExtensionsBrowserClient::IsShuttingDown() {
+   return false;
+ }
+ 
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++UserScriptListener* CefExtensionsBrowserClient::GetUserScriptListener() {
++  return &user_script_listener_;
++}
++
++void CefExtensionsBrowserClient::SignalContentScriptsLoaded(
++    content::BrowserContext* context) {
++  user_script_listener_.OnScriptsLoaded(context);
++}
++#endif
++
+ bool CefExtensionsBrowserClient::AreExtensionsDisabled(
+     const base::CommandLine& command_line,
+     BrowserContext* context) {
+diff --git a/src/cef/libcef/browser/extensions/extensions_browser_client.h b/src/cef/libcef/browser/extensions/extensions_browser_client.h
+index fd8540e315169..aefa8fcf91d32
+--- a/src/cef/libcef/browser/extensions/extensions_browser_client.h
++++ b/src/cef/libcef/browser/extensions/extensions_browser_client.h
+@@ -8,6 +8,10 @@
+ 
+ #include "extensions/browser/extensions_browser_client.h"
+ 
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++#include "chrome/browser/extensions/user_script_listener.h"
++#endif
++
+ namespace extensions {
+ 
+ class ExtensionsAPIClient;
+@@ -119,6 +123,11 @@ class CefExtensionsBrowserClient : public ExtensionsBrowserClient {
+   bool IsLockScreenContext(content::BrowserContext* context) override;
+   std::string GetApplicationLocale() override;
+ 
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++  UserScriptListener* GetUserScriptListener() override;
++  void SignalContentScriptsLoaded(content::BrowserContext* context) override;
++#endif
++
+  private:
+   // Support for extension APIs.
+   std::unique_ptr<ExtensionsAPIClient> api_client_;
+@@ -127,6 +136,10 @@ class CefExtensionsBrowserClient : public ExtensionsBrowserClient {
+   std::unique_ptr<ComponentExtensionResourceManager> resource_manager_;
+ 
+   std::unique_ptr<KioskDelegate> kiosk_delegate_;
++
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++  UserScriptListener user_script_listener_;
++#endif
+ };
+ 
+ }  // namespace extensions
+diff --git a/src/cef/libcef/browser/frame_host_impl.cc b/src/cef/libcef/browser/frame_host_impl.cc
+index 51400bf46b19d..7bbff72eda200
+--- a/src/cef/libcef/browser/frame_host_impl.cc
++++ b/src/cef/libcef/browser/frame_host_impl.cc
+@@ -182,6 +182,14 @@ void CefFrameHostImpl::LoadURL(const CefString& url) {
+                     std::string());
+ }
+ 
++
++void CefFrameHostImpl::PostURL(const CefString& url, const std::vector<char>& post_data) {
++#ifdef OHOS_POST_URL
++  LoadURLWithExtras(url, content::Referrer(), kPageTransitionExplicit,
++                   "Content-Type:application/x-www-form-urlencoded", "POST", post_data);
++#endif
++}
++
+ void CefFrameHostImpl::ExecuteJavaScript(const CefString& jsCode,
+                                          const CefString& scriptUrl,
+                                          int startLine) {
+@@ -367,7 +375,13 @@ void CefFrameHostImpl::LoadRequest(cef::mojom::RequestParamsPtr params) {
+ void CefFrameHostImpl::LoadURLWithExtras(const std::string& url,
+                                          const content::Referrer& referrer,
+                                          ui::PageTransition transition,
++#ifdef OHOS_POST_URL
++                                         const std::string& extra_headers,
++                                         const std::string& method,
++                                         const std::vector<char>& post_data) {
++#else
+                                          const std::string& extra_headers) {
++#endif
+   // Only known frame ids or kMainFrameId are supported.
+   const auto frame_id = GetFrameId();
+   if (frame_id < CefFrameHostImpl::kMainFrameId) {
+@@ -385,7 +399,16 @@ void CefFrameHostImpl::LoadURLWithExtras(const std::string& url,
+           gurl, referrer, WindowOpenDisposition::CURRENT_TAB, transition,
+           /*is_renderer_initiated=*/false);
+       params.extra_headers = extra_headers;
+-
++#ifdef OHOS_POST_URL
++      if (method == "POST") {
++        if (post_data.size() <= 0) {
++          params.post_data = new network::ResourceRequestBody();
++        } else {
++          params.post_data = network::ResourceRequestBody::CreateFromBytes(
++            reinterpret_cast<const char *>(&post_data[0]), post_data.size());
++        }
++      }
++#endif
+       browser->LoadMainFrameURL(params);
+     }
+   } else {
+@@ -394,6 +417,17 @@ void CefFrameHostImpl::LoadURLWithExtras(const std::string& url,
+     params->referrer =
+         blink::mojom::Referrer::New(referrer.url, referrer.policy);
+     params->headers = extra_headers;
++#ifdef OHOS_POST_URL
++    if (method == "POST") {
++      params->method = method;
++      if (post_data.size() <= 0) {
++        params->upload_data = new network::ResourceRequestBody();
++      } else {
++        params->upload_data = network::ResourceRequestBody::CreateFromBytes(
++          reinterpret_cast<const char *>(&post_data[0]), post_data.size());
++      }
++    }
++#endif
+     LoadRequest(std::move(params));
+   }
+ }
+@@ -1001,6 +1035,15 @@ void CefFrameHostImpl::ZoomBy(float delta, float width, float height) {
+                                       delta, width, height));
+ }
+ 
++void CefFrameHostImpl::SetOverscrollMode(int mode) {
++  SendToRenderFrame(__FUNCTION__,
++                    base::BindOnce(
++                        [](int mode, const RenderFrameType& render_frame) {
++                          render_frame->SetOverscrollMode(mode);
++                        },
++                        mode));
++}
++
+ void CefFrameHostImpl::GetHitData(int& type, CefString& extra_data) {
+   std::string temp_extra_data;
+   SendToRenderFrame(__FUNCTION__,
+diff --git a/src/cef/libcef/browser/frame_host_impl.h b/src/cef/libcef/browser/frame_host_impl.h
+index f5b4e5d20241d..443b6042c0313
+--- a/src/cef/libcef/browser/frame_host_impl.h
++++ b/src/cef/libcef/browser/frame_host_impl.h
+@@ -63,6 +63,8 @@ class CefFrameHostImpl : public CefFrame, public cef::mojom::BrowserFrame {
+   void GetText(CefRefPtr<CefStringVisitor> visitor) override;
+   void LoadRequest(CefRefPtr<CefRequest> request) override;
+   void LoadURL(const CefString& url) override;
++  void PostURL(const CefString& url,
++               const std::vector<char>& post_data) override;
+   void ExecuteJavaScript(const CefString& jsCode,
+                          const CefString& scriptUrl,
+                          int startLine) override;
+@@ -97,7 +99,13 @@ class CefFrameHostImpl : public CefFrame, public cef::mojom::BrowserFrame {
+   void LoadURLWithExtras(const std::string& url,
+                          const content::Referrer& referrer,
+                          ui::PageTransition transition,
++#ifdef OHOS_POST_URL
++                         const std::string& extra_headers,
++                         const std::string& method = std::string(),
++                         const std::vector<char>& post_data = std::vector<char>());
++#else
+                          const std::string& extra_headers);
++#endif
+ 
+   // Send a command to the renderer for execution.
+   void SendCommand(const std::string& command);
+@@ -193,6 +201,7 @@ class CefFrameHostImpl : public CefFrame, public cef::mojom::BrowserFrame {
+   void SlideScroll(float vx, float vy);
+   void ZoomBy(float delta, float width, float height);
+   void GetHitData(int& type, CefString& extra_data);
++  void SetOverscrollMode(int mode);
+ #endif  // defined(OHOS_INPUT_EVENTS)
+ 
+ #endif  // BUILDFLAG(IS_OHOS)
+diff --git a/src/cef/libcef/browser/javascript/oh_gin_javascript_bridge_dispatcher_host.cc b/src/cef/libcef/browser/javascript/oh_gin_javascript_bridge_dispatcher_host.cc
+index 96977290f1255..60e3efc886b17
+--- a/src/cef/libcef/browser/javascript/oh_gin_javascript_bridge_dispatcher_host.cc
++++ b/src/cef/libcef/browser/javascript/oh_gin_javascript_bridge_dispatcher_host.cc
+@@ -12,9 +12,23 @@
+ #include "content/public/browser/web_contents.h"
+ #include "libcef/browser/javascript/oh_gin_javascript_bridge_message_filter.h"
+ #include "libcef/common/javascript/oh_gin_javascript_bridge_messages.h"
++#include "libcef/common/javascript/oh_gin_javascript_bridge_value.h"
+ #include "libcef/common/values_impl.h"
+ #include "oh_gin_javascript_bridge_object_deletion_message_filter.h"
+ 
++namespace {
++#define JS_BRIDGE_BINARY_ARGS_COUNT 2
++void StringSplit(std::string str,
++                 const char split,
++                 std::vector<std::string>& result) {
++  std::istringstream iss(str);
++  std::string token;
++  while (getline(iss, token, split)) {
++    result.push_back(token);
++  }
++}
++}  // namespace
++
+ namespace NWEB {
+ OhGinJavascriptBridgeDispatcherHost::OhGinJavascriptBridgeDispatcherHost(
+     content::WebContents* web_contents,
+@@ -22,6 +36,8 @@ OhGinJavascriptBridgeDispatcherHost::OhGinJavascriptBridgeDispatcherHost(
+     : content::WebContentsObserver(web_contents), client_(client) {}
+ 
+ OhGinJavascriptBridgeDispatcherHost::~OhGinJavascriptBridgeDispatcherHost() {
++  LOG(DEBUG) << "OhGinJavascriptBridgeDispatcherHost::~"
++                "OhGinJavascriptBridgeDispatcherHost called";
+   client_.reset();
+   method_map_.clear();
+ }
+@@ -114,13 +130,10 @@ void OhGinJavascriptBridgeDispatcherHost::RenderViewHostChanged(
+   }
+ }
+ 
+-void OhGinJavascriptBridgeDispatcherHost::AddNamedObject(
++void OhGinJavascriptBridgeDispatcherHost::AddNamedObjectForWebController(
+     const std::string& object_name,
+     const std::vector<std::string>& method_list) {
+-  LOG(INFO) << "AddNamedObject::" << object_name;
+-  DCHECK_CURRENTLY_ON(content::BrowserThread::UI);
+   {
+-    std::unique_lock<std::mutex> lk(object_mtx_);
+     ObjectMethodMap::iterator it;
+     for (it = method_map_.begin(); it != method_map_.end(); ++it) {
+       if (it->second.first == object_name) {
+@@ -152,23 +165,81 @@ void OhGinJavascriptBridgeDispatcherHost::AddNamedObject(
+           [&object_name,
+            this](content::RenderFrameHostImpl* render_frame_host) {
+             render_frame_host->Send(new OhGinJavascriptBridgeMsg_AddNamedObject(
+-                render_frame_host->GetRoutingID(), object_name, this->object_id_));
++                render_frame_host->GetRoutingID(), object_name,
++                this->object_id_));
++          });
++}
++
++void OhGinJavascriptBridgeDispatcherHost::AddNamedObjectForWebViewController(
++    const std::string& object_name,
++    const std::vector<std::string>& method_list,
++    const ObjectID object_id) {
++  if (object_id <= 0) {
++    LOG(ERROR) << "AddNamedObject:" << object_name
++               << " failed due to object_id == " << object_id;
++    return;
++  }
++  RemoveNamedObject(object_name, method_list);
++  {
++    MethodPair object_pair;
++    std::unordered_set<std::string> method_set;
++    for (std::string s : method_list) {
++      method_set.emplace(s);
++    }
++    object_pair.first = object_name;
++    object_pair.second = method_set;
++    method_map_[object_id] = object_pair;
++  }
++
++  InstallFilterAndRegisterAllRoutingIds();
++
++  web_contents()
++      ->GetPrimaryMainFrame()
++      ->ForEachRenderFrameHostIncludingSpeculative(
++          [&object_name,
++           object_id](content::RenderFrameHostImpl* render_frame_host) {
++            render_frame_host->Send(new OhGinJavascriptBridgeMsg_AddNamedObject(
++                render_frame_host->GetRoutingID(), object_name, object_id));
+           });
+ }
+ 
++void OhGinJavascriptBridgeDispatcherHost::AddNamedObject(
++    const std::string& object_name,
++    const std::vector<std::string>& method_list,
++    const ObjectID object_id) {
++  DCHECK_CURRENTLY_ON(content::BrowserThread::UI);
++  // In order to be compatible with older webcotroller,
++  // Currently, the webcontroller save the object_id on the core side, get
++  // object from ace side by object_name the webviewcontroller save the
++  // object_id on the web_webview side, get object from web_webview side by
++  // object_id
++  if (object_id ==
++      static_cast<ObjectID>(JavaScriptObjIdErrorCode::WEBCONTROLLERERROR)) {
++    AddNamedObjectForWebController(object_name, method_list);
++  } else {
++    AddNamedObjectForWebViewController(object_name, method_list, object_id);
++  }
++}
++
+ void OhGinJavascriptBridgeDispatcherHost::RemoveNamedObject(
+     const std::string& object_name,
+     const std::vector<std::string>& method_list) {
+   DCHECK_CURRENTLY_ON(content::BrowserThread::UI);
+   if (method_map_.empty()) {
+-    LOG(INFO) << "OhGinJavascriptBridgeDispatcherHost::RemoveNamedObject:Map "
+-                 "is empty!";
++    LOG(ERROR) << "OhGinJavascriptBridgeDispatcherHost::RemoveNamedObject:Map "
++                  "is empty!";
+     return;
+   }
+   {
+-    std::unique_lock<std::mutex> lk(object_mtx_);
+     ObjectMethodMap::iterator it;
+     for (it = method_map_.begin(); it != method_map_.end(); ++it) {
++      if (!(object_name == it->second.first) &&
++          std::next(it) == method_map_.end()) {
++        LOG(ERROR) << "OhGinJavascriptBridgeDispatcherHost::RemoveNamedObject:"
++                      "object_name:"
++                   << object_name << " is not exist!";
++        return;
++      }
+       if (!(object_name == it->second.first)) {
+         continue;
+       }
+@@ -187,17 +258,32 @@ void OhGinJavascriptBridgeDispatcherHost::RemoveNamedObject(
+           [&copied_name](content::RenderFrameHostImpl* render_frame_host) {
+             render_frame_host->Send(
+                 new OhGinJavascriptBridgeMsg_RemoveNamedObject(
+-                    render_frame_host->GetRoutingID(),
+-                    copied_name));
++                    render_frame_host->GetRoutingID(), copied_name));
+           });
+ }
+ 
+ void OhGinJavascriptBridgeDispatcherHost::OnGetMethods(
+     int32_t object_id,
+     std::set<std::string>* returned_method_names) {
+-  LOG(INFO) << "OhGinJavascriptBridgeDispatcherHost::OnGetMethods::"
+-            << object_id;
++  // get from web_webview side
+   if (method_map_.find(object_id) == method_map_.end()) {
++    if (!client_) {
++      LOG(ERROR) << "OhGinJavascriptBridgeDispatcherHost::"
++                    "OnGetMethods: client_ is null";
++      return;
++    }
++    CefRefPtr<CefValue> cefValue;
++    client_->GetJavaScriptObjectMethods(object_id, cefValue);
++    if (!cefValue) {
++      LOG(ERROR) << "OhGinJavascriptBridgeDispatcherHost::"
++                    "OnGetMethods: cefValue is null";
++      return;
++    }
++    size_t length = cefValue->GetList()->GetSize();
++    for (size_t i = 0; i < length; ++i) {
++      returned_method_names->insert(
++          cefValue->GetList()->GetValue(i)->GetString().ToString());
++    }
+     return;
+   }
+   MethodPair p = method_map_[object_id];
+@@ -210,56 +296,312 @@ void OhGinJavascriptBridgeDispatcherHost::OnHasMethod(
+     int32_t object_id,
+     const std::string& method_name,
+     bool* result) {
+-  LOG(INFO) << "OhGinJavascriptBridgeDispatcherHost::OnHasMethod::"
+-            << method_name.c_str();
+-  if (method_map_.find(object_id) == method_map_.end()) {
+-    *result = false;
+-    return;
++  *result = false;
++  if (method_map_.find(object_id) != method_map_.end()) {
++    MethodPair p = method_map_[object_id];
++    if (p.second.find(method_name) != p.second.end()) {
++      *result = true;
++      return;
++    }
+   }
+ 
+-  MethodPair p = method_map_[object_id];
+-  if (p.second.find(method_name) == p.second.end()) {
+-    *result = false;
++  if (!client_) {
++    LOG(ERROR) << "OhGinJavascriptBridgeDispatcherHost::"
++                  "OnHasMethod: client_ is null";
+     return;
+   }
+ 
+-  *result = true;
++  *result = client_->HasJavaScriptObjectMethods(object_id, method_name);
+ }
+ 
+-std::unique_ptr<base::Value> ParseValueTONWebValue(
+-    CefRefPtr<CefListValue> result) {
+-  std::unique_ptr<base::Value> value = std::make_unique<base::Value>();
+-  if (!result.get() || result->GetSize() == 0) {
+-    return value;
++std::unique_ptr<base::Value> ParseCefValueTObaseValueHelper(
++    CefRefPtr<CefValue> result) {
++  std::unique_ptr<base::Value> baseValue = std::make_unique<base::Value>();
++  if (!result.get()) {
++    LOG(ERROR) << "OhGinJavascriptBridgeDispatcherHost::"
++                  "ParseCefValueTObaseValueHelper: result is null";
++    return baseValue;
+   }
+ 
+-  CefRefPtr<CefValue> argument = result->GetValue(0);
+-
+-  switch (argument->GetType()) {
+-    case CefValueType::VTYPE_INT:
+-      value = std::make_unique<base::Value>(result->GetInt(0));
+-      break;
++  switch (result->GetType()) {
++    case CefValueType::VTYPE_NULL: {
++      LOG(DEBUG) << "OhGinJavascriptBridgeDispatcherHost::"
++                    "ParseCefValueTObaseValueHelper: VTYPE_NULL";
++      return std::make_unique<base::Value>();
++    }
++    case CefValueType::VTYPE_INT: {
++      LOG(DEBUG) << "OhGinJavascriptBridgeDispatcherHost::"
++                    "ParseCefValueTObaseValueHelper: VTYPE_INT = "
++                 << result->GetInt();
++      return std::make_unique<base::Value>(result->GetInt());
++    }
+     case CefValueType::VTYPE_DOUBLE: {
+-      value = std::make_unique<base::Value>(result->GetDouble(0));
+-      break;
++      LOG(DEBUG) << "OhGinJavascriptBridgeDispatcherHost::"
++                    "ParseCefValueTObaseValueHelper: VTYPE_DOUBLE = "
++                 << result->GetDouble();
++      return std::make_unique<base::Value>(result->GetDouble());
+     }
+-    case CefValueType::VTYPE_BOOL:
+-      value = std::make_unique<base::Value>(result->GetBool(0));
+-      break;
+-    case CefValueType::VTYPE_STRING:
+-      value = std::make_unique<base::Value>(result->GetString(0).ToString());
+-      break;
+-    case CefValueType::VTYPE_INVALID:
+-      value = std::make_unique<base::Value>();
++    case CefValueType::VTYPE_BOOL: {
++      LOG(DEBUG) << "OhGinJavascriptBridgeDispatcherHost::"
++                    "ParseCefValueTObaseValueHelper: VTYPE_BOOL = "
++                 << result->GetBool();
++      return std::make_unique<base::Value>(result->GetBool());
++    }
++    case CefValueType::VTYPE_STRING: {
++      LOG(DEBUG) << "OhGinJavascriptBridgeDispatcherHost::"
++                    "ParseCefValueTObaseValueHelper: VTYPE_STRING";
++      return std::make_unique<base::Value>(result->GetString().ToString());
++    }
++    case CefValueType::VTYPE_LIST: {
++      LOG(DEBUG) << "OhGinJavascriptBridgeDispatcherHost::"
++                    "ParseCefValueTObaseValueHelper: VTYPE_LIST";
++      auto cefArr = result->GetList();
++      std::unique_ptr<base::Value::List> value =
++          std::make_unique<base::Value::List>();
++      if (!cefArr) {
++        LOG(ERROR) << "OhGinJavascriptBridgeDispatcherHost::"
++                      "ParseCefValueTObaseValueHelper: cefArr is null";
++        break;
++      }
++      int size = static_cast<int>(cefArr->GetSize());
++      for (int i = 0; i < size; ++i) {
++        auto cefValTmp = cefArr->GetValue(i);
++        auto baseValTmp = ParseCefValueTObaseValueHelper(cefValTmp);
++        value->Append(std::move(*baseValTmp));
++      }
++      return std::make_unique<base::Value>(std::move(*value));
++    }
++    case CefValueType::VTYPE_DICTIONARY: {
++      LOG(DEBUG) << "OhGinJavascriptBridgeDispatcherHost::"
++                    "ParseCefValueTObaseValueHelper: VTYPE_DICTIONARY";
++      auto cefDict = result->GetDictionary();
++      std::unique_ptr<base::Value::Dict> value =
++          std::make_unique<base::Value::Dict>();
++      if (!cefDict) {
++        LOG(ERROR) << "OhGinJavascriptBridgeDispatcherHost::"
++                      "ParseCefValueTObaseValueHelper: cefDict is null";
++        break;
++      }
++      CefDictionaryValue::KeyList cefKeys;
++      cefDict->GetKeys(cefKeys);
++      for (auto& key : cefKeys) {
++        auto cefValTmp = cefDict->GetValue(key);
++        auto baseValTmp = ParseCefValueTObaseValueHelper(cefValTmp);
++        value->Set(key.ToString(), std::move(*baseValTmp));
++      }
++      return std::make_unique<base::Value>(std::move(*value));
++    }
++    case CefValueType::VTYPE_BINARY: {
++      LOG(DEBUG) << "OhGinJavascriptBridgeDispatcherHost::"
++                    "ParseCefValueTObaseValueHelper: VTYPE_BINARY";
++      auto size = result->GetBinary()->GetSize();
++      auto buff = std::make_unique<char[]>(size);
++      result->GetBinary()->GetData(buff.get(), size, 0);
++      int32_t objId;
++      std::string str(buff.get());
++      std::vector<std::string> strList;
++      StringSplit(str, ';', strList);
++      if (strList.size() != JS_BRIDGE_BINARY_ARGS_COUNT) {
++        LOG(ERROR) << "OhGinJavascriptBridgeDispatcherHost::"
++                      "ParseCefValueTObaseValueHelper: strList.size() == "
++                   << strList.size() << " is error";
++        baseValue = OhGinJavascriptBridgeValue::CreateObjectIDValue(-1);
++        break;
++      }
++      std::istringstream ss(strList[1]);
++      ss >> objId;
++      if (objId <= 0) {
++        LOG(ERROR) << "OhGinJavascriptBridgeDispatcherHost::"
++                      "ParseCefValueTObaseValueHelper: objId == "
++                   << objId << " is error";
++        baseValue = OhGinJavascriptBridgeValue::CreateObjectIDValue(-1);
++        break;
++      }
++      if (strList[0] == "TYPE_OBJECT_ID") {
++        baseValue = OhGinJavascriptBridgeValue::CreateObjectIDValue(objId);
++        break;
++      }
++
++      return OhGinJavascriptBridgeValue::CreateObjectIDValue(objId);
++    }
++    case CefValueType::VTYPE_INVALID: {
++      LOG(DEBUG) << "OhGinJavascriptBridgeDispatcherHost::"
++                    "ParseCefValueTObaseValueHelper: VTYPE_INVALID";
++      return std::make_unique<base::Value>();
++    }
++    default: {
++      LOG(INFO) << "OhGinJavascriptBridgeDispatcherHost::"
++                   "ParseCefValueTObaseValueHelper: not support value type";
++      return std::make_unique<base::Value>();
++    }
++  }
++
++  return baseValue;
++}
++
++CefRefPtr<CefValue> ParseBaseValueTOCefValueHelper(base::Value* value) {
++  CefRefPtr<CefValue> cefValue = CefValue::Create();
++  if (!value) {
++    LOG(ERROR) << "OhGinJavascriptBridgeDispatcherHost::"
++                  "ParseBaseValueTOCefValueHelper: value is null ";
++    return cefValue;
++  }
++  switch (value->type()) {
++    case base::Value::Type::INTEGER: {
++      LOG(DEBUG) << "OhGinJavascriptBridgeDispatcherHost::"
++                    "ParseBaseValueTOCefValueHelper: INTEGER = "
++                 << value->GetInt();
++      cefValue->SetInt(value->GetInt());
++      return cefValue;
++    }
++    case base::Value::Type::DOUBLE: {
++      LOG(DEBUG) << "OhGinJavascriptBridgeDispatcherHost::"
++                    "ParseBaseValueTOCefValueHelper: DOUBLE = "
++                 << value->GetDouble();
++      cefValue->SetDouble(value->GetDouble());
++      return cefValue;
++    }
++    case base::Value::Type::BOOLEAN: {
++      LOG(DEBUG) << "OhGinJavascriptBridgeDispatcherHost::"
++                    "ParseBaseValueTOCefValueHelper: BOOLEAN = "
++                 << value->GetBool();
++      cefValue->SetBool(value->GetBool());
++      return cefValue;
++    }
++    case base::Value::Type::STRING: {
++      LOG(DEBUG) << "OhGinJavascriptBridgeDispatcherHost::"
++                    "ParseBaseValueTOCefValueHelper: STRING";
++      cefValue->SetString(CefString(*value->GetIfString()));
++      return cefValue;
++    }
++    case base::Value::Type::LIST: {
++      LOG(DEBUG) << "OhGinJavascriptBridgeDispatcherHost::"
++                    "ParseBaseValueTOCefValueHelper: LIST";
++      size_t length = value->GetList().size();
++      auto cefList = CefListValue::Create();
++      for (size_t i = 0; i < length; i++) {
++        base::Value& child = value->GetList()[i];
++        auto cefVal = ParseBaseValueTOCefValueHelper(&child);
++        cefList->SetValue(i, cefVal);
++      }
++      cefValue->SetList(cefList);
++      return cefValue;
++    }
++    case base::Value::Type::DICT: {
++      LOG(DEBUG) << "OhGinJavascriptBridgeDispatcherHost::"
++                    "ParseBaseValueTOCefValueHelper: DICTIONARY";
++      auto cefDict = CefDictionaryValue::Create();
++      for (base::Value::Dict::iterator iter = value->GetDict().begin();
++           iter != value->GetDict().end(); iter++) {
++        const std::string& key = iter->first;
++        auto found = value->GetDict().Find(key);
++        auto cefVal = ParseBaseValueTOCefValueHelper(found);
++        cefDict->SetValue(CefString(key), cefVal);
++      }
++      cefValue->SetDictionary(cefDict);
++      return cefValue;
++    }
++    case base::Value::Type::BINARY: {
++      LOG(DEBUG) << "OhGinJavascriptBridgeDispatcherHost::"
++                    "ParseBaseValueTOCefValueHelper: BINARY";
++      std::unique_ptr<const OhGinJavascriptBridgeValue> gin_value(
++          OhGinJavascriptBridgeValue::FromValue(value));
++      if (gin_value &&
++          gin_value->GetType() == OhGinJavascriptBridgeValue::TYPE_OBJECT_ID) {
++        if (OhGinJavascriptBridgeValue::ContainsOhGinJavascriptBridgeValue(
++                value)) {
++          OhGinJavascriptBridgeDispatcherHost::ObjectID object_id;
++          if (gin_value->GetAsObjectID(&object_id)) {
++            if (object_id <= 0) {
++              LOG(ERROR) << "OhGinJavascriptBridgeDispatcherHost::"
++                            "ParseBaseValueTOCefValueHelper: object_id == "
++                         << object_id << " is error";
++            }
++            std::string bin = std::string("TYPE_OBJECT_ID") + std::string(";") +
++                              std::to_string(object_id);
++            auto cefBin = CefBinaryValue::Create(bin.c_str(), bin.size());
++            cefValue->SetBinary(cefBin);
++          }
++        }
++      } else if (gin_value &&
++                 gin_value->GetType() ==
++                     OhGinJavascriptBridgeValue::TYPE_H5_OBJECT_ID) {
++        if (OhGinJavascriptBridgeValue::ContainsOhGinJavascriptBridgeValue(
++                value)) {
++          std::string h5_object_id_with_names;
++          if (gin_value->GetAsObjectIDWithMdNames(&h5_object_id_with_names)) {
++            LOG(DEBUG) << "OhGinJavascriptBridgeDispatcherHost::"
++                          "ParseBaseValueTOCefValueHelper: TYPE_H5_OBJECT_ID "
++                          "h5_object_id_with_names .empty()= "
++                       << h5_object_id_with_names.empty();
++            std::string bin = std::string("TYPE_H5_OBJECT_ID") +
++                              std::string(";") + h5_object_id_with_names;
++            auto cefBin = CefBinaryValue::Create(bin.c_str(), bin.size());
++            cefValue->SetBinary(cefBin);
++          }
++        }
++      } else if (gin_value &&
++                 gin_value->GetType() ==
++                     OhGinJavascriptBridgeValue::TYPE_H5_FUNCTION_ID) {
++        if (OhGinJavascriptBridgeValue::ContainsOhGinJavascriptBridgeValue(
++                value)) {
++          OhGinJavascriptBridgeDispatcherHost::ObjectID h5_function_id;
++          if (gin_value->GetAsObjectID(&h5_function_id)) {
++            LOG(DEBUG) << "OhGinJavascriptBridgeDispatcherHost::"
++                          "ParseBaseValueTOCefValueHelper: TYPE_H5_FUNCTION_ID "
++                          "h5_function_id == "
++                       << h5_function_id;
++            std::string bin = std::string("TYPE_H5_FUNCTION_ID") +
++                              std::string(";") + std::to_string(h5_function_id);
++            auto cefBin = CefBinaryValue::Create(bin.c_str(), bin.size());
++            cefValue->SetBinary(cefBin);
++          }
++        }
++      }
++      return cefValue;
++    }
++    case base::Value::Type::NONE:
++      LOG(DEBUG) << "OhGinJavascriptBridgeDispatcherHost::"
++                    "ParseBaseValueTOCefValueHelper: NONE";
+       break;
+     default:
+-      value = std::make_unique<base::Value>();
++      LOG(INFO) << "OhGinJavascriptBridgeDispatcherHost::"
++                   "ParseBaseValueTOCefValueHelper: not support value type";
+       break;
+   }
++  return cefValue;
++}
++
++std::unique_ptr<base::Value> ParseCefValueTOBaseValue(
++    CefRefPtr<CefListValue> result) {
++  std::unique_ptr<base::Value> value = std::make_unique<base::Value>();
++  if (!result.get() || result->GetSize() == 0) {
++    LOG(ERROR) << "OhGinJavascriptBridgeDispatcherHost::"
++                  "ParseCefValueTOBaseValue: result is null or empty";
++    return value;
++  }
++
++  CefRefPtr<CefValue> argument = result->GetValue(0);
++  value = ParseCefValueTObaseValueHelper(argument);
+ 
+   return value;
+ }
+ 
++CefRefPtr<CefListValue> ParseBaseValueTOCefValue(base::Value::List* value) {
++  auto cefList = CefListValue::Create();
++  if (!value) {
++    LOG(ERROR) << "OhGinJavascriptBridgeDispatcherHost::"
++                  "ParseBaseValueTOCefValue: value is null";
++    return cefList;
++  }
++  for (size_t i = 0; i < value->size(); ++i) {
++    base::Value& child = (*value)[i];
++    auto cefVal = ParseBaseValueTOCefValueHelper(&child);
++    cefList->SetValue(i, cefVal);
++  }
++  return cefList;
++}
++
+ void OhGinJavascriptBridgeDispatcherHost::OnInvokeMethod(
+     int routing_id,
+     int32_t object_id,
+@@ -267,33 +609,81 @@ void OhGinJavascriptBridgeDispatcherHost::OnInvokeMethod(
+     const base::Value::List& arguments,
+     base::Value::List* wrapped_result,
+     OhGinJavascriptBridgeError* error_code) {
+-  (void)routing_id;
+-  LOG(INFO) << "OnInvokeMethod method_name : " << method_name.c_str();
+-  if (method_map_.find(object_id) == method_map_.end()) {
+-    *error_code = kOhGinJavascriptBridgeUnknownObjectId;
+-    return;
+-  }
++  base::Value::List* argument = const_cast<base::Value::List*>(&arguments);
+ 
+-  CefRefPtr<CefListValueImpl> ceflistvalue =
+-      new CefListValueImpl(arguments.Clone(), false);
++  CefRefPtr<CefListValue> ceflistvalue = ParseBaseValueTOCefValue(argument);
+ 
+-  MethodPair object_pair = method_map_[object_id];
++  std::string classname = "";
++  if (method_map_.find(object_id) != method_map_.end()) {
++    MethodPair object_pair = method_map_[object_id];
++    classname = object_pair.first;
++  }
+ 
+   std::string method = method_name;
+-  std::string classname = object_pair.first;
+ 
+   CefRefPtr<CefListValue> result = CefListValue::Create();
+ 
+-  if (!client_)
++  if (!client_) {
++    LOG(ERROR) << "OhGinJavascriptBridgeDispatcherHost::OnInvokeMethod: "
++                  "client_ is null";
+     return;
+-  int error =
+-      client_->NotifyJavaScriptResult(ceflistvalue, method, classname, result);
++  }
++  // 为了兼容老版本webcotroller方式, classname可能为空
++  int error = client_->NotifyJavaScriptResult(ceflistvalue, method, classname,
++                                              result, routing_id, object_id);
+   *error_code = static_cast<OhGinJavascriptBridgeError>(error);
+   if (error != 0) {
+     return;
+   }
+ 
+   wrapped_result->Append(
+-      base::Value::FromUniquePtrValue(ParseValueTONWebValue(result)));
++      base::Value::FromUniquePtrValue(ParseCefValueTOBaseValue(result)));
++}
++
++void OhGinJavascriptBridgeDispatcherHost::OnObjectWrapperDeleted(
++    int routing_id,
++    ObjectID object_id) {
++  LOG(DEBUG)
++      << "OhGinJavascriptBridgeDispatcherHost::OnObjectWrapperDeleted called";
++  if (!client_) {
++    LOG(ERROR) << "OhGinJavascriptBridgeDispatcherHost::"
++                  "OnObjectWrapperDeleted: client_ is null";
++    return;
++  }
++  client_->RemoveJavaScriptObjectHolder(routing_id, object_id);
++}
++
++void OhGinJavascriptBridgeDispatcherHost::DoCallH5Function(
++    int32_t routing_id,
++    int32_t h5_object_id,
++    const std::string&
++        h5_method_name,  // IF h5_method_name empty, call anonymous function
++    const std::vector<CefRefPtr<CefValue>>& args) {
++  LOG(DEBUG) << "OhGinJavascriptBridgeDispatcherHost::DoCallH5Function in";
++  content::WebContentsImpl* web_contents_impl =
++      static_cast<content::WebContentsImpl*>(web_contents());
++  if (!web_contents_impl) {
++    LOG(ERROR) << "OhGinJavascriptBridgeDispatcherHost::DoCallH5Function "
++                  "web_contents_impl null";
++    return;
++  }
++
++  content::RenderFrameHost* target_frame =
++      web_contents_impl->GetTargetFramesIncludingPending(routing_id);
++
++  if (target_frame) {
++    LOG(DEBUG)
++        << "OhGinJavascriptBridgeDispatcherHost::DoCallH5Function called";
++    base::Value::List base_args;
++    std::unique_ptr<base::Value> value = std::make_unique<base::Value>();
++    for (auto& item : args) {
++      value = ParseCefValueTObaseValueHelper(item);
++      base_args.Append(base::Value::FromUniquePtrValue(std::move(value)));
++    }
++
++    target_frame->Send(new OhGinJavascriptBridgeMsg_DoCallH5Function(
++        target_frame->GetRoutingID(), routing_id, h5_object_id, h5_method_name,
++        base_args));
++  }
+ }
+ }  // namespace NWEB
+diff --git a/src/cef/libcef/browser/javascript/oh_gin_javascript_bridge_dispatcher_host.h b/src/cef/libcef/browser/javascript/oh_gin_javascript_bridge_dispatcher_host.h
+index 9d0991f029959..6e7ba343a5846
+--- a/src/cef/libcef/browser/javascript/oh_gin_javascript_bridge_dispatcher_host.h
++++ b/src/cef/libcef/browser/javascript/oh_gin_javascript_bridge_dispatcher_host.h
+@@ -23,6 +23,14 @@ class OhGinJavascriptBridgeDispatcherHost
+     : public base::RefCountedThreadSafe<OhGinJavascriptBridgeDispatcherHost>,
+       public content::WebContentsObserver {
+  public:
++  // 为了兼容老版本webcontroller, 要保持跟ace和core侧定义一致
++  enum class JavaScriptObjIdErrorCode : int32_t {
++    WEBCONTROLLERERROR = -2,
++    WEBVIEWCONTROLLERERROR = -1,
++    END = 0
++  };
++  typedef int32_t ObjectID;
++
+   OhGinJavascriptBridgeDispatcherHost(content::WebContents* web_contents,
+                                       CefRefPtr<CefClient> client);
+   OhGinJavascriptBridgeDispatcherHost(
+@@ -31,7 +39,8 @@ class OhGinJavascriptBridgeDispatcherHost
+       const OhGinJavascriptBridgeDispatcherHost&) = delete;
+ 
+   void AddNamedObject(const std::string& classname,
+-                      const std::vector<std::string>& method_list);
++                      const std::vector<std::string>& method_list,
++                      const ObjectID object_id);
+   void RemoveNamedObject(const std::string& classname,
+                          const std::vector<std::string>& method_list);
+ 
+@@ -53,9 +62,17 @@ class OhGinJavascriptBridgeDispatcherHost
+                       const base::Value::List& arguments,
+                       base::Value::List* result,
+                       OhGinJavascriptBridgeError* error_code);
++  void OnObjectWrapperDeleted(int routing_id, ObjectID object_id);
++  void ClearMethodMap() {
++    method_map_.clear();
++  }
++
++  void DoCallH5Function(int32_t routing_id,
++                        int32_t h5_object_id,
++                        const std::string& h5_method_name,
++                        const std::vector<CefRefPtr<CefValue>>& args);
+ 
+  private:
+-  typedef int32_t ObjectID;
+   friend class base::RefCountedThreadSafe<OhGinJavascriptBridgeDispatcherHost>;
+ 
+   // object id and ace js function name
+@@ -65,15 +82,22 @@ class OhGinJavascriptBridgeDispatcherHost
+ 
+   // Run on the UI thread.
+   void InstallFilterAndRegisterAllRoutingIds();
++  void AddNamedObjectForWebController(
++      const std::string& classname,
++      const std::vector<std::string>& method_list);
++
++  void AddNamedObjectForWebViewController(
++      const std::string& classname,
++      const std::vector<std::string>& method_list,
++      const ObjectID object_id);
+   content::WebContentsImpl* web_contents() const;
+ 
+   // js property name and object id
+   using MethodPair = std::pair<std::string, std::unordered_set<std::string>>;
+   using ObjectMethodMap = std::map<ObjectID, MethodPair>;
+   ObjectMethodMap method_map_;
+-  int32_t object_id_ = 0;
++  int32_t object_id_ = 1;
+ 
+-  std::mutex object_mtx_;
+   CefRefPtr<CefClient> client_;
+ };
+ }  // namespace NWEB
+diff --git a/src/cef/libcef/browser/javascript/oh_gin_javascript_bridge_message_filter.cc b/src/cef/libcef/browser/javascript/oh_gin_javascript_bridge_message_filter.cc
+index 893096c5a5ea0..43252632d2771
+--- a/src/cef/libcef/browser/javascript/oh_gin_javascript_bridge_message_filter.cc
++++ b/src/cef/libcef/browser/javascript/oh_gin_javascript_bridge_message_filter.cc
+@@ -9,6 +9,7 @@
+ #include "base/memory/scoped_refptr.h"
+ #include "base/task/thread_pool.h"
+ #include "base/types/pass_key.h"
++#include "cef/libcef/browser/thread_util.h"
+ #include "cef/libcef/common/javascript/oh_gin_javascript_bridge_messages.h"
+ #include "content/browser/renderer_host/agent_scheduling_group_host.h"
+ #include "content/public/browser/browser_task_traits.h"
+@@ -35,6 +36,10 @@ OhGinJavascriptBridgeMessageFilter::OhGinJavascriptBridgeMessageFilter(
+ 
+ OhGinJavascriptBridgeMessageFilter::~OhGinJavascriptBridgeMessageFilter() {
+   LOG(INFO) << "OhGinJavascriptBridgeMessageFilter dtor";
++  for (const auto &[_, dispatchHost] : hosts_) {
++    dispatchHost->ClearMethodMap();
++  }
++  hosts_.clear();
+ }
+ 
+ void OhGinJavascriptBridgeMessageFilter::OnDestruct() const {
+@@ -47,12 +52,10 @@ void OhGinJavascriptBridgeMessageFilter::OnDestruct() const {
+ 
+ bool OhGinJavascriptBridgeMessageFilter::OnMessageReceived(
+     const IPC::Message& message) {
+-  base::ThreadPool::PostTask(
+-      FROM_HERE, {base::MayBlock(), base::TaskPriority::USER_BLOCKING},
+-      base::BindOnce(
+-          base::IgnoreResult(
+-              &OhGinJavascriptBridgeMessageFilter::OnMessageReceivedThread),
+-          base::WrapRefCounted(this), message));
++  CEF_POST_TASK(CEF_UIT,
++                base::BindOnce(
++                base::IgnoreResult(&OhGinJavascriptBridgeMessageFilter::OnMessageReceivedThread),
++                base::WrapRefCounted(this), message));
+   return true;
+ }
+ 
+@@ -144,7 +147,7 @@ OhGinJavascriptBridgeMessageFilter::FindHost() {
+   if (iter != hosts_.end()) {
+     return iter->second;
+   }
+-
++  LOG(WARNING) << "JSBridge host not found, routingID:" << current_routing_id_;
+   return nullptr;
+ }
+ 
+@@ -188,6 +191,9 @@ void OhGinJavascriptBridgeMessageFilter::OnInvokeMethod(
+ }
+ 
+ void OhGinJavascriptBridgeMessageFilter::OnObjectWrapperDeleted(int object_id) {
+-  (void)object_id;
++  scoped_refptr<OhGinJavascriptBridgeDispatcherHost> host = FindHost();
++  if (host) {
++    host->OnObjectWrapperDeleted(current_routing_id_, object_id);
++  }
+ }
+-}  // namespace NWEB
++}  // namespace NWEB
+\ No newline at end of file
+diff --git a/src/cef/libcef/browser/javascript/oh_javascript_injector.cc b/src/cef/libcef/browser/javascript/oh_javascript_injector.cc
+index 7b133d350c905..9272358946a60
+--- a/src/cef/libcef/browser/javascript/oh_javascript_injector.cc
++++ b/src/cef/libcef/browser/javascript/oh_javascript_injector.cc
+@@ -18,17 +18,38 @@ OhJavascriptInjector::~OhJavascriptInjector() {}
+ 
+ void OhJavascriptInjector::AddInterface(
+     const std::string& object_name,
+-    const std::vector<std::string> method_list) {
+-  LOG(INFO) << "AddInterface name : " << object_name.c_str();
+-  javascript_bridge_dispatcher_host_->AddNamedObject(object_name, method_list);
++    const std::vector<std::string> method_list,
++    const int32_t object_id) {
++  if (!javascript_bridge_dispatcher_host_) {
++    return;
++  }
++
++  javascript_bridge_dispatcher_host_->AddNamedObject(object_name, method_list,
++                                                     object_id);
+ }
+ 
+ void OhJavascriptInjector::RemoveInterface(
+     const std::string& object_name,
+     const std::vector<std::string> method_list) {
+-  LOG(INFO) << "RemoveInterface name : " << object_name.c_str();
++  if (!javascript_bridge_dispatcher_host_) {
++    return;
++  }
++
+   javascript_bridge_dispatcher_host_->RemoveNamedObject(object_name,
+                                                         method_list);
+ }
++
++void OhJavascriptInjector::DoCallH5Function(
++    int32_t routing_id,
++    int32_t h5_object_id,
++    const std::string& h5_method_name,
++    const std::vector<CefRefPtr<CefValue>>& args) {
++  if (!javascript_bridge_dispatcher_host_) {
++    return;
++  }
++
++  javascript_bridge_dispatcher_host_->DoCallH5Function(routing_id, h5_object_id,
++                                                       h5_method_name, args);
++}
+ WEB_CONTENTS_USER_DATA_KEY_IMPL(OhJavascriptInjector);
+ }  // namespace NWEB
+diff --git a/src/cef/libcef/browser/javascript/oh_javascript_injector.h b/src/cef/libcef/browser/javascript/oh_javascript_injector.h
+index 7437035468210..240cc52b043a4
+--- a/src/cef/libcef/browser/javascript/oh_javascript_injector.h
++++ b/src/cef/libcef/browser/javascript/oh_javascript_injector.h
+@@ -24,9 +24,14 @@ class OhJavascriptInjector
+   ~OhJavascriptInjector();
+ 
+   void AddInterface(const std::string& object_name,
+-                    const std::vector<std::string> method_list);
++                    const std::vector<std::string> method_list,
++                    const int32_t object_id);
+   void RemoveInterface(const std::string& object_name,
+                        const std::vector<std::string> method_list);
++  void DoCallH5Function(int32_t routing_id,
++                        int32_t h5_object_id,
++                        const std::string& h5_method_name,
++                        const std::vector<CefRefPtr<CefValue>>& args);
+ 
+  private:
+   friend class content::WebContentsUserData<OhJavascriptInjector>;
+diff --git a/src/cef/libcef/browser/net/chrome_scheme_handler.cc b/src/cef/libcef/browser/net/chrome_scheme_handler.cc
+index 8aab53ff7e8c1..7dc132259e2fe
+--- a/src/cef/libcef/browser/net/chrome_scheme_handler.cc
++++ b/src/cef/libcef/browser/net/chrome_scheme_handler.cc
+@@ -58,8 +58,10 @@ const char kChromeURL[] = "chrome://";
+ 
+ namespace {
+ 
++#if !defined(OHOS_ARKWEB_EXTENSIONS)
+ const char kChromeUIExtensionsSupportHost[] = "extensions-support";
+ const char kChromeUILicenseHost[] = "license";
++#endif
+ const char kChromeUIWebUIHostsHost[] = "webui-hosts";
+ 
+ // TODO(network): Consider handling content::kChromeDevToolsScheme via WebUI
+@@ -76,6 +78,9 @@ const char kChromeUIWebUIHostsHost[] = "webui-hosts";
+ // additional changes. Do not add new hosts to this list without also manually
+ // testing all related functionality in CEF.
+ const char* kAllowedWebUIHosts[] = {
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++    chrome::kChromeUIExtensionsHost, kChromeUIWebUIHostsHost
++#else
+     chrome::kChromeUIAccessibilityHost,
+     content::kChromeUIBlobInternalsHost,
+     chrome::kChromeUIChromeURLsHost,
+@@ -103,6 +108,7 @@ const char* kAllowedWebUIHosts[] = {
+     chrome::kChromeUIVersionHost,
+     content::kChromeUIWebRTCInternalsHost,
+     kChromeUIWebUIHostsHost,
++#endif
+ };
+ 
+ // Hosts that don't have useful output when linked directly. They'll be excluded
+@@ -119,6 +125,9 @@ enum ChromeHostId {
+   CHROME_LICENSE,
+   CHROME_VERSION,
+   CHROME_WEBUI_HOSTS,
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++  CHROME_EXTENSION_HOSTS,
++#endif
+ };
+ 
+ // Chrome hosts implemented by CEF.
+@@ -126,11 +135,15 @@ const struct {
+   const char* host;
+   ChromeHostId host_id;
+ } kAllowedCefHosts[] = {
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++    {kChromeUIWebUIHostsHost, CHROME_WEBUI_HOSTS}
++#else
+     {chrome::kChromeUIChromeURLsHost, CHROME_WEBUI_HOSTS},
+     {kChromeUIExtensionsSupportHost, CHROME_EXTENSIONS_SUPPORT},
+     {kChromeUILicenseHost, CHROME_LICENSE},
+     {chrome::kChromeUIVersionHost, CHROME_VERSION},
+     {kChromeUIWebUIHostsHost, CHROME_WEBUI_HOSTS},
++#endif
+ };
+ 
+ ChromeHostId GetChromeHostId(const std::string& host) {
+@@ -424,8 +437,13 @@ bool OnWebUIHostsUI(std::string* mime_type, std::string* output) {
+       continue;
+     }
+ 
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++    html += "<li><a href=\"arkweb://" + list[i] + "\">arkweb://" + list[i] +
++            "</a></li>\n";
++#else
+     html += "<li><a href=\"chrome://" + list[i] + "\">chrome://" + list[i] +
+             "</a></li>\n";
++#endif
+   }
+ 
+   list.clear();
+@@ -541,7 +559,11 @@ class CefWebUIControllerFactory : public content::WebUIControllerFactory {
+     }
+ 
+     if (!url.SchemeIs(content::kChromeUIScheme) &&
+-        !url.SchemeIs(content::kChromeUIUntrustedScheme)) {
++        !url.SchemeIs(content::kChromeUIUntrustedScheme)
++#if defined(OHOS_ARKWEB_EXTENSIONS)
++        && !url.SchemeIs(content::kArkWebUIScheme)
++#endif
++    ) {
+       return false;
+     }
+ 
+diff --git a/src/cef/libcef/browser/net_service/cookie_manager_impl.cc b/src/cef/libcef/browser/net_service/cookie_manager_impl.cc
+index 8364b7701b91e..e8d4332a82dfb
+--- a/src/cef/libcef/browser/net_service/cookie_manager_impl.cc
++++ b/src/cef/libcef/browser/net_service/cookie_manager_impl.cc
+@@ -236,26 +236,18 @@ bool CefCookieManagerImpl::VisitUrlCookies(
+ bool CefCookieManagerImpl::SetCookie(const CefString& url,
+                                      const CefCookie& cookie,
+                                      CefRefPtr<CefSetCookieCallback> callback,
+-                                     bool is_sync) {
++                                     bool is_sync,
++                                     const CefString& str_cookie) {
+   GURL gurl = GURL(url.ToString());
+-#ifdef OHOS_COOKIE
+-  if (!FixInvalidGurl(url, gurl)) {
+-    return false;
+-  }
+-#else
+-  if (!gurl.is_valid()) {
+-    return false;
+-  }
+-#endif
+ 
+   if (!ValidContext()) {
+     StoreOrTriggerInitCallback(base::BindOnce(
+         base::IgnoreResult(&CefCookieManagerImpl::SetCookieInternal), this,
+-        gurl, cookie, callback, is_sync));
++        gurl, cookie, callback, is_sync, str_cookie));
+     return true;
+   }
+ 
+-  return SetCookieInternal(gurl, cookie, callback, is_sync);
++  return SetCookieInternal(gurl, cookie, callback, is_sync, str_cookie);
+ }
+ 
+ bool CefCookieManagerImpl::DeleteCookies(
+@@ -391,7 +383,7 @@ bool CefCookieManagerImpl::SetCookieInternal(
+     const GURL& url,
+     const CefCookie& cookie,
+     CefRefPtr<CefSetCookieCallback> callback,
+-    bool is_sync) {
++    bool is_sync, const CefString& str_cookie) {
+   DCHECK(ValidContext());
+   DCHECK(url.is_valid());
+ 
+@@ -405,11 +397,14 @@ bool CefCookieManagerImpl::SetCookieInternal(
+     expiration_time = CefBaseTime(cookie.expires);
+   }
+ 
++#if !BUILDFLAG(IS_OHOS)
+   net::CookieSameSite same_site =
+       net_service::MakeCookieSameSite(cookie.same_site);
+   net::CookiePriority priority =
+       net_service::MakeCookiePriority(cookie.priority);
++#endif
+ 
++#if !BUILDFLAG(IS_OHOS)
+   auto canonical_cookie = net::CanonicalCookie::CreateSanitizedCookie(
+       url, name, value, domain, path,
+       base::Time(),  // Creation time.
+@@ -417,6 +412,11 @@ bool CefCookieManagerImpl::SetCookieInternal(
+       base::Time(),  // Last access time.
+       cookie.secure ? true : false, cookie.httponly ? true : false, same_site,
+       priority, /*same_party=*/false, /*partition_key=*/absl::nullopt);
++#else
++  std::unique_ptr<net::CanonicalCookie> canonical_cookie(net::CanonicalCookie::Create(
++      url, str_cookie.ToString(), base::Time::Now(), absl::nullopt /* server_time */,
++      net::CookiePartitionKey::FromWire(net::SchemefulSite(url), absl::nullopt)));
++#endif
+ 
+   if (!canonical_cookie) {
+     SetCookieCallbackImpl(
+diff --git a/src/cef/libcef/browser/net_service/cookie_manager_impl.h b/src/cef/libcef/browser/net_service/cookie_manager_impl.h
+index 3a5691b511b3e..86b0dc8cbab6a
+--- a/src/cef/libcef/browser/net_service/cookie_manager_impl.h
++++ b/src/cef/libcef/browser/net_service/cookie_manager_impl.h
+@@ -4,7 +4,9 @@
+ 
+ #ifndef CEF_LIBCEF_BROWSER_NET_SERVICE_COOKIE_MANAGER_IMPL_H_
+ #define CEF_LIBCEF_BROWSER_NET_SERVICE_COOKIE_MANAGER_IMPL_H_
+-
++#ifdef OHOS_COOKIE
++#include "libcef/browser/net_service/cookie_manager_ohos_impl.h"
++#else
+ #include "include/cef_cookie.h"
+ #include "libcef/browser/browser_context.h"
+ #include "libcef/browser/thread_util.h"
+@@ -40,7 +42,8 @@ class CefCookieManagerImpl : public CefCookieManager {
+   bool SetCookie(const CefString& url,
+                  const CefCookie& cookie,
+                  CefRefPtr<CefSetCookieCallback> callback,
+-                 bool is_sync) override;
++                 bool is_sync,
++                 const CefString& str_cookie) override;
+   bool DeleteCookies(const CefString& url,
+                      const CefString& cookie_name,
+ #if BUILDFLAG(IS_OHOS)
+@@ -67,7 +70,9 @@ class CefCookieManagerImpl : public CefCookieManager {
+                                CefRefPtr<CefCookieVisitor> visitor, bool sync);
+   bool SetCookieInternal(const GURL& url,
+                          const CefCookie& cookie,
+-                         CefRefPtr<CefSetCookieCallback> callback, bool sync);
++                         CefRefPtr<CefSetCookieCallback> callback,
++                         bool sync,
++                         const CefString& str_cookie);
+   bool DeleteCookiesInternal(const GURL& url,
+                              const CefString& cookie_name,
+                              bool is_session,
+@@ -128,5 +133,5 @@ class CefCookieManagerImpl : public CefCookieManager {
+ 
+   IMPLEMENT_REFCOUNTING(CefCookieManagerImpl);
+ };
+-
++#endif  // OHOS_COOKIE
+ #endif  // CEF_LIBCEF_BROWSER_NET_SERVICE_COOKIE_MANAGER_IMPL_H_
