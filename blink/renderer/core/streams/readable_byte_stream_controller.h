@@ -194,7 +194,8 @@ class ReadableByteStreamController : public ReadableStreamController {
 
   // https://streams.spec.whatwg.org/#readable-byte-stream-controller-fill-pull-into-descriptor-from-queue
   static bool FillPullIntoDescriptorFromQueue(ReadableByteStreamController*,
-                                              PullIntoDescriptor*);
+                                              PullIntoDescriptor*,
+                                              ExceptionState&);
 
   // https://streams.spec.whatwg.org/#readable-byte-stream-controller-pull-into
   static void PullInto(ScriptState*,
