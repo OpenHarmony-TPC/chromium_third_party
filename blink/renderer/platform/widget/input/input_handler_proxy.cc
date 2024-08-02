@@ -730,6 +730,18 @@ void InputHandlerProxy::SetOverscrollMode(int mode) {
   elastic_overscroll_controller_->SetOverscrollMode(mode);
 }
 
+#if defined(OHOS_GET_SCROLL_OFFSET)
+gfx::Vector2dF InputHandlerProxy::GetOverScrollOffset() {
+  gfx::Vector2dF overscroll_offset;
+  overscroll_offset.set_x(0.0f);
+  overscroll_offset.set_y(0.0f);
+  if (!elastic_overscroll_controller_) {
+    LOG(ERROR) << "Error:Overscroll controller is not initialized";
+    return overscroll_offset;
+  }
+  return elastic_overscroll_controller_->GetOverScrollOffset();
+}
+#endif
 #endif
 void InputHandlerProxy::InjectScrollbarGestureScroll(
     const WebInputEvent::Type type,

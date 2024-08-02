@@ -191,6 +191,11 @@ void ElasticOverscrollController::SetOverscrollMode(int mode) {
   overscroll_mode_ = mode;
 }
 
+#if defined(OHOS_GET_SCROLL_OFFSET)
+gfx::Vector2dF ElasticOverscrollController::GetOverScrollOffset() {
+  return stretch_scroll_force_;
+}
+#endif
 #endif 
 void ElasticOverscrollController::Overscroll(
     const gfx::Vector2dF& overscroll_delta) {

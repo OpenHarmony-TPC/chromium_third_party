@@ -81,6 +81,9 @@ class WebFrameWidget : public WebWidget {
 #if BUILDFLAG(IS_OHOS)
   virtual void SetZoomLevel(float magnify_delta, const gfx::Point& anchor) {}
   virtual void SetOverscrollMode(int mode) {}
+#if defined(OHOS_GET_SCROLL_OFFSET)
+  virtual gfx::Vector2dF GetOverScrollOffset() = 0;
+#endif
 #endif  // BUILDFLAG(IS_OHOS)
 
   // Returns the local root of this WebFrameWidget.
