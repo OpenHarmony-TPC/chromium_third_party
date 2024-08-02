@@ -4794,6 +4794,18 @@ void WebFrameWidgetImpl::DidNativeEmbedEvent(const WebPointerEvent& web_pointer_
     LOG(DEBUG) << "NativeEmbed type = " << type << ",x = " << x << ",y = " << y;
   }
 }
+
+#if defined(OHOS_GET_SCROLL_OFFSET)
+gfx::Vector2dF WebFrameWidgetImpl::GetOverScrollOffset() {
+  gfx::Vector2dF overscroll_offset;
+  overscroll_offset.set_x(0.0f);
+  overscroll_offset.set_y(0.0f);
+  if (!widget_base_) {
+    return overscroll_offset;
+  }
+  return widget_base_->GetOverScrollOffset();
+}
+#endif
 #endif  // defined(OHOS_INPUT_EVENTS)
 
 #ifdef OHOS_EX_FREE_COPY
