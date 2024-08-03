@@ -19,6 +19,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/wait.h>
+#if defined(OHOS_CRASHPAD)
+#include<sys/syscall.h>
+#endif
 #include <unistd.h>
 
 #include "base/check.h"
@@ -131,7 +134,11 @@ bool SpawnSubprocess(const std::vector<std::string>& argv,
   // parent shouldn’t be concerned with reaping it. This approach means that
   // accidental early termination of the handler process will not result in a
   // zombie process.
+#if defined(OHOS_CRASHPAD)
+  pid_t pid = syscall(SYS_clone, SIGCHLD, nullptr);
+#else
   pid_t pid = fork();
+#endif
   if (pid < 0) {
     PLOG(ERROR) << "fork";
     return false;
