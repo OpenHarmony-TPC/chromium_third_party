@@ -100,6 +100,8 @@ class CORE_EXPORT MouseEventManager final
 
   DragState& GetDragState();
 
+  bool isDraging();
+
   void FocusDocumentView();
 
   // Resets the state that indicates the next events could cause a drag. It is

@@ -99,6 +99,8 @@ class CORE_EXPORT DragController final
 
   DragState& GetDragState();
 
+  bool isDraging();
+
   static std::unique_ptr<DragImage> DragImageForSelection(LocalFrame&, float);
 
   // Return the selection bounds in absolute coordinates for the frame, clipped
@@ -168,7 +170,9 @@ class CORE_EXPORT DragController final
 
   DragDestinationAction drag_destination_action_;
   bool did_initiate_drag_;
+  bool is_draging_;
 #ifdef OHOS_DRAG_DROP
+
   WTF::StringBuilder origin_style_;
 #endif
 };
