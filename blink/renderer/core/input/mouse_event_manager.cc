@@ -1118,6 +1118,11 @@ DragState& MouseEventManager::GetDragState() {
   return frame_->GetPage()->GetDragController().GetDragState();
 }
 
+bool MouseEventManager::isDraging() {
+  DCHECK(frame_->GetPage());
+  return frame_->GetPage()->GetDragController().isDraging();
+}
+
 void MouseEventManager::ResetDragSource() {
   // Check validity of drag source.
   if (!frame_->GetPage())

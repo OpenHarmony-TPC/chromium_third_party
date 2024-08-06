@@ -240,6 +240,7 @@ void DragController::DragEnded() {
 #ifdef OHOS_DRAG_DROP
   RestoreDragLinkEffects();
 #endif
+  is_draging_ = false;
   drag_initiator_ = nullptr;
   did_initiate_drag_ = false;
   page_->GetDragCaret().Clear();
@@ -1511,6 +1512,7 @@ bool DragController::StartDrag(LocalFrame* frame,
   DoSystemDrag(drag_image.get(), drag_obj_rect,
                effective_drag_initiation_location,
                state.drag_data_transfer_.Get(), frame);
+  is_draging_ = true;
   return true;
 }
 
@@ -1583,6 +1585,10 @@ DragState& DragController::GetDragState() {
   if (!drag_state_)
     drag_state_ = MakeGarbageCollected<DragState>();
   return *drag_state_;
+}
+
+bool DragController::isDraging() {
+  return is_draging_;
 }
 
 void DragController::ContextDestroyed() {
