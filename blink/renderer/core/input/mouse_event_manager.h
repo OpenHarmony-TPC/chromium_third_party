@@ -100,7 +100,7 @@ class CORE_EXPORT MouseEventManager final
 
   DragState& GetDragState();
 
-  bool isDraging();
+  bool IsDraging();
 
   void FocusDocumentView();
 

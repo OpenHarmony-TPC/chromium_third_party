@@ -174,7 +174,8 @@ DragController::DragController(Page* page)
       file_input_element_under_mouse_(nullptr),
       document_is_handling_drag_(false),
       drag_destination_action_(kDragDestinationActionNone),
-      did_initiate_drag_(false) {}
+      did_initiate_drag_(false),
+      is_draging_(false) {} 
 
 static DocumentFragment* DocumentFragmentFromDragData(
     DragData* drag_data,
@@ -1587,7 +1588,7 @@ DragState& DragController::GetDragState() {
   return *drag_state_;
 }
 
-bool DragController::isDraging() {
+bool DragController::IsDraging() {
   return is_draging_;
 }
 

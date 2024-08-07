@@ -99,7 +99,7 @@ class CORE_EXPORT DragController final
 
   DragState& GetDragState();
 
-  bool isDraging();
+  bool IsDraging();
 
   static std::unique_ptr<DragImage> DragImageForSelection(LocalFrame&, float);
 

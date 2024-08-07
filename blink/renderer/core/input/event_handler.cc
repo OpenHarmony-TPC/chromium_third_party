@@ -1105,8 +1105,8 @@ WebInputEventResult EventHandler::HandleMouseMoveOrLeaveEvent(
                                                             mev.InnerNode());
 
     LocalFrameView* view = frame_->View();
-    bool isDraging = mouse_event_manager_->isDraging();
-    if ((!is_remote_frame || is_portal) && view && !isDraging) {
+    bool is_draging = mouse_event_manager_->IsDraging();
+    if ((!is_remote_frame || is_portal) && view && !is_draging) {
       absl::optional<ui::Cursor> optional_cursor =
           SelectCursor(mev.GetHitTestLocation(), mev.GetHitTestResult());
       if (optional_cursor.has_value()) {
