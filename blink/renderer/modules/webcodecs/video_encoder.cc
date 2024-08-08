@@ -137,7 +137,7 @@ media::VideoEncodeAccelerator::SupportedRateControlMode BitrateToSupportedMode(
       return media::VideoEncodeAccelerator::kConstantMode;
     case media::Bitrate::Mode::kVariable:
       return media::VideoEncodeAccelerator::kVariableMode
-#if BUILDFLAG(IS_ANDROID)
+#if BUILDFLAG(IS_ANDROID) || BUILDFLAG(IS_OHOS)
              // On Android we allow CBR-only encoders to be used for VBR because
              // most devices don't properly advertise support for VBR encoding.
              // In most cases they will initialize successfully when configured
@@ -528,7 +528,7 @@ bool MayHaveOSSoftwareEncoder(media::VideoCodecProfile profile) {
   //
   // TODO(crbug.com/1383643): Add IS_WIN here once we can force
   // selection of a software encoder there.
-#if BUILDFLAG(IS_MAC) || BUILDFLAG(IS_ANDROID)
+#if BUILDFLAG(IS_MAC) || BUILDFLAG(IS_ANDROID) || BUILDFLAG(IS_OHOS)
   const auto codec = media::VideoCodecProfileToVideoCodec(profile);
   return codec == media::VideoCodec::kHEVC ||
 #if BUILDFLAG(ENABLE_OPENH264)
