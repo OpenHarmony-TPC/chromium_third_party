@@ -1796,7 +1796,7 @@ void DragController::StartDragTextEffects() {
 
   //textEffect should not happend in ImageDrag
   Element* element = static_cast<Element*>(node);
-  // 针对图文混拖的情况,增加对拖拽类型的判断
+  // Add the judgment of the dragging type for mixed dragging of image and text
   if (CanDragImage(*element) && drag_state_->drag_type_ == kDragSourceActionImage)
     return;
 
@@ -1892,9 +1892,8 @@ void DragController::RestoreDragImageEffects() {
   Node* node = drag_state_->drag_src_.Get();
   if (!node)
     return;
-  //
+
   Element* element = static_cast<Element*>(node);
-  //Element* element = ToElement(node);
   if (!CanDragImage(*element))
     return;
 
