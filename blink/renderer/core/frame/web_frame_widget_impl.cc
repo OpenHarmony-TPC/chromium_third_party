@@ -3683,7 +3683,7 @@ void WebFrameWidgetImpl::SetPanAction(mojom::blink::PanAction pan_action) {
 }
 
 void WebFrameWidgetImpl::DidHandleGestureEvent(const WebGestureEvent& event) {
-#if BUILDFLAG(IS_ANDROID) || defined(USE_AURA) || BUILDFLAG(IS_IOS)
+#if BUILDFLAG(IS_ANDROID) || defined(USE_AURA) || BUILDFLAG(IS_IOS) || BUILDFLAG(IS_OHOS)
   if (event.GetType() == WebInputEvent::Type::kGestureTap) {
     widget_base_->ShowVirtualKeyboard();
   } else if (event.GetType() == WebInputEvent::Type::kGestureLongPress) {
