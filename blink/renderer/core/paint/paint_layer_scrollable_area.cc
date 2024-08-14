@@ -1421,6 +1421,19 @@ gfx::Rect PaintLayerScrollableArea::RectForVerticalScrollbar() const {
     return gfx::Rect();
 
   const gfx::Rect& scroll_corner = ScrollCornerRect();
+#ifdef OHOS_SCROLLBAR
+  int marginBottom = 0;
+  if (VerticalScrollbar()->IsOverlayScrollbar()) {
+    marginBottom = ScaleFromDIP();
+  }
+  return gfx::Rect(
+    VerticalScrollbarStart(), GetLayoutBox()->BorderTop().ToInt(),
+    VerticalScrollbar()->ScrollbarThickness(),
+    PixelSnappedBorderBoxSize().height() -
+        (GetLayoutBox()->BorderTop() + GetLayoutBox()->BorderBottom())
+            .ToInt() -
+        scroll_corner.height() - marginBottom);
+#else
   return gfx::Rect(
       VerticalScrollbarStart(), GetLayoutBox()->BorderTop().ToInt(),
       VerticalScrollbar()->ScrollbarThickness(),
@@ -1428,6 +1441,7 @@ gfx::Rect PaintLayerScrollableArea::RectForVerticalScrollbar() const {
           (GetLayoutBox()->BorderTop() + GetLayoutBox()->BorderBottom())
               .ToInt() -
           scroll_corner.height());
+#endif
 }
 
 int PaintLayerScrollableArea::VerticalScrollbarStart() const {
