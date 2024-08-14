@@ -241,7 +241,11 @@ v8::MaybeLocal<v8::Script> V8ScriptRunner::CompileScript(
   probe::V8Compile probe(execution_context, file_name,
                          script_start_position.line_.ZeroBasedInt(),
                          script_start_position.column_.ZeroBasedInt());
-
+#if BUILDFLAG(IS_OHOS)
+  TRACE_EVENT_BEGIN2(kTraceEventCategoryGroup, "v8.compile location", "lineNumber",
+      script_start_position.line_.OneBasedInt(), "columnNumber", script_start_position.column_.OneBasedInt());
+  TRACE_EVENT_END0(kTraceEventCategoryGroup, "v8.compile location");
+#endif
   if (!*TRACE_EVENT_API_GET_CATEGORY_GROUP_ENABLED(kTraceEventCategoryGroup)) {
     return CompileScriptInternal(isolate, script_state, classic_script, origin,
                                  compile_options, no_cache_reason, nullptr);
@@ -743,6 +747,22 @@ v8::MaybeLocal<v8::Value> V8ScriptRunner::CallFunction(
                          inspector_function_call_event::Data(
                              std::move(trace_context), context, function);
                        });
+#if BUILDFLAG(IS_OHOS)
+    v8::Local<v8::Function> original_function = GetBoundFunction(function);
+    v8::Local<v8::Value> function_name = original_function->GetDebugName();
+    if (!function_name.IsEmpty() && function_name->IsString()) {
+      TRACE_EVENT_BEGIN1("devtools.timeline", "FunctionName", "functionName",
+          ToCoreString(function_name.As<v8::String>()).Ascii().c_str());
+      TRACE_EVENT_END0("devtools.timeline", "FunctionName");
+    }
+    std::unique_ptr<SourceLocation> location = CaptureSourceLocation(original_function);
+    TRACE_EVENT_BEGIN2("devtools.timeline", "FunctionUrl", "url",
+        location->Url().Ascii().c_str(), "scriptId", location->ScriptId());
+    TRACE_EVENT_END0("devtools.timeline", "FunctionUrl");
+    TRACE_EVENT_BEGIN2("devtools.timeline", "FunctionLocation", "lineNumber",
+        location->LineNumber(), "columnNumber", location->ColumnNumber());
+    TRACE_EVENT_END0("devtools.timeline", "FunctionLocation");
+#endif
   }
 
   probe::CallFunction probe(context, isolate->GetCurrentContext(), function,
