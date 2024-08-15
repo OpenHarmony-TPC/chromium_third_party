@@ -40,10 +40,11 @@
 #include "third_party/ohos_ndk/includes/ohos_adapter/ohos_adapter_helper.h"
 
 // For process crash constants
-constexpr char PACKAGE_NAME[] = "PACKAGE_NAME";
+constexpr char BUNDLE_NAME[] = "BUNDLE_NAME";
 constexpr char PROCESS_CRASH[] = "PROCESS_CRASH";
 constexpr char PROCESS_TYPE[] = "PROCESS_TYPE";
 constexpr char CRASH_COUNT[] = "CRASH_COUNT";
+constexpr char ERROR_REASON[] = "ERROR_REASON";
 
 // For process crash log constants
 constexpr char UID[] = "UID";
@@ -100,7 +101,8 @@ std::string CrashpadDfx::GetBuildId(const uint64_t noteAddr,const uint64_t noteS
             return "";
         }
         memcpy(&nhdr, reinterpret_cast<void*>(noteAddr + offset), sizeof(nhdr));
-        LOG(DEBUG) << "Note header read at offset " << offset << ": namesz=" << nhdr.n_namesz << ", descsz=" << nhdr.n_descsz << ", type=" << nhdr.n_type;
+        LOG(DEBUG) << "Note header read at offset " << offset << ": namesz=" << nhdr.n_namesz 
+        << ", descsz=" << nhdr.n_descsz << ", type=" << nhdr.n_type;
         offset += sizeof(nhdr);
 
         if (noteSize - offset < nhdr.n_namesz) {
@@ -219,7 +221,7 @@ std::string CrashpadDfx::GetProcessBundleName() {
         LOG(ERROR) << "CommandLine object is null. Cannot retrieve bundle name.";
         return "";
     }
-
+ 
     if (command_line->HasSwitch("bundle-name")) {
         std::string bundle_name = command_line->GetSwitchValueASCII("bundle-name");
         if (bundle_name.empty()) {
@@ -233,24 +235,28 @@ std::string CrashpadDfx::GetProcessBundleName() {
     }
 }
 
-void CrashpadDfx::ReportProcessCrash(const std::string process_type,
-                                    const std::string happen_time,
-                                    const std::string package_name) {
+void CrashpadDfx::ProcessCrashReport(const std::string process_type,
+                                     const std::string happen_time,
+                                     const std::string bundle_name,
+                                     const std::string error_reason) {
     const std::string build_id = RetrieveBuildId();
     uid_t uid = GetEffectiveProcessUID();
-    const std::string user_id = std::to_string(getuid()/200000);;
+    uid_t user_id_t = getuid()/200000;
+    const std::string user_id = std::to_string(user_id_t);;
     const std::string crash_count = std::to_string(GetAndUpdateRenderProcessCrashCount(process_type));
-
+ 
     OHOS::NWeb::OhosAdapterHelper::GetInstance().GetHiSysEventAdapterInstance().Write(
-    PROCESS_CRASH, OHOS::NWeb::HiSysEventAdapter::EventType::FAULT, 
+      PROCESS_CRASH,
+      OHOS::NWeb::HiSysEventAdapter::EventType::FAULT,
     {
-    PACKAGE_NAME,package_name,
-    PROCESS_TYPE,process_type,
-    CRASH_COUNT,crash_count,
-    UID,std::to_string(uid),
-    BUILDID,build_id,
-    HAPPEN_TIME,happen_time,
-    USERID,user_id
+      BUNDLE_NAME, bundle_name,
+      PROCESS_TYPE, process_type,
+      ERROR_REASON, error_reason,
+      CRASH_COUNT, crash_count,
+      UID, std::to_string(uid),
+      BUILDID, build_id,
+      HAPPEN_TIME, happen_time,
+      USERID, user_id
     });
 }
 
@@ -261,7 +267,8 @@ std::string CrashpadDfx::UpdateCrashDumpPathSuffix() {
   const std::string bundle_name = g_bundle_name;
   const std::string happen_time = g_happen_time;
   const std::string user_id = std::to_string(getuid()/200000);
-  const std::string dump_path_suffix = crashpad + delimiter + bundle_name  + delimiter + std::to_string(g_process_uid) + delimiter + buildID + delimiter + happen_time;
+  const std::string dump_path_suffix = crashpad + delimiter + bundle_name  + delimiter 
+  + std::to_string(g_process_uid) + delimiter + buildID + delimiter + happen_time;
   return dump_path_suffix;
 }
 #endif //defined(OHOS_CRASHPAD)
