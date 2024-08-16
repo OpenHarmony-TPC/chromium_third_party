@@ -49,11 +49,10 @@
 #include "util/posix/signals.h"
 #include "util/posix/spawn_subprocess.h"
 
-
 #if defined(OHOS_CRASHPAD)
 #include "third_party/crashpad/crashpad/util/linux/crashpad_dfx.h"
 #endif
-
+ 
 #if defined(OHOS_CRASHPAD)
 std::string g_happen_time = "";
 std::string g_bundle_name = "";
@@ -305,6 +304,7 @@ class LaunchAtCrashHandler : public SignalHandler {
 
     argv_strings_.push_back(FormatArgumentAddress("trace-parent-with-exception",
                                                   &GetExceptionInfo()));
+
     StringVectorToCStringVector(argv_strings_, &argv_);
     return Install(unhandled_signals);
   }
@@ -313,7 +313,8 @@ class LaunchAtCrashHandler : public SignalHandler {
 #if defined(OHOS_CRASHPAD)
     ScopedPrSetPtracer set_ptracer(sys_getpid(), /* may_log= */ false);
     const std::string process_type = "browser";
-    const std::string package_name = CrashpadDfx::GetProcessBundleName();
+    const std::string error_reason = "browser exited";
+    const std::string bundle_name = CrashpadDfx::GetProcessBundleName();
 #endif
     pid_t pid = fork();
     if (pid < 0) {
@@ -342,7 +343,7 @@ class LaunchAtCrashHandler : public SignalHandler {
     waitpid(pid, &status, 0);
 #if defined(OHOS_CRASHPAD)
 #if defined(REPORT_SYS_EVENT)
-    CrashpadDfx::ReportProcessCrash(process_type,g_happen_time,package_name);
+    CrashpadDfx::ProcessCrashReport(process_type, g_happen_time, bundle_name, error_reason);
 #endif // defined(REPORT_SYS_EVENT)
     LOG(INFO) << "crashpad LaunchAtCrashHandler::HandleCrashImpl, parent process wait child process exit, status = " \
       << status << ", child process pid = " << pid;
