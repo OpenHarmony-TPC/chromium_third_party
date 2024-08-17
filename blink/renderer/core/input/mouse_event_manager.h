@@ -100,7 +100,9 @@ class CORE_EXPORT MouseEventManager final
 
   DragState& GetDragState();
 
+#ifdef OHOS_DRAG_DROP
   bool IsDraging();
+#endif
 
   void FocusDocumentView();
 
