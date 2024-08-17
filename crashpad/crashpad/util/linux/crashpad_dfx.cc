@@ -194,14 +194,14 @@ std::string CrashpadDfx::RetrieveBuildId() {
         return cachedBuildID;
     }
 #if defined(__arm__)
-    const std::string soFilePath = "/data/storage/el1/bundle/nweb/libs/arm/libweb_engine.so";
-    const std::string soFilePathNew = "/data/storage/el1/bundle/arkwebcore/libs/arm/libweb_engine.so";
+    const std::string soFilePath = "/data/storage/el1/bundle/nweb/libs/arm/libarkweb_engine.so";
+    const std::string soFilePathNew = "/data/storage/el1/bundle/arkwebcore/libs/arm/libarkweb_engine.so";
 #elif defined(__aarch64__)
-    const std::string soFilePath = "/data/storage/el1/bundle/nweb/libs/arm64/libweb_engine.so";
-    const std::string soFilePathNew = "/data/storage/el1/bundle/arkwebcore/libs/arm64/libweb_engine.so";
+    const std::string soFilePath = "/data/storage/el1/bundle/nweb/libs/arm64/libarkweb_engine.so";
+    const std::string soFilePathNew = "/data/storage/el1/bundle/arkwebcore/libs/arm64/libarkweb_engine.so";
 #elif defined(__x86_64__)
-    const std::string soFilePath = "/data/storage/el1/bundle/nweb/libs/x86_64/libweb_engine.so";
-    const std::string soFilePathNew = "/data/storage/el1/bundle/arkwebcore/libs/x86_64/libweb_engine.so";
+    const std::string soFilePath = "/data/storage/el1/bundle/nweb/libs/x86_64/libarkweb_engine.so";
+    const std::string soFilePathNew = "/data/storage/el1/bundle/arkwebcore/libs/x86_64/libarkweb_engine.so";
 #else
     cachedBuildID = "unsupported";
     return cachedBuildID;
