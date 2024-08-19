@@ -174,7 +174,12 @@ DragController::DragController(Page* page)
       file_input_element_under_mouse_(nullptr),
       document_is_handling_drag_(false),
       drag_destination_action_(kDragDestinationActionNone),
-      did_initiate_drag_(false) {}
+#ifdef OHOS_DRAG_DROP
+      did_initiate_drag_(false),
+      is_draging_(false) {} 
+#else
+      did_initiate_drag_(false) {} 
+#endif
 
 static DocumentFragment* DocumentFragmentFromDragData(
     DragData* drag_data,
@@ -239,8 +244,8 @@ void DragController::ClearDragCaret() {
 void DragController::DragEnded() {
 #ifdef OHOS_DRAG_DROP
   RestoreDragLinkEffects();
-#endif
   is_draging_ = false;
+#endif
   drag_initiator_ = nullptr;
   did_initiate_drag_ = false;
   page_->GetDragCaret().Clear();
@@ -1512,7 +1517,9 @@ bool DragController::StartDrag(LocalFrame* frame,
   DoSystemDrag(drag_image.get(), drag_obj_rect,
                effective_drag_initiation_location,
                state.drag_data_transfer_.Get(), frame);
+#ifdef OHOS_DRAG_DROP               
   is_draging_ = true;
+#endif
   return true;
 }
 
@@ -1585,10 +1592,6 @@ DragState& DragController::GetDragState() {
   if (!drag_state_)
     drag_state_ = MakeGarbageCollected<DragState>();
   return *drag_state_;
-}
-
-bool DragController::isDraging() {
-  return is_draging_;
 }
 
 void DragController::ContextDestroyed() {
@@ -1901,6 +1904,10 @@ void DragController::RestoreDragImageEffects() {
   if (!style)
     return;
   element->setAttribute(html_names::kStyleAttr, origin_style_.ToAtomicString());
+}
+
+bool DragController::IsDraging() {
+  return is_draging_;
 }
 #endif
 
