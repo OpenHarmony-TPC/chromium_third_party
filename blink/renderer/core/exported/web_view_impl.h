@@ -495,9 +495,8 @@ class CORE_EXPORT WebViewImpl final : public WebView,
 
   void EnterFullscreen(LocalFrame&,
                        const FullscreenOptions*,
-                       FullscreenRequestType
+                       FullscreenRequestType,
 #if defined(OHOS_MEDIA)
-                       ,
                        const absl::optional<gfx::Size>&
 #endif  // defined(OHOS_MEDIA)
   );
