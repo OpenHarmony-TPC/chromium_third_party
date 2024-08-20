@@ -36,7 +36,7 @@ class LayoutNative final : public LayoutImage {
 
   bool SupportsAcceleratedRendering() const;
 
-  HTMLPlugInElement* NativeElement() const;
+  HTMLPlugInElement* PluginElement() const;
 
   const char* GetName() const override {
     NOT_DESTROYED();
@@ -49,11 +49,6 @@ class LayoutNative final : public LayoutImage {
   }
 
  private:
-  void UpdateFromElement() override;
-
-  LayoutSize CalculateIntrinsicSize(float scale);
-  void UpdateIntrinsicSize(bool is_in_layout);
-
   bool IsChildAllowed(LayoutObject*, const ComputedStyle&) const final {
     NOT_DESTROYED();
     return false;
@@ -63,8 +58,6 @@ class LayoutNative final : public LayoutImage {
     NOT_DESTROYED();
     return false;
   }
-
-  void ImageChanged(WrappedImagePtr, CanDeferInvalidation) override;
 
   bool IsOfType(LayoutObjectType type) const override {
     NOT_DESTROYED();
@@ -81,14 +74,12 @@ class LayoutNative final : public LayoutImage {
     return true;
   }
   CompositingReasons AdditionalCompositingReasons() const override;
-
-  void UpdateNativeContent(bool is_in_layout);
 };
 
 template <>
 struct DowncastTraits<LayoutNative> {
   static bool AllowFrom(const LayoutObject& object) {
-    return object.IsLayoutImage();
+    return object.IsLayoutNative();
   }
 };
 

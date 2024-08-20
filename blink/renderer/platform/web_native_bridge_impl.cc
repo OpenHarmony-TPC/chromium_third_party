@@ -210,7 +210,7 @@ void WebNativeBridgeImpl::OnSetLayer() {
   DVLOG(1) << __func__;
   DCHECK(main_task_runner_->BelongsToCurrentThread());
   DCHECK(!video_layer_);
-  media::WebRectChangedCB rect_change_cb = base::BindRepeating(
+  media::RectChangedCB rect_change_cb = base::BindRepeating(
       &WebNativeBridgeImpl::OnLayerRectChange, base::Unretained(this));
 
   media::RectVisibleChangedCB rect_visible_change_cb = base::BindRepeating(
