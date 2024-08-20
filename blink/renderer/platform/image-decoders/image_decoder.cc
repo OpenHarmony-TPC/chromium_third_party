@@ -48,7 +48,9 @@
 #include "third_party/blink/renderer/platform/image-decoders/avif/avif_image_decoder.h"
 #endif
 #if BUILDFLAG(IS_OHOS)
+#if BUILDFLAG(ENABLE_HEIF_SUPPORT)
 #include "third_party/blink/renderer/platform/image-decoders/heif/heif_image_decoder.h"
+#endif
 #endif
 
 namespace blink {
@@ -73,8 +75,10 @@ cc::ImageType FileExtensionToImageType(String image_extension) {
     return cc::ImageType::kAVIF;
 #endif
 #if BUILDFLAG(IS_OHOS)
+if BUILDFLAG(ENABLE_HEIF_SUPPORT)
   if (image_extension == "heif")
     return cc::ImageType::kHEIF;
+#endif
 #endif
   return cc::ImageType::kInvalid;
 }
@@ -183,9 +187,11 @@ String SniffMimeTypeInternal(scoped_refptr<SegmentReader> reader) {
     return "image/avif";
 #endif
 #if BUILDFLAG(IS_OHOS)
+#if BUILDFLAG(ENABLE_HEIF_SUPPORT)
   if (HEIFImageDecoder::MatchesHeifSignature(reader->GetAsSkData())) {
     return "image/heif";
   }
+#endif
 #endif
 
   return String();
@@ -272,10 +278,12 @@ std::unique_ptr<ImageDecoder> ImageDecoder::CreateByMimeType(
         max_decoded_bytes, animation_option);
 #endif
 #if BUILDFLAG(IS_OHOS)
+#if BUILDFLAG(ENABLE_HEIF_SUPPORT)
   } else if (mime_type == "image/heif") {
     decoder = std::make_unique<HEIFImageDecoder>(
         alpha_option, high_bit_depth_decoding_option, color_behavior,
         max_decoded_bytes, animation_option);
+#endif
 #endif
   }
 
