@@ -75,7 +75,7 @@ cc::ImageType FileExtensionToImageType(String image_extension) {
     return cc::ImageType::kAVIF;
 #endif
 #if BUILDFLAG(IS_OHOS)
-if BUILDFLAG(ENABLE_HEIF_SUPPORT)
+#if BUILDFLAG(ENABLE_HEIF_SUPPORT)
   if (image_extension == "heif")
     return cc::ImageType::kHEIF;
 #endif
