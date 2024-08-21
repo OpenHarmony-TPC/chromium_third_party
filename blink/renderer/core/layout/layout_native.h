@@ -67,8 +67,6 @@ class LayoutNative final : public LayoutImage {
   void PaintReplaced(const PaintInfo&,
                      const PhysicalOffset& paint_offset) const override;
 
-  void UpdateLayout() override;
-
   bool CanHaveAdditionalCompositingReasons() const override {
     NOT_DESTROYED();
     return true;
