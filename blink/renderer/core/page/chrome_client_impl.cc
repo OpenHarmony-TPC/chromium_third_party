@@ -890,13 +890,13 @@ void ChromeClientImpl::EnterFullscreen(
     const FullscreenOptions* options,
     FullscreenRequestType request_type
 #if defined(OHOS_MEDIA)
-    ,const absl::optional<gfx::Size>& video_natural_size
+    , const absl::optional<gfx::Size>& video_natural_size
 #endif  // defined(OHOS_MEDIA)
 ) {
   DCHECK(web_view_);
   web_view_->EnterFullscreen(frame, options, request_type
 #if defined(OHOS_MEDIA)
-                             ,video_natural_size
+                             , video_natural_size
 #endif  // defined(OHOS_MEDIA)
   );
 }
