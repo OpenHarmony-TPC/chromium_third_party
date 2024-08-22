@@ -268,8 +268,12 @@ scoped_refptr<WidgetInputHandlerManager> WidgetInputHandlerManager::Create(
     manager->InitInputHandler();
 
   // A compositor thread implies we're using an input handler.
+#if defined(OHOS_SOFTWARE_COMPOSITOR)
+  DCHECK(uses_input_handler);
+#else
   DCHECK(!manager->compositor_thread_default_task_runner_ ||
          uses_input_handler);
+#endif
   // Conversely, if we don't use an input handler we must not have a compositor
   // thread.
   DCHECK(uses_input_handler ||
@@ -316,11 +320,9 @@ WidgetInputHandlerManager::WidgetInputHandlerManager(
   }
 #endif
 #if defined(OHOS_SOFTWARE_COMPOSITOR)
-  if (compositor_thread_default_task_runner_) {
-    software_proxy_registry_ =
-        std::make_unique<SoftwareCompositorProxyRegistryOhos>(
-            compositor_thread_default_task_runner_);
-  }
+software_proxy_registry_ =
+    std::make_unique<SoftwareCompositorProxyRegistryOhos>(
+          compositor_thread_default_task_runner_);
 #endif
 }
 
