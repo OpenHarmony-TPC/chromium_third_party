@@ -2698,7 +2698,8 @@ WebInputEventResult WebFrameWidgetImpl::HandleInputEvent(
   DCHECK(!WebInputEvent::IsTouchEventType(input_event.GetType()));
   CHECK(LocalRootImpl());
 
-  if (input_event.GetType() == WebInputEvent::Type::kPointerUp) {
+  if (input_event.GetType() == WebInputEvent::Type::kPointerUp ||
+      input_event.GetType() == WebInputEvent::Type::kKeyUp) {
     base::ohos::TouchObserver::GetInstance().
       SetTouchUpTime(::base::subtle::TimeTicksNowIgnoringOverride().since_origin().InNanoseconds());
   }
