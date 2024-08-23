@@ -156,6 +156,7 @@
 #endif
 
 #if BUILDFLAG(IS_OHOS)
+#include "base/ohos/ltpo/include/touch_observer.h"
 #include "third_party/blink/renderer/core/html/html_image_loader.h"
 #include "third_party/blink/renderer/core/html/html_plugin_element.h"
 #endif
@@ -2697,6 +2698,12 @@ WebInputEventResult WebFrameWidgetImpl::HandleInputEvent(
   DCHECK(!WebInputEvent::IsTouchEventType(input_event.GetType()));
   CHECK(LocalRootImpl());
 
+  if (input_event.GetType() == WebInputEvent::Type::kPointerUp ||
+      input_event.GetType() == WebInputEvent::Type::kKeyUp) {
+    base::ohos::TouchObserver::GetInstance().
+      SetTouchUpTime(::base::subtle::TimeTicksNowIgnoringOverride().since_origin().InNanoseconds());
+  }
+
   // Clients shouldn't be dispatching events to a provisional frame but this
   // can happen. Ensure that event handling can assume we're in a committed
   // frame.
@@ -3677,7 +3684,7 @@ void WebFrameWidgetImpl::SetPanAction(mojom::blink::PanAction pan_action) {
 }
 
 void WebFrameWidgetImpl::DidHandleGestureEvent(const WebGestureEvent& event) {
-#if BUILDFLAG(IS_ANDROID) || defined(USE_AURA) || BUILDFLAG(IS_IOS)
+#if BUILDFLAG(IS_ANDROID) || defined(USE_AURA) || BUILDFLAG(IS_IOS) || BUILDFLAG(IS_OHOS)
   if (event.GetType() == WebInputEvent::Type::kGestureTap) {
     widget_base_->ShowVirtualKeyboard();
   } else if (event.GetType() == WebInputEvent::Type::kGestureLongPress) {
@@ -4788,6 +4795,18 @@ void WebFrameWidgetImpl::DidNativeEmbedEvent(const WebPointerEvent& web_pointer_
     LOG(DEBUG) << "NativeEmbed type = " << type << ",x = " << x << ",y = " << y;
   }
 }
+
+#if defined(OHOS_GET_SCROLL_OFFSET)
+gfx::Vector2dF WebFrameWidgetImpl::GetOverScrollOffset() {
+  gfx::Vector2dF overscroll_offset;
+  overscroll_offset.set_x(0.0f);
+  overscroll_offset.set_y(0.0f);
+  if (!widget_base_) {
+    return overscroll_offset;
+  }
+  return widget_base_->GetOverScrollOffset();
+}
+#endif
 #endif  // defined(OHOS_INPUT_EVENTS)
 
 #ifdef OHOS_EX_FREE_COPY

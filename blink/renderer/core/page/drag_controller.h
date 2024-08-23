@@ -124,6 +124,7 @@ class CORE_EXPORT DragController final
   bool IsInImageDraging();
   bool IsInTextDraging();
   void SetDragInitState(bool did_initiate_drag);
+  bool IsDraging();
 
 #endif
 
@@ -169,7 +170,9 @@ class CORE_EXPORT DragController final
   DragDestinationAction drag_destination_action_;
   bool did_initiate_drag_;
 #ifdef OHOS_DRAG_DROP
+
   WTF::StringBuilder origin_style_;
+  bool is_draging_;
 #endif
 };
 

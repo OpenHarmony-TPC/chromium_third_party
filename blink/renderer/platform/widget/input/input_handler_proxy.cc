@@ -436,6 +436,9 @@ void InputHandlerProxy::NativeHitTestResult(bool native, size_t fingerId, int la
     layerId = layer_impl->id();
     native = true;
   }
+  if (layer_impl) {
+    nativeRect_ = layer_impl->GetNativeRect();
+  }
   native_map_[fingerId] = native;
   if (native) {
     native_id_map_[fingerId] = layerId;
@@ -457,9 +460,15 @@ void InputHandlerProxy::SendNativeEvent(const WebTouchEvent& touch_event,
     cc::LayerImpl* layer_impl = input_handler_->GetLayerImplById(layer_id);
     if (layer_impl) {
       embed_id_ = std::to_string(layer_impl->native_embed_id());
-      gfx::RectF nativeRect = layer_impl->GetNativeRect();
-      x = x - nativeRect.x();
-      y = y - nativeRect.y();
+      float scale = layer_impl->GetIdealContentsScaleKey();
+      float initScale = layer_impl->GetInitScale();
+      if (initScale > 0.f && scale > 0.f) {
+        x = (x - nativeRect_.x()) / (scale / initScale);
+        y = (y - nativeRect_.y()) / (scale / initScale);
+      } else {
+        x = x - nativeRect_.x();
+        y = y - nativeRect_.y();
+      }
       client_->DidNativeEmbedEvent(type, embed_id_, id, x, y);
     } else {
       if (!native_event_queue_->empty()) {
@@ -730,6 +739,18 @@ void InputHandlerProxy::SetOverscrollMode(int mode) {
   elastic_overscroll_controller_->SetOverscrollMode(mode);
 }
 
+#if defined(OHOS_GET_SCROLL_OFFSET)
+gfx::Vector2dF InputHandlerProxy::GetOverScrollOffset() {
+  gfx::Vector2dF overscroll_offset;
+  overscroll_offset.set_x(0.0f);
+  overscroll_offset.set_y(0.0f);
+  if (!elastic_overscroll_controller_) {
+    LOG(ERROR) << "Error:Overscroll controller is not initialized";
+    return overscroll_offset;
+  }
+  return elastic_overscroll_controller_->GetOverScrollOffset();
+}
+#endif
 #endif
 void InputHandlerProxy::InjectScrollbarGestureScroll(
     const WebInputEvent::Type type,
@@ -1573,11 +1594,7 @@ InputHandlerProxy::EventDisposition InputHandlerProxy::HandleTouchMove(
     EventWithCallback* event_with_callback) {
   const auto& touch_event =
       static_cast<const WebTouchEvent&>(event_with_callback->event());
-#if BUILDFLAG(IS_OHOS)
-  if (touch_event.is_fit_content) {
-    return DROP_EVENT;
-  }
-#endif
+
   TRACE_EVENT2("input", "InputHandlerProxy::HandleTouchMove", "touch_result",
                touch_result_.has_value() ? touch_result_.value() : -1,
                "is_start_or_first",

@@ -229,6 +229,12 @@ void NativeLoader::UpdateSize(gfx::Size size) {
   }
 }
 
+void NativeLoader::OnLayerRectVisibleChange(bool visibility) {
+  for (auto& observer : native_bridge_observer_remote_set_->Value()) {
+    observer->OnLayerRectVisibleChange(visibility);
+  }
+}
+
 void NativeLoader::OnLayerRectChange(const gfx::Rect& rect) {
   if (PluginBoundingRect().ApproximatelyEqual(rect, 1) ||
       !native_bridge_observer_remote_set_) {

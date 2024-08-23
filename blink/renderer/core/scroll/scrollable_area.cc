@@ -110,7 +110,11 @@ ScrollableArea::ScrollableArea(
       horizontal_scrollbar_needs_paint_invalidation_(false),
       vertical_scrollbar_needs_paint_invalidation_(false),
       scroll_corner_needs_paint_invalidation_(false),
+#ifdef OHOS_SCROLLBAR
+      scrollbars_hidden_if_overlay_(false),
+#else
       scrollbars_hidden_if_overlay_(true),
+#endif
       scrollbar_captured_(false),
       mouse_over_scrollbar_(false),
       has_been_disposed_(false),
@@ -665,6 +669,22 @@ void ScrollableArea::SetScrollbarColor(SkColor colorValue) {
 void ScrollableArea::SetScrollbarOverlayColorTheme(
     ScrollbarOverlayColorTheme overlay_theme) {
   scrollbar_overlay_color_theme_ = overlay_theme;
+#ifdef OHOS_SCROLLBAR
+  if(HasOverlayScrollbars()) {
+    //set scrollbar color for overlay color theme
+    if(scrollbar_overlay_color_theme_ == kScrollbarOverlayColorThemeDark) {
+      SkColor skDark = SkColorSetRGB(0x18, 0x24, 0x31);
+      SetScrollbarColor(skDark);
+      LOG(INFO) << "ScrollableArea::SetScrollbarOverlayColorTheme"
+        << " scrollbar color is RGB:0x18, 0x24, 0x31";
+    } else {
+      SkColor skLight = SkColorSetRGB(0xFF, 0xFF, 0xFF);
+      SetScrollbarColor(skLight);
+      LOG(INFO) << "ScrollableArea::SetScrollbarOverlayColorTheme"
+        << " scrollbar color is RGB:0xFF, 0xFF, 0xFF";
+    }
+  }
+#endif // OHOS_SCROLLBAR
 
   if (Scrollbar* scrollbar = HorizontalScrollbar()) {
     GetPageScrollbarTheme().UpdateScrollbarOverlayColorTheme(*scrollbar);
@@ -697,6 +717,7 @@ void ScrollableArea::RecalculateScrollbarOverlayColorTheme() {
       background_color.GetHSL(hue, saturation, lightness);
       overlay_theme = lightness <= 0.5 ? kScrollbarOverlayColorThemeLight
                                        : kScrollbarOverlayColorThemeDark;
+      scrollbar_overlay_color_theme_ = overlay_theme;
     }
   }
 

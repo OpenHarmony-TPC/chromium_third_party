@@ -39,12 +39,13 @@
 #if defined(OHOS_CRASHPAD)
 #include "third_party/crashpad/crashpad/util/linux/crashpad_dfx.h"
 #endif
-
+ 
 #if defined(OHOS_CRASHPAD)
 uid_t g_process_uid = 0;
 extern std::string g_happen_time;
 extern std::string g_bundle_name;
 #endif
+
 namespace crashpad {
 
 namespace {
@@ -551,10 +552,9 @@ bool ExceptionHandlerServer::HandleCrashDumpRequest(
 
 #if defined(OHOS_CRASHPAD)
     const std::string process_type = "render";
-    const std::string package_name = g_bundle_name; 
-    const std::string happen_time = g_happen_time;
+    const std::string error_reason = "render exited";
 #if defined(REPORT_SYS_EVENT)
-    CrashpadDfx::ReportProcessCrash(process_type,happen_time,package_name);
+    CrashpadDfx::ProcessCrashReport(process_type, g_happen_time, g_bundle_name, error_reason);
 #endif
 #endif
   return SendMessageToClient(

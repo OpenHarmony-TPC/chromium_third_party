@@ -78,6 +78,9 @@ class PLATFORM_EXPORT ElasticOverscrollController {
       cc::ScrollElasticityHelper* helper);
 #if defined(OHOS_INPUT_EVENTS)
   void SetOverscrollMode(int mode);
+#if defined(OHOS_GET_SCROLL_OFFSET)
+  gfx::Vector2dF GetOverScrollOffset();
+#endif
 #endif
 
  protected:

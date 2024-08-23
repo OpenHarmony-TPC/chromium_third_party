@@ -77,6 +77,7 @@ class CORE_EXPORT NativeLoader
   void OnCreateNativeSurface(int native_embed_id,
                              RectChangeCB rect_changed_cb) final;
   void OnLayerRectChange(const gfx::Rect& rect) final;
+  void OnLayerRectVisibleChange(bool visibility) final;
   void OnDestroyNativeSurface() final;
   void Repaint() final;
   void SetCcLayer(cc::Layer*) final;

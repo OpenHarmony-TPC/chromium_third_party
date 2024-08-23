@@ -142,7 +142,11 @@ void SyncLoadContext::StartAsyncWithWaitableEvent(
       loader_options, cors_exempt_header_list, context,
       context->url_loader_factory_, std::move(throttles),
       std::move(resource_load_info_notifier_wrapper),
+#if BUILDFLAG(IS_OHOS)
+      /*back_forward_cache_loader_helper=*/nullptr, true);
+#else
       /*back_forward_cache_loader_helper=*/nullptr);
+#endif
 }
 
 SyncLoadContext::SyncLoadContext(

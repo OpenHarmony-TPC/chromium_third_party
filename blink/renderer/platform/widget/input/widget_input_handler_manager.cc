@@ -268,8 +268,12 @@ scoped_refptr<WidgetInputHandlerManager> WidgetInputHandlerManager::Create(
     manager->InitInputHandler();
 
   // A compositor thread implies we're using an input handler.
+#if defined(OHOS_SOFTWARE_COMPOSITOR)
+  DCHECK(uses_input_handler);
+#else
   DCHECK(!manager->compositor_thread_default_task_runner_ ||
          uses_input_handler);
+#endif
   // Conversely, if we don't use an input handler we must not have a compositor
   // thread.
   DCHECK(uses_input_handler ||
@@ -316,11 +320,9 @@ WidgetInputHandlerManager::WidgetInputHandlerManager(
   }
 #endif
 #if defined(OHOS_SOFTWARE_COMPOSITOR)
-  if (compositor_thread_default_task_runner_) {
-    software_proxy_registry_ =
-        std::make_unique<SoftwareCompositorProxyRegistryOhos>(
-            compositor_thread_default_task_runner_);
-  }
+software_proxy_registry_ =
+    std::make_unique<SoftwareCompositorProxyRegistryOhos>(
+          compositor_thread_default_task_runner_);
 #endif
 }
 
@@ -1235,7 +1237,8 @@ void WidgetInputHandlerManager::UpdateBrowserControlsState(
 void WidgetInputHandlerManager::DidNativeEmbedEvent(blink::WebInputEvent::Type type,
                                                     std::string embedId,
                                                     int32_t id,
-                                                    float x,float y) {
+                                                    float x,
+                                                    float y) {
   main_thread_task_runner_->PostTask(
       FROM_HERE,
       base::BindOnce(&WidgetBase::DidNativeEmbedEvent, widget_, type, embedId, id, x, y));
@@ -1292,6 +1295,18 @@ void WidgetInputHandlerManager::SetOverscrollMode(int mode) {
   }
   input_handler_proxy_->SetOverscrollMode(mode);
 }
+
+#if defined(OHOS_GET_SCROLL_OFFSET)
+gfx::Vector2dF WidgetInputHandlerManager::GetOverScrollOffset() {
+  gfx::Vector2dF overscroll_offset;
+  overscroll_offset.set_x(0.0f);
+  overscroll_offset.set_y(0.0f);
+  if (!input_handler_proxy_) {
+    return overscroll_offset;
+  }
+  return input_handler_proxy_->GetOverScrollOffset();
+}
+#endif
 #endif  // defined(OHOS_INPUT_EVENTS)
 
 }  // namespace blink

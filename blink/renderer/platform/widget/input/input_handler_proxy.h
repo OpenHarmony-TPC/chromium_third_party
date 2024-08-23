@@ -245,6 +245,9 @@ class PLATFORM_EXPORT InputHandlerProxy : public cc::InputHandlerClient,
 #endif
 #if defined(OHOS_INPUT_EVENTS)
   void SetOverscrollMode(int mode);
+#if defined(OHOS_GET_SCROLL_OFFSET)
+  gfx::Vector2dF GetOverScrollOffset();
+#endif
 #endif
 
   // SnapFlingClient implementation.
@@ -456,6 +459,7 @@ class PLATFORM_EXPORT InputHandlerProxy : public cc::InputHandlerClient,
   std::unordered_map<size_t, bool> native_map_;
   WebTouchEvent start_touch_event_;
   std::unordered_map<size_t, int> native_id_map_;
+  gfx::RectF nativeRect_;
 #endif
 };
 
