@@ -2687,7 +2687,7 @@ void LocalFrameView::UpdateCompositedSelectionIfNeed() {
   }
   gfx::Rect clipped_selection_bounds =
       local_frame->Selection().ClippedSelectionBoundsInRootFrame();
-  if(!clipped_selection_bounds.IsEmpty()) {
+  if (!clipped_selection_bounds.IsEmpty()) {
     if (auto* frame_widget = local_frame->GetWidgetForLocalRoot()) {
       frame_widget->RegisterClippedVisualViewportSelectionBounds(
         clipped_selection_bounds);
