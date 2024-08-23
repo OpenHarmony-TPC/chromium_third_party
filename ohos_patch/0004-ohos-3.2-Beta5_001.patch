@@ -7118,3 +7118,1803 @@ index bf5e49c14b13d..96cc2faf567a7
    // ui::GestureProviderClient implementation.
    void ProcessAckedTouchEvent(
        const content::TouchEventWithLatencyInfo& touch,
+diff --git a/src/cef/libcef/browser/osr/touch_selection_controller_client_osr.cc b/src/cef/libcef/browser/osr/touch_selection_controller_client_osr.cc
+index a4566a8dbba89..f2751a7a4c027
+--- a/src/cef/libcef/browser/osr/touch_selection_controller_client_osr.cc
++++ b/src/cef/libcef/browser/osr/touch_selection_controller_client_osr.cc
+@@ -21,6 +21,7 @@
+ #include "ui/base/pointer/touch_editing_controller.h"
+ #include "ui/gfx/geometry/point_conversions.h"
+ #include "ui/gfx/geometry/size_conversions.h"
++#include "base/logging.h"
+ 
+ namespace {
+ 
+@@ -125,7 +126,22 @@ CefTouchSelectionControllerClientOSR::~CefTouchSelectionControllerClientOSR() {
+ 
+ void CefTouchSelectionControllerClientOSR::CloseQuickMenuAndHideHandles() {
+   CloseQuickMenu();
+-  rwhv_->selection_controller()->HideAndDisallowShowingAutomatically();
++  auto controller = rwhv_->selection_controller();
++  if (controller) {
++    if (!controller->GetInsertHandle() || !controller->GetInsertHandle()->GetEnabled()) {
++      rwhv_->selection_controller()->HideAndDisallowShowingAutomatically();
++    } else if (controller->GetInsertHandle()->GetEnabled()) {
++      rwhv_->selection_controller()->SetTemporarilyHidden(true);
++      NotifyTouchSelectionChanged(true);
++    }
++  }
++}
++
++void CefTouchSelectionControllerClientOSR::SetTemporarilyHidden(bool hidden) {
++  if (rwhv_ && rwhv_->selection_controller()) {
++    rwhv_->selection_controller()->SetTemporarilyHidden(hidden);
++    NotifyTouchSelectionChanged(false);
++  }
+ }
+ 
+ void CefTouchSelectionControllerClientOSR::OnWindowMoved() {
+@@ -290,7 +306,6 @@ void CefTouchSelectionControllerClientOSR::ShowQuickMenu() {
+         new CefRunQuickMenuCallbackImpl(base::BindOnce(
+             &CefTouchSelectionControllerClientOSR::ExecuteCommand,
+             weak_ptr_factory_.GetWeakPtr())));
+-
+     quick_menu_running_ = true;
+     if (!handler->RunQuickMenu(
+             browser, browser->GetFocusedFrame(),
+@@ -307,6 +322,7 @@ void CefTouchSelectionControllerClientOSR::ShowQuickMenu() {
+       if (browser->web_contents()) {
+         browser->web_contents()->SetShowingContextMenu(true);
+       }
++      browser->SetTouchInsertHandleMenuShow(false);
+     }
+   }
+ }
+@@ -404,6 +420,7 @@ void CefTouchSelectionControllerClientOSR::OnSelectionEvent(
+     ui::SelectionEventType event) {
+   // This function (implicitly) uses active_menu_client_, so we don't go to the
+   // active view for this.
++  auto browser = rwhv_->browser_impl();
+   switch (event) {
+     case ui::SELECTION_HANDLES_SHOWN:
+       quick_menu_requested_ = true;
+@@ -416,7 +433,9 @@ void CefTouchSelectionControllerClientOSR::OnSelectionEvent(
+             rwhv_->browser_impl()->GetTouchInsertHandleMenuShow();
+       }
+       NotifyTouchSelectionChanged(true);
+-      UpdateQuickMenu();
++      if (quick_menu_requested_) {
++        ShowQuickMenu();
++      }
+       break;
+     case ui::SELECTION_HANDLES_CLEARED:
+     case ui::INSERTION_HANDLE_CLEARED:
+@@ -433,11 +452,10 @@ void CefTouchSelectionControllerClientOSR::OnSelectionEvent(
+       handle_drag_in_progress_ = false;
+       break;
+     case ui::SELECTION_HANDLES_MOVED:
++    case ui::INSERTION_HANDLE_MOVED:
+       if (!handle_drag_in_progress_) {
+         UpdateQuickMenu();
+       }
+-      [[fallthrough]];
+-    case ui::INSERTION_HANDLE_MOVED:
+       NotifyTouchSelectionChanged(true);
+       break;
+     case ui::INSERTION_HANDLE_TAPPED:
+@@ -450,9 +468,6 @@ void CefTouchSelectionControllerClientOSR::OnSelectionEvent(
+       }
+       break;
+   }
+-  if (rwhv_ && rwhv_->browser_impl()) {
+-    rwhv_->browser_impl()->SetTouchInsertHandleMenuShow(false);
+-  }
+ }
+ 
+ void CefTouchSelectionControllerClientOSR::InternalClient::OnSelectionEvent(
+@@ -616,4 +631,4 @@ bool CefTouchSelectionControllerClientOSR::
+     return true;
+   }
+   return false;
+-}
++}
+\ No newline at end of file
+diff --git a/src/cef/libcef/browser/osr/touch_selection_controller_client_osr.h b/src/cef/libcef/browser/osr/touch_selection_controller_client_osr.h
+index 9794cf9fc8ea0..b7de80ae61a1b
+--- a/src/cef/libcef/browser/osr/touch_selection_controller_client_osr.h
++++ b/src/cef/libcef/browser/osr/touch_selection_controller_client_osr.h
+@@ -41,6 +41,7 @@ class CefTouchSelectionControllerClientOSR
+   ~CefTouchSelectionControllerClientOSR() override;
+ 
+   void CloseQuickMenuAndHideHandles();
++  void SetTemporarilyHidden(bool hidden);
+ 
+   void OnWindowMoved();
+ 
+diff --git a/src/cef/libcef/browser/osr/web_contents_view_osr.cc b/src/cef/libcef/browser/osr/web_contents_view_osr.cc
+index e81a41ae714c1..3469cfdf25aa8
+--- a/src/cef/libcef/browser/osr/web_contents_view_osr.cc
++++ b/src/cef/libcef/browser/osr/web_contents_view_osr.cc
+@@ -148,6 +148,8 @@ bool CefWebContentsViewOSR::CloseTabAfterEventTrackingIfNeeded() {
+ }
+ #endif  // BUILDFLAG(IS_MAC)
+ 
++void CefWebContentsViewOSR::FullscreenStateChanged(bool is_fullscreen) {}
++
+ void CefWebContentsViewOSR::StartDragging(
+     const content::DropData& drop_data,
+     blink::DragOperationsMask allowed_ops,
+@@ -172,6 +174,27 @@ void CefWebContentsViewOSR::UpdateDragCursor(
+     browser->UpdateDragCursor(operation);
+ }
+ 
++#if BUILDFLAG(USE_EXTERNAL_POPUP_MENU)
++void CefWebContentsViewOSR::ShowPopupMenu(
++    content::RenderFrameHost* render_frame_host,
++    mojo::PendingRemote<blink::mojom::PopupMenuClient> popup_client,
++    const gfx::Rect& bounds,
++    int item_height,
++    double item_font_size,
++    int selected_item,
++    std::vector<blink::mojom::MenuItemPtr> menu_items,
++    bool right_aligned,
++    bool allow_multiple_selection) {
++  CefRefPtr<AlloyBrowserHostImpl> browser = GetBrowser();
++  if (browser.get()) {
++    browser->ShowPopupMenu(std::move(popup_client), bounds,
++                           item_height, item_font_size, selected_item,
++                           std::move(menu_items), right_aligned,
++                           allow_multiple_selection);
++  }
++}
++#endif
++
+ CefRenderWidgetHostViewOSR* CefWebContentsViewOSR::GetView() const {
+   if (web_contents_) {
+     return static_cast<CefRenderWidgetHostViewOSR*>(
+diff --git a/src/cef/libcef/browser/osr/web_contents_view_osr.h b/src/cef/libcef/browser/osr/web_contents_view_osr.h
+index 81b5689dcb6f7..e5dd7ae1c817b
+--- a/src/cef/libcef/browser/osr/web_contents_view_osr.h
++++ b/src/cef/libcef/browser/osr/web_contents_view_osr.h
+@@ -65,6 +65,8 @@ class CefWebContentsViewOSR : public content::WebContentsView,
+   bool CloseTabAfterEventTrackingIfNeeded() override;
+ #endif
+ 
++  void FullscreenStateChanged(bool is_fullscreen) override;
++
+   // RenderViewHostDelegateView methods.
+   void StartDragging(const content::DropData& drop_data,
+                      blink::DragOperationsMask allowed_ops,
+@@ -78,6 +80,18 @@ class CefWebContentsViewOSR : public content::WebContentsView,
+   virtual void LostFocus(
+       content::RenderWidgetHostImpl* render_widget_host) override;
+   virtual void TakeFocus(bool reverse) override;
++#if BUILDFLAG(USE_EXTERNAL_POPUP_MENU)
++  void ShowPopupMenu(
++      content::RenderFrameHost* render_frame_host,
++      mojo::PendingRemote<blink::mojom::PopupMenuClient> popup_client,
++      const gfx::Rect& bounds,
++      int item_height,
++      double item_font_size,
++      int selected_item,
++      std::vector<blink::mojom::MenuItemPtr> menu_items,
++      bool right_aligned,
++      bool allow_multiple_selection) override;
++#endif
+ 
+  private:
+   CefRenderWidgetHostViewOSR* GetView() const;
+diff --git a/src/cef/libcef/browser/permission/alloy_access_request.cc b/src/cef/libcef/browser/permission/alloy_access_request.cc
+index c15d3bd73dae4..416b37379cde8
+--- a/src/cef/libcef/browser/permission/alloy_access_request.cc
++++ b/src/cef/libcef/browser/permission/alloy_access_request.cc
+@@ -10,7 +10,9 @@ AlloyAccessRequest::AlloyAccessRequest(const CefString& origin,
+     : origin_(origin), resources_(resources), callback_(std::move(callback)) {}
+ 
+ AlloyAccessRequest::~AlloyAccessRequest() {
+-  std::move(callback_).Run(false);
++  if (!callback_.is_null()) {
++    std::move(callback_).Run(false);
++  }
+ }
+ 
+ CefString AlloyAccessRequest::Origin() {
+@@ -22,5 +24,7 @@ int AlloyAccessRequest::ResourceAcessId() {
+ }
+ 
+ void AlloyAccessRequest::ReportRequestResult(bool allowed) {
+-  std::move(callback_).Run(allowed);
++  if (!callback_.is_null()) {
++    std::move(callback_).Run(allowed);
++  }
+ }
+\ No newline at end of file
+diff --git a/src/cef/libcef/browser/prefs/browser_prefs.cc b/src/cef/libcef/browser/prefs/browser_prefs.cc
+index e34ca3e4edd42..0a964b7fe42c1
+--- a/src/cef/libcef/browser/prefs/browser_prefs.cc
++++ b/src/cef/libcef/browser/prefs/browser_prefs.cc
+@@ -22,10 +22,8 @@
+ #include "chrome/browser/accessibility/accessibility_ui.h"
+ #include "chrome/browser/download/download_prefs.h"
+ #include "chrome/browser/media/media_device_id_salt.h"
+-#include "chrome/browser/media/router/media_router_feature.h"
+ #include "chrome/browser/net/profile_network_context_service.h"
+ #include "chrome/browser/net/system_network_context_manager.h"
+-#include "chrome/browser/plugins/plugin_info_host_impl.h"
+ #include "chrome/browser/prefetch/prefetch_prefs.h"
+ #include "chrome/browser/prefs/chrome_command_line_pref_store.h"
+ #include "chrome/browser/printing/print_preview_sticky_settings.h"
+@@ -75,6 +73,14 @@
+ #include "chrome/browser/supervised_user/supervised_user_settings_service_factory.h"
+ #endif
+ 
++#if BUILDFLAG(IS_OHOS) && BUILDFLAG(ENABLE_PLUGINS)
++#include "chrome/browser/plugins/plugin_info_host_impl.h"
++#endif
++
++#if BUILDFLAG(IS_OHOS) && BUILDFLAG(OHOS_ENABLE_MEDIA_ROUTER)
++#include "chrome/browser/media/router/media_router_feature.h"
++#endif
++
+ namespace browser_prefs {
+ 
+ namespace {
+@@ -223,8 +229,12 @@ std::unique_ptr<PrefService> CreatePrefService(Profile* profile,
+   CefMediaCaptureDevicesDispatcher::RegisterPrefs(registry.get());
+   certificate_transparency::prefs::RegisterPrefs(registry.get());
+   flags_ui::PrefServiceFlagsStorage::RegisterPrefs(registry.get());
++#if BUILDFLAG(IS_OHOS) && BUILDFLAG(OHOS_ENABLE_MEDIA_ROUTER)
+   media_router::RegisterLocalStatePrefs(registry.get());
++#endif
++#if BUILDFLAG(IS_OHOS) && BUILDFLAG(ENABLE_PLUGINS)
+   PluginInfoHostImpl::RegisterUserPrefs(registry.get());
++#endif
+   PrefProxyConfigTrackerImpl::RegisterPrefs(registry.get());
+   ProfileNetworkContextService::RegisterLocalStatePrefs(registry.get());
+   SSLConfigServiceManager::RegisterPrefs(registry.get());
+@@ -266,7 +276,9 @@ std::unique_ptr<PrefService> CreatePrefService(Profile* profile,
+     extensions::ExtensionPrefs::RegisterProfilePrefs(registry.get());
+     HostContentSettingsMap::RegisterProfilePrefs(registry.get());
+     language::LanguagePrefs::RegisterProfilePrefs(registry.get());
++#if BUILDFLAG(IS_OHOS) && BUILDFLAG(OHOS_ENABLE_MEDIA_ROUTER)
+     media_router::RegisterProfilePrefs(registry.get());
++#endif
+     MediaDeviceIDSalt::RegisterProfilePrefs(registry.get());
+     prefetch::RegisterPredictionOptionsProfilePrefs(registry.get());
+     ProfileNetworkContextService::RegisterProfilePrefs(registry.get());
+@@ -291,8 +303,10 @@ std::unique_ptr<PrefService> CreatePrefService(Profile* profile,
+         prefs::kPrintPreviewDefaultDestinationSelectionRules, std::string());
+     registry->RegisterBooleanPref(prefs::kCloudPrintSubmitEnabled, false);
+     registry->RegisterBooleanPref(prefs::kEnableMediaRouter, true);
++#if BUILDFLAG(IS_OHOS) && BUILDFLAG(ENABLE_PRINT_PREVIEW)
+     printing::PolicySettings::RegisterProfilePrefs(registry.get());
+     printing::PrintPreviewStickySettings::RegisterProfilePrefs(registry.get());
++#endif
+     DownloadPrefs::RegisterProfilePrefs(registry.get());
+ 
+     // Cache preferences.
+diff --git a/src/cef/libcef/browser/prefs/renderer_prefs.cc b/src/cef/libcef/browser/prefs/renderer_prefs.cc
+index 4fd9397b037f3..fdd2157dcdb89
+--- a/src/cef/libcef/browser/prefs/renderer_prefs.cc
++++ b/src/cef/libcef/browser/prefs/renderer_prefs.cc
+@@ -184,6 +184,7 @@ void SetBool(CommandLinePrefStore* prefs, const std::string& key, bool value) {
+                   WriteablePrefStore::DEFAULT_PREF_WRITE_FLAGS);
+ }
+ 
++#if !BUILDFLAG(IS_OHOS)
+ blink::mojom::PreferredColorScheme ToBlinkPreferredColorScheme(
+     ui::NativeTheme::PreferredColorScheme native_theme_scheme) {
+   switch (native_theme_scheme) {
+@@ -195,6 +196,7 @@ blink::mojom::PreferredColorScheme ToBlinkPreferredColorScheme(
+ 
+   NOTREACHED();
+ }
++#endif
+ 
+ // From chrome/browser/chrome_content_browser_client.cc
+ // Returns true if preferred color scheme is modified based on at least one of
+@@ -207,8 +209,10 @@ bool UpdatePreferredColorScheme(blink::web_pref::WebPreferences* web_prefs,
+   auto old_preferred_color_scheme = web_prefs->preferred_color_scheme;
+ 
+   // Update based on native theme scheme.
++#if !BUILDFLAG(IS_OHOS)
+   web_prefs->preferred_color_scheme =
+       ToBlinkPreferredColorScheme(native_theme->GetPreferredColorScheme());
++#endif
+ 
+   // Force a light preferred color scheme on certain URLs if kWebUIDarkMode is
+   // disabled; some of the UI is not yet correctly themed.
+@@ -359,6 +363,11 @@ void SetCefPrefs(const CefBrowserSettings& cef,
+ 
+   /* ohos webview begin*/
+   SET_STATE(cef.force_dark_mode_enabled, web.force_dark_mode_enabled);
++  if (cef.dark_prefer_color_scheme_enabled == STATE_ENABLED) {
++    web.preferred_color_scheme = blink::mojom::PreferredColorScheme::kDark;
++  } else {
++    web.preferred_color_scheme = blink::mojom::PreferredColorScheme::kLight;
++  }
+   SET_STATE(cef.loads_images_automatically, web.loads_images_automatically);
+   SET_STATE(cef.allow_running_insecure_content,
+             web.allow_running_insecure_content);
+@@ -367,6 +376,10 @@ void SetCefPrefs(const CefBrowserSettings& cef,
+   SET_STATE(cef.allow_mixed_content_upgrades, web.allow_mixed_content_upgrades);
+   SET_STATE(cef.initialize_at_minimum_page_scale,
+             web.initialize_at_minimum_page_scale);
++#if BUILDFLAG(IS_OHOS)
++  SET_STATE(cef.hide_vertical_scrollbars, web.hide_vertical_scrollbars);
++  SET_STATE(cef.hide_horizontal_scrollbars, web.hide_horizontal_scrollbars);
++#endif
+   web.viewport_meta_enabled = cef.viewport_meta_enabled;
+   web.autoplay_policy =
+       cef.user_gesture_required
+@@ -421,6 +434,7 @@ void PopulateWebPreferences(content::RenderViewHost* rvh,
+   }
+ 
+   auto* native_theme = ui::NativeTheme::GetInstanceForWeb();
++#if !BUILDFLAG(IS_OHOS)
+   switch (native_theme->GetPreferredColorScheme()) {
+     case ui::NativeTheme::PreferredColorScheme::kDark:
+       web.preferred_color_scheme = blink::mojom::PreferredColorScheme::kDark;
+@@ -429,6 +443,7 @@ void PopulateWebPreferences(content::RenderViewHost* rvh,
+       web.preferred_color_scheme = blink::mojom::PreferredColorScheme::kLight;
+       break;
+   }
++#endif
+ 
+   switch (native_theme->GetPreferredContrast()) {
+     case ui::NativeTheme::PreferredContrast::kNoPreference:
+diff --git a/src/cef/libcef/browser/request_context_impl.cc b/src/cef/libcef/browser/request_context_impl.cc
+index bb4de98dbaca4..77543ac833990
+--- a/src/cef/libcef/browser/request_context_impl.cc
++++ b/src/cef/libcef/browser/request_context_impl.cc
+@@ -579,12 +579,14 @@ CefRefPtr<CefExtension> CefRequestContextImpl::GetExtension(
+   return browser_context()->GetExtension(extension_id);
+ }
+ 
++#if BUILDFLAG(IS_OHOS) && BUILDFLAG(OHOS_ENABLE_MEDIA_ROUTER)
+ CefRefPtr<CefMediaRouter> CefRequestContextImpl::GetMediaRouter(
+     CefRefPtr<CefCompletionCallback> callback) {
+   CefRefPtr<CefMediaRouterImpl> media_router = new CefMediaRouterImpl();
+   InitializeMediaRouterInternal(media_router, callback);
+   return media_router.get();
+ }
++#endif
+ 
+ void CefRequestContextImpl::OnRenderFrameCreated(
+     const content::GlobalRenderFrameHostId& global_id,
+@@ -805,6 +807,7 @@ void CefRequestContextImpl::InitializeWebStorageInternal(
+                         web_storage, callback));
+ }
+ 
++#if BUILDFLAG(IS_OHOS) && BUILDFLAG(OHOS_ENABLE_MEDIA_ROUTER)
+ void CefRequestContextImpl::InitializeMediaRouterInternal(
+     CefRefPtr<CefMediaRouterImpl> media_router,
+     CefRefPtr<CefCompletionCallback> callback) {
+@@ -818,6 +821,7 @@ void CefRequestContextImpl::InitializeMediaRouterInternal(
+                         },
+                         media_router, callback));
+ }
++#endif
+ 
+ CefBrowserContext* CefRequestContextImpl::browser_context() const {
+   return browser_context_;
+diff --git a/src/cef/libcef/browser/request_context_impl.h b/src/cef/libcef/browser/request_context_impl.h
+index e495dd1f3a619..6b145ef17e4df
+--- a/src/cef/libcef/browser/request_context_impl.h
++++ b/src/cef/libcef/browser/request_context_impl.h
+@@ -8,12 +8,15 @@
+ 
+ #include "include/cef_request_context.h"
+ #include "libcef/browser/browser_context.h"
+-#include "libcef/browser/media_router/media_router_impl.h"
+ #include "libcef/browser/net_database/cef_data_base_impl.h"
+ #include "libcef/browser/net_service/cookie_manager_impl.h"
+ #include "libcef/browser/storage/web_storage_impl.h"
+ #include "libcef/browser/thread_util.h"
+ 
++#if BUILDFLAG(IS_OHOS) && BUILDFLAG(OHOS_ENABLE_MEDIA_ROUTER)
++#include "libcef/browser/media_router/media_router_impl.h"
++#endif
++
+ namespace content {
+ struct GlobalRenderFrameHostId;
+ }
+@@ -100,8 +103,10 @@ class CefRequestContextImpl : public CefRequestContext {
+   bool HasExtension(const CefString& extension_id) override;
+   bool GetExtensions(std::vector<CefString>& extension_ids) override;
+   CefRefPtr<CefExtension> GetExtension(const CefString& extension_id) override;
++#if BUILDFLAG(IS_OHOS) && BUILDFLAG(OHOS_ENABLE_MEDIA_ROUTER)
+   CefRefPtr<CefMediaRouter> GetMediaRouter(
+       CefRefPtr<CefCompletionCallback> callback) override;
++#endif
+ 
+   const CefRequestContextSettings& settings() const { return config_.settings; }
+ 
+@@ -174,8 +179,10 @@ class CefRequestContextImpl : public CefRequestContext {
+       CefRefPtr<CefCompletionCallback> callback);
+   void InitializeWebStorageInternal(CefRefPtr<CefWebStorageImpl> web_storage,
+                                     CefRefPtr<CefCompletionCallback> callback);
++#if BUILDFLAG(IS_OHOS) && BUILDFLAG(OHOS_ENABLE_MEDIA_ROUTER)
+   void InitializeMediaRouterInternal(CefRefPtr<CefMediaRouterImpl> media_router,
+                                      CefRefPtr<CefCompletionCallback> callback);
++#endif
+ 
+   CefBrowserContext* browser_context() const;
+ 
+diff --git a/src/cef/libcef/browser/storage/web_storage_impl.cc b/src/cef/libcef/browser/storage/web_storage_impl.cc
+index 7d246b423648e..1bc79467760e9
+--- a/src/cef/libcef/browser/storage/web_storage_impl.cc
++++ b/src/cef/libcef/browser/storage/web_storage_impl.cc
+@@ -71,6 +71,7 @@ void GetStorageKeysTask::OnStorageKeysObtained(
+     blink::mojom::StorageType type,
+     const std::set<blink::StorageKey>& storage_keys) {
+   DCHECK(CEF_CURRENTLY_ON_IOT());
++  LOG(INFO) << "OnStorageKeysObtained storage_keys size: " << storage_keys.size();
+   num_callbacks_to_wait_ = storage_keys.size();
+   num_callbacks_received_ = 0u;
+   for (const blink::StorageKey& storage_key : storage_keys) {
+diff --git a/src/cef/libcef/browser/views/browser_view_impl.cc b/src/cef/libcef/browser/views/browser_view_impl.cc
+index 139dff2ad6053..045e9d17fb75e
+--- a/src/cef/libcef/browser/views/browser_view_impl.cc
++++ b/src/cef/libcef/browser/views/browser_view_impl.cc
+@@ -6,7 +6,6 @@
+ 
+ #include "libcef/browser/browser_host_base.h"
+ #include "libcef/browser/browser_util.h"
+-#include "libcef/browser/chrome/views/chrome_browser_view.h"
+ #include "libcef/browser/context.h"
+ #include "libcef/browser/request_context_impl.h"
+ #include "libcef/browser/thread_util.h"
+@@ -15,6 +14,10 @@
+ #include "content/public/browser/native_web_keyboard_event.h"
+ #include "ui/content_accelerators/accelerator_util.h"
+ 
++#if defined(OHOS_ENABLE_CEF_CHROME_RUNTIME)
++#include "libcef/browser/chrome/views/chrome_browser_view.h"
++#endif // defined(OHOS_ENABLE_CEF_CHROME_RUNTIME)
++
+ // static
+ CefRefPtr<CefBrowserView> CefBrowserView::CreateBrowserView(
+     CefRefPtr<CefClient> client,
+@@ -138,9 +141,11 @@ CefRefPtr<CefBrowser> CefBrowserViewImpl::GetBrowser() {
+ 
+ CefRefPtr<CefView> CefBrowserViewImpl::GetChromeToolbar() {
+   CEF_REQUIRE_VALID_RETURN(nullptr);
++#if defined(OHOS_ENABLE_CEF_CHROME_RUNTIME)
+   if (cef::IsChromeRuntimeEnabled()) {
+     return static_cast<ChromeBrowserView*>(root_view())->cef_toolbar();
+   }
++#endif // defined(OHOS_ENABLE_CEF_CHROME_RUNTIME)
+ 
+   return nullptr;
+ }
+@@ -232,25 +237,33 @@ void CefBrowserViewImpl::SetDefaults(const CefBrowserSettings& settings) {
+ }
+ 
+ views::View* CefBrowserViewImpl::CreateRootView() {
++#if defined(OHOS_ENABLE_CEF_CHROME_RUNTIME)
+   if (cef::IsChromeRuntimeEnabled()) {
+     return new ChromeBrowserView(delegate(), this);
+   }
++#endif // defined(OHOS_ENABLE_CEF_CHROME_RUNTIME)
+ 
+   return new CefBrowserViewView(delegate(), this);
+ }
+ 
+ void CefBrowserViewImpl::InitializeRootView() {
++#if defined(OHOS_ENABLE_CEF_CHROME_RUNTIME)
+   if (cef::IsChromeRuntimeEnabled()) {
+     static_cast<ChromeBrowserView*>(root_view())->Initialize();
+   } else {
+     static_cast<CefBrowserViewView*>(root_view())->Initialize();
+   }
++#else
++  static_cast<CefBrowserViewView*>(root_view())->Initialize();
++#endif // defined(OHOS_ENABLE_CEF_CHROME_RUNTIME)
+ }
+ 
+ views::WebView* CefBrowserViewImpl::web_view() const {
++#if defined(OHOS_ENABLE_CEF_CHROME_RUNTIME)
+   if (cef::IsChromeRuntimeEnabled()) {
+     return static_cast<ChromeBrowserView*>(root_view())->contents_web_view();
+   }
++#endif // defined(OHOS_ENABLE_CEF_CHROME_RUNTIME)
+ 
+   return static_cast<CefBrowserViewView*>(root_view());
+ }
+diff --git a/src/cef/libcef/browser/views/window_view.cc b/src/cef/libcef/browser/views/window_view.cc
+index f1784a5a8735f..ab43771ebc8e3
+--- a/src/cef/libcef/browser/views/window_view.cc
++++ b/src/cef/libcef/browser/views/window_view.cc
+@@ -4,7 +4,6 @@
+ 
+ #include "libcef/browser/views/window_view.h"
+ 
+-#include "libcef/browser/chrome/views/chrome_browser_frame.h"
+ #include "libcef/browser/image_impl.h"
+ #include "libcef/browser/views/window_impl.h"
+ #include "libcef/features/runtime.h"
+@@ -29,6 +28,10 @@
+ #include "ui/aura/window.h"
+ #endif
+ 
++#if defined(OHOS_ENABLE_CEF_CHROME_RUNTIME)
++#include "libcef/browser/chrome/views/chrome_browser_frame.h"
++#endif // defined(OHOS_ENABLE_CEF_CHROME_RUNTIME)
++
+ namespace {
+ 
+ // Specialize ClientView to handle Widget-related events.
+@@ -259,8 +262,12 @@ void CefWindowView::CreateWidget() {
+ 
+   // |widget| is owned by the NativeWidget and will be destroyed in response to
+   // a native destruction message.
++#if defined(OHOS_ENABLE_CEF_CHROME_RUNTIME)
+   views::Widget* widget = cef::IsChromeRuntimeEnabled() ? new ChromeBrowserFrame
+                                                         : new views::Widget;
++#else
++  views::Widget* widget = new views::Widget;
++#endif // defined(OHOS_ENABLE_CEF_CHROME_RUNTIME)
+ 
+   views::Widget::InitParams params;
+   params.delegate = this;
+diff --git a/src/cef/libcef/common/alloy/alloy_content_client.cc b/src/cef/libcef/common/alloy/alloy_content_client.cc
+index fe1f5fa84f268..a6f52055f18db
+--- a/src/cef/libcef/common/alloy/alloy_content_client.cc
++++ b/src/cef/libcef/common/alloy/alloy_content_client.cc
+@@ -32,7 +32,6 @@
+ #include "content/public/common/cdm_info.h"
+ #include "content/public/common/content_constants.h"
+ #include "content/public/common/content_switches.h"
+-#include "content/public/common/pepper_plugin_info.h"
+ #include "ppapi/shared_impl/ppapi_permissions.h"
+ #include "third_party/widevine/cdm/buildflags.h"
+ #include "ui/base/l10n/l10n_util.h"
+@@ -42,8 +41,13 @@
+ #include "chrome/common/media/cdm_host_file_path.h"
+ #endif
+ 
++#if BUILDFLAG(IS_OHOS) && BUILDFLAG(ENABLE_PLUGINS)
++#include "content/public/common/pepper_plugin_info.h"
++#endif
++
+ namespace {
+ 
++#if BUILDFLAG(IS_OHOS) && BUILDFLAG(ENABLE_PLUGINS)
+ // The following plugin-related methods are from
+ // chrome/common/chrome_content_client.cc
+ 
+@@ -80,16 +84,19 @@ void ComputeBuiltInPlugins(std::vector<content::PepperPluginInfo>* plugins) {
+     plugins->push_back(pdf_info);
+   }
+ }
++#endif
+ 
+ }  // namespace
+ 
+ AlloyContentClient::AlloyContentClient() = default;
+ AlloyContentClient::~AlloyContentClient() = default;
+ 
++#if BUILDFLAG(IS_OHOS) && BUILDFLAG(ENABLE_PLUGINS)
+ void AlloyContentClient::AddPepperPlugins(
+     std::vector<content::PepperPluginInfo>* plugins) {
+   ComputeBuiltInPlugins(plugins);
+ }
++#endif
+ 
+ void AlloyContentClient::AddContentDecryptionModules(
+     std::vector<content::CdmInfo>* cdms,
+@@ -158,6 +165,7 @@ gfx::Image& AlloyContentClient::GetNativeImageNamed(int resource_id) {
+   return value;
+ }
+ 
++#if BUILDFLAG(IS_OHOS) && BUILDFLAG(ENABLE_PLUGINS)
+ // static
+ void AlloyContentClient::SetPDFEntryFunctions(
+     content::PepperPluginInfo::GetInterfaceFunc get_interface,
+@@ -167,3 +175,4 @@ void AlloyContentClient::SetPDFEntryFunctions(
+   g_pdf_initialize_module = initialize_module;
+   g_pdf_shutdown_module = shutdown_module;
+ }
++#endif
+diff --git a/src/cef/libcef/common/alloy/alloy_content_client.h b/src/cef/libcef/common/alloy/alloy_content_client.h
+index 160bfe855c2b0..03200dbe45b6c
+--- a/src/cef/libcef/common/alloy/alloy_content_client.h
++++ b/src/cef/libcef/common/alloy/alloy_content_client.h
+@@ -9,7 +9,13 @@
+ 
+ #include "base/compiler_specific.h"
+ #include "content/public/common/content_client.h"
++
++#if BUILDFLAG(IS_OHOS)
++#include "ppapi/buildflags/buildflags.h"
++#if BUILDFLAG(ENABLE_PLUGINS)
+ #include "content/public/common/pepper_plugin_info.h"
++#endif
++#endif
+ 
+ class AlloyContentClient : public content::ContentClient {
+  public:
+@@ -17,8 +23,10 @@ class AlloyContentClient : public content::ContentClient {
+   ~AlloyContentClient() override;
+ 
+   // content::ContentClient overrides.
++#if BUILDFLAG(IS_OHOS) && BUILDFLAG(ENABLE_PLUGINS)
+   void AddPepperPlugins(
+       std::vector<content::PepperPluginInfo>* plugins) override;
++#endif
+   void AddContentDecryptionModules(
+       std::vector<content::CdmInfo>* cdms,
+       std::vector<media::CdmHostFilePath>* cdm_host_file_paths) override;
+@@ -32,10 +40,12 @@ class AlloyContentClient : public content::ContentClient {
+   base::RefCountedMemory* GetDataResourceBytes(int resource_id) override;
+   gfx::Image& GetNativeImageNamed(int resource_id) override;
+ 
++#if BUILDFLAG(IS_OHOS) && BUILDFLAG(ENABLE_PLUGINS)
+   static void SetPDFEntryFunctions(
+       content::PepperPluginInfo::GetInterfaceFunc get_interface,
+       content::PepperPluginInfo::PPP_InitializeModuleFunc initialize_module,
+       content::PepperPluginInfo::PPP_ShutdownModuleFunc shutdown_module);
++#endif
+ };
+ 
+ #endif  // CEF_LIBCEF_COMMON_ALLOY_ALLOY_CONTENT_CLIENT_H_
+diff --git a/src/cef/libcef/common/alloy/alloy_main_delegate.cc b/src/cef/libcef/common/alloy/alloy_main_delegate.cc
+index 5022baa38ce1b..af0eeffcf2a28
+--- a/src/cef/libcef/common/alloy/alloy_main_delegate.cc
++++ b/src/cef/libcef/common/alloy/alloy_main_delegate.cc
+@@ -25,7 +25,6 @@
+ #include "base/strings/string_util.h"
+ #include "base/synchronization/waitable_event.h"
+ #include "chrome/browser/browser_process.h"
+-#include "chrome/child/pdf_child_init.h"
+ #include "chrome/common/chrome_constants.h"
+ #include "chrome/common/chrome_paths.h"
+ #include "chrome/common/chrome_switches.h"
+@@ -41,7 +40,6 @@
+ #include "content/public/common/url_constants.h"
+ #include "extensions/common/constants.h"
+ #include "net/base/features.h"
+-#include "pdf/pdf_ppapi.h"
+ #include "sandbox/policy/switches.h"
+ #include "services/network/public/cpp/features.h"
+ #include "third_party/blink/public/common/switches.h"
+@@ -58,6 +56,14 @@
+ #include "ui/base/resource/resource_bundle_win.h"
+ #endif
+ 
++#if BUILDFLAG(IS_OHOS)
++#include "pdf/buildflags.h"
++#if BUILDFLAG(ENABLE_PDF)
++#include "chrome/child/pdf_child_init.h"
++#include "pdf/pdf_ppapi.h"
++#endif
++#endif
++
+ namespace {
+ 
+ const char* const kNonWildcardDomainNonPortSchemes[] = {
+@@ -379,13 +385,17 @@ void AlloyMainDelegate::PreSandboxStartup() {
+                                           chrome::DIR_USER_DATA);
+ 
+   InitializeResourceBundle();
++#if BUILDFLAG(IS_OHOS) && BUILDFLAG(ENABLE_PDF)
+   MaybePatchGdiGetFontData();
++#endif
+ }
+ 
+ void AlloyMainDelegate::SandboxInitialized(const std::string& process_type) {
++#if BUILDFLAG(IS_OHOS) && BUILDFLAG(ENABLE_PLUGINS)
+   AlloyContentClient::SetPDFEntryFunctions(chrome_pdf::PPP_GetInterface,
+                                            chrome_pdf::PPP_InitializeModule,
+                                            chrome_pdf::PPP_ShutdownModule);
++#endif
+ }
+ 
+ absl::variant<int, content::MainFunctionParams> AlloyMainDelegate::RunProcess(
+@@ -548,7 +558,6 @@ void AlloyMainDelegate::InitializeResourceBundle() {
+ 
+   std::string locale = command_line->GetSwitchValueASCII(switches::kLang);
+   DCHECK(!locale.empty());
+-
+   const std::string loaded_locale =
+       ui::ResourceBundle::InitSharedInstanceWithLocale(
+           locale, &resource_bundle_delegate_,
+@@ -562,33 +571,47 @@ void AlloyMainDelegate::InitializeResourceBundle() {
+       LOG(ERROR) << "Could not load locale pak for " << locale;
+ 
+     resource_bundle_delegate_.set_allow_pack_file_load(true);
+-
++#if BUILDFLAG(IS_OHOS)
++    resource_bundle.AddDataPackFromPath(resources_pak_file,
++                                        ui::kScaleFactorNone);
++#else
+     if (base::PathExists(resources_pak_file)) {
+       resource_bundle.AddDataPackFromPath(resources_pak_file,
+                                           ui::kScaleFactorNone);
+     } else {
+       LOG(ERROR) << "Could not load resources.pak";
+     }
++#endif
+ 
+     // Always load the 1x data pack first as the 2x data pack contains both 1x
+     // and 2x images. The 1x data pack only has 1x images, thus passes in an
+     // accurate scale factor to gfx::ImageSkia::AddRepresentation.
+     if (resource_util::IsScaleFactorSupported(ui::k100Percent)) {
++#if BUILDFLAG(IS_OHOS)
++      resource_bundle.AddDataPackFromPath(chrome_100_percent_pak_file,
++                                          ui::k100Percent);
++#else
+       if (base::PathExists(chrome_100_percent_pak_file)) {
+         resource_bundle.AddDataPackFromPath(chrome_100_percent_pak_file,
+                                             ui::k100Percent);
+       } else {
+         LOG(ERROR) << "Could not load chrome_100_percent.pak";
+       }
++#endif
+     }
+ 
+     if (resource_util::IsScaleFactorSupported(ui::k200Percent)) {
++#if BUILDFLAG(IS_OHOS)
++      resource_bundle.AddDataPackFromPath(chrome_200_percent_pak_file,
++                                          ui::k200Percent);
++#else
+       if (base::PathExists(chrome_200_percent_pak_file)) {
+         resource_bundle.AddDataPackFromPath(chrome_200_percent_pak_file,
+                                             ui::k200Percent);
+       } else {
+         LOG(ERROR) << "Could not load chrome_200_percent.pak";
+       }
++#endif
+     }
+ 
+     // Skip the default pak file loading that would otherwise occur in
+diff --git a/src/cef/libcef/common/mojom/cef.mojom b/src/cef/libcef/common/mojom/cef.mojom
+index 1f8a41de20c2b..5fc111634eee8
+--- a/src/cef/libcef/common/mojom/cef.mojom
++++ b/src/cef/libcef/common/mojom/cef.mojom
+@@ -12,6 +12,7 @@ import "services/network/public/mojom/url_request.mojom";
+ import "third_party/blink/public/mojom/loader/referrer.mojom";
+ import "ui/gfx/geometry/mojom/geometry.mojom";
+ import "url/mojom/url.mojom";
++import "mojo/public/mojom/base/time.mojom";
+ 
+ [EnableIf=is_ohos]
+ import "skia/public/mojom/bitmap.mojom";
+@@ -130,6 +131,18 @@ interface RenderFrame {
+ 
+   [EnableIf=is_ohos]
+   RemoveCache();
++
++  [EnableIf=is_ohos]
++  ScrollPageUpDown(bool is_up, bool move_half, float view_height);
++
++  [EnableIf=is_ohos]
++  ScrollTo(float x, float y);
++
++  [EnableIf=is_ohos]
++  ScrollBy(float delta_x, float delta_y);
++
++  [EnableIf=is_ohos]
++  SlideScroll(float vx, float vy);
+ };
+ 
+ // Interface for communicating with a frame in the browser process.
+diff --git a/src/cef/libcef/common/net/scheme_registration.cc b/src/cef/libcef/common/net/scheme_registration.cc
+index b377b1a580f03..74a02b838c60a
+--- a/src/cef/libcef/common/net/scheme_registration.cc
++++ b/src/cef/libcef/common/net/scheme_registration.cc
+@@ -69,6 +69,7 @@ bool IsInternalHandledScheme(const std::string& scheme) {
+       url::kJavaScriptScheme,
+       url::kWsScheme,
+       url::kWssScheme,
++      url::kResourcesScheme,
+   };
+ 
+   for (size_t i = 0; i < sizeof(schemes) / sizeof(schemes[0]); ++i) {
+diff --git a/src/cef/libcef/common/soc_perf_util.cc b/src/cef/libcef/common/soc_perf_util.cc
+index 1864b77cad2b1..6d7ca453ab84e
+--- a/src/cef/libcef/common/soc_perf_util.cc
++++ b/src/cef/libcef/common/soc_perf_util.cc
+@@ -20,22 +20,48 @@ base::Time SocPerUtil::last_time_boost_timestamp;
+ 
+ namespace {
+ const int SOC_PERF_CONFIG_ID = 10020;
++const int SOC_PERF_SLIDE_NORMAL_CONFIG_ID = 10025;
++const int SOC_PERF_WEB_GUSTURE_ID = 10012;
+ const int MIN_LAYER_NUM = 50;
+ const int MIN_VIDEO_LAYOUT_NUM = 1;
+ const int MAX_BOOST_RUN_TIME_IN_SECOND = 10;
+ const int REST_TIME_IN_SECOND = 2;
+ }  // namespace
+ 
+-void SocPerUtil::ApplySocConfig() {
+-  TRACE_EVENT2("soc_perf", "SocPerUtil::ApplySocConfig", "layout_num",
++void SocPerUtil::EnableFlingBoost() {
++  TRACE_EVENT2("soc_perf", "SocPerUtil::EnableFlingBoost2", "layout_num",
+                video_layout_num, "layer_num", layer_num);
++  OHOS::NWeb::OhosAdapterHelper::GetInstance()
++      .CreateSocPerfClientAdapter()
++      ->ApplySocPerfConfigByIdEx(SOC_PERF_WEB_GUSTURE_ID, false);
++
++  OHOS::NWeb::OhosAdapterHelper::GetInstance()
++      .CreateSocPerfClientAdapter()
++      ->ApplySocPerfConfigByIdEx(SOC_PERF_SLIDE_NORMAL_CONFIG_ID, true);
++
+   if (video_layout_num >= MIN_VIDEO_LAYOUT_NUM || layer_num >= MIN_LAYER_NUM) {
+     OHOS::NWeb::OhosAdapterHelper::GetInstance()
+         .CreateSocPerfClientAdapter()
+-        ->ApplySocPerfConfigById(SOC_PERF_CONFIG_ID);
++        ->ApplySocPerfConfigByIdEx(SOC_PERF_CONFIG_ID, true);
+   }
+ }
+ 
++void SocPerUtil::DisableFlingBoost() {
++  TRACE_EVENT0("soc_perf", "SocPerUtil::DisableFlingBoost");
++
++  OHOS::NWeb::OhosAdapterHelper::GetInstance()
++      .CreateSocPerfClientAdapter()
++      ->ApplySocPerfConfigByIdEx(SOC_PERF_SLIDE_NORMAL_CONFIG_ID, false);
++
++  OHOS::NWeb::OhosAdapterHelper::GetInstance()
++      .CreateSocPerfClientAdapter()
++      ->ApplySocPerfConfigByIdEx(SOC_PERF_CONFIG_ID, false);
++
++  OHOS::NWeb::OhosAdapterHelper::GetInstance()
++      .CreateSocPerfClientAdapter()
++      ->ApplySocPerfConfigByIdEx(SOC_PERF_WEB_GUSTURE_ID, false);
++}
++
+ void SocPerUtil::TryRunSocPerf() {
+   if ((base::Time().Now() - first_time_boost_timestamp).InSeconds() >=
+       MAX_BOOST_RUN_TIME_IN_SECOND) {
+diff --git a/src/cef/libcef/common/soc_perf_util.h b/src/cef/libcef/common/soc_perf_util.h
+index 87afb17332a97..cdfc6147b68c2
+--- a/src/cef/libcef/common/soc_perf_util.h
++++ b/src/cef/libcef/common/soc_perf_util.h
+@@ -14,7 +14,8 @@ extern int layer_num;
+ 
+ class SocPerUtil {
+  public:
+-  static void ApplySocConfig();
++  static void EnableFlingBoost();
++  static void DisableFlingBoost();
+   static void StartBoost();
+ 
+  private:
+diff --git a/src/cef/libcef/renderer/alloy/alloy_content_renderer_client.cc b/src/cef/libcef/renderer/alloy/alloy_content_renderer_client.cc
+index c43d739441ea6..c388996b30e4a
+--- a/src/cef/libcef/renderer/alloy/alloy_content_renderer_client.cc
++++ b/src/cef/libcef/renderer/alloy/alloy_content_renderer_client.cc
+@@ -33,7 +33,6 @@
+ #include "libcef/renderer/alloy/url_loader_throttle_provider_impl.h"
+ #include "libcef/renderer/browser_impl.h"
+ #include "libcef/renderer/extensions/extensions_renderer_client.h"
+-#include "libcef/renderer/extensions/print_render_frame_helper_delegate.h"
+ #include "libcef/renderer/render_frame_observer.h"
+ #include "libcef/renderer/render_manager.h"
+ #include "libcef/renderer/thread_util.h"
+@@ -53,14 +52,9 @@
+ #include "chrome/renderer/chrome_content_renderer_client.h"
+ #include "chrome/renderer/extensions/chrome_extensions_renderer_client.h"
+ #include "chrome/renderer/loadtimes_extension_bindings.h"
+-#include "chrome/renderer/pepper/chrome_pdf_print_client.h"
+-#include "chrome/renderer/pepper/pepper_helper.h"
+ #include "chrome/renderer/plugins/chrome_plugin_placeholder.h"
+ #include "components/content_settings/core/common/content_settings_types.h"
+ #include "components/nacl/common/nacl_constants.h"
+-#include "components/pdf/common/internal_plugin_helpers.h"
+-#include "components/pdf/renderer/internal_plugin_renderer_helpers.h"
+-#include "components/pdf/renderer/pdf_find_in_page.h"
+ #include "components/printing/renderer/print_render_frame_helper.h"
+ #include "components/spellcheck/renderer/spellcheck.h"
+ #include "components/spellcheck/renderer/spellcheck_provider.h"
+@@ -109,6 +103,21 @@
+ #include "base/strings/sys_string_conversions.h"
+ #endif
+ 
++#if BUILDFLAG(IS_OHOS) && BUILDFLAG(ENABLE_PRINT_PREVIEW)
++#include "libcef/renderer/extensions/print_render_frame_helper_delegate.h"
++#endif
++
++#if BUILDFLAG(IS_OHOS) && BUILDFLAG(ENABLE_PLUGINS)
++#include "chrome/renderer/pepper/pepper_helper.h"
++#endif
++
++#if BUILDFLAG(IS_OHOS) && BUILDFLAG(ENABLE_PDF)
++#include "chrome/renderer/pepper/chrome_pdf_print_client.h"
++#include "components/pdf/common/internal_plugin_helpers.h"
++#include "components/pdf/renderer/internal_plugin_renderer_helpers.h"
++#include "components/pdf/renderer/pdf_find_in_page.h"
++#endif
++
+ AlloyContentRendererClient::AlloyContentRendererClient()
+     : main_entry_time_(base::TimeTicks::Now()),
+       render_manager_(new CefRenderManager) {
+@@ -232,10 +241,12 @@ void AlloyContentRendererClient::RenderThreadStarted() {
+   }
+ #endif  // BUILDFLAG(IS_MAC)
+ 
++#if BUILDFLAG(IS_OHOS) && BUILDFLAG(ENABLE_PDF)
+   if (extensions::PdfExtensionEnabled()) {
+     pdf_print_client_.reset(new ChromePDFPrintClient());
+     pdf::PepperPDFHost::SetPrintClient(pdf_print_client_.get());
+   }
++#endif
+ 
+   if (extensions::ExtensionsEnabled())
+     extensions_renderer_client_->RenderThreadStarted();
+@@ -276,7 +287,9 @@ void AlloyContentRendererClient::RenderFrameCreated(
+     content::RenderFrame* render_frame) {
+   auto render_frame_observer = new CefRenderFrameObserver(render_frame);
+ 
++#if BUILDFLAG(IS_OHOS) && BUILDFLAG(ENABLE_PLUGINS)
+   new PepperHelper(render_frame);
++#endif
+ 
+   if (extensions::ExtensionsEnabled()) {
+     extensions_renderer_client_->RenderFrameCreated(
+@@ -302,18 +315,22 @@ void AlloyContentRendererClient::RenderFrameCreated(
+     OnBrowserCreated(render_frame->GetRenderView(), is_windowless);
+   }
+ 
++#if BUILDFLAG(IS_OHOS) && BUILDFLAG(ENABLE_PRINT_PREVIEW)
+   if (is_windowless.has_value()) {
+     new printing::PrintRenderFrameHelper(
+         render_frame,
+         base::WrapUnique(
+             new extensions::CefPrintRenderFrameHelperDelegate(*is_windowless)));
+   }
++#endif
+ 
++#if BUILDFLAG(IS_OHOS) && BUILDFLAG(ENABLE_PDF)
+   if (base::FeatureList::IsEnabled(chrome_pdf::features::kPdfUnseasoned)) {
+     render_frame_observer->associated_interfaces()->AddInterface(
+         base::BindRepeating(&pdf::PdfFindInPageFactory::BindReceiver,
+                             render_frame->GetRoutingID()));
+   }
++#endif
+ }
+ 
+ void AlloyContentRendererClient::WebViewCreated(blink::WebView* web_view) {
+@@ -332,6 +349,7 @@ bool AlloyContentRendererClient::IsPluginHandledExternally(
+     const blink::WebElement& plugin_element,
+     const GURL& original_url,
+     const std::string& mime_type) {
++#if BUILDFLAG(IS_OHOS) && BUILDFLAG(ENABLE_PLUGINS)
+   if (!extensions::ExtensionsEnabled())
+     return false;
+ 
+@@ -373,12 +391,16 @@ bool AlloyContentRendererClient::IsPluginHandledExternally(
+   return ChromeExtensionsRendererClient::MaybeCreateMimeHandlerView(
+       plugin_element, original_url, plugin_info->actual_mime_type,
+       plugin_info->plugin);
++#else
++  return false;
++#endif
+ }
+ 
+ bool AlloyContentRendererClient::OverrideCreatePlugin(
+     content::RenderFrame* render_frame,
+     const blink::WebPluginParams& params,
+     blink::WebPlugin** plugin) {
++#if BUILDFLAG(IS_OHOS) && BUILDFLAG(ENABLE_PLUGINS)
+   std::string orig_mime_type = params.mime_type.Utf8();
+   if (extensions::ExtensionsEnabled() &&
+       !extensions_renderer_client_->OverrideCreatePlugin(render_frame,
+@@ -394,6 +416,7 @@ bool AlloyContentRendererClient::OverrideCreatePlugin(
+       &plugin_info);
+   *plugin = ChromeContentRendererClient::CreatePlugin(render_frame, params,
+                                                       *plugin_info);
++#endif
+   return true;
+ }
+ 
+diff --git a/src/cef/libcef/renderer/alloy/alloy_content_renderer_client.h b/src/cef/libcef/renderer/alloy/alloy_content_renderer_client.h
+index 150978262a3ba..59680bb4b815c
+--- a/src/cef/libcef/renderer/alloy/alloy_content_renderer_client.h
++++ b/src/cef/libcef/renderer/alloy/alloy_content_renderer_client.h
+@@ -25,6 +25,10 @@
+ #include "mojo/public/cpp/bindings/generic_pending_receiver.h"
+ #include "services/service_manager/public/cpp/local_interface_provider.h"
+ 
++#if BUILDFLAG(IS_OHOS)
++#include "pdf/buildflags.h"
++#endif
++
+ namespace extensions {
+ class CefExtensionsRendererClient;
+ class Dispatcher;
+@@ -152,7 +156,9 @@ class AlloyContentRendererClient
+   std::unique_ptr<SpellCheck> spellcheck_;
+   std::unique_ptr<visitedlink::VisitedLinkReader> visited_link_slave_;
+ 
++#if BUILDFLAG(IS_OHOS) && BUILDFLAG(ENABLE_PDF)
+   std::unique_ptr<ChromePDFPrintClient> pdf_print_client_;
++#endif
+ 
+   std::unique_ptr<extensions::ExtensionsClient> extensions_client_;
+   std::unique_ptr<extensions::CefExtensionsRendererClient>
+diff --git a/src/cef/libcef/renderer/frame_impl.cc b/src/cef/libcef/renderer/frame_impl.cc
+index 5010d4a9cad73..e74978a2fa7a4
+--- a/src/cef/libcef/renderer/frame_impl.cc
++++ b/src/cef/libcef/renderer/frame_impl.cc
+@@ -71,6 +71,17 @@ const std::string kAddressPrefix = "geo:0,0?q=";
+ const std::string kEmailPrefix = "mailto:";
+ const std::string kPhoneNumberPrefix = "tel:";
+ 
++// The amount of content to overlap between two screens when using
++// pageUp/pageDown methiods. static int PAGE_SCROLL_OVERLAP = 24; Standard
++// animated scroll speed.
++static int STD_SCROLL_ANIMATION_SPEED_PIX_PER_SEC = 480;
++// Time for the longest scroll animation.
++static int MAX_SCROLL_ANIMATION_DURATION_MILLISEC = 750;
++
++static int DEFAULT_SCROLL_ANIMATION_DURATION_MILLISEC = 600;
++
++static double POSITION_RATIO = 138.9;
++
+ enum HitTestDataType {
+   kUnknown = 0,
+   kPhone = 2,
+@@ -81,6 +92,17 @@ enum HitTestDataType {
+   kSrcImageLink = 8,
+   kEditText = 9,
+ };
++
++int computeDurationInMilliSec(int dx, int dy) {
++  int distance = std::max(std::abs(dx), std::abs(dy));
++  int duration = distance * 1000 / STD_SCROLL_ANIMATION_SPEED_PIX_PER_SEC;
++  return std::min(duration, MAX_SCROLL_ANIMATION_DURATION_MILLISEC);
++}
++
++float computeSlidePosition(float v) {
++    return (v * POSITION_RATIO / 1000);
++}
++
+ #endif  // BUILDFLAG(IS_OHOS)
+ 
+ }  // namespace
+@@ -808,39 +830,38 @@ void CefFrameImpl::PutZoomingForTextFactor(float factor) {
+   auto render_frame = content::RenderFrame::FromWebFrame(frame_);
+   DCHECK(render_frame->IsMainFrame());
+   blink::WebView* webview = render_frame->GetRenderView()->GetWebView();
+- 
++
+   if (!webview)
+     return;
+   // Hide selection and autofill popups.
+   webview->CancelPagePopup();
+- 
++
+   render_frame->GetWebFrame()->FrameWidget()->SetTextZoomFactor(factor);
+ }
+- 
++
+ void CefFrameImpl::GetImageForContextNode() {
+   if (!frame_) {
+     LOG(ERROR) << "GetImageForContextNode frame is nullptr";
+     return;
+   }
+   cef::mojom::GetImageForContextNodeParamsPtr params =
+-    cef::mojom::GetImageForContextNodeParams::New();
++      cef::mojom::GetImageForContextNodeParams::New();
+   blink::WebNode context_node = frame_->ContextMenuImageNode();
+   std::vector<uint8_t> image_data;
+   gfx::Size original_size;
+   std::string image_extension;
+ 
+   if (context_node.IsNull() || !context_node.IsElementNode()) {
+-    SendToBrowserFrame(
+-        __FUNCTION__,
+-        base::BindOnce(
+-            [](cef::mojom::GetImageForContextNodeParamsPtr data,
+-               const BrowserFrameType& browser_frame) {
+-              browser_frame->OnGetImageForContextNodeNull();
+-            },
+-            std::move(params)));
++    SendToBrowserFrame(__FUNCTION__,
++                       base::BindOnce(
++                           [](cef::mojom::GetImageForContextNodeParamsPtr data,
++                              const BrowserFrameType& browser_frame) {
++                             browser_frame->OnGetImageForContextNodeNull();
++                           },
++                           std::move(params)));
+     return;
+   }
+-  
++
+   blink::WebElement web_element = context_node.To<blink::WebElement>();
+   original_size = web_element.GetImageSize();
+ 
+@@ -963,8 +984,7 @@ void CefFrameImpl::UpdateLocale(const std::string& locale) {
+     return;
+   }
+   std::string result =
+-      ui::ResourceBundle::GetSharedInstance().ReloadLocaleResources(
+-          locale);
++      ui::ResourceBundle::GetSharedInstance().ReloadLocaleResources(locale);
+   if (result.empty()) {
+     LOG(ERROR) << "CefFrameImpl update locale failed";
+   }
+@@ -977,13 +997,83 @@ void CefFrameImpl::GetImagesWithResponse(
+       base::BindOnce(
+           [](cef::mojom::RenderFrame::GetImagesWithResponseCallback callback,
+              blink::WebLocalFrame* frame) {
+-            blink::WebElementCollection collection = frame->GetDocument().GetElementsByHTMLTagName("img");
++            blink::WebElementCollection collection =
++                frame->GetDocument().GetElementsByHTMLTagName("img");
+             DCHECK(!collection.IsNull());
+             bool response = !(collection.FirstItem()).IsNull();
+             std::move(callback).Run(response);
+           },
+           std::move(callback)));
+ }
++
++void CefFrameImpl::ScrollPageUpDown(bool is_up,
++                                    bool is_half,
++                                    float view_height) {
++  auto render_frame = content::RenderFrame::FromWebFrame(frame_);
++  DCHECK(render_frame->IsMainFrame());
++  blink::WebView* webview = render_frame->GetRenderView()->GetWebView();
++  if (!webview) {
++    LOG(ERROR) << "scorll page up down get webview failed";
++    return;
++  }
++  auto scroll_offset = webview->GetScrollOffset();
++  float dy;
++  if (is_up) {
++    dy = is_half ? -view_height : -scroll_offset.y();
++  } else {
++    if (!is_half) {
++      float bottom_y = webview->GetScrollBottom();
++      if (bottom_y <= 0) {
++        LOG(ERROR) << "get scroll bottom offset failed.";
++        return;
++      }
++      dy = bottom_y - scroll_offset.y();
++    } else {
++      dy = view_height;
++    }
++  }
++  webview->SmoothScroll(scroll_offset.x(), scroll_offset.y() + dy,
++                        base::Milliseconds(computeDurationInMilliSec(0, dy)));
++}
++
++void CefFrameImpl::ScrollTo(float x, float y) {
++  auto render_frame = content::RenderFrame::FromWebFrame(frame_);
++  DCHECK(render_frame->IsMainFrame());
++  blink::WebView* webview = render_frame->GetRenderView()->GetWebView();
++  if (!webview) {
++    LOG(ERROR) << "scrollto get webview failed";
++    return;
++  }
++  webview->SetScrollOffset(gfx::PointF(x, y));
++}
++
++void CefFrameImpl::ScrollBy(float delta_x, float delta_y) {
++  auto render_frame = content::RenderFrame::FromWebFrame(frame_);
++  DCHECK(render_frame->IsMainFrame());
++  blink::WebView* webview = render_frame->GetRenderView()->GetWebView();
++  if (!webview) {
++    LOG(ERROR) << "scrollby get webview failed";
++    return;
++  }
++  auto scroll_offset = webview->GetScrollOffset();
++  webview->SetScrollOffset(gfx::PointF(delta_x + scroll_offset.x(),
++                           delta_y + scroll_offset.y()));
++}
++
++void CefFrameImpl::SlideScroll(float vx, float vy) {
++  auto render_frame = content::RenderFrame::FromWebFrame(frame_);
++  DCHECK(render_frame->IsMainFrame());
++  blink::WebView* webview = render_frame->GetRenderView()->GetWebView();
++  if (!webview) {
++    LOG(ERROR) << "scrollby get webview failed";
++    return;
++  }
++  float dx = vx == 0 ? 0 : computeSlidePosition(vx);
++  float dy = vy == 0 ? 0 : computeSlidePosition(vy);
++  auto scroll_offset = webview->GetScrollOffset();
++  webview->SmoothScroll(dx + scroll_offset.x(), dy + scroll_offset.y(),
++                        base::Milliseconds(DEFAULT_SCROLL_ANIMATION_DURATION_MILLISEC));
++}
+ #endif  // BUILDFLAG(IS_OHOS)
+ 
+ // Enable deprecation warnings on Windows. See http://crbug.com/585142.
+diff --git a/src/cef/libcef/renderer/frame_impl.h b/src/cef/libcef/renderer/frame_impl.h
+index ab9a91db2c403..d5d4f727493f4
+--- a/src/cef/libcef/renderer/frame_impl.h
++++ b/src/cef/libcef/renderer/frame_impl.h
+@@ -159,7 +159,10 @@ class CefFrameImpl : public CefFrame, public cef::mojom::RenderFrame {
+   void GetImagesWithResponse(
+     cef::mojom::RenderFrame::GetImagesWithResponseCallback callback) override;
+   void RemoveCache() override;
+-  
++  void ScrollPageUpDown(bool is_up, bool is_half, float view_height) override;
++  void ScrollTo(float x, float y) override;
++  void ScrollBy(float delta_x, float delta_y) override;
++  void SlideScroll(float vx, float vy) override;
+   GURL GetAbsoluteUrl(const blink::WebNode& node,
+                       const std::u16string& url_fragment);
+   GURL GetAbsoluteSrcUrl(const blink::WebElement& element);
+diff --git a/src/cef/libcef_dll/cpptoc/access_request_cpptoc.cc b/src/cef/libcef_dll/cpptoc/access_request_cpptoc.cc
+index d97849ec3b453..f01822fdc08ec
+--- a/src/cef/libcef_dll/cpptoc/access_request_cpptoc.cc
++++ b/src/cef/libcef_dll/cpptoc/access_request_cpptoc.cc
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=6b186aa2b1640034df797d439745503309071680$
++// $hash=43f719c6388e6fb2ee41d8502b7f47983313cfc9$
+ //
+ 
+ #include "libcef_dll/cpptoc/access_request_cpptoc.h"
+diff --git a/src/cef/libcef_dll/cpptoc/access_request_cpptoc.h b/src/cef/libcef_dll/cpptoc/access_request_cpptoc.h
+index c5262807d7ce3..8ce9c60ae05ed
+--- a/src/cef/libcef_dll/cpptoc/access_request_cpptoc.h
++++ b/src/cef/libcef_dll/cpptoc/access_request_cpptoc.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=7f780d77c50f8f64713a51f886c76adc70e44357$
++// $hash=44c32953a5dc70e64d35222732817d6b065f0e33$
+ //
+ 
+ #ifndef CEF_LIBCEF_DLL_CPPTOC_ACCESS_REQUEST_CPPTOC_H_
+diff --git a/src/cef/libcef_dll/cpptoc/accessibility_handler_cpptoc.cc b/src/cef/libcef_dll/cpptoc/accessibility_handler_cpptoc.cc
+index 992a81d60965e..daa3ab86b14ba
+--- a/src/cef/libcef_dll/cpptoc/accessibility_handler_cpptoc.cc
++++ b/src/cef/libcef_dll/cpptoc/accessibility_handler_cpptoc.cc
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=f20a2530c9b5ad72cccd301ee4234a16132c487d$
++// $hash=63799a16d1ff311eb185eb57bae7d682d150d376$
+ //
+ 
+ #include "libcef_dll/cpptoc/accessibility_handler_cpptoc.h"
+diff --git a/src/cef/libcef_dll/cpptoc/accessibility_handler_cpptoc.h b/src/cef/libcef_dll/cpptoc/accessibility_handler_cpptoc.h
+index b6dce7abc847c..faf271035e848
+--- a/src/cef/libcef_dll/cpptoc/accessibility_handler_cpptoc.h
++++ b/src/cef/libcef_dll/cpptoc/accessibility_handler_cpptoc.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=0605de17534cba62d36fc1160997660c4a38e40b$
++// $hash=0d1469b1473cbef38092a2b0624ac33faa6e1d89$
+ //
+ 
+ #ifndef CEF_LIBCEF_DLL_CPPTOC_ACCESSIBILITY_HANDLER_CPPTOC_H_
+diff --git a/src/cef/libcef_dll/cpptoc/app_cpptoc.cc b/src/cef/libcef_dll/cpptoc/app_cpptoc.cc
+index bc6f55efe8a81..58572b24012c9
+--- a/src/cef/libcef_dll/cpptoc/app_cpptoc.cc
++++ b/src/cef/libcef_dll/cpptoc/app_cpptoc.cc
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=ee267b6567062246b9f82b4b50b68d82d2cc939f$
++// $hash=04b98a2d9c374132d2149fd8e3cf8b110acba86f$
+ //
+ 
+ #include "libcef_dll/cpptoc/app_cpptoc.h"
+diff --git a/src/cef/libcef_dll/cpptoc/app_cpptoc.h b/src/cef/libcef_dll/cpptoc/app_cpptoc.h
+index c705f806df64a..fe94e85891294
+--- a/src/cef/libcef_dll/cpptoc/app_cpptoc.h
++++ b/src/cef/libcef_dll/cpptoc/app_cpptoc.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=601455da6a16a7212debdb8184b8f731be4e2f8d$
++// $hash=a4d3edb584e87581659ded4e0bb20739b2b0efea$
+ //
+ 
+ #ifndef CEF_LIBCEF_DLL_CPPTOC_APP_CPPTOC_H_
+diff --git a/src/cef/libcef_dll/cpptoc/audio_handler_cpptoc.cc b/src/cef/libcef_dll/cpptoc/audio_handler_cpptoc.cc
+index 0317067179b0d..36aec0d286c7d
+--- a/src/cef/libcef_dll/cpptoc/audio_handler_cpptoc.cc
++++ b/src/cef/libcef_dll/cpptoc/audio_handler_cpptoc.cc
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=519a82bbea84ea39cadc72c55291e15cb2a74072$
++// $hash=56d4812b8f81cbda67550a8b03e8b7af911e5e28$
+ //
+ 
+ #include "libcef_dll/cpptoc/audio_handler_cpptoc.h"
+diff --git a/src/cef/libcef_dll/cpptoc/audio_handler_cpptoc.h b/src/cef/libcef_dll/cpptoc/audio_handler_cpptoc.h
+index d2574a797abb7..1d574545486ef
+--- a/src/cef/libcef_dll/cpptoc/audio_handler_cpptoc.h
++++ b/src/cef/libcef_dll/cpptoc/audio_handler_cpptoc.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=352ed71e6c70ef8e5f38e635ed8fc17b2fcc2b4e$
++// $hash=6d31cfb9774514e0a15c999903fa4eb9ce76634d$
+ //
+ 
+ #ifndef CEF_LIBCEF_DLL_CPPTOC_AUDIO_HANDLER_CPPTOC_H_
+diff --git a/src/cef/libcef_dll/cpptoc/auth_callback_cpptoc.cc b/src/cef/libcef_dll/cpptoc/auth_callback_cpptoc.cc
+index 146cf8370d04b..caedf03194a5c
+--- a/src/cef/libcef_dll/cpptoc/auth_callback_cpptoc.cc
++++ b/src/cef/libcef_dll/cpptoc/auth_callback_cpptoc.cc
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=1c155d75ccb34c91336d15446c10b7e476f23c44$
++// $hash=b71adaa7f64de4164420e0f28f1c1064813c2beb$
+ //
+ 
+ #include "libcef_dll/cpptoc/auth_callback_cpptoc.h"
+diff --git a/src/cef/libcef_dll/cpptoc/auth_callback_cpptoc.h b/src/cef/libcef_dll/cpptoc/auth_callback_cpptoc.h
+index b9aae72ade919..6a1dd700efad2
+--- a/src/cef/libcef_dll/cpptoc/auth_callback_cpptoc.h
++++ b/src/cef/libcef_dll/cpptoc/auth_callback_cpptoc.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=036ebbbaaa86b497dda11ef6371e5bc6c9171b04$
++// $hash=be94cb2e319c4a42e8bc9ee41b78935834e8a59c$
+ //
+ 
+ #ifndef CEF_LIBCEF_DLL_CPPTOC_AUTH_CALLBACK_CPPTOC_H_
+diff --git a/src/cef/libcef_dll/cpptoc/before_download_callback_cpptoc.cc b/src/cef/libcef_dll/cpptoc/before_download_callback_cpptoc.cc
+index 6187dfa3f368c..97825a59f8046
+--- a/src/cef/libcef_dll/cpptoc/before_download_callback_cpptoc.cc
++++ b/src/cef/libcef_dll/cpptoc/before_download_callback_cpptoc.cc
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=0f0475ffcd9ea6ca7f91616c52c21b3e51b075f3$
++// $hash=5b940bd6e4a7e6a9cabd42b87ae9ff89eb1a0c5d$
+ //
+ 
+ #include "libcef_dll/cpptoc/before_download_callback_cpptoc.h"
+diff --git a/src/cef/libcef_dll/cpptoc/before_download_callback_cpptoc.h b/src/cef/libcef_dll/cpptoc/before_download_callback_cpptoc.h
+index fc31cf841792f..9f2944cd96091
+--- a/src/cef/libcef_dll/cpptoc/before_download_callback_cpptoc.h
++++ b/src/cef/libcef_dll/cpptoc/before_download_callback_cpptoc.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=53a024e4e503f7e107c19ed638684c5708efd6e6$
++// $hash=76dfadaa2d0f5ef6cdb8621cad3136e89b33ae25$
+ //
+ 
+ #ifndef CEF_LIBCEF_DLL_CPPTOC_BEFORE_DOWNLOAD_CALLBACK_CPPTOC_H_
+diff --git a/src/cef/libcef_dll/cpptoc/binary_value_cpptoc.cc b/src/cef/libcef_dll/cpptoc/binary_value_cpptoc.cc
+index 51659b1677737..9ad3bd943056c
+--- a/src/cef/libcef_dll/cpptoc/binary_value_cpptoc.cc
++++ b/src/cef/libcef_dll/cpptoc/binary_value_cpptoc.cc
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=fd59a248f99060800fc3bab5c381784eb3309a57$
++// $hash=b1f1f6a65560c0607e7eb3c4a57dbc40cab0b811$
+ //
+ 
+ #include "libcef_dll/cpptoc/binary_value_cpptoc.h"
+diff --git a/src/cef/libcef_dll/cpptoc/binary_value_cpptoc.h b/src/cef/libcef_dll/cpptoc/binary_value_cpptoc.h
+index 994621aa25378..3f6a9e362ddc9
+--- a/src/cef/libcef_dll/cpptoc/binary_value_cpptoc.h
++++ b/src/cef/libcef_dll/cpptoc/binary_value_cpptoc.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=83361bb9395a566ef5bfcd9d87eade8df222d075$
++// $hash=bdc631b2bd2c0a68146e823e0ff23e1b3a455023$
+ //
+ 
+ #ifndef CEF_LIBCEF_DLL_CPPTOC_BINARY_VALUE_CPPTOC_H_
+diff --git a/src/cef/libcef_dll/cpptoc/browser_cpptoc.cc b/src/cef/libcef_dll/cpptoc/browser_cpptoc.cc
+index 1cdfa28447136..d713abd8f25ec
+--- a/src/cef/libcef_dll/cpptoc/browser_cpptoc.cc
++++ b/src/cef/libcef_dll/cpptoc/browser_cpptoc.cc
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=c1509a4a06a744e423e92c8d75b17128fd0601e1$
++// $hash=de6d56ff06c32a54e999d9309218c6a546eaa146$
+ //
+ 
+ #include "libcef_dll/cpptoc/browser_cpptoc.h"
+diff --git a/src/cef/libcef_dll/cpptoc/browser_cpptoc.h b/src/cef/libcef_dll/cpptoc/browser_cpptoc.h
+index 08c927b4983fc..1a10254e25c87
+--- a/src/cef/libcef_dll/cpptoc/browser_cpptoc.h
++++ b/src/cef/libcef_dll/cpptoc/browser_cpptoc.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=68e6a8ff4e47ec0c3c767d80746091550b9d11dc$
++// $hash=01e044c521a174528e137e4b131d9df95875eb65$
+ //
+ 
+ #ifndef CEF_LIBCEF_DLL_CPPTOC_BROWSER_CPPTOC_H_
+diff --git a/src/cef/libcef_dll/cpptoc/browser_host_cpptoc.cc b/src/cef/libcef_dll/cpptoc/browser_host_cpptoc.cc
+index 131f0d1a8d2c4..b7b75e6dd316f
+--- a/src/cef/libcef_dll/cpptoc/browser_host_cpptoc.cc
++++ b/src/cef/libcef_dll/cpptoc/browser_host_cpptoc.cc
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,10 +9,11 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=1d35c0dce6fb6b92779d45000924a5c0992e5ce7$
++// $hash=fbbfbf396665393a59e2487e84880bafe3568174$
+ //
+ 
+ #include "libcef_dll/cpptoc/browser_host_cpptoc.h"
++#include "libcef_dll/cpptoc/binary_value_cpptoc.h"
+ #include "libcef_dll/cpptoc/browser_cpptoc.h"
+ #include "libcef_dll/cpptoc/dictionary_value_cpptoc.h"
+ #include "libcef_dll/cpptoc/drag_data_cpptoc.h"
+@@ -20,6 +21,7 @@
+ #include "libcef_dll/cpptoc/navigation_entry_cpptoc.h"
+ #include "libcef_dll/cpptoc/registration_cpptoc.h"
+ #include "libcef_dll/cpptoc/request_context_cpptoc.h"
++#include "libcef_dll/cpptoc/value_cpptoc.h"
+ #include "libcef_dll/ctocpp/client_ctocpp.h"
+ #include "libcef_dll/ctocpp/dev_tools_message_observer_ctocpp.h"
+ #include "libcef_dll/ctocpp/download_image_callback_ctocpp.h"
+@@ -29,6 +31,7 @@
+ #include "libcef_dll/ctocpp/run_file_dialog_callback_ctocpp.h"
+ #include "libcef_dll/ctocpp/store_web_archive_result_callback_ctocpp.h"
+ #include "libcef_dll/ctocpp/task_ctocpp.h"
++#include "libcef_dll/ctocpp/web_message_receiver_ctocpp.h"
+ #include "libcef_dll/shutdown_checker.h"
+ #include "libcef_dll/transfer_util.h"
+ 
+@@ -1251,7 +1254,7 @@ browser_host_destroy_all_web_message_ports(struct _cef_browser_host_t* self) {
+ void CEF_CALLBACK
+ browser_host_post_port_message(struct _cef_browser_host_t* self,
+                                cef_string_t* port_handle,
+-                               cef_string_t* data) {
++                               struct _cef_value_t* message) {
+   shutdown_checker::AssertNotShutdown();
+ 
+   // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
+@@ -1263,24 +1266,23 @@ browser_host_post_port_message(struct _cef_browser_host_t* self,
+   DCHECK(port_handle);
+   if (!port_handle)
+     return;
+-  // Verify param: data; type: string_byref
+-  DCHECK(data);
+-  if (!data)
++  // Verify param: message; type: refptr_same
++  DCHECK(message);
++  if (!message)
+     return;
+ 
+   // Translate param: port_handle; type: string_byref
+   CefString port_handleStr(port_handle);
+-  // Translate param: data; type: string_byref
+-  CefString dataStr(data);
+ 
+   // Execute
+-  CefBrowserHostCppToC::Get(self)->PostPortMessage(port_handleStr, dataStr);
++  CefBrowserHostCppToC::Get(self)->PostPortMessage(
++      port_handleStr, CefValueCppToC::Unwrap(message));
+ }
+ 
+ void CEF_CALLBACK browser_host_set_port_message_callback(
+     struct _cef_browser_host_t* self,
+     cef_string_t* port_handle,
+-    struct _cef_java_script_result_callback_t* callback) {
++    struct _cef_web_message_receiver_t* callback) {
+   shutdown_checker::AssertNotShutdown();
+ 
+   // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
+@@ -1302,7 +1304,7 @@ void CEF_CALLBACK browser_host_set_port_message_callback(
+ 
+   // Execute
+   CefBrowserHostCppToC::Get(self)->SetPortMessageCallback(
+-      port_handleStr, CefJavaScriptResultCallbackCToCpp::Wrap(callback));
++      port_handleStr, CefWebMessageReceiverCToCpp::Wrap(callback));
+ }
+ 
+ void CEF_CALLBACK browser_host_get_hit_data(struct _cef_browser_host_t* self,
+@@ -1985,6 +1987,152 @@ void CEF_CALLBACK browser_host_remove_cache(struct _cef_browser_host_t* self,
+                                                                   : false);
+ }
+ 
++void CEF_CALLBACK
++browser_host_scroll_page_up_down(struct _cef_browser_host_t* self,
++                                 int is_up,
++                                 int is_half,
++                                 float view_height) {
++  shutdown_checker::AssertNotShutdown();
++
++  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
++
++  DCHECK(self);
++  if (!self)
++    return;
++
++  // Execute
++  CefBrowserHostCppToC::Get(self)->ScrollPageUpDown(
++      is_up ? true : false, is_half ? true : false, view_height);
++}
++
++struct _cef_binary_value_t* CEF_CALLBACK
++browser_host_get_web_state(struct _cef_browser_host_t* self) {
++  shutdown_checker::AssertNotShutdown();
++
++  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
++
++  DCHECK(self);
++  if (!self)
++    return NULL;
++
++  // Execute
++  CefRefPtr<CefBinaryValue> _retval =
++      CefBrowserHostCppToC::Get(self)->GetWebState();
++
++  // Return type: refptr_same
++  return CefBinaryValueCppToC::Wrap(_retval);
++}
++
++int CEF_CALLBACK
++browser_host_restore_web_state(struct _cef_browser_host_t* self,
++                               struct _cef_binary_value_t* state) {
++  shutdown_checker::AssertNotShutdown();
++
++  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
++
++  DCHECK(self);
++  if (!self)
++    return 0;
++  // Verify param: state; type: refptr_same
++  DCHECK(state);
++  if (!state)
++    return 0;
++
++  // Execute
++  bool _retval = CefBrowserHostCppToC::Get(self)->RestoreWebState(
++      CefBinaryValueCppToC::Unwrap(state));
++
++  // Return type: bool
++  return _retval;
++}
++
++void CEF_CALLBACK browser_host_scroll_to(struct _cef_browser_host_t* self,
++                                         float x,
++                                         float y) {
++  shutdown_checker::AssertNotShutdown();
++
++  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
++
++  DCHECK(self);
++  if (!self)
++    return;
++
++  // Execute
++  CefBrowserHostCppToC::Get(self)->ScrollTo(x, y);
++}
++
++void CEF_CALLBACK browser_host_scroll_by(struct _cef_browser_host_t* self,
++                                         float delta_x,
++                                         float delta_y) {
++  shutdown_checker::AssertNotShutdown();
++
++  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
++
++  DCHECK(self);
++  if (!self)
++    return;
++
++  // Execute
++  CefBrowserHostCppToC::Get(self)->ScrollBy(delta_x, delta_y);
++}
++
++void CEF_CALLBACK browser_host_slide_scroll(struct _cef_browser_host_t* self,
++                                            float vx,
++                                            float vy) {
++  shutdown_checker::AssertNotShutdown();
++
++  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
++
++  DCHECK(self);
++  if (!self)
++    return;
++
++  // Execute
++  CefBrowserHostCppToC::Get(self)->SlideScroll(vx, vy);
++}
++
++void CEF_CALLBACK browser_host_set_file_access(struct _cef_browser_host_t* self,
++                                               int falg) {
++  shutdown_checker::AssertNotShutdown();
++
++  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
++
++  DCHECK(self);
++  if (!self)
++    return;
++
++  // Execute
++  CefBrowserHostCppToC::Get(self)->SetFileAccess(falg ? true : false);
++}
++
++void CEF_CALLBACK
++browser_host_set_block_network(struct _cef_browser_host_t* self, int falg) {
++  shutdown_checker::AssertNotShutdown();
++
++  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
++
++  DCHECK(self);
++  if (!self)
++    return;
++
++  // Execute
++  CefBrowserHostCppToC::Get(self)->SetBlockNetwork(falg ? true : false);
++}
++
++void CEF_CALLBACK browser_host_set_cache_mode(struct _cef_browser_host_t* self,
++                                              int falg) {
++  shutdown_checker::AssertNotShutdown();
++
++  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
++
++  DCHECK(self);
++  if (!self)
++    return;
++
++  // Execute
++  CefBrowserHostCppToC::Get(self)->SetCacheMode(falg);
++}
++
+ }  // namespace
+ 
+ // CONSTRUCTOR - Do not edit by hand.
+@@ -2098,6 +2246,15 @@ CefBrowserHostCppToC::CefBrowserHostCppToC() {
+   GetStruct()->get_original_url = browser_host_get_original_url;
+   GetStruct()->put_network_available = browser_host_put_network_available;
+   GetStruct()->remove_cache = browser_host_remove_cache;
++  GetStruct()->scroll_page_up_down = browser_host_scroll_page_up_down;
++  GetStruct()->get_web_state = browser_host_get_web_state;
++  GetStruct()->restore_web_state = browser_host_restore_web_state;
++  GetStruct()->scroll_to = browser_host_scroll_to;
++  GetStruct()->scroll_by = browser_host_scroll_by;
++  GetStruct()->slide_scroll = browser_host_slide_scroll;
++  GetStruct()->set_file_access = browser_host_set_file_access;
++  GetStruct()->set_block_network = browser_host_set_block_network;
++  GetStruct()->set_cache_mode = browser_host_set_cache_mode;
+ }
+ 
+ // DESTRUCTOR - Do not edit by hand.
+diff --git a/src/cef/libcef_dll/cpptoc/browser_host_cpptoc.h b/src/cef/libcef_dll/cpptoc/browser_host_cpptoc.h
+index 3a7c59332962d..2f88bb3380b13
+--- a/src/cef/libcef_dll/cpptoc/browser_host_cpptoc.h
++++ b/src/cef/libcef_dll/cpptoc/browser_host_cpptoc.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=244bcb519cd21d6febf70c4ce40fbc1cbb18176c$
++// $hash=e51f496e40bd2b3b9573d2ca084e578bb1df1407$
+ //
+ 
+ #ifndef CEF_LIBCEF_DLL_CPPTOC_BROWSER_HOST_CPPTOC_H_
