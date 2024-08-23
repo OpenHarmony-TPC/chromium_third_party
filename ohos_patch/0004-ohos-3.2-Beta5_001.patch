@@ -5238,3 +5238,1883 @@ index 32a11de3e1280..a46ac3be4a3f6
    PrefsTabHelper::GetServiceInstance();
    RendererUpdaterFactory::GetInstance();
    SpellcheckServiceFactory::GetInstance();
+diff --git a/src/cef/libcef/browser/browser_host_base.cc b/src/cef/libcef/browser/browser_host_base.cc
+index 0a046454b0a54..6e2923b34552d
+--- a/src/cef/libcef/browser/browser_host_base.cc
++++ b/src/cef/libcef/browser/browser_host_base.cc
+@@ -50,6 +50,7 @@
+ #include "base/strings/string_number_conversions.h"
+ #include "chrome/browser/browser_process.h"
+ #include "content/public/common/mhtml_generation_params.h"
++#include "libcef/browser/navigation_state_serializer.h"
+ #include "libcef/browser/javascript/oh_javascript_injector.h"
+ #include "ui/base/resource/resource_bundle.h"
+ #endif
+@@ -498,6 +499,7 @@ void CefBrowserHostBase::UpdateBrowserSettings(
+   //    browser_settings.file_access_from_file_urls;
+   /* ohos webview add*/
+   settings_.force_dark_mode_enabled = browser_settings.force_dark_mode_enabled;
++  settings_.dark_prefer_color_scheme_enabled = browser_settings.dark_prefer_color_scheme_enabled;
+   settings_.javascript_can_open_windows_automatically =
+       browser_settings.javascript_can_open_windows_automatically;
+   settings_.loads_images_automatically =
+@@ -519,6 +521,10 @@ void CefBrowserHostBase::UpdateBrowserSettings(
+   settings_.viewport_meta_enabled = browser_settings.viewport_meta_enabled;
+   settings_.user_gesture_required = browser_settings.user_gesture_required;
+   settings_.pinch_smooth_mode = browser_settings.pinch_smooth_mode;
++#if BUILDFLAG(IS_OHOS)
++  settings_.hide_vertical_scrollbars = browser_settings.hide_vertical_scrollbars;
++  settings_.hide_horizontal_scrollbars = browser_settings.hide_horizontal_scrollbars;
++#endif
+ }
+ 
+ void CefBrowserHostBase::SetWebPreferences(
+@@ -721,8 +727,7 @@ CefString CefBrowserHostBase::GetOriginalUrl() {
+ void CefBrowserHostBase::PutNetworkAvailable(bool available) {
+   auto frame = GetMainFrame();
+   if (frame && frame->IsValid()) {
+-    static_cast<CefFrameHostImpl*>(frame.get())
+-        ->SetJsOnlineProperty(available);
++    static_cast<CefFrameHostImpl*>(frame.get())->SetJsOnlineProperty(available);
+   }
+ }
+ 
+@@ -767,7 +772,8 @@ void CefBrowserHostBase::ExitFullScreen() {
+     return;
+   }
+   wc->GetMainFrame()->AllowInjectingJavaScript();
+-  std::string jscode("{if(document.fullscreenElement){document.exitFullscreen()}}");
++  std::string jscode(
++      "{if(document.fullscreenElement){document.exitFullscreen()}}");
+   wc->GetMainFrame()->ExecuteJavaScript(base::UTF8ToUTF16(jscode),
+                                         base::NullCallback());
+ }
+@@ -975,6 +981,59 @@ void CefBrowserHostBase::RemoveCache(bool include_disk_files) {
+     return;
+   }
+ }
++void CefBrowserHostBase::ScrollPageUpDown(bool is_up,
++                                          bool is_half,
++                                          float view_height) {
++  auto frame = GetMainFrame();
++  if (frame && frame->IsValid()) {
++    static_cast<CefFrameHostImpl*>(frame.get())
++        ->ScrollPageUpDown(is_up, is_half, view_height);
++  }
++}
++
++void CefBrowserHostBase::ScrollTo(float x,
++                                  float y) {
++  auto frame = GetMainFrame();
++  if (frame && frame->IsValid()) {
++    static_cast<CefFrameHostImpl*>(frame.get())
++        ->ScrollTo(x, y);
++  }
++}
++
++void CefBrowserHostBase::ScrollBy(float delta_x,
++                                  float delta_y) {
++  auto frame = GetMainFrame();
++  if (frame && frame->IsValid()) {
++    static_cast<CefFrameHostImpl*>(frame.get())
++        ->ScrollBy(delta_x, delta_y);
++  }
++}
++
++void CefBrowserHostBase::SlideScroll(float vx,
++                                     float vy) {
++  auto frame = GetMainFrame();
++  if (frame && frame->IsValid()) {
++    static_cast<CefFrameHostImpl*>(frame.get())
++       ->SlideScroll(vx, vy);
++  }
++}
++
++CefRefPtr<CefBinaryValue> CefBrowserHostBase::GetWebState() {
++  auto web_contents = GetWebContents();
++  if (!web_contents) {
++    return nullptr;
++  }
++
++  return NavigationStateSerializer::WriteNavigationStatus(*web_contents);
++}
++
++bool CefBrowserHostBase::RestoreWebState(const CefRefPtr<CefBinaryValue> state) {
++  auto web_contents = GetWebContents();
++  if (!web_contents || !state) {
++    return false;
++  }
++  return NavigationStateSerializer::RestoreNavigationStatus(*web_contents, state);
++}
+ #endif  // IS_OHOS
+ 
+ void CefBrowserHostBase::StopLoad() {
+@@ -1539,19 +1598,32 @@ void CefBrowserHostBase::ClosePort(CefString& portHandle) {
+ }
+ 
+ void CefBrowserHostBase::PostPortMessage(CefString& portHandle,
+-                                         CefString& data) {
++                                         CefRefPtr<CefValue> data) {
+   auto web_contents = GetWebContents();
+   if (!web_contents) {
+     LOG(ERROR) << "GetWebContents null";
+     return;
+   }
+ 
+-  std::u16string message(base::UTF8ToUTF16(data.ToString()));
++  blink::WebMessagePort::Message message;
++  if (data->GetType() == VTYPE_STRING) {
++    message = blink::WebMessagePort::Message(base::UTF8ToUTF16(data->GetString().ToString()));
++  } else if (data->GetType() == VTYPE_BINARY) {
++    CefRefPtr<CefBinaryValue> binValue = data->GetBinary();
++    size_t len = binValue->GetSize();
++    std::vector<uint8_t> arr(len);
++    binValue->GetData(&arr[0], len, 0);
++    message = blink::WebMessagePort::Message(std::move(arr));
++  } else {
++    LOG(ERROR) << "CefBrowserHostBase::PostPortMessage not support type";
++	return;
++  }
++
+   // find the WebMessagePort in map
+   for (auto iter = portMap_.begin(); iter != portMap_.end(); ++iter) {
+     if (portHandle.ToString().compare(std::to_string(iter->first.first)) == 0) {
+       if (iter->second.first.CanPostMessage()) {
+-        iter->second.first.PostMessage(blink::WebMessagePort::Message(message));
++        iter->second.first.PostMessage(std::move(message));
+       } else {
+         LOG(ERROR) << "port can not post messsage";
+       }
+@@ -1559,8 +1631,7 @@ void CefBrowserHostBase::PostPortMessage(CefString& portHandle,
+     } else if (portHandle.ToString().compare(
+                    std::to_string(iter->first.second)) == 0) {
+       if (iter->second.second.CanPostMessage()) {
+-        iter->second.second.PostMessage(
+-            blink::WebMessagePort::Message(message));
++        iter->second.second.PostMessage(std::move(message));
+       } else {
+         LOG(ERROR) << "port can not post messsage";
+       }
+@@ -1574,7 +1645,7 @@ void CefBrowserHostBase::PostPortMessage(CefString& portHandle,
+ // WebMessagePort of the pipe.
+ void CefBrowserHostBase::SetPortMessageCallback(
+     CefString& portHandle,
+-    CefRefPtr<CefJavaScriptResultCallback> callback) {
++    CefRefPtr<CefWebMessageReceiver> callback) {
+   auto web_contents = GetWebContents();
+   if (!web_contents) {
+     LOG(ERROR) << "GetWebContents null";
+@@ -1640,7 +1711,7 @@ WebMessageReceiverImpl::~WebMessageReceiverImpl() {
+ }
+ 
+ void WebMessageReceiverImpl::SetOnMessageCallback(
+-    CefRefPtr<CefJavaScriptResultCallback> callback) {
++    CefRefPtr<CefWebMessageReceiver> callback) {
+   LOG(INFO) << "WebMessageReceiverImpl::SetOnMessageCallback ";
+   callback_ = callback;
+ }
+@@ -1650,9 +1721,17 @@ bool WebMessageReceiverImpl::OnMessage(blink::WebMessagePort::Message message) {
+   LOG(INFO) << "OnMessage start";
+   // Pass the message on to the receiver.
+   if (callback_) {
+-    LOG(INFO) << "OnMessage:" << message.data;
+-    std::u16string data = message.data;
+-    callback_->OnJavaScriptExeResult(base::UTF16ToUTF8(data));
++    CefRefPtr<CefValue> data = CefValue::Create();
++    if (!message.data.empty()) {
++      data->SetString(base::UTF16ToUTF8(message.data));
++    } else {
++      std::vector<uint8_t> vecBinary = message.array_buffer;
++      CefRefPtr<CefBinaryValue> value =
++        CefBinaryValue::Create(vecBinary.data(), vecBinary.size());
++      data->SetBinary(value);
++    }
++
++    callback_->OnMessage(data);
+   } else {
+     LOG(ERROR) << "u should set callback to receive message";
+   }
+@@ -1717,8 +1796,10 @@ void CefBrowserHostBase::LoadWithDataAndBaseUrl(const CefString& baseUrl,
+                                                 const CefString& encoding,
+                                                 const CefString& historyUrl) {
+   if (!CEF_CURRENTLY_ON_UIT()) {
+-    CEF_POST_TASK(CEF_UIT, base::BindOnce(&CefBrowserHostBase::LoadWithDataAndBaseUrl,
+-      this, baseUrl, data, mimeType, encoding, historyUrl));
++    CEF_POST_TASK(
++        CEF_UIT,
++        base::BindOnce(&CefBrowserHostBase::LoadWithDataAndBaseUrl, this,
++                       baseUrl, data, mimeType, encoding, historyUrl));
+     return;
+   }
+   std::string dataBase = data.empty() ? "" : data;
+@@ -1761,7 +1842,7 @@ void CefBrowserHostBase::LoadWithData(const CefString& data,
+                                       const CefString& encoding) {
+   if (!CEF_CURRENTLY_ON_UIT()) {
+     CEF_POST_TASK(CEF_UIT, base::BindOnce(&CefBrowserHostBase::LoadWithData,
+-      this, data, mimeType, encoding));
++                                          this, data, mimeType, encoding));
+     return;
+   }
+   std::string dataBase = data.empty() ? "" : data;
+@@ -1835,6 +1916,48 @@ bool CefBrowserHostBase::GetWebDebuggingAccess() {
+   return is_web_debugging_access_;
+ }
+ 
++#if BUILDFLAG(IS_OHOS)
++void CefBrowserHostBase::SetFileAccess(bool flag) {
++  base::AutoLock lock_scope(state_lock_);
++  if (file_access_ == flag) {
++    return;
++  }
++  file_access_ = flag;
++}
++
++void CefBrowserHostBase::SetBlockNetwork(bool flag) {
++  base::AutoLock lock_scope(state_lock_);
++  if (network_blocked_ == flag) {
++    return;
++  }
++  network_blocked_ = flag;
++}
++
++void CefBrowserHostBase::SetCacheMode(int flag) {
++  base::AutoLock lock_scope(state_lock_);
++  if (cache_mode_ == flag) {
++    return;
++  }
++  cache_mode_ = flag;
++}
++
++
++bool CefBrowserHostBase::GetFileAccess() {
++  base::AutoLock lock_scope(state_lock_);
++  return file_access_;
++}
++
++bool CefBrowserHostBase::GetBlockNetwork() {
++  base::AutoLock lock_scope(state_lock_);
++  return network_blocked_;
++}
++
++int CefBrowserHostBase::GetCacheMode() {
++  base::AutoLock lock_scope(state_lock_);
++  return cache_mode_;
++}
++#endif
++
+ void CefBrowserHostBase::GetImageForContextNode() {
+   auto frame = GetMainFrame();
+   if (frame && frame->IsValid()) {
+diff --git a/src/cef/libcef/browser/browser_host_base.h b/src/cef/libcef/browser/browser_host_base.h
+index a098827de9f05..a752ef2c3a23d
+--- a/src/cef/libcef/browser/browser_host_base.h
++++ b/src/cef/libcef/browser/browser_host_base.h
+@@ -108,10 +108,10 @@ class WebMessageReceiverImpl : public blink::WebMessagePort::MessageReceiver {
+   // WebMessagePort::MessageReceiver implementation:
+   bool OnMessage(blink::WebMessagePort::Message message) override;
+ 
+-  void SetOnMessageCallback(CefRefPtr<CefJavaScriptResultCallback> callback);
++  void SetOnMessageCallback(CefRefPtr<CefWebMessageReceiver> callback);
+ 
+  private:
+-  CefRefPtr<CefJavaScriptResultCallback> callback_;
++  CefRefPtr<CefWebMessageReceiver> callback_;
+ };
+ 
+ struct CefHitData {
+@@ -239,6 +239,12 @@ class CefBrowserHostBase : public CefBrowserHost,
+   CefString GetOriginalUrl() override;
+   void PutNetworkAvailable(bool available) override;
+   void RemoveCache(bool include_disk_files) override;
++  CefRefPtr<CefBinaryValue> GetWebState() override;
++  bool RestoreWebState(const CefRefPtr<CefBinaryValue> state) override;
++  void ScrollPageUpDown(bool is_up, bool is_half, float view_height) override;
++  void ScrollTo(float x, float y) override;
++  void ScrollBy(float delta_x, float delta_y) override;
++  void SlideScroll(float vx, float vy) override;
+   /* ohos webview end */
+ #endif
+ 
+@@ -276,10 +282,10 @@ class CefBrowserHostBase : public CefBrowserHost,
+                       std::vector<CefString>& ports,
+                       CefString& targetUri) override;
+   void ClosePort(CefString& port_handle) override;
+-  void PostPortMessage(CefString& port_handle, CefString& data) override;
++  void PostPortMessage(CefString& port_handle, CefRefPtr<CefValue> message) override;
+   void SetPortMessageCallback(
+       CefString& port_handle,
+-      CefRefPtr<CefJavaScriptResultCallback> callback) override;
++      CefRefPtr<CefWebMessageReceiver> callback) override;
+   void DestroyAllWebMessagePorts() override;
+ #endif
+   CefString Title() override;
+@@ -409,6 +415,18 @@ class CefBrowserHostBase : public CefBrowserHost,
+   void SetWebDebuggingAccess(bool isEnableDebug) override;
+   bool GetWebDebuggingAccess() override;
+ 
++#if BUILDFLAG(IS_OHOS)
++  void SetFileAccess(bool flag) override;
++  void SetBlockNetwork(bool flag) override;
++  void SetCacheMode(int flag) override;
++  bool GetFileAccess();
++  bool GetBlockNetwork();
++  int GetCacheMode();
++  bool file_access_ = false;
++  bool network_blocked_ = false;
++  int cache_mode_ = 0;
++#endif
++
+ #if BUILDFLAG(IS_OHOS)
+   bool ShouldShowLoadingUI() override;
+ #endif
+diff --git a/src/cef/libcef/browser/browser_host_create.cc b/src/cef/libcef/browser/browser_host_create.cc
+index 21742d9599e16..60d14a5d4b9ae
+--- a/src/cef/libcef/browser/browser_host_create.cc
++++ b/src/cef/libcef/browser/browser_host_create.cc
+@@ -5,11 +5,14 @@
+ 
+ #include "include/cef_browser.h"
+ #include "libcef/browser/alloy/alloy_browser_host_impl.h"
+-#include "libcef/browser/chrome/chrome_browser_host_impl.h"
+ #include "libcef/browser/context.h"
+ #include "libcef/browser/thread_util.h"
+ #include "libcef/features/runtime.h"
+ 
++#if defined(OHOS_ENABLE_CEF_CHROME_RUNTIME)
++#include "libcef/browser/chrome/chrome_browser_host_impl.h"
++#endif // defined(OHOS_ENABLE_CEF_CHROME_RUNTIME)
++
+ namespace {
+ 
+ class CreateBrowserHelper {
+@@ -138,10 +141,12 @@ CefRefPtr<CefBrowser> CefBrowserHost::CreateBrowserSync(
+ // static
+ CefRefPtr<CefBrowserHostBase> CefBrowserHostBase::Create(
+     CefBrowserCreateParams& create_params) {
++#if defined(OHOS_ENABLE_CEF_CHROME_RUNTIME)
+   if (cef::IsChromeRuntimeEnabled()) {
+     auto browser = ChromeBrowserHostImpl::Create(create_params);
+     return browser.get();
+   }
++#endif // defined(OHOS_ENABLE_CEF_CHROME_RUNTIME)
+ 
+   auto browser = AlloyBrowserHostImpl::Create(create_params);
+   return browser.get();
+diff --git a/src/cef/libcef/browser/browser_platform_delegate.cc b/src/cef/libcef/browser/browser_platform_delegate.cc
+index d5ef0e763cfe8..d3f93c844f946
+--- a/src/cef/libcef/browser/browser_platform_delegate.cc
++++ b/src/cef/libcef/browser/browser_platform_delegate.cc
+@@ -393,6 +393,18 @@ void CefBrowserPlatformDelegate::StopFinding(bool clearSelection) {
+   NOTIMPLEMENTED();
+ }
+ 
++void CefBrowserPlatformDelegate::ShowPopupMenu(
++    mojo::PendingRemote<blink::mojom::PopupMenuClient> popup_client,
++    const gfx::Rect& bounds,
++    int item_height,
++    double item_font_size,
++    int selected_item,
++    std::vector<blink::mojom::MenuItemPtr> menu_items,
++    bool right_aligned,
++    bool allow_multiple_selection) {
++  NOTIMPLEMENTED();
++}
++
+ // static
+ int CefBrowserPlatformDelegate::TranslateWebEventModifiers(
+     uint32 cef_modifiers) {
+diff --git a/src/cef/libcef/browser/browser_platform_delegate.h b/src/cef/libcef/browser/browser_platform_delegate.h
+index fbcb7521503ec..f69fa5b0c42e1
+--- a/src/cef/libcef/browser/browser_platform_delegate.h
++++ b/src/cef/libcef/browser/browser_platform_delegate.h
+@@ -17,6 +17,7 @@
+ #include "base/callback_forward.h"
+ #include "extensions/common/mojom/view_type.mojom-forward.h"
+ #include "third_party/blink/public/common/page/drag_operation.h"
++#include "third_party/blink/public/mojom/choosers/popup_menu.mojom.h"
+ #include "third_party/blink/public/mojom/drag/drag.mojom-forward.h"
+ #include "third_party/skia/include/core/SkColor.h"
+ #include "ui/base/dragdrop/mojom/drag_drop_types.mojom-forward.h"
+@@ -359,6 +360,15 @@ class CefBrowserPlatformDelegate {
+                     bool findNext,
+                     bool newSession);
+   virtual void StopFinding(bool clearSelection);
++  virtual void ShowPopupMenu(
++    mojo::PendingRemote<blink::mojom::PopupMenuClient> popup_client,
++    const gfx::Rect& bounds,
++    int item_height,
++    double item_font_size,
++    int selected_item,
++    std::vector<blink::mojom::MenuItemPtr> menu_items,
++    bool right_aligned,
++    bool allow_multiple_selection);
+ 
+  protected:
+   // Allow deletion via std::unique_ptr only.
+diff --git a/src/cef/libcef/browser/browser_platform_delegate_create.cc b/src/cef/libcef/browser/browser_platform_delegate_create.cc
+index da158b2a3a659..8c2723bb11048
+--- a/src/cef/libcef/browser/browser_platform_delegate_create.cc
++++ b/src/cef/libcef/browser/browser_platform_delegate_create.cc
+@@ -12,7 +12,6 @@
+ #include "build/build_config.h"
+ 
+ #include "libcef/browser/browser_host_base.h"
+-#include "libcef/browser/chrome/browser_platform_delegate_chrome.h"
+ #include "libcef/browser/extensions/browser_platform_delegate_background.h"
+ #include "libcef/features/runtime_checks.h"
+ 
+@@ -30,10 +29,16 @@
+ #endif
+ 
+ #if defined(TOOLKIT_VIEWS)
++#if defined(OHOS_ENABLE_CEF_CHROME_RUNTIME)
+ #include "libcef/browser/chrome/views/browser_platform_delegate_chrome_views.h"
++#endif // defined(OHOS_ENABLE_CEF_CHROME_RUNTIME)
+ #include "libcef/browser/views/browser_platform_delegate_views.h"
+ #endif
+ 
++#if defined(OHOS_ENABLE_CEF_CHROME_RUNTIME)
++#include "libcef/browser/chrome/browser_platform_delegate_chrome.h"
++#endif // defined(OHOS_ENABLE_CEF_CHROME_RUNTIME)
++
+ namespace {
+ 
+ std::unique_ptr<CefBrowserPlatformDelegateNative> CreateNativeDelegate(
+@@ -79,6 +84,7 @@ std::unique_ptr<CefBrowserPlatformDelegate> CefBrowserPlatformDelegate::Create(
+   const SkColor background_color = CefContext::Get()->GetBackgroundColor(
+       &create_params.settings, is_windowless ? STATE_ENABLED : STATE_DISABLED);
+ 
++#if defined(OHOS_ENABLE_CEF_CHROME_RUNTIME)
+   if (cef::IsChromeRuntimeEnabled()) {
+     // CefWindowInfo is not used in this case.
+     std::unique_ptr<CefBrowserPlatformDelegateNative> native_delegate =
+@@ -94,6 +100,7 @@ std::unique_ptr<CefBrowserPlatformDelegate> CefBrowserPlatformDelegate::Create(
+     return std::make_unique<CefBrowserPlatformDelegateChrome>(
+         std::move(native_delegate));
+   }
++#endif // defined(OHOS_ENABLE_CEF_CHROME_RUNTIME)
+ 
+   if (create_params.window_info) {
+     std::unique_ptr<CefBrowserPlatformDelegateNative> native_delegate =
+diff --git a/src/cef/libcef/browser/context_menu_params_impl.cc b/src/cef/libcef/browser/context_menu_params_impl.cc
+index c8d817852b2a3..3cff40a84c1d0
+--- a/src/cef/libcef/browser/context_menu_params_impl.cc
++++ b/src/cef/libcef/browser/context_menu_params_impl.cc
+@@ -147,3 +147,14 @@ bool CefContextMenuParamsImpl::IsCustomMenu() {
+   CEF_VALUE_VERIFY_RETURN(false, false);
+   return !const_value().custom_items.empty();
+ }
++
++CefContextMenuParamsImpl::InputFieldType CefContextMenuParamsImpl::GetInputFieldType() {
++  CEF_VALUE_VERIFY_RETURN(false, CM_INPUTFIELDTYPE_NONE);
++  return static_cast<InputFieldType>(const_value().input_field_type);
++}
++
++CefContextMenuParamsImpl::SourceType CefContextMenuParamsImpl::GetSourceType() {
++  CEF_VALUE_VERIFY_RETURN(false, CM_SOURCETYPE_NONE);
++  return static_cast<SourceType>(const_value().source_type);
++}
++
+diff --git a/src/cef/libcef/browser/context_menu_params_impl.h b/src/cef/libcef/browser/context_menu_params_impl.h
+index 782848a03b7dd..eedb81e10f9ba
+--- a/src/cef/libcef/browser/context_menu_params_impl.h
++++ b/src/cef/libcef/browser/context_menu_params_impl.h
+@@ -41,6 +41,8 @@ class CefContextMenuParamsImpl
+   bool IsSpellCheckEnabled() override;
+   EditStateFlags GetEditStateFlags() override;
+   bool IsCustomMenu() override;
++  InputFieldType GetInputFieldType() override;
++  SourceType GetSourceType() override;
+ };
+ 
+ #endif  // CEF_LIBCEF_BROWSER_CONTEXT_MENU_PARAMS_IMPL_H_
+diff --git a/src/cef/libcef/browser/extensions/browser_extensions_util.cc b/src/cef/libcef/browser/extensions/browser_extensions_util.cc
+index 74e94b9e26fc7..aff6b30e85345
+--- a/src/cef/libcef/browser/extensions/browser_extensions_util.cc
++++ b/src/cef/libcef/browser/extensions/browser_extensions_util.cc
+@@ -23,6 +23,10 @@
+ #include "content/public/browser/render_view_host.h"
+ #include "extensions/browser/extension_registry.h"
+ 
++#if BUILDFLAG(IS_OHOS)
++#include "printing/buildflags/buildflags.h"
++#endif
++
+ namespace extensions {
+ 
+ namespace {
+@@ -52,10 +56,14 @@ content::WebContents* GetOwnerForGuestContents(content::WebContents* guest) {
+     return plugin_guest->owner_web_contents();
+   }
+ 
++#if BUILDFLAG(IS_OHOS) && BUILDFLAG(ENABLE_PRINT_PREVIEW)
+   // Maybe it's a print preview dialog.
+   auto print_preview_controller =
+       g_browser_process->print_preview_dialog_controller();
+   return print_preview_controller->GetInitiator(guest);
++#else
++  return nullptr;
++#endif
+ }
+ 
+ CefRefPtr<CefBrowserHostBase> GetOwnerBrowserForGlobalId(
+diff --git a/src/cef/libcef/browser/extensions/component_extension_resource_manager.cc b/src/cef/libcef/browser/extensions/component_extension_resource_manager.cc
+index 4c8f5666fb962..b9d1f2e716fda
+--- a/src/cef/libcef/browser/extensions/component_extension_resource_manager.cc
++++ b/src/cef/libcef/browser/extensions/component_extension_resource_manager.cc
+@@ -8,23 +8,33 @@
+ #include "base/logging.h"
+ #include "base/path_service.h"
+ #include "base/values.h"
+-#include "chrome/browser/pdf/pdf_extension_util.h"
+ #include "chrome/common/chrome_paths.h"
+ #include "chrome/grit/component_extension_resources_map.h"
+-#include "chrome/grit/pdf_resources_map.h"
+ #include "extensions/common/constants.h"
+ 
++#if BUILDFLAG(IS_OHOS)
++#include "pdf/buildflags.h"
++#if BUILDFLAG(ENABLE_PDF)
++#include "chrome/browser/pdf/pdf_extension_util.h"
++#include "chrome/grit/pdf_resources_map.h"
++#endif
++#endif
++
+ namespace extensions {
+ 
+ CefComponentExtensionResourceManager::CefComponentExtensionResourceManager() {
+   AddComponentResourceEntries(kComponentExtensionResources,
+                               kComponentExtensionResourcesSize);
++#if BUILDFLAG(IS_OHOS) && BUILDFLAG(ENABLE_PDF)
+   AddComponentResourceEntries(kPdfResources, kPdfResourcesSize);
++#endif
+ 
+   base::Value dict(base::Value::Type::DICTIONARY);
++#if BUILDFLAG(IS_OHOS) && BUILDFLAG(ENABLE_PDF)
+   pdf_extension_util::AddStrings(
+       pdf_extension_util::PdfViewerContext::kPdfViewer, &dict);
+   pdf_extension_util::AddAdditionalData(/*enable_annotations=*/true, &dict);
++#endif
+ 
+   ui::TemplateReplacements pdf_viewer_replacements;
+   ui::TemplateReplacementsFromDictionaryValue(
+diff --git a/src/cef/libcef/browser/extensions/extension_system.cc b/src/cef/libcef/browser/extensions/extension_system.cc
+index 21cfc861c382f..3f54b1fe7d5f5
+--- a/src/cef/libcef/browser/extensions/extension_system.cc
++++ b/src/cef/libcef/browser/extensions/extension_system.cc
+@@ -21,7 +21,6 @@
+ #include "base/strings/string_tokenizer.h"
+ #include "base/strings/utf_string_conversions.h"
+ #include "base/threading/thread_restrictions.h"
+-#include "chrome/browser/pdf/pdf_extension_util.h"
+ #include "chrome/browser/profiles/profile.h"
+ #include "chrome/common/chrome_paths.h"
+ #include "components/crx_file/id_util.h"
+@@ -31,7 +30,6 @@
+ #include "content/public/browser/notification_details.h"
+ #include "content/public/browser/notification_service.h"
+ #include "content/public/browser/notification_source.h"
+-#include "content/public/browser/plugin_service.h"
+ #include "content/public/browser/render_process_host.h"
+ #include "extensions/browser/api/app_runtime/app_runtime_api.h"
+ #include "extensions/browser/extension_prefs.h"
+@@ -52,6 +50,20 @@
+ #include "extensions/common/switches.h"
+ #include "net/base/mime_util.h"
+ 
++#if BUILDFLAG(IS_OHOS)
++#include "ppapi/buildflags/buildflags.h"
++#if BUILDFLAG(ENABLE_PLUGINS)
++#include "content/public/browser/plugin_service.h"
++#endif
++#endif
++
++#if BUILDFLAG(IS_OHOS)
++#include "pdf/buildflags.h"
++#if BUILDFLAG(ENABLE_PDF)
++#include "chrome/browser/pdf/pdf_extension_util.h"
++#endif
++#endif
++
+ using content::BrowserContext;
+ 
+ namespace extensions {
+@@ -263,11 +275,13 @@ void CefExtensionSystem::Init() {
+   //    the guest WebContents will be destroyed. This triggers a call to
+   //    CefMimeHandlerViewGuestDelegate::OnGuestDetached which removes the
+   //    routing ID association with the owner CefBrowser.
++#if BUILDFLAG(IS_OHOS) && BUILDFLAG(ENABLE_PDF)
+   if (PdfExtensionEnabled()) {
+     LoadExtension(ParseManifest(pdf_extension_util::GetManifest()),
+                   base::FilePath(FILE_PATH_LITERAL("pdf")), true /* internal */,
+                   nullptr, nullptr);
+   }
++#endif
+ 
+   initialized_ = true;
+ }
+@@ -683,10 +697,12 @@ void CefExtensionSystem::NotifyExtensionLoaded(const Extension* extension) {
+       }
+       info.mime_types.push_back(mime_type_info);
+     }
++#if BUILDFLAG(IS_OHOS) && BUILDFLAG(ENABLE_PLUGINS)
+     content::PluginService* plugin_service =
+         content::PluginService::GetInstance();
+     plugin_service->RefreshPlugins();
+     plugin_service->RegisterInternalPlugin(info, true);
++#endif
+   }
+ }
+ 
+@@ -707,10 +723,12 @@ void CefExtensionSystem::NotifyExtensionUnloaded(
+   if (handler && !handler->handler_url().empty()) {
+     base::FilePath path =
+         base::FilePath::FromUTF8Unsafe(extension->url().spec());
++#if BUILDFLAG(IS_OHOS) && BUILDFLAG(ENABLE_PLUGINS)
+     content::PluginService* plugin_service =
+         content::PluginService::GetInstance();
+     plugin_service->UnregisterInternalPlugin(path);
+     plugin_service->RefreshPlugins();
++#endif
+   }
+ 
+   registry_->TriggerOnUnloaded(extension, reason);
+diff --git a/src/cef/libcef/browser/extensions/extensions_api_client.cc b/src/cef/libcef/browser/extensions/extensions_api_client.cc
+index 97976cdebb1a1..9dd257baa66b6
+--- a/src/cef/libcef/browser/extensions/extensions_api_client.cc
++++ b/src/cef/libcef/browser/extensions/extensions_api_client.cc
+@@ -11,16 +11,29 @@
+ #include "libcef/browser/extensions/api/storage/sync_value_store_cache.h"
+ #include "libcef/browser/extensions/extension_web_contents_observer.h"
+ #include "libcef/browser/extensions/mime_handler_view_guest_delegate.h"
+-#include "libcef/browser/printing/print_view_manager.h"
+ 
+ #include "base/memory/ptr_util.h"
+-#include "chrome/browser/ui/pdf/chrome_pdf_web_contents_helper_client.h"
+ #include "chrome/browser/ui/prefs/prefs_tab_helper.h"
+-#include "components/pdf/browser/pdf_web_contents_helper.h"
+ #include "components/zoom/zoom_controller.h"
+ #include "extensions/browser/guest_view/extensions_guest_view_manager_delegate.h"
+ #include "printing/mojom/print.mojom.h"
+ 
++#if BUILDFLAG(IS_OHOS)
++#include "printing/buildflags/buildflags.h"
++#if BUILDFLAG(ENABLE_PRINT_PREVIEW)
++#include "libcef/browser/printing/print_view_manager.h"
++#endif
++#endif
++
++#if BUILDFLAG(IS_OHOS)
++#include "pdf/buildflags.h"
++#endif
++
++#if BUILDFLAG(IS_OHOS) && BUILDFLAG(ENABLE_PDF)
++#include "chrome/browser/ui/pdf/chrome_pdf_web_contents_helper_client.h"
++#include "components/pdf/browser/pdf_web_contents_helper.h"
++#endif
++
+ namespace extensions {
+ 
+ CefExtensionsAPIClient::CefExtensionsAPIClient() {}
+@@ -51,12 +64,16 @@ CefExtensionsAPIClient::CreateMimeHandlerViewGuestDelegate(
+ void CefExtensionsAPIClient::AttachWebContentsHelpers(
+     content::WebContents* web_contents) const {
+   PrefsTabHelper::CreateForWebContents(web_contents);
++#if BUILDFLAG(IS_OHOS) && BUILDFLAG(ENABLE_PRINT_PREVIEW)
+   printing::CefPrintViewManager::CreateForWebContents(web_contents);
++#endif
+ 
++#if BUILDFLAG(IS_OHOS) && BUILDFLAG(ENABLE_PDF)
+   // Used by the PDF extension.
+   pdf::PDFWebContentsHelper::CreateForWebContentsWithClient(
+       web_contents, std::unique_ptr<pdf::PDFWebContentsHelperClient>(
+                         new ChromePDFWebContentsHelperClient()));
++#endif
+ 
+   // Used by the tabs extension API.
+   zoom::ZoomController::CreateForWebContents(web_contents);
+diff --git a/src/cef/libcef/browser/frame_host_impl.cc b/src/cef/libcef/browser/frame_host_impl.cc
+index ade8f9f6996c8..b79a4ee9f5857
+--- a/src/cef/libcef/browser/frame_host_impl.cc
++++ b/src/cef/libcef/browser/frame_host_impl.cc
+@@ -294,11 +294,12 @@ void CefFrameHostImpl::RefreshAttributes() {
+ }
+ 
+ void CefFrameHostImpl::UpdateLocale(const CefString& locale) {
+-  SendToRenderFrame(__FUNCTION__,
+-                    base::BindOnce([](const std::string& locale,
+-                      const RenderFrameType& render_frame) {
+-                      render_frame->UpdateLocale(locale);
+-                    }, locale.ToString()));
++  SendToRenderFrame(__FUNCTION__, base::BindOnce(
++                                      [](const std::string& locale,
++                                         const RenderFrameType& render_frame) {
++                                        render_frame->UpdateLocale(locale);
++                                      },
++                                      locale.ToString()));
+ }
+ 
+ void CefFrameHostImpl::NotifyMoveOrResizeStarted() {
+@@ -779,12 +780,13 @@ void CefFrameHostImpl::SetInitialScale(float scale) {
+ }
+ 
+ void CefFrameHostImpl::SetJsOnlineProperty(bool network_up) {
+-  SendToRenderFrame(__FUNCTION__,
+-                    base::BindOnce(
+-                        [](bool network_up, const RenderFrameType& render_frame) {
+-                          render_frame->SetJsOnlineProperty(network_up);
+-                        },
+-                        network_up));
++  SendToRenderFrame(
++      __FUNCTION__,
++      base::BindOnce(
++          [](bool network_up, const RenderFrameType& render_frame) {
++            render_frame->SetJsOnlineProperty(network_up);
++          },
++          network_up));
+ }
+ 
+ void CefFrameHostImpl::GetImageForContextNode() {
+@@ -804,16 +806,17 @@ void CefFrameHostImpl::PutZoomingForTextFactor(float factor) {
+                         factor));
+ }
+ 
+-void CefFrameHostImpl::GetImagesCallback(CefRefPtr<CefFrameHostImpl> frame,
+-                                         CefRefPtr<CefGetImagesCallback> callback, bool response) {
++void CefFrameHostImpl::GetImagesCallback(
++    CefRefPtr<CefFrameHostImpl> frame,
++    CefRefPtr<CefGetImagesCallback> callback,
++    bool response) {
+   if (auto browser = frame->GetBrowser()) {
+     callback->GetImages(response);
+   }
+ }
+ 
+ void CefFrameHostImpl::GetImagesWithResponse(
+-    cef::mojom::RenderFrame::GetImagesWithResponseCallback
+-        response_callback) {
++    cef::mojom::RenderFrame::GetImagesWithResponseCallback response_callback) {
+   SendToRenderFrame(
+       __FUNCTION__,
+       base::BindOnce(
+@@ -826,17 +829,16 @@ void CefFrameHostImpl::GetImagesWithResponse(
+ }
+ 
+ void CefFrameHostImpl::GetImages(CefRefPtr<CefGetImagesCallback> callback) {
+-  GetImagesWithResponse(
+-      base::BindOnce(&CefFrameHostImpl::GetImagesCallback, base::Unretained(this),
+-                     CefRefPtr<CefFrameHostImpl>(this), callback));
++  GetImagesWithResponse(base::BindOnce(
++      &CefFrameHostImpl::GetImagesCallback, base::Unretained(this),
++      CefRefPtr<CefFrameHostImpl>(this), callback));
+ }
+ 
+ void CefFrameHostImpl::RemoveCache(bool include_disk_files) {
+   SendToRenderFrame(__FUNCTION__,
+-                    base::BindOnce(
+-                        [](const RenderFrameType& render_frame) {
+-                          render_frame->RemoveCache();
+-                        }));
++                    base::BindOnce([](const RenderFrameType& render_frame) {
++                      render_frame->RemoveCache();
++                    }));
+ 
+   if (include_disk_files) {
+     auto browser = GetBrowserHostBase();
+@@ -857,9 +859,55 @@ void CefFrameHostImpl::RemoveCache(bool include_disk_files) {
+         base::Time(), base::Time::Max(),
+         content::BrowsingDataRemover::DATA_TYPE_CACHE,
+         content::BrowsingDataRemover::ORIGIN_TYPE_UNPROTECTED_WEB |
+-        content::BrowsingDataRemover::ORIGIN_TYPE_PROTECTED_WEB);
++            content::BrowsingDataRemover::ORIGIN_TYPE_PROTECTED_WEB);
+   }
+ }
++
++void CefFrameHostImpl::ScrollPageUpDown(bool is_up,
++                                        bool is_half,
++                                        float view_height) {
++  SendToRenderFrame(__FUNCTION__,
++                    base::BindOnce(
++                        [](bool is_up, bool is_half, float view_height,
++                           const RenderFrameType& render_frame) {
++                          render_frame->ScrollPageUpDown(is_up, is_half,
++                                                         view_height);
++                        },
++                        is_up, is_half, view_height));
++}
++
++void CefFrameHostImpl::ScrollTo(float x,
++                                float y) {
++  SendToRenderFrame(__FUNCTION__,
++                    base::BindOnce(
++                        [](float x, float y,
++                           const RenderFrameType& render_frame) {
++                          render_frame->ScrollTo(x, y);
++                        },
++                        x, y));
++}
++
++void CefFrameHostImpl::ScrollBy(float delta_x,
++                                float delta_y) {
++  SendToRenderFrame(__FUNCTION__,
++                    base::BindOnce(
++                        [](float delta_x, float delta_y,
++                           const RenderFrameType& render_frame) {
++                          render_frame->ScrollBy(delta_x, delta_y);
++                        },
++                        delta_x, delta_y));
++}
++
++void CefFrameHostImpl::SlideScroll(float vx,
++                                   float vy) {
++  SendToRenderFrame(__FUNCTION__,
++                    base::BindOnce(
++                        [](float vx, float vy,
++                           const RenderFrameType& render_frame) {
++                          render_frame->SlideScroll(vx, vy);
++                        },
++                        vx, vy));
++}
+ #endif  // BUILDFLAG(IS_OHOS)
+ 
+ void CefExecuteJavaScriptWithUserGestureForTests(CefRefPtr<CefFrame> frame,
+diff --git a/src/cef/libcef/browser/frame_host_impl.h b/src/cef/libcef/browser/frame_host_impl.h
+index 00f0918d783d5..5a43da2de74a0
+--- a/src/cef/libcef/browser/frame_host_impl.h
++++ b/src/cef/libcef/browser/frame_host_impl.h
+@@ -169,7 +169,10 @@ class CefFrameHostImpl : public CefFrame, public cef::mojom::BrowserFrame {
+                              response_callback);
+   void GetImages(CefRefPtr<CefGetImagesCallback> callback) override;
+   void RemoveCache(bool include_disk_files);
+-
++  void ScrollPageUpDown(bool is_up, bool is_half, float view_height);
++  void ScrollTo(float x, float y);
++  void ScrollBy(float delta_x, float delta_y);
++  void SlideScroll(float vx, float vy);
+ #endif  // BUILDFLAG(IS_OHOS)
+ 
+   static const int64_t kMainFrameId;
+diff --git a/src/cef/libcef/browser/main_runner.cc b/src/cef/libcef/browser/main_runner.cc
+index d4284ee6c27e8..4de525d6b94ce
+--- a/src/cef/libcef/browser/main_runner.cc
++++ b/src/cef/libcef/browser/main_runner.cc
+@@ -9,7 +9,6 @@
+ #include "libcef/browser/thread_util.h"
+ #include "libcef/common/alloy/alloy_main_runner_delegate.h"
+ #include "libcef/common/cef_switches.h"
+-#include "libcef/common/chrome/chrome_main_runner_delegate.h"
+ #include "libcef/features/runtime.h"
+ 
+ #include "base/at_exit.h"
+@@ -40,12 +39,18 @@
+ #include "third_party/crashpad/crashpad/handler/handler_main.h"
+ #endif
+ 
++#if defined(OHOS_ENABLE_CEF_CHROME_RUNTIME)
++#include "libcef/common/chrome/chrome_main_runner_delegate.h"
++#endif // defined(OHOS_ENABLE_CEF_CHROME_RUNTIME)
++
+ namespace {
+ 
+ enum class RuntimeType {
+   UNINITIALIZED,
+   ALLOY,
++#if defined(OHOS_ENABLE_CEF_CHROME_RUNTIME)
+   CHROME,
++#endif // defined(OHOS_ENABLE_CEF_CHROME_RUNTIME)
+ };
+ RuntimeType g_runtime_type = RuntimeType::UNINITIALIZED;
+ 
+@@ -54,6 +59,7 @@ std::unique_ptr<CefMainRunnerDelegate> MakeDelegate(
+     CefMainRunnerHandler* runner,
+     CefSettings* settings,
+     CefRefPtr<CefApp> application) {
++#if defined(OHOS_ENABLE_CEF_CHROME_RUNTIME)
+   if (type == RuntimeType::ALLOY) {
+     g_runtime_type = RuntimeType::ALLOY;
+     return std::make_unique<AlloyMainRunnerDelegate>(runner, settings,
+@@ -63,6 +69,11 @@ std::unique_ptr<CefMainRunnerDelegate> MakeDelegate(
+     return std::make_unique<ChromeMainRunnerDelegate>(runner, settings,
+                                                       application);
+   }
++#else
++  g_runtime_type = RuntimeType::ALLOY;
++  return std::make_unique<AlloyMainRunnerDelegate>(runner, settings,
++                                                   application);
++#endif // defined(OHOS_ENABLE_CEF_CHROME_RUNTIME)
+ }
+ 
+ #if BUILDFLAG(IS_MAC) || BUILDFLAG(IS_WIN)
+@@ -229,9 +240,13 @@ bool CefMainRunner::Initialize(CefSettings* settings,
+                                bool* initialized,
+                                base::OnceClosure context_initialized) {
+   DCHECK(!main_delegate_);
++#if defined(OHOS_ENABLE_CEF_CHROME_RUNTIME)
+   main_delegate_ = MakeDelegate(
+       settings->chrome_runtime ? RuntimeType::CHROME : RuntimeType::ALLOY, this,
+       settings, application);
++#else
++  main_delegate_ = MakeDelegate(RuntimeType::ALLOY, this, settings, application);
++#endif // defined(OHOS_ENABLE_CEF_CHROME_RUNTIME)
+ 
+   const int exit_code =
+       ContentMainInitialize(args, windows_sandbox_info, &settings->no_sandbox);
+@@ -318,9 +333,13 @@ int CefMainRunner::RunAsHelperProcess(const CefMainArgs& args,
+   if (process_type.empty())
+     return -1;
+ 
++#if defined(OHOS_ENABLE_CEF_CHROME_RUNTIME)
+   auto runtime_type = command_line.HasSwitch(switches::kEnableChromeRuntime)
+                           ? RuntimeType::CHROME
+                           : RuntimeType::ALLOY;
++#else
++  auto runtime_type = RuntimeType::ALLOY;
++#endif // defined(OHOS_ENABLE_CEF_CHROME_RUNTIME)
+   auto main_delegate = MakeDelegate(runtime_type, /*runner=*/nullptr,
+                                     /*settings=*/nullptr, application);
+   main_delegate->BeforeExecuteProcess(args);
+@@ -536,7 +555,11 @@ bool IsAlloyRuntimeEnabled() {
+ }
+ 
+ bool IsChromeRuntimeEnabled() {
++#if defined(OHOS_ENABLE_CEF_CHROME_RUNTIME)
+   return g_runtime_type == RuntimeType::CHROME;
++#else
++  return false;
++#endif // defined(OHOS_ENABLE_CEF_CHROME_RUNTIME)
+ }
+ 
+ }  // namespace cef
+diff --git a/src/cef/libcef/browser/menu_manager.cc b/src/cef/libcef/browser/menu_manager.cc
+index 2ad53d395c385..879b0f449f186
+--- a/src/cef/libcef/browser/menu_manager.cc
++++ b/src/cef/libcef/browser/menu_manager.cc
+@@ -21,9 +21,15 @@
+ #include "content/public/browser/render_process_host.h"
+ #include "content/public/browser/render_widget_host_view.h"
+ #include "third_party/blink/public/mojom/context_menu/context_menu.mojom.h"
++#include "ui/base/clipboard/clipboard.h"
++#include "ui/base/data_transfer_policy/data_transfer_endpoint.h"
+ 
+ namespace {
+ 
++constexpr cef_context_menu_edit_state_flags_t kMenuCommands[] = {
++    CM_EDITFLAG_CAN_CUT, CM_EDITFLAG_CAN_COPY, CM_EDITFLAG_CAN_PASTE,
++    CM_EDITFLAG_CAN_DELETE, CM_EDITFLAG_CAN_SELECT_ALL};
++
+ CefString GetLabel(int message_id) {
+   std::u16string label =
+       CefAppManager::Get()->GetContentClient()->GetLocalizedString(message_id);
+@@ -120,6 +126,53 @@ bool CefMenuManager::IsShowingContextMenu() {
+   return web_contents()->IsShowingContextMenu();
+ }
+ 
++bool CefMenuManager::IsCommandIdEnabled(int command_id,
++    content::ContextMenuParams& params) const {
++  bool editable = params.is_editable;
++  bool readable = params.input_field_type != blink::mojom::ContextMenuDataInputFieldType::kPassword;
++  bool has_selection = !params.selection_text.empty();
++  bool has_image_contents = params.has_image_contents;
++
++  switch (command_id) {
++    case CM_EDITFLAG_CAN_CUT:
++    case CM_EDITFLAG_CAN_DELETE:
++      return editable && readable && has_selection;
++    case CM_EDITFLAG_CAN_COPY:
++      return readable && (has_selection || has_image_contents);
++    case CM_EDITFLAG_CAN_PASTE: {
++      std::u16string result;
++      bool can_paste = false;
++      ui::DataTransferEndpoint data_dst = ui::DataTransferEndpoint(
++          ui::EndpointType::kDefault, false);
++      ui::Clipboard::GetForCurrentThread()->ReadText(
++          ui::ClipboardBuffer::kCopyPaste, &data_dst, &result);
++
++      if (result.empty()) {
++        can_paste = ui::Clipboard::GetForCurrentThread()->IsFormatAvailable(
++            ui::ClipboardFormatType::BitmapType(),
++            ui::ClipboardBuffer::kCopyPaste, &data_dst);
++      }
++      can_paste = can_paste ? can_paste : !result.empty();
++      return editable && can_paste;
++    }
++    case CM_EDITFLAG_CAN_SELECT_ALL:
++      return editable || readable;
++    default:
++      return false;
++  }
++}
++
++void CefMenuManager::UpdateMenuEditStateFlags(content::ContextMenuParams& params) {
++  int menu_flags = 0;
++  for (const auto& command : kMenuCommands) {
++    if (IsCommandIdEnabled(command, params)) {
++      menu_flags |= command;
++    }
++  }
++
++  params.edit_flags = menu_flags;
++}
++
+ bool CefMenuManager::CreateContextMenu(
+     const content::ContextMenuParams& params) {
+   // The renderer may send the "show context menu" message multiple times, one
+@@ -134,6 +187,7 @@ bool CefMenuManager::CreateContextMenu(
+ 
+   params_ = params;
+   model_->Clear();
++  UpdateMenuEditStateFlags(params_);
+ 
+   // Create the default menu model.
+   CreateDefaultModel();
+diff --git a/src/cef/libcef/browser/menu_manager.h b/src/cef/libcef/browser/menu_manager.h
+index 239e3b7c3fab7..14da5e4ce6ee6
+--- a/src/cef/libcef/browser/menu_manager.h
++++ b/src/cef/libcef/browser/menu_manager.h
+@@ -63,6 +63,11 @@ class CefMenuManager : public CefMenuModelImpl::Delegate,
+   // Returns true if the specified id is a custom context menu command.
+   bool IsCustomContextMenuCommand(int command_id);
+ 
++  bool IsCommandIdEnabled(int command_id,
++    content::ContextMenuParams& params) const;
++
++  void UpdateMenuEditStateFlags(content::ContextMenuParams& params);
++
+   // AlloyBrowserHostImpl pointer is guaranteed to outlive this object.
+   AlloyBrowserHostImpl* browser_;
+ 
+diff --git a/src/cef/libcef/browser/navigation_state_serializer.cc b/src/cef/libcef/browser/navigation_state_serializer.cc
+new file mode 100755
+index 0000000000000..7da18ce018344
+--- /dev/null
++++ b/src/cef/libcef/browser/navigation_state_serializer.cc
+@@ -0,0 +1,161 @@
++/*
++ * Copyright (c) 2022 Huawei Device Co., Ltd.
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *     http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++
++#include "libcef/browser/navigation_state_serializer.h"
++
++#include "base/logging.h"
++#include "third_party/blink/public/common/page_state/page_state.h"
++
++CefRefPtr<CefBinaryValue>
++NavigationStateSerializer::WriteNavigationStatus(
++    content::WebContents& web_contents) {
++  content::NavigationController& controller = web_contents.GetController();
++  if (!web_contents.GetController().GetLastCommittedEntry() ||
++      web_contents.GetController().GetLastCommittedEntry()->IsInitialEntry()) {
++    LOG(ERROR) << "navigation controller invalid";
++    return nullptr;
++  }
++  base::Pickle pickle;
++  int entry_count = controller.GetEntryCount();
++  int entry_index = controller.GetLastCommittedEntryIndex();
++  pickle.WriteInt(entry_count);
++  pickle.WriteInt(entry_index);
++  for (int index = 0; index < entry_count; ++index) {
++    WriteNavigationEntry(*controller.GetEntryAtIndex(index), &pickle);
++  }
++  return CefBinaryValue::Create(pickle.data(), pickle.size());
++}
++
++void NavigationStateSerializer::WriteNavigationEntry(
++    content::NavigationEntry& entry,
++    base::Pickle* pickle) {
++  if (!pickle)
++    return;
++  pickle->WriteString(entry.GetURL().spec());
++  pickle->WriteString(entry.GetVirtualURL().spec());
++
++  const content::Referrer& referrer = entry.GetReferrer();
++  pickle->WriteString(referrer.url.spec());
++  pickle->WriteInt(static_cast<int>(referrer.policy));
++  pickle->WriteString16(entry.GetTitle());
++  pickle->WriteString(entry.GetPageState().ToEncodedData());
++  pickle->WriteBool(static_cast<int>(entry.GetHasPostData()));
++  pickle->WriteString(entry.GetOriginalRequestURL().spec());
++  pickle->WriteString(entry.GetBaseURLForDataURL().spec());
++  pickle->WriteBool(static_cast<int>(entry.GetIsOverridingUserAgent()));
++  pickle->WriteInt64(entry.GetTimestamp().ToInternalValue());
++  pickle->WriteInt(entry.GetHttpStatusCode());
++}
++
++bool NavigationStateSerializer::RestoreNavigationStatus(
++    content::WebContents& web_contents,
++    const CefRefPtr<CefBinaryValue>& state) {
++  if (!state) {
++    LOG(ERROR) << "web state is nullptr.";
++    return false;
++  }
++  size_t state_size = state->GetSize();
++  if (state_size <= 0) {
++    LOG(ERROR) << "web state size invalid.";
++    return false;
++  }
++  uint8_t temp_buffer[state_size];
++  state->GetData(temp_buffer, state_size, 0);
++  base::Pickle pickle(reinterpret_cast<const char*>(temp_buffer),
++                      state->GetSize());
++  base::PickleIterator iterator(pickle);
++  int entry_count = -1;
++  int entry_index = -2;
++  if (!iterator.ReadInt(&entry_count) || !iterator.ReadInt(&entry_index) ||
++      entry_index >= entry_count) {
++    LOG(ERROR) << "web state size invalid.";
++    return false;
++  }
++
++  std::unique_ptr<content::NavigationEntryRestoreContext> context =
++      content::NavigationEntryRestoreContext::Create();
++  std::vector<std::unique_ptr<content::NavigationEntry>> entries;
++  entries.reserve(entry_count);
++  for (int i = 0; i < entry_count; ++i) {
++    std::unique_ptr<content::NavigationEntry> entry =
++        content::NavigationEntry::Create();
++    if (!RestoreNavigationEntry(&iterator, entry, context.get()))
++      return false;
++    entries.push_back(std::move(entry));
++  }
++
++  content::NavigationController& controller = web_contents.GetController();
++  controller.Restore(entry_index, content::RestoreType::kRestored, &entries);
++  controller.LoadIfNecessary();
++  return true;
++}
++
++bool NavigationStateSerializer::RestoreNavigationEntry(
++    base::PickleIterator* iterator,
++    std::unique_ptr<content::NavigationEntry>& entry,
++    content::NavigationEntryRestoreContext* context) {
++  if (!iterator || !entry || !context) {
++    return false;
++  }
++  std::string url;
++  std::string virtual_url;
++  std::string original_request_url;
++  std::string base_url_for_data_url;
++  std::string referrer_url;
++  int policy;
++  std::u16string title;
++  std::string content_state;
++  bool has_post_data;
++  bool is_overriding_user_agent;
++  int64_t timestamp;
++  int http_status_code;
++
++  if (!iterator->ReadString(&url) || !iterator->ReadString(&virtual_url) ||
++      !iterator->ReadString(&referrer_url) || !iterator->ReadInt(&policy) ||
++      !iterator->ReadString16(&title) ||
++      !iterator->ReadString(&content_state) ||
++      !iterator->ReadBool(&has_post_data) ||
++      !iterator->ReadString(&original_request_url) ||
++      !iterator->ReadString(&base_url_for_data_url) ||
++      !iterator->ReadBool(&is_overriding_user_agent) ||
++      !iterator->ReadInt64(&timestamp) ||
++      !iterator->ReadInt(&http_status_code)) {
++    LOG(ERROR) << "restore navigation entry failed.";
++    return false;
++  }
++
++  GURL deserialized_url;
++  entry->SetURL(deserialized_url);
++  entry->SetVirtualURL(GURL(virtual_url));
++  entry->SetTitle(title);
++  content::Referrer deserialized_referrer;
++  deserialized_referrer.url = GURL(referrer_url);
++  deserialized_referrer.policy = content::Referrer::ConvertToPolicy(policy);
++  if (content_state.empty()) {
++    entry->SetPageState(blink::PageState::CreateFromURL(deserialized_url),
++                        context);
++    entry->SetReferrer(deserialized_referrer);
++  } else {
++    entry->SetPageState(blink::PageState::CreateFromEncodedData(content_state),
++                        context);
++  }
++  entry->SetHasPostData(has_post_data);
++  entry->SetOriginalRequestURL(GURL(original_request_url));
++  entry->SetBaseURLForDataURL(GURL(base_url_for_data_url));
++  entry->SetIsOverridingUserAgent(is_overriding_user_agent);
++  entry->SetTimestamp(base::Time::FromInternalValue(timestamp));
++  entry->SetHttpStatusCode(http_status_code);
++  return true;
++}
+\ No newline at end of file
+diff --git a/src/cef/libcef/browser/navigation_state_serializer.h b/src/cef/libcef/browser/navigation_state_serializer.h
+new file mode 100755
+index 0000000000000..73d0bbefe5d2e
+--- /dev/null
++++ b/src/cef/libcef/browser/navigation_state_serializer.h
+@@ -0,0 +1,45 @@
++/*
++ * Copyright (c) 2022 Huawei Device Co., Ltd.
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *     http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++
++#ifndef NAVIGATION_STATE_SERIALIZER_H
++#define NAVIGATION_STATE_SERIALIZER_H
++#pragma once
++
++#include <memory>
++#include <vector>
++
++#include "base/pickle.h"
++#include "content/public/browser/navigation_entry.h"
++#include "content/public/browser/navigation_entry_restore_context.h"
++#include "content/public/browser/web_contents.h"
++#include "include/cef_values.h"
++
++class NavigationStateSerializer {
++ public:
++  static CefRefPtr<CefBinaryValue> WriteNavigationStatus(
++      content::WebContents& web_contents);
++  static bool RestoreNavigationStatus(content::WebContents& web_contents,
++                                      const CefRefPtr<CefBinaryValue>& state);
++
++ private:
++  static void WriteNavigationEntry(content::NavigationEntry& entry,
++                                   base::Pickle* pickle);
++  static bool RestoreNavigationEntry(
++      base::PickleIterator* iterator,
++      std::unique_ptr<content::NavigationEntry>& entry,
++      content::NavigationEntryRestoreContext* context);
++};
++
++#endif
+\ No newline at end of file
+diff --git a/src/cef/libcef/browser/net/chrome_scheme_handler.cc b/src/cef/libcef/browser/net/chrome_scheme_handler.cc
+index 533483340a79b..98aaa94a2b703
+--- a/src/cef/libcef/browser/net/chrome_scheme_handler.cc
++++ b/src/cef/libcef/browser/net/chrome_scheme_handler.cc
+@@ -166,9 +166,11 @@ bool IsUnlistedHost(const std::string& host) {
+ 
+ // Returns true if a host is WebUI and should be allowed to load.
+ bool IsAllowedWebUIHost(const std::string& host) {
++#if defined(OHOS_ENABLE_CEF_CHROME_RUNTIME)
+   // Chrome runtime allows all WebUI hosts.
+   if (cef::IsChromeRuntimeEnabled())
+     return true;
++#endif // defined(OHOS_ENABLE_CEF_CHROME_RUNTIME)
+ 
+   // Explicitly whitelisted WebUI hosts.
+   for (size_t i = 0;
+@@ -293,6 +295,7 @@ class TemplateParser {
+ bool OnExtensionsSupportUI(std::string* mime_type, std::string* output) {
+   *mime_type = "text/html";
+ 
++#if defined(OHOS_ENABLE_CEF_CHROME_RUNTIME)
+   if (cef::IsChromeRuntimeEnabled()) {
+     // Redirect to the Chrome documentation.
+     *output =
+@@ -302,6 +305,7 @@ bool OnExtensionsSupportUI(std::string* mime_type, std::string* output) {
+         "</head></html>\n";
+     return true;
+   }
++#endif // defined(OHOS_ENABLE_CEF_CHROME_RUNTIME)
+ 
+   static const char kDevURL[] = "https://developer.chrome.com/extensions/";
+ 
+diff --git a/src/cef/libcef/browser/net/scheme_handler.cc b/src/cef/libcef/browser/net/scheme_handler.cc
+index 9686e53fa94a5..701ff98e6a964
+--- a/src/cef/libcef/browser/net/scheme_handler.cc
++++ b/src/cef/libcef/browser/net/scheme_handler.cc
+@@ -6,13 +6,16 @@
+ 
+ #include <string>
+ 
+-#include "libcef/browser/net/chrome_scheme_handler.h"
+ #include "libcef/browser/net/devtools_scheme_handler.h"
+ #include "libcef/common/net/scheme_registration.h"
+ #include "libcef/features/runtime.h"
+ 
+ #include "content/public/common/url_constants.h"
+ 
++#if defined(OHOS_ENABLE_CEF_CHROME_RUNTIME)
++#include "libcef/browser/net/chrome_scheme_handler.h"
++#endif
++
+ namespace scheme {
+ 
+ void RegisterInternalHandlers(CefIOThreadState* iothread_state) {
+diff --git a/src/cef/libcef/browser/net_database/cef_data_base_impl.cc b/src/cef/libcef/browser/net_database/cef_data_base_impl.cc
+index ceb653c27b0f4..f91e981433c06
+--- a/src/cef/libcef/browser/net_database/cef_data_base_impl.cc
++++ b/src/cef/libcef/browser/net_database/cef_data_base_impl.cc
+@@ -57,17 +57,19 @@ void CefDataBaseImpl::SaveHttpAuthCredentials(const CefString& host,
+ void CefDataBaseImpl::GetHttpAuthCredentials(
+     const CefString& host,
+     const CefString& realm,
+-    std::vector<CefString>& username_password) {
++    CefString& username,
++    char* password,
++    uint32_t passwordSize) {
+   if (host.empty() || realm.empty()) {
+     return;
+   }
+ 
+-  std::vector<std::string> result;
++  std::string usernameStr;
+   OHOS::NWeb::OhosWebDataBaseAdapter& databaseAdapter =
+       OHOS::NWeb::OhosAdapterHelper::GetInstance()
+           .GetOhosWebDataBaseAdapterInstance();
+-  databaseAdapter.GetHttpAuthCredentials(host, realm, result);
+-  TransferVector(result, username_password);
++  databaseAdapter.GetHttpAuthCredentials(host, realm, usernameStr, password, passwordSize);
++  username = usernameStr;
+   return;
+ }
+ 
+diff --git a/src/cef/libcef/browser/net_database/cef_data_base_impl.h b/src/cef/libcef/browser/net_database/cef_data_base_impl.h
+index 439385953b998..b990d0ceae2a4
+--- a/src/cef/libcef/browser/net_database/cef_data_base_impl.h
++++ b/src/cef/libcef/browser/net_database/cef_data_base_impl.h
+@@ -28,7 +28,9 @@ class CefDataBaseImpl : public CefDataBase {
+   void GetHttpAuthCredentials(
+       const CefString& host,
+       const CefString& realm,
+-      std::vector<CefString>& username_password) override;
++      CefString& username,
++      char* password,
++      uint32_t passwordSize) override;
+ 
+   bool ExistPermissionByOrigin(const CefString& origin, int type) override;
+ 
+diff --git a/src/cef/libcef/browser/net_database/cef_dns_data_base.cc b/src/cef/libcef/browser/net_database/cef_dns_data_base.cc
+index a6ebf9267945b..0a55885825ae7
+--- a/src/cef/libcef/browser/net_database/cef_dns_data_base.cc
++++ b/src/cef/libcef/browser/net_database/cef_dns_data_base.cc
+@@ -4,49 +4,48 @@
+ 
+ #include "cef_dns_data_base.h"
+ 
++#include <set>
+ #include "base/logging.h"
+ #include "net/base/ip_endpoint.h"
+ #include "nweb_pre_dns_adapter.h"
+ #include "ohos_adapter_helper.h"
+ #include "third_party/abseil-cpp/absl/types/optional.h"
+ 
++namespace {
++std::set<const std::string> g_hostname;
++}
+ void CacheHostName(const std::string& hostname) {
+-  OHOS::NWeb::OhosWebDnsDataBaseAdapter& dnsDatabaseAdapter =
+-    OHOS::NWeb::OhosAdapterHelper::GetInstance().GetWebDnsDataBaseInstance();
+-  if (dnsDatabaseAdapter.ExistHostname(hostname)) {
+-    return;
++  if (g_hostname.count(hostname) == 0) {
++    g_hostname.insert(hostname);
++    auto& dnsDatabaseAdapter = OHOS::NWeb::OhosAdapterHelper::GetInstance().GetWebDnsDataBaseInstance();
++    dnsDatabaseAdapter.InsertHostname(hostname);
+   }
+-
+-  dnsDatabaseAdapter.InsertHostname(hostname);
+ }
+ 
+ net::AddressList GetAddrList(const std::string& hostname) {
+   using OHOS::NWeb::g_AddrInfoMap;
+-  net::AddressList addr_list;
+-  if (g_AddrInfoMap.empty()) {
+-    return addr_list;
+-  }
+-
+-  addrinfo* addrInfo;
+   auto it = g_AddrInfoMap.find(hostname);
+   if (it == g_AddrInfoMap.end()) {
+-    return addr_list;
++    return net::AddressList();
+   }
+-  addrInfo = it->second;
+-  auto canonical_name = (addrInfo->ai_canonname != nullptr)
+-             ? absl::optional<std::string>(std::string(addrInfo->ai_canonname))
+-             : absl::optional<std::string>();
++
++  net::AddressList addr_list;
++  addrinfo* addrInfo = it->second;
++  auto canonical_name =
++      addrInfo->ai_canonname
++          ? absl::make_optional(std::string(addrInfo->ai_canonname))
++          : absl::nullopt;
+   if (canonical_name) {
+-    std::vector<std::string> aliases({*canonical_name});
+-    addr_list.SetDnsAliases(std::move(aliases));
++    addr_list.SetDnsAliases({*canonical_name});
+   }
+-  for (auto ai = addrInfo; ai != NULL; ai = ai->ai_next) {
++  for (auto ai = addrInfo; ai != nullptr; ai = ai->ai_next) {
+     net::IPEndPoint ipe;
+     // NOTE: Ignoring non-INET* families.
+-    if (ipe.FromSockAddr(ai->ai_addr, ai->ai_addrlen))
++    if (ipe.FromSockAddr(ai->ai_addr, ai->ai_addrlen)) {
+       addr_list.push_back(ipe);
+-    else
++    } else {
+       LOG(INFO) << "Unknown family found in addrinfo: " << ai->ai_family;
++    }
+   }
+   return addr_list;
+ }
+\ No newline at end of file
+diff --git a/src/cef/libcef/browser/net_service/login_delegate.cc b/src/cef/libcef/browser/net_service/login_delegate.cc
+index dc05f1f1a6945..326b285c0878c
+--- a/src/cef/libcef/browser/net_service/login_delegate.cc
++++ b/src/cef/libcef/browser/net_service/login_delegate.cc
+@@ -4,6 +4,8 @@
+ 
+ #include "libcef/browser/net_service/login_delegate.h"
+ 
++#include <securec.h>
++
+ #include "libcef/browser/browser_host_base.h"
+ #include "libcef/browser/net_database/cef_data_base_impl.h"
+ #include "libcef/browser/net_service/browser_urlrequest_impl.h"
+@@ -17,8 +19,6 @@
+ namespace net_service {
+ 
+ namespace {
+-const int USERNAME_PASSWORD_VECTOR_NUM = 2;
+-
+ class AuthCallbackImpl : public CefAuthCallback {
+  public:
+   explicit AuthCallbackImpl(base::WeakPtr<LoginDelegate> delegate,
+@@ -68,6 +68,7 @@ class AuthCallbackImpl : public CefAuthCallback {
+   }
+ 
+   bool IsHttpAuthInfoSaved() override {
++    constexpr int32_t MAX_PWD_LENGTH = 256;
+     auto dataBase = CefDataBase::GetGlobalDataBase();
+     if (dataBase == nullptr) {
+       return false;
+@@ -75,25 +76,29 @@ class AuthCallbackImpl : public CefAuthCallback {
+     if (!dataBase->ExistHttpAuthCredentials()) {
+       return false;
+     }
+-    std::vector<CefString> usernamePassword;
+-    usernamePassword.clear();
+-    dataBase->GetHttpAuthCredentials(host_, realm_, usernamePassword);
+-    if (usernamePassword.size() < USERNAME_PASSWORD_VECTOR_NUM) {
++    CefString username;
++    char password[MAX_PWD_LENGTH + 1] = {0};
++    dataBase->GetHttpAuthCredentials(host_, realm_, username, password, MAX_PWD_LENGTH + 1);
++    if (username.empty() || strlen(password) == 0) {
++      (void)memset_s(password, MAX_PWD_LENGTH + 1, 0, MAX_PWD_LENGTH + 1);
+       return false;
+     }
+-    CefString username = usernamePassword[0];
+-    CefString password = usernamePassword[1];
++    CefString passwordCef(password, strlen(password));
++    (void)memset_s(password, MAX_PWD_LENGTH + 1, 0, MAX_PWD_LENGTH + 1);
+     if (!task_runner_->RunsTasksInCurrentSequence()) {
+       task_runner_->PostTask(
+           FROM_HERE, base::BindOnce(&AuthCallbackImpl::Continue, this, username,
+-                                    password));
++                                    passwordCef));
++      passwordCef.MemsetToZero();
+       return true;
+     }
+     if (delegate_) {
+-      delegate_->Continue(username, password);
++      delegate_->Continue(username, passwordCef);
+       delegate_ = nullptr;
++      passwordCef.MemsetToZero();
+       return true;
+     }
++    passwordCef.MemsetToZero();
+     return false;
+   }
+ 
+diff --git a/src/cef/libcef/browser/net_service/net_helpers.cc b/src/cef/libcef/browser/net_service/net_helpers.cc
+index 9bca0ec6a4c36..c8c630566b91a
+--- a/src/cef/libcef/browser/net_service/net_helpers.cc
++++ b/src/cef/libcef/browser/net_service/net_helpers.cc
+@@ -38,8 +38,8 @@ bool NetHelpers::ShouldBlockContentUrls() {
+   return !allow_content_access;
+ }
+ 
+-bool NetHelpers::ShouldBlockFileUrls() {
+-  return !allow_file_access;
++bool NetHelpers::ShouldBlockFileUrls(struct NetHelperSetting setting) {
++  return !setting.file_access;
+ }
+ 
+ bool NetHelpers::IsAllowAcceptCookies() {
+@@ -77,33 +77,33 @@ bool IsSpecialFileUrl(const GURL& url) {
+   return false;
+ }
+ 
+-bool IsURLBlocked(const GURL& url) {
++bool IsURLBlocked(const GURL& url, struct NetHelperSetting setting) {
+   // Part of implementation of NWebPreference.allowContentAccess.
+   if (url.SchemeIs(url::kContentScheme) && NetHelpers::ShouldBlockContentUrls())
+     return true;
+ 
+   // Part of implementation of NWebPreference.allowFileAccess.
+-  if (url.SchemeIsFile() && NetHelpers::ShouldBlockFileUrls()) {
++  if (url.SchemeIsFile() && NetHelpers::ShouldBlockFileUrls(setting)) {
+     // Appdatas are always available.
+     return !IsSpecialFileUrl(url);
+   }
+ 
+-  return NetHelpers::is_network_blocked && url.SchemeIs(url::kFtpScheme);
++  return setting.block_network && url.SchemeIs(url::kFtpScheme);
+ }
+ 
+-int UpdateLoadFlags(int load_flags) {
+-  if (NetHelpers::is_network_blocked) {
++int UpdateLoadFlags(int load_flags, NetHelperSetting setting) {
++  if (setting.block_network) {
+     LOG(INFO) << "Update cache control flag to block network.";
+     return UpdateCacheLoadFlags(
+         load_flags,
+         net::LOAD_ONLY_FROM_CACHE | net::LOAD_SKIP_CACHE_VALIDATION);
+   }
+ 
+-  if (!NetHelpers::cache_mode) {
++  if (!setting.cache_mode) {
+     return load_flags;
+   }
+ 
+-  return UpdateCacheLoadFlags(load_flags, NetHelpers::cache_mode);
++  return UpdateCacheLoadFlags(load_flags, setting.cache_mode);
+ }
+ 
+ }  // namespace net_service
+diff --git a/src/cef/libcef/browser/net_service/net_helpers.h b/src/cef/libcef/browser/net_service/net_helpers.h
+index f2283769ec839..6c8fa83c33a74
+--- a/src/cef/libcef/browser/net_service/net_helpers.h
++++ b/src/cef/libcef/browser/net_service/net_helpers.h
+@@ -11,10 +11,16 @@ namespace net_service {
+ 
+ #define NETHELPERS_EXPORT __attribute__((visibility("default")))
+ 
++struct NetHelperSetting {
++  bool file_access;
++  bool block_network;
++  int cache_mode;
++};
++
+ class NETHELPERS_EXPORT NetHelpers {
+  public:
+   static bool ShouldBlockContentUrls();
+-  static bool ShouldBlockFileUrls();
++  static bool ShouldBlockFileUrls(struct NetHelperSetting setting);
+   static bool IsAllowAcceptCookies();
+   static bool IsThirdPartyCookieAllowed();
+ 
+@@ -29,11 +35,11 @@ class NETHELPERS_EXPORT NetHelpers {
+ bool IsSpecialFileUrl(const GURL& url);
+ 
+ // Update request's |load_flags| based on the settings.
+-int UpdateLoadFlags(int load_flags);
++int UpdateLoadFlags(int load_flags, struct NetHelperSetting setting);
+ 
+ // Returns true if the given URL should be aborted with
+ // net::ERR_ACCESS_DENIED.
+-bool IsURLBlocked(const GURL& url);
++bool IsURLBlocked(const GURL& url, struct NetHelperSetting setting);
+ 
+ }  // namespace net_service
+ 
+diff --git a/src/cef/libcef/browser/net_service/proxy_url_loader_factory.cc b/src/cef/libcef/browser/net_service/proxy_url_loader_factory.cc
+index 93d08697df16e..a016633fb5382
+--- a/src/cef/libcef/browser/net_service/proxy_url_loader_factory.cc
++++ b/src/cef/libcef/browser/net_service/proxy_url_loader_factory.cc
+@@ -500,13 +500,15 @@ void InterceptedRequest::Restart() {
+     }
+   }
+ 
+-  if (IsURLBlocked(request_.url)) {
++  struct NetHelperSetting setting;
++  factory_->request_handler_->GetSettingOfNetHelper(setting);
++  if (IsURLBlocked(request_.url, setting)) {
+     SendErrorAndCompleteImmediately(net::ERR_ACCESS_DENIED);
+     LOG(INFO) << "File url access denied! url=" << request_.url.spec();
+     return;
+   }
+ 
+-  request_.load_flags = UpdateLoadFlags(request_.load_flags);
++  request_.load_flags = UpdateLoadFlags(request_.load_flags, setting);
+ 
+   const GURL original_url = request_.url;
+ 
+@@ -612,11 +614,7 @@ void InterceptedRequest::OnReceiveResponse(
+     request->SetURL(CefString(request_.url.spec()));
+     request->SetMethod(CefString(request_.method));
+     request->Set(request_.headers);
+-    content::GetUIThreadTaskRunner({})->PostTask(
+-        FROM_HERE, base::BindOnce(&InterceptedRequest::OnHttpErrorForUIThread,
+-                                  base::Unretained(this), id_, request,
+-                                  request_.is_main_frame,
+-                                  request_.has_user_gesture, error_reponse));
++    OnHttpErrorForUIThread(id_, request, request_.is_main_frame, request_.has_user_gesture, error_reponse);
+   }
+ 
+   if (current_request_uses_header_client_) {
+diff --git a/src/cef/libcef/browser/net_service/proxy_url_loader_factory.h b/src/cef/libcef/browser/net_service/proxy_url_loader_factory.h
+index 53011b62b2981..c94b8eba97720
+--- a/src/cef/libcef/browser/net_service/proxy_url_loader_factory.h
++++ b/src/cef/libcef/browser/net_service/proxy_url_loader_factory.h
+@@ -140,6 +140,9 @@ class InterceptedRequestHandler {
+                            bool is_main_frame,
+                            bool has_user_gesture,
+                            CefRefPtr<CefResponse> error_response) {}
++
++  // To get setting of net helper.
++  virtual void GetSettingOfNetHelper(struct NetHelperSetting& setting) {}
+ };
+ 
+ // URL Loader Factory that supports request/response interception, processing
+diff --git a/src/cef/libcef/browser/net_service/resource_request_handler_wrapper.cc b/src/cef/libcef/browser/net_service/resource_request_handler_wrapper.cc
+index 15b602200100b..dd61f9586dfcc
+--- a/src/cef/libcef/browser/net_service/resource_request_handler_wrapper.cc
++++ b/src/cef/libcef/browser/net_service/resource_request_handler_wrapper.cc
+@@ -1200,6 +1200,27 @@ class InterceptedRequestHandlerWrapper : public InterceptedRequestHandler {
+                               error_response);
+   }
+ 
++  void GetSettingOfNetHelper(struct NetHelperSetting& setting) override {
++    CEF_REQUIRE_UIT();
++    if (!init_state_) {
++      // set the default value
++      setting.file_access = false;
++      setting.block_network = false;
++      setting.cache_mode = 0;
++      return;
++    }
++    if (!init_state_->browser_) {
++      // set the default value
++      setting.file_access = false;
++      setting.block_network = false;
++      setting.cache_mode = 0;
++      return;
++    }
++    setting.file_access = init_state_->browser_->GetFileAccess();
++    setting.block_network = init_state_->browser_->GetBlockNetwork();
++    setting.cache_mode = init_state_->browser_->GetCacheMode();
++  }
++
+  private:
+   void CallHandlerOnComplete(RequestState* state,
+                              const network::URLLoaderCompletionStatus& status) {
+diff --git a/src/cef/libcef/browser/osr/browser_platform_delegate_osr.cc b/src/cef/libcef/browser/osr/browser_platform_delegate_osr.cc
+index 69a0423ceb774..bdef16ae39192
+--- a/src/cef/libcef/browser/osr/browser_platform_delegate_osr.cc
++++ b/src/cef/libcef/browser/osr/browser_platform_delegate_osr.cc
+@@ -18,6 +18,48 @@
+ #include "content/public/browser/render_view_host.h"
+ #include "ui/events/base_event_utils.h"
+ 
++namespace {
++void ConvertSelectPopupItem(const blink::mojom::MenuItemPtr& menu_ptr,
++                            CefSelectPopupItem& menu_item) {
++  CefString label = CefString(menu_ptr->label.value_or(""));
++  CefString tool_tip = CefString(menu_ptr->tool_tip.value_or(""));
++  cef_string_set(label.c_str(), label.length(), &(menu_item.label), true);
++  cef_string_set(tool_tip.c_str(), tool_tip.length(), &(menu_item.tool_tip),
++                 true);
++  menu_item.action = menu_ptr->action;
++  menu_item.enabled = menu_ptr->enabled;
++  menu_item.checked = menu_ptr->checked;
++  menu_item.type = static_cast<cef_select_popup_item_type_t>(menu_ptr->type);
++  menu_item.text_direction =
++      static_cast<cef_text_direction_t>(menu_ptr->text_direction);
++  menu_item.has_text_direction_override = menu_ptr->has_text_direction_override;
++}
++}  // namespace
++
++class CefSelectPopupCallbackImpl : public CefSelectPopupCallback {
++ public:
++  explicit CefSelectPopupCallbackImpl(
++      mojo::PendingRemote<blink::mojom::PopupMenuClient> popup_client) {
++    popup_client_.Bind(std::move(popup_client));
++  }
++
++  void Continue(const std::vector<int>& indices) override {
++    if (popup_client_) {
++      popup_client_->DidAcceptIndices(indices);
++    }
++  }
++
++  void Cancel() override {
++    if (popup_client_) {
++      popup_client_->DidCancel();
++    }
++  }
++
++ private:
++  mojo::Remote<blink::mojom::PopupMenuClient> popup_client_;
++  IMPLEMENT_REFCOUNTING(CefSelectPopupCallbackImpl);
++};
++
+ CefBrowserPlatformDelegateOsr::CefBrowserPlatformDelegateOsr(
+     std::unique_ptr<CefBrowserPlatformDelegateNative> native_delegate,
+     bool use_shared_texture,
+@@ -495,6 +537,34 @@ void CefBrowserPlatformDelegateOsr::StartDragging(
+     DragSourceSystemDragEnded();
+ }
+ 
++void CefBrowserPlatformDelegateOsr::ShowPopupMenu(
++    mojo::PendingRemote<blink::mojom::PopupMenuClient> popup_client,
++    const gfx::Rect& bounds,
++    int item_height,
++    double item_font_size,
++    int selected_item,
++    std::vector<blink::mojom::MenuItemPtr> menu_items,
++    bool right_aligned,
++    bool allow_multiple_selection) {
++  CefRefPtr<CefDialogHandler> handler =
++      browser_->GetClient()->GetDialogHandler();
++  if (handler.get()) {
++    std::vector<CefSelectPopupItem> item_list;
++    for (int i = 0; i < menu_items.size(); i++) {
++      CefSelectPopupItem menu_item;
++      ConvertSelectPopupItem(menu_items[i], menu_item);
++      item_list.push_back(menu_item);
++    }
++    CefRefPtr<CefSelectPopupCallback> callback =
++        new CefSelectPopupCallbackImpl(std::move(popup_client));
++    handler->OnSelectPopupMenu(
++        browser_,
++        CefRect(bounds.x(), bounds.y(), bounds.width(), bounds.height()),
++        item_height, item_font_size, selected_item, item_list, right_aligned,
++        allow_multiple_selection, callback);
++  }
++}
++
+ void CefBrowserPlatformDelegateOsr::UpdateDragCursor(
+     ui::mojom::DragOperation operation) {
+   CefRefPtr<CefRenderHandler> handler =
+@@ -609,4 +679,4 @@ CefRenderWidgetHostViewOSR* CefBrowserPlatformDelegateOsr::GetOSRHostView()
+   }
+ 
+   return nullptr;
+-}
++}
+\ No newline at end of file
+diff --git a/src/cef/libcef/browser/osr/browser_platform_delegate_osr.h b/src/cef/libcef/browser/osr/browser_platform_delegate_osr.h
+index 5efb3ee968db5..7074ae9d77398
+--- a/src/cef/libcef/browser/osr/browser_platform_delegate_osr.h
++++ b/src/cef/libcef/browser/osr/browser_platform_delegate_osr.h
+@@ -89,6 +89,15 @@ class CefBrowserPlatformDelegateOsr
+   void AccessibilityLocationChangesReceived(
+       const std::vector<content::AXLocationChangeNotificationDetails>& locData)
+       override;
++  void ShowPopupMenu(
++    mojo::PendingRemote<blink::mojom::PopupMenuClient> popup_client,
++    const gfx::Rect& bounds,
++    int item_height,
++    double item_font_size,
++    int selected_item,
++    std::vector<blink::mojom::MenuItemPtr> menu_items,
++    bool right_aligned,
++    bool allow_multiple_selection) override;
+ 
+   // CefBrowserPlatformDelegateNative::WindowlessHandler methods:
+   CefWindowHandle GetParentWindowHandle() const override;
+diff --git a/src/cef/libcef/browser/osr/render_widget_host_view_osr.cc b/src/cef/libcef/browser/osr/render_widget_host_view_osr.cc
+index 86b0da5a7d138..b5e9a81f243c4
+--- a/src/cef/libcef/browser/osr/render_widget_host_view_osr.cc
++++ b/src/cef/libcef/browser/osr/render_widget_host_view_osr.cc
+@@ -1173,10 +1173,9 @@ void CefRenderWidgetHostViewOSR::OnScaleChanged(float old_page_scale_factor,
+     CefRefPtr<CefDisplayHandler> handler =
+         browser_impl_->client()->GetDisplayHandler();
+     CHECK(handler);
+-    float ratio = browser_impl_->GetVirtualPixelRatio();
+     handler->OnScaleChanged(browser_impl_.get(),
+-                            std::round(old_page_scale_factor * (100 / ratio)),
+-                            std::round(nwe_page_scale_factor * (100 / ratio)));
++                            std::round(old_page_scale_factor * 100),
++                            std::round(nwe_page_scale_factor * 100));
+   }
+ }
+ 
+@@ -1599,6 +1598,9 @@ void CefRenderWidgetHostViewOSR::SetFocus(bool focus) {
+   if (focus) {
+     widget->GotFocus();
+     widget->SetActive(true);
++    if (selection_controller_client_) {
++      selection_controller_client_->SetTemporarilyHidden(false);
++    }
+   } else {
+ #if !BUILDFLAG(IS_OHOS)
+     if (browser_impl_.get())
+@@ -1619,7 +1621,7 @@ void CefRenderWidgetHostViewOSR::OnUpdateTextInputStateCalled(
+     bool did_update_state) {
+   const auto state = text_input_manager->GetTextInputState();
+   if (state && !state->show_ime_if_needed) {
+-    LOG(INFO) << "OnUpdateTextInputStateCalled no need to show ime";
++    return;
+   }
+ 
+   CefRenderHandler::TextInputMode mode = CEF_TEXT_INPUT_MODE_NONE;
+@@ -1641,6 +1643,21 @@ void CefRenderWidgetHostViewOSR::OnUpdateTextInputStateCalled(
+                                       show_keyboard);
+ }
+ 
++void CefRenderWidgetHostViewOSR::FocusedNodeChanged(bool is_editable_node,
++  const gfx::Rect& node_bounds_in_screen)
++{
++  CefRefPtr<CefRenderHandler> handler =
++    browser_impl_->GetClient()->GetRenderHandler();
++  CHECK(handler);
++  if (is_editable_node) {
++    handler->OnVirtualKeyboardRequested(browser_impl_->GetBrowser(),
++        CEF_TEXT_INPUT_MODE_DEFAULT, false);
++  } else {
++    handler->OnVirtualKeyboardRequested(browser_impl_->GetBrowser(),
++        CEF_TEXT_INPUT_MODE_NONE, false);
++  }
++}
++
+ void CefRenderWidgetHostViewOSR::ProcessAckedTouchEvent(
+     const content::TouchEventWithLatencyInfo& touch,
+     blink::mojom::InputEventResultState ack_result) {
+@@ -1967,8 +1984,13 @@ void CefRenderWidgetHostViewOSR::OnScrollOffsetChanged() {
+     CefRefPtr<CefRenderHandler> handler =
+         browser_impl_->client()->GetRenderHandler();
+     CHECK(handler);
++  #if BUILDFLAG(IS_OHOS)
++    handler->OnScrollOffsetChanged(browser_impl_.get(), std::round(last_scroll_offset_.x()),
++                                   std::round(last_scroll_offset_.y()));
++  #else
+     handler->OnScrollOffsetChanged(browser_impl_.get(), last_scroll_offset_.x(),
+                                    last_scroll_offset_.y());
++  #endif
+   }
+   is_scroll_offset_changed_pending_ = false;
+ }
+diff --git a/src/cef/libcef/browser/osr/render_widget_host_view_osr.h b/src/cef/libcef/browser/osr/render_widget_host_view_osr.h
+index bf5e49c14b13d..96cc2faf567a7
+--- a/src/cef/libcef/browser/osr/render_widget_host_view_osr.h
++++ b/src/cef/libcef/browser/osr/render_widget_host_view_osr.h
+@@ -225,6 +225,9 @@ class CefRenderWidgetHostViewOSR
+       RenderWidgetHostViewBase* updated_view,
+       bool did_update_state) override;
+ 
++  void FocusedNodeChanged(bool is_editable_node,
++      const gfx::Rect& node_bounds_in_screen) override;
++
+   // ui::GestureProviderClient implementation.
+   void ProcessAckedTouchEvent(
+       const content::TouchEventWithLatencyInfo& touch,
