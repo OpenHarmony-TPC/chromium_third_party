@@ -16296,3 +16296,1748 @@ index 378b2e54202dd..2cca93268f1ef
    NOTREACHED() << "Unexpected class type: " << type;
    return nullptr;
  }
+diff --git a/src/cef/libcef_dll/ctocpp/browser_permission_request_delegate_ctocpp.h b/src/cef/libcef_dll/ctocpp/browser_permission_request_delegate_ctocpp.h
+index 4b7598dc129c5..39c61973fe3be
+--- a/src/cef/libcef_dll/ctocpp/browser_permission_request_delegate_ctocpp.h
++++ b/src/cef/libcef_dll/ctocpp/browser_permission_request_delegate_ctocpp.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=c9c5f759ffc22b4c39e35c6273d17966ec357b35$
++// $hash=a2e7c9e77ee45cef4da269e9e613fd4fdef5f9ac$
+ //
+ 
+ #ifndef CEF_LIBCEF_DLL_CTOCPP_BROWSER_PERMISSION_REQUEST_DELEGATE_CTOCPP_H_
+@@ -30,23 +30,24 @@ class CefBrowserPermissionRequestDelegateCToCpp
+     : public CefCToCppRefCounted<CefBrowserPermissionRequestDelegateCToCpp,
+                                  CefBrowserPermissionRequestDelegate,
+                                  cef_browser_permission_request_delegate_t> {
+-public:
++ public:
+   CefBrowserPermissionRequestDelegateCToCpp();
+   virtual ~CefBrowserPermissionRequestDelegateCToCpp();
+ 
+   // CefBrowserPermissionRequestDelegate methods.
+-  void AskGeolocationPermission(const CefString &origin,
++  void AskGeolocationPermission(const CefString& origin,
+                                 cef_permission_callback_t callback) override;
+-  void AbortAskGeolocationPermission(const CefString &origin) override;
++  void AbortAskGeolocationPermission(const CefString& origin) override;
+   void AskProtectedMediaIdentifierPermission(
+-      const CefString &origin, cef_permission_callback_t callback) override;
+-  void
+-  AbortAskProtectedMediaIdentifierPermission(const CefString &origin) override;
+-  void AskMIDISysexPermission(const CefString &origin,
++      const CefString& origin,
++      cef_permission_callback_t callback) override;
++  void AbortAskProtectedMediaIdentifierPermission(
++      const CefString& origin) override;
++  void AskMIDISysexPermission(const CefString& origin,
+                               cef_permission_callback_t callback) override;
+-  void AbortAskMIDISysexPermission(const CefString &origin) override;
++  void AbortAskMIDISysexPermission(const CefString& origin) override;
+   void NotifyGeolocationPermission(bool value,
+-                                   const CefString &origin) override;
++                                   const CefString& origin) override;
+ };
+ 
+-#endif // CEF_LIBCEF_DLL_CTOCPP_BROWSER_PERMISSION_REQUEST_DELEGATE_CTOCPP_H_
++#endif  // CEF_LIBCEF_DLL_CTOCPP_BROWSER_PERMISSION_REQUEST_DELEGATE_CTOCPP_H_
+diff --git a/src/cef/libcef_dll/ctocpp/browser_process_handler_ctocpp.cc b/src/cef/libcef_dll/ctocpp/browser_process_handler_ctocpp.cc
+index 2338c499f1748..c8739c79bde6f
+--- a/src/cef/libcef_dll/ctocpp/browser_process_handler_ctocpp.cc
++++ b/src/cef/libcef_dll/ctocpp/browser_process_handler_ctocpp.cc
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=3302f28c60da03b9f5ba5fa110523b353765d1a3$
++// $hash=a2e2cd65794078959c9d31ee3a294fb937d6f802$
+ //
+ 
+ #include "libcef_dll/ctocpp/browser_process_handler_ctocpp.h"
+diff --git a/src/cef/libcef_dll/ctocpp/browser_process_handler_ctocpp.h b/src/cef/libcef_dll/ctocpp/browser_process_handler_ctocpp.h
+index 3871506b1a685..50c763307fbc5
+--- a/src/cef/libcef_dll/ctocpp/browser_process_handler_ctocpp.h
++++ b/src/cef/libcef_dll/ctocpp/browser_process_handler_ctocpp.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=7a13d15a99d1c92a757b776bb00d932296012054$
++// $hash=66b5c3e001c23a720ae8a8e6d98afeb2419e5038$
+ //
+ 
+ #ifndef CEF_LIBCEF_DLL_CTOCPP_BROWSER_PROCESS_HANDLER_CTOCPP_H_
+diff --git a/src/cef/libcef_dll/ctocpp/callback_ctocpp.cc b/src/cef/libcef_dll/ctocpp/callback_ctocpp.cc
+index c0030004cbe5b..8c86cd7330e2d
+--- a/src/cef/libcef_dll/ctocpp/callback_ctocpp.cc
++++ b/src/cef/libcef_dll/ctocpp/callback_ctocpp.cc
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=ef330e0d61e143966544b8a80f04b72dc32ec4e3$
++// $hash=669523b79dbdfe2fff4015e8a1b247e7f90e62e0$
+ //
+ 
+ #include "libcef_dll/ctocpp/callback_ctocpp.h"
+diff --git a/src/cef/libcef_dll/ctocpp/callback_ctocpp.h b/src/cef/libcef_dll/ctocpp/callback_ctocpp.h
+index f4d7a15e7851f..1e59651494167
+--- a/src/cef/libcef_dll/ctocpp/callback_ctocpp.h
++++ b/src/cef/libcef_dll/ctocpp/callback_ctocpp.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=4a884b7737dd5ba552273873e63dd4df51a632b7$
++// $hash=33a36c40703e1a794c2d8365f0ed692bad529e4b$
+ //
+ 
+ #ifndef CEF_LIBCEF_DLL_CTOCPP_CALLBACK_CTOCPP_H_
+diff --git a/src/cef/libcef_dll/ctocpp/client_ctocpp.cc b/src/cef/libcef_dll/ctocpp/client_ctocpp.cc
+index 5a741e37ed727..f31c0ee080445
+--- a/src/cef/libcef_dll/ctocpp/client_ctocpp.cc
++++ b/src/cef/libcef_dll/ctocpp/client_ctocpp.cc
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=6c7761f17f60e6c3db928ffc15b373b0c50dfb47$
++// $hash=d090744e28308c8ad6b47906ee231b4fe52fa6a2$
+ //
+ 
+ #include "libcef_dll/ctocpp/client_ctocpp.h"
+@@ -39,14 +39,14 @@
+ 
+ NO_SANITIZE("cfi-icall")
+ CefRefPtr<CefAudioHandler> CefClientCToCpp::GetAudioHandler() {
+-  cef_client_t *_struct = GetStruct();
++  cef_client_t* _struct = GetStruct();
+   if (CEF_MEMBER_MISSING(_struct, get_audio_handler))
+     return nullptr;
+ 
+   // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
+ 
+   // Execute
+-  cef_audio_handler_t *_retval = _struct->get_audio_handler(_struct);
++  cef_audio_handler_t* _retval = _struct->get_audio_handler(_struct);
+ 
+   // Return type: refptr_same
+   return CefAudioHandlerCToCpp::Wrap(_retval);
+@@ -54,14 +54,14 @@ CefRefPtr<CefAudioHandler> CefClientCToCpp::GetAudioHandler() {
+ 
+ NO_SANITIZE("cfi-icall")
+ CefRefPtr<CefContextMenuHandler> CefClientCToCpp::GetContextMenuHandler() {
+-  cef_client_t *_struct = GetStruct();
++  cef_client_t* _struct = GetStruct();
+   if (CEF_MEMBER_MISSING(_struct, get_context_menu_handler))
+     return nullptr;
+ 
+   // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
+ 
+   // Execute
+-  cef_context_menu_handler_t *_retval =
++  cef_context_menu_handler_t* _retval =
+       _struct->get_context_menu_handler(_struct);
+ 
+   // Return type: refptr_same
+@@ -70,14 +70,14 @@ CefRefPtr<CefContextMenuHandler> CefClientCToCpp::GetContextMenuHandler() {
+ 
+ NO_SANITIZE("cfi-icall")
+ CefRefPtr<CefDialogHandler> CefClientCToCpp::GetDialogHandler() {
+-  cef_client_t *_struct = GetStruct();
++  cef_client_t* _struct = GetStruct();
+   if (CEF_MEMBER_MISSING(_struct, get_dialog_handler))
+     return nullptr;
+ 
+   // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
+ 
+   // Execute
+-  cef_dialog_handler_t *_retval = _struct->get_dialog_handler(_struct);
++  cef_dialog_handler_t* _retval = _struct->get_dialog_handler(_struct);
+ 
+   // Return type: refptr_same
+   return CefDialogHandlerCToCpp::Wrap(_retval);
+@@ -85,14 +85,14 @@ CefRefPtr<CefDialogHandler> CefClientCToCpp::GetDialogHandler() {
+ 
+ NO_SANITIZE("cfi-icall")
+ CefRefPtr<CefDisplayHandler> CefClientCToCpp::GetDisplayHandler() {
+-  cef_client_t *_struct = GetStruct();
++  cef_client_t* _struct = GetStruct();
+   if (CEF_MEMBER_MISSING(_struct, get_display_handler))
+     return nullptr;
+ 
+   // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
+ 
+   // Execute
+-  cef_display_handler_t *_retval = _struct->get_display_handler(_struct);
++  cef_display_handler_t* _retval = _struct->get_display_handler(_struct);
+ 
+   // Return type: refptr_same
+   return CefDisplayHandlerCToCpp::Wrap(_retval);
+@@ -100,14 +100,14 @@ CefRefPtr<CefDisplayHandler> CefClientCToCpp::GetDisplayHandler() {
+ 
+ NO_SANITIZE("cfi-icall")
+ CefRefPtr<CefDownloadHandler> CefClientCToCpp::GetDownloadHandler() {
+-  cef_client_t *_struct = GetStruct();
++  cef_client_t* _struct = GetStruct();
+   if (CEF_MEMBER_MISSING(_struct, get_download_handler))
+     return nullptr;
+ 
+   // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
+ 
+   // Execute
+-  cef_download_handler_t *_retval = _struct->get_download_handler(_struct);
++  cef_download_handler_t* _retval = _struct->get_download_handler(_struct);
+ 
+   // Return type: refptr_same
+   return CefDownloadHandlerCToCpp::Wrap(_retval);
+@@ -115,14 +115,14 @@ CefRefPtr<CefDownloadHandler> CefClientCToCpp::GetDownloadHandler() {
+ 
+ NO_SANITIZE("cfi-icall")
+ CefRefPtr<CefDragHandler> CefClientCToCpp::GetDragHandler() {
+-  cef_client_t *_struct = GetStruct();
++  cef_client_t* _struct = GetStruct();
+   if (CEF_MEMBER_MISSING(_struct, get_drag_handler))
+     return nullptr;
+ 
+   // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
+ 
+   // Execute
+-  cef_drag_handler_t *_retval = _struct->get_drag_handler(_struct);
++  cef_drag_handler_t* _retval = _struct->get_drag_handler(_struct);
+ 
+   // Return type: refptr_same
+   return CefDragHandlerCToCpp::Wrap(_retval);
+@@ -130,14 +130,14 @@ CefRefPtr<CefDragHandler> CefClientCToCpp::GetDragHandler() {
+ 
+ NO_SANITIZE("cfi-icall")
+ CefRefPtr<CefFindHandler> CefClientCToCpp::GetFindHandler() {
+-  cef_client_t *_struct = GetStruct();
++  cef_client_t* _struct = GetStruct();
+   if (CEF_MEMBER_MISSING(_struct, get_find_handler))
+     return nullptr;
+ 
+   // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
+ 
+   // Execute
+-  cef_find_handler_t *_retval = _struct->get_find_handler(_struct);
++  cef_find_handler_t* _retval = _struct->get_find_handler(_struct);
+ 
+   // Return type: refptr_same
+   return CefFindHandlerCToCpp::Wrap(_retval);
+@@ -145,14 +145,14 @@ CefRefPtr<CefFindHandler> CefClientCToCpp::GetFindHandler() {
+ 
+ NO_SANITIZE("cfi-icall")
+ CefRefPtr<CefFocusHandler> CefClientCToCpp::GetFocusHandler() {
+-  cef_client_t *_struct = GetStruct();
++  cef_client_t* _struct = GetStruct();
+   if (CEF_MEMBER_MISSING(_struct, get_focus_handler))
+     return nullptr;
+ 
+   // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
+ 
+   // Execute
+-  cef_focus_handler_t *_retval = _struct->get_focus_handler(_struct);
++  cef_focus_handler_t* _retval = _struct->get_focus_handler(_struct);
+ 
+   // Return type: refptr_same
+   return CefFocusHandlerCToCpp::Wrap(_retval);
+@@ -160,14 +160,14 @@ CefRefPtr<CefFocusHandler> CefClientCToCpp::GetFocusHandler() {
+ 
+ NO_SANITIZE("cfi-icall")
+ CefRefPtr<CefFrameHandler> CefClientCToCpp::GetFrameHandler() {
+-  cef_client_t *_struct = GetStruct();
++  cef_client_t* _struct = GetStruct();
+   if (CEF_MEMBER_MISSING(_struct, get_frame_handler))
+     return nullptr;
+ 
+   // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
+ 
+   // Execute
+-  cef_frame_handler_t *_retval = _struct->get_frame_handler(_struct);
++  cef_frame_handler_t* _retval = _struct->get_frame_handler(_struct);
+ 
+   // Return type: refptr_same
+   return CefFrameHandlerCToCpp::Wrap(_retval);
+@@ -175,14 +175,14 @@ CefRefPtr<CefFrameHandler> CefClientCToCpp::GetFrameHandler() {
+ 
+ NO_SANITIZE("cfi-icall")
+ CefRefPtr<CefJSDialogHandler> CefClientCToCpp::GetJSDialogHandler() {
+-  cef_client_t *_struct = GetStruct();
++  cef_client_t* _struct = GetStruct();
+   if (CEF_MEMBER_MISSING(_struct, get_jsdialog_handler))
+     return nullptr;
+ 
+   // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
+ 
+   // Execute
+-  cef_jsdialog_handler_t *_retval = _struct->get_jsdialog_handler(_struct);
++  cef_jsdialog_handler_t* _retval = _struct->get_jsdialog_handler(_struct);
+ 
+   // Return type: refptr_same
+   return CefJSDialogHandlerCToCpp::Wrap(_retval);
+@@ -190,14 +190,14 @@ CefRefPtr<CefJSDialogHandler> CefClientCToCpp::GetJSDialogHandler() {
+ 
+ NO_SANITIZE("cfi-icall")
+ CefRefPtr<CefKeyboardHandler> CefClientCToCpp::GetKeyboardHandler() {
+-  cef_client_t *_struct = GetStruct();
++  cef_client_t* _struct = GetStruct();
+   if (CEF_MEMBER_MISSING(_struct, get_keyboard_handler))
+     return nullptr;
+ 
+   // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
+ 
+   // Execute
+-  cef_keyboard_handler_t *_retval = _struct->get_keyboard_handler(_struct);
++  cef_keyboard_handler_t* _retval = _struct->get_keyboard_handler(_struct);
+ 
+   // Return type: refptr_same
+   return CefKeyboardHandlerCToCpp::Wrap(_retval);
+@@ -205,14 +205,14 @@ CefRefPtr<CefKeyboardHandler> CefClientCToCpp::GetKeyboardHandler() {
+ 
+ NO_SANITIZE("cfi-icall")
+ CefRefPtr<CefLifeSpanHandler> CefClientCToCpp::GetLifeSpanHandler() {
+-  cef_client_t *_struct = GetStruct();
++  cef_client_t* _struct = GetStruct();
+   if (CEF_MEMBER_MISSING(_struct, get_life_span_handler))
+     return nullptr;
+ 
+   // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
+ 
+   // Execute
+-  cef_life_span_handler_t *_retval = _struct->get_life_span_handler(_struct);
++  cef_life_span_handler_t* _retval = _struct->get_life_span_handler(_struct);
+ 
+   // Return type: refptr_same
+   return CefLifeSpanHandlerCToCpp::Wrap(_retval);
+@@ -220,14 +220,14 @@ CefRefPtr<CefLifeSpanHandler> CefClientCToCpp::GetLifeSpanHandler() {
+ 
+ NO_SANITIZE("cfi-icall")
+ CefRefPtr<CefLoadHandler> CefClientCToCpp::GetLoadHandler() {
+-  cef_client_t *_struct = GetStruct();
++  cef_client_t* _struct = GetStruct();
+   if (CEF_MEMBER_MISSING(_struct, get_load_handler))
+     return nullptr;
+ 
+   // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
+ 
+   // Execute
+-  cef_load_handler_t *_retval = _struct->get_load_handler(_struct);
++  cef_load_handler_t* _retval = _struct->get_load_handler(_struct);
+ 
+   // Return type: refptr_same
+   return CefLoadHandlerCToCpp::Wrap(_retval);
+@@ -235,14 +235,14 @@ CefRefPtr<CefLoadHandler> CefClientCToCpp::GetLoadHandler() {
+ 
+ NO_SANITIZE("cfi-icall")
+ CefRefPtr<CefPrintHandler> CefClientCToCpp::GetPrintHandler() {
+-  cef_client_t *_struct = GetStruct();
++  cef_client_t* _struct = GetStruct();
+   if (CEF_MEMBER_MISSING(_struct, get_print_handler))
+     return nullptr;
+ 
+   // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
+ 
+   // Execute
+-  cef_print_handler_t *_retval = _struct->get_print_handler(_struct);
++  cef_print_handler_t* _retval = _struct->get_print_handler(_struct);
+ 
+   // Return type: refptr_same
+   return CefPrintHandlerCToCpp::Wrap(_retval);
+@@ -250,14 +250,14 @@ CefRefPtr<CefPrintHandler> CefClientCToCpp::GetPrintHandler() {
+ 
+ NO_SANITIZE("cfi-icall")
+ CefRefPtr<CefRenderHandler> CefClientCToCpp::GetRenderHandler() {
+-  cef_client_t *_struct = GetStruct();
++  cef_client_t* _struct = GetStruct();
+   if (CEF_MEMBER_MISSING(_struct, get_render_handler))
+     return nullptr;
+ 
+   // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
+ 
+   // Execute
+-  cef_render_handler_t *_retval = _struct->get_render_handler(_struct);
++  cef_render_handler_t* _retval = _struct->get_render_handler(_struct);
+ 
+   // Return type: refptr_same
+   return CefRenderHandlerCToCpp::Wrap(_retval);
+@@ -265,14 +265,14 @@ CefRefPtr<CefRenderHandler> CefClientCToCpp::GetRenderHandler() {
+ 
+ NO_SANITIZE("cfi-icall")
+ CefRefPtr<CefRequestHandler> CefClientCToCpp::GetRequestHandler() {
+-  cef_client_t *_struct = GetStruct();
++  cef_client_t* _struct = GetStruct();
+   if (CEF_MEMBER_MISSING(_struct, get_request_handler))
+     return nullptr;
+ 
+   // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
+ 
+   // Execute
+-  cef_request_handler_t *_retval = _struct->get_request_handler(_struct);
++  cef_request_handler_t* _retval = _struct->get_request_handler(_struct);
+ 
+   // Return type: refptr_same
+   return CefRequestHandlerCToCpp::Wrap(_retval);
+@@ -280,14 +280,14 @@ CefRefPtr<CefRequestHandler> CefClientCToCpp::GetRequestHandler() {
+ 
+ NO_SANITIZE("cfi-icall")
+ CefRefPtr<CefPermissionRequest> CefClientCToCpp::GetPermissionRequest() {
+-  cef_client_t *_struct = GetStruct();
++  cef_client_t* _struct = GetStruct();
+   if (CEF_MEMBER_MISSING(_struct, get_permission_request))
+     return nullptr;
+ 
+   // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
+ 
+   // Execute
+-  cef_permission_request_t *_retval = _struct->get_permission_request(_struct);
++  cef_permission_request_t* _retval = _struct->get_permission_request(_struct);
+ 
+   // Return type: refptr_same
+   return CefPermissionRequestCToCpp::Wrap(_retval);
+@@ -295,9 +295,11 @@ CefRefPtr<CefPermissionRequest> CefClientCToCpp::GetPermissionRequest() {
+ 
+ NO_SANITIZE("cfi-icall")
+ bool CefClientCToCpp::OnProcessMessageReceived(
+-    CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame,
+-    CefProcessId source_process, CefRefPtr<CefProcessMessage> message) {
+-  cef_client_t *_struct = GetStruct();
++    CefRefPtr<CefBrowser> browser,
++    CefRefPtr<CefFrame> frame,
++    CefProcessId source_process,
++    CefRefPtr<CefProcessMessage> message) {
++  cef_client_t* _struct = GetStruct();
+   if (CEF_MEMBER_MISSING(_struct, on_process_message_received))
+     return false;
+ 
+@@ -327,10 +329,10 @@ bool CefClientCToCpp::OnProcessMessageReceived(
+ 
+ NO_SANITIZE("cfi-icall")
+ int CefClientCToCpp::NotifyJavaScriptResult(CefRefPtr<CefListValue> args,
+-                                            const CefString &method,
+-                                            const CefString &object_name,
++                                            const CefString& method,
++                                            const CefString& object_name,
+                                             CefRefPtr<CefListValue> result) {
+-  cef_client_t *_struct = GetStruct();
++  cef_client_t* _struct = GetStruct();
+   if (CEF_MEMBER_MISSING(_struct, notify_java_script_result))
+     return 0;
+ 
+@@ -371,13 +373,14 @@ CefClientCToCpp::CefClientCToCpp() {}
+ CefClientCToCpp::~CefClientCToCpp() {}
+ 
+ template <>
+-cef_client_t *
++cef_client_t*
+ CefCToCppRefCounted<CefClientCToCpp, CefClient, cef_client_t>::UnwrapDerived(
+-    CefWrapperType type, CefClient *c) {
++    CefWrapperType type,
++    CefClient* c) {
+   NOTREACHED() << "Unexpected class type: " << type;
+   return nullptr;
+ }
+ 
+ template <>
+-CefWrapperType CefCToCppRefCounted<CefClientCToCpp, CefClient,
+-                                   cef_client_t>::kWrapperType = WT_CLIENT;
++CefWrapperType CefCToCppRefCounted<CefClientCToCpp, CefClient, cef_client_t>::
++    kWrapperType = WT_CLIENT;
+diff --git a/src/cef/libcef_dll/ctocpp/client_ctocpp.h b/src/cef/libcef_dll/ctocpp/client_ctocpp.h
+index 72c58879a1cc4..37f3eb67cc0ea
+--- a/src/cef/libcef_dll/ctocpp/client_ctocpp.h
++++ b/src/cef/libcef_dll/ctocpp/client_ctocpp.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=7516e646aea8db0ff68ea79041e05ebb9a320cf2$
++// $hash=13d421c7598593f4bee5b3e62cb8aaf348a350f9$
+ //
+ 
+ #ifndef CEF_LIBCEF_DLL_CTOCPP_CLIENT_CTOCPP_H_
+@@ -28,7 +28,7 @@
+ // This class may be instantiated and accessed DLL-side only.
+ class CefClientCToCpp
+     : public CefCToCppRefCounted<CefClientCToCpp, CefClient, cef_client_t> {
+-public:
++ public:
+   CefClientCToCpp();
+   virtual ~CefClientCToCpp();
+ 
+@@ -55,9 +55,9 @@ public:
+                                 CefProcessId source_process,
+                                 CefRefPtr<CefProcessMessage> message) override;
+   int NotifyJavaScriptResult(CefRefPtr<CefListValue> args,
+-                             const CefString &method,
+-                             const CefString &object_name,
++                             const CefString& method,
++                             const CefString& object_name,
+                              CefRefPtr<CefListValue> result) override;
+ };
+ 
+-#endif // CEF_LIBCEF_DLL_CTOCPP_CLIENT_CTOCPP_H_
++#endif  // CEF_LIBCEF_DLL_CTOCPP_CLIENT_CTOCPP_H_
+diff --git a/src/cef/libcef_dll/ctocpp/command_line_ctocpp.cc b/src/cef/libcef_dll/ctocpp/command_line_ctocpp.cc
+index a96b067677f06..e7b02e834fad5
+--- a/src/cef/libcef_dll/ctocpp/command_line_ctocpp.cc
++++ b/src/cef/libcef_dll/ctocpp/command_line_ctocpp.cc
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=cc3c62b07c8e4d6f019637a0338673ac21ffa017$
++// $hash=2f7f88a79dc5c9bb4c7af27e6abac4b4e7ba3d76$
+ //
+ 
+ #include "libcef_dll/ctocpp/command_line_ctocpp.h"
+diff --git a/src/cef/libcef_dll/ctocpp/command_line_ctocpp.h b/src/cef/libcef_dll/ctocpp/command_line_ctocpp.h
+index e11c013b6bf61..7beaa99e038c6
+--- a/src/cef/libcef_dll/ctocpp/command_line_ctocpp.h
++++ b/src/cef/libcef_dll/ctocpp/command_line_ctocpp.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=6dffc109a4a5bdc10bda0a03950f1a8b81f964b7$
++// $hash=c91f76be5a60016fa78afe2813b0d4df3bb422e7$
+ //
+ 
+ #ifndef CEF_LIBCEF_DLL_CTOCPP_COMMAND_LINE_CTOCPP_H_
+diff --git a/src/cef/libcef_dll/ctocpp/completion_callback_ctocpp.cc b/src/cef/libcef_dll/ctocpp/completion_callback_ctocpp.cc
+index 4b9308d9569e9..302cfe2802419
+--- a/src/cef/libcef_dll/ctocpp/completion_callback_ctocpp.cc
++++ b/src/cef/libcef_dll/ctocpp/completion_callback_ctocpp.cc
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=f65d432f0ca5891aa466010183e437ba5e2007be$
++// $hash=bc0832e0b26f161d96d699a1922df4144ae6cf2d$
+ //
+ 
+ #include "libcef_dll/ctocpp/completion_callback_ctocpp.h"
+diff --git a/src/cef/libcef_dll/ctocpp/completion_callback_ctocpp.h b/src/cef/libcef_dll/ctocpp/completion_callback_ctocpp.h
+index a934d50e22740..37956aadac1fb
+--- a/src/cef/libcef_dll/ctocpp/completion_callback_ctocpp.h
++++ b/src/cef/libcef_dll/ctocpp/completion_callback_ctocpp.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=d8c3f928349e064d8afe7853d4a47c90c1ed0114$
++// $hash=bbdf6c23d87122deb5d3100430547b2c608497a9$
+ //
+ 
+ #ifndef CEF_LIBCEF_DLL_CTOCPP_COMPLETION_CALLBACK_CTOCPP_H_
+diff --git a/src/cef/libcef_dll/ctocpp/context_menu_handler_ctocpp.cc b/src/cef/libcef_dll/ctocpp/context_menu_handler_ctocpp.cc
+index eea53aa71656c..6d1bd15c9aa41
+--- a/src/cef/libcef_dll/ctocpp/context_menu_handler_ctocpp.cc
++++ b/src/cef/libcef_dll/ctocpp/context_menu_handler_ctocpp.cc
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=e251b197b3369b44f3d66ce414094ac24ba1db10$
++// $hash=074448a6721865377653c8625a38925aef5f3c7d$
+ //
+ 
+ #include "libcef_dll/ctocpp/context_menu_handler_ctocpp.h"
+diff --git a/src/cef/libcef_dll/ctocpp/context_menu_handler_ctocpp.h b/src/cef/libcef_dll/ctocpp/context_menu_handler_ctocpp.h
+index d5e0c793ac084..92e77bccbb2e8
+--- a/src/cef/libcef_dll/ctocpp/context_menu_handler_ctocpp.h
++++ b/src/cef/libcef_dll/ctocpp/context_menu_handler_ctocpp.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=533df2bb508d88d0828f0da6284732c2ecbbafab$
++// $hash=0d0bcb30d9e8b5894158c9ecf80fa710e4ce6b7d$
+ //
+ 
+ #ifndef CEF_LIBCEF_DLL_CTOCPP_CONTEXT_MENU_HANDLER_CTOCPP_H_
+diff --git a/src/cef/libcef_dll/ctocpp/context_menu_params_ctocpp.cc b/src/cef/libcef_dll/ctocpp/context_menu_params_ctocpp.cc
+index c5dd4186ddc9e..18323da16151c
+--- a/src/cef/libcef_dll/ctocpp/context_menu_params_ctocpp.cc
++++ b/src/cef/libcef_dll/ctocpp/context_menu_params_ctocpp.cc
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=233d530cb984468703b97752bda1178191d4ba75$
++// $hash=bc04acf3a86598987676f33a6d39c10435dded70$
+ //
+ 
+ #include "libcef_dll/ctocpp/context_menu_params_ctocpp.h"
+@@ -230,7 +230,7 @@ CefContextMenuParams::MediaType CefContextMenuParamsCToCpp::GetMediaType() {
+ 
+ NO_SANITIZE("cfi-icall")
+ CefContextMenuParams::MediaStateFlags
+-CefContextMenuParamsCToCpp::GetMediaStateFlags() {
++    CefContextMenuParamsCToCpp::GetMediaStateFlags() {
+   shutdown_checker::AssertNotShutdown();
+ 
+   cef_context_menu_params_t* _struct = GetStruct();
+@@ -351,7 +351,7 @@ bool CefContextMenuParamsCToCpp::IsSpellCheckEnabled() {
+ 
+ NO_SANITIZE("cfi-icall")
+ CefContextMenuParams::EditStateFlags
+-CefContextMenuParamsCToCpp::GetEditStateFlags() {
++    CefContextMenuParamsCToCpp::GetEditStateFlags() {
+   shutdown_checker::AssertNotShutdown();
+ 
+   cef_context_menu_params_t* _struct = GetStruct();
+@@ -384,6 +384,42 @@ NO_SANITIZE("cfi-icall") bool CefContextMenuParamsCToCpp::IsCustomMenu() {
+   return _retval ? true : false;
+ }
+ 
++NO_SANITIZE("cfi-icall")
++CefContextMenuParams::InputFieldType
++    CefContextMenuParamsCToCpp::GetInputFieldType() {
++  shutdown_checker::AssertNotShutdown();
++
++  cef_context_menu_params_t* _struct = GetStruct();
++  if (CEF_MEMBER_MISSING(_struct, get_input_field_type))
++    return CM_INPUTFIELDTYPE_NONE;
++
++  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
++
++  // Execute
++  cef_context_menu_input_field_type_t _retval =
++      _struct->get_input_field_type(_struct);
++
++  // Return type: simple
++  return _retval;
++}
++
++NO_SANITIZE("cfi-icall")
++CefContextMenuParams::SourceType CefContextMenuParamsCToCpp::GetSourceType() {
++  shutdown_checker::AssertNotShutdown();
++
++  cef_context_menu_params_t* _struct = GetStruct();
++  if (CEF_MEMBER_MISSING(_struct, get_source_type))
++    return CM_SOURCETYPE_NONE;
++
++  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
++
++  // Execute
++  cef_context_menu_source_type_t _retval = _struct->get_source_type(_struct);
++
++  // Return type: simple
++  return _retval;
++}
++
+ // CONSTRUCTOR - Do not edit by hand.
+ 
+ CefContextMenuParamsCToCpp::CefContextMenuParamsCToCpp() {}
+diff --git a/src/cef/libcef_dll/ctocpp/context_menu_params_ctocpp.h b/src/cef/libcef_dll/ctocpp/context_menu_params_ctocpp.h
+index b692a5160bbce..2540013e815c4
+--- a/src/cef/libcef_dll/ctocpp/context_menu_params_ctocpp.h
++++ b/src/cef/libcef_dll/ctocpp/context_menu_params_ctocpp.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=de83ca0067722af09407abc0b7723a8d91d083ad$
++// $hash=fd06aad327c518573e68c645f3facd55fea2da34$
+ //
+ 
+ #ifndef CEF_LIBCEF_DLL_CTOCPP_CONTEXT_MENU_PARAMS_CTOCPP_H_
+@@ -56,6 +56,8 @@ class CefContextMenuParamsCToCpp
+   bool IsSpellCheckEnabled() override;
+   EditStateFlags GetEditStateFlags() override;
+   bool IsCustomMenu() override;
++  InputFieldType GetInputFieldType() override;
++  SourceType GetSourceType() override;
+ };
+ 
+ #endif  // CEF_LIBCEF_DLL_CTOCPP_CONTEXT_MENU_PARAMS_CTOCPP_H_
+diff --git a/src/cef/libcef_dll/ctocpp/cookie_access_filter_ctocpp.cc b/src/cef/libcef_dll/ctocpp/cookie_access_filter_ctocpp.cc
+index 3156b1db01495..53958890ff8c0
+--- a/src/cef/libcef_dll/ctocpp/cookie_access_filter_ctocpp.cc
++++ b/src/cef/libcef_dll/ctocpp/cookie_access_filter_ctocpp.cc
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=b1ae8622378ad8661289554e6c542e970850aaed$
++// $hash=d24bf7fb06a84dfbe57aa7bfe49cbb0de242a840$
+ //
+ 
+ #include "libcef_dll/ctocpp/cookie_access_filter_ctocpp.h"
+diff --git a/src/cef/libcef_dll/ctocpp/cookie_access_filter_ctocpp.h b/src/cef/libcef_dll/ctocpp/cookie_access_filter_ctocpp.h
+index 0170c33256d11..0da831215c084
+--- a/src/cef/libcef_dll/ctocpp/cookie_access_filter_ctocpp.h
++++ b/src/cef/libcef_dll/ctocpp/cookie_access_filter_ctocpp.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=7a3357796fd02da5a233d4dfa6b8c7194ba8f969$
++// $hash=b325a81a438e8e510eb826bc4e6acf5df04281c8$
+ //
+ 
+ #ifndef CEF_LIBCEF_DLL_CTOCPP_COOKIE_ACCESS_FILTER_CTOCPP_H_
+diff --git a/src/cef/libcef_dll/ctocpp/cookie_manager_ctocpp.cc b/src/cef/libcef_dll/ctocpp/cookie_manager_ctocpp.cc
+index 9f8b8ea1acbea..8d8bd262840d1
+--- a/src/cef/libcef_dll/ctocpp/cookie_manager_ctocpp.cc
++++ b/src/cef/libcef_dll/ctocpp/cookie_manager_ctocpp.cc
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=6e1bd6af22e730b6d6a12a7296414250bf415979$
++// $hash=3a8702e5b54310d93f9f43d60dd4d6d77b83da9d$
+ //
+ 
+ #include "libcef_dll/ctocpp/cookie_manager_ctocpp.h"
+@@ -28,7 +28,7 @@ CefRefPtr<CefCookieManager> CefCookieManager::GetGlobalManager(
+   // Unverified params: callback
+ 
+   // Execute
+-  cef_cookie_manager_t *_retval = cef_cookie_manager_get_global_manager(
++  cef_cookie_manager_t* _retval = cef_cookie_manager_get_global_manager(
+       CefCompletionCallbackCppToC::Wrap(callback));
+ 
+   // Return type: refptr_same
+@@ -36,9 +36,9 @@ CefRefPtr<CefCookieManager> CefCookieManager::GetGlobalManager(
+ }
+ 
+ NO_SANITIZE("cfi-icall")
+-bool CefCookieManager::CreateCefCookie(const CefString &url,
+-                                       const CefString &value,
+-                                       CefCookie &cef_cookie) {
++bool CefCookieManager::CreateCefCookie(const CefString& url,
++                                       const CefString& value,
++                                       CefCookie& cef_cookie) {
+   // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
+ 
+   // Verify param: url; type: string_byref_const
+@@ -61,7 +61,7 @@ bool CefCookieManager::CreateCefCookie(const CefString &url,
+ // VIRTUAL METHODS - Body may be edited by hand.
+ 
+ NO_SANITIZE("cfi-icall") bool CefCookieManagerCToCpp::IsAcceptCookieAllowed() {
+-  cef_cookie_manager_t *_struct = GetStruct();
++  cef_cookie_manager_t* _struct = GetStruct();
+   if (CEF_MEMBER_MISSING(_struct, is_accept_cookie_allowed))
+     return false;
+ 
+@@ -76,7 +76,7 @@ NO_SANITIZE("cfi-icall") bool CefCookieManagerCToCpp::IsAcceptCookieAllowed() {
+ 
+ NO_SANITIZE("cfi-icall")
+ void CefCookieManagerCToCpp::PutAcceptCookieEnabled(bool accept) {
+-  cef_cookie_manager_t *_struct = GetStruct();
++  cef_cookie_manager_t* _struct = GetStruct();
+   if (CEF_MEMBER_MISSING(_struct, put_accept_cookie_enabled))
+     return;
+ 
+@@ -88,7 +88,7 @@ void CefCookieManagerCToCpp::PutAcceptCookieEnabled(bool accept) {
+ 
+ NO_SANITIZE("cfi-icall")
+ bool CefCookieManagerCToCpp::IsThirdPartyCookieAllowed() {
+-  cef_cookie_manager_t *_struct = GetStruct();
++  cef_cookie_manager_t* _struct = GetStruct();
+   if (CEF_MEMBER_MISSING(_struct, is_third_party_cookie_allowed))
+     return false;
+ 
+@@ -103,7 +103,7 @@ bool CefCookieManagerCToCpp::IsThirdPartyCookieAllowed() {
+ 
+ NO_SANITIZE("cfi-icall")
+ void CefCookieManagerCToCpp::PutAcceptThirdPartyCookieEnabled(bool accept) {
+-  cef_cookie_manager_t *_struct = GetStruct();
++  cef_cookie_manager_t* _struct = GetStruct();
+   if (CEF_MEMBER_MISSING(_struct, put_accept_third_party_cookie_enabled))
+     return;
+ 
+@@ -115,7 +115,7 @@ void CefCookieManagerCToCpp::PutAcceptThirdPartyCookieEnabled(bool accept) {
+ 
+ NO_SANITIZE("cfi-icall")
+ bool CefCookieManagerCToCpp::IsFileURLSchemeCookiesAllowed() {
+-  cef_cookie_manager_t *_struct = GetStruct();
++  cef_cookie_manager_t* _struct = GetStruct();
+   if (CEF_MEMBER_MISSING(_struct, is_file_urlscheme_cookies_allowed))
+     return false;
+ 
+@@ -130,7 +130,7 @@ bool CefCookieManagerCToCpp::IsFileURLSchemeCookiesAllowed() {
+ 
+ NO_SANITIZE("cfi-icall")
+ void CefCookieManagerCToCpp::PutAcceptFileURLSchemeCookiesEnabled(bool allow) {
+-  cef_cookie_manager_t *_struct = GetStruct();
++  cef_cookie_manager_t* _struct = GetStruct();
+   if (CEF_MEMBER_MISSING(_struct, put_accept_file_urlscheme_cookies_enabled))
+     return;
+ 
+@@ -143,7 +143,7 @@ void CefCookieManagerCToCpp::PutAcceptFileURLSchemeCookiesEnabled(bool allow) {
+ NO_SANITIZE("cfi-icall")
+ bool CefCookieManagerCToCpp::VisitAllCookies(
+     CefRefPtr<CefCookieVisitor> visitor) {
+-  cef_cookie_manager_t *_struct = GetStruct();
++  cef_cookie_manager_t* _struct = GetStruct();
+   if (CEF_MEMBER_MISSING(_struct, visit_all_cookies))
+     return false;
+ 
+@@ -164,9 +164,10 @@ bool CefCookieManagerCToCpp::VisitAllCookies(
+ 
+ NO_SANITIZE("cfi-icall")
+ bool CefCookieManagerCToCpp::VisitUrlCookies(
+-    const CefString &url, bool includeHttpOnly,
++    const CefString& url,
++    bool includeHttpOnly,
+     CefRefPtr<CefCookieVisitor> visitor) {
+-  cef_cookie_manager_t *_struct = GetStruct();
++  cef_cookie_manager_t* _struct = GetStruct();
+   if (CEF_MEMBER_MISSING(_struct, visit_url_cookies))
+     return false;
+ 
+@@ -192,9 +193,10 @@ bool CefCookieManagerCToCpp::VisitUrlCookies(
+ 
+ NO_SANITIZE("cfi-icall")
+ bool CefCookieManagerCToCpp::SetCookie(
+-    const CefString &url, const CefCookie &cookie,
++    const CefString& url,
++    const CefCookie& cookie,
+     CefRefPtr<CefSetCookieCallback> callback) {
+-  cef_cookie_manager_t *_struct = GetStruct();
++  cef_cookie_manager_t* _struct = GetStruct();
+   if (CEF_MEMBER_MISSING(_struct, set_cookie))
+     return false;
+ 
+@@ -216,9 +218,11 @@ bool CefCookieManagerCToCpp::SetCookie(
+ 
+ NO_SANITIZE("cfi-icall")
+ bool CefCookieManagerCToCpp::DeleteCookies(
+-    const CefString &url, const CefString &cookie_name, bool is_session,
++    const CefString& url,
++    const CefString& cookie_name,
++    bool is_session,
+     CefRefPtr<CefDeleteCookiesCallback> callback) {
+-  cef_cookie_manager_t *_struct = GetStruct();
++  cef_cookie_manager_t* _struct = GetStruct();
+   if (CEF_MEMBER_MISSING(_struct, delete_cookies))
+     return false;
+ 
+@@ -238,7 +242,7 @@ bool CefCookieManagerCToCpp::DeleteCookies(
+ NO_SANITIZE("cfi-icall")
+ bool CefCookieManagerCToCpp::FlushStore(
+     CefRefPtr<CefCompletionCallback> callback) {
+-  cef_cookie_manager_t *_struct = GetStruct();
++  cef_cookie_manager_t* _struct = GetStruct();
+   if (CEF_MEMBER_MISSING(_struct, flush_store))
+     return false;
+ 
+@@ -263,15 +267,17 @@ CefCookieManagerCToCpp::CefCookieManagerCToCpp() {}
+ CefCookieManagerCToCpp::~CefCookieManagerCToCpp() {}
+ 
+ template <>
+-cef_cookie_manager_t *
+-CefCToCppRefCounted<CefCookieManagerCToCpp, CefCookieManager,
++cef_cookie_manager_t*
++CefCToCppRefCounted<CefCookieManagerCToCpp,
++                    CefCookieManager,
+                     cef_cookie_manager_t>::UnwrapDerived(CefWrapperType type,
+-                                                         CefCookieManager *c) {
++                                                         CefCookieManager* c) {
+   NOTREACHED() << "Unexpected class type: " << type;
+   return nullptr;
+ }
+ 
+ template <>
+-CefWrapperType CefCToCppRefCounted<CefCookieManagerCToCpp, CefCookieManager,
++CefWrapperType CefCToCppRefCounted<CefCookieManagerCToCpp,
++                                   CefCookieManager,
+                                    cef_cookie_manager_t>::kWrapperType =
+     WT_COOKIE_MANAGER;
+diff --git a/src/cef/libcef_dll/ctocpp/cookie_manager_ctocpp.h b/src/cef/libcef_dll/ctocpp/cookie_manager_ctocpp.h
+index cfdbc7af723a6..02e2ba430134b
+--- a/src/cef/libcef_dll/ctocpp/cookie_manager_ctocpp.h
++++ b/src/cef/libcef_dll/ctocpp/cookie_manager_ctocpp.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=f92d6bb66153459fd6906db5e1fe32781dfafa2d$
++// $hash=23d749e39a04142c1e7d09579460dba887d31d9b$
+ //
+ 
+ #ifndef CEF_LIBCEF_DLL_CTOCPP_COOKIE_MANAGER_CTOCPP_H_
+diff --git a/src/cef/libcef_dll/ctocpp/cookie_visitor_ctocpp.cc b/src/cef/libcef_dll/ctocpp/cookie_visitor_ctocpp.cc
+index c915510144dc1..9468de70c0879
+--- a/src/cef/libcef_dll/ctocpp/cookie_visitor_ctocpp.cc
++++ b/src/cef/libcef_dll/ctocpp/cookie_visitor_ctocpp.cc
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=46632d6c9d6e3c6891abc90323313bea54d7419e$
++// $hash=708c4aeb30bed97847155c90b86fecc6388b0a60$
+ //
+ 
+ #include "libcef_dll/ctocpp/cookie_visitor_ctocpp.h"
+diff --git a/src/cef/libcef_dll/ctocpp/cookie_visitor_ctocpp.h b/src/cef/libcef_dll/ctocpp/cookie_visitor_ctocpp.h
+index 62d00723628ae..25aae27f205f1
+--- a/src/cef/libcef_dll/ctocpp/cookie_visitor_ctocpp.h
++++ b/src/cef/libcef_dll/ctocpp/cookie_visitor_ctocpp.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=c1dca55691f6d564ad2a69b38acd141982368895$
++// $hash=1824342f14e23ea975b7faed0406036568d88ba8$
+ //
+ 
+ #ifndef CEF_LIBCEF_DLL_CTOCPP_COOKIE_VISITOR_CTOCPP_H_
+diff --git a/src/cef/libcef_dll/ctocpp/data_base_ctocpp.cc b/src/cef/libcef_dll/ctocpp/data_base_ctocpp.cc
+index 28b630c8dd5b7..447b0734ffdb5
+--- a/src/cef/libcef_dll/ctocpp/data_base_ctocpp.cc
++++ b/src/cef/libcef_dll/ctocpp/data_base_ctocpp.cc
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=3ab167d92ecbdc7c4c52483058038ed50a68231a$
++// $hash=2cf79925fe0507a777cba65aadf5d72f57e38a3c$
+ //
+ 
+ #include "libcef_dll/ctocpp/data_base_ctocpp.h"
+@@ -90,10 +90,11 @@ void CefDataBaseCToCpp::SaveHttpAuthCredentials(const CefString& host,
+ }
+ 
+ NO_SANITIZE("cfi-icall")
+-void CefDataBaseCToCpp::GetHttpAuthCredentials(
+-    const CefString& host,
+-    const CefString& realm,
+-    std::vector<CefString>& username_password) {
++void CefDataBaseCToCpp::GetHttpAuthCredentials(const CefString& host,
++                                               const CefString& realm,
++                                               CefString& username,
++                                               char* password,
++                                               uint32_t passwordSize) {
+   cef_data_base_t* _struct = GetStruct();
+   if (CEF_MEMBER_MISSING(_struct, get_http_auth_credentials))
+     return;
+@@ -108,29 +109,21 @@ void CefDataBaseCToCpp::GetHttpAuthCredentials(
+   DCHECK(!realm.empty());
+   if (realm.empty())
+     return;
+-
+-  // Translate param: username_password; type: string_vec_byref
+-  cef_string_list_t username_passwordList = cef_string_list_alloc();
+-  DCHECK(username_passwordList);
+-  if (username_passwordList)
+-    transfer_string_list_contents(username_password, username_passwordList);
++  // Verify param: password; type: simple_byaddr
++  DCHECK(password);
++  if (!password)
++    return;
+ 
+   // Execute
+-  _struct->get_http_auth_credentials(_struct, host.GetStruct(),
+-                                     realm.GetStruct(), username_passwordList);
+-
+-  // Restore param:username_password; type: string_vec_byref
+-  if (username_passwordList) {
+-    username_password.clear();
+-    transfer_string_list_contents(username_passwordList, username_password);
+-    cef_string_list_free(username_passwordList);
+-  }
++  _struct->get_http_auth_credentials(
++      _struct, host.GetStruct(), realm.GetStruct(),
++      username.GetWritableStruct(), password, passwordSize);
+ }
+ 
+ NO_SANITIZE("cfi-icall")
+-bool CefDataBaseCToCpp::ExistPermissionByOrigin(const CefString &origin,
++bool CefDataBaseCToCpp::ExistPermissionByOrigin(const CefString& origin,
+                                                 int type) {
+-  cef_data_base_t *_struct = GetStruct();
++  cef_data_base_t* _struct = GetStruct();
+   if (CEF_MEMBER_MISSING(_struct, exist_permission_by_origin))
+     return false;
+ 
+@@ -150,9 +143,10 @@ bool CefDataBaseCToCpp::ExistPermissionByOrigin(const CefString &origin,
+ }
+ 
+ NO_SANITIZE("cfi-icall")
+-bool CefDataBaseCToCpp::GetPermissionResultByOrigin(const CefString &origin,
+-                                                    int type, bool &result) {
+-  cef_data_base_t *_struct = GetStruct();
++bool CefDataBaseCToCpp::GetPermissionResultByOrigin(const CefString& origin,
++                                                    int type,
++                                                    bool& result) {
++  cef_data_base_t* _struct = GetStruct();
+   if (CEF_MEMBER_MISSING(_struct, get_permission_result_by_origin))
+     return false;
+ 
+@@ -178,9 +172,10 @@ bool CefDataBaseCToCpp::GetPermissionResultByOrigin(const CefString &origin,
+ }
+ 
+ NO_SANITIZE("cfi-icall")
+-void CefDataBaseCToCpp::SetPermissionByOrigin(const CefString &origin, int type,
++void CefDataBaseCToCpp::SetPermissionByOrigin(const CefString& origin,
++                                              int type,
+                                               bool result) {
+-  cef_data_base_t *_struct = GetStruct();
++  cef_data_base_t* _struct = GetStruct();
+   if (CEF_MEMBER_MISSING(_struct, set_permission_by_origin))
+     return;
+ 
+@@ -196,9 +191,9 @@ void CefDataBaseCToCpp::SetPermissionByOrigin(const CefString &origin, int type,
+ }
+ 
+ NO_SANITIZE("cfi-icall")
+-void CefDataBaseCToCpp::ClearPermissionByOrigin(const CefString &origin,
++void CefDataBaseCToCpp::ClearPermissionByOrigin(const CefString& origin,
+                                                 int type) {
+-  cef_data_base_t *_struct = GetStruct();
++  cef_data_base_t* _struct = GetStruct();
+   if (CEF_MEMBER_MISSING(_struct, clear_permission_by_origin))
+     return;
+ 
+@@ -214,7 +209,7 @@ void CefDataBaseCToCpp::ClearPermissionByOrigin(const CefString &origin,
+ }
+ 
+ NO_SANITIZE("cfi-icall") void CefDataBaseCToCpp::ClearAllPermission(int type) {
+-  cef_data_base_t *_struct = GetStruct();
++  cef_data_base_t* _struct = GetStruct();
+   if (CEF_MEMBER_MISSING(_struct, clear_all_permission))
+     return;
+ 
+@@ -226,8 +221,9 @@ NO_SANITIZE("cfi-icall") void CefDataBaseCToCpp::ClearAllPermission(int type) {
+ 
+ NO_SANITIZE("cfi-icall")
+ void CefDataBaseCToCpp::GetOriginsByPermission(
+-    int type, std::vector<CefString> &origins) {
+-  cef_data_base_t *_struct = GetStruct();
++    int type,
++    std::vector<CefString>& origins) {
++  cef_data_base_t* _struct = GetStruct();
+   if (CEF_MEMBER_MISSING(_struct, get_origins_by_permission))
+     return;
+ 
+diff --git a/src/cef/libcef_dll/ctocpp/data_base_ctocpp.h b/src/cef/libcef_dll/ctocpp/data_base_ctocpp.h
+index 36a158f4d2aa9..41b9a15b369a7
+--- a/src/cef/libcef_dll/ctocpp/data_base_ctocpp.h
++++ b/src/cef/libcef_dll/ctocpp/data_base_ctocpp.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=7b5c7ec8ac08f9547744baa38e840cf35a3e7a25$
++// $hash=0a76a650645cbe773c0109fd95ce88ff4c0841e5$
+ //
+ 
+ #ifndef CEF_LIBCEF_DLL_CTOCPP_DATA_BASE_CTOCPP_H_
+@@ -41,10 +41,11 @@ class CefDataBaseCToCpp : public CefCToCppRefCounted<CefDataBaseCToCpp,
+                                const CefString& realm,
+                                const CefString& username,
+                                const char* password) override;
+-  void GetHttpAuthCredentials(
+-      const CefString& host,
+-      const CefString& realm,
+-      std::vector<CefString>& username_password) override;
++  void GetHttpAuthCredentials(const CefString& host,
++                              const CefString& realm,
++                              CefString& username,
++                              char* password,
++                              uint32_t passwordSize) override;
+   bool ExistPermissionByOrigin(const CefString& origin, int type) override;
+   bool GetPermissionResultByOrigin(const CefString& origin,
+                                    int type,
+diff --git a/src/cef/libcef_dll/ctocpp/delete_cookies_callback_ctocpp.cc b/src/cef/libcef_dll/ctocpp/delete_cookies_callback_ctocpp.cc
+index 4f5301ec811ed..25be285954dae
+--- a/src/cef/libcef_dll/ctocpp/delete_cookies_callback_ctocpp.cc
++++ b/src/cef/libcef_dll/ctocpp/delete_cookies_callback_ctocpp.cc
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=765b5a3f3e0ac077f2ff72541ae26ca342c4ca78$
++// $hash=55be7ac3ac6c4e07af7c20c920c6c83b7d0a25d3$
+ //
+ 
+ #include "libcef_dll/ctocpp/delete_cookies_callback_ctocpp.h"
+diff --git a/src/cef/libcef_dll/ctocpp/delete_cookies_callback_ctocpp.h b/src/cef/libcef_dll/ctocpp/delete_cookies_callback_ctocpp.h
+index 90f109ac9e05b..7e7bdaf33bc11
+--- a/src/cef/libcef_dll/ctocpp/delete_cookies_callback_ctocpp.h
++++ b/src/cef/libcef_dll/ctocpp/delete_cookies_callback_ctocpp.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=cd33af6263f686958bccf5907e1c4622950a7a40$
++// $hash=e064baa776ef2fb9b70d51ec556613859a222067$
+ //
+ 
+ #ifndef CEF_LIBCEF_DLL_CTOCPP_DELETE_COOKIES_CALLBACK_CTOCPP_H_
+diff --git a/src/cef/libcef_dll/ctocpp/dev_tools_message_observer_ctocpp.cc b/src/cef/libcef_dll/ctocpp/dev_tools_message_observer_ctocpp.cc
+index 367af2dd9ad49..b7da42aca079b
+--- a/src/cef/libcef_dll/ctocpp/dev_tools_message_observer_ctocpp.cc
++++ b/src/cef/libcef_dll/ctocpp/dev_tools_message_observer_ctocpp.cc
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=610f96da1baaa48d1aa7fcff8a4c4fb33d2965ab$
++// $hash=dc9df8e6b51991e751cb5f6607db87d3d9b3bb18$
+ //
+ 
+ #include "libcef_dll/ctocpp/dev_tools_message_observer_ctocpp.h"
+diff --git a/src/cef/libcef_dll/ctocpp/dev_tools_message_observer_ctocpp.h b/src/cef/libcef_dll/ctocpp/dev_tools_message_observer_ctocpp.h
+index 99eb59beed067..c328e21fdbccb
+--- a/src/cef/libcef_dll/ctocpp/dev_tools_message_observer_ctocpp.h
++++ b/src/cef/libcef_dll/ctocpp/dev_tools_message_observer_ctocpp.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=3b8cfdd8e4bc8e1981634fdd6a78f8eb9a23da4b$
++// $hash=13f5ab113bea9ee958f3d92e1c10898fd182c14e$
+ //
+ 
+ #ifndef CEF_LIBCEF_DLL_CTOCPP_DEV_TOOLS_MESSAGE_OBSERVER_CTOCPP_H_
+diff --git a/src/cef/libcef_dll/ctocpp/dialog_handler_ctocpp.cc b/src/cef/libcef_dll/ctocpp/dialog_handler_ctocpp.cc
+index 2cb31ef5631ed..01d360a03eabd
+--- a/src/cef/libcef_dll/ctocpp/dialog_handler_ctocpp.cc
++++ b/src/cef/libcef_dll/ctocpp/dialog_handler_ctocpp.cc
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,12 +9,13 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=df2505130721df8255b0d5bd511fb8ef394a7d8e$
++// $hash=2ce0bd2dda4afb008613b357545251c4e498dd53$
+ //
+ 
+ #include "libcef_dll/ctocpp/dialog_handler_ctocpp.h"
+ #include "libcef_dll/cpptoc/browser_cpptoc.h"
+ #include "libcef_dll/cpptoc/file_dialog_callback_cpptoc.h"
++#include "libcef_dll/cpptoc/select_popup_callback_cpptoc.h"
+ #include "libcef_dll/shutdown_checker.h"
+ #include "libcef_dll/transfer_util.h"
+ 
+@@ -72,6 +73,59 @@ bool CefDialogHandlerCToCpp::OnFileDialog(
+   return _retval ? true : false;
+ }
+ 
++NO_SANITIZE("cfi-icall")
++void CefDialogHandlerCToCpp::OnSelectPopupMenu(
++    CefRefPtr<CefBrowser> browser,
++    const CefRect& bounds,
++    int item_height,
++    double item_font_size,
++    int selected_item,
++    const std::vector<CefSelectPopupItem>& menu_items,
++    bool right_aligned,
++    bool allow_multiple_selection,
++    CefRefPtr<CefSelectPopupCallback> callback) {
++  shutdown_checker::AssertNotShutdown();
++
++  cef_dialog_handler_t* _struct = GetStruct();
++  if (CEF_MEMBER_MISSING(_struct, on_select_popup_menu))
++    return;
++
++  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
++
++  // Verify param: browser; type: refptr_diff
++  DCHECK(browser.get());
++  if (!browser.get())
++    return;
++  // Verify param: callback; type: refptr_diff
++  DCHECK(callback.get());
++  if (!callback.get())
++    return;
++
++  // Translate param: menu_items; type: simple_vec_byref_const
++  const size_t menu_itemsCount = menu_items.size();
++  cef_select_popup_item_t* menu_itemsList = NULL;
++  if (menu_itemsCount > 0) {
++    menu_itemsList = new cef_select_popup_item_t[menu_itemsCount];
++    DCHECK(menu_itemsList);
++    if (menu_itemsList) {
++      for (size_t i = 0; i < menu_itemsCount; ++i) {
++        menu_itemsList[i] = menu_items[i];
++      }
++    }
++  }
++
++  // Execute
++  _struct->on_select_popup_menu(_struct, CefBrowserCppToC::Wrap(browser),
++                                &bounds, item_height, item_font_size,
++                                selected_item, menu_itemsCount, menu_itemsList,
++                                right_aligned, allow_multiple_selection,
++                                CefSelectPopupCallbackCppToC::Wrap(callback));
++
++  // Restore param:menu_items; type: simple_vec_byref_const
++  if (menu_itemsList)
++    delete[] menu_itemsList;
++}
++
+ // CONSTRUCTOR - Do not edit by hand.
+ 
+ CefDialogHandlerCToCpp::CefDialogHandlerCToCpp() {}
+diff --git a/src/cef/libcef_dll/ctocpp/dialog_handler_ctocpp.h b/src/cef/libcef_dll/ctocpp/dialog_handler_ctocpp.h
+index 6ebdca55397a2..f3096ae0457b7
+--- a/src/cef/libcef_dll/ctocpp/dialog_handler_ctocpp.h
++++ b/src/cef/libcef_dll/ctocpp/dialog_handler_ctocpp.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=fb268437c35b6a412dc6305ae83798d4d1db56d6$
++// $hash=9d70e8e88a252b29a7157b30e487ce44b6d77404$
+ //
+ 
+ #ifndef CEF_LIBCEF_DLL_CTOCPP_DIALOG_HANDLER_CTOCPP_H_
+@@ -44,6 +44,15 @@ class CefDialogHandlerCToCpp
+                     int selected_accept_filter,
+                     bool capture,
+                     CefRefPtr<CefFileDialogCallback> callback) override;
++  void OnSelectPopupMenu(CefRefPtr<CefBrowser> browser,
++                         const CefRect& bounds,
++                         int item_height,
++                         double item_font_size,
++                         int selected_item,
++                         const std::vector<CefSelectPopupItem>& menu_items,
++                         bool right_aligned,
++                         bool allow_multiple_selection,
++                         CefRefPtr<CefSelectPopupCallback> callback) override;
+ };
+ 
+ #endif  // CEF_LIBCEF_DLL_CTOCPP_DIALOG_HANDLER_CTOCPP_H_
+diff --git a/src/cef/libcef_dll/ctocpp/dictionary_value_ctocpp.cc b/src/cef/libcef_dll/ctocpp/dictionary_value_ctocpp.cc
+index f7263738203fd..de5fa0b770e7f
+--- a/src/cef/libcef_dll/ctocpp/dictionary_value_ctocpp.cc
++++ b/src/cef/libcef_dll/ctocpp/dictionary_value_ctocpp.cc
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=70aa25f8ab57f0c152666a730aff4247684108f9$
++// $hash=aa3f8a292eeec9a65ab219958a3706b40500faa5$
+ //
+ 
+ #include "libcef_dll/ctocpp/dictionary_value_ctocpp.h"
+diff --git a/src/cef/libcef_dll/ctocpp/dictionary_value_ctocpp.h b/src/cef/libcef_dll/ctocpp/dictionary_value_ctocpp.h
+index a0af1d99608b4..ba9843f84957a
+--- a/src/cef/libcef_dll/ctocpp/dictionary_value_ctocpp.h
++++ b/src/cef/libcef_dll/ctocpp/dictionary_value_ctocpp.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=ad04d2893bd8949c1384a4dcd68c9acb0f2b967d$
++// $hash=68a7aff9f01e57edaeaa53bfbbc4c6121ebb3a1b$
+ //
+ 
+ #ifndef CEF_LIBCEF_DLL_CTOCPP_DICTIONARY_VALUE_CTOCPP_H_
+diff --git a/src/cef/libcef_dll/ctocpp/display_handler_ctocpp.cc b/src/cef/libcef_dll/ctocpp/display_handler_ctocpp.cc
+index 1281236ab0c23..8834d04bd513d
+--- a/src/cef/libcef_dll/ctocpp/display_handler_ctocpp.cc
++++ b/src/cef/libcef_dll/ctocpp/display_handler_ctocpp.cc
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=dcdaebfe8fdc44caf9f4903321577b155b2ec959$
++// $hash=c3f669584e3f282ce2eb05b3aca53e97e0548d8a$
+ //
+ 
+ #include "libcef_dll/ctocpp/display_handler_ctocpp.h"
+diff --git a/src/cef/libcef_dll/ctocpp/display_handler_ctocpp.h b/src/cef/libcef_dll/ctocpp/display_handler_ctocpp.h
+index b40137e95cf7a..dafe883cd9bd1
+--- a/src/cef/libcef_dll/ctocpp/display_handler_ctocpp.h
++++ b/src/cef/libcef_dll/ctocpp/display_handler_ctocpp.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=dc1b9dda1a8f57d46d2c0049cd62a57dd5f56868$
++// $hash=b242381316d4973e89fe4ae2c9f41e2ef7be2242$
+ //
+ 
+ #ifndef CEF_LIBCEF_DLL_CTOCPP_DISPLAY_HANDLER_CTOCPP_H_
+diff --git a/src/cef/libcef_dll/ctocpp/domdocument_ctocpp.cc b/src/cef/libcef_dll/ctocpp/domdocument_ctocpp.cc
+index 3506a6b90e091..e1bcbda6790a6
+--- a/src/cef/libcef_dll/ctocpp/domdocument_ctocpp.cc
++++ b/src/cef/libcef_dll/ctocpp/domdocument_ctocpp.cc
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=e5f17a1d61c8211bcf16be848e8aaf48934c5b0c$
++// $hash=4dddf3528abafd3fce06482308a76df0a056cd3c$
+ //
+ 
+ #include "libcef_dll/ctocpp/domdocument_ctocpp.h"
+diff --git a/src/cef/libcef_dll/ctocpp/domdocument_ctocpp.h b/src/cef/libcef_dll/ctocpp/domdocument_ctocpp.h
+index b795fe326dbac..29fe326f855a3
+--- a/src/cef/libcef_dll/ctocpp/domdocument_ctocpp.h
++++ b/src/cef/libcef_dll/ctocpp/domdocument_ctocpp.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=50b7c300f95667c483dcb19c13f274fbc352f7d1$
++// $hash=987816a9b106341068d08f3cd9254c98cf77f6ad$
+ //
+ 
+ #ifndef CEF_LIBCEF_DLL_CTOCPP_DOMDOCUMENT_CTOCPP_H_
+diff --git a/src/cef/libcef_dll/ctocpp/domnode_ctocpp.cc b/src/cef/libcef_dll/ctocpp/domnode_ctocpp.cc
+index 566e426bf9015..f4b1c0e27a4ee
+--- a/src/cef/libcef_dll/ctocpp/domnode_ctocpp.cc
++++ b/src/cef/libcef_dll/ctocpp/domnode_ctocpp.cc
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=64846f6de30a56d2aaed093cbfd9959c7cc2f1af$
++// $hash=bc1d300ce01b57d299dff3b67d54508fa827489e$
+ //
+ 
+ #include "libcef_dll/ctocpp/domnode_ctocpp.h"
+diff --git a/src/cef/libcef_dll/ctocpp/domnode_ctocpp.h b/src/cef/libcef_dll/ctocpp/domnode_ctocpp.h
+index 4678361566ab3..a16b3109a5788
+--- a/src/cef/libcef_dll/ctocpp/domnode_ctocpp.h
++++ b/src/cef/libcef_dll/ctocpp/domnode_ctocpp.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=a824395854fca10143c0329a0f95dcfc837c6d86$
++// $hash=343a5f84d09a6933f005c3915582c73c43bda406$
+ //
+ 
+ #ifndef CEF_LIBCEF_DLL_CTOCPP_DOMNODE_CTOCPP_H_
+diff --git a/src/cef/libcef_dll/ctocpp/domvisitor_ctocpp.cc b/src/cef/libcef_dll/ctocpp/domvisitor_ctocpp.cc
+index 3ece62f9ed3ad..1361ee52a0b28
+--- a/src/cef/libcef_dll/ctocpp/domvisitor_ctocpp.cc
++++ b/src/cef/libcef_dll/ctocpp/domvisitor_ctocpp.cc
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=c3351e11fd6ae488bd77aeba4b4c8485f24119ad$
++// $hash=7379b70849292e5b7709d2ff0a4e2541869c86a5$
+ //
+ 
+ #include "libcef_dll/ctocpp/domvisitor_ctocpp.h"
+diff --git a/src/cef/libcef_dll/ctocpp/domvisitor_ctocpp.h b/src/cef/libcef_dll/ctocpp/domvisitor_ctocpp.h
+index b1cf8b622addf..0504b52266ade
+--- a/src/cef/libcef_dll/ctocpp/domvisitor_ctocpp.h
++++ b/src/cef/libcef_dll/ctocpp/domvisitor_ctocpp.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=950252a2903cd57d097fb9dcd4eacf0761914e7a$
++// $hash=9f8a534b9feef5b972259d972bf30ad838e1a788$
+ //
+ 
+ #ifndef CEF_LIBCEF_DLL_CTOCPP_DOMVISITOR_CTOCPP_H_
+diff --git a/src/cef/libcef_dll/ctocpp/download_handler_ctocpp.cc b/src/cef/libcef_dll/ctocpp/download_handler_ctocpp.cc
+index 981d59333f344..6da1c6e272d2c
+--- a/src/cef/libcef_dll/ctocpp/download_handler_ctocpp.cc
++++ b/src/cef/libcef_dll/ctocpp/download_handler_ctocpp.cc
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=c4e47ffd023b528b9c5b658126f4a1d9fd05cf98$
++// $hash=9fc07deae728fc443a569cc273456e5c5b98af4a$
+ //
+ 
+ #include "libcef_dll/ctocpp/download_handler_ctocpp.h"
+diff --git a/src/cef/libcef_dll/ctocpp/download_handler_ctocpp.h b/src/cef/libcef_dll/ctocpp/download_handler_ctocpp.h
+index a74b923cf19f8..71a554efaf5c9
+--- a/src/cef/libcef_dll/ctocpp/download_handler_ctocpp.h
++++ b/src/cef/libcef_dll/ctocpp/download_handler_ctocpp.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=172a12dd9e68b65afff9eef5b93f0e480beaf904$
++// $hash=2a8f0822ec7ffa38dc5a712c913a48adc216eead$
+ //
+ 
+ #ifndef CEF_LIBCEF_DLL_CTOCPP_DOWNLOAD_HANDLER_CTOCPP_H_
+diff --git a/src/cef/libcef_dll/ctocpp/download_image_callback_ctocpp.cc b/src/cef/libcef_dll/ctocpp/download_image_callback_ctocpp.cc
+index 73a483afcb324..e9c3070ecfd63
+--- a/src/cef/libcef_dll/ctocpp/download_image_callback_ctocpp.cc
++++ b/src/cef/libcef_dll/ctocpp/download_image_callback_ctocpp.cc
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=8568e306d0db860b1cd222f7c6dba344f349cb2d$
++// $hash=b838fd3af2c144711044cae354ea86e336ce39a8$
+ //
+ 
+ #include "libcef_dll/ctocpp/download_image_callback_ctocpp.h"
+diff --git a/src/cef/libcef_dll/ctocpp/download_image_callback_ctocpp.h b/src/cef/libcef_dll/ctocpp/download_image_callback_ctocpp.h
+index ff4558668f291..5c7b7ccb064e2
+--- a/src/cef/libcef_dll/ctocpp/download_image_callback_ctocpp.h
++++ b/src/cef/libcef_dll/ctocpp/download_image_callback_ctocpp.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=fa13abafcf97f6a71d08ca7ec67d45a71d636603$
++// $hash=c281c09951a9b4f85556d0a9008b2524326254dd$
+ //
+ 
+ #ifndef CEF_LIBCEF_DLL_CTOCPP_DOWNLOAD_IMAGE_CALLBACK_CTOCPP_H_
+diff --git a/src/cef/libcef_dll/ctocpp/download_item_callback_ctocpp.cc b/src/cef/libcef_dll/ctocpp/download_item_callback_ctocpp.cc
+index 06081331571ee..e4b2d18132cde
+--- a/src/cef/libcef_dll/ctocpp/download_item_callback_ctocpp.cc
++++ b/src/cef/libcef_dll/ctocpp/download_item_callback_ctocpp.cc
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=092e50c318b7d1c933ffb293ff062df17bfbb736$
++// $hash=c7e4d15ade6e97ad9019c493941a06a5807b3e25$
+ //
+ 
+ #include "libcef_dll/ctocpp/download_item_callback_ctocpp.h"
+diff --git a/src/cef/libcef_dll/ctocpp/download_item_callback_ctocpp.h b/src/cef/libcef_dll/ctocpp/download_item_callback_ctocpp.h
+index 78eaf83b49c83..0f52a4120b1da
+--- a/src/cef/libcef_dll/ctocpp/download_item_callback_ctocpp.h
++++ b/src/cef/libcef_dll/ctocpp/download_item_callback_ctocpp.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=dc38ebb20863207084498e6d14e8a5e8fde59eea$
++// $hash=013ef6edbf734cdf4e6d00ba5b8be6c46284e2ca$
+ //
+ 
+ #ifndef CEF_LIBCEF_DLL_CTOCPP_DOWNLOAD_ITEM_CALLBACK_CTOCPP_H_
+diff --git a/src/cef/libcef_dll/ctocpp/download_item_ctocpp.cc b/src/cef/libcef_dll/ctocpp/download_item_ctocpp.cc
+index 66f136e42f1cb..62e08e36a4ccf
+--- a/src/cef/libcef_dll/ctocpp/download_item_ctocpp.cc
++++ b/src/cef/libcef_dll/ctocpp/download_item_ctocpp.cc
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=05c6527a7cdeb9495bca9da965956fb3006a7bdd$
++// $hash=b99a604e59d6759cf17a05dbdb8e7dbf6080f43c$
+ //
+ 
+ #include "libcef_dll/ctocpp/download_item_ctocpp.h"
+diff --git a/src/cef/libcef_dll/ctocpp/download_item_ctocpp.h b/src/cef/libcef_dll/ctocpp/download_item_ctocpp.h
+index 07900a1549b1b..265c2e8a6a4d8
+--- a/src/cef/libcef_dll/ctocpp/download_item_ctocpp.h
++++ b/src/cef/libcef_dll/ctocpp/download_item_ctocpp.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=800621bf853598aa11673f3c38e5f30858aa1ff1$
++// $hash=30923eaf63fab5b36c95a1a8da4a2e229a794a86$
+ //
+ 
+ #ifndef CEF_LIBCEF_DLL_CTOCPP_DOWNLOAD_ITEM_CTOCPP_H_
+diff --git a/src/cef/libcef_dll/ctocpp/drag_data_ctocpp.cc b/src/cef/libcef_dll/ctocpp/drag_data_ctocpp.cc
+index fc33a78e534a2..f6fb0e57c20c8
+--- a/src/cef/libcef_dll/ctocpp/drag_data_ctocpp.cc
++++ b/src/cef/libcef_dll/ctocpp/drag_data_ctocpp.cc
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=57352ff85ca98fc34a0f2c58afbb1224ce1a1f09$
++// $hash=a9a85999cc0792beae39e7b2796eedf435a88a1b$
+ //
+ 
+ #include "libcef_dll/ctocpp/drag_data_ctocpp.h"
