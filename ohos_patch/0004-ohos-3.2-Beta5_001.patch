@@ -1,0 +1,1812 @@
+diff --git a/src/BUILD.gn b/src/BUILD.gn
+index 2c35c744f576c..42c59a4c5f587
+--- a/src/BUILD.gn
++++ b/src/BUILD.gn
+@@ -104,13 +104,12 @@ group("gn_all") {
+     "//url:url_unittests",
+   ]
+ 
+-  deps += [ "//ohos_nweb:libnweb_adapter" ]
+-
+   #ifdef OHOS_NWEB_EX
+   if (defined(ohos_nweb_ex) && ohos_nweb_ex) {
+     deps += [
+       "//ohos_browser_shell",
+       "//ohos_nweb_ex/browser_service",
++      "//ohos_nweb_ex/test:ohos_nweb_ex_unittests",
+       "//ohos_nweb_hap",
+     ]
+   }  # endif // OHOS_NWEB_EX
+diff --git a/src/PRESUBMIT.py b/src/PRESUBMIT.py
+index 9e494489f8072..8b6873613163e
+--- a/src/PRESUBMIT.py
++++ b/src/PRESUBMIT.py
+@@ -985,6 +985,19 @@ _BANNED_CPP_FUNCTIONS = (
+           r'^base[\\/]win[\\/]scoped_winrt_initializer\.cc$'
+       ),
+     ),
++    (
++      r'\bchartorune\b',
++      (
++        'chartorune is not memory-safe, unless you can guarantee the input ',
++        'string is always null-terminated. Otherwise, please use charntorune ',
++        'from libphonenumber instead.'
++      ),
++      True,
++      [
++        _THIRD_PARTY_EXCEPT_BLINK,
++        # Exceptions to this rule should have a fuzzer.
++      ],
++    ),
+ )
+ 
+ # Format: Sequence of tuples containing:
+diff --git a/src/base/files/file_util_posix.cc b/src/base/files/file_util_posix.cc
+index 7e4b3cd4796f2..584d51b168eda
+--- a/src/base/files/file_util_posix.cc
++++ b/src/base/files/file_util_posix.cc
+@@ -570,12 +570,6 @@ bool ExecutableExistsInPath(Environment* env,
+ #if !BUILDFLAG(IS_APPLE)
+ // This is implemented in file_util_mac.mm for Mac.
+ bool GetTempDir(FilePath* path) {
+-  const char* tmp = getenv("TMPDIR");
+-  if (tmp) {
+-    *path = FilePath(tmp);
+-    return true;
+-  }
+-
+ #if BUILDFLAG(IS_ANDROID) || BUILDFLAG(IS_OHOS)
+   return PathService::Get(DIR_CACHE, path);
+ #else
+diff --git a/src/base/files/memory_mapped_file.cc b/src/base/files/memory_mapped_file.cc
+index f1fbe30072846..6e466b9f3ff4b
+--- a/src/base/files/memory_mapped_file.cc
++++ b/src/base/files/memory_mapped_file.cc
+@@ -28,7 +28,20 @@ bool MemoryMappedFile::Region::operator!=(
+ }
+ 
+ MemoryMappedFile::~MemoryMappedFile() {
++#if BUILDFLAG(IS_OHOS)
++  if (!customizeData_) {
++    CloseHandles();
++    return;
++  }
++
++  if (data_) {
++    delete [] data_;
++    data_ = nullptr;
++  }
++  length_ = 0;
++#else
+   CloseHandles();
++#endif
+ }
+ 
+ #if !BUILDFLAG(IS_NACL)
+diff --git a/src/base/files/memory_mapped_file.h b/src/base/files/memory_mapped_file.h
+index 88536c5eb436f..2d96dfa52aaea
+--- a/src/base/files/memory_mapped_file.h
++++ b/src/base/files/memory_mapped_file.h
+@@ -111,6 +111,17 @@ class BASE_EXPORT MemoryMappedFile {
+   // Is file_ a valid file handle that points to an open, memory mapped file?
+   bool IsValid() const;
+ 
++#if BUILDFLAG(IS_OHOS)
++  void SetDataAndLength(std::unique_ptr<uint8_t[]> &data, size_t length) {
++    if (IsValid() && !customizeData_) {
++      CloseHandles();
++    }
++    customizeData_ = true;
++    data_ = data.release();
++    length_ = length;
++  }
++#endif
++
+  private:
+   // Given the arbitrarily aligned memory region [start, size], returns the
+   // boundaries of the region aligned to the granularity specified by the OS,
+@@ -140,6 +151,9 @@ class BASE_EXPORT MemoryMappedFile {
+   File file_;
+   uint8_t* data_;
+   size_t length_;
++#if BUILDFLAG(IS_OHOS)
++  bool customizeData_ = false;
++#endif
+ 
+ #if BUILDFLAG(IS_WIN)
+   win::ScopedHandle file_mapping_;
+diff --git a/src/base/i18n/icu_util.cc b/src/base/i18n/icu_util.cc
+index b39ad6cc6441c..87283aef6e1f6
+--- a/src/base/i18n/icu_util.cc
++++ b/src/base/i18n/icu_util.cc
+@@ -57,6 +57,12 @@
+ #include "third_party/icu/source/i18n/unicode/timezone.h"
+ #endif
+ 
++#if BUILDFLAG(IS_OHOS)
++#include "base/command_line.h"
++#include "content/public/common/content_switches.h"
++#include "ohos_adapter_helper.h"
++#endif
++
+ namespace base {
+ namespace i18n {
+ 
+@@ -265,6 +271,34 @@ int LoadIcuData(PlatformFile data_fd,
+   return 0;
+ }
+ 
++#if BUILDFLAG(IS_OHOS)
++const char kIcuDataFileNameHap[] = "resources/rawfile/icudtl.dat";
++int LoadIcuDataByHap(PlatformFile data_fd,
++                     const MemoryMappedFile::Region& data_region,
++                     std::unique_ptr<MemoryMappedFile>* out_mapped_data_file,
++                     UErrorCode* out_error_code) {
++  size_t length = 0;
++  std::unique_ptr<uint8_t[]> data;
++  auto resourceInstance = OHOS::NWeb::OhosAdapterHelper::GetInstance().GetResourceAdapter();
++  if (!resourceInstance->GetRawFileData(kIcuDataFileNameHap, length, data, true)) {
++    LOG(ERROR) << "Couldn't mmap icu data file by hap: " << kIcuDataFileNameHap;
++    return 1;
++  }
++
++  *out_mapped_data_file = std::make_unique<MemoryMappedFile>();
++  (*out_error_code) = U_ZERO_ERROR;
++  InitializeExternalTimeZoneData();
++  (*out_mapped_data_file)->SetDataAndLength(data, length);
++  LOG(INFO) << "icu data file length: " << length;
++  udata_setCommonData(const_cast<uint8_t*>((*out_mapped_data_file)->data()), out_error_code);
++  if (U_FAILURE(*out_error_code)) {
++    LOG(ERROR) << "Failed to initialize ICU with data file: " << u_errorName(*out_error_code);
++    return 3;
++  }
++  return 0;
++}
++#endif
++
+ bool InitializeICUWithFileDescriptorInternal(
+     PlatformFile data_fd,
+     const MemoryMappedFile::Region& data_region) {
+@@ -276,7 +310,15 @@ bool InitializeICUWithFileDescriptorInternal(
+ 
+   std::unique_ptr<MemoryMappedFile> mapped_file;
+   UErrorCode err;
++#if BUILDFLAG(IS_OHOS)
++  if (base::CommandLine::ForCurrentProcess()->HasSwitch(switches::kOhosHapPath)) {
++    g_debug_icu_load = LoadIcuDataByHap(data_fd, data_region, &mapped_file, &err);
++  } else {
++    g_debug_icu_load = LoadIcuData(data_fd, data_region, &mapped_file, &err);
++  }
++#else
+   g_debug_icu_load = LoadIcuData(data_fd, data_region, &mapped_file, &err);
++#endif
+   if (g_debug_icu_load == 1 || g_debug_icu_load == 2) {
+     return false;
+   }
+@@ -298,7 +340,7 @@ bool InitializeICUFromDataFile() {
+   // cause any problems.
+   LazyOpenIcuDataFile();
+   bool result =
+-      InitializeICUWithFileDescriptorInternal(g_icudtl_pf, g_icudtl_region);
++    InitializeICUWithFileDescriptorInternal(g_icudtl_pf, g_icudtl_region);
+ 
+ #if BUILDFLAG(IS_WIN)
+   int debug_icu_load = g_debug_icu_load;
+diff --git a/src/base/logging.cc b/src/base/logging.cc
+index 0de6357094283..6f930c3dbc87d
+--- a/src/base/logging.cc
++++ b/src/base/logging.cc
+@@ -146,7 +146,7 @@ namespace {
+ VlogInfo* g_vlog_info = nullptr;
+ VlogInfo* g_vlog_info_prev = nullptr;
+ 
+-const char* const log_severity_names[] = {"INFO", "WARNING", "ERROR", "FATAL"};
++const char* const log_severity_names[] = {"INFO", "WARNING", "ERROR", "FATAL", "DEBUG"};
+ static_assert(LOGGING_NUM_SEVERITIES == base::size(log_severity_names),
+               "Incorrect number of log_severity_names");
+ 
+@@ -850,6 +850,8 @@ LogMessage::~LogMessage() {
+       case LOGGING_FATAL:
+         priority = LogLevel::LOG_FATAL;
+         break;
++      case LOGGING_DEBUG:
++        priority = LogLevel::LOG_DEBUG;
+     }
+     const char kOHOSLogTag[] = "chromium";
+     HiLogPrintOHOS(LOG_CORE, priority, 0xD004500, kOHOSLogTag, str_newline.c_str());
+diff --git a/src/base/logging.h b/src/base/logging.h
+index a3ff92f0fd7df..83a8dc3517608
+--- a/src/base/logging.h
++++ b/src/base/logging.h
+@@ -359,7 +359,8 @@ constexpr LogSeverity LOGGING_INFO = 0;
+ constexpr LogSeverity LOGGING_WARNING = 1;
+ constexpr LogSeverity LOGGING_ERROR = 2;
+ constexpr LogSeverity LOGGING_FATAL = 3;
+-constexpr LogSeverity LOGGING_NUM_SEVERITIES = 4;
++constexpr LogSeverity LOGGING_DEBUG = 4;
++constexpr LogSeverity LOGGING_NUM_SEVERITIES = 5;
+ 
+ // LOGGING_DFATAL is LOGGING_FATAL in DCHECK-enabled builds, ERROR in normal
+ // mode.
+@@ -373,6 +374,7 @@ constexpr LogSeverity LOGGING_DFATAL = LOGGING_ERROR;
+ // from LOG_FOO to LOGGING_FOO.
+ // TODO(thestig): Convert existing users to LOGGING_FOO and remove this block.
+ constexpr LogSeverity LOG_VERBOSE = LOGGING_VERBOSE;
++constexpr LogSeverity LOG_DEBUG = LOGGING_DEBUG;
+ constexpr LogSeverity LOG_INFO = LOGGING_INFO;
+ constexpr LogSeverity LOG_WARNING = LOGGING_WARNING;
+ constexpr LogSeverity LOG_ERROR = LOGGING_ERROR;
+@@ -382,6 +384,9 @@ constexpr LogSeverity LOG_DFATAL = LOGGING_DFATAL;
+ // A few definitions of macros that don't generate much code. These are used
+ // by LOG() and LOG_IF, etc. Since these are used all over our code, it's
+ // better to have compact code for these operations.
++#define COMPACT_GOOGLE_LOG_EX_DEBUG(ClassName, ...)                  \
++  ::logging::ClassName(__FILE__, __LINE__, ::logging::LOGGING_DEBUG, \
++                       ##__VA_ARGS__)
+ #define COMPACT_GOOGLE_LOG_EX_INFO(ClassName, ...)                  \
+   ::logging::ClassName(__FILE__, __LINE__, ::logging::LOGGING_INFO, \
+                        ##__VA_ARGS__)
+@@ -401,6 +406,7 @@ constexpr LogSeverity LOG_DFATAL = LOGGING_DFATAL;
+   ::logging::ClassName(__FILE__, __LINE__, ::logging::LOGGING_DCHECK, \
+                        ##__VA_ARGS__)
+ 
++#define COMPACT_GOOGLE_LOG_DEBUG COMPACT_GOOGLE_LOG_EX_DEBUG(LogMessage)
+ #define COMPACT_GOOGLE_LOG_INFO COMPACT_GOOGLE_LOG_EX_INFO(LogMessage)
+ #define COMPACT_GOOGLE_LOG_WARNING COMPACT_GOOGLE_LOG_EX_WARNING(LogMessage)
+ #define COMPACT_GOOGLE_LOG_ERROR COMPACT_GOOGLE_LOG_EX_ERROR(LogMessage)
+diff --git a/src/build/config/compiler/BUILD.gn b/src/build/config/compiler/BUILD.gn
+index da2e9864f99e3..28ee784acd77d
+--- a/src/build/config/compiler/BUILD.gn
++++ b/src/build/config/compiler/BUILD.gn
+@@ -238,7 +238,7 @@ config("default_include_dirs") {
+ # the executable they are loaded into, so they are unresolved at link-time.
+ config("no_unresolved_symbols") {
+   if (!using_sanitizer &&
+-      (is_linux || is_chromeos || is_android || is_fuchsia)) {
++      (is_linux || is_chromeos || is_android || is_fuchsia || is_ohos)) {
+     ldflags = [
+       "-Wl,-z,defs",
+       "-Wl,--as-needed",
+@@ -692,6 +692,10 @@ config("compiler") {
+       # TODO(thakis): Check if '=0' (that is, number of cores, instead
+       # of "all" which means number of hardware threads) is faster.
+       ldflags += [ "-Wl,--thinlto-jobs=all" ]
++      if (is_ohos && !use_musl) {
++        ldflags -= [ "-Wl,--thinlto-jobs=all" ]
++        ldflags += [ "-Wl,--thinlto-jobs=8" ]
++      }
+       if (is_mac) {
+         ldflags +=
+             [ "-Wl,-cache_path_lto," +
+@@ -720,7 +724,7 @@ config("compiler") {
+     }
+ 
+     # TODO(https://crbug.com/1211155): investigate why this isn't effective on arm32.
+-    if ((!is_android && !is_ohos) || current_cpu == "arm64") {
++    if (!is_android || current_cpu == "arm64") {
+       cflags += [ "-fwhole-program-vtables" ]
+       if (!is_win) {
+         ldflags += [ "-fwhole-program-vtables" ]
+diff --git a/src/build/config/compiler/compiler.gni b/src/build/config/compiler/compiler.gni
+index 05a30aa62deb8..15fa15254b93c
+--- a/src/build/config/compiler/compiler.gni
++++ b/src/build/config/compiler/compiler.gni
+@@ -74,7 +74,7 @@ declare_args() {
+   use_thin_lto =
+       is_cfi ||
+       (is_clang && is_official_build && chrome_pgo_phase != 1 &&
+-       (is_linux || is_win || is_mac ||
++       (is_linux || is_win || is_mac || is_ohos ||
+         (is_android && target_os != "chromeos") ||
+         ((is_chromeos_ash || is_chromeos_lacros) && is_chromeos_device)))
+ 
+diff --git a/src/build/config/ohos/BUILD.gn b/src/build/config/ohos/BUILD.gn
+index 267a37869f9e7..5cb5cb6ccc4ad
+--- a/src/build/config/ohos/BUILD.gn
++++ b/src/build/config/ohos/BUILD.gn
+@@ -259,7 +259,11 @@ config("runtime_library") {
+ }
+ 
+ config("lld_pack_relocations") {
+-  ldflags = [ "-Wl,--pack-dyn-relocs=android" ]
++  if (use_musl) {
++    ldflags = [ "-Wl,--pack-dyn-relocs=relr" ]
++  } else {
++    ldflags = [ "-Wl,--pack-dyn-relocs=android" ]
++  }
+ }
+ 
+ # Used for instrumented build to generate the orderfile.
+diff --git a/src/cc/layers/scrollbar_layer_impl_base.cc b/src/cc/layers/scrollbar_layer_impl_base.cc
+index 8afe837d5255f..5c7ecb6ce32c6
+--- a/src/cc/layers/scrollbar_layer_impl_base.cc
++++ b/src/cc/layers/scrollbar_layer_impl_base.cc
+@@ -7,6 +7,7 @@
+ #include <algorithm>
+ 
+ #include "base/cxx17_backports.h"
++#include "base/logging.h"
+ #include "cc/trees/effect_node.h"
+ #include "cc/trees/layer_tree_impl.h"
+ #include "cc/trees/scroll_node.h"
+diff --git a/src/cc/layers/scrollbar_layer_impl_base.h b/src/cc/layers/scrollbar_layer_impl_base.h
+index b0a5eb3dd8e69..a456eedd6182f
+--- a/src/cc/layers/scrollbar_layer_impl_base.h
++++ b/src/cc/layers/scrollbar_layer_impl_base.h
+@@ -12,6 +12,10 @@
+ #include "cc/layers/layer.h"
+ #include "cc/layers/layer_impl.h"
+ #include "cc/trees/layer_tree_settings.h"
++#if BUILDFLAG(IS_OHOS)
++#include "display_manager_adapter.h"
++#include "ohos_adapter_helper.h"
++#endif
+ 
+ namespace cc {
+ 
+@@ -115,6 +119,13 @@ class CC_EXPORT ScrollbarLayerImplBase : public LayerImpl {
+   ScrollbarOrientation orientation_;
+   bool is_left_side_vertical_scrollbar_;
+ 
++#if BUILDFLAG(IS_OHOS)
++  std::unique_ptr<OHOS::NWeb::DisplayManagerAdapter> display_manager_adapter_ =
++      nullptr;
++  float initial_layout_size_ratio_ = 2.0f;
++  void SetInitalLayoutRatio();
++#endif
++
+   // Difference between the clip layer's height and the visible viewport
+   // height (which may differ in the presence of top-controls hiding).
+   float vertical_adjust_;
+diff --git a/src/cef/BUILD.gn b/src/cef/BUILD.gn
+index 34b45df974a8a..4af75193cdca7
+--- a/src/cef/BUILD.gn
++++ b/src/cef/BUILD.gn
+@@ -249,7 +249,7 @@ if (is_linux) {
+ 
+ # Set ENABLE_PRINTING=1 ENABLE_BASIC_PRINTING=1.
+ assert(enable_basic_printing)
+-assert(enable_print_preview)
++assert(enable_print_preview || is_ohos)
+ 
+ # Enable support for Widevine CDM.
+ assert(enable_widevine || is_ohos)
+@@ -259,6 +259,13 @@ if (is_clang) {
+   assert(!clang_use_chrome_plugins)
+ }
+ 
++if (is_ohos) {
++  import("//pdf/features.gni")
++  declare_args() {
++    ohos_enable_cef_chrome_runtime = false
++  }
++}
++
+ #
+ # Local variables.
+ #
+@@ -449,6 +456,8 @@ static_library("libcef_static") {
+               "libcef/browser/browser_platform_delegate_create.cc",
+               "libcef/browser/browser_util.cc",
+               "libcef/browser/browser_util.h",
++              "libcef/browser/navigation_state_serializer.cc",
++              "libcef/browser/navigation_state_serializer.h",
+               "libcef/browser/chrome/browser_delegate.h",
+               "libcef/browser/chrome/browser_platform_delegate_chrome.cc",
+               "libcef/browser/chrome/browser_platform_delegate_chrome.h",
+@@ -863,6 +872,75 @@ static_library("libcef_static") {
+     "//third_party/crashpad/crashpad",
+   ]
+ 
++  if (defined(ohos_enable_cef_chrome_runtime) &&
++      !ohos_enable_cef_chrome_runtime) {
++    sources -= [
++      "//chrome/app/chrome_main_delegate.cc",
++      "//chrome/app/chrome_main_delegate.h",
++      "libcef/browser/chrome/browser_delegate.h",
++      "libcef/browser/chrome/browser_platform_delegate_chrome.cc",
++      "libcef/browser/chrome/browser_platform_delegate_chrome.h",
++      "libcef/browser/chrome/chrome_browser_context.cc",
++      "libcef/browser/chrome/chrome_browser_context.h",
++      "libcef/browser/chrome/chrome_browser_delegate.cc",
++      "libcef/browser/chrome/chrome_browser_delegate.h",
++      "libcef/browser/chrome/chrome_browser_host_impl.cc",
++      "libcef/browser/chrome/chrome_browser_host_impl.h",
++      "libcef/browser/chrome/chrome_browser_main_extra_parts_cef.cc",
++      "libcef/browser/chrome/chrome_browser_main_extra_parts_cef.h",
++      "libcef/browser/chrome/chrome_content_browser_client_cef.cc",
++      "libcef/browser/chrome/chrome_content_browser_client_cef.h",
++      "libcef/browser/chrome/chrome_context_menu_handler.cc",
++      "libcef/browser/chrome/chrome_context_menu_handler.h",
++      "libcef/browser/chrome/extensions/chrome_mime_handler_view_guest_delegate_cef.cc",
++      "libcef/browser/chrome/extensions/chrome_mime_handler_view_guest_delegate_cef.h",
++      "libcef/browser/chrome_crash_reporter_client_stub.cc",
++      "libcef/browser/net/chrome_scheme_handler.cc",
++      "libcef/browser/net/chrome_scheme_handler.h",
++      "libcef/common/chrome/chrome_content_client_cef.cc",
++      "libcef/common/chrome/chrome_content_client_cef.h",
++      "libcef/common/chrome/chrome_main_delegate_cef.cc",
++      "libcef/common/chrome/chrome_main_delegate_cef.h",
++      "libcef/common/chrome/chrome_main_runner_delegate.cc",
++      "libcef/common/chrome/chrome_main_runner_delegate.h",
++      "libcef/renderer/chrome/chrome_content_renderer_client_cef.cc",
++      "libcef/renderer/chrome/chrome_content_renderer_client_cef.h",
++    ]
++  }
++
++  if (is_ohos && !enable_print_preview) {
++    sources -= [
++      "libcef/browser/printing/constrained_window_views_client.cc",
++      "libcef/browser/printing/constrained_window_views_client.h",
++      "libcef/browser/printing/print_view_manager.cc",
++      "libcef/browser/printing/print_view_manager.h",
++      "libcef/renderer/extensions/print_render_frame_helper_delegate.cc",
++      "libcef/renderer/extensions/print_render_frame_helper_delegate.h",
++    ]
++  }
++
++  if (is_ohos && !enable_plugins) {
++    sources -= [
++      "libcef/browser/web_plugin_impl.cc",
++      "libcef/browser/web_plugin_impl.h",
++    ]
++  }
++
++  if (is_ohos && !ohos_enable_media_router) {
++    sources -= [
++      "libcef/browser/media_router/media_route_impl.cc",
++      "libcef/browser/media_router/media_route_impl.h",
++      "libcef/browser/media_router/media_router_impl.cc",
++      "libcef/browser/media_router/media_router_impl.h",
++      "libcef/browser/media_router/media_router_manager.cc",
++      "libcef/browser/media_router/media_router_manager.h",
++      "libcef/browser/media_router/media_sink_impl.cc",
++      "libcef/browser/media_router/media_sink_impl.h",
++      "libcef/browser/media_router/media_source_impl.cc",
++      "libcef/browser/media_router/media_source_impl.h",
++    ]
++  }
++
+   public_deps = [
+     # Bring in feature flag defines.
+     "//cef/libcef/features",
+@@ -974,6 +1052,42 @@ static_library("libcef_static") {
+     "//v8",
+   ]
+ 
++  if (defined(ohos_enable_cef_chrome_runtime) &&
++      !ohos_enable_cef_chrome_runtime) {
++    deps -= [
++      "//chrome:packed_resources",
++      "//chrome:resources",
++      "//chrome:strings",
++      "//chrome/services/printing:lib",
++    ]
++  }
++
++  if (is_ohos && !enable_print_preview) {
++    deps -= [
++      "//components/printing/browser",
++      "//components/printing/common",
++      "//components/printing/renderer",
++      "//components/services/print_compositor/public/cpp",
++      "//components/services/print_compositor/public/mojom",
++    ]
++  }
++
++  if (is_ohos && !enable_plugins) {
++    deps -= [ "//components/plugins/renderer" ]
++  }
++
++  if (is_ohos && !enable_pdf) {
++    deps -= [
++      "//components/pdf/browser",
++      "//components/pdf/renderer",
++      "//pdf",
++    ]
++  }
++
++  if (is_ohos && !ohos_enable_media_router) {
++    deps -= [ "//components/media_router/common/mojom:media_router" ]
++  }
++
+   if (defined(ohos_nweb_ex) && ohos_nweb_ex) {
+     deps += [ "//ohos_nweb_ex/overrides/cef" ]
+   }
+@@ -1113,7 +1227,7 @@ static_library("libcef_static") {
+     deps += [ "//tools/v8_context_snapshot" ]
+   }
+ 
+-  if (toolkit_views || is_ohos) {
++  if (toolkit_views) {
+     sources += [
+       "libcef/browser/chrome/views/browser_platform_delegate_chrome_views.cc",
+       "libcef/browser/chrome/views/browser_platform_delegate_chrome_views.h",
+@@ -1330,6 +1444,58 @@ static_library("libcef_static") {
+       "libcef_dll/views_stub.cc",
+     ]
+   }
++
++  if (is_ohos) {
++    sources += [
++      "libcef/browser/chrome/views/chrome_views_util.cc",
++      "libcef/browser/chrome/views/chrome_views_util.h",
++      "libcef/browser/views/view_util.cc",
++      "libcef/browser/views/view_util.h",
++    ]
++
++    if (use_aura) {
++      sources += [
++        "libcef/browser/native/browser_platform_delegate_native_aura.cc",
++        "libcef/browser/native/browser_platform_delegate_native_aura.h",
++        "libcef/browser/views/view_util_aura.cc",
++
++        # Part of //ui/views:test_support which is testingonly.
++        "//ui/views/test/desktop_test_views_delegate_aura.cc",
++        "//ui/views/test/test_views_delegate_aura.cc",
++
++        # Support for UI input events.
++        # Part of //ui/base:test_support which is testingonly.
++        "//ui/aura/test/ui_controls_factory_aura.h",
++        "//ui/base/test/ui_controls_aura.cc",
++      ]
++
++      deps += [
++        "//ui/aura",
++        "//ui/wm",
++        "//ui/wm/public",
++      ]
++
++      if (is_ohos) {
++        sources += [
++          # Support for UI input events.
++          # Part of //ui/aura:test_support which is testingonly.
++          "//ui/aura/test/aura_test_utils.cc",
++          "//ui/aura/test/aura_test_utils.h",
++
++          # Part of //ui/events:test_support which is testingonly.
++          # "//ui/events/test/x11_event_waiter.cc",
++          # "//ui/events/test/x11_event_waiter.h",
++        ]
++
++        deps += [
++          "//ui/events",
++          "//ui/strings",
++          "//ui/views",
++          "//ui/views/controls/webview",
++        ]
++      }
++    }
++  }
+ }
+ 
+ #
+@@ -1519,7 +1685,27 @@ make_pack_header("resources") {
+     "//ui/resources:webui_resources_grd",
+   ]
+ 
+-  if (toolkit_views || is_ohos) {
++  if (defined(ohos_enable_cef_chrome_runtime) &&
++      !ohos_enable_cef_chrome_runtime) {
++    inputs -= [
++      "$root_gen_dir/chrome/grit/browser_resources.h",
++      "$root_gen_dir/chrome/grit/common_resources.h",
++      "$root_gen_dir/chrome/grit/component_extension_resources.h",
++      "$root_gen_dir/chrome/grit/dev_ui_browser_resources.h",
++      "$root_gen_dir/chrome/grit/pdf_resources.h",
++      "$root_gen_dir/chrome/grit/renderer_resources.h",
++    ]
++    deps -= [
++      "//chrome/browser:dev_ui_browser_resources",
++      "//chrome/browser:resources",
++      "//chrome/browser/resources:component_extension_resources",
++      "//chrome/browser/resources/pdf:resources",
++      "//chrome/common:resources",
++      "//chrome/renderer:resources",
++    ]
++  }
++
++  if (toolkit_views) {
+     inputs += [ "$root_gen_dir/ui/views/resources/grit/views_resources.h" ]
+     deps += [ "//ui/views/resources:resources_grd" ]
+   }
+@@ -1561,6 +1747,22 @@ make_pack_header("strings") {
+     "//ui/strings:app_locale_settings",
+     "//ui/strings:ui_strings",
+   ]
++
++  if (defined(ohos_enable_cef_chrome_runtime) &&
++      !ohos_enable_cef_chrome_runtime) {
++    inputs -= [
++      "$root_gen_dir/chrome/grit/chromium_strings.h",
++      "$root_gen_dir/chrome/grit/generated_resources.h",
++      "$root_gen_dir/chrome/grit/locale_settings.h",
++      "$root_gen_dir/chrome/grit/platform_locale_settings.h",
++    ]
++    deps -= [
++      "//chrome/app:chromium_strings",
++      "//chrome/app:generated_resources",
++      "//chrome/app/resources:locale_settings",
++      "//chrome/app/resources:platform_locale_settings",
++    ]
++  }
+ }
+ 
+ # Generate cef_api_hash.h.
+@@ -1753,6 +1955,18 @@ if (is_mac) {
+       ldflags = [ "-Wl,--version-script=" +
+                   rebase_path("//cef/libcef_dll/libcef.lst") ]
+     }
++
++    if (is_ohos) {
++      deps += [ "//ohos_nweb:nweb_sources" ]
++      if (defined(ohos_nweb_ex) && ohos_nweb_ex) {
++        deps += [ "//ohos_nweb_ex:nweb_ex" ]
++      }
++      configs += [ "//build/config/ohos:lld_pack_relocations" ]
++      if (!(defined(testonly) && testonly)) {
++        configs -= [ "//build/config/compiler:thinlto_optimize_default" ]
++        configs += [ "//build/config/compiler:thinlto_optimize_max" ]
++      }
++    }
+   }
+ }
+ 
+diff --git a/src/cef/cef_paths.gypi b/src/cef/cef_paths.gypi
+index 45331261cf845..b82cb6579f4e1
+--- a/src/cef/cef_paths.gypi
++++ b/src/cef/cef_paths.gypi
+@@ -1,4 +1,4 @@
+-# Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++# Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ # reserved. Use of this source code is governed by a BSD-style license that
+ # can be found in the LICENSE file.
+ #
+@@ -8,7 +8,7 @@
+ # by hand. See the translator.README.txt file in the tools directory for
+ # more information.
+ #
+-# $hash=6509e4ab15ca15cfbe46f0e54693db2dcb590810$
++# $hash=c0184bbfa08d5b1a2168f3886235203d2fa5b758$
+ #
+ 
+ {
+@@ -48,7 +48,6 @@
+       'include/cef_keyboard_handler.h',
+       'include/cef_life_span_handler.h',
+       'include/cef_load_handler.h',
+-      'include/cef_media_router.h',
+       'include/cef_menu_model.h',
+       'include/cef_menu_model_delegate.h',
+       'include/cef_navigation_entry.h',
+@@ -86,7 +85,6 @@
+       'include/cef_v8.h',
+       'include/cef_values.h',
+       'include/cef_waitable_event.h',
+-      'include/cef_web_plugin.h',
+       'include/cef_web_storage.h',
+       'include/cef_x509_certificate.h',
+       'include/cef_xml_reader.h',
+@@ -150,7 +148,6 @@
+       'include/capi/cef_keyboard_handler_capi.h',
+       'include/capi/cef_life_span_handler_capi.h',
+       'include/capi/cef_load_handler_capi.h',
+-      'include/capi/cef_media_router_capi.h',
+       'include/capi/cef_menu_model_capi.h',
+       'include/capi/cef_menu_model_delegate_capi.h',
+       'include/capi/cef_navigation_entry_capi.h',
+@@ -188,7 +185,6 @@
+       'include/capi/cef_v8_capi.h',
+       'include/capi/cef_values_capi.h',
+       'include/capi/cef_waitable_event_capi.h',
+-      'include/capi/cef_web_plugin_capi.h',
+       'include/capi/cef_web_storage_capi.h',
+       'include/capi/cef_x509_certificate_capi.h',
+       'include/capi/cef_xml_reader_capi.h',
+@@ -348,20 +344,6 @@
+       'libcef_dll/cpptoc/list_value_cpptoc.h',
+       'libcef_dll/ctocpp/load_handler_ctocpp.cc',
+       'libcef_dll/ctocpp/load_handler_ctocpp.h',
+-      'libcef_dll/ctocpp/media_observer_ctocpp.cc',
+-      'libcef_dll/ctocpp/media_observer_ctocpp.h',
+-      'libcef_dll/cpptoc/media_route_cpptoc.cc',
+-      'libcef_dll/cpptoc/media_route_cpptoc.h',
+-      'libcef_dll/ctocpp/media_route_create_callback_ctocpp.cc',
+-      'libcef_dll/ctocpp/media_route_create_callback_ctocpp.h',
+-      'libcef_dll/cpptoc/media_router_cpptoc.cc',
+-      'libcef_dll/cpptoc/media_router_cpptoc.h',
+-      'libcef_dll/cpptoc/media_sink_cpptoc.cc',
+-      'libcef_dll/cpptoc/media_sink_cpptoc.h',
+-      'libcef_dll/ctocpp/media_sink_device_info_callback_ctocpp.cc',
+-      'libcef_dll/ctocpp/media_sink_device_info_callback_ctocpp.h',
+-      'libcef_dll/cpptoc/media_source_cpptoc.cc',
+-      'libcef_dll/cpptoc/media_source_cpptoc.h',
+       'libcef_dll/cpptoc/views/menu_button_cpptoc.cc',
+       'libcef_dll/cpptoc/views/menu_button_cpptoc.h',
+       'libcef_dll/ctocpp/views/menu_button_delegate_ctocpp.cc',
+@@ -452,6 +434,8 @@
+       'libcef_dll/cpptoc/views/scroll_view_cpptoc.h',
+       'libcef_dll/cpptoc/select_client_certificate_callback_cpptoc.cc',
+       'libcef_dll/cpptoc/select_client_certificate_callback_cpptoc.h',
++      'libcef_dll/cpptoc/select_popup_callback_cpptoc.cc',
++      'libcef_dll/cpptoc/select_popup_callback_cpptoc.h',
+       'libcef_dll/cpptoc/server_cpptoc.cc',
+       'libcef_dll/cpptoc/server_cpptoc.h',
+       'libcef_dll/ctocpp/server_handler_ctocpp.cc',
+@@ -528,12 +512,8 @@
+       'libcef_dll/ctocpp/views/view_delegate_ctocpp.h',
+       'libcef_dll/cpptoc/waitable_event_cpptoc.cc',
+       'libcef_dll/cpptoc/waitable_event_cpptoc.h',
+-      'libcef_dll/cpptoc/web_plugin_info_cpptoc.cc',
+-      'libcef_dll/cpptoc/web_plugin_info_cpptoc.h',
+-      'libcef_dll/ctocpp/web_plugin_info_visitor_ctocpp.cc',
+-      'libcef_dll/ctocpp/web_plugin_info_visitor_ctocpp.h',
+-      'libcef_dll/ctocpp/web_plugin_unstable_callback_ctocpp.cc',
+-      'libcef_dll/ctocpp/web_plugin_unstable_callback_ctocpp.h',
++      'libcef_dll/ctocpp/web_message_receiver_ctocpp.cc',
++      'libcef_dll/ctocpp/web_message_receiver_ctocpp.h',
+       'libcef_dll/cpptoc/web_storage_cpptoc.cc',
+       'libcef_dll/cpptoc/web_storage_cpptoc.h',
+       'libcef_dll/cpptoc/views/window_cpptoc.cc',
+@@ -682,20 +662,6 @@
+       'libcef_dll/ctocpp/list_value_ctocpp.h',
+       'libcef_dll/cpptoc/load_handler_cpptoc.cc',
+       'libcef_dll/cpptoc/load_handler_cpptoc.h',
+-      'libcef_dll/cpptoc/media_observer_cpptoc.cc',
+-      'libcef_dll/cpptoc/media_observer_cpptoc.h',
+-      'libcef_dll/ctocpp/media_route_ctocpp.cc',
+-      'libcef_dll/ctocpp/media_route_ctocpp.h',
+-      'libcef_dll/cpptoc/media_route_create_callback_cpptoc.cc',
+-      'libcef_dll/cpptoc/media_route_create_callback_cpptoc.h',
+-      'libcef_dll/ctocpp/media_router_ctocpp.cc',
+-      'libcef_dll/ctocpp/media_router_ctocpp.h',
+-      'libcef_dll/ctocpp/media_sink_ctocpp.cc',
+-      'libcef_dll/ctocpp/media_sink_ctocpp.h',
+-      'libcef_dll/cpptoc/media_sink_device_info_callback_cpptoc.cc',
+-      'libcef_dll/cpptoc/media_sink_device_info_callback_cpptoc.h',
+-      'libcef_dll/ctocpp/media_source_ctocpp.cc',
+-      'libcef_dll/ctocpp/media_source_ctocpp.h',
+       'libcef_dll/ctocpp/views/menu_button_ctocpp.cc',
+       'libcef_dll/ctocpp/views/menu_button_ctocpp.h',
+       'libcef_dll/cpptoc/views/menu_button_delegate_cpptoc.cc',
+@@ -786,6 +752,8 @@
+       'libcef_dll/ctocpp/views/scroll_view_ctocpp.h',
+       'libcef_dll/ctocpp/select_client_certificate_callback_ctocpp.cc',
+       'libcef_dll/ctocpp/select_client_certificate_callback_ctocpp.h',
++      'libcef_dll/ctocpp/select_popup_callback_ctocpp.cc',
++      'libcef_dll/ctocpp/select_popup_callback_ctocpp.h',
+       'libcef_dll/ctocpp/server_ctocpp.cc',
+       'libcef_dll/ctocpp/server_ctocpp.h',
+       'libcef_dll/cpptoc/server_handler_cpptoc.cc',
+@@ -862,12 +830,8 @@
+       'libcef_dll/cpptoc/views/view_delegate_cpptoc.h',
+       'libcef_dll/ctocpp/waitable_event_ctocpp.cc',
+       'libcef_dll/ctocpp/waitable_event_ctocpp.h',
+-      'libcef_dll/ctocpp/web_plugin_info_ctocpp.cc',
+-      'libcef_dll/ctocpp/web_plugin_info_ctocpp.h',
+-      'libcef_dll/cpptoc/web_plugin_info_visitor_cpptoc.cc',
+-      'libcef_dll/cpptoc/web_plugin_info_visitor_cpptoc.h',
+-      'libcef_dll/cpptoc/web_plugin_unstable_callback_cpptoc.cc',
+-      'libcef_dll/cpptoc/web_plugin_unstable_callback_cpptoc.h',
++      'libcef_dll/cpptoc/web_message_receiver_cpptoc.cc',
++      'libcef_dll/cpptoc/web_message_receiver_cpptoc.h',
+       'libcef_dll/ctocpp/web_storage_ctocpp.cc',
+       'libcef_dll/ctocpp/web_storage_ctocpp.h',
+       'libcef_dll/ctocpp/views/window_ctocpp.cc',
+diff --git a/src/cef/include/capi/cef_accessibility_handler_capi.h b/src/cef/include/capi/cef_accessibility_handler_capi.h
+index cafa9a27d3c12..40b5a26b2c9cf
+--- a/src/cef/include/capi/cef_accessibility_handler_capi.h
++++ b/src/cef/include/capi/cef_accessibility_handler_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=306e44d49ab6198a0fa1bcea50e8a25ee18672be$
++// $hash=5dc54f9c45e2a1df857f114a11c97509da95db34$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_CEF_ACCESSIBILITY_HANDLER_CAPI_H_
+diff --git a/src/cef/include/capi/cef_app_capi.h b/src/cef/include/capi/cef_app_capi.h
+index 4554a25dc0104..f5418cdfd9752
+--- a/src/cef/include/capi/cef_app_capi.h
++++ b/src/cef/include/capi/cef_app_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=adfba3dd6479b96a95639c13ee1e07bed7b335d0$
++// $hash=7713ef16c0c137b67ad926fafe2dfae35d187b48$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_CEF_APP_CAPI_H_
+diff --git a/src/cef/include/capi/cef_audio_handler_capi.h b/src/cef/include/capi/cef_audio_handler_capi.h
+index ffb9ff0b18de4..11d69d36c5bd1
+--- a/src/cef/include/capi/cef_audio_handler_capi.h
++++ b/src/cef/include/capi/cef_audio_handler_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=fd8d34089842ee8f8490ef1828c3091d12052e28$
++// $hash=dca41618f6b4b8c5623912b0637918ab10c61846$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_CEF_AUDIO_HANDLER_CAPI_H_
+diff --git a/src/cef/include/capi/cef_auth_callback_capi.h b/src/cef/include/capi/cef_auth_callback_capi.h
+index fd06fe2312988..97ed88afd31da
+--- a/src/cef/include/capi/cef_auth_callback_capi.h
++++ b/src/cef/include/capi/cef_auth_callback_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=0938c1802b077b2b17708c6a8ee305984e079d64$
++// $hash=5b63adedf123da2990eef1445830f221e557ce95$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_CEF_AUTH_CALLBACK_CAPI_H_
+diff --git a/src/cef/include/capi/cef_browser_capi.h b/src/cef/include/capi/cef_browser_capi.h
+index 0f5e4026dbe05..d0d087ab0df9b
+--- a/src/cef/include/capi/cef_browser_capi.h
++++ b/src/cef/include/capi/cef_browser_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=e13b741eb5cb983fde79d62937d9eb8a55dd6ebb$
++// $hash=097fc69d7b712dde294d45394bc0eff518a34689$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_CEF_BROWSER_CAPI_H_
+@@ -59,6 +59,7 @@ struct _cef_browser_host_t;
+ struct _cef_client_t;
+ struct _cef_java_script_result_callback_t;
+ struct _cef_store_web_archive_result_callback_t;
++struct _cef_web_message_receiver_t;
+ 
+ ///
+ // Structure used to represent a browser. When used in the browser process the
+@@ -864,7 +865,7 @@ typedef struct _cef_browser_host_t {
+   ///
+   void(CEF_CALLBACK* post_port_message)(struct _cef_browser_host_t* self,
+                                         cef_string_t* port_handle,
+-                                        cef_string_t* data);
++                                        struct _cef_value_t* message);
+ 
+   ///
+   // Set the callback of the port.
+@@ -872,7 +873,7 @@ typedef struct _cef_browser_host_t {
+   void(CEF_CALLBACK* set_port_message_callback)(
+       struct _cef_browser_host_t* self,
+       cef_string_t* port_handle,
+-      struct _cef_java_script_result_callback_t* callback);
++      struct _cef_web_message_receiver_t* callback);
+ 
+   ///
+   // Gets the latest hitdata
+@@ -1195,6 +1196,65 @@ typedef struct _cef_browser_host_t {
+   ///
+   void(CEF_CALLBACK* remove_cache)(struct _cef_browser_host_t* self,
+                                    int include_disk_files);
++
++  ///
++  // Scroll page up or down
++  ///
++  void(CEF_CALLBACK* scroll_page_up_down)(struct _cef_browser_host_t* self,
++                                          int is_up,
++                                          int is_half,
++                                          float view_height);
++
++  ///
++  // Get web history state
++  ///
++  struct _cef_binary_value_t*(CEF_CALLBACK* get_web_state)(
++      struct _cef_browser_host_t* self);
++
++  ///
++  // Restore web history state
++  ///
++  int(CEF_CALLBACK* restore_web_state)(struct _cef_browser_host_t* self,
++                                       struct _cef_binary_value_t* state);
++
++  ///
++  // Scroll to the position.
++  ///
++  void(CEF_CALLBACK* scroll_to)(struct _cef_browser_host_t* self,
++                                float x,
++                                float y);
++
++  ///
++  // Scroll by the delta distance.
++  ///
++  void(CEF_CALLBACK* scroll_by)(struct _cef_browser_host_t* self,
++                                float delta_x,
++                                float delta_y);
++
++  ///
++  // Slide Scroll by the speed.
++  ///
++  void(CEF_CALLBACK* slide_scroll)(struct _cef_browser_host_t* self,
++                                   float vx,
++                                   float vy);
++
++  ///
++  // Set whether webview can access files
++  ///
++  void(CEF_CALLBACK* set_file_access)(struct _cef_browser_host_t* self,
++                                      int falg);
++
++  ///
++  // Set whether webview can access network
++  ///
++  void(CEF_CALLBACK* set_block_network)(struct _cef_browser_host_t* self,
++                                        int falg);
++
++  ///
++  // Set the cache mode of webview
++  ///
++  void(CEF_CALLBACK* set_cache_mode)(struct _cef_browser_host_t* self,
++                                     int falg);
+ } cef_browser_host_t;
+ 
+ ///
+@@ -1269,6 +1329,23 @@ typedef struct _cef_store_web_archive_result_callback_t {
+       const cef_string_t* result);
+ } cef_store_web_archive_result_callback_t;
+ 
++///
++// Structure to implement to be notified of asynchronous web message channel.
++///
++typedef struct _cef_web_message_receiver_t {
++  ///
++  // Base structure.
++  ///
++  cef_base_ref_counted_t base;
++
++  ///
++  // Method that will be called upon |PostPortMessage|. |message| will be sent
++  // to another end of web message channel.
++  ///
++  void(CEF_CALLBACK* on_message)(struct _cef_web_message_receiver_t* self,
++                                 struct _cef_value_t* message);
++} cef_web_message_receiver_t;
++
+ #ifdef __cplusplus
+ }
+ #endif
+diff --git a/src/cef/include/capi/cef_browser_process_handler_capi.h b/src/cef/include/capi/cef_browser_process_handler_capi.h
+index 2a3dc178e7353..a53e677b9be24
+--- a/src/cef/include/capi/cef_browser_process_handler_capi.h
++++ b/src/cef/include/capi/cef_browser_process_handler_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=8c97f9b58c642c144cc37824ad820192640307cb$
++// $hash=e56e9d7bc7bd7d42f768a845cb3dc8ead6475fcd$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_CEF_BROWSER_PROCESS_HANDLER_CAPI_H_
+diff --git a/src/cef/include/capi/cef_callback_capi.h b/src/cef/include/capi/cef_callback_capi.h
+index 481e45266351a..05353af3423ee
+--- a/src/cef/include/capi/cef_callback_capi.h
++++ b/src/cef/include/capi/cef_callback_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=6dabadb8090f82aa929beda6f4724bac4cd17020$
++// $hash=a48ae6711d03e12ddfe94aa3b54a46fbd41bd179$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_CEF_CALLBACK_CAPI_H_
+diff --git a/src/cef/include/capi/cef_client_capi.h b/src/cef/include/capi/cef_client_capi.h
+index ce800661252b7..606e22de72f37
+--- a/src/cef/include/capi/cef_client_capi.h
++++ b/src/cef/include/capi/cef_client_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=d69368574610ae29c8b17bf71174c237fb01ca28$
++// $hash=100836d9c768fb63da4c355cb0571e34d0c6a8dd$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_CEF_CLIENT_CAPI_H_
+@@ -76,133 +76,137 @@ typedef struct _cef_client_t {
+   ///
+   // Return the handler for audio rendering events.
+   ///
+-  struct _cef_audio_handler_t *(CEF_CALLBACK *get_audio_handler)(
+-      struct _cef_client_t *self);
++  struct _cef_audio_handler_t*(CEF_CALLBACK* get_audio_handler)(
++      struct _cef_client_t* self);
+ 
+   ///
+   // Return the handler for context menus. If no handler is provided the default
+   // implementation will be used.
+   ///
+-  struct _cef_context_menu_handler_t *(CEF_CALLBACK *get_context_menu_handler)(
+-      struct _cef_client_t *self);
++  struct _cef_context_menu_handler_t*(CEF_CALLBACK* get_context_menu_handler)(
++      struct _cef_client_t* self);
+ 
+   ///
+   // Return the handler for dialogs. If no handler is provided the default
+   // implementation will be used.
+   ///
+-  struct _cef_dialog_handler_t *(CEF_CALLBACK *get_dialog_handler)(
+-      struct _cef_client_t *self);
++  struct _cef_dialog_handler_t*(CEF_CALLBACK* get_dialog_handler)(
++      struct _cef_client_t* self);
+ 
+   ///
+   // Return the handler for browser display state events.
+   ///
+-  struct _cef_display_handler_t *(CEF_CALLBACK *get_display_handler)(
+-      struct _cef_client_t *self);
++  struct _cef_display_handler_t*(CEF_CALLBACK* get_display_handler)(
++      struct _cef_client_t* self);
+ 
+   ///
+   // Return the handler for download events. If no handler is returned downloads
+   // will not be allowed.
+   ///
+-  struct _cef_download_handler_t *(CEF_CALLBACK *get_download_handler)(
+-      struct _cef_client_t *self);
++  struct _cef_download_handler_t*(CEF_CALLBACK* get_download_handler)(
++      struct _cef_client_t* self);
+ 
+   ///
+   // Return the handler for drag events.
+   ///
+-  struct _cef_drag_handler_t *(CEF_CALLBACK *get_drag_handler)(
+-      struct _cef_client_t *self);
++  struct _cef_drag_handler_t*(CEF_CALLBACK* get_drag_handler)(
++      struct _cef_client_t* self);
+ 
+   ///
+   // Return the handler for find result events.
+   ///
+-  struct _cef_find_handler_t *(CEF_CALLBACK *get_find_handler)(
+-      struct _cef_client_t *self);
++  struct _cef_find_handler_t*(CEF_CALLBACK* get_find_handler)(
++      struct _cef_client_t* self);
+ 
+   ///
+   // Return the handler for focus events.
+   ///
+-  struct _cef_focus_handler_t *(CEF_CALLBACK *get_focus_handler)(
+-      struct _cef_client_t *self);
++  struct _cef_focus_handler_t*(CEF_CALLBACK* get_focus_handler)(
++      struct _cef_client_t* self);
+ 
+   ///
+   // Return the handler for events related to cef_frame_t lifespan. This
+   // function will be called once during cef_browser_t creation and the result
+   // will be cached for performance reasons.
+   ///
+-  struct _cef_frame_handler_t *(CEF_CALLBACK *get_frame_handler)(
+-      struct _cef_client_t *self);
++  struct _cef_frame_handler_t*(CEF_CALLBACK* get_frame_handler)(
++      struct _cef_client_t* self);
+ 
+   ///
+   // Return the handler for JavaScript dialogs. If no handler is provided the
+   // default implementation will be used.
+   ///
+-  struct _cef_jsdialog_handler_t *(CEF_CALLBACK *get_jsdialog_handler)(
+-      struct _cef_client_t *self);
++  struct _cef_jsdialog_handler_t*(CEF_CALLBACK* get_jsdialog_handler)(
++      struct _cef_client_t* self);
+ 
+   ///
+   // Return the handler for keyboard events.
+   ///
+-  struct _cef_keyboard_handler_t *(CEF_CALLBACK *get_keyboard_handler)(
+-      struct _cef_client_t *self);
++  struct _cef_keyboard_handler_t*(CEF_CALLBACK* get_keyboard_handler)(
++      struct _cef_client_t* self);
+ 
+   ///
+   // Return the handler for browser life span events.
+   ///
+-  struct _cef_life_span_handler_t *(CEF_CALLBACK *get_life_span_handler)(
+-      struct _cef_client_t *self);
++  struct _cef_life_span_handler_t*(CEF_CALLBACK* get_life_span_handler)(
++      struct _cef_client_t* self);
+ 
+   ///
+   // Return the handler for browser load status events.
+   ///
+-  struct _cef_load_handler_t *(CEF_CALLBACK *get_load_handler)(
+-      struct _cef_client_t *self);
++  struct _cef_load_handler_t*(CEF_CALLBACK* get_load_handler)(
++      struct _cef_client_t* self);
+ 
+   ///
+   // Return the handler for printing on Linux. If a print handler is not
+   // provided then printing will not be supported on the Linux platform.
+   ///
+-  struct _cef_print_handler_t *(CEF_CALLBACK *get_print_handler)(
+-      struct _cef_client_t *self);
++  struct _cef_print_handler_t*(CEF_CALLBACK* get_print_handler)(
++      struct _cef_client_t* self);
+ 
+   ///
+   // Return the handler for off-screen rendering events.
+   ///
+-  struct _cef_render_handler_t *(CEF_CALLBACK *get_render_handler)(
+-      struct _cef_client_t *self);
++  struct _cef_render_handler_t*(CEF_CALLBACK* get_render_handler)(
++      struct _cef_client_t* self);
+ 
+   ///
+   // Return the handler for browser request events.
+   ///
+-  struct _cef_request_handler_t *(CEF_CALLBACK *get_request_handler)(
+-      struct _cef_client_t *self);
++  struct _cef_request_handler_t*(CEF_CALLBACK* get_request_handler)(
++      struct _cef_client_t* self);
+ 
+   ///
+   // Return the handler for browser geolocation permission request events.
+   ///
+-  struct _cef_permission_request_t *(CEF_CALLBACK *get_permission_request)(
+-      struct _cef_client_t *self);
++  struct _cef_permission_request_t*(CEF_CALLBACK* get_permission_request)(
++      struct _cef_client_t* self);
+ 
+   ///
+   // Called when a new message is received from a different process. Return true
+   // (1) if the message was handled or false (0) otherwise.  It is safe to keep
+   // a reference to |message| outside of this callback.
+   ///
+-  int(CEF_CALLBACK *on_process_message_received)(
+-      struct _cef_client_t *self, struct _cef_browser_t *browser,
+-      struct _cef_frame_t *frame, cef_process_id_t source_process,
+-      struct _cef_process_message_t *message);
++  int(CEF_CALLBACK* on_process_message_received)(
++      struct _cef_client_t* self,
++      struct _cef_browser_t* browser,
++      struct _cef_frame_t* frame,
++      cef_process_id_t source_process,
++      struct _cef_process_message_t* message);
+ 
+   ///
+   // Returns the list of arguments NotifyJavaScriptResult.
+   ///
+-  int(CEF_CALLBACK *notify_java_script_result)(
+-      struct _cef_client_t *self, struct _cef_list_value_t *args,
+-      const cef_string_t *method, const cef_string_t *object_name,
+-      struct _cef_list_value_t *result);
++  int(CEF_CALLBACK* notify_java_script_result)(
++      struct _cef_client_t* self,
++      struct _cef_list_value_t* args,
++      const cef_string_t* method,
++      const cef_string_t* object_name,
++      struct _cef_list_value_t* result);
+ } cef_client_t;
+ 
+ #ifdef __cplusplus
+ }
+ #endif
+ 
+-#endif // CEF_INCLUDE_CAPI_CEF_CLIENT_CAPI_H_
++#endif  // CEF_INCLUDE_CAPI_CEF_CLIENT_CAPI_H_
+diff --git a/src/cef/include/capi/cef_command_line_capi.h b/src/cef/include/capi/cef_command_line_capi.h
+index 7f69a1d34da58..f1088f0143950
+--- a/src/cef/include/capi/cef_command_line_capi.h
++++ b/src/cef/include/capi/cef_command_line_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=93f3d769c0d48ed6e1d91ad8a8e2f95d4ee54287$
++// $hash=deb97d81f206e08a6f78510e7f8f1985aef98ff0$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_CEF_COMMAND_LINE_CAPI_H_
+diff --git a/src/cef/include/capi/cef_context_menu_handler_capi.h b/src/cef/include/capi/cef_context_menu_handler_capi.h
+index 04dbeaf8390ec..d292f78cec42f
+--- a/src/cef/include/capi/cef_context_menu_handler_capi.h
++++ b/src/cef/include/capi/cef_context_menu_handler_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=07baaa2ecbddce012a9ef020766e4cb40ff8b9b0$
++// $hash=351828c559518eeefb3b74bb24558ae51a49f2a5$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_CEF_CONTEXT_MENU_HANDLER_CAPI_H_
+@@ -373,6 +373,20 @@ typedef struct _cef_context_menu_params_t {
+   // items).
+   ///
+   int(CEF_CALLBACK* is_custom_menu)(struct _cef_context_menu_params_t* self);
++
++  ///
++  // Returns the input field type of context node that the context menu was
++  // invoked on.
++  ///
++  cef_context_menu_input_field_type_t(CEF_CALLBACK* get_input_field_type)(
++      struct _cef_context_menu_params_t* self);
++
++  ///
++  // Returns the source type of context node that the context menu was invoked
++  // on.
++  ///
++  cef_context_menu_source_type_t(CEF_CALLBACK* get_source_type)(
++      struct _cef_context_menu_params_t* self);
+ } cef_context_menu_params_t;
+ 
+ #ifdef __cplusplus
+diff --git a/src/cef/include/capi/cef_cookie_capi.h b/src/cef/include/capi/cef_cookie_capi.h
+index fe865a0831b00..d81c9e8f46251
+--- a/src/cef/include/capi/cef_cookie_capi.h
++++ b/src/cef/include/capi/cef_cookie_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=76bce0d14b3cfcc4afb47d59936e4f2e0932566b$
++// $hash=fcda5b9ec03f8bae722fa681f0cde144caf6c929$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_CEF_COOKIE_CAPI_H_
+diff --git a/src/cef/include/capi/cef_crash_util_capi.h b/src/cef/include/capi/cef_crash_util_capi.h
+index 2a569bdb807d9..4ebf112d358d1
+--- a/src/cef/include/capi/cef_crash_util_capi.h
++++ b/src/cef/include/capi/cef_crash_util_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=0460e68eb7d1b1188706c42d14beafbf9a6f7126$
++// $hash=dd437f3b8022c0c92074a0d1d9aa5b2cef40e109$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_CEF_CRASH_UTIL_CAPI_H_
+diff --git a/src/cef/include/capi/cef_data_base_capi.h b/src/cef/include/capi/cef_data_base_capi.h
+index a0e1d91eaa644..12b11dd1e81cb
+--- a/src/cef/include/capi/cef_data_base_capi.h
++++ b/src/cef/include/capi/cef_data_base_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=d2a63576b59c75e748b5a725af9a4337414c82b9$
++// $hash=99bb61cf23fa49b4a7ce08c77d0c98980bc07a1f$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_CEF_DATA_BASE_CAPI_H_
+@@ -78,11 +78,12 @@ typedef struct _cef_data_base_t {
+   ///
+   // get http auth data by host and realm.
+   ///
+-  void(CEF_CALLBACK* get_http_auth_credentials)(
+-      struct _cef_data_base_t* self,
+-      const cef_string_t* host,
+-      const cef_string_t* realm,
+-      cef_string_list_t username_password);
++  void(CEF_CALLBACK* get_http_auth_credentials)(struct _cef_data_base_t* self,
++                                                const cef_string_t* host,
++                                                const cef_string_t* realm,
++                                                cef_string_t* username,
++                                                char* password,
++                                                uint32_t passwordSize);
+ 
+   ///
+   // gets whether the instance holds the specified permissions for the specified
+diff --git a/src/cef/include/capi/cef_devtools_message_observer_capi.h b/src/cef/include/capi/cef_devtools_message_observer_capi.h
+index 137f82136d035..b9e7662ff2908
+--- a/src/cef/include/capi/cef_devtools_message_observer_capi.h
++++ b/src/cef/include/capi/cef_devtools_message_observer_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=ec62239c2b24ff512b64ca758be825ff57fb3b6b$
++// $hash=bd660c767a942fc27ea2ede0343e029ac8b7c603$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_CEF_DEVTOOLS_MESSAGE_OBSERVER_CAPI_H_
+diff --git a/src/cef/include/capi/cef_dialog_handler_capi.h b/src/cef/include/capi/cef_dialog_handler_capi.h
+index 0071832626b2d..2d5c1438f0756
+--- a/src/cef/include/capi/cef_dialog_handler_capi.h
++++ b/src/cef/include/capi/cef_dialog_handler_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=abdbb4a150fc310df31ec08d1618e1e557dfe3e2$
++// $hash=999efab317d9de20cf31c967a7facaed253ced56$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_CEF_DIALOG_HANDLER_CAPI_H_
+@@ -73,6 +73,30 @@ typedef struct _cef_file_dialog_callback_t {
+   void(CEF_CALLBACK* cancel)(struct _cef_file_dialog_callback_t* self);
+ } cef_file_dialog_callback_t;
+ 
++///
++// Callback structure for asynchronous continuation of <select> selection.
++///
++typedef struct _cef_select_popup_callback_t {
++  ///
++  // Base structure.
++  ///
++  cef_base_ref_counted_t base;
++
++  ///
++  // Continue the <select> selection. |indices| should be the 0-based array
++  // index of the value selected from the <select> array passed to
++  // cef_dialog_handler_t::ShowSelectPopup.
++  ///
++  void(CEF_CALLBACK* cont)(struct _cef_select_popup_callback_t* self,
++                           size_t indicesCount,
++                           int const* indices);
++
++  ///
++  // Cancel <select> selection.
++  ///
++  void(CEF_CALLBACK* cancel)(struct _cef_select_popup_callback_t* self);
++} cef_select_popup_callback_t;
++
+ ///
+ // Implement this structure to handle dialog events. The functions of this
+ // structure will be called on the browser process UI thread.
+@@ -108,6 +132,22 @@ typedef struct _cef_dialog_handler_t {
+       int selected_accept_filter,
+       int capture,
+       struct _cef_file_dialog_callback_t* callback);
++
++  ///
++  // Show <select> popup menu.
++  ///
++  void(CEF_CALLBACK* on_select_popup_menu)(
++      struct _cef_dialog_handler_t* self,
++      struct _cef_browser_t* browser,
++      const cef_rect_t* bounds,
++      int item_height,
++      double item_font_size,
++      int selected_item,
++      size_t menu_itemsCount,
++      cef_select_popup_item_t const* menu_items,
++      int right_aligned,
++      int allow_multiple_selection,
++      struct _cef_select_popup_callback_t* callback);
+ } cef_dialog_handler_t;
+ 
+ #ifdef __cplusplus
+diff --git a/src/cef/include/capi/cef_display_handler_capi.h b/src/cef/include/capi/cef_display_handler_capi.h
+index c59849b24eebd..ed9cc06c26811
+--- a/src/cef/include/capi/cef_display_handler_capi.h
++++ b/src/cef/include/capi/cef_display_handler_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=98444bfe2f513889b45f8a8c7d047cb21b110243$
++// $hash=a7d326ca19b9ac03c15ed63eed59e0a7f763456b$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_CEF_DISPLAY_HANDLER_CAPI_H_
+diff --git a/src/cef/include/capi/cef_dom_capi.h b/src/cef/include/capi/cef_dom_capi.h
+index 97300ec387f46..eab26e375d8fc
+--- a/src/cef/include/capi/cef_dom_capi.h
++++ b/src/cef/include/capi/cef_dom_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=c6de3fb4d64a2b2ad06a4b9c5e9d7625d40b5bb6$
++// $hash=b01f97e4395b8da428df01f58d8301b3b8c41cc0$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_CEF_DOM_CAPI_H_
+diff --git a/src/cef/include/capi/cef_download_handler_capi.h b/src/cef/include/capi/cef_download_handler_capi.h
+index 29b05871030e6..3d3e57314dd05
+--- a/src/cef/include/capi/cef_download_handler_capi.h
++++ b/src/cef/include/capi/cef_download_handler_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=ec13ec3e2819e4ac49792c3a1c57bc60b45fb95b$
++// $hash=8c9afdb42e9045fad9c6c3a901552f67a69e3f34$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_CEF_DOWNLOAD_HANDLER_CAPI_H_
+diff --git a/src/cef/include/capi/cef_download_item_capi.h b/src/cef/include/capi/cef_download_item_capi.h
+index 2d52f11b42381..b211640529979
+--- a/src/cef/include/capi/cef_download_item_capi.h
++++ b/src/cef/include/capi/cef_download_item_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=b9f0d91dd2fdb3625365ff8b332b08e1f0ea1187$
++// $hash=91273857318c2755502ed75f36dd9cca4cf3beb1$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_CEF_DOWNLOAD_ITEM_CAPI_H_
+diff --git a/src/cef/include/capi/cef_drag_data_capi.h b/src/cef/include/capi/cef_drag_data_capi.h
+index 7e133155d6633..927234788fc4d
+--- a/src/cef/include/capi/cef_drag_data_capi.h
++++ b/src/cef/include/capi/cef_drag_data_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=b6e3236a062cd25ec26c3daeb1940d1e1bf0d96a$
++// $hash=319451cc942ceffde5c1b4f5e19972e5132ee71e$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_CEF_DRAG_DATA_CAPI_H_
+diff --git a/src/cef/include/capi/cef_drag_handler_capi.h b/src/cef/include/capi/cef_drag_handler_capi.h
+index 68b26d7165a35..97c56380eada1
+--- a/src/cef/include/capi/cef_drag_handler_capi.h
++++ b/src/cef/include/capi/cef_drag_handler_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=5b2051c42c1d4c41b85ca823d34b26bfa5de6777$
++// $hash=3c99a3db33be866a89d9600248b9b6ebcc48fbcb$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_CEF_DRAG_HANDLER_CAPI_H_
+diff --git a/src/cef/include/capi/cef_extension_capi.h b/src/cef/include/capi/cef_extension_capi.h
+index 24ba87d64125c..466af7a7207ed
+--- a/src/cef/include/capi/cef_extension_capi.h
++++ b/src/cef/include/capi/cef_extension_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=fcfe34c1517ebdb3f00c1f737b91361e771b820d$
++// $hash=75dd531ede2169c637c969db447761ca7e59aac9$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_CEF_EXTENSION_CAPI_H_
+diff --git a/src/cef/include/capi/cef_extension_handler_capi.h b/src/cef/include/capi/cef_extension_handler_capi.h
+index 73c4f3bca1b99..04325f3a21976
+--- a/src/cef/include/capi/cef_extension_handler_capi.h
++++ b/src/cef/include/capi/cef_extension_handler_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=768e2436e54cceb2675ddd03ebdc61b5c0785bdc$
++// $hash=90bd893bc1fdd605330bcfabcab9faeab419c42a$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_CEF_EXTENSION_HANDLER_CAPI_H_
+diff --git a/src/cef/include/capi/cef_file_util_capi.h b/src/cef/include/capi/cef_file_util_capi.h
+index 234f4240f8a76..942ec7d69e15c
+--- a/src/cef/include/capi/cef_file_util_capi.h
++++ b/src/cef/include/capi/cef_file_util_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=e76fa23e9682bf0865319d93e4009752ac8f854f$
++// $hash=42b3783846c1c99e91e4f69e8d8df2be2c823251$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_CEF_FILE_UTIL_CAPI_H_
+diff --git a/src/cef/include/capi/cef_find_handler_capi.h b/src/cef/include/capi/cef_find_handler_capi.h
+index fd8a317f67416..10a9c854e67f5
+--- a/src/cef/include/capi/cef_find_handler_capi.h
++++ b/src/cef/include/capi/cef_find_handler_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=f2e80b8637b07f19adea666e554269de4627e399$
++// $hash=25230ddd8f70b87fd98ba72581e99c3428344f89$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_CEF_FIND_HANDLER_CAPI_H_
+diff --git a/src/cef/include/capi/cef_focus_handler_capi.h b/src/cef/include/capi/cef_focus_handler_capi.h
+index 16159861500c2..bfb7fbf286e74
+--- a/src/cef/include/capi/cef_focus_handler_capi.h
++++ b/src/cef/include/capi/cef_focus_handler_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=a136a2679c8af339b21a89e8ae3090a9dbb8daa7$
++// $hash=dd317f470d2f7096459be0c0fc2cadfd483633b0$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_CEF_FOCUS_HANDLER_CAPI_H_
+diff --git a/src/cef/include/capi/cef_frame_capi.h b/src/cef/include/capi/cef_frame_capi.h
+index 13df7c250c6a3..b89a458a1b735
+--- a/src/cef/include/capi/cef_frame_capi.h
++++ b/src/cef/include/capi/cef_frame_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=33259e318960845a94c06bca658b46bfb335a23f$
++// $hash=1f592012807b171ad5177d991d53c972559ea56a$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_CEF_FRAME_CAPI_H_
+diff --git a/src/cef/include/capi/cef_frame_handler_capi.h b/src/cef/include/capi/cef_frame_handler_capi.h
+index 1352ee28f56a6..8b69fd73e6d5c
+--- a/src/cef/include/capi/cef_frame_handler_capi.h
++++ b/src/cef/include/capi/cef_frame_handler_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=8f791b2d1d5bea27f9e6ca5e0db731a0a76d181c$
++// $hash=3d27496e328f3e76fb05bde7b0da65563604c073$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_CEF_FRAME_HANDLER_CAPI_H_
+diff --git a/src/cef/include/capi/cef_i18n_util_capi.h b/src/cef/include/capi/cef_i18n_util_capi.h
+index 7a642b28a77a3..c6ceba4b8b419
+--- a/src/cef/include/capi/cef_i18n_util_capi.h
++++ b/src/cef/include/capi/cef_i18n_util_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=b6168013910802cf6d7603892741385958026dcd$
++// $hash=4fa59a60e9138f66bf3f290a499f7fc5a69041ae$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_CEF_I18N_UTIL_CAPI_H_
+diff --git a/src/cef/include/capi/cef_image_capi.h b/src/cef/include/capi/cef_image_capi.h
+index 99af056297923..56cdb4c4fc8e8
+--- a/src/cef/include/capi/cef_image_capi.h
++++ b/src/cef/include/capi/cef_image_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=b5a36ef39ff250c9d3cb1e9a8c7ee38d7e0f8b3f$
++// $hash=51ec70e713506e02d7157fc9d8268d02e91d80a3$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_CEF_IMAGE_CAPI_H_
+diff --git a/src/cef/include/capi/cef_jsdialog_handler_capi.h b/src/cef/include/capi/cef_jsdialog_handler_capi.h
+index c0ab4497edc9e..15d43781582a9
+--- a/src/cef/include/capi/cef_jsdialog_handler_capi.h
++++ b/src/cef/include/capi/cef_jsdialog_handler_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=c68332a779bab425aa2e6a858d20a43448631890$
++// $hash=f8dc9d32c3f345e1c3b7d02a098bebaafad7e81f$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_CEF_JSDIALOG_HANDLER_CAPI_H_
+diff --git a/src/cef/include/capi/cef_keyboard_handler_capi.h b/src/cef/include/capi/cef_keyboard_handler_capi.h
+index 3d6c50fc38e3e..cf3746dcc8b52
+--- a/src/cef/include/capi/cef_keyboard_handler_capi.h
++++ b/src/cef/include/capi/cef_keyboard_handler_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=140d3a3ce78f5e8ab50a24a2fd6377e7a8ea3256$
++// $hash=4ef92123de5221aa1ad5959d004e293d6a966fbd$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_CEF_KEYBOARD_HANDLER_CAPI_H_
+diff --git a/src/cef/include/capi/cef_life_span_handler_capi.h b/src/cef/include/capi/cef_life_span_handler_capi.h
+index c5e09131cbad3..e1db2aa4605e3
+--- a/src/cef/include/capi/cef_life_span_handler_capi.h
++++ b/src/cef/include/capi/cef_life_span_handler_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=205d56bf87a049ce7ac21b111d42a99659ad7c76$
++// $hash=f9ae882bb6092d1f94b7c78dc6b45369c8b0ec2e$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_CEF_LIFE_SPAN_HANDLER_CAPI_H_
