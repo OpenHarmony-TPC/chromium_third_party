@@ -3535,3 +3535,1706 @@ index 5b77305af987d..88209153d9c72
  };
  
  #endif  // CEF_INCLUDE_CEF_DIALOG_HANDLER_H_
+diff --git a/src/cef/include/cef_media_router.h b/src/cef/include/cef_media_router.h
+deleted file mode 100644
+index 378c3fc51530e..0000000000000
+--- a/src/cef/include/cef_media_router.h
++++ /dev/null
+@@ -1,323 +0,0 @@
+-// Copyright (c) 2020 Marshall A. Greenblatt. All rights reserved.
+-//
+-// Redistribution and use in source and binary forms, with or without
+-// modification, are permitted provided that the following conditions are
+-// met:
+-//
+-//    * Redistributions of source code must retain the above copyright
+-// notice, this list of conditions and the following disclaimer.
+-//    * Redistributions in binary form must reproduce the above
+-// copyright notice, this list of conditions and the following disclaimer
+-// in the documentation and/or other materials provided with the
+-// distribution.
+-//    * Neither the name of Google Inc. nor the name Chromium Embedded
+-// Framework nor the names of its contributors may be used to endorse
+-// or promote products derived from this software without specific prior
+-// written permission.
+-//
+-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+-// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+-// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+-// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+-// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+-// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+-// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+-// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+-// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+-// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+-// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+-//
+-// ---------------------------------------------------------------------------
+-//
+-// The contents of this file must follow a specific format in order to
+-// support the CEF translator tool. See the translator.README.txt file in the
+-// tools directory for more information.
+-//
+-
+-#ifndef CEF_INCLUDE_CEF_MEDIA_ROUTER_H_
+-#define CEF_INCLUDE_CEF_MEDIA_ROUTER_H_
+-#pragma once
+-
+-#include <vector>
+-#include "include/cef_base.h"
+-#include "include/cef_callback.h"
+-#include "include/cef_registration.h"
+-
+-class CefMediaObserver;
+-class CefMediaRoute;
+-class CefMediaRouteCreateCallback;
+-class CefMediaSink;
+-class CefMediaSinkDeviceInfoCallback;
+-class CefMediaSource;
+-
+-///
+-// Supports discovery of and communication with media devices on the local
+-// network via the Cast and DIAL protocols. The methods of this class may be
+-// called on any browser process thread unless otherwise indicated.
+-///
+-/*--cef(source=library)--*/
+-class CefMediaRouter : public virtual CefBaseRefCounted {
+- public:
+-  ///
+-  // Returns the MediaRouter object associated with the global request context.
+-  // If |callback| is non-NULL it will be executed asnychronously on the UI
+-  // thread after the manager's storage has been initialized. Equivalent to
+-  // calling CefRequestContext::GetGlobalContext()->GetMediaRouter().
+-  ///
+-  /*--cef(optional_param=callback)--*/
+-  static CefRefPtr<CefMediaRouter> GetGlobalMediaRouter(
+-      CefRefPtr<CefCompletionCallback> callback);
+-
+-  ///
+-  // Add an observer for MediaRouter events. The observer will remain registered
+-  // until the returned Registration object is destroyed.
+-  ///
+-  /*--cef()--*/
+-  virtual CefRefPtr<CefRegistration> AddObserver(
+-      CefRefPtr<CefMediaObserver> observer) = 0;
+-
+-  ///
+-  // Returns a MediaSource object for the specified media source URN. Supported
+-  // URN schemes include "cast:" and "dial:", and will be already known by the
+-  // client application (e.g. "cast:<appId>?clientId=<clientId>").
+-  ///
+-  /*--cef()--*/
+-  virtual CefRefPtr<CefMediaSource> GetSource(const CefString& urn) = 0;
+-
+-  ///
+-  // Trigger an asynchronous call to CefMediaObserver::OnSinks on all
+-  // registered observers.
+-  ///
+-  /*--cef()--*/
+-  virtual void NotifyCurrentSinks() = 0;
+-
+-  ///
+-  // Create a new route between |source| and |sink|. Source and sink must be
+-  // valid, compatible (as reported by CefMediaSink::IsCompatibleWith), and a
+-  // route between them must not already exist. |callback| will be executed
+-  // on success or failure. If route creation succeeds it will also trigger an
+-  // asynchronous call to CefMediaObserver::OnRoutes on all registered
+-  // observers.
+-  ///
+-  /*--cef()--*/
+-  virtual void CreateRoute(CefRefPtr<CefMediaSource> source,
+-                           CefRefPtr<CefMediaSink> sink,
+-                           CefRefPtr<CefMediaRouteCreateCallback> callback) = 0;
+-
+-  ///
+-  // Trigger an asynchronous call to CefMediaObserver::OnRoutes on all
+-  // registered observers.
+-  ///
+-  /*--cef()--*/
+-  virtual void NotifyCurrentRoutes() = 0;
+-};
+-
+-///
+-// Implemented by the client to observe MediaRouter events and registered via
+-// CefMediaRouter::AddObserver. The methods of this class will be called on the
+-// browser process UI thread.
+-///
+-/*--cef(source=client)--*/
+-class CefMediaObserver : public virtual CefBaseRefCounted {
+- public:
+-  typedef cef_media_route_connection_state_t ConnectionState;
+-
+-  ///
+-  // The list of available media sinks has changed or
+-  // CefMediaRouter::NotifyCurrentSinks was called.
+-  ///
+-  /*--cef()--*/
+-  virtual void OnSinks(const std::vector<CefRefPtr<CefMediaSink>>& sinks) = 0;
+-
+-  ///
+-  // The list of available media routes has changed or
+-  // CefMediaRouter::NotifyCurrentRoutes was called.
+-  ///
+-  /*--cef()--*/
+-  virtual void OnRoutes(
+-      const std::vector<CefRefPtr<CefMediaRoute>>& routes) = 0;
+-
+-  ///
+-  // The connection state of |route| has changed.
+-  ///
+-  /*--cef()--*/
+-  virtual void OnRouteStateChanged(CefRefPtr<CefMediaRoute> route,
+-                                   ConnectionState state) = 0;
+-
+-  ///
+-  // A message was recieved over |route|. |message| is only valid for
+-  // the scope of this callback and should be copied if necessary.
+-  ///
+-  /*--cef()--*/
+-  virtual void OnRouteMessageReceived(CefRefPtr<CefMediaRoute> route,
+-                                      const void* message,
+-                                      size_t message_size) = 0;
+-};
+-
+-///
+-// Represents the route between a media source and sink. Instances of this
+-// object are created via CefMediaRouter::CreateRoute and retrieved via
+-// CefMediaObserver::OnRoutes. Contains the status and metadata of a
+-// routing operation. The methods of this class may be called on any browser
+-// process thread unless otherwise indicated.
+-///
+-/*--cef(source=library)--*/
+-class CefMediaRoute : public virtual CefBaseRefCounted {
+- public:
+-  ///
+-  // Returns the ID for this route.
+-  ///
+-  /*--cef()--*/
+-  virtual CefString GetId() = 0;
+-
+-  ///
+-  // Returns the source associated with this route.
+-  ///
+-  /*--cef()--*/
+-  virtual CefRefPtr<CefMediaSource> GetSource() = 0;
+-
+-  ///
+-  // Returns the sink associated with this route.
+-  ///
+-  /*--cef()--*/
+-  virtual CefRefPtr<CefMediaSink> GetSink() = 0;
+-
+-  ///
+-  // Send a message over this route. |message| will be copied if necessary.
+-  ///
+-  /*--cef()--*/
+-  virtual void SendRouteMessage(const void* message, size_t message_size) = 0;
+-
+-  ///
+-  // Terminate this route. Will result in an asynchronous call to
+-  // CefMediaObserver::OnRoutes on all registered observers.
+-  ///
+-  /*--cef()--*/
+-  virtual void Terminate() = 0;
+-};
+-
+-///
+-// Callback interface for CefMediaRouter::CreateRoute. The methods of this
+-// class will be called on the browser process UI thread.
+-///
+-/*--cef(source=client)--*/
+-class CefMediaRouteCreateCallback : public virtual CefBaseRefCounted {
+- public:
+-  typedef cef_media_route_create_result_t RouteCreateResult;
+-
+-  ///
+-  // Method that will be executed when the route creation has finished. |result|
+-  // will be CEF_MRCR_OK if the route creation succeeded. |error| will be a
+-  // description of the error if the route creation failed. |route| is the
+-  // resulting route, or empty if the route creation failed.
+-  ///
+-  /*--cef(optional_param=error,optional_param=route)--*/
+-  virtual void OnMediaRouteCreateFinished(RouteCreateResult result,
+-                                          const CefString& error,
+-                                          CefRefPtr<CefMediaRoute> route) = 0;
+-};
+-
+-///
+-// Represents a sink to which media can be routed. Instances of this object are
+-// retrieved via CefMediaObserver::OnSinks. The methods of this class may
+-// be called on any browser process thread unless otherwise indicated.
+-///
+-/*--cef(source=library)--*/
+-class CefMediaSink : public virtual CefBaseRefCounted {
+- public:
+-  typedef cef_media_sink_icon_type_t IconType;
+-
+-  ///
+-  // Returns the ID for this sink.
+-  ///
+-  /*--cef()--*/
+-  virtual CefString GetId() = 0;
+-
+-  ///
+-  // Returns the name of this sink.
+-  ///
+-  /*--cef()--*/
+-  virtual CefString GetName() = 0;
+-
+-  ///
+-  // Returns the description of this sink.
+-  ///
+-  /*--cef()--*/
+-  virtual CefString GetDescription() = 0;
+-
+-  ///
+-  // Returns the icon type for this sink.
+-  ///
+-  /*--cef(default_retval=CEF_MSIT_GENERIC)--*/
+-  virtual IconType GetIconType() = 0;
+-
+-  ///
+-  // Asynchronously retrieves device info.
+-  ///
+-  /*--cef()--*/
+-  virtual void GetDeviceInfo(
+-      CefRefPtr<CefMediaSinkDeviceInfoCallback> callback) = 0;
+-
+-  ///
+-  // Returns true if this sink accepts content via Cast.
+-  ///
+-  /*--cef()--*/
+-  virtual bool IsCastSink() = 0;
+-
+-  ///
+-  // Returns true if this sink accepts content via DIAL.
+-  ///
+-  /*--cef()--*/
+-  virtual bool IsDialSink() = 0;
+-
+-  ///
+-  // Returns true if this sink is compatible with |source|.
+-  ///
+-  /*--cef()--*/
+-  virtual bool IsCompatibleWith(CefRefPtr<CefMediaSource> source) = 0;
+-};
+-
+-///
+-// Callback interface for CefMediaSink::GetDeviceInfo. The methods of this
+-// class will be called on the browser process UI thread.
+-///
+-/*--cef(source=client)--*/
+-class CefMediaSinkDeviceInfoCallback : public virtual CefBaseRefCounted {
+- public:
+-  ///
+-  // Method that will be executed asyncronously once device information has been
+-  // retrieved.
+-  ///
+-  /*--cef()--*/
+-  virtual void OnMediaSinkDeviceInfo(
+-      const CefMediaSinkDeviceInfo& device_info) = 0;
+-};
+-
+-///
+-// Represents a source from which media can be routed. Instances of this object
+-// are retrieved via CefMediaRouter::GetSource. The methods of this class may be
+-// called on any browser process thread unless otherwise indicated.
+-///
+-/*--cef(source=library)--*/
+-class CefMediaSource : public virtual CefBaseRefCounted {
+- public:
+-  ///
+-  // Returns the ID (media source URN or URL) for this source.
+-  ///
+-  /*--cef()--*/
+-  virtual CefString GetId() = 0;
+-
+-  ///
+-  // Returns true if this source outputs its content via Cast.
+-  ///
+-  /*--cef()--*/
+-  virtual bool IsCastSource() = 0;
+-
+-  ///
+-  // Returns true if this source outputs its content via DIAL.
+-  ///
+-  /*--cef()--*/
+-  virtual bool IsDialSource() = 0;
+-};
+-
+-#endif  // CEF_INCLUDE_CEF_MEDIA_ROUTER_H_
+diff --git a/src/cef/include/cef_request_context.h b/src/cef/include/cef_request_context.h
+index 016362f4a3572..e95de9a65bc3f
+--- a/src/cef/include/cef_request_context.h
++++ b/src/cef/include/cef_request_context.h
+@@ -45,7 +45,6 @@
+ #include "include/cef_data_base.h"
+ #include "include/cef_extension.h"
+ #include "include/cef_extension_handler.h"
+-#include "include/cef_media_router.h"
+ #include "include/cef_values.h"
+ #include "include/cef_web_storage.h"
+ 
+@@ -380,15 +379,6 @@ class CefRequestContext : public virtual CefBaseRefCounted {
+   /*--cef()--*/
+   virtual CefRefPtr<CefExtension> GetExtension(
+       const CefString& extension_id) = 0;
+-
+-  ///
+-  // Returns the MediaRouter object associated with this context.  If |callback|
+-  // is non-NULL it will be executed asnychronously on the UI thread after the
+-  // manager's context has been initialized.
+-  ///
+-  /*--cef(optional_param=callback)--*/
+-  virtual CefRefPtr<CefMediaRouter> GetMediaRouter(
+-      CefRefPtr<CefCompletionCallback> callback) = 0;
+ };
+ 
+ #endif  // CEF_INCLUDE_CEF_REQUEST_CONTEXT_H_
+diff --git a/src/cef/include/cef_request_context_handler.h b/src/cef/include/cef_request_context_handler.h
+index 3bf495dda0f6c..162fd229fc87d
+--- a/src/cef/include/cef_request_context_handler.h
++++ b/src/cef/include/cef_request_context_handler.h
+@@ -43,7 +43,7 @@
+ #include "include/cef_frame.h"
+ #include "include/cef_request.h"
+ #include "include/cef_resource_request_handler.h"
+-#include "include/cef_web_plugin.h"
++//#include "include/cef_web_plugin.h" // !enable_plugins
+ 
+ ///
+ // Implement this interface to provide handler implementations. The handler
+diff --git a/src/cef/include/cef_web_plugin.h b/src/cef/include/cef_web_plugin.h
+deleted file mode 100644
+index 2ffd572a506d2..0000000000000
+--- a/src/cef/include/cef_web_plugin.h
++++ /dev/null
+@@ -1,148 +0,0 @@
+-// Copyright (c) 2012 Marshall A. Greenblatt. All rights reserved.
+-//
+-// Redistribution and use in source and binary forms, with or without
+-// modification, are permitted provided that the following conditions are
+-// met:
+-//
+-//    * Redistributions of source code must retain the above copyright
+-// notice, this list of conditions and the following disclaimer.
+-//    * Redistributions in binary form must reproduce the above
+-// copyright notice, this list of conditions and the following disclaimer
+-// in the documentation and/or other materials provided with the
+-// distribution.
+-//    * Neither the name of Google Inc. nor the name Chromium Embedded
+-// Framework nor the names of its contributors may be used to endorse
+-// or promote products derived from this software without specific prior
+-// written permission.
+-//
+-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+-// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+-// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+-// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+-// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+-// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+-// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+-// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+-// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+-// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+-// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+-//
+-// ---------------------------------------------------------------------------
+-//
+-// The contents of this file must follow a specific format in order to
+-// support the CEF translator tool. See the translator.README.txt file in the
+-// tools directory for more information.
+-//
+-
+-#ifndef CEF_INCLUDE_CEF_WEB_PLUGIN_H_
+-#define CEF_INCLUDE_CEF_WEB_PLUGIN_H_
+-
+-#include "include/cef_base.h"
+-
+-class CefBrowser;
+-
+-///
+-// Information about a specific web plugin.
+-///
+-/*--cef(source=library)--*/
+-class CefWebPluginInfo : public virtual CefBaseRefCounted {
+- public:
+-  ///
+-  // Returns the plugin name.
+-  ///
+-  /*--cef()--*/
+-  virtual CefString GetName() = 0;
+-
+-  ///
+-  // Returns the plugin file path (DLL/bundle/library).
+-  ///
+-  /*--cef()--*/
+-  virtual CefString GetPath() = 0;
+-
+-  ///
+-  // Returns the version of the plugin (may be OS-specific).
+-  ///
+-  /*--cef()--*/
+-  virtual CefString GetVersion() = 0;
+-
+-  ///
+-  // Returns a description of the plugin from the version information.
+-  ///
+-  /*--cef()--*/
+-  virtual CefString GetDescription() = 0;
+-};
+-
+-///
+-// Interface to implement for visiting web plugin information. The methods of
+-// this class will be called on the browser process UI thread.
+-///
+-/*--cef(source=client)--*/
+-class CefWebPluginInfoVisitor : public virtual CefBaseRefCounted {
+- public:
+-  ///
+-  // Method that will be called once for each plugin. |count| is the 0-based
+-  // index for the current plugin. |total| is the total number of plugins.
+-  // Return false to stop visiting plugins. This method may never be called if
+-  // no plugins are found.
+-  ///
+-  /*--cef()--*/
+-  virtual bool Visit(CefRefPtr<CefWebPluginInfo> info,
+-                     int count,
+-                     int total) = 0;
+-};
+-
+-///
+-// Visit web plugin information. Can be called on any thread in the browser
+-// process.
+-///
+-/*--cef()--*/
+-void CefVisitWebPluginInfo(CefRefPtr<CefWebPluginInfoVisitor> visitor);
+-
+-///
+-// Cause the plugin list to refresh the next time it is accessed regardless
+-// of whether it has already been loaded. Can be called on any thread in the
+-// browser process.
+-///
+-/*--cef()--*/
+-void CefRefreshWebPlugins();
+-
+-///
+-// Unregister an internal plugin. This may be undone the next time
+-// CefRefreshWebPlugins() is called. Can be called on any thread in the browser
+-// process.
+-///
+-/*--cef()--*/
+-void CefUnregisterInternalWebPlugin(const CefString& path);
+-
+-///
+-// Register a plugin crash. Can be called on any thread in the browser process
+-// but will be executed on the IO thread.
+-///
+-/*--cef()--*/
+-void CefRegisterWebPluginCrash(const CefString& path);
+-
+-///
+-// Interface to implement for receiving unstable plugin information. The methods
+-// of this class will be called on the browser process IO thread.
+-///
+-/*--cef(source=client)--*/
+-class CefWebPluginUnstableCallback : public virtual CefBaseRefCounted {
+- public:
+-  ///
+-  // Method that will be called for the requested plugin. |unstable| will be
+-  // true if the plugin has reached the crash count threshold of 3 times in 120
+-  // seconds.
+-  ///
+-  /*--cef()--*/
+-  virtual void IsUnstable(const CefString& path, bool unstable) = 0;
+-};
+-
+-///
+-// Query if a plugin is unstable. Can be called on any thread in the browser
+-// process.
+-///
+-/*--cef()--*/
+-void CefIsWebPluginUnstable(const CefString& path,
+-                            CefRefPtr<CefWebPluginUnstableCallback> callback);
+-
+-#endif  // CEF_INCLUDE_CEF_WEB_PLUGIN_H_
+diff --git a/src/cef/include/internal/cef_string_wrappers.h b/src/cef/include/internal/cef_string_wrappers.h
+index c53f5627e99ae..0909f90669e6c
+--- a/src/cef/include/internal/cef_string_wrappers.h
++++ b/src/cef/include/internal/cef_string_wrappers.h
+@@ -531,6 +531,16 @@ class CefStringBase {
+     owner_ = false;
+   }
+ 
++  ///
++  // Memset the data to zero.
++  ///
++  void MemsetToZero() {
++    if (!string_)
++      return;
++    if (string_->str != NULL)
++      memset(string_->str, 0, string_->length);
++  }
++
+   ///
+   // Attach to the specified string structure. If |owner| is true this class
+   // will take ownership of the structure.
+diff --git a/src/cef/include/internal/cef_types.h b/src/cef/include/internal/cef_types.h
+index e24b376d19871..6ec7dd2e48e2c
+--- a/src/cef/include/internal/cef_types.h
++++ b/src/cef/include/internal/cef_types.h
+@@ -664,6 +664,7 @@ typedef struct _cef_browser_settings_t {
+   // Force the background color to be dark
+   ///
+   cef_state_t force_dark_mode_enabled;
++  cef_state_t dark_prefer_color_scheme_enabled;
+   cef_state_t loads_images_automatically;
+   bool javascript_can_open_windows_automatically;
+   int text_size_percent;
+@@ -677,6 +678,10 @@ typedef struct _cef_browser_settings_t {
+   bool viewport_meta_enabled;
+   bool user_gesture_required;
+   bool pinch_smooth_mode;
++#if BUILDFLAG(IS_OHOS)
++  cef_state_t hide_vertical_scrollbars;
++  cef_state_t hide_horizontal_scrollbars;
++#endif
+   /* ohos webview end */
+ } cef_browser_settings_t;
+ 
+@@ -3308,6 +3313,197 @@ typedef struct _cef_touch_handle_state_t {
+   float edge_height;
+ } cef_touch_handle_state_t;
+ 
++///
++// Supported context menu input field types. These constants match their equivalents
++// in Chromium's ContextMenuDataInputFieldType and should not be renumbered.
++///
++typedef enum {
++  ///
++  // Not an input field.
++  ///
++  CM_INPUTFIELDTYPE_NONE,
++
++  ///
++  // type = text, search, email, url
++  ///
++  CM_INPUTFIELDTYPE_PLAINTEXT,
++
++  ///
++  // type = password
++  ///
++  CM_INPUTFIELDTYPE_PASSWORD,
++
++  ///
++  // type = number
++  ///
++  CM_INPUTFIELDTYPE_NUMBER,
++
++  ///
++  // type = tel
++  ///
++  CM_INPUTFIELDTYPE_TELEPHONE,
++
++  ///
++  // type = <etc.>
++  ///
++  CM_INPUTFIELDTYPE_OTHER,
++} cef_context_menu_input_field_type_t;
++
++///
++// Supported context menu source types. These constants match their equivalents
++// in Chromium's ui::MenuSourceType and should not be renumbered.
++///
++typedef enum {
++  ///
++  // type = none
++  ///
++  CM_SOURCETYPE_NONE,
++
++  ///
++  // type = mouse
++  ///
++  CM_SOURCETYPE_MOUSE,
++
++  ///
++  // type = keyboard
++  ///
++  CM_SOURCETYPE_KEYBOARD,
++
++  ///
++  // type = touch
++  ///
++  CM_SOURCETYPE_TOUCH,
++
++  ///
++  // type = touch edit menu
++  ///
++  CM_SOURCETYPE_TOUCH_EDIT_MENU,
++
++  ///
++  // type = long press
++  ///
++  CM_SOURCETYPE_LONG_PRESS,
++
++  ///
++  // type = long tap
++  ///
++  CM_SOURCETYPE_LONG_TAP,
++
++  ///
++  // type = number
++  ///
++  CM_SOURCETYPE_TOUCH_HANDLE,
++
++  ///
++  // type = stylus
++  ///
++  CM_SOURCETYPE_STYLUS,
++
++  ///
++  // type = adjust selection
++  ///
++  CM_SOURCETYPE_ADJUST_SELECTION,
++
++  ///
++  // type = selection reset
++  ///
++  CM_SOURCETYPE_SELECTION_RESET,
++} cef_context_menu_source_type_t;
++
++///
++// Supported text direction. See text_direction.mojom.
++///
++typedef enum {
++  ///
++  // type = unknown direction
++  ///
++  UNKNOWN,
++
++  ///
++  // type = right to left
++  ///
++  RTL,
++
++  ///
++  // type = left to right
++  ///
++  LTR,
++} cef_text_direction_t;
++
++///
++// Supported <select> item type. See popup_menu.mojom.
++///
++typedef enum {
++  ///
++  // type = kOption
++  ///
++  OPTION,
++
++  ///
++  // type = kCheckableOption
++  ///
++  CHECKABLE_OPTION,
++
++  ///
++  // type = kGruop
++  ///
++  GROUP,
++
++  ///
++  // type = kSeparator
++  ///
++  SEPARATOR,
++
++  ///
++  // type = kSubMenu
++  ///
++  SubMenu,
++} cef_select_popup_item_type_t;
++
++/// 
++// Supported <select> item.
++///
++typedef struct _cef_select_popup_item_t {
++  ///
++  // label name of item.
++  ///
++  cef_string_t label;
++
++  ///
++  // tool tip of item.
++  ///
++  cef_string_t tool_tip;
++
++  ///
++  // type of item.
++  ///
++  cef_select_popup_item_type_t type;
++
++  ///
++  // action of item.
++  ///
++  uint32_t action;
++
++  ///
++  // text direction of item.
++  ///
++  cef_text_direction_t text_direction;
++
++  ///
++  // whether item is enabled.
++  ///
++  bool enabled;
++
++  ///
++  // whether item has text direction overridel
++  ///
++  bool has_text_direction_override;
++
++  ///
++  // whether item is checked.
++  ///
++  bool checked;
++} cef_select_popup_item_t;
+ #ifdef __cplusplus
+ }
+ #endif
+diff --git a/src/cef/include/internal/cef_types_wrappers.h b/src/cef/include/internal/cef_types_wrappers.h
+index 9bfde0a89e3f9..d69abfcbf52b3
+--- a/src/cef/include/internal/cef_types_wrappers.h
++++ b/src/cef/include/internal/cef_types_wrappers.h
+@@ -730,6 +730,7 @@ struct CefBrowserSettingsTraits {
+ 
+     /* ohos webview begin */
+     target->force_dark_mode_enabled = src->force_dark_mode_enabled;
++    target->dark_prefer_color_scheme_enabled = src->dark_prefer_color_scheme_enabled;
+     target->javascript_can_open_windows_automatically =
+         src->javascript_can_open_windows_automatically;
+     target->loads_images_automatically = src->loads_images_automatically;
+@@ -746,6 +747,10 @@ struct CefBrowserSettingsTraits {
+     target->viewport_meta_enabled = src->viewport_meta_enabled;
+     target->user_gesture_required = src->user_gesture_required;
+     target->pinch_smooth_mode = src->pinch_smooth_mode;
++#if BUILDFLAG(IS_OHOS)
++    target->hide_vertical_scrollbars = src->hide_vertical_scrollbars;
++    target->hide_horizontal_scrollbars = src->hide_horizontal_scrollbars;
++#endif
+     /* ohos webview end */
+   }
+ };
+@@ -1050,4 +1055,23 @@ struct CefMediaSinkDeviceInfoTraits {
+ ///
+ typedef CefStructBase<CefMediaSinkDeviceInfoTraits> CefMediaSinkDeviceInfo;
+ 
++struct CefSelectPopupItemTraits {
++  typedef cef_select_popup_item_t struct_type;
++
++  static inline void init(struct_type* s) {}
++
++  static inline void clear(struct_type* s) {}
++
++  static inline void set(const struct_type* src,
++                         struct_type* target,
++                         bool copy) {
++    *target = *src;
++  }
++};
++
++///
++// Class representing select popup item.
++///
++typedef CefStructBase<CefSelectPopupItemTraits> CefSelectPopupItem;
++
+ #endif  // CEF_INCLUDE_INTERNAL_CEF_TYPES_WRAPPERS_H_
+diff --git a/src/cef/libcef/browser/alloy/alloy_browser_context.cc b/src/cef/libcef/browser/alloy/alloy_browser_context.cc
+index 6ede933824b83..2e09ea0d29090
+--- a/src/cef/libcef/browser/alloy/alloy_browser_context.cc
++++ b/src/cef/libcef/browser/alloy/alloy_browser_context.cc
+@@ -24,7 +24,6 @@
+ #include "base/strings/string_util.h"
+ #include "chrome/browser/font_family_cache.h"
+ #include "chrome/browser/media/media_device_id_salt.h"
+-#include "chrome/browser/plugins/chrome_plugin_service_filter.h"
+ #include "chrome/browser/profiles/profile_key.h"
+ #include "chrome/browser/ui/zoom/chrome_zoom_level_prefs.h"
+ #include "chrome/common/pref_names.h"
+@@ -49,6 +48,10 @@
+ #include "net/proxy_resolution/proxy_config_service.h"
+ #include "services/network/public/mojom/cors_origin_pattern.mojom.h"
+ 
++#if BUILDFLAG(IS_OHOS) && BUILDFLAG(ENABLE_PLUGINS)
++#include "chrome/browser/plugins/chrome_plugin_service_filter.h"
++#endif
++
+ using content::BrowserThread;
+ 
+ // Creates and manages VisitedLinkEventListener objects for each
+@@ -183,7 +186,9 @@ void AlloyBrowserContext::Initialize() {
+   if (extensions_enabled)
+     extension_system_->Init();
+ 
++#if BUILDFLAG(IS_OHOS) && BUILDFLAG(ENABLE_PLUGINS)
+   ChromePluginServiceFilter::GetInstance()->RegisterProfile(this);
++#endif
+ 
+   media_device_id_salt_ = new MediaDeviceIDSalt(pref_service);
+ }
+@@ -194,7 +199,9 @@ void AlloyBrowserContext::Shutdown() {
+   // Send notifications to clean up objects associated with this Profile.
+   MaybeSendDestroyedNotification();
+ 
++#if BUILDFLAG(IS_OHOS) && BUILDFLAG(ENABLE_PLUGINS)
+   ChromePluginServiceFilter::GetInstance()->UnregisterProfile(this);
++#endif
+ 
+   // Remove any BrowserContextKeyedServiceFactory associations. This must be
+   // called before the ProxyService owned by AlloyBrowserContext is destroyed.
+diff --git a/src/cef/libcef/browser/alloy/alloy_browser_host_impl.cc b/src/cef/libcef/browser/alloy/alloy_browser_host_impl.cc
+index ee3704e8da89f..ec9cc632fb823
+--- a/src/cef/libcef/browser/alloy/alloy_browser_host_impl.cc
++++ b/src/cef/libcef/browser/alloy/alloy_browser_host_impl.cc
+@@ -331,6 +331,13 @@ void AlloyBrowserHostImpl::CloseBrowser(bool force_close) {
+       // Will result in a call to BeforeUnloadFired() and, if the close isn't
+       // canceled, CloseContents().
+       contents->DispatchBeforeUnload(false /* auto_cancel */);
++#if BUILDFLAG(IS_OHOS)
++      // In cef_life_span_handler.h file show DoClose step.
++      // Step 1 to Step 3 is over.
++      // This will replace Step 4 : User approves the close. Beause both in 
++      // Android and OH close will not be blocked by beforeunload event.
++      CloseContents(contents);
++#endif
+     } else {
+       CloseContents(contents);
+     }
+@@ -1180,6 +1187,14 @@ void AlloyBrowserHostImpl::CloseContents(content::WebContents* source) {
+     if (handler.get()) {
+       close_browser = !handler->DoClose(this);
+     }
++#if BUILDFLAG(IS_OHOS)
++    // |DoClose| will notify the UI to close, |DESTRUCTION_STATE_NONE| means
++    // |CloseBrowser| has not been triggered by UI. We should close browser
++    // when received |CloseBrowser| request from UI.
++    if (destruction_state_ == DESTRUCTION_STATE_NONE) {
++      close_browser = false;
++    }
++#endif
+   }
+ 
+   if (close_browser) {
+@@ -1254,7 +1269,6 @@ bool AlloyBrowserHostImpl::HandleContextMenu(
+   auto rvh = web_contents()->GetRenderViewHost();
+   CefRenderWidgetHostViewOSR* view =
+       static_cast<CefRenderWidgetHostViewOSR*>(rvh->GetWidget()->GetView());
+-  touch_insert_handle_menu_show_ = true;
+   if (view) {
+     CefTouchSelectionControllerClientOSR* touch_client =
+         static_cast<CefTouchSelectionControllerClientOSR*>(
+@@ -1750,6 +1764,23 @@ void AlloyBrowserHostImpl::StartDragging(
+   }
+ }
+ 
++void AlloyBrowserHostImpl::ShowPopupMenu(
++    mojo::PendingRemote<blink::mojom::PopupMenuClient> popup_client,
++    const gfx::Rect& bounds,
++    int item_height,
++    double item_font_size,
++    int selected_item,
++    std::vector<blink::mojom::MenuItemPtr> menu_items,
++    bool right_aligned,
++    bool allow_multiple_selection) {
++  if (platform_delegate_) {
++    platform_delegate_->ShowPopupMenu(std::move(popup_client), bounds,
++                                      item_height, item_font_size, selected_item,
++                                      std::move(menu_items), right_aligned,
++                                      allow_multiple_selection);
++  }
++}
++
+ void AlloyBrowserHostImpl::UpdateDragCursor(
+     ui::mojom::DragOperation operation) {
+   if (platform_delegate_)
+diff --git a/src/cef/libcef/browser/alloy/alloy_browser_host_impl.h b/src/cef/libcef/browser/alloy/alloy_browser_host_impl.h
+index a59dfe1562b11..f134101b58cf0
+--- a/src/cef/libcef/browser/alloy/alloy_browser_host_impl.h
++++ b/src/cef/libcef/browser/alloy/alloy_browser_host_impl.h
+@@ -28,6 +28,7 @@
+ #include "content/public/browser/web_contents_delegate.h"
+ #include "content/public/browser/web_contents_observer.h"
+ #include "extensions/common/mojom/view_type.mojom-forward.h"
++#include "third_party/blink/public/mojom/choosers/popup_menu.mojom.h"
+ 
+ class CefAudioCapturer;
+ class CefBrowserInfo;
+@@ -207,9 +208,20 @@ class AlloyBrowserHostImpl : public CefBrowserHostBase,
+   /* ohos webview begin */
+   void SetBackgroundColor(int color) override;
+   void SetTouchInsertHandleMenuShow(bool show) {
+-    touch_insert_handle_menu_show_ = show;
++    web_contents()->SetTouchInsertHandleMenuShow(show);
+   }
+-  bool GetTouchInsertHandleMenuShow() { return touch_insert_handle_menu_show_; }
++  bool GetTouchInsertHandleMenuShow() {
++    return web_contents()->GetTouchInsertHandleMenuShow();
++  }
++  void ShowPopupMenu(
++    mojo::PendingRemote<blink::mojom::PopupMenuClient> popup_client,
++    const gfx::Rect& bounds,
++    int item_height,
++    double item_font_size,
++    int selected_item,
++    std::vector<blink::mojom::MenuItemPtr> menu_items,
++    bool right_aligned,
++    bool allow_multiple_selection);
+   /* ohos webview end */
+ 
+   // content::WebContentsDelegate methods.
+diff --git a/src/cef/libcef/browser/alloy/alloy_browser_main.cc b/src/cef/libcef/browser/alloy/alloy_browser_main.cc
+index c6136251089ae..63e13b778d4f7
+--- a/src/cef/libcef/browser/alloy/alloy_browser_main.cc
++++ b/src/cef/libcef/browser/alloy/alloy_browser_main.cc
+@@ -13,8 +13,6 @@
+ #include "libcef/browser/context.h"
+ #include "libcef/browser/devtools/devtools_manager_delegate.h"
+ #include "libcef/browser/extensions/extension_system_factory.h"
+-#include "libcef/browser/net/chrome_scheme_handler.h"
+-#include "libcef/browser/printing/constrained_window_views_client.h"
+ #include "libcef/browser/thread_util.h"
+ #include "libcef/common/app_manager.h"
+ #include "libcef/common/extensions/extensions_util.h"
+@@ -25,11 +23,8 @@
+ #include "base/task/post_task.h"
+ #include "base/task/thread_pool.h"
+ #include "chrome/browser/browser_process.h"
+-#include "chrome/browser/media/router/chrome_media_router_factory.h"
+ #include "chrome/browser/net/system_network_context_manager.h"
+-#include "chrome/browser/plugins/plugin_finder.h"
+ #include "chrome/common/chrome_switches.h"
+-#include "components/constrained_window/constrained_window_views.h"
+ #include "content/public/browser/gpu_data_manager.h"
+ #include "content/public/browser/network_service_instance.h"
+ #include "content/public/common/result_codes.h"
+@@ -92,12 +87,31 @@
+ #include "chrome/browser/component_updater/widevine_cdm_component_installer.h"
+ #endif
+ 
++#if defined(OHOS_ENABLE_CEF_CHROME_RUNTIME)
++#include "libcef/browser/net/chrome_scheme_handler.h"
++#endif
++
++#if BUILDFLAG(IS_OHOS) && BUILDFLAG(ENABLE_PRINT_PREVIEW)
++#include "components/constrained_window/constrained_window_views.h"
++#include "libcef/browser/printing/constrained_window_views_client.h"
++#endif
++
++#if BUILDFLAG(IS_OHOS) && BUILDFLAG(ENABLE_PLUGINS)
++#include "chrome/browser/plugins/plugin_finder.h"
++#endif
++
++#if BUILDFLAG(IS_OHOS) && BUILDFLAG(OHOS_ENABLE_MEDIA_ROUTER)
++#include "chrome/browser/media/router/chrome_media_router_factory.h"
++#endif
++
+ AlloyBrowserMainParts::AlloyBrowserMainParts(
+     content::MainFunctionParams parameters)
+     : BrowserMainParts(), parameters_(std::move(parameters)) {}
+ 
+ AlloyBrowserMainParts::~AlloyBrowserMainParts() {
++#if BUILDFLAG(IS_OHOS) && BUILDFLAG(ENABLE_PRINT_PREVIEW)
+   constrained_window::SetConstrainedWindowViewsClient(nullptr);
++#endif
+ }
+ 
+ int AlloyBrowserMainParts::PreEarlyInitialization() {
+@@ -111,7 +125,9 @@ int AlloyBrowserMainParts::PreEarlyInitialization() {
+ }
+ 
+ void AlloyBrowserMainParts::ToolkitInitialized() {
++#if BUILDFLAG(IS_OHOS) && BUILDFLAG(ENABLE_PRINT_PREVIEW)
+   SetConstrainedWindowViewsClient(CreateCefConstrainedWindowViewsClient());
++#endif
+ #if defined(USE_AURA)
+   CHECK(aura::Env::GetInstance());
+ 
+@@ -147,7 +163,9 @@ void AlloyBrowserMainParts::PreCreateMainMessageLoop() {
+   ChromeBrowserMainPartsWin::SetupInstallerUtilStrings();
+ #endif  // BUILDFLAG(IS_WIN)
+ 
++#if BUILDFLAG(IS_OHOS) && BUILDFLAG(OHOS_ENABLE_MEDIA_ROUTER)
+   media_router::ChromeMediaRouterFactory::DoPlatformInit();
++#endif
+ }
+ 
+ void AlloyBrowserMainParts::PostCreateMainMessageLoop() {
+@@ -237,10 +255,14 @@ int AlloyBrowserMainParts::PreMainMessageLoopRun() {
+   InitializeWinParentalControls();
+ #endif
+ 
++#if BUILDFLAG(IS_OHOS) && BUILDFLAG(ENABLE_PLUGINS)
+   // Triggers initialization of the singleton instance on UI thread.
+   PluginFinder::GetInstance()->Init();
++#endif
+ 
++#if defined(OHOS_ENABLE_CEF_CHROME_RUNTIME)
+   scheme::RegisterWebUIControllerFactory();
++#endif
+ 
+ #if BUILDFLAG(ENABLE_MEDIA_FOUNDATION_WIDEVINE_CDM) || \
+     BUILDFLAG(ENABLE_WIDEVINE_CDM_COMPONENT)
+diff --git a/src/cef/libcef/browser/alloy/alloy_content_browser_client.cc b/src/cef/libcef/browser/alloy/alloy_content_browser_client.cc
+index 1b8696bd6ece0..f472e1012109a
+--- a/src/cef/libcef/browser/alloy/alloy_content_browser_client.cc
++++ b/src/cef/libcef/browser/alloy/alloy_content_browser_client.cc
+@@ -28,7 +28,6 @@
+ #include "libcef/browser/extensions/extension_system.h"
+ #include "libcef/browser/extensions/extension_web_contents_observer.h"
+ #include "libcef/browser/media_capture_devices_dispatcher.h"
+-#include "libcef/browser/net/chrome_scheme_handler.h"
+ #include "libcef/browser/net/throttle_handler.h"
+ #include "libcef/browser/net_service/cookie_manager_impl.h"
+ #include "libcef/browser/net_service/login_delegate.h"
+@@ -36,7 +35,6 @@
+ #include "libcef/browser/net_service/resource_request_handler_wrapper.h"
+ #include "libcef/browser/net_service/restrict_cookie_manager.h"
+ #include "libcef/browser/prefs/renderer_prefs.h"
+-#include "libcef/browser/printing/print_view_manager.h"
+ #include "libcef/browser/speech_recognition_manager_delegate.h"
+ #include "libcef/browser/ssl_info_impl.h"
+ #include "libcef/browser/thread_util.h"
+@@ -66,36 +64,24 @@
+ #include "chrome/browser/net/profile_network_context_service.h"
+ #include "chrome/browser/net/profile_network_context_service_factory.h"
+ #include "chrome/browser/net/system_network_context_manager.h"
+-#include "chrome/browser/pdf/chrome_pdf_stream_delegate.h"
+-#include "chrome/browser/plugins/pdf_iframe_navigation_throttle.h"
+-#include "chrome/browser/plugins/plugin_info_host_impl.h"
+-#include "chrome/browser/plugins/plugin_response_interceptor_url_loader_throttle.h"
+ #include "chrome/browser/plugins/plugin_utils.h"
+ #include "chrome/browser/profiles/profile.h"
+ #include "chrome/browser/profiles/renderer_updater.h"
+ #include "chrome/browser/profiles/renderer_updater_factory.h"
+-#include "chrome/browser/renderer_host/pepper/chrome_browser_pepper_host_factory.h"
+ #include "chrome/browser/spellchecker/spell_check_host_chrome_impl.h"
+ #include "chrome/common/chrome_content_client.h"
+ #include "chrome/common/chrome_paths.h"
+ #include "chrome/common/chrome_switches.h"
+ #include "chrome/common/google_url_loader_throttle.h"
+-#include "chrome/common/pdf_util.h"
+ #include "chrome/common/pref_names.h"
+ #include "chrome/common/webui_url_constants.h"
+ #include "chrome/grit/browser_resources.h"
+ #include "chrome/grit/generated_resources.h"
+-#include "chrome/services/printing/printing_service.h"
+ #include "components/content_settings/core/browser/cookie_settings.h"
+ #include "components/embedder_support/switches.h"
+ #include "components/embedder_support/user_agent_utils.h"
+-#include "components/pdf/browser/pdf_navigation_throttle.h"
+-#include "components/pdf/browser/pdf_url_loader_request_interceptor.h"
+-#include "components/pdf/browser/pdf_web_contents_helper.h"
+-#include "components/pdf/common/internal_plugin_helpers.h"
+ #include "components/spellcheck/common/spellcheck.mojom.h"
+ #include "components/version_info/version_info.h"
+-#include "content/browser/plugin_service_impl.h"
+ #include "content/browser/renderer_host/render_frame_host_impl.h"
+ #include "content/public/browser/browser_context.h"
+ #include "content/public/browser/browser_ppapi_host.h"
+@@ -180,6 +166,37 @@
+ #include "chrome/browser/spellchecker/spell_check_panel_host_impl.h"
+ #endif
+ 
++#if defined(OHOS_ENABLE_CEF_CHROME_RUNTIME)
++#include "libcef/browser/net/chrome_scheme_handler.h"
++#endif
++
++#if BUILDFLAG(IS_OHOS)
++#include "printing/buildflags/buildflags.h"
++#if BUILDFLAG(ENABLE_PRINT_PREVIEW)
++#include "chrome/services/printing/printing_service.h"
++#include "libcef/browser/printing/print_view_manager.h"
++#endif
++#endif
++
++#if BUILDFLAG(IS_OHOS) && BUILDFLAG(ENABLE_PLUGINS)
++#include "chrome/browser/plugins/plugin_info_host_impl.h"
++#include "chrome/browser/plugins/plugin_response_interceptor_url_loader_throttle.h"
++#include "chrome/browser/renderer_host/pepper/chrome_browser_pepper_host_factory.h"
++#include "content/browser/plugin_service_impl.h"
++#endif
++
++#if BUILDFLAG(IS_OHOS) && BUILDFLAG(ENABLE_PDF)
++#include "chrome/browser/pdf/chrome_pdf_stream_delegate.h"
++#include "chrome/browser/plugins/pdf_iframe_navigation_throttle.h"
++#include "chrome/common/pdf_util.h"
++#include "components/pdf/browser/pdf_navigation_throttle.h"
++#include "components/pdf/browser/pdf_url_loader_request_interceptor.h"
++#include "components/pdf/browser/pdf_web_contents_helper.h"
++#include "components/pdf/common/internal_plugin_helpers.h"
++#else
++#include "content/public/browser/url_loader_request_interceptor.h"
++#endif
++
+ namespace {
+ void TransferVector(const std::vector<std::string>& source,
+                     std::vector<CefString>& target) {
+@@ -644,6 +661,7 @@ int GetCrashSignalFD(const base::CommandLine& command_line) {
+ }
+ #endif  // BUILDFLAG(IS_POSIX) && !BUILDFLAG(IS_MAC)
+ 
++#if BUILDFLAG(IS_OHOS) && BUILDFLAG(ENABLE_PLUGINS)
+ // From chrome/browser/plugins/chrome_content_browser_client_plugins_part.cc.
+ void BindPluginInfoHost(
+     int render_process_id,
+@@ -659,6 +677,7 @@ void BindPluginInfoHost(
+       std::make_unique<PluginInfoHostImpl>(render_process_id, profile),
+       std::move(receiver));
+ }
++#endif
+ 
+ base::FilePath GetRootCachePath() {
+   // The CefContext::ValidateCachePath method enforces the requirement that all
+@@ -817,7 +836,11 @@ void AlloyContentBrowserClient::GetAdditionalAllowedSchemesForFileSystem(
+ 
+ bool AlloyContentBrowserClient::IsWebUIAllowedToMakeNetworkRequests(
+     const url::Origin& origin) {
++#if defined(OHOS_ENABLE_CEF_CHROME_RUNTIME)
+   return scheme::IsWebUIAllowedToMakeNetworkRequests(origin);
++#else
++  return false;
++#endif
+ }
+ 
+ bool AlloyContentBrowserClient::IsHandledURL(const GURL& url) {
+@@ -1207,7 +1230,7 @@ bool AlloyContentBrowserClient::CanCreateWindow(
+   if (!browser_host) {
+     return false;
+   }
+-  if (!browser_host->settings().javascript_can_open_windows_automatically) {
++  if (!browser_host->settings().javascript_can_open_windows_automatically && !user_gesture) {
+     LOG(INFO) << "javascript_can_open_windows_automatically false";
+     return false;
+   }
+@@ -1238,7 +1261,7 @@ bool AlloyContentBrowserClient::CanCreateWindow(
+   CefRefPtr<CefBrowserHostBase> browser_host =
+       CefBrowserHostBase::GetBrowserForContents(web_contents);
+ 
+-  if (!browser_host->settings().javascript_can_open_windows_automatically) {
++  if (!browser_host->settings().javascript_can_open_windows_automatically && !user_gesture) {
+     LOG(INFO) << "javascript_can_open_windows_automatically false";
+     return false;
+   }
+@@ -1270,7 +1293,9 @@ bool AlloyContentBrowserClient::OverrideWebPreferencesAfterNavigation(
+ 
+ void AlloyContentBrowserClient::BrowserURLHandlerCreated(
+     content::BrowserURLHandler* handler) {
++#if defined(OHOS_ENABLE_CEF_CHROME_RUNTIME)
+   scheme::BrowserURLHandlerCreated(handler);
++#endif
+ }
+ 
+ std::string AlloyContentBrowserClient::GetDefaultDownloadName() {
+@@ -1279,9 +1304,11 @@ std::string AlloyContentBrowserClient::GetDefaultDownloadName() {
+ 
+ void AlloyContentBrowserClient::DidCreatePpapiPlugin(
+     content::BrowserPpapiHost* browser_host) {
++#if BUILDFLAG(IS_OHOS) && BUILDFLAG(ENABLE_PLUGINS)
+   browser_host->GetPpapiHost()->AddHostFactoryFilter(
+       std::unique_ptr<ppapi::host::HostFactory>(
+           new ChromeBrowserPepperHostFactory(browser_host)));
++#endif
+ }
+ 
+ std::unique_ptr<content::DevToolsManagerDelegate>
+@@ -1302,6 +1329,7 @@ void AlloyContentBrowserClient::
+       },
+       &render_frame_host));
+ 
++#if BUILDFLAG(IS_OHOS) && BUILDFLAG(ENABLE_PRINT_PREVIEW)
+   associated_registry.AddInterface(base::BindRepeating(
+       [](content::RenderFrameHost* render_frame_host,
+          mojo::PendingAssociatedReceiver<printing::mojom::PrintManagerHost>
+@@ -1310,7 +1338,9 @@ void AlloyContentBrowserClient::
+                                                             render_frame_host);
+       },
+       &render_frame_host));
++#endif
+ 
++#if BUILDFLAG(IS_OHOS) && BUILDFLAG(ENABLE_PDF)
+   associated_registry.AddInterface(base::BindRepeating(
+       [](content::RenderFrameHost* render_frame_host,
+          mojo::PendingAssociatedReceiver<pdf::mojom::PdfService> receiver) {
+@@ -1318,6 +1348,7 @@ void AlloyContentBrowserClient::
+                                                   render_frame_host);
+       },
+       &render_frame_host));
++#endif
+ }
+ 
+ std::vector<std::unique_ptr<content::NavigationThrottle>>
+@@ -1325,6 +1356,7 @@ AlloyContentBrowserClient::CreateThrottlesForNavigation(
+     content::NavigationHandle* navigation_handle) {
+   throttle::NavigationThrottleList throttles;
+ 
++#if BUILDFLAG(IS_OHOS) && BUILDFLAG(ENABLE_PDF)
+   if (extensions::ExtensionsEnabled()) {
+     auto pdf_iframe_throttle =
+         PDFIFrameNavigationThrottle::MaybeCreateThrottleFor(navigation_handle);
+@@ -1336,6 +1368,7 @@ AlloyContentBrowserClient::CreateThrottlesForNavigation(
+     if (pdf_throttle)
+       throttles.push_back(std::move(pdf_throttle));
+   }
++#endif
+ 
+   throttle::CreateThrottlesForNavigation(navigation_handle, throttles);
+ 
+@@ -1351,9 +1384,11 @@ AlloyContentBrowserClient::CreateURLLoaderThrottles(
+     int frame_tree_node_id) {
+   std::vector<std::unique_ptr<blink::URLLoaderThrottle>> result;
+ 
++#if BUILDFLAG(IS_OHOS) && BUILDFLAG(ENABLE_PLUGINS)
+   // Used to substitute View ID for PDF contents when using the PDF plugin.
+   result.push_back(std::make_unique<PluginResponseInterceptorURLLoaderThrottle>(
+       request.destination, frame_tree_node_id));
++#endif
+ 
+   Profile* profile = Profile::FromBrowserContext(browser_context);
+ 
+@@ -1376,6 +1411,7 @@ AlloyContentBrowserClient::WillCreateURLLoaderRequestInterceptors(
+   std::vector<std::unique_ptr<content::URLLoaderRequestInterceptor>>
+       interceptors;
+ 
++#if BUILDFLAG(IS_OHOS) && BUILDFLAG(ENABLE_PDF)
+   if (extensions::ExtensionsEnabled()) {
+     auto pdf_interceptor =
+         pdf::PdfURLLoaderRequestInterceptor::MaybeCreateInterceptor(
+@@ -1383,6 +1419,7 @@ AlloyContentBrowserClient::WillCreateURLLoaderRequestInterceptors(
+     if (pdf_interceptor)
+       interceptors.push_back(std::move(pdf_interceptor));
+   }
++#endif
+ 
+   return interceptors;
+ }
+@@ -1403,8 +1440,10 @@ void AlloyContentBrowserClient::ExposeInterfacesToRenderer(
+     service_manager::BinderRegistry* registry,
+     blink::AssociatedInterfaceRegistry* associated_registry,
+     content::RenderProcessHost* host) {
++#if BUILDFLAG(IS_OHOS) && BUILDFLAG(ENABLE_PLUGINS)
+   associated_registry->AddInterface(
+       base::BindRepeating(&BindPluginInfoHost, host->GetID()));
++#endif
+ 
+   if (extensions::ExtensionsEnabled()) {
+     associated_registry->AddInterface(base::BindRepeating(
+@@ -1490,6 +1529,10 @@ void AlloyContentBrowserClient::RegisterNonNetworkSubresourceURLLoaderFactories(
+                      content::CreateFileURLLoaderFactory(
+                          browser_context->GetPath(),
+                          browser_context->GetSharedCorsOriginAccessList()));
++  factories->emplace(url::kResourcesScheme,
++                     content::CreateFileURLLoaderFactory(
++                         browser_context->GetPath(),
++                         browser_context->GetSharedCorsOriginAccessList()));
+ #endif
+   if (!extensions::ExtensionsEnabled())
+     return;
+@@ -1621,6 +1664,11 @@ bool AlloyContentBrowserClient::ConfigureNetworkContextParams(
+   // TODO(cef): Remove this and add required NetworkIsolationKeys,
+   // this is currently not the case and this was not required pre M84.
+   network_context_params->require_network_isolation_key = false;
++#if BUILDFLAG(IS_OHOS)
++  network_context_params->initial_ssl_config = network::mojom::SSLConfig::New();
++  network_context_params->initial_ssl_config->version_min =
++        network::mojom::SSLVersion::kTLS1;
++#endif
+ 
+   return true;
+ }
+@@ -1789,11 +1837,15 @@ base::flat_set<std::string>
+ AlloyContentBrowserClient::GetPluginMimeTypesWithExternalHandlers(
+     content::BrowserContext* browser_context) {
+   base::flat_set<std::string> mime_types;
++#if BUILDFLAG(IS_OHOS) && BUILDFLAG(ENABLE_PLUGINS)
+   auto map = PluginUtils::GetMimeTypeToExtensionIdMap(browser_context);
+   for (const auto& pair : map)
+     mime_types.insert(pair.first);
++#endif
++#if BUILDFLAG(IS_OHOS) && BUILDFLAG(ENABLE_PDF)
+   if (pdf::IsInternalPluginExternallyHandled())
+     mime_types.insert(pdf::kInternalPluginMimeType);
++#endif
+   return mime_types;
+ }
+ 
+@@ -1808,6 +1860,7 @@ bool AlloyContentBrowserClient::ArePersistentMediaDeviceIDsAllowed(
+       ->IsFullCookieAccessAllowed(url, site_for_cookies, top_frame_origin);
+ }
+ 
++#if BUILDFLAG(IS_OHOS) && BUILDFLAG(ENABLE_PLUGINS)
+ bool AlloyContentBrowserClient::ShouldAllowPluginCreation(
+     const url::Origin& embedder_origin,
+     const content::PepperPluginInfo& plugin_info) {
+@@ -1817,6 +1870,7 @@ bool AlloyContentBrowserClient::ShouldAllowPluginCreation(
+ 
+   return true;
+ }
++#endif
+ 
+ #if BUILDFLAG(IS_OHOS)
+ bool AlloyContentBrowserClient::ShouldTryToUseExistingProcessHost(
+@@ -1895,10 +1949,14 @@ void AlloyContentBrowserClient::OnWebContentsCreated(
+ 
+ bool AlloyContentBrowserClient::IsFindInPageDisabledForOrigin(
+     const url::Origin& origin) {
++#if BUILDFLAG(IS_OHOS) && BUILDFLAG(ENABLE_PDF)
+   // For PDF viewing with the PPAPI-free PDF Viewer, find-in-page should only
+   // display results from the PDF content, and not from the UI.
+   return base::FeatureList::IsEnabled(chrome_pdf::features::kPdfUnseasoned) &&
+          IsPdfExtensionOrigin(origin);
++#else
++  return false;
++#endif
+ }
+ 
+ CefRefPtr<CefRequestContextImpl> AlloyContentBrowserClient::request_context()
+diff --git a/src/cef/libcef/browser/alloy/alloy_content_browser_client.h b/src/cef/libcef/browser/alloy/alloy_content_browser_client.h
+index eed665622b379..6bab20215fa3c
+--- a/src/cef/libcef/browser/alloy/alloy_content_browser_client.h
++++ b/src/cef/libcef/browser/alloy/alloy_content_browser_client.h
+@@ -244,9 +244,11 @@ class AlloyContentBrowserClient : public content::ContentBrowserClient {
+       const GURL& scope,
+       const net::SiteForCookies& site_for_cookies,
+       const absl::optional<url::Origin>& top_frame_origin) override;
++#if BUILDFLAG(IS_OHOS) && BUILDFLAG(ENABLE_PLUGINS)
+   bool ShouldAllowPluginCreation(
+       const url::Origin& embedder_origin,
+       const content::PepperPluginInfo& plugin_info) override;
++#endif
+   void OnWebContentsCreated(content::WebContents* web_contents) override;
+   bool IsFindInPageDisabledForOrigin(const url::Origin& origin) override;
+ 
+diff --git a/src/cef/libcef/browser/alloy/browser_platform_delegate_alloy.cc b/src/cef/libcef/browser/alloy/browser_platform_delegate_alloy.cc
+index 082421f19893c..8c27ed9a7c81d
+--- a/src/cef/libcef/browser/alloy/browser_platform_delegate_alloy.cc
++++ b/src/cef/libcef/browser/alloy/browser_platform_delegate_alloy.cc
+@@ -10,14 +10,11 @@
+ #include "libcef/browser/extensions/extension_system.h"
+ #include "libcef/browser/extensions/extension_view_host.h"
+ #include "libcef/browser/extensions/extension_web_contents_observer.h"
+-#include "libcef/browser/printing/print_view_manager.h"
+ #include "libcef/common/extensions/extensions_util.h"
+ #include "libcef/common/net/url_util.h"
+ #include "libcef/features/runtime_checks.h"
+ 
+ #include "base/logging.h"
+-#include "chrome/browser/printing/print_view_manager.h"
+-#include "chrome/browser/printing/print_view_manager_common.h"
+ #include "chrome/browser/ui/prefs/prefs_tab_helper.h"
+ #include "components/find_in_page/find_tab_helper.h"
+ #include "components/find_in_page/find_types.h"
+@@ -31,12 +28,23 @@
+ #include "printing/mojom/print.mojom.h"
+ #include "third_party/blink/public/mojom/frame/find_in_page.mojom.h"
+ 
++#if BUILDFLAG(IS_OHOS)
++#include "printing/buildflags/buildflags.h"
++#if BUILDFLAG(ENABLE_PRINT_PREVIEW)
++#include "libcef/browser/printing/print_view_manager.h"
++#include "chrome/browser/printing/print_view_manager.h"
++#include "chrome/browser/printing/print_view_manager_common.h"
++#endif
++#endif
++
+ namespace {
+ 
++#if BUILDFLAG(IS_OHOS) && BUILDFLAG(ENABLE_PRINT_PREVIEW)
+ printing::CefPrintViewManager* GetPrintViewManager(
+     content::WebContents* web_contents) {
+   return printing::CefPrintViewManager::FromWebContents(web_contents);
+ }
++#endif
+ 
+ }  // namespace
+ 
+@@ -181,7 +189,9 @@ void CefBrowserPlatformDelegateAlloy::BrowserCreated(
+   web_contents_->SetDelegate(static_cast<AlloyBrowserHostImpl*>(browser));
+ 
+   PrefsTabHelper::CreateForWebContents(web_contents_);
++#if BUILDFLAG(IS_OHOS) && BUILDFLAG(ENABLE_PRINT_PREVIEW)
+   printing::CefPrintViewManager::CreateForWebContents(web_contents_);
++#endif
+ 
+   if (extensions::ExtensionsEnabled()) {
+     // Used by the tabs extension API.
+@@ -363,6 +373,7 @@ bool CefBrowserPlatformDelegateAlloy::IsPrintPreviewSupported() const {
+ }
+ 
+ void CefBrowserPlatformDelegateAlloy::Print() {
++#if BUILDFLAG(IS_OHOS) && BUILDFLAG(ENABLE_PRINT_PREVIEW)
+   REQUIRE_ALLOY_RUNTIME();
+ 
+   auto contents_to_use = printing::GetWebContentsToUse(web_contents_);
+@@ -378,12 +389,14 @@ void CefBrowserPlatformDelegateAlloy::Print() {
+   } else {
+     GetPrintViewManager(contents_to_use)->PrintNow(rfh_to_use);
+   }
++#endif
+ }
+ 
+ void CefBrowserPlatformDelegateAlloy::PrintToPDF(
+     const CefString& path,
+     const CefPdfPrintSettings& settings,
+     CefRefPtr<CefPdfPrintCallback> callback) {
++#if BUILDFLAG(IS_OHOS) && BUILDFLAG(ENABLE_PRINT_PREVIEW)
+   REQUIRE_ALLOY_RUNTIME();
+ 
+   auto contents_to_use = printing::GetWebContentsToUse(web_contents_);
+@@ -402,6 +415,7 @@ void CefBrowserPlatformDelegateAlloy::PrintToPDF(
+   GetPrintViewManager(contents_to_use)
+       ->PrintToPDF(rfh_to_use, base::FilePath(path), settings,
+                    std::move(pdf_callback));
++#endif
+ }
+ 
+ void CefBrowserPlatformDelegateAlloy::Find(const CefString& searchText,
+diff --git a/src/cef/libcef/browser/alloy/chrome_browser_process_alloy.cc b/src/cef/libcef/browser/alloy/chrome_browser_process_alloy.cc
+index 0e636b44e566f..72e3e714a4a77
+--- a/src/cef/libcef/browser/alloy/chrome_browser_process_alloy.cc
++++ b/src/cef/libcef/browser/alloy/chrome_browser_process_alloy.cc
+@@ -19,9 +19,7 @@
+ #include "chrome/browser/component_updater/chrome_component_updater_configurator.h"
+ #include "chrome/browser/net/system_network_context_manager.h"
+ #include "chrome/browser/policy/chrome_browser_policy_connector.h"
+-#include "chrome/browser/printing/background_printing_manager.h"
+ #include "chrome/browser/printing/print_job_manager.h"
+-#include "chrome/browser/printing/print_preview_dialog_controller.h"
+ #include "chrome/browser/ui/prefs/pref_watcher.h"
+ #include "components/component_updater/component_updater_service.h"
+ #include "components/component_updater/timer_update_scheduler.h"
+@@ -94,7 +92,9 @@ void ChromeBrowserProcessAlloy::CleanupOnUIThread() {
+   // tasks to run once teardown has started.
+   print_job_manager_->Shutdown();
+   print_job_manager_.reset(nullptr);
++#if BUILDFLAG(IS_OHOS) && BUILDFLAG(ENABLE_PRINT_PREVIEW)
+   print_preview_dialog_controller_ = nullptr;
++#endif
+ 
+   profile_manager_.reset();
+   event_router_forwarder_ = nullptr;
+@@ -112,16 +112,20 @@ void ChromeBrowserProcessAlloy::CleanupOnUIThread() {
+     if (pref_watcher)
+       pref_watcher->Shutdown();
+ 
++#if BUILDFLAG(IS_OHOS) && BUILDFLAG(ENABLE_PRINT_PREVIEW)
+     // Unregister observers for |background_printing_manager_|.
+     if (background_printing_manager_) {
+       background_printing_manager_->DeletePreviewContentsForBrowserContext(
+           profile);
+     }
++#endif
+   }
+ 
+   local_state_.reset();
+   browser_policy_connector_.reset();
++#if BUILDFLAG(IS_OHOS) && BUILDFLAG(ENABLE_PRINT_PREVIEW)
+   background_printing_manager_.reset();
++#endif
+   field_trial_list_.reset();
+   component_updater_.reset();
+ 
+@@ -259,20 +263,28 @@ printing::PrintJobManager* ChromeBrowserProcessAlloy::print_job_manager() {
+ 
+ printing::PrintPreviewDialogController*
+ ChromeBrowserProcessAlloy::print_preview_dialog_controller() {
++#if BUILDFLAG(IS_OHOS) && BUILDFLAG(ENABLE_PRINT_PREVIEW)
+   if (!print_preview_dialog_controller_.get()) {
+     print_preview_dialog_controller_ =
+         new printing::PrintPreviewDialogController();
+   }
+   return print_preview_dialog_controller_.get();
++#else
++  return nullptr;
++#endif
+ }
+ 
+ printing::BackgroundPrintingManager*
+ ChromeBrowserProcessAlloy::background_printing_manager() {
++#if BUILDFLAG(IS_OHOS) && BUILDFLAG(ENABLE_PRINT_PREVIEW)
+   if (!background_printing_manager_.get()) {
+     background_printing_manager_.reset(
+         new printing::BackgroundPrintingManager());
+   }
+   return background_printing_manager_.get();
++#else
++  return nullptr;
++#endif
+ }
+ 
+ IntranetRedirectDetector*
+diff --git a/src/cef/libcef/browser/alloy/chrome_browser_process_alloy.h b/src/cef/libcef/browser/alloy/chrome_browser_process_alloy.h
+index 1a3fea0944156..b6a9253870c95
+--- a/src/cef/libcef/browser/alloy/chrome_browser_process_alloy.h
++++ b/src/cef/libcef/browser/alloy/chrome_browser_process_alloy.h
+@@ -18,6 +18,14 @@
+ #include "chrome/browser/extensions/event_router_forwarder.h"
+ #include "media/media_buildflags.h"
+ 
++#if BUILDFLAG(IS_OHOS)
++#include "printing/buildflags/buildflags.h"
++#if BUILDFLAG(ENABLE_PRINT_PREVIEW)
++#include "chrome/browser/printing/background_printing_manager.h"
++#include "chrome/browser/printing/print_preview_dialog_controller.h"
++#endif
++#endif
++
+ namespace extensions {
+ class ExtensionsBrowserClient;
+ class ExtensionsClient;
+@@ -127,10 +135,12 @@ class ChromeBrowserProcessAlloy : public BrowserProcess {
+   std::unique_ptr<printing::PrintJobManager> print_job_manager_;
+   std::unique_ptr<ChromeProfileManagerAlloy> profile_manager_;
+   scoped_refptr<extensions::EventRouterForwarder> event_router_forwarder_;
++#if BUILDFLAG(IS_OHOS) && BUILDFLAG(ENABLE_PRINT_PREVIEW)
+   scoped_refptr<printing::PrintPreviewDialogController>
+       print_preview_dialog_controller_;
+   std::unique_ptr<printing::BackgroundPrintingManager>
+       background_printing_manager_;
++#endif
+   std::unique_ptr<PrefService> local_state_;
+   // Must be destroyed after |local_state_|.
+   std::unique_ptr<policy::ChromeBrowserPolicyConnector>
+diff --git a/src/cef/libcef/browser/browser_context.cc b/src/cef/libcef/browser/browser_context.cc
+index 63793430388b0..0fdd5a18c9d67
+--- a/src/cef/libcef/browser/browser_context.cc
++++ b/src/cef/libcef/browser/browser_context.cc
+@@ -8,7 +8,6 @@
+ #include <utility>
+ 
+ #include "libcef/browser/context.h"
+-#include "libcef/browser/media_router/media_router_manager.h"
+ #include "libcef/browser/request_context_impl.h"
+ #include "libcef/browser/thread_util.h"
+ #include "libcef/common/cef_switches.h"
+@@ -28,6 +27,10 @@
+ #include "content/public/browser/browser_thread.h"
+ #include "content/public/browser/storage_partition.h"
+ 
++#if BUILDFLAG(IS_OHOS) && BUILDFLAG(OHOS_ENABLE_MEDIA_ROUTER)
++#include "libcef/browser/media_router/media_router_manager.h"
++#endif
++
+ using content::BrowserThread;
+ 
+ namespace {
+@@ -212,8 +215,10 @@ void CefBrowserContext::Shutdown() {
+   // Unregister the context first to avoid re-entrancy during shutdown.
+   g_manager.Get().RemoveImpl(this, cache_path_);
+ 
++#if BUILDFLAG(IS_OHOS) && BUILDFLAG(OHOS_ENABLE_MEDIA_ROUTER)
+   // Destroy objects that may hold references to the MediaRouter.
+   media_router_manager_.reset();
++#endif
+ 
+   // Invalidate any Getter references to this object.
+   weak_ptr_factory_.InvalidateWeakPtrs();
+@@ -264,6 +269,7 @@ CefBrowserContext* CefBrowserContext::FromProfile(const Profile* profile) {
+   if (cef_context)
+     return cef_context;
+ 
++#if defined(OHOS_ENABLE_CEF_CHROME_RUNTIME)
+   if (cef::IsChromeRuntimeEnabled()) {
+     auto* original_profile = profile->GetOriginalProfile();
+     if (original_profile != profile) {
+@@ -273,6 +279,7 @@ CefBrowserContext* CefBrowserContext::FromProfile(const Profile* profile) {
+       return FromBrowserContext(original_profile);
+     }
+   }
++#endif // defined(OHOS_ENABLE_CEF_CHROME_RUNTIME)
+ 
+   return nullptr;
+ }
+@@ -403,6 +410,7 @@ network::mojom::NetworkContext* CefBrowserContext::GetNetworkContext() {
+   return browser_context->GetDefaultStoragePartition()->GetNetworkContext();
+ }
+ 
++#if BUILDFLAG(IS_OHOS) && BUILDFLAG(OHOS_ENABLE_MEDIA_ROUTER)
+ CefMediaRouterManager* CefBrowserContext::GetMediaRouterManager() {
+   CEF_REQUIRE_UIT();
+   if (!media_router_manager_) {
+@@ -410,6 +418,7 @@ CefMediaRouterManager* CefBrowserContext::GetMediaRouterManager() {
+   }
+   return media_router_manager_.get();
+ }
++#endif
+ 
+ CefBrowserContext::CookieableSchemes CefBrowserContext::GetCookieableSchemes()
+     const {
+diff --git a/src/cef/libcef/browser/browser_context.h b/src/cef/libcef/browser/browser_context.h
+index 3bae0202a7521..f8d95ac12f29b
+--- a/src/cef/libcef/browser/browser_context.h
++++ b/src/cef/libcef/browser/browser_context.h
+@@ -22,6 +22,10 @@
+ #include "third_party/abseil-cpp/absl/types/optional.h"
+ #include "url/origin.h"
+ 
++#if BUILDFLAG(IS_OHOS)
++#include "media/media_buildflags.h"
++#endif
++
+ /*
+ // Classes used in request processing (network, storage, service, etc.):
+ //
+@@ -220,7 +224,9 @@ class CefBrowserContext {
+ 
+   scoped_refptr<CefIOThreadState> iothread_state_;
+   CookieableSchemes cookieable_schemes_;
++#if BUILDFLAG(IS_OHOS) && BUILDFLAG(OHOS_ENABLE_MEDIA_ROUTER)
+   std::unique_ptr<CefMediaRouterManager> media_router_manager_;
++#endif
+ 
+   // CefRequestContextImpl objects referencing this object.
+   std::set<CefRequestContextImpl*> request_context_set_;
+diff --git a/src/cef/libcef/browser/browser_context_keyed_service_factories.cc b/src/cef/libcef/browser/browser_context_keyed_service_factories.cc
+index 32a11de3e1280..a46ac3be4a3f6
+--- a/src/cef/libcef/browser/browser_context_keyed_service_factories.cc
++++ b/src/cef/libcef/browser/browser_context_keyed_service_factories.cc
+@@ -6,8 +6,6 @@
+ #include "libcef/common/extensions/extensions_util.h"
+ 
+ #include "chrome/browser/content_settings/cookie_settings_factory.h"
+-#include "chrome/browser/media/router/chrome_media_router_factory.h"
+-#include "chrome/browser/plugins/plugin_prefs_factory.h"
+ #include "chrome/browser/profiles/renderer_updater_factory.h"
+ #include "chrome/browser/spellchecker/spellcheck_factory.h"
+ #include "chrome/browser/themes/theme_service_factory.h"
+@@ -16,12 +14,30 @@
+ #include "extensions/browser/api/storage/storage_frontend.h"
+ #include "extensions/browser/renderer_startup_helper.h"
+ 
++#if BUILDFLAG(IS_OHOS)
++#include "ppapi/buildflags/buildflags.h"
++#if BUILDFLAG(ENABLE_PLUGINS)
++#include "chrome/browser/plugins/plugin_prefs_factory.h"
++#endif
++#endif
++
++#if BUILDFLAG(IS_OHOS)
++#include "media/media_buildflags.h"
++#if BUILDFLAG(OHOS_ENABLE_MEDIA_ROUTER)
++#include "chrome/browser/media/router/chrome_media_router_factory.h"
++#endif
++#endif
++
+ namespace cef {
+ 
+ void EnsureBrowserContextKeyedServiceFactoriesBuilt() {
+   CookieSettingsFactory::GetInstance();
++#if BUILDFLAG(IS_OHOS) && BUILDFLAG(OHOS_ENABLE_MEDIA_ROUTER)
+   media_router::ChromeMediaRouterFactory::GetInstance();
++#endif
++#if BUILDFLAG(IS_OHOS) && BUILDFLAG(ENABLE_PLUGINS)
+   PluginPrefsFactory::GetInstance();
++#endif
+   PrefsTabHelper::GetServiceInstance();
+   RendererUpdaterFactory::GetInstance();
+   SpellcheckServiceFactory::GetInstance();
