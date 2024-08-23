@@ -1810,3 +1810,1728 @@ index c5e09131cbad3..e1db2aa4605e3
  //
  
  #ifndef CEF_INCLUDE_CAPI_CEF_LIFE_SPAN_HANDLER_CAPI_H_
+diff --git a/src/cef/include/capi/cef_load_handler_capi.h b/src/cef/include/capi/cef_load_handler_capi.h
+index 317444b6f19f7..e8f8e10193d2f
+--- a/src/cef/include/capi/cef_load_handler_capi.h
++++ b/src/cef/include/capi/cef_load_handler_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=812538f84d327ea24469bcfc50957df699dc6edd$
++// $hash=bf5522dc1385a750cad8b9197a588045beaaba58$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_CEF_LOAD_HANDLER_CAPI_H_
+diff --git a/src/cef/include/capi/cef_menu_model_capi.h b/src/cef/include/capi/cef_menu_model_capi.h
+index a1f7920ce974e..6b260824da7c7
+--- a/src/cef/include/capi/cef_menu_model_capi.h
++++ b/src/cef/include/capi/cef_menu_model_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=9f30f2caa9eedc0d4fe963dbf0127602ffcbec61$
++// $hash=a64d72dbd200dfb6a03a2a370b756e559422e97f$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_CEF_MENU_MODEL_CAPI_H_
+diff --git a/src/cef/include/capi/cef_menu_model_delegate_capi.h b/src/cef/include/capi/cef_menu_model_delegate_capi.h
+index bd4628568f266..a0b114e251387
+--- a/src/cef/include/capi/cef_menu_model_delegate_capi.h
++++ b/src/cef/include/capi/cef_menu_model_delegate_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=bdb670bcaa9eb9f5748900ad25bcc061155d6076$
++// $hash=5525030c1b87ab3430a11e7e12db71505531f548$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_CEF_MENU_MODEL_DELEGATE_CAPI_H_
+diff --git a/src/cef/include/capi/cef_navigation_entry_capi.h b/src/cef/include/capi/cef_navigation_entry_capi.h
+index 6115f52a09330..e1202c0483f95
+--- a/src/cef/include/capi/cef_navigation_entry_capi.h
++++ b/src/cef/include/capi/cef_navigation_entry_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=bdaa64de1cef6de3abdcff88b64b32afc718b238$
++// $hash=0e0d367fabdb12792de5ba8c588fe4bbc035b7a9$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_CEF_NAVIGATION_ENTRY_CAPI_H_
+diff --git a/src/cef/include/capi/cef_origin_whitelist_capi.h b/src/cef/include/capi/cef_origin_whitelist_capi.h
+index 563bbdd2cd239..ca47638d2f2e1
+--- a/src/cef/include/capi/cef_origin_whitelist_capi.h
++++ b/src/cef/include/capi/cef_origin_whitelist_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=0939a44345bea8df7ca5f1dbd6afbe41972121f2$
++// $hash=41e29ffa7778537b0bfec9d7094babf6b3f6db69$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_CEF_ORIGIN_WHITELIST_CAPI_H_
+diff --git a/src/cef/include/capi/cef_parser_capi.h b/src/cef/include/capi/cef_parser_capi.h
+index d3ec0ee5d4eb5..37d43cf8f12ac
+--- a/src/cef/include/capi/cef_parser_capi.h
++++ b/src/cef/include/capi/cef_parser_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=f5e1c0fc43c6e85dbafa66975d9dc5e2bc7be69f$
++// $hash=de8e3f97b060588604ec89b3cb5e2ddcd9e11499$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_CEF_PARSER_CAPI_H_
+diff --git a/src/cef/include/capi/cef_path_util_capi.h b/src/cef/include/capi/cef_path_util_capi.h
+index 3cbb3ba4b01d0..c49b5a0bc3be1
+--- a/src/cef/include/capi/cef_path_util_capi.h
++++ b/src/cef/include/capi/cef_path_util_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=41ddd04d4efb147b05eb93816af1591ec3b61b76$
++// $hash=9955c85f6282d1ee103791206079c1d2100ab7be$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_CEF_PATH_UTIL_CAPI_H_
+diff --git a/src/cef/include/capi/cef_permission_request_capi.h b/src/cef/include/capi/cef_permission_request_capi.h
+index 33c483a4c2b1e..f056f4d95be1d
+--- a/src/cef/include/capi/cef_permission_request_capi.h
++++ b/src/cef/include/capi/cef_permission_request_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=e930f6445aaeb80ff2f6b1a3077d7d0d4bbd7109$
++// $hash=51af1ce96096db7ed212692b5915a74a18e0222d$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_CEF_PERMISSION_REQUEST_CAPI_H_
+@@ -60,18 +60,18 @@ typedef struct _cef_access_request_t {
+   // Get the origin that is trying to acess the resource.
+   ///
+   // The resulting string must be freed by calling cef_string_userfree_free().
+-  cef_string_userfree_t(CEF_CALLBACK *origin)(
+-      struct _cef_access_request_t *self);
++  cef_string_userfree_t(CEF_CALLBACK* origin)(
++      struct _cef_access_request_t* self);
+ 
+   ///
+   // Get the resource that the origin is trying to acess.
+   ///
+-  int(CEF_CALLBACK *resource_acess_id)(struct _cef_access_request_t *self);
++  int(CEF_CALLBACK* resource_acess_id)(struct _cef_access_request_t* self);
+ 
+   ///
+   // Report whether the origin is allowed to acess the resource.
+   ///
+-  void(CEF_CALLBACK *report_request_result)(struct _cef_access_request_t *self,
++  void(CEF_CALLBACK* report_request_result)(struct _cef_access_request_t* self,
+                                             int allowed);
+ } cef_access_request_t;
+ 
+@@ -90,14 +90,15 @@ typedef struct _cef_permission_request_t {
+   // set for that origin. The host application should invoke the specified
+   // callback with the desired permission state.
+   ///
+-  void(CEF_CALLBACK *on_geolocation_show)(
+-      struct _cef_permission_request_t *self, const cef_string_t *origin);
++  void(CEF_CALLBACK* on_geolocation_show)(
++      struct _cef_permission_request_t* self,
++      const cef_string_t* origin);
+ 
+   ///
+   // Revert the operation in the OnGeolocationShow.
+   ///
+-  void(CEF_CALLBACK *on_geolocation_hide)(
+-      struct _cef_permission_request_t *self);
++  void(CEF_CALLBACK* on_geolocation_hide)(
++      struct _cef_permission_request_t* self);
+ 
+   ///
+   // Notify the host application that web content from the specified origin is
+@@ -105,16 +106,16 @@ typedef struct _cef_permission_request_t {
+   // set for that origin. The host application should invoke the specified
+   // callback with the desired permission state.
+   ///
+-  void(CEF_CALLBACK *on_permission_request)(
+-      struct _cef_permission_request_t *self,
+-      struct _cef_access_request_t *request);
++  void(CEF_CALLBACK* on_permission_request)(
++      struct _cef_permission_request_t* self,
++      struct _cef_access_request_t* request);
+ 
+   ///
+   // Revert the operation in the OnPermissionRequest.
+   ///
+-  void(CEF_CALLBACK *on_permission_request_canceled)(
+-      struct _cef_permission_request_t *self,
+-      struct _cef_access_request_t *request);
++  void(CEF_CALLBACK* on_permission_request_canceled)(
++      struct _cef_permission_request_t* self,
++      struct _cef_access_request_t* request);
+ } cef_permission_request_t;
+ 
+ ///
+@@ -129,51 +130,55 @@ typedef struct _cef_browser_permission_request_delegate_t {
+   ///
+   // Handle the Geolocation permission requests.
+   ///
+-  void(CEF_CALLBACK *ask_geolocation_permission)(
+-      struct _cef_browser_permission_request_delegate_t *self,
+-      const cef_string_t *origin, cef_permission_callback_t callback);
++  void(CEF_CALLBACK* ask_geolocation_permission)(
++      struct _cef_browser_permission_request_delegate_t* self,
++      const cef_string_t* origin,
++      cef_permission_callback_t callback);
+ 
+   ///
+   // Cancel the Geolocation permission requests.
+   ///
+-  void(CEF_CALLBACK *abort_ask_geolocation_permission)(
+-      struct _cef_browser_permission_request_delegate_t *self,
+-      const cef_string_t *origin);
++  void(CEF_CALLBACK* abort_ask_geolocation_permission)(
++      struct _cef_browser_permission_request_delegate_t* self,
++      const cef_string_t* origin);
+ 
+   ///
+   // Handle the Protected Media Identifier permission requests.
+   ///
+-  void(CEF_CALLBACK *ask_protected_media_identifier_permission)(
+-      struct _cef_browser_permission_request_delegate_t *self,
+-      const cef_string_t *origin, cef_permission_callback_t callback);
++  void(CEF_CALLBACK* ask_protected_media_identifier_permission)(
++      struct _cef_browser_permission_request_delegate_t* self,
++      const cef_string_t* origin,
++      cef_permission_callback_t callback);
+ 
+   ///
+   // Cancel the Protected Media Identifier permission requests.
+   ///
+-  void(CEF_CALLBACK *abort_ask_protected_media_identifier_permission)(
+-      struct _cef_browser_permission_request_delegate_t *self,
+-      const cef_string_t *origin);
++  void(CEF_CALLBACK* abort_ask_protected_media_identifier_permission)(
++      struct _cef_browser_permission_request_delegate_t* self,
++      const cef_string_t* origin);
+ 
+   ///
+   // Handle the MIDI Sysex permission requests.
+   ///
+-  void(CEF_CALLBACK *ask_midisysex_permission)(
+-      struct _cef_browser_permission_request_delegate_t *self,
+-      const cef_string_t *origin, cef_permission_callback_t callback);
++  void(CEF_CALLBACK* ask_midisysex_permission)(
++      struct _cef_browser_permission_request_delegate_t* self,
++      const cef_string_t* origin,
++      cef_permission_callback_t callback);
+ 
+   ///
+   // Cancel the MIDI Sysex permission requests.
+   ///
+-  void(CEF_CALLBACK *abort_ask_midisysex_permission)(
+-      struct _cef_browser_permission_request_delegate_t *self,
+-      const cef_string_t *origin);
++  void(CEF_CALLBACK* abort_ask_midisysex_permission)(
++      struct _cef_browser_permission_request_delegate_t* self,
++      const cef_string_t* origin);
+ 
+   ///
+   // The callback for the Geolocation permission requests.
+   ///
+-  void(CEF_CALLBACK *notify_geolocation_permission)(
+-      struct _cef_browser_permission_request_delegate_t *self, int value,
+-      const cef_string_t *origin);
++  void(CEF_CALLBACK* notify_geolocation_permission)(
++      struct _cef_browser_permission_request_delegate_t* self,
++      int value,
++      const cef_string_t* origin);
+ } cef_browser_permission_request_delegate_t;
+ 
+ ///
+@@ -190,32 +195,33 @@ typedef struct _cef_geolocation_acess_t {
+   // Return true (1) if the geolocation permission state is set for the
+   // specified origin.
+   ///
+-  int(CEF_CALLBACK *contain_origin)(struct _cef_geolocation_acess_t *self,
+-                                    const cef_string_t *origin);
++  int(CEF_CALLBACK* contain_origin)(struct _cef_geolocation_acess_t* self,
++                                    const cef_string_t* origin);
+ 
+   ///
+   // Return true (1) if the geolocation permission state set for the specified
+   // origin is true (1).
+   ///
+-  int(CEF_CALLBACK *is_origin_access_enabled)(
+-      struct _cef_geolocation_acess_t *self, const cef_string_t *origin);
++  int(CEF_CALLBACK* is_origin_access_enabled)(
++      struct _cef_geolocation_acess_t* self,
++      const cef_string_t* origin);
+ 
+   ///
+   // Set the geolocation permission state to true (1)  for the specified origin.
+   ///
+-  void(CEF_CALLBACK *enabled)(struct _cef_geolocation_acess_t *self,
+-                              const cef_string_t *origin);
++  void(CEF_CALLBACK* enabled)(struct _cef_geolocation_acess_t* self,
++                              const cef_string_t* origin);
+ 
+   ///
+   // Set the geolocation permission state to false (0)  for the specified
+   // origin.
+   ///
+-  void(CEF_CALLBACK *disabled)(struct _cef_geolocation_acess_t *self,
+-                               const cef_string_t *origin);
++  void(CEF_CALLBACK* disabled)(struct _cef_geolocation_acess_t* self,
++                               const cef_string_t* origin);
+ } cef_geolocation_acess_t;
+ 
+ #ifdef __cplusplus
+ }
+ #endif
+ 
+-#endif // CEF_INCLUDE_CAPI_CEF_PERMISSION_REQUEST_CAPI_H_
++#endif  // CEF_INCLUDE_CAPI_CEF_PERMISSION_REQUEST_CAPI_H_
+diff --git a/src/cef/include/capi/cef_print_handler_capi.h b/src/cef/include/capi/cef_print_handler_capi.h
+index df321dea177b1..0563268bfb5e9
+--- a/src/cef/include/capi/cef_print_handler_capi.h
++++ b/src/cef/include/capi/cef_print_handler_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=e26be3efc18d8c79d019c02b1d73a7ec2866b142$
++// $hash=3a9d7294c9a4c3aeafe1231c7a3ba5afd7fad0b5$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_CEF_PRINT_HANDLER_CAPI_H_
+diff --git a/src/cef/include/capi/cef_print_settings_capi.h b/src/cef/include/capi/cef_print_settings_capi.h
+index e611abfd47243..2b776c142d53a
+--- a/src/cef/include/capi/cef_print_settings_capi.h
++++ b/src/cef/include/capi/cef_print_settings_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=fdbd26f9dd20dbd7813fc17a8c34650b2da19581$
++// $hash=eef0d62c1e839660037f32600f5a396d3dce3019$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_CEF_PRINT_SETTINGS_CAPI_H_
+diff --git a/src/cef/include/capi/cef_process_message_capi.h b/src/cef/include/capi/cef_process_message_capi.h
+index b87770ba48738..206ea501212be
+--- a/src/cef/include/capi/cef_process_message_capi.h
++++ b/src/cef/include/capi/cef_process_message_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=2549ea10cd3a41bc04ab81bad24eb12787de68b9$
++// $hash=12e4604521c186e03d984931e66613d33fc32ffd$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_CEF_PROCESS_MESSAGE_CAPI_H_
+diff --git a/src/cef/include/capi/cef_process_util_capi.h b/src/cef/include/capi/cef_process_util_capi.h
+index f22dd7e8ab6e4..3f609f440eb2f
+--- a/src/cef/include/capi/cef_process_util_capi.h
++++ b/src/cef/include/capi/cef_process_util_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=1f2b752c4e314b240ce95cb3b87863c2f99534a8$
++// $hash=230303a48ff28b79f289c199b06a4d3540cb36af$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_CEF_PROCESS_UTIL_CAPI_H_
+diff --git a/src/cef/include/capi/cef_registration_capi.h b/src/cef/include/capi/cef_registration_capi.h
+index 3285569eb8f08..2bdb0e51830a9
+--- a/src/cef/include/capi/cef_registration_capi.h
++++ b/src/cef/include/capi/cef_registration_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=d5efa37953d0f0097fef20bc18f4938621c6b168$
++// $hash=9dbe775fa78723fa6695c778fbe8cdbd36b0a888$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_CEF_REGISTRATION_CAPI_H_
+diff --git a/src/cef/include/capi/cef_render_handler_capi.h b/src/cef/include/capi/cef_render_handler_capi.h
+index 605ec1c02ceb2..16c82b8fa0c46
+--- a/src/cef/include/capi/cef_render_handler_capi.h
++++ b/src/cef/include/capi/cef_render_handler_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=50df1cb9393d36c975aecddb2775ada0d8b9eeec$
++// $hash=3a236866417ec98ad3fb5f325b07250a31c0183c$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_CEF_RENDER_HANDLER_CAPI_H_
+diff --git a/src/cef/include/capi/cef_render_process_handler_capi.h b/src/cef/include/capi/cef_render_process_handler_capi.h
+index 2fea446ebe519..1ab59d126d5b1
+--- a/src/cef/include/capi/cef_render_process_handler_capi.h
++++ b/src/cef/include/capi/cef_render_process_handler_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=0b8abb0e55cb56fcb778ced72a61a108c2b28011$
++// $hash=5827d7a0ee7343daab5fc2a36bdbfabb9d85bb37$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_CEF_RENDER_PROCESS_HANDLER_CAPI_H_
+diff --git a/src/cef/include/capi/cef_request_capi.h b/src/cef/include/capi/cef_request_capi.h
+index 3ddd18fef51ce..66d1721d93be6
+--- a/src/cef/include/capi/cef_request_capi.h
++++ b/src/cef/include/capi/cef_request_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=47b361878452f2a94e559782913d80beb0dba25a$
++// $hash=77ebea253e3607ed44c60791bb461a202d95c222$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_CEF_REQUEST_CAPI_H_
+diff --git a/src/cef/include/capi/cef_request_context_capi.h b/src/cef/include/capi/cef_request_context_capi.h
+index 857f918122f6e..28508ef72433d
+--- a/src/cef/include/capi/cef_request_context_capi.h
++++ b/src/cef/include/capi/cef_request_context_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=d2ccf65028b87821b92eda7e8d715ec98f8e1623$
++// $hash=c6c04067690990978ca3bbbbc6ddd6f5a0186f91$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_CEF_REQUEST_CONTEXT_CAPI_H_
+@@ -45,7 +45,6 @@
+ #include "include/capi/cef_data_base_capi.h"
+ #include "include/capi/cef_extension_capi.h"
+ #include "include/capi/cef_extension_handler_capi.h"
+-#include "include/capi/cef_media_router_capi.h"
+ #include "include/capi/cef_values_capi.h"
+ #include "include/capi/cef_web_storage_capi.h"
+ 
+@@ -370,15 +369,6 @@ typedef struct _cef_request_context_t {
+   struct _cef_extension_t*(CEF_CALLBACK* get_extension)(
+       struct _cef_request_context_t* self,
+       const cef_string_t* extension_id);
+-
+-  ///
+-  // Returns the MediaRouter object associated with this context.  If |callback|
+-  // is non-NULL it will be executed asnychronously on the UI thread after the
+-  // manager's context has been initialized.
+-  ///
+-  struct _cef_media_router_t*(CEF_CALLBACK* get_media_router)(
+-      struct _cef_request_context_t* self,
+-      struct _cef_completion_callback_t* callback);
+ } cef_request_context_t;
+ 
+ ///
+diff --git a/src/cef/include/capi/cef_request_context_handler_capi.h b/src/cef/include/capi/cef_request_context_handler_capi.h
+index eb1e08b0c8a5b..1a2bb1d2d2e99
+--- a/src/cef/include/capi/cef_request_context_handler_capi.h
++++ b/src/cef/include/capi/cef_request_context_handler_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=b44d320d5cceb5022543e8154170b8d276628c76$
++// $hash=f517370ae17962732a0894555330fd002860b83a$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_CEF_REQUEST_CONTEXT_HANDLER_CAPI_H_
+@@ -45,12 +45,13 @@
+ #include "include/capi/cef_frame_capi.h"
+ #include "include/capi/cef_request_capi.h"
+ #include "include/capi/cef_resource_request_handler_capi.h"
+-#include "include/capi/cef_web_plugin_capi.h"
+ 
+ #ifdef __cplusplus
+ extern "C" {
+ #endif
+ 
++// #include "include/cef_web_plugin.h" // !enable_plugins
++
+ ///
+ // Implement this structure to provide handler implementations. The handler
+ // instance will not be released until all objects related to the context have
+diff --git a/src/cef/include/capi/cef_request_handler_capi.h b/src/cef/include/capi/cef_request_handler_capi.h
+index a5daa4db861ba..d55682ebb3f26
+--- a/src/cef/include/capi/cef_request_handler_capi.h
++++ b/src/cef/include/capi/cef_request_handler_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=0a47add5335ff2d73e08d1e491f2561356f63fcd$
++// $hash=76ffdecdfc2fb8b6956b936d0a5762e4f7b122a1$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_CEF_REQUEST_HANDLER_CAPI_H_
+diff --git a/src/cef/include/capi/cef_resource_bundle_capi.h b/src/cef/include/capi/cef_resource_bundle_capi.h
+index 9e83df4059bfb..e10a539cdc16b
+--- a/src/cef/include/capi/cef_resource_bundle_capi.h
++++ b/src/cef/include/capi/cef_resource_bundle_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=a9e35ca17785f77666db7650208cacfd9a85c3e0$
++// $hash=d45529ccb797163f6ff0b790d4959e7644355a8b$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_CEF_RESOURCE_BUNDLE_CAPI_H_
+diff --git a/src/cef/include/capi/cef_resource_bundle_handler_capi.h b/src/cef/include/capi/cef_resource_bundle_handler_capi.h
+index a72d6dffd3f87..c025ec51f7998
+--- a/src/cef/include/capi/cef_resource_bundle_handler_capi.h
++++ b/src/cef/include/capi/cef_resource_bundle_handler_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=3d7b3d4702c8d35dc8780f9e87eb7560d6ce1dee$
++// $hash=0436aa15546615fe9252d46ea89887ec59c0e85d$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_CEF_RESOURCE_BUNDLE_HANDLER_CAPI_H_
+diff --git a/src/cef/include/capi/cef_resource_handler_capi.h b/src/cef/include/capi/cef_resource_handler_capi.h
+index 4c581cb71fb09..e73f1484e1fec
+--- a/src/cef/include/capi/cef_resource_handler_capi.h
++++ b/src/cef/include/capi/cef_resource_handler_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=67df3d56f0cc0f58d2b0a2fe884bbb2c1c39813f$
++// $hash=443ce8d80b80b55337069a9a118fb0eb645faba3$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_CEF_RESOURCE_HANDLER_CAPI_H_
+diff --git a/src/cef/include/capi/cef_resource_request_handler_capi.h b/src/cef/include/capi/cef_resource_request_handler_capi.h
+index 1773465c3aa3e..0f06b2f65f44c
+--- a/src/cef/include/capi/cef_resource_request_handler_capi.h
++++ b/src/cef/include/capi/cef_resource_request_handler_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=3d5c3c54c9f7eedc5cd1dd61c0f69edcd6a1143a$
++// $hash=d95bcd8d70029011eb9e0f2c64febb627939d121$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_CEF_RESOURCE_REQUEST_HANDLER_CAPI_H_
+diff --git a/src/cef/include/capi/cef_response_capi.h b/src/cef/include/capi/cef_response_capi.h
+index d4973e6cdaf75..7e03febd1c38f
+--- a/src/cef/include/capi/cef_response_capi.h
++++ b/src/cef/include/capi/cef_response_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=6ebf7adcdaee57772810c1528b27140ae95966d0$
++// $hash=0b0b89911503aeb4fc52afa8d0d0f4e103181b6c$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_CEF_RESPONSE_CAPI_H_
+diff --git a/src/cef/include/capi/cef_response_filter_capi.h b/src/cef/include/capi/cef_response_filter_capi.h
+index 2267054ca8133..66708ecccb2bc
+--- a/src/cef/include/capi/cef_response_filter_capi.h
++++ b/src/cef/include/capi/cef_response_filter_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=fb06b9630b95fedb5d202aab7814d914ab7c943b$
++// $hash=557c259e90896df250dafa16c1205a817204dc22$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_CEF_RESPONSE_FILTER_CAPI_H_
+diff --git a/src/cef/include/capi/cef_scheme_capi.h b/src/cef/include/capi/cef_scheme_capi.h
+index 444506c93f356..fa07fd7691c7a
+--- a/src/cef/include/capi/cef_scheme_capi.h
++++ b/src/cef/include/capi/cef_scheme_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=df8c46dd19ef6a3964c49d79e770de6e4245e208$
++// $hash=2dd528ca9ff88be60782b87036f464a6bd6e69a5$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_CEF_SCHEME_CAPI_H_
+diff --git a/src/cef/include/capi/cef_server_capi.h b/src/cef/include/capi/cef_server_capi.h
+index a3aa6a64d9ad1..f23b3545406dd
+--- a/src/cef/include/capi/cef_server_capi.h
++++ b/src/cef/include/capi/cef_server_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=72c2b4f976016cea50e54a386c09a786973c01a3$
++// $hash=58c1f77a5342d836003a2246fcbe501a6f05086b$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_CEF_SERVER_CAPI_H_
+diff --git a/src/cef/include/capi/cef_ssl_info_capi.h b/src/cef/include/capi/cef_ssl_info_capi.h
+index b122a75862ceb..2a76452b3b9fe
+--- a/src/cef/include/capi/cef_ssl_info_capi.h
++++ b/src/cef/include/capi/cef_ssl_info_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=d72f3b34b4150f29f1491b2c729f4a8afc4a33f4$
++// $hash=9a4618d543430a0818201958879d89a6b082019b$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_CEF_SSL_INFO_CAPI_H_
+diff --git a/src/cef/include/capi/cef_ssl_status_capi.h b/src/cef/include/capi/cef_ssl_status_capi.h
+index 49268b3f2413e..f9467c7c8accf
+--- a/src/cef/include/capi/cef_ssl_status_capi.h
++++ b/src/cef/include/capi/cef_ssl_status_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=1bc8a73a196fbbb6cec3dd1738b817575b17706d$
++// $hash=60394d189c5dfa8625f7e5fdab03eeda1fce7c5a$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_CEF_SSL_STATUS_CAPI_H_
+diff --git a/src/cef/include/capi/cef_stream_capi.h b/src/cef/include/capi/cef_stream_capi.h
+index 3197a5b1f5ddf..357af53881211
+--- a/src/cef/include/capi/cef_stream_capi.h
++++ b/src/cef/include/capi/cef_stream_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=87f6cad177614ece33d9574f0f2964e5bb97d613$
++// $hash=3c7df6e11c46a966f2bb7d2e751927779ddf4dd2$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_CEF_STREAM_CAPI_H_
+diff --git a/src/cef/include/capi/cef_string_visitor_capi.h b/src/cef/include/capi/cef_string_visitor_capi.h
+index 4acd1b472ab4e..89499c9ff2e9b
+--- a/src/cef/include/capi/cef_string_visitor_capi.h
++++ b/src/cef/include/capi/cef_string_visitor_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=398537ec88bfe902c49908db4a549da297594b70$
++// $hash=215af99d25f001165995c9fa88c59d6e8a05f28f$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_CEF_STRING_VISITOR_CAPI_H_
+diff --git a/src/cef/include/capi/cef_task_capi.h b/src/cef/include/capi/cef_task_capi.h
+index 5f6281e1b943b..b9d721b00f254
+--- a/src/cef/include/capi/cef_task_capi.h
++++ b/src/cef/include/capi/cef_task_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=e943dd2af818e5a5f19f6cbd1648896684c666c6$
++// $hash=be97992f2fd5e08cf5483c55a1db72a74a1fa5c6$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_CEF_TASK_CAPI_H_
+diff --git a/src/cef/include/capi/cef_thread_capi.h b/src/cef/include/capi/cef_thread_capi.h
+index 4b99983d5b3ba..5f496f2368f92
+--- a/src/cef/include/capi/cef_thread_capi.h
++++ b/src/cef/include/capi/cef_thread_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=d99ffc2270c1cf8b0f06dd08c1b6e9b27cee4bc8$
++// $hash=6ef25dfdc109d397dd9ac685605c143ed453843d$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_CEF_THREAD_CAPI_H_
+diff --git a/src/cef/include/capi/cef_trace_capi.h b/src/cef/include/capi/cef_trace_capi.h
+index df39462f05228..19792c5ed1145
+--- a/src/cef/include/capi/cef_trace_capi.h
++++ b/src/cef/include/capi/cef_trace_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=a7b4410e0a35eb0aba747014665419fb6b6fcb67$
++// $hash=95fee99cebd49941b0016a94fe1377a273df875f$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_CEF_TRACE_CAPI_H_
+diff --git a/src/cef/include/capi/cef_urlrequest_capi.h b/src/cef/include/capi/cef_urlrequest_capi.h
+index 75a834c811c31..50ba3da3394b0
+--- a/src/cef/include/capi/cef_urlrequest_capi.h
++++ b/src/cef/include/capi/cef_urlrequest_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=a14d77cd7756797afb4db3d28a2359da53011bfa$
++// $hash=1a7f7266ca653ae00fda873d7b1161fda5be5655$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_CEF_URLREQUEST_CAPI_H_
+diff --git a/src/cef/include/capi/cef_v8_capi.h b/src/cef/include/capi/cef_v8_capi.h
+index 824c3dbb48e2f..21a1134c93647
+--- a/src/cef/include/capi/cef_v8_capi.h
++++ b/src/cef/include/capi/cef_v8_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=2bdcad7f8e3c03285a5e5ddb9a02a5a2182f254c$
++// $hash=515a6f62bb5217ba8ec2f7d39ab80c8309969a36$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_CEF_V8_CAPI_H_
+diff --git a/src/cef/include/capi/cef_values_capi.h b/src/cef/include/capi/cef_values_capi.h
+index 90df63d6cedeb..dc4674a91eb70
+--- a/src/cef/include/capi/cef_values_capi.h
++++ b/src/cef/include/capi/cef_values_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=c557496bdc1403b25b22ca9354a942478131c7ce$
++// $hash=ddc15ea7b9330cf163a23d502e104084469fceee$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_CEF_VALUES_CAPI_H_
+diff --git a/src/cef/include/capi/cef_waitable_event_capi.h b/src/cef/include/capi/cef_waitable_event_capi.h
+index aa507e1083f85..ba326fa23f21e
+--- a/src/cef/include/capi/cef_waitable_event_capi.h
++++ b/src/cef/include/capi/cef_waitable_event_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=aff380a4fa3f1a26063170381d47c67971511f1d$
++// $hash=5f8073d54b2908fb4257e39f9a7ec377c904607d$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_CEF_WAITABLE_EVENT_CAPI_H_
+diff --git a/src/cef/include/capi/cef_web_storage_capi.h b/src/cef/include/capi/cef_web_storage_capi.h
+index b013bf001c667..97bf6d8a52884
+--- a/src/cef/include/capi/cef_web_storage_capi.h
++++ b/src/cef/include/capi/cef_web_storage_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=4f98d594eaa1a0b41b534f51da2639bfc9a12778$
++// $hash=94416352092795abfea395fe1b6853fea26edf5e$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_CEF_WEB_STORAGE_CAPI_H_
+diff --git a/src/cef/include/capi/cef_x509_certificate_capi.h b/src/cef/include/capi/cef_x509_certificate_capi.h
+index 8650b4055db2a..7c663501075c7
+--- a/src/cef/include/capi/cef_x509_certificate_capi.h
++++ b/src/cef/include/capi/cef_x509_certificate_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=32b942f6b50b842ddec08addc2b5794f2a272dbe$
++// $hash=50344d992070d4f7c39071988e3df72aa1eab9df$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_CEF_X509_CERTIFICATE_CAPI_H_
+diff --git a/src/cef/include/capi/cef_xml_reader_capi.h b/src/cef/include/capi/cef_xml_reader_capi.h
+index 75f32a4d1d897..0245d236da957
+--- a/src/cef/include/capi/cef_xml_reader_capi.h
++++ b/src/cef/include/capi/cef_xml_reader_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=c3bdf957dfd307568842b95599e3259d4c8d8f44$
++// $hash=48faeb26812f4fa6d8965c47acc96e635c45d27a$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_CEF_XML_READER_CAPI_H_
+diff --git a/src/cef/include/capi/cef_zip_reader_capi.h b/src/cef/include/capi/cef_zip_reader_capi.h
+index 5d899353362ca..27c81799e25bd
+--- a/src/cef/include/capi/cef_zip_reader_capi.h
++++ b/src/cef/include/capi/cef_zip_reader_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=ac91bcd40e1439ee1e742cc47989530b112c99bd$
++// $hash=28f7ff6c3af903a645adc15ad4b696939e79df19$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_CEF_ZIP_READER_CAPI_H_
+diff --git a/src/cef/include/capi/test/cef_test_helpers_capi.h b/src/cef/include/capi/test/cef_test_helpers_capi.h
+index 128ab4c64925e..092ebf4d02b81
+--- a/src/cef/include/capi/test/cef_test_helpers_capi.h
++++ b/src/cef/include/capi/test/cef_test_helpers_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=584acfdb7be699b0192c46ac9fa88084f141e845$
++// $hash=cd0ff16b2ea4d2d973ca9b7c7f503e7c1df0ad26$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_TEST_CEF_TEST_HELPERS_CAPI_H_
+diff --git a/src/cef/include/capi/test/cef_translator_test_capi.h b/src/cef/include/capi/test/cef_translator_test_capi.h
+index 48811c5e883d6..601c8637e94ac
+--- a/src/cef/include/capi/test/cef_translator_test_capi.h
++++ b/src/cef/include/capi/test/cef_translator_test_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=d70d5b74890e3ca91f01333ebdb4f3298caeb619$
++// $hash=1f8029c1907d5e1097d7347f03618bec25388f9b$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_TEST_CEF_TRANSLATOR_TEST_CAPI_H_
+diff --git a/src/cef/include/capi/views/cef_box_layout_capi.h b/src/cef/include/capi/views/cef_box_layout_capi.h
+index 6499ec22fd540..687aa2a3c57a4
+--- a/src/cef/include/capi/views/cef_box_layout_capi.h
++++ b/src/cef/include/capi/views/cef_box_layout_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=bf1d1dc95fa2053645a348d6f554688b9d06c83a$
++// $hash=5e9d3854f9d31ac72038fb24aa9ef5944691a4ca$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_VIEWS_CEF_BOX_LAYOUT_CAPI_H_
+diff --git a/src/cef/include/capi/views/cef_browser_view_capi.h b/src/cef/include/capi/views/cef_browser_view_capi.h
+index ab629c8a61cbb..3c2942a89061d
+--- a/src/cef/include/capi/views/cef_browser_view_capi.h
++++ b/src/cef/include/capi/views/cef_browser_view_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=9ae10b92eed7495112c94825521ac46fb9327ef7$
++// $hash=90e42cb56ab7b8b752ddaf9526cb3b6e5af0d0fb$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_VIEWS_CEF_BROWSER_VIEW_CAPI_H_
+diff --git a/src/cef/include/capi/views/cef_browser_view_delegate_capi.h b/src/cef/include/capi/views/cef_browser_view_delegate_capi.h
+index 27ae4c1c4ee72..0a828fd052d26
+--- a/src/cef/include/capi/views/cef_browser_view_delegate_capi.h
++++ b/src/cef/include/capi/views/cef_browser_view_delegate_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=520df1f3e00efbffc9d499149f2f797bf0f85c99$
++// $hash=ec5c49d383e69a87b525c6e1ec3e2c779db6ab78$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_VIEWS_CEF_BROWSER_VIEW_DELEGATE_CAPI_H_
+diff --git a/src/cef/include/capi/views/cef_button_capi.h b/src/cef/include/capi/views/cef_button_capi.h
+index 40e71ec963aee..59699f8ae27b2
+--- a/src/cef/include/capi/views/cef_button_capi.h
++++ b/src/cef/include/capi/views/cef_button_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=5ebbf84a506d3d4d0bfb3d8db48f060a682f1ac9$
++// $hash=ce7101147c7a834842e1b4006f3d830aa58cfc91$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_VIEWS_CEF_BUTTON_CAPI_H_
+diff --git a/src/cef/include/capi/views/cef_button_delegate_capi.h b/src/cef/include/capi/views/cef_button_delegate_capi.h
+index d853dbf97ed59..c9180f5c96122
+--- a/src/cef/include/capi/views/cef_button_delegate_capi.h
++++ b/src/cef/include/capi/views/cef_button_delegate_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=9f1752ee949e98662a718de764e83f26ce06ec26$
++// $hash=cd06431dcfeb4f0907a478695ff1690da701fa8c$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_VIEWS_CEF_BUTTON_DELEGATE_CAPI_H_
+diff --git a/src/cef/include/capi/views/cef_display_capi.h b/src/cef/include/capi/views/cef_display_capi.h
+index 40c304b44f512..85e2ce6599231
+--- a/src/cef/include/capi/views/cef_display_capi.h
++++ b/src/cef/include/capi/views/cef_display_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=2fd0db428ce5902d59a7802c901e1c13b2367b5a$
++// $hash=6cc3e2f52a4e8eab9690225cc085f726032c7bb1$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_VIEWS_CEF_DISPLAY_CAPI_H_
+diff --git a/src/cef/include/capi/views/cef_fill_layout_capi.h b/src/cef/include/capi/views/cef_fill_layout_capi.h
+index a8778a96d6898..23f4aa770bb7d
+--- a/src/cef/include/capi/views/cef_fill_layout_capi.h
++++ b/src/cef/include/capi/views/cef_fill_layout_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=13972453cdca328c6ee81249aeb202d80da6d290$
++// $hash=477dc88c896170d4b617be9f7ce0bc21ebbbccbe$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_VIEWS_CEF_FILL_LAYOUT_CAPI_H_
+diff --git a/src/cef/include/capi/views/cef_label_button_capi.h b/src/cef/include/capi/views/cef_label_button_capi.h
+index 47ff1de60f6ca..ab9757079cd9c
+--- a/src/cef/include/capi/views/cef_label_button_capi.h
++++ b/src/cef/include/capi/views/cef_label_button_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=de3e738efca85a84422c92fa8504b24ed4efab8a$
++// $hash=e638b5ad0528625d06234d8a35b44eb11a79fc3c$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_VIEWS_CEF_LABEL_BUTTON_CAPI_H_
+diff --git a/src/cef/include/capi/views/cef_layout_capi.h b/src/cef/include/capi/views/cef_layout_capi.h
+index 8047df752aa6a..1408aa90ca55f
+--- a/src/cef/include/capi/views/cef_layout_capi.h
++++ b/src/cef/include/capi/views/cef_layout_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=6ef0d3d4390654fc1460a2ff586f2bbfd62e96b8$
++// $hash=8c78341b1803cdcba66c5e95d0eab1ce2dea4e02$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_VIEWS_CEF_LAYOUT_CAPI_H_
+diff --git a/src/cef/include/capi/views/cef_menu_button_capi.h b/src/cef/include/capi/views/cef_menu_button_capi.h
+index 50aaca9d60ecd..7fbf905e48f80
+--- a/src/cef/include/capi/views/cef_menu_button_capi.h
++++ b/src/cef/include/capi/views/cef_menu_button_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=925b09f77cd71327a447bf5c9601cc21a7eb7c3a$
++// $hash=6c4206291d525099e382ce8b39b5bc82655455fc$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_VIEWS_CEF_MENU_BUTTON_CAPI_H_
+diff --git a/src/cef/include/capi/views/cef_menu_button_delegate_capi.h b/src/cef/include/capi/views/cef_menu_button_delegate_capi.h
+index c5f22aabac2a7..e0d2ec5279fcd
+--- a/src/cef/include/capi/views/cef_menu_button_delegate_capi.h
++++ b/src/cef/include/capi/views/cef_menu_button_delegate_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=ca7948602a0d20a5bd0271065d79e8679898eff6$
++// $hash=357d6e0ba5823c66b72eae87696a33c0855134ee$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_VIEWS_CEF_MENU_BUTTON_DELEGATE_CAPI_H_
+diff --git a/src/cef/include/capi/views/cef_overlay_controller_capi.h b/src/cef/include/capi/views/cef_overlay_controller_capi.h
+index a0d6ac3a7d142..0226cd9c6f340
+--- a/src/cef/include/capi/views/cef_overlay_controller_capi.h
++++ b/src/cef/include/capi/views/cef_overlay_controller_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=14eaca76dba704ee64f454aaca821a6818012fc6$
++// $hash=55371efcc9d09b9205ce160174a85d1b345d56ea$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_VIEWS_CEF_OVERLAY_CONTROLLER_CAPI_H_
+diff --git a/src/cef/include/capi/views/cef_panel_capi.h b/src/cef/include/capi/views/cef_panel_capi.h
+index 276c6206d488b..7ee9d9faf56ab
+--- a/src/cef/include/capi/views/cef_panel_capi.h
++++ b/src/cef/include/capi/views/cef_panel_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=d5311ffa72e57d240f6963b1f45a278041bd33f4$
++// $hash=1aee6ef8b8b0c8d6a820f99a17a0d13b417cbe86$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_VIEWS_CEF_PANEL_CAPI_H_
+diff --git a/src/cef/include/capi/views/cef_panel_delegate_capi.h b/src/cef/include/capi/views/cef_panel_delegate_capi.h
+index bef0a26510f8d..76bd0ef5201ff
+--- a/src/cef/include/capi/views/cef_panel_delegate_capi.h
++++ b/src/cef/include/capi/views/cef_panel_delegate_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=3b6b3ef725189debb1dd43db395a111f50dee60c$
++// $hash=0b27daf9b7ff1378a7404b913d6e7bf778ec4c46$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_VIEWS_CEF_PANEL_DELEGATE_CAPI_H_
+diff --git a/src/cef/include/capi/views/cef_scroll_view_capi.h b/src/cef/include/capi/views/cef_scroll_view_capi.h
+index 2c93f45c3a00a..2c8f180a45adc
+--- a/src/cef/include/capi/views/cef_scroll_view_capi.h
++++ b/src/cef/include/capi/views/cef_scroll_view_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=374b16fddbbb8bedc2dbb2e03dcfaa8cddba6aeb$
++// $hash=bf4d81ab1ea8b9920e890161f32f805c5fcd0622$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_VIEWS_CEF_SCROLL_VIEW_CAPI_H_
+diff --git a/src/cef/include/capi/views/cef_textfield_capi.h b/src/cef/include/capi/views/cef_textfield_capi.h
+index fbb97eea9334b..8e56b964be535
+--- a/src/cef/include/capi/views/cef_textfield_capi.h
++++ b/src/cef/include/capi/views/cef_textfield_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=798f84672412f544765b800d03cf284b066f818c$
++// $hash=3faf27fd1377ad64fe06aa30e69934b78102456e$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_VIEWS_CEF_TEXTFIELD_CAPI_H_
+diff --git a/src/cef/include/capi/views/cef_textfield_delegate_capi.h b/src/cef/include/capi/views/cef_textfield_delegate_capi.h
+index 167249eef60cc..92a115c24c01d
+--- a/src/cef/include/capi/views/cef_textfield_delegate_capi.h
++++ b/src/cef/include/capi/views/cef_textfield_delegate_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=44337fe515a5acf51829e1dd00a54f2c1230aba5$
++// $hash=c81f3ad4200af508ec18645f9a1c47ca137b2422$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_VIEWS_CEF_TEXTFIELD_DELEGATE_CAPI_H_
+diff --git a/src/cef/include/capi/views/cef_view_capi.h b/src/cef/include/capi/views/cef_view_capi.h
+index 9907ccc53797b..5fbac19fa73a4
+--- a/src/cef/include/capi/views/cef_view_capi.h
++++ b/src/cef/include/capi/views/cef_view_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=d2aadfa4159846c2719387e2814d5e108def4b81$
++// $hash=86f76917de91f297c2165a7e2311b8e1220a24ac$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_VIEWS_CEF_VIEW_CAPI_H_
+diff --git a/src/cef/include/capi/views/cef_view_delegate_capi.h b/src/cef/include/capi/views/cef_view_delegate_capi.h
+index 09971e2a201dd..663a9a4bee755
+--- a/src/cef/include/capi/views/cef_view_delegate_capi.h
++++ b/src/cef/include/capi/views/cef_view_delegate_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=6a8166eca76513b59a4f6355f4f765dc1d77e4ee$
++// $hash=aae94169e63ebfb9223ef32a28eeeb03d5cc710f$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_VIEWS_CEF_VIEW_DELEGATE_CAPI_H_
+diff --git a/src/cef/include/capi/views/cef_window_capi.h b/src/cef/include/capi/views/cef_window_capi.h
+index 8e493af11e137..52546b074656b
+--- a/src/cef/include/capi/views/cef_window_capi.h
++++ b/src/cef/include/capi/views/cef_window_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=1785245d89e84d5a27ce062208bc19a4031ce97f$
++// $hash=3ea36e131dbb52dbe2c80567e38835b6aab1613b$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_VIEWS_CEF_WINDOW_CAPI_H_
+diff --git a/src/cef/include/capi/views/cef_window_delegate_capi.h b/src/cef/include/capi/views/cef_window_delegate_capi.h
+index 3bcffb3e2ef42..4fa5096b31dd0
+--- a/src/cef/include/capi/views/cef_window_delegate_capi.h
++++ b/src/cef/include/capi/views/cef_window_delegate_capi.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -33,7 +33,7 @@
+ // by hand. See the translator.README.txt file in the tools directory for
+ // more information.
+ //
+-// $hash=cd5d7c4e83237ceb39c5639489ca6004d2d69f0c$
++// $hash=e8f5a22c50d02ae662383e056d4bf64de235d68d$
+ //
+ 
+ #ifndef CEF_INCLUDE_CAPI_VIEWS_CEF_WINDOW_DELEGATE_CAPI_H_
+diff --git a/src/cef/include/cef_api_hash.h b/src/cef/include/cef_api_hash.h
+index 1558dbba069b4..058fd83436f8c
+--- a/src/cef/include/cef_api_hash.h
++++ b/src/cef/include/cef_api_hash.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
++// Copyright (c) 2023 Marshall A. Greenblatt. All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+@@ -42,15 +42,15 @@
+ // way that may cause binary incompatibility with other builds. The universal
+ // hash value will change if any platform is affected whereas the platform hash
+ // values will change only if that particular platform is affected.
+-#define CEF_API_HASH_UNIVERSAL "c731adb5e5a7fdb5c827ccc611df6eb4d4b33717"
++#define CEF_API_HASH_UNIVERSAL "fa7171a110d7f5a06e06c770c9224972d99054ec"
+ #if defined(OS_WIN)
+-#define CEF_API_HASH_PLATFORM "dc628cf4312be11edcb89422ce900cf7f773c1f0"
++#define CEF_API_HASH_PLATFORM "56a3fec8d1782d7f1bf12d13c6f61b5707282879"
+ #elif defined(OS_MAC)
+-#define CEF_API_HASH_PLATFORM "f7c028130eb6fefadbb4874ca2b0dac73e8113e7"
++#define CEF_API_HASH_PLATFORM "c01d748bab5bbdd4b4ed03a6b91fddf28c5ce635"
+ #elif defined(OS_LINUX)
+-#define CEF_API_HASH_PLATFORM "0533f1d7611266b46636c9c75fd4a908a6062f93"
++#define CEF_API_HASH_PLATFORM "61c970f2c3d3c064401adeb42d16a19566d577c2"
+ #elif defined(OS_OHOS)
+-#define CEF_API_HASH_PLATFORM "0533f1d7611266b46636c9c75fd4a908a6062f93"
++#define CEF_API_HASH_PLATFORM "61c970f2c3d3c064401adeb42d16a19566d577c2"
+ #endif
+ 
+ #ifdef __cplusplus
+diff --git a/src/cef/include/cef_browser.h b/src/cef/include/cef_browser.h
+index 56b0cf4594242..33090400deb67
+--- a/src/cef/include/cef_browser.h
++++ b/src/cef/include/cef_browser.h
+@@ -53,6 +53,7 @@
+ class CefBrowserHost;
+ class CefClient;
+ class CefJavaScriptResultCallback;
++class CefWebMessageReceiver;
+ class CefStoreWebArchiveResultCallback;
+ 
+ ///
+@@ -237,7 +238,8 @@ class CefBrowser : public virtual CefBaseRefCounted {
+   // Returns the Permission Request Delegate object.
+   ///
+   /*--cef()--*/
+-  virtual CefRefPtr<CefBrowserPermissionRequestDelegate> GetPermissionRequestDelegate() = 0;
++  virtual CefRefPtr<CefBrowserPermissionRequestDelegate>
++  GetPermissionRequestDelegate() = 0;
+ 
+   ///
+   // Returns the Geolocation Permission handler object.
+@@ -899,7 +901,7 @@ class CefBrowserHost : public virtual CefBaseRefCounted {
+   // Post a message to the port.
+   ///
+   /*--cef()--*/
+-  virtual void PostPortMessage(CefString& port_handle, CefString& data) = 0;
++  virtual void PostPortMessage(CefString& port_handle, CefRefPtr<CefValue> message) = 0;
+ 
+   ///
+   // Set the callback of the port.
+@@ -907,7 +909,7 @@ class CefBrowserHost : public virtual CefBaseRefCounted {
+   /*--cef()--*/
+   virtual void SetPortMessageCallback(
+       CefString& port_handle,
+-      CefRefPtr<CefJavaScriptResultCallback> callback) = 0;
++      CefRefPtr<CefWebMessageReceiver> callback) = 0;
+ 
+   ///
+   // Gets the latest hitdata
+@@ -953,7 +955,8 @@ class CefBrowserHost : public virtual CefBaseRefCounted {
+   // Loads the given data into this WebView
+   // optional_param=data, optional_param=mimeType, optional_param=encoding,
+   ///
+-  /*--cef(optional_param=data, optional_param=mimeType, optional_param=encoding,)--*/
++  /*--cef(optional_param=data, optional_param=mimeType,
++          optional_param=encoding,)--*/
+   virtual void LoadWithData(const CefString& data,
+                             const CefString& mimeType,
+                             const CefString& encoding) = 0;
+@@ -1235,6 +1238,62 @@ class CefBrowserHost : public virtual CefBaseRefCounted {
+   ///
+   /*--cef()--*/
+   virtual void RemoveCache(bool include_disk_files) = 0;
++
++  ///
++  // Scroll page up or down
++  ///
++  /*--cef()--*/
++  virtual void ScrollPageUpDown(bool is_up,
++                                bool is_half,
++                                float view_height) = 0;
++
++  ///
++  // Get web history state
++  ///
++  /*--cef()--*/
++  virtual CefRefPtr<CefBinaryValue> GetWebState() = 0;
++
++  ///
++  // Restore web history state
++  ///
++  /*--cef()--*/
++  virtual bool RestoreWebState(const CefRefPtr<CefBinaryValue> state) = 0;
++
++  ///
++  // Scroll to the position.
++  ///
++  /*--cef()--*/
++  virtual void ScrollTo(float x, float y) = 0;
++
++  ///
++  // Scroll by the delta distance.
++  ///
++  /*--cef()--*/
++  virtual void ScrollBy(float delta_x, float delta_y) = 0;
++
++  ///
++  // Slide Scroll by the speed.
++  ///
++  /*--cef()--*/
++  virtual void SlideScroll(float vx, float vy) = 0;
++
++  ///
++  // Set whether webview can access files
++  ///
++  /*--cef()--*/
++  virtual void SetFileAccess(bool falg) = 0;
++
++  ///
++  // Set whether webview can access network
++  ///
++  /*--cef()--*/
++  virtual void SetBlockNetwork(bool falg) = 0;
++
++  ///
++  // Set the cache mode of webview
++  ///
++  /*--cef()--*/
++  virtual void SetCacheMode(int falg) = 0;
+ };
+ 
+ ///
+@@ -1268,6 +1327,20 @@ class CefStoreWebArchiveResultCallback : public virtual CefBaseRefCounted {
+   /*--cef(optional_param=result)--*/
+   virtual void OnStoreWebArchiveDone(const CefString& result) = 0;
+ };
++
++///
++// Interface to implement to be notified of asynchronous web message channel.
++///
++/*--cef(source=client)--*/
++class CefWebMessageReceiver : public virtual CefBaseRefCounted {
++ public:
++  ///
++  // Method that will be called upon |PostPortMessage|. |message| will be sent
++  // to another end of web message channel.
++  ///
++  /*--cef()--*/
++  virtual void OnMessage(CefRefPtr<CefValue> message) = 0;
++};
+ /* ---------- ohos webview add end --------- */
+ 
+ #endif  // CEF_INCLUDE_CEF_BROWSER_H_
+diff --git a/src/cef/include/cef_context_menu_handler.h b/src/cef/include/cef_context_menu_handler.h
+index 6df23c193cef5..c9864ccd93baf
+--- a/src/cef/include/cef_context_menu_handler.h
++++ b/src/cef/include/cef_context_menu_handler.h
+@@ -219,6 +219,8 @@ class CefContextMenuParams : public virtual CefBaseRefCounted {
+   typedef cef_context_menu_media_type_t MediaType;
+   typedef cef_context_menu_media_state_flags_t MediaStateFlags;
+   typedef cef_context_menu_edit_state_flags_t EditStateFlags;
++  typedef cef_context_menu_input_field_type_t InputFieldType;
++  typedef cef_context_menu_source_type_t SourceType;
+ 
+   ///
+   // Returns the X coordinate of the mouse where the context menu was invoked.
+@@ -356,6 +358,18 @@ class CefContextMenuParams : public virtual CefBaseRefCounted {
+   ///
+   /*--cef()--*/
+   virtual bool IsCustomMenu() = 0;
++
++  ///
++  // Returns the input field type of context node that the context menu was invoked on.
++  ///
++  /*--cef(default_retval=CM_INPUTFIELDTYPE_NONE)--*/
++  virtual InputFieldType GetInputFieldType() = 0;
++
++  ///
++  // Returns the source type of context node that the context menu was invoked on.
++  ///
++  /*--cef(default_retval=CM_SOURCETYPE_NONE)--*/
++  virtual SourceType GetSourceType() = 0;
+ };
+ 
+ #endif  // CEF_INCLUDE_CEF_CONTEXT_MENU_HANDLER_H_
+diff --git a/src/cef/include/cef_data_base.h b/src/cef/include/cef_data_base.h
+index 31aa67d68425c..a6a937ede1691
+--- a/src/cef/include/cef_data_base.h
++++ b/src/cef/include/cef_data_base.h
+@@ -81,7 +81,9 @@ class CefDataBase : public virtual CefBaseRefCounted {
+   virtual void GetHttpAuthCredentials(
+       const CefString& host,
+       const CefString& realm,
+-      std::vector<CefString>& username_password) = 0;
++      CefString& username,
++      char* password,
++      uint32_t passwordSize) = 0;
+ 
+   ///
+   // gets whether the instance holds the specified permissions for the specified
+diff --git a/src/cef/include/cef_dialog_handler.h b/src/cef/include/cef_dialog_handler.h
+index 5b77305af987d..88209153d9c72
+--- a/src/cef/include/cef_dialog_handler.h
++++ b/src/cef/include/cef_dialog_handler.h
+@@ -66,6 +66,27 @@ class CefFileDialogCallback : public virtual CefBaseRefCounted {
+   virtual void Cancel() = 0;
+ };
+ 
++///
++// Callback interface for asynchronous continuation of <select> selection.
++///
++/*--cef(source=library)--*/
++class CefSelectPopupCallback : public virtual CefBaseRefCounted {
++ public:
++  ///
++  // Continue the <select> selection. |indices| should be the 0-based array
++  // index of the value selected from the <select> array passed to
++  // CefDialogHandler::ShowSelectPopup.
++  ///
++  /*--cef(capi_name=cont)--*/
++  virtual void Continue(const std::vector<int>& indices) = 0;
++
++  ///
++  // Cancel <select> selection.
++  ///
++  /*--cef()--*/
++  virtual void Cancel() = 0;
++};
++
+ ///
+ // Implement this interface to handle dialog events. The methods of this class
+ // will be called on the browser process UI thread.
+@@ -102,6 +123,20 @@ class CefDialogHandler : public virtual CefBaseRefCounted {
+                             CefRefPtr<CefFileDialogCallback> callback) {
+     return false;
+   }
++
++  /// 
++  // Show <select> popup menu.
++  ///
++  /*--cef()--*/
++  virtual void OnSelectPopupMenu(CefRefPtr<CefBrowser> browser,
++                                 const CefRect& bounds,
++                                 int item_height,
++                                 double item_font_size,
++                                 int selected_item,
++                                 const std::vector<CefSelectPopupItem>& menu_items,
++                                 bool right_aligned,
++                                 bool allow_multiple_selection,
++                                 CefRefPtr<CefSelectPopupCallback> callback) {}
+ };
+ 
+ #endif  // CEF_INCLUDE_CEF_DIALOG_HANDLER_H_
