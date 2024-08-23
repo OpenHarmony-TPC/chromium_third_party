@@ -14407,3 +14407,1892 @@ index e67288a57d5d5..fc41243e66b16
  //
  
  #ifndef CEF_LIBCEF_DLL_CPPTOC_VIEWS_BOX_LAYOUT_CPPTOC_H_
+diff --git a/src/cef/libcef_dll/cpptoc/views/browser_view_cpptoc.cc b/src/cef/libcef_dll/cpptoc/views/browser_view_cpptoc.cc
+index 2109aac1d9e5f..2bc455e6b441f
+--- a/src/cef/libcef_dll/cpptoc/views/browser_view_cpptoc.cc
++++ b/src/cef/libcef_dll/cpptoc/views/browser_view_cpptoc.cc
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=ed2a9f38555ed559f342f6fd39f21192611771ee$
++// $hash=a07b2f308b7192403cc92086f11545fd6adca28d$
+ //
+ 
+ #include "libcef_dll/cpptoc/views/browser_view_cpptoc.h"
+diff --git a/src/cef/libcef_dll/cpptoc/views/browser_view_cpptoc.h b/src/cef/libcef_dll/cpptoc/views/browser_view_cpptoc.h
+index f4e36ae4f19c1..2f9fd838f8df4
+--- a/src/cef/libcef_dll/cpptoc/views/browser_view_cpptoc.h
++++ b/src/cef/libcef_dll/cpptoc/views/browser_view_cpptoc.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=dc07da6d436a7d99817045690a3932010cd1acfd$
++// $hash=f981c5f7247ec57926549c145c47a7cdcbdd80a0$
+ //
+ 
+ #ifndef CEF_LIBCEF_DLL_CPPTOC_VIEWS_BROWSER_VIEW_CPPTOC_H_
+diff --git a/src/cef/libcef_dll/cpptoc/views/browser_view_delegate_cpptoc.cc b/src/cef/libcef_dll/cpptoc/views/browser_view_delegate_cpptoc.cc
+index 46d9fa3794932..2ef39d183df08
+--- a/src/cef/libcef_dll/cpptoc/views/browser_view_delegate_cpptoc.cc
++++ b/src/cef/libcef_dll/cpptoc/views/browser_view_delegate_cpptoc.cc
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=8f3129779912a325240795e05610d6190997e028$
++// $hash=d2fdb9e5fa608211f3583bafc74602d0573421c1$
+ //
+ 
+ #include "libcef_dll/cpptoc/views/browser_view_delegate_cpptoc.h"
+diff --git a/src/cef/libcef_dll/cpptoc/views/browser_view_delegate_cpptoc.h b/src/cef/libcef_dll/cpptoc/views/browser_view_delegate_cpptoc.h
+index feb502ae7e5f2..f0761f3bbc572
+--- a/src/cef/libcef_dll/cpptoc/views/browser_view_delegate_cpptoc.h
++++ b/src/cef/libcef_dll/cpptoc/views/browser_view_delegate_cpptoc.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=5bd6bbfbc74b0059f073463c28b74c9b31916e59$
++// $hash=b091e620040d148171ce5c99d5376cb00356eb37$
+ //
+ 
+ #ifndef CEF_LIBCEF_DLL_CPPTOC_VIEWS_BROWSER_VIEW_DELEGATE_CPPTOC_H_
+diff --git a/src/cef/libcef_dll/cpptoc/views/button_cpptoc.cc b/src/cef/libcef_dll/cpptoc/views/button_cpptoc.cc
+index 7ccd17db62912..890ca97f8b920
+--- a/src/cef/libcef_dll/cpptoc/views/button_cpptoc.cc
++++ b/src/cef/libcef_dll/cpptoc/views/button_cpptoc.cc
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=f002c60074ac76bb3e4db3d070b5ea1b430e620d$
++// $hash=d1d8ab075e6ac6cf29e2284f21b17a7e0648af71$
+ //
+ 
+ #include "libcef_dll/cpptoc/views/button_cpptoc.h"
+diff --git a/src/cef/libcef_dll/cpptoc/views/button_cpptoc.h b/src/cef/libcef_dll/cpptoc/views/button_cpptoc.h
+index 5848a3fd83e7c..ed70f485bb601
+--- a/src/cef/libcef_dll/cpptoc/views/button_cpptoc.h
++++ b/src/cef/libcef_dll/cpptoc/views/button_cpptoc.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=60660c0973fee97e850fcf4026b57a6f367ea294$
++// $hash=3fc906cb8937c58418501c33ba81462806b26860$
+ //
+ 
+ #ifndef CEF_LIBCEF_DLL_CPPTOC_VIEWS_BUTTON_CPPTOC_H_
+diff --git a/src/cef/libcef_dll/cpptoc/views/button_delegate_cpptoc.cc b/src/cef/libcef_dll/cpptoc/views/button_delegate_cpptoc.cc
+index 05464b089ed6e..c04277528fc71
+--- a/src/cef/libcef_dll/cpptoc/views/button_delegate_cpptoc.cc
++++ b/src/cef/libcef_dll/cpptoc/views/button_delegate_cpptoc.cc
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=4e776c8db93f07efd47e80fe380071539e94ec81$
++// $hash=4bcd9e786dcddeb99de73e14839f121a211f0e2d$
+ //
+ 
+ #include "libcef_dll/cpptoc/views/button_delegate_cpptoc.h"
+diff --git a/src/cef/libcef_dll/cpptoc/views/button_delegate_cpptoc.h b/src/cef/libcef_dll/cpptoc/views/button_delegate_cpptoc.h
+index 3a682e09bcf4d..b342d8c50d4fe
+--- a/src/cef/libcef_dll/cpptoc/views/button_delegate_cpptoc.h
++++ b/src/cef/libcef_dll/cpptoc/views/button_delegate_cpptoc.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=f3b8ad78e8614f873ee581697ac29cad49a19260$
++// $hash=455b4eb400cc642cfb4cf0089b12059b8be31af6$
+ //
+ 
+ #ifndef CEF_LIBCEF_DLL_CPPTOC_VIEWS_BUTTON_DELEGATE_CPPTOC_H_
+diff --git a/src/cef/libcef_dll/cpptoc/views/display_cpptoc.cc b/src/cef/libcef_dll/cpptoc/views/display_cpptoc.cc
+index 470fee9d11971..41d13961f52f4
+--- a/src/cef/libcef_dll/cpptoc/views/display_cpptoc.cc
++++ b/src/cef/libcef_dll/cpptoc/views/display_cpptoc.cc
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=546b8f890852fb4df26a85aec6b83effe1bdc6e6$
++// $hash=19b9c4f4c94c1109c599ccda41440f573c966009$
+ //
+ 
+ #include "libcef_dll/cpptoc/views/display_cpptoc.h"
+diff --git a/src/cef/libcef_dll/cpptoc/views/display_cpptoc.h b/src/cef/libcef_dll/cpptoc/views/display_cpptoc.h
+index 6ae1863347202..13eb6a6591302
+--- a/src/cef/libcef_dll/cpptoc/views/display_cpptoc.h
++++ b/src/cef/libcef_dll/cpptoc/views/display_cpptoc.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=5918cca150c476ead77121bb93599c763a3e13e7$
++// $hash=73811073aeb490787e777b5e7f8e41ef34cd6369$
+ //
+ 
+ #ifndef CEF_LIBCEF_DLL_CPPTOC_VIEWS_DISPLAY_CPPTOC_H_
+diff --git a/src/cef/libcef_dll/cpptoc/views/fill_layout_cpptoc.cc b/src/cef/libcef_dll/cpptoc/views/fill_layout_cpptoc.cc
+index b6b3a99c2a3a8..e42c249a84afc
+--- a/src/cef/libcef_dll/cpptoc/views/fill_layout_cpptoc.cc
++++ b/src/cef/libcef_dll/cpptoc/views/fill_layout_cpptoc.cc
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=304f5db25f7e2a1e4cf169f7cc205013bb06f861$
++// $hash=04718b744aa511fa8917dbcc464aecf6cda4550a$
+ //
+ 
+ #include "libcef_dll/cpptoc/views/fill_layout_cpptoc.h"
+diff --git a/src/cef/libcef_dll/cpptoc/views/fill_layout_cpptoc.h b/src/cef/libcef_dll/cpptoc/views/fill_layout_cpptoc.h
+index a9bdbaf9d538a..a695842261622
+--- a/src/cef/libcef_dll/cpptoc/views/fill_layout_cpptoc.h
++++ b/src/cef/libcef_dll/cpptoc/views/fill_layout_cpptoc.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=e2bad567245e3e1bdf240be33a3b0008ec0e3b18$
++// $hash=88b95199af576610e6ce7e71603fb3c8b1426046$
+ //
+ 
+ #ifndef CEF_LIBCEF_DLL_CPPTOC_VIEWS_FILL_LAYOUT_CPPTOC_H_
+diff --git a/src/cef/libcef_dll/cpptoc/views/label_button_cpptoc.cc b/src/cef/libcef_dll/cpptoc/views/label_button_cpptoc.cc
+index 9916f2ecfd30b..56c31670f73bd
+--- a/src/cef/libcef_dll/cpptoc/views/label_button_cpptoc.cc
++++ b/src/cef/libcef_dll/cpptoc/views/label_button_cpptoc.cc
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=c32cf44685b993619659ae5f6fb681e40d0b4cd9$
++// $hash=c71d13ab650b2516ba6ae3b3cfda6b2f67b45e97$
+ //
+ 
+ #include "libcef_dll/cpptoc/views/label_button_cpptoc.h"
+diff --git a/src/cef/libcef_dll/cpptoc/views/label_button_cpptoc.h b/src/cef/libcef_dll/cpptoc/views/label_button_cpptoc.h
+index a26b71ad35f67..dad5d89582a65
+--- a/src/cef/libcef_dll/cpptoc/views/label_button_cpptoc.h
++++ b/src/cef/libcef_dll/cpptoc/views/label_button_cpptoc.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=60d980037705be97fb1113e0b23b0e4bdd29b801$
++// $hash=8e86fa292ee6e5debd2525e71eaa3ae8e42c8e55$
+ //
+ 
+ #ifndef CEF_LIBCEF_DLL_CPPTOC_VIEWS_LABEL_BUTTON_CPPTOC_H_
+diff --git a/src/cef/libcef_dll/cpptoc/views/layout_cpptoc.cc b/src/cef/libcef_dll/cpptoc/views/layout_cpptoc.cc
+index 5976c28b094d8..e4c688b99a411
+--- a/src/cef/libcef_dll/cpptoc/views/layout_cpptoc.cc
++++ b/src/cef/libcef_dll/cpptoc/views/layout_cpptoc.cc
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=91327244b4a4c037841a54ea2a06ebe42efe5477$
++// $hash=ef68f133e06458b067d4768ea64360b48f6f7b76$
+ //
+ 
+ #include "libcef_dll/cpptoc/views/layout_cpptoc.h"
+diff --git a/src/cef/libcef_dll/cpptoc/views/layout_cpptoc.h b/src/cef/libcef_dll/cpptoc/views/layout_cpptoc.h
+index 93ac800c7ac30..76c9930eef23f
+--- a/src/cef/libcef_dll/cpptoc/views/layout_cpptoc.h
++++ b/src/cef/libcef_dll/cpptoc/views/layout_cpptoc.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=8044bcf51ec6feacc1a186f6780c9076f5c1ec74$
++// $hash=d0adda3ed7bbb825b0c9959960f832d23f75ccdc$
+ //
+ 
+ #ifndef CEF_LIBCEF_DLL_CPPTOC_VIEWS_LAYOUT_CPPTOC_H_
+diff --git a/src/cef/libcef_dll/cpptoc/views/menu_button_cpptoc.cc b/src/cef/libcef_dll/cpptoc/views/menu_button_cpptoc.cc
+index 4f3f0fb971be5..d43d7c55aed6a
+--- a/src/cef/libcef_dll/cpptoc/views/menu_button_cpptoc.cc
++++ b/src/cef/libcef_dll/cpptoc/views/menu_button_cpptoc.cc
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=be533dcd2dd95060259a8baaece87bf2c6df0c27$
++// $hash=b40df03337901e30bbd3db00a852dedc7ea500d8$
+ //
+ 
+ #include "libcef_dll/cpptoc/views/menu_button_cpptoc.h"
+diff --git a/src/cef/libcef_dll/cpptoc/views/menu_button_cpptoc.h b/src/cef/libcef_dll/cpptoc/views/menu_button_cpptoc.h
+index 6b38233af507d..52f93e09a71c7
+--- a/src/cef/libcef_dll/cpptoc/views/menu_button_cpptoc.h
++++ b/src/cef/libcef_dll/cpptoc/views/menu_button_cpptoc.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=d3b01ef1bca22e454dd4375df90a5a3fbd0f11f3$
++// $hash=f2f44594e4cbcb3ef1ee3eb39d3d498f7a6cafbc$
+ //
+ 
+ #ifndef CEF_LIBCEF_DLL_CPPTOC_VIEWS_MENU_BUTTON_CPPTOC_H_
+diff --git a/src/cef/libcef_dll/cpptoc/views/menu_button_delegate_cpptoc.cc b/src/cef/libcef_dll/cpptoc/views/menu_button_delegate_cpptoc.cc
+index 6fe5582d5c00f..295a2851e8ae2
+--- a/src/cef/libcef_dll/cpptoc/views/menu_button_delegate_cpptoc.cc
++++ b/src/cef/libcef_dll/cpptoc/views/menu_button_delegate_cpptoc.cc
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=269173ab9f81796dec4b732e2050e26a177d8387$
++// $hash=869a0291457438cf60cb7464dcc63dd0ac7a8cfc$
+ //
+ 
+ #include "libcef_dll/cpptoc/views/menu_button_delegate_cpptoc.h"
+diff --git a/src/cef/libcef_dll/cpptoc/views/menu_button_delegate_cpptoc.h b/src/cef/libcef_dll/cpptoc/views/menu_button_delegate_cpptoc.h
+index 0ecc9e377eb0c..5f70f5a485c48
+--- a/src/cef/libcef_dll/cpptoc/views/menu_button_delegate_cpptoc.h
++++ b/src/cef/libcef_dll/cpptoc/views/menu_button_delegate_cpptoc.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=670b8f7f67a5eacd3288724ec6439c56248477ec$
++// $hash=9178b58c1b03965fc20636f3efd97c2385618574$
+ //
+ 
+ #ifndef CEF_LIBCEF_DLL_CPPTOC_VIEWS_MENU_BUTTON_DELEGATE_CPPTOC_H_
+diff --git a/src/cef/libcef_dll/cpptoc/views/menu_button_pressed_lock_cpptoc.cc b/src/cef/libcef_dll/cpptoc/views/menu_button_pressed_lock_cpptoc.cc
+index daa1e5fdd8d64..c3d85d202a0aa
+--- a/src/cef/libcef_dll/cpptoc/views/menu_button_pressed_lock_cpptoc.cc
++++ b/src/cef/libcef_dll/cpptoc/views/menu_button_pressed_lock_cpptoc.cc
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=c6db7f8e7c031a323e9da96aed3aee7fd7a4f558$
++// $hash=2dc6b6ba5f4b65f25877aa56083d0e6dea42e7ae$
+ //
+ 
+ #include "libcef_dll/cpptoc/views/menu_button_pressed_lock_cpptoc.h"
+diff --git a/src/cef/libcef_dll/cpptoc/views/menu_button_pressed_lock_cpptoc.h b/src/cef/libcef_dll/cpptoc/views/menu_button_pressed_lock_cpptoc.h
+index 51cac8072d11e..79a8566ee59ac
+--- a/src/cef/libcef_dll/cpptoc/views/menu_button_pressed_lock_cpptoc.h
++++ b/src/cef/libcef_dll/cpptoc/views/menu_button_pressed_lock_cpptoc.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=072279b56eeeaf089107f5f78ee431c907afda46$
++// $hash=5d7f30f1265294fc8617b444bd35bee3da172746$
+ //
+ 
+ #ifndef CEF_LIBCEF_DLL_CPPTOC_VIEWS_MENU_BUTTON_PRESSED_LOCK_CPPTOC_H_
+diff --git a/src/cef/libcef_dll/cpptoc/views/overlay_controller_cpptoc.cc b/src/cef/libcef_dll/cpptoc/views/overlay_controller_cpptoc.cc
+index d830c864bcf15..d8ce4395261fd
+--- a/src/cef/libcef_dll/cpptoc/views/overlay_controller_cpptoc.cc
++++ b/src/cef/libcef_dll/cpptoc/views/overlay_controller_cpptoc.cc
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=6cf61c4e2900a7776278d4a0542f2b3e32d4420b$
++// $hash=eec6e92443829047f908febc6d9ce7e6eafc6566$
+ //
+ 
+ #include "libcef_dll/cpptoc/views/overlay_controller_cpptoc.h"
+diff --git a/src/cef/libcef_dll/cpptoc/views/overlay_controller_cpptoc.h b/src/cef/libcef_dll/cpptoc/views/overlay_controller_cpptoc.h
+index 8e428ae9da78f..b89f8b4b273c0
+--- a/src/cef/libcef_dll/cpptoc/views/overlay_controller_cpptoc.h
++++ b/src/cef/libcef_dll/cpptoc/views/overlay_controller_cpptoc.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=15c5e3c251b7a4f882b2e49e9a2ee6e84deb21e1$
++// $hash=8d50609d2e79539752a8118f831e853b845892f4$
+ //
+ 
+ #ifndef CEF_LIBCEF_DLL_CPPTOC_VIEWS_OVERLAY_CONTROLLER_CPPTOC_H_
+diff --git a/src/cef/libcef_dll/cpptoc/views/panel_cpptoc.cc b/src/cef/libcef_dll/cpptoc/views/panel_cpptoc.cc
+index 3c7aeecd67dec..396ff3ee062b0
+--- a/src/cef/libcef_dll/cpptoc/views/panel_cpptoc.cc
++++ b/src/cef/libcef_dll/cpptoc/views/panel_cpptoc.cc
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=fbec1a9b566580497409a7dbd3382e7c51db61ae$
++// $hash=27650c566e4a7c056e5bb87a76df335ba641ab0f$
+ //
+ 
+ #include "libcef_dll/cpptoc/views/panel_cpptoc.h"
+diff --git a/src/cef/libcef_dll/cpptoc/views/panel_cpptoc.h b/src/cef/libcef_dll/cpptoc/views/panel_cpptoc.h
+index ae2d99182ac5e..7411c0d35d823
+--- a/src/cef/libcef_dll/cpptoc/views/panel_cpptoc.h
++++ b/src/cef/libcef_dll/cpptoc/views/panel_cpptoc.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=4fd7a58485d8ef00e6b2dff8ffdfcb1405eb4fcc$
++// $hash=2c4b5c88fc2a00039dc5eb01aaa90ecd7c2ea0ad$
+ //
+ 
+ #ifndef CEF_LIBCEF_DLL_CPPTOC_VIEWS_PANEL_CPPTOC_H_
+diff --git a/src/cef/libcef_dll/cpptoc/views/panel_delegate_cpptoc.cc b/src/cef/libcef_dll/cpptoc/views/panel_delegate_cpptoc.cc
+index ba1fabff98ba7..68f6d427f4ebb
+--- a/src/cef/libcef_dll/cpptoc/views/panel_delegate_cpptoc.cc
++++ b/src/cef/libcef_dll/cpptoc/views/panel_delegate_cpptoc.cc
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=03a39472314a6cb7cf93fb0196be57e9ae308c53$
++// $hash=7b91896f42ce5d096e4278d9e96dc3ac99a9e86b$
+ //
+ 
+ #include "libcef_dll/cpptoc/views/panel_delegate_cpptoc.h"
+diff --git a/src/cef/libcef_dll/cpptoc/views/panel_delegate_cpptoc.h b/src/cef/libcef_dll/cpptoc/views/panel_delegate_cpptoc.h
+index 05fb713501368..578ce7c78238e
+--- a/src/cef/libcef_dll/cpptoc/views/panel_delegate_cpptoc.h
++++ b/src/cef/libcef_dll/cpptoc/views/panel_delegate_cpptoc.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=821d48d74b437c7a0387b1d0ac1875621873b2e4$
++// $hash=1eedf21b5a9e1edb24e6c24de55c991388b50c7c$
+ //
+ 
+ #ifndef CEF_LIBCEF_DLL_CPPTOC_VIEWS_PANEL_DELEGATE_CPPTOC_H_
+diff --git a/src/cef/libcef_dll/cpptoc/views/scroll_view_cpptoc.cc b/src/cef/libcef_dll/cpptoc/views/scroll_view_cpptoc.cc
+index 2b15cdde26698..4b55421134531
+--- a/src/cef/libcef_dll/cpptoc/views/scroll_view_cpptoc.cc
++++ b/src/cef/libcef_dll/cpptoc/views/scroll_view_cpptoc.cc
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=02f2588f9c40c510115d3279fbffdb9bf2f4dcfb$
++// $hash=9d80193629328eede62d0da7ed5bf06b16781f52$
+ //
+ 
+ #include "libcef_dll/cpptoc/views/scroll_view_cpptoc.h"
+diff --git a/src/cef/libcef_dll/cpptoc/views/scroll_view_cpptoc.h b/src/cef/libcef_dll/cpptoc/views/scroll_view_cpptoc.h
+index a08983a1fcb16..1861706c60cf3
+--- a/src/cef/libcef_dll/cpptoc/views/scroll_view_cpptoc.h
++++ b/src/cef/libcef_dll/cpptoc/views/scroll_view_cpptoc.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=a5d02fd363950248101f5113ceeee2c280dd831c$
++// $hash=f0b7e40e7ec1e3870dbc7f25430978c46eb1a51f$
+ //
+ 
+ #ifndef CEF_LIBCEF_DLL_CPPTOC_VIEWS_SCROLL_VIEW_CPPTOC_H_
+diff --git a/src/cef/libcef_dll/cpptoc/views/textfield_cpptoc.cc b/src/cef/libcef_dll/cpptoc/views/textfield_cpptoc.cc
+index 9ea6250ee730f..b8a8e7452d0ad
+--- a/src/cef/libcef_dll/cpptoc/views/textfield_cpptoc.cc
++++ b/src/cef/libcef_dll/cpptoc/views/textfield_cpptoc.cc
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=1fab78c3e307dcdcdfbcc5d458121f50e23bf626$
++// $hash=f21462763c1f6f19e8c0a18c100edb60cb13660c$
+ //
+ 
+ #include "libcef_dll/cpptoc/views/textfield_cpptoc.h"
+diff --git a/src/cef/libcef_dll/cpptoc/views/textfield_cpptoc.h b/src/cef/libcef_dll/cpptoc/views/textfield_cpptoc.h
+index 730d6486d2022..790835306ec36
+--- a/src/cef/libcef_dll/cpptoc/views/textfield_cpptoc.h
++++ b/src/cef/libcef_dll/cpptoc/views/textfield_cpptoc.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=2e8b2aebc574d685d1c39e7cb96b2e8c724a6d9c$
++// $hash=0b5018c0b9d42f4ee100098365c46e0ea723ea29$
+ //
+ 
+ #ifndef CEF_LIBCEF_DLL_CPPTOC_VIEWS_TEXTFIELD_CPPTOC_H_
+diff --git a/src/cef/libcef_dll/cpptoc/views/textfield_delegate_cpptoc.cc b/src/cef/libcef_dll/cpptoc/views/textfield_delegate_cpptoc.cc
+index 83590dc8889c2..dd9ad3ace4988
+--- a/src/cef/libcef_dll/cpptoc/views/textfield_delegate_cpptoc.cc
++++ b/src/cef/libcef_dll/cpptoc/views/textfield_delegate_cpptoc.cc
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=0009ced13fa9f1e26064455df0c9f5043d7618cf$
++// $hash=e9c21f1320ea2c7c750afbe1901f273f71df8213$
+ //
+ 
+ #include "libcef_dll/cpptoc/views/textfield_delegate_cpptoc.h"
+diff --git a/src/cef/libcef_dll/cpptoc/views/textfield_delegate_cpptoc.h b/src/cef/libcef_dll/cpptoc/views/textfield_delegate_cpptoc.h
+index 75abe63a36ebc..2ad4735f35999
+--- a/src/cef/libcef_dll/cpptoc/views/textfield_delegate_cpptoc.h
++++ b/src/cef/libcef_dll/cpptoc/views/textfield_delegate_cpptoc.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=157e47e42dbb25aa2effd5bd085228d1dc3ad061$
++// $hash=33ba2bd44c946bf204f2f7a929b8d208768ca3dd$
+ //
+ 
+ #ifndef CEF_LIBCEF_DLL_CPPTOC_VIEWS_TEXTFIELD_DELEGATE_CPPTOC_H_
+diff --git a/src/cef/libcef_dll/cpptoc/views/view_cpptoc.cc b/src/cef/libcef_dll/cpptoc/views/view_cpptoc.cc
+index f5728725a0bbf..e9b1fff41244a
+--- a/src/cef/libcef_dll/cpptoc/views/view_cpptoc.cc
++++ b/src/cef/libcef_dll/cpptoc/views/view_cpptoc.cc
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=48694fa56762351ccd3369dca9e679efbda61160$
++// $hash=4808be531e96aa028463b2713f2141d9d1d7cd8b$
+ //
+ 
+ #include "libcef_dll/cpptoc/views/view_cpptoc.h"
+diff --git a/src/cef/libcef_dll/cpptoc/views/view_cpptoc.h b/src/cef/libcef_dll/cpptoc/views/view_cpptoc.h
+index e508ab45a5731..efb597517ef8d
+--- a/src/cef/libcef_dll/cpptoc/views/view_cpptoc.h
++++ b/src/cef/libcef_dll/cpptoc/views/view_cpptoc.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=725abc7d1f25861799c54c827de37617b23a1bd5$
++// $hash=0d24d12448e97907667f8347a38818e0a4d713ed$
+ //
+ 
+ #ifndef CEF_LIBCEF_DLL_CPPTOC_VIEWS_VIEW_CPPTOC_H_
+diff --git a/src/cef/libcef_dll/cpptoc/views/view_delegate_cpptoc.cc b/src/cef/libcef_dll/cpptoc/views/view_delegate_cpptoc.cc
+index 28e568feef411..804f515ac3d06
+--- a/src/cef/libcef_dll/cpptoc/views/view_delegate_cpptoc.cc
++++ b/src/cef/libcef_dll/cpptoc/views/view_delegate_cpptoc.cc
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=43217c47279478323050eef44d6403cb4b5c62a6$
++// $hash=58ecca3b863657322cdb1280298486167d55bdfe$
+ //
+ 
+ #include "libcef_dll/cpptoc/views/view_delegate_cpptoc.h"
+diff --git a/src/cef/libcef_dll/cpptoc/views/view_delegate_cpptoc.h b/src/cef/libcef_dll/cpptoc/views/view_delegate_cpptoc.h
+index 38d6332b824c5..a6903ef4f71e5
+--- a/src/cef/libcef_dll/cpptoc/views/view_delegate_cpptoc.h
++++ b/src/cef/libcef_dll/cpptoc/views/view_delegate_cpptoc.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=ebd265b4907f2531eacce52bd6cfd1f8848b7abf$
++// $hash=384b7d1f2df446d35d6ba46e62d89976d88fef7c$
+ //
+ 
+ #ifndef CEF_LIBCEF_DLL_CPPTOC_VIEWS_VIEW_DELEGATE_CPPTOC_H_
+diff --git a/src/cef/libcef_dll/cpptoc/views/window_cpptoc.cc b/src/cef/libcef_dll/cpptoc/views/window_cpptoc.cc
+index 53932f99f8248..b4c3387060178
+--- a/src/cef/libcef_dll/cpptoc/views/window_cpptoc.cc
++++ b/src/cef/libcef_dll/cpptoc/views/window_cpptoc.cc
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=360b248f7f43cd62a111f59a79fc81b40f8d4023$
++// $hash=e89c6c2ef5a7af05e58a2a7e76097910e97c9db4$
+ //
+ 
+ #include "libcef_dll/cpptoc/views/window_cpptoc.h"
+diff --git a/src/cef/libcef_dll/cpptoc/views/window_cpptoc.h b/src/cef/libcef_dll/cpptoc/views/window_cpptoc.h
+index de348f70d4a58..e02be4494da84
+--- a/src/cef/libcef_dll/cpptoc/views/window_cpptoc.h
++++ b/src/cef/libcef_dll/cpptoc/views/window_cpptoc.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=5b14236c7e00a7dafa47fdc32ce78d347de477a1$
++// $hash=12ff3d7d14f9977ff1f62e9a35b04b153a135480$
+ //
+ 
+ #ifndef CEF_LIBCEF_DLL_CPPTOC_VIEWS_WINDOW_CPPTOC_H_
+diff --git a/src/cef/libcef_dll/cpptoc/views/window_delegate_cpptoc.cc b/src/cef/libcef_dll/cpptoc/views/window_delegate_cpptoc.cc
+index 769c84a11a7f5..cdc36f8fac76e
+--- a/src/cef/libcef_dll/cpptoc/views/window_delegate_cpptoc.cc
++++ b/src/cef/libcef_dll/cpptoc/views/window_delegate_cpptoc.cc
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=9a65c4a9e35ba40f01a3d27c772ef9b736eb75ea$
++// $hash=cd7d5a65be4a9c5b983b390ec08670baf6f82be2$
+ //
+ 
+ #include "libcef_dll/cpptoc/views/window_delegate_cpptoc.h"
+diff --git a/src/cef/libcef_dll/cpptoc/views/window_delegate_cpptoc.h b/src/cef/libcef_dll/cpptoc/views/window_delegate_cpptoc.h
+index dff58e097e217..441a2ca239b81
+--- a/src/cef/libcef_dll/cpptoc/views/window_delegate_cpptoc.h
++++ b/src/cef/libcef_dll/cpptoc/views/window_delegate_cpptoc.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=594a3ff498c14872187e0ae8d466a023664c92b6$
++// $hash=b4d82958ac79ac843f904c4aa8010a6909ca06fa$
+ //
+ 
+ #ifndef CEF_LIBCEF_DLL_CPPTOC_VIEWS_WINDOW_DELEGATE_CPPTOC_H_
+diff --git a/src/cef/libcef_dll/cpptoc/waitable_event_cpptoc.cc b/src/cef/libcef_dll/cpptoc/waitable_event_cpptoc.cc
+index f65b2038dc345..3af7d1b6c0951
+--- a/src/cef/libcef_dll/cpptoc/waitable_event_cpptoc.cc
++++ b/src/cef/libcef_dll/cpptoc/waitable_event_cpptoc.cc
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=ea0c4c4d8c202a47a9b5b63a57525dc726c1e40e$
++// $hash=c74bf87e609f7e27581c49144f0c751199f7c2cb$
+ //
+ 
+ #include "libcef_dll/cpptoc/waitable_event_cpptoc.h"
+diff --git a/src/cef/libcef_dll/cpptoc/waitable_event_cpptoc.h b/src/cef/libcef_dll/cpptoc/waitable_event_cpptoc.h
+index cc466b7b3ed5e..1e1ba61868eaf
+--- a/src/cef/libcef_dll/cpptoc/waitable_event_cpptoc.h
++++ b/src/cef/libcef_dll/cpptoc/waitable_event_cpptoc.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=f19f05824d06a9aadd3ad10b58e2041eb855a66e$
++// $hash=c3d08738052ecc67921493df15ea0df38c040314$
+ //
+ 
+ #ifndef CEF_LIBCEF_DLL_CPPTOC_WAITABLE_EVENT_CPPTOC_H_
+diff --git a/src/cef/libcef_dll/cpptoc/web_message_receiver_cpptoc.cc b/src/cef/libcef_dll/cpptoc/web_message_receiver_cpptoc.cc
+new file mode 100644
+index 0000000000000..e791792deed44
+--- /dev/null
++++ b/src/cef/libcef_dll/cpptoc/web_message_receiver_cpptoc.cc
+@@ -0,0 +1,71 @@
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
++// reserved. Use of this source code is governed by a BSD-style license that
++// can be found in the LICENSE file.
++//
++// ---------------------------------------------------------------------------
++//
++// This file was generated by the CEF translator tool. If making changes by
++// hand only do so within the body of existing method and function
++// implementations. See the translator.README.txt file in the tools directory
++// for more information.
++//
++// $hash=4a0b96e9541249b0a756bb5709359fade8df76f6$
++//
++
++#include "libcef_dll/cpptoc/web_message_receiver_cpptoc.h"
++#include "libcef_dll/ctocpp/value_ctocpp.h"
++#include "libcef_dll/shutdown_checker.h"
++
++namespace {
++
++// MEMBER FUNCTIONS - Body may be edited by hand.
++
++void CEF_CALLBACK
++web_message_receiver_on_message(struct _cef_web_message_receiver_t* self,
++                                struct _cef_value_t* message) {
++  shutdown_checker::AssertNotShutdown();
++
++  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
++
++  DCHECK(self);
++  if (!self)
++    return;
++  // Verify param: message; type: refptr_diff
++  DCHECK(message);
++  if (!message)
++    return;
++
++  // Execute
++  CefWebMessageReceiverCppToC::Get(self)->OnMessage(
++      CefValueCToCpp::Wrap(message));
++}
++
++}  // namespace
++
++// CONSTRUCTOR - Do not edit by hand.
++
++CefWebMessageReceiverCppToC::CefWebMessageReceiverCppToC() {
++  GetStruct()->on_message = web_message_receiver_on_message;
++}
++
++// DESTRUCTOR - Do not edit by hand.
++
++CefWebMessageReceiverCppToC::~CefWebMessageReceiverCppToC() {
++  shutdown_checker::AssertNotShutdown();
++}
++
++template <>
++CefRefPtr<CefWebMessageReceiver> CefCppToCRefCounted<
++    CefWebMessageReceiverCppToC,
++    CefWebMessageReceiver,
++    cef_web_message_receiver_t>::UnwrapDerived(CefWrapperType type,
++                                               cef_web_message_receiver_t* s) {
++  NOTREACHED() << "Unexpected class type: " << type;
++  return nullptr;
++}
++
++template <>
++CefWrapperType CefCppToCRefCounted<CefWebMessageReceiverCppToC,
++                                   CefWebMessageReceiver,
++                                   cef_web_message_receiver_t>::kWrapperType =
++    WT_WEB_MESSAGE_RECEIVER;
+diff --git a/src/cef/libcef_dll/cpptoc/web_message_receiver_cpptoc.h b/src/cef/libcef_dll/cpptoc/web_message_receiver_cpptoc.h
+new file mode 100644
+index 0000000000000..9846b0985a9bf
+--- /dev/null
++++ b/src/cef/libcef_dll/cpptoc/web_message_receiver_cpptoc.h
+@@ -0,0 +1,40 @@
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
++// reserved. Use of this source code is governed by a BSD-style license that
++// can be found in the LICENSE file.
++//
++// ---------------------------------------------------------------------------
++//
++// This file was generated by the CEF translator tool. If making changes by
++// hand only do so within the body of existing method and function
++// implementations. See the translator.README.txt file in the tools directory
++// for more information.
++//
++// $hash=849fd01178757316d7b9a87fcc89d7a862186798$
++//
++
++#ifndef CEF_LIBCEF_DLL_CPPTOC_WEB_MESSAGE_RECEIVER_CPPTOC_H_
++#define CEF_LIBCEF_DLL_CPPTOC_WEB_MESSAGE_RECEIVER_CPPTOC_H_
++#pragma once
++
++#if !defined(WRAPPING_CEF_SHARED)
++#error This file can be included wrapper-side only
++#endif
++
++#include "include/capi/cef_browser_capi.h"
++#include "include/capi/cef_client_capi.h"
++#include "include/cef_browser.h"
++#include "include/cef_client.h"
++#include "libcef_dll/cpptoc/cpptoc_ref_counted.h"
++
++// Wrap a C++ class with a C structure.
++// This class may be instantiated and accessed wrapper-side only.
++class CefWebMessageReceiverCppToC
++    : public CefCppToCRefCounted<CefWebMessageReceiverCppToC,
++                                 CefWebMessageReceiver,
++                                 cef_web_message_receiver_t> {
++ public:
++  CefWebMessageReceiverCppToC();
++  virtual ~CefWebMessageReceiverCppToC();
++};
++
++#endif  // CEF_LIBCEF_DLL_CPPTOC_WEB_MESSAGE_RECEIVER_CPPTOC_H_
+diff --git a/src/cef/libcef_dll/cpptoc/web_storage_cpptoc.cc b/src/cef/libcef_dll/cpptoc/web_storage_cpptoc.cc
+index 5176cd1efbcd8..648fdc96bc2ee
+--- a/src/cef/libcef_dll/cpptoc/web_storage_cpptoc.cc
++++ b/src/cef/libcef_dll/cpptoc/web_storage_cpptoc.cc
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=959e73af8a9517a5a2381606195efc0fde114317$
++// $hash=53c636c06989583d0ad24c92f4aedce825e5e8ad$
+ //
+ 
+ #include "libcef_dll/cpptoc/web_storage_cpptoc.h"
+diff --git a/src/cef/libcef_dll/cpptoc/web_storage_cpptoc.h b/src/cef/libcef_dll/cpptoc/web_storage_cpptoc.h
+index 1e1b951eccc99..6c3ea996fbd0e
+--- a/src/cef/libcef_dll/cpptoc/web_storage_cpptoc.h
++++ b/src/cef/libcef_dll/cpptoc/web_storage_cpptoc.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=e96ec830a2f1b20fc1ec99664ce7a2df266b73dc$
++// $hash=811b936281434fdc17bbb33dc50640bfc8d5dd33$
+ //
+ 
+ #ifndef CEF_LIBCEF_DLL_CPPTOC_WEB_STORAGE_CPPTOC_H_
+diff --git a/src/cef/libcef_dll/cpptoc/write_handler_cpptoc.cc b/src/cef/libcef_dll/cpptoc/write_handler_cpptoc.cc
+index 8de6eb3a2e2fa..5cb60f31a9a19
+--- a/src/cef/libcef_dll/cpptoc/write_handler_cpptoc.cc
++++ b/src/cef/libcef_dll/cpptoc/write_handler_cpptoc.cc
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=208b9651cb7a357f7665e6d449c6ba974dfae9e3$
++// $hash=9c53b2b7086bf095aa4a4b39fbf5beb6b89b8ea7$
+ //
+ 
+ #include "libcef_dll/cpptoc/write_handler_cpptoc.h"
+diff --git a/src/cef/libcef_dll/cpptoc/write_handler_cpptoc.h b/src/cef/libcef_dll/cpptoc/write_handler_cpptoc.h
+index dfcfd5b41dadf..60a0ba7924f85
+--- a/src/cef/libcef_dll/cpptoc/write_handler_cpptoc.h
++++ b/src/cef/libcef_dll/cpptoc/write_handler_cpptoc.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=b6360b7899237a1d616dd8c1cff016d397acbcd3$
++// $hash=94c67ea9a0a7a44b92ef2d322f7dd34490f5b8e6$
+ //
+ 
+ #ifndef CEF_LIBCEF_DLL_CPPTOC_WRITE_HANDLER_CPPTOC_H_
+diff --git a/src/cef/libcef_dll/cpptoc/x509cert_principal_cpptoc.cc b/src/cef/libcef_dll/cpptoc/x509cert_principal_cpptoc.cc
+index abbd87a9ba645..f0685aeada23c
+--- a/src/cef/libcef_dll/cpptoc/x509cert_principal_cpptoc.cc
++++ b/src/cef/libcef_dll/cpptoc/x509cert_principal_cpptoc.cc
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=08b0ac0ef8621f8ce81753616044a5e04dc4a191$
++// $hash=513c53172ce1c11c036ff200d1ea73c4015b7f3d$
+ //
+ 
+ #include "libcef_dll/cpptoc/x509cert_principal_cpptoc.h"
+diff --git a/src/cef/libcef_dll/cpptoc/x509cert_principal_cpptoc.h b/src/cef/libcef_dll/cpptoc/x509cert_principal_cpptoc.h
+index 244854b81a8d6..8aba2d611d836
+--- a/src/cef/libcef_dll/cpptoc/x509cert_principal_cpptoc.h
++++ b/src/cef/libcef_dll/cpptoc/x509cert_principal_cpptoc.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=2041bbbdcbf9434c1a5205ebae8438d47725aa1f$
++// $hash=6e97a51d6d111d04e88c67e98eff127d7ca09dc1$
+ //
+ 
+ #ifndef CEF_LIBCEF_DLL_CPPTOC_X509CERT_PRINCIPAL_CPPTOC_H_
+diff --git a/src/cef/libcef_dll/cpptoc/x509certificate_cpptoc.cc b/src/cef/libcef_dll/cpptoc/x509certificate_cpptoc.cc
+index e510b4d19200f..6a0b07933fcd1
+--- a/src/cef/libcef_dll/cpptoc/x509certificate_cpptoc.cc
++++ b/src/cef/libcef_dll/cpptoc/x509certificate_cpptoc.cc
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=cac3e88ea15965e3a7786500606845b0b6157212$
++// $hash=42a3effdf914b981136faef4528708ea47aba8c1$
+ //
+ 
+ #include "libcef_dll/cpptoc/x509certificate_cpptoc.h"
+diff --git a/src/cef/libcef_dll/cpptoc/x509certificate_cpptoc.h b/src/cef/libcef_dll/cpptoc/x509certificate_cpptoc.h
+index 29644da070b96..6ef90271fca96
+--- a/src/cef/libcef_dll/cpptoc/x509certificate_cpptoc.h
++++ b/src/cef/libcef_dll/cpptoc/x509certificate_cpptoc.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=6eb11abb213e5b3e50494c956c51d6286020ca39$
++// $hash=11090b23faf77d87bde0a603e74a0697be58fa7c$
+ //
+ 
+ #ifndef CEF_LIBCEF_DLL_CPPTOC_X509CERTIFICATE_CPPTOC_H_
+diff --git a/src/cef/libcef_dll/cpptoc/xml_reader_cpptoc.cc b/src/cef/libcef_dll/cpptoc/xml_reader_cpptoc.cc
+index ae117e5f241ce..a782ff1432587
+--- a/src/cef/libcef_dll/cpptoc/xml_reader_cpptoc.cc
++++ b/src/cef/libcef_dll/cpptoc/xml_reader_cpptoc.cc
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=3ac5f5c45a59bad3310db431653227ceac42186e$
++// $hash=e4ec9a462bd52b87a605d8c2c677b278943e55f9$
+ //
+ 
+ #include "libcef_dll/cpptoc/xml_reader_cpptoc.h"
+diff --git a/src/cef/libcef_dll/cpptoc/xml_reader_cpptoc.h b/src/cef/libcef_dll/cpptoc/xml_reader_cpptoc.h
+index 5f32d62c81f89..0a69e23f147a2
+--- a/src/cef/libcef_dll/cpptoc/xml_reader_cpptoc.h
++++ b/src/cef/libcef_dll/cpptoc/xml_reader_cpptoc.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=397fee4bf9eb4c1dc2117bba9ac2b63542335196$
++// $hash=1305b95acf584a0a0e5fd412e948f195233f476b$
+ //
+ 
+ #ifndef CEF_LIBCEF_DLL_CPPTOC_XML_READER_CPPTOC_H_
+diff --git a/src/cef/libcef_dll/cpptoc/zip_reader_cpptoc.cc b/src/cef/libcef_dll/cpptoc/zip_reader_cpptoc.cc
+index a53a7a724eeb0..7231cc3ffead5
+--- a/src/cef/libcef_dll/cpptoc/zip_reader_cpptoc.cc
++++ b/src/cef/libcef_dll/cpptoc/zip_reader_cpptoc.cc
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=9fe9e9199e284af22669ba2abfb715d0e7ae8de3$
++// $hash=1fdbab5695a0c6e3eb026cd78dda309b620c75a7$
+ //
+ 
+ #include "libcef_dll/cpptoc/zip_reader_cpptoc.h"
+diff --git a/src/cef/libcef_dll/cpptoc/zip_reader_cpptoc.h b/src/cef/libcef_dll/cpptoc/zip_reader_cpptoc.h
+index c04789a0c9290..06233d39eae09
+--- a/src/cef/libcef_dll/cpptoc/zip_reader_cpptoc.h
++++ b/src/cef/libcef_dll/cpptoc/zip_reader_cpptoc.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=10530d641ffc50165b89d16e76230b9ab3f9aca5$
++// $hash=488ca93df16ff22fdd9d397aab117990f01f3331$
+ //
+ 
+ #ifndef CEF_LIBCEF_DLL_CPPTOC_ZIP_READER_CPPTOC_H_
+diff --git a/src/cef/libcef_dll/ctocpp/access_request_ctocpp.cc b/src/cef/libcef_dll/ctocpp/access_request_ctocpp.cc
+index 4d7e095ef4da0..800bc7e9e08db
+--- a/src/cef/libcef_dll/ctocpp/access_request_ctocpp.cc
++++ b/src/cef/libcef_dll/ctocpp/access_request_ctocpp.cc
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=05b34b1c04c69b654aad9a8136efbe83693d255f$
++// $hash=1e70efca41e4964cb02f68b5f93dc4a4567b60da$
+ //
+ 
+ #include "libcef_dll/ctocpp/access_request_ctocpp.h"
+diff --git a/src/cef/libcef_dll/ctocpp/access_request_ctocpp.h b/src/cef/libcef_dll/ctocpp/access_request_ctocpp.h
+index fc0300402f19d..5eb1d7f759de9
+--- a/src/cef/libcef_dll/ctocpp/access_request_ctocpp.h
++++ b/src/cef/libcef_dll/ctocpp/access_request_ctocpp.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=9a6a1dd32258b15f1694c3070c61bf0d0092f18f$
++// $hash=08c6bc8913ed7dcf8134fe99745d8f9a4fbc7fa4$
+ //
+ 
+ #ifndef CEF_LIBCEF_DLL_CTOCPP_ACCESS_REQUEST_CTOCPP_H_
+diff --git a/src/cef/libcef_dll/ctocpp/accessibility_handler_ctocpp.cc b/src/cef/libcef_dll/ctocpp/accessibility_handler_ctocpp.cc
+index 544ecf2731753..1f6d139cc9793
+--- a/src/cef/libcef_dll/ctocpp/accessibility_handler_ctocpp.cc
++++ b/src/cef/libcef_dll/ctocpp/accessibility_handler_ctocpp.cc
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=ced6517a7c7149502b418c5fb06386ff30777630$
++// $hash=0613e7faeb146728fa191bcb163f5d2a7386378f$
+ //
+ 
+ #include "libcef_dll/ctocpp/accessibility_handler_ctocpp.h"
+diff --git a/src/cef/libcef_dll/ctocpp/accessibility_handler_ctocpp.h b/src/cef/libcef_dll/ctocpp/accessibility_handler_ctocpp.h
+index 17804af63428b..0a94e2ead1e4e
+--- a/src/cef/libcef_dll/ctocpp/accessibility_handler_ctocpp.h
++++ b/src/cef/libcef_dll/ctocpp/accessibility_handler_ctocpp.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=7ab53ef41cd69320ac6441e514582fd583203207$
++// $hash=3bfebc6542251128247e89a55fba8cbb3bc7061d$
+ //
+ 
+ #ifndef CEF_LIBCEF_DLL_CTOCPP_ACCESSIBILITY_HANDLER_CTOCPP_H_
+diff --git a/src/cef/libcef_dll/ctocpp/app_ctocpp.cc b/src/cef/libcef_dll/ctocpp/app_ctocpp.cc
+index 6d60e8f0cd219..49ca33f2e07c5
+--- a/src/cef/libcef_dll/ctocpp/app_ctocpp.cc
++++ b/src/cef/libcef_dll/ctocpp/app_ctocpp.cc
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=9986455b9b29bd88504e9b4c2b73bfebc87cfc61$
++// $hash=60ccdb3fa2c50678bc2ba4aeb04a6ed9428f0671$
+ //
+ 
+ #include "libcef_dll/ctocpp/app_ctocpp.h"
+diff --git a/src/cef/libcef_dll/ctocpp/app_ctocpp.h b/src/cef/libcef_dll/ctocpp/app_ctocpp.h
+index bac5ba4bb12b3..80424a306c27b
+--- a/src/cef/libcef_dll/ctocpp/app_ctocpp.h
++++ b/src/cef/libcef_dll/ctocpp/app_ctocpp.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=b1a38565477fd1c436d8a62bfa9d41747f7fe30f$
++// $hash=ea433c4f09f9cc1c432e3406dacfe27ec81c20cb$
+ //
+ 
+ #ifndef CEF_LIBCEF_DLL_CTOCPP_APP_CTOCPP_H_
+diff --git a/src/cef/libcef_dll/ctocpp/audio_handler_ctocpp.cc b/src/cef/libcef_dll/ctocpp/audio_handler_ctocpp.cc
+index fcba4e08799dd..0352ecfc01bef
+--- a/src/cef/libcef_dll/ctocpp/audio_handler_ctocpp.cc
++++ b/src/cef/libcef_dll/ctocpp/audio_handler_ctocpp.cc
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=e2df55073d0fb809dcd4cf0f6bb7ed36dcd4f73c$
++// $hash=de4ec961ee7ee01943cf5a21b7e0729109d74d31$
+ //
+ 
+ #include "libcef_dll/ctocpp/audio_handler_ctocpp.h"
+diff --git a/src/cef/libcef_dll/ctocpp/audio_handler_ctocpp.h b/src/cef/libcef_dll/ctocpp/audio_handler_ctocpp.h
+index cdb6138637ad3..07bf46b6327a1
+--- a/src/cef/libcef_dll/ctocpp/audio_handler_ctocpp.h
++++ b/src/cef/libcef_dll/ctocpp/audio_handler_ctocpp.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=9de91dcf5136e07c0d5c06ad9be8173b918f668a$
++// $hash=761b05f6a7cd2f0cfc1968a3902bd874060ad79b$
+ //
+ 
+ #ifndef CEF_LIBCEF_DLL_CTOCPP_AUDIO_HANDLER_CTOCPP_H_
+diff --git a/src/cef/libcef_dll/ctocpp/auth_callback_ctocpp.cc b/src/cef/libcef_dll/ctocpp/auth_callback_ctocpp.cc
+index ee290eb9b4c8f..e86d64fbbb335
+--- a/src/cef/libcef_dll/ctocpp/auth_callback_ctocpp.cc
++++ b/src/cef/libcef_dll/ctocpp/auth_callback_ctocpp.cc
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=e7ec4903d06110c27d271a7e946c90231b8d3f08$
++// $hash=1397d65bac566cf536f65f10709e0cd0448692fa$
+ //
+ 
+ #include "libcef_dll/ctocpp/auth_callback_ctocpp.h"
+diff --git a/src/cef/libcef_dll/ctocpp/auth_callback_ctocpp.h b/src/cef/libcef_dll/ctocpp/auth_callback_ctocpp.h
+index c03f19aec0d3b..aba08fadedf4e
+--- a/src/cef/libcef_dll/ctocpp/auth_callback_ctocpp.h
++++ b/src/cef/libcef_dll/ctocpp/auth_callback_ctocpp.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=74b470ef09c99a7d2ccbe7e9134e0b4d1f11be03$
++// $hash=b21ded769da39fdf3e0ae7991bdc6a2175a4113d$
+ //
+ 
+ #ifndef CEF_LIBCEF_DLL_CTOCPP_AUTH_CALLBACK_CTOCPP_H_
+diff --git a/src/cef/libcef_dll/ctocpp/before_download_callback_ctocpp.cc b/src/cef/libcef_dll/ctocpp/before_download_callback_ctocpp.cc
+index 35b0bb6593a34..e98722822d887
+--- a/src/cef/libcef_dll/ctocpp/before_download_callback_ctocpp.cc
++++ b/src/cef/libcef_dll/ctocpp/before_download_callback_ctocpp.cc
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=dab6c53c94db70fbeb54b440584a5147c52fe082$
++// $hash=70cd50b1ed22e0b0068a90539de1f00ddd0511dd$
+ //
+ 
+ #include "libcef_dll/ctocpp/before_download_callback_ctocpp.h"
+diff --git a/src/cef/libcef_dll/ctocpp/before_download_callback_ctocpp.h b/src/cef/libcef_dll/ctocpp/before_download_callback_ctocpp.h
+index 52415e89675ad..23739dd84de11
+--- a/src/cef/libcef_dll/ctocpp/before_download_callback_ctocpp.h
++++ b/src/cef/libcef_dll/ctocpp/before_download_callback_ctocpp.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=f2b6a61b2459566fef19ee3824d7c155bf7f25d1$
++// $hash=743f5b5893055b96eb373b93368c727b3d36d3c6$
+ //
+ 
+ #ifndef CEF_LIBCEF_DLL_CTOCPP_BEFORE_DOWNLOAD_CALLBACK_CTOCPP_H_
+diff --git a/src/cef/libcef_dll/ctocpp/binary_value_ctocpp.cc b/src/cef/libcef_dll/ctocpp/binary_value_ctocpp.cc
+index 307b982cde15b..b9c7809c3ece0
+--- a/src/cef/libcef_dll/ctocpp/binary_value_ctocpp.cc
++++ b/src/cef/libcef_dll/ctocpp/binary_value_ctocpp.cc
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=80a91b8a85dc537cb49cbd5eaea974f92fbf9cde$
++// $hash=50f74bf4eaafce6b10c91af2a9bf516fac113cf5$
+ //
+ 
+ #include "libcef_dll/ctocpp/binary_value_ctocpp.h"
+diff --git a/src/cef/libcef_dll/ctocpp/binary_value_ctocpp.h b/src/cef/libcef_dll/ctocpp/binary_value_ctocpp.h
+index 5a768b4747b97..414f70260ccf9
+--- a/src/cef/libcef_dll/ctocpp/binary_value_ctocpp.h
++++ b/src/cef/libcef_dll/ctocpp/binary_value_ctocpp.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=e9e56607998130280b093c45987aa294c06f1912$
++// $hash=b6f011a6c26b4264084eb68dae0d63032c07013c$
+ //
+ 
+ #ifndef CEF_LIBCEF_DLL_CTOCPP_BINARY_VALUE_CTOCPP_H_
+diff --git a/src/cef/libcef_dll/ctocpp/browser_ctocpp.cc b/src/cef/libcef_dll/ctocpp/browser_ctocpp.cc
+index f2a84fea5f8a4..a9bdc2a55717a
+--- a/src/cef/libcef_dll/ctocpp/browser_ctocpp.cc
++++ b/src/cef/libcef_dll/ctocpp/browser_ctocpp.cc
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=8a99c30f78379c8bac224637139db4110d8801cb$
++// $hash=ab991c66f7028ebb53acbd5cf350c89a880f4383$
+ //
+ 
+ #include "libcef_dll/ctocpp/browser_ctocpp.h"
+diff --git a/src/cef/libcef_dll/ctocpp/browser_ctocpp.h b/src/cef/libcef_dll/ctocpp/browser_ctocpp.h
+index df1823631cb26..f59811147206e
+--- a/src/cef/libcef_dll/ctocpp/browser_ctocpp.h
++++ b/src/cef/libcef_dll/ctocpp/browser_ctocpp.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=4e74199d2ef640e3276988dc06a53ff84140b3fc$
++// $hash=66aac50bedd02f309bb3715b0d4cafb0cd824c4d$
+ //
+ 
+ #ifndef CEF_LIBCEF_DLL_CTOCPP_BROWSER_CTOCPP_H_
+diff --git a/src/cef/libcef_dll/ctocpp/browser_host_ctocpp.cc b/src/cef/libcef_dll/ctocpp/browser_host_ctocpp.cc
+index 5ee4cf01c6285..188871e22d02a
+--- a/src/cef/libcef_dll/ctocpp/browser_host_ctocpp.cc
++++ b/src/cef/libcef_dll/ctocpp/browser_host_ctocpp.cc
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=da4be0653a8e67000f1c6e34219ee3f7b288ca58$
++// $hash=4912cb91f0c5d4e550ab1441c8848477bc787a11$
+ //
+ 
+ #include "libcef_dll/ctocpp/browser_host_ctocpp.h"
+@@ -22,6 +22,8 @@
+ #include "libcef_dll/cpptoc/run_file_dialog_callback_cpptoc.h"
+ #include "libcef_dll/cpptoc/store_web_archive_result_callback_cpptoc.h"
+ #include "libcef_dll/cpptoc/task_cpptoc.h"
++#include "libcef_dll/cpptoc/web_message_receiver_cpptoc.h"
++#include "libcef_dll/ctocpp/binary_value_ctocpp.h"
+ #include "libcef_dll/ctocpp/browser_ctocpp.h"
+ #include "libcef_dll/ctocpp/dictionary_value_ctocpp.h"
+ #include "libcef_dll/ctocpp/drag_data_ctocpp.h"
+@@ -29,6 +31,7 @@
+ #include "libcef_dll/ctocpp/navigation_entry_ctocpp.h"
+ #include "libcef_dll/ctocpp/registration_ctocpp.h"
+ #include "libcef_dll/ctocpp/request_context_ctocpp.h"
++#include "libcef_dll/ctocpp/value_ctocpp.h"
+ #include "libcef_dll/shutdown_checker.h"
+ #include "libcef_dll/transfer_util.h"
+ 
+@@ -1122,7 +1125,7 @@ void CefBrowserHostCToCpp::DestroyAllWebMessagePorts() {
+ 
+ NO_SANITIZE("cfi-icall")
+ void CefBrowserHostCToCpp::PostPortMessage(CefString& port_handle,
+-                                           CefString& data) {
++                                           CefRefPtr<CefValue> message) {
+   shutdown_checker::AssertNotShutdown();
+ 
+   cef_browser_host_t* _struct = GetStruct();
+@@ -1131,15 +1134,20 @@ void CefBrowserHostCToCpp::PostPortMessage(CefString& port_handle,
+ 
+   // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
+ 
++  // Verify param: message; type: refptr_same
++  DCHECK(message.get());
++  if (!message.get())
++    return;
++
+   // Execute
+   _struct->post_port_message(_struct, port_handle.GetWritableStruct(),
+-                             data.GetWritableStruct());
++                             CefValueCToCpp::Unwrap(message));
+ }
+ 
+ NO_SANITIZE("cfi-icall")
+ void CefBrowserHostCToCpp::SetPortMessageCallback(
+     CefString& port_handle,
+-    CefRefPtr<CefJavaScriptResultCallback> callback) {
++    CefRefPtr<CefWebMessageReceiver> callback) {
+   shutdown_checker::AssertNotShutdown();
+ 
+   cef_browser_host_t* _struct = GetStruct();
+@@ -1156,7 +1164,7 @@ void CefBrowserHostCToCpp::SetPortMessageCallback(
+   // Execute
+   _struct->set_port_message_callback(
+       _struct, port_handle.GetWritableStruct(),
+-      CefJavaScriptResultCallbackCppToC::Wrap(callback));
++      CefWebMessageReceiverCppToC::Wrap(callback));
+ }
+ 
+ NO_SANITIZE("cfi-icall")
+@@ -1758,6 +1766,143 @@ void CefBrowserHostCToCpp::RemoveCache(bool include_disk_files) {
+   _struct->remove_cache(_struct, include_disk_files);
+ }
+ 
++NO_SANITIZE("cfi-icall")
++void CefBrowserHostCToCpp::ScrollPageUpDown(bool is_up,
++                                            bool is_half,
++                                            float view_height) {
++  shutdown_checker::AssertNotShutdown();
++
++  cef_browser_host_t* _struct = GetStruct();
++  if (CEF_MEMBER_MISSING(_struct, scroll_page_up_down))
++    return;
++
++  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
++
++  // Execute
++  _struct->scroll_page_up_down(_struct, is_up, is_half, view_height);
++}
++
++NO_SANITIZE("cfi-icall")
++CefRefPtr<CefBinaryValue> CefBrowserHostCToCpp::GetWebState() {
++  shutdown_checker::AssertNotShutdown();
++
++  cef_browser_host_t* _struct = GetStruct();
++  if (CEF_MEMBER_MISSING(_struct, get_web_state))
++    return nullptr;
++
++  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
++
++  // Execute
++  cef_binary_value_t* _retval = _struct->get_web_state(_struct);
++
++  // Return type: refptr_same
++  return CefBinaryValueCToCpp::Wrap(_retval);
++}
++
++NO_SANITIZE("cfi-icall")
++bool CefBrowserHostCToCpp::RestoreWebState(
++    const CefRefPtr<CefBinaryValue> state) {
++  shutdown_checker::AssertNotShutdown();
++
++  cef_browser_host_t* _struct = GetStruct();
++  if (CEF_MEMBER_MISSING(_struct, restore_web_state))
++    return false;
++
++  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
++
++  // Verify param: state; type: refptr_same
++  DCHECK(state.get());
++  if (!state.get())
++    return false;
++
++  // Execute
++  int _retval =
++      _struct->restore_web_state(_struct, CefBinaryValueCToCpp::Unwrap(state));
++
++  // Return type: bool
++  return _retval ? true : false;
++}
++
++NO_SANITIZE("cfi-icall") void CefBrowserHostCToCpp::ScrollTo(float x, float y) {
++  shutdown_checker::AssertNotShutdown();
++
++  cef_browser_host_t* _struct = GetStruct();
++  if (CEF_MEMBER_MISSING(_struct, scroll_to))
++    return;
++
++  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
++
++  // Execute
++  _struct->scroll_to(_struct, x, y);
++}
++
++NO_SANITIZE("cfi-icall")
++void CefBrowserHostCToCpp::ScrollBy(float delta_x, float delta_y) {
++  shutdown_checker::AssertNotShutdown();
++
++  cef_browser_host_t* _struct = GetStruct();
++  if (CEF_MEMBER_MISSING(_struct, scroll_by))
++    return;
++
++  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
++
++  // Execute
++  _struct->scroll_by(_struct, delta_x, delta_y);
++}
++
++NO_SANITIZE("cfi-icall")
++void CefBrowserHostCToCpp::SlideScroll(float vx, float vy) {
++  shutdown_checker::AssertNotShutdown();
++
++  cef_browser_host_t* _struct = GetStruct();
++  if (CEF_MEMBER_MISSING(_struct, slide_scroll))
++    return;
++
++  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
++
++  // Execute
++  _struct->slide_scroll(_struct, vx, vy);
++}
++
++NO_SANITIZE("cfi-icall") void CefBrowserHostCToCpp::SetFileAccess(bool falg) {
++  shutdown_checker::AssertNotShutdown();
++
++  cef_browser_host_t* _struct = GetStruct();
++  if (CEF_MEMBER_MISSING(_struct, set_file_access))
++    return;
++
++  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
++
++  // Execute
++  _struct->set_file_access(_struct, falg);
++}
++
++NO_SANITIZE("cfi-icall") void CefBrowserHostCToCpp::SetBlockNetwork(bool falg) {
++  shutdown_checker::AssertNotShutdown();
++
++  cef_browser_host_t* _struct = GetStruct();
++  if (CEF_MEMBER_MISSING(_struct, set_block_network))
++    return;
++
++  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
++
++  // Execute
++  _struct->set_block_network(_struct, falg);
++}
++
++NO_SANITIZE("cfi-icall") void CefBrowserHostCToCpp::SetCacheMode(int falg) {
++  shutdown_checker::AssertNotShutdown();
++
++  cef_browser_host_t* _struct = GetStruct();
++  if (CEF_MEMBER_MISSING(_struct, set_cache_mode))
++    return;
++
++  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
++
++  // Execute
++  _struct->set_cache_mode(_struct, falg);
++}
++
+ // CONSTRUCTOR - Do not edit by hand.
+ 
+ CefBrowserHostCToCpp::CefBrowserHostCToCpp() {}
+diff --git a/src/cef/libcef_dll/ctocpp/browser_host_ctocpp.h b/src/cef/libcef_dll/ctocpp/browser_host_ctocpp.h
+index ece6642e28544..f75f810a9f13e
+--- a/src/cef/libcef_dll/ctocpp/browser_host_ctocpp.h
++++ b/src/cef/libcef_dll/ctocpp/browser_host_ctocpp.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=7d2cea734649b808710e6c44ee7eab4f5e5b47cc$
++// $hash=29c3bfce4a45f38ec3fd21096e13addeb83f6310$
+ //
+ 
+ #ifndef CEF_LIBCEF_DLL_CTOCPP_BROWSER_HOST_CTOCPP_H_
+@@ -129,10 +129,11 @@ class CefBrowserHostCToCpp : public CefCToCppRefCounted<CefBrowserHostCToCpp,
+                       CefString& targetUri) override;
+   void ClosePort(CefString& port_handle) override;
+   void DestroyAllWebMessagePorts() override;
+-  void PostPortMessage(CefString& port_handle, CefString& data) override;
++  void PostPortMessage(CefString& port_handle,
++                       CefRefPtr<CefValue> message) override;
+   void SetPortMessageCallback(
+       CefString& port_handle,
+-      CefRefPtr<CefJavaScriptResultCallback> callback) override;
++      CefRefPtr<CefWebMessageReceiver> callback) override;
+   void GetHitData(int& type, CefString& extra_data) override;
+   void SetInitialScale(float scale) override;
+   int PageLoadProgress() override;
+@@ -186,6 +187,15 @@ class CefBrowserHostCToCpp : public CefCToCppRefCounted<CefBrowserHostCToCpp,
+   CefString GetOriginalUrl() override;
+   void PutNetworkAvailable(bool available) override;
+   void RemoveCache(bool include_disk_files) override;
++  void ScrollPageUpDown(bool is_up, bool is_half, float view_height) override;
++  CefRefPtr<CefBinaryValue> GetWebState() override;
++  bool RestoreWebState(const CefRefPtr<CefBinaryValue> state) override;
++  void ScrollTo(float x, float y) override;
++  void ScrollBy(float delta_x, float delta_y) override;
++  void SlideScroll(float vx, float vy) override;
++  void SetFileAccess(bool falg) override;
++  void SetBlockNetwork(bool falg) override;
++  void SetCacheMode(int falg) override;
+ };
+ 
+ #endif  // CEF_LIBCEF_DLL_CTOCPP_BROWSER_HOST_CTOCPP_H_
+diff --git a/src/cef/libcef_dll/ctocpp/browser_permission_request_delegate_ctocpp.cc b/src/cef/libcef_dll/ctocpp/browser_permission_request_delegate_ctocpp.cc
+index 378b2e54202dd..2cca93268f1ef
+--- a/src/cef/libcef_dll/ctocpp/browser_permission_request_delegate_ctocpp.cc
++++ b/src/cef/libcef_dll/ctocpp/browser_permission_request_delegate_ctocpp.cc
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2022 The Chromium Embedded Framework Authors. All rights
++// Copyright (c) 2023 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ //
+@@ -9,7 +9,7 @@
+ // implementations. See the translator.README.txt file in the tools directory
+ // for more information.
+ //
+-// $hash=4a9c34d8dd8e49725dd7288c3a8c3e2a978c977c$
++// $hash=7af372362be16cd5150da026dbbf41c85daeba88$
+ //
+ 
+ #include "libcef_dll/ctocpp/browser_permission_request_delegate_ctocpp.h"
+@@ -19,10 +19,11 @@
+ 
+ NO_SANITIZE("cfi-icall")
+ void CefBrowserPermissionRequestDelegateCToCpp::AskGeolocationPermission(
+-    const CefString &origin, cef_permission_callback_t callback) {
++    const CefString& origin,
++    cef_permission_callback_t callback) {
+   shutdown_checker::AssertNotShutdown();
+ 
+-  cef_browser_permission_request_delegate_t *_struct = GetStruct();
++  cef_browser_permission_request_delegate_t* _struct = GetStruct();
+   if (CEF_MEMBER_MISSING(_struct, ask_geolocation_permission))
+     return;
+ 
+@@ -39,10 +40,10 @@ void CefBrowserPermissionRequestDelegateCToCpp::AskGeolocationPermission(
+ 
+ NO_SANITIZE("cfi-icall")
+ void CefBrowserPermissionRequestDelegateCToCpp::AbortAskGeolocationPermission(
+-    const CefString &origin) {
++    const CefString& origin) {
+   shutdown_checker::AssertNotShutdown();
+ 
+-  cef_browser_permission_request_delegate_t *_struct = GetStruct();
++  cef_browser_permission_request_delegate_t* _struct = GetStruct();
+   if (CEF_MEMBER_MISSING(_struct, abort_ask_geolocation_permission))
+     return;
+ 
+@@ -59,11 +60,11 @@ void CefBrowserPermissionRequestDelegateCToCpp::AbortAskGeolocationPermission(
+ 
+ NO_SANITIZE("cfi-icall")
+ void CefBrowserPermissionRequestDelegateCToCpp::
+-    AskProtectedMediaIdentifierPermission(const CefString &origin,
++    AskProtectedMediaIdentifierPermission(const CefString& origin,
+                                           cef_permission_callback_t callback) {
+   shutdown_checker::AssertNotShutdown();
+ 
+-  cef_browser_permission_request_delegate_t *_struct = GetStruct();
++  cef_browser_permission_request_delegate_t* _struct = GetStruct();
+   if (CEF_MEMBER_MISSING(_struct, ask_protected_media_identifier_permission))
+     return;
+ 
+@@ -81,10 +82,10 @@ void CefBrowserPermissionRequestDelegateCToCpp::
+ 
+ NO_SANITIZE("cfi-icall")
+ void CefBrowserPermissionRequestDelegateCToCpp::
+-    AbortAskProtectedMediaIdentifierPermission(const CefString &origin) {
++    AbortAskProtectedMediaIdentifierPermission(const CefString& origin) {
+   shutdown_checker::AssertNotShutdown();
+ 
+-  cef_browser_permission_request_delegate_t *_struct = GetStruct();
++  cef_browser_permission_request_delegate_t* _struct = GetStruct();
+   if (CEF_MEMBER_MISSING(_struct,
+                          abort_ask_protected_media_identifier_permission))
+     return;
+@@ -103,10 +104,11 @@ void CefBrowserPermissionRequestDelegateCToCpp::
+ 
+ NO_SANITIZE("cfi-icall")
+ void CefBrowserPermissionRequestDelegateCToCpp::AskMIDISysexPermission(
+-    const CefString &origin, cef_permission_callback_t callback) {
++    const CefString& origin,
++    cef_permission_callback_t callback) {
+   shutdown_checker::AssertNotShutdown();
+ 
+-  cef_browser_permission_request_delegate_t *_struct = GetStruct();
++  cef_browser_permission_request_delegate_t* _struct = GetStruct();
+   if (CEF_MEMBER_MISSING(_struct, ask_midisysex_permission))
+     return;
+ 
+@@ -123,10 +125,10 @@ void CefBrowserPermissionRequestDelegateCToCpp::AskMIDISysexPermission(
+ 
+ NO_SANITIZE("cfi-icall")
+ void CefBrowserPermissionRequestDelegateCToCpp::AbortAskMIDISysexPermission(
+-    const CefString &origin) {
++    const CefString& origin) {
+   shutdown_checker::AssertNotShutdown();
+ 
+-  cef_browser_permission_request_delegate_t *_struct = GetStruct();
++  cef_browser_permission_request_delegate_t* _struct = GetStruct();
+   if (CEF_MEMBER_MISSING(_struct, abort_ask_midisysex_permission))
+     return;
+ 
+@@ -143,10 +145,11 @@ void CefBrowserPermissionRequestDelegateCToCpp::AbortAskMIDISysexPermission(
+ 
+ NO_SANITIZE("cfi-icall")
+ void CefBrowserPermissionRequestDelegateCToCpp::NotifyGeolocationPermission(
+-    bool value, const CefString &origin) {
++    bool value,
++    const CefString& origin) {
+   shutdown_checker::AssertNotShutdown();
+ 
+-  cef_browser_permission_request_delegate_t *_struct = GetStruct();
++  cef_browser_permission_request_delegate_t* _struct = GetStruct();
+   if (CEF_MEMBER_MISSING(_struct, notify_geolocation_permission))
+     return;
+ 
+@@ -174,11 +177,11 @@ CefBrowserPermissionRequestDelegateCToCpp::
+ }
+ 
+ template <>
+-cef_browser_permission_request_delegate_t *
++cef_browser_permission_request_delegate_t*
+ CefCToCppRefCounted<CefBrowserPermissionRequestDelegateCToCpp,
+                     CefBrowserPermissionRequestDelegate,
+                     cef_browser_permission_request_delegate_t>::
+-    UnwrapDerived(CefWrapperType type, CefBrowserPermissionRequestDelegate *c) {
++    UnwrapDerived(CefWrapperType type, CefBrowserPermissionRequestDelegate* c) {
+   NOTREACHED() << "Unexpected class type: " << type;
+   return nullptr;
+ }
