@@ -453,7 +453,9 @@ void ResourceRequestSender::OnReceivedResponse(
 }
 
 #if BUILDFLAG(IS_OHOS)
-void ResourceRequestSender::OnTransferDataWithSharedMemory(base::ReadOnlySharedMemoryRegion region, uint64_t buffer_size) {
+void ResourceRequestSender::OnTransferDataWithSharedMemory(
+    base::ReadOnlySharedMemoryRegion region,
+    uint64_t buffer_size) {
   if(!request_info_) {
     return;
   }
