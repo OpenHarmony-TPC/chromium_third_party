@@ -175,7 +175,9 @@ SyncLoadContext::SyncLoadContext(
                                               timeout)) {
 
 #if BUILDFLAG(IS_OHOS)
-  LOG(DEBUG) << "SyncLoadContext pid=" << base::GetCurrentProcId() << ", main thread tid=" << base::GetCurrentRealPid() << ", real tid=" << base::PlatformThread::CurrentRealId();
+  LOG(DEBUG) << "SyncLoadContext pid=" << base::GetCurrentProcId()
+             << ", main thread tid=" << base::GetCurrentRealPid()
+             << ", real tid=" << base::PlatformThread::CurrentRealId();
   BindRemote(render_thread);
 
   if (report_manager_) {
