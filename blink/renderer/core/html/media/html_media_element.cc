@@ -405,6 +405,8 @@ float PageConstraintInitalScale(const Document& document) {
   float scale = 1.0;
   if (auto* page = document.GetPage()) {
     scale = page->GetPageScaleConstraintsSet().FinalConstraints().initial_scale;
+  } else {
+    LOG(INFO) << "using default scale 1.0";
   }
   return scale;
 }
@@ -5226,6 +5228,7 @@ gfx::Rect HTMLMediaElement::GetVideoRect() {
     return gfx::Rect(ToFlooredPoint(layout_box->Location()),
         ToFlooredSize(layout_box->Size()));
   }
+  LOG(INFO) << "using default vidoe size";
   return gfx::Rect(LayoutReplaced::kDefaultWidth,
         LayoutReplaced::kDefaultHeight);
 }
