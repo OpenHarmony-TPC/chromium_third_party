@@ -240,13 +240,13 @@ static void setup_rtcd_internal(void) {
   (void)flags;
 
   vp9_block_error = vp9_block_error_neon;
-#if defined (clang) && (clang_major >= 17)
+#if defined (__clang__) && (__clang_major__ >= 17)
   if (flags & HAS_SVE) {
     vp9_block_error = vp9_block_error_sve;
   }
 #endif
   vp9_block_error_fp = vp9_block_error_fp_neon;
-#if defined (clang) && (clang_major >= 17)
+#if defined (__clang__) && (__clang_major__ >= 17)
   if (flags & HAS_SVE) {
     vp9_block_error_fp = vp9_block_error_fp_sve;
   }
