@@ -3720,7 +3720,7 @@ static void setup_rtcd_internal(void) {
     vpx_sse = vpx_sse_neon_dotprod;
   }
   vpx_sum_squares_2d_i16 = vpx_sum_squares_2d_i16_neon;
-#if defined (clang) && (clang_major >= 17)
+#if defined (__clang__) && (__clang_major__ >= 17)
   if (flags & HAS_SVE) {
     vpx_sum_squares_2d_i16 = vpx_sum_squares_2d_i16_sve;
   }
