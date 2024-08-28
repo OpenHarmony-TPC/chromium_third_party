@@ -131,9 +131,6 @@ class CORE_EXPORT NativeLoader
   mojo::PendingAssociatedReceiver<media::mojom::blink::NativeBridgeObserver>
   AddNativeBridgeObserverAndPassReceiver();
 
-  // Timers used to schedule one-shot tasks with no delay.
-  HeapTaskRunnerTimer<NativeLoader> load_timer_;
-
   cc::Layer* cc_layer_;
 
   Member<HTMLPlugInElement> plugin_element_;

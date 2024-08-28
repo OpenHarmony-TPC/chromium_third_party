@@ -66,10 +66,6 @@ float PageConstraintInitalScale(const Document& document) {
 
 NativeLoader::NativeLoader(HTMLPlugInElement* plugin_element)
     : ExecutionContextLifecycleStateObserver(GetExecutionContext()),
-      load_timer_(
-          plugin_element->GetDocument().GetTaskRunner(TaskType::kInternalMedia),
-          this,
-          &NativeLoader::LoadTimerFired),
       cc_layer_(nullptr),
       plugin_element_(plugin_element) {
   LOG(INFO) << "[NativeEmbed] NativeLoader::NativeLoader element "
@@ -135,8 +131,7 @@ LocalFrame* NativeLoader::CurrentFrame() {
 
 void NativeLoader::ScheduleLoadResource() {
   LOG(INFO) << "NativeEmbed NativeLoader::ScheduleLoadResource";
-  load_timer_.Stop();
-  load_timer_.StartOneShot(base::TimeDelta(), FROM_HERE);
+  LoadTimerFired(nullptr);
 }
 
 void NativeLoader::LoadTimerFired(TimerBase*) {
@@ -306,7 +301,6 @@ void NativeLoader::SetCcLayer(cc::Layer* cc_layer) {
 
 void NativeLoader::ClearNativeResource() {
   LOG(INFO) << "NativeEmbed NativeLoader::ClearNativeResource";
-  load_timer_.Stop();
 
   if (web_native_bridge_) {
     web_native_bridge_.reset();
@@ -330,7 +324,6 @@ cc::Layer* NativeLoader::CcLayer() const {
 }
 
 void NativeLoader::Trace(Visitor* visitor) const {
-  visitor->Trace(load_timer_);
   visitor->Trace(native_bridge_host_remote_);
   visitor->Trace(native_bridge_observer_remote_set_);
   ExecutionContextLifecycleStateObserver::Trace(visitor);
