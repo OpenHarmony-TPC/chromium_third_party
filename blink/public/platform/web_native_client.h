@@ -31,7 +31,7 @@ class BLINK_PLATFORM_EXPORT WebNativeClient {
   virtual void Repaint() = 0;
   virtual void SetCcLayer(cc::Layer*) = 0;
 
-  using RectChangeCB = base::RepeatingCallback<void(const gfx::Rect&, const bool)>;
+  using RectChangeCB = base::RepeatingCallback<void(const gfx::Rect&)>;
   virtual void OnCreateNativeSurface(int native_embed_id,
                                      RectChangeCB rect_changed_cb) = 0;
   virtual void OnLayerRectChange(const gfx::Rect& rect) = 0;
