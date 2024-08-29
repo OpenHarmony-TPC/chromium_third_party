@@ -110,8 +110,6 @@ class CORE_EXPORT NativeLoader
   // error to call this method before having access to the document's frame.
   media::mojom::blink::NativeBridgeHost& GetNativeBridgeHostRemote();
 
-  void LoadTimerFired(TimerBase*);
-
   void LoadResource(LocalFrame* frame);
   void ClearNativeResource();
 
@@ -129,9 +127,6 @@ class CORE_EXPORT NativeLoader
   // bind to.
   mojo::PendingAssociatedReceiver<media::mojom::blink::NativeBridgeObserver>
   AddNativeBridgeObserverAndPassReceiver();
-
-  // Timers used to schedule one-shot tasks with no delay.
-  HeapTaskRunnerTimer<NativeLoader> load_timer_;
 
   cc::Layer* cc_layer_;
 
