@@ -531,20 +531,18 @@ void WidgetBaseInputHandler::HandleInputEvent(
   }
 #endif
 
-#if defined(HW_WEBVIEW_LOG_MESSAGE_HANDLER) || defined(HW_WEBVIEW_BASE)
-  if ((*base::CommandLine::ForCurrentProcess())
-          .HasSwitch(switches::kHwWebviewLogMessageHandler)) {
-    if (processed != WebInputEventResult::kNotHandled) {
-      LOG(INFO) << "input event not handled by webkit: "
-                    << WebInputEvent::GetName(input_event.GetType())
-                    << ", processed:" << static_cast<int32_t>(processed);
-    }
-  } else if (processed != WebInputEventResult::kNotHandled) {
+if ((*base::CommandLine::ForCurrentProcess())
+        .HasSwitch(switches::kHwWebviewLogMessageHandler)) {
+  if (processed != WebInputEventResult::kNotHandled) {
     LOG(INFO) << "input event not handled by webkit: "
-              << WebInputEvent::GetName(input_event.GetType())
-              << ", processed:" << static_cast<int32_t>(processed);
+                  << WebInputEvent::GetName(input_event.GetType())
+                  << ", processed:" << static_cast<int32_t>(processed);
   }
-#endif  // HW_WEBVIEW_LOG_MESSAGE_HANDLER || HW_WEBVIEW_BASE
+} else if (processed != WebInputEventResult::kNotHandled) {
+  LOG(INFO) << "input event not handled by webkit: "
+            << WebInputEvent::GetName(input_event.GetType())
+            << ", processed:" << static_cast<int32_t>(processed);
+}
 
   // Ensure all injected scrolls were handled or queue up - any remaining
   // injected scrolls at this point would not be processed.
