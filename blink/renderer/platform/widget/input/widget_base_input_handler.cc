@@ -445,6 +445,7 @@ void WidgetBaseInputHandler::HandleInputEvent(
                                 std::move(handling_state.event_overscroll()),
                                 std::move(handling_state.touch_action()));
       }
+      LOG(INFO) << "Input handler destroyed when:" << WebInputEvent::GetName(input_event.GetType());
       return;
     }
   }
@@ -529,6 +530,21 @@ void WidgetBaseInputHandler::HandleInputEvent(
     widget_->client()->FocusChangeComplete();
   }
 #endif
+
+#if defined(HW_WEBVIEW_LOG_MESSAGE_HANDLER) || defined(HW_WEBVIEW_BASE)
+  if ((*base::CommandLine::ForCurrentProcess())
+          .HasSwitch(switches::kHwWebviewLogMessageHandler)) {
+    if (processed != WebInputEventResult::kNotHandled) {
+      LOG(RENDERER) << "input event not handled by webkit: "
+                    << WebInputEvent::GetName(input_event.GetType())
+                    << ", processed:" << static_cast<int32_t>(processed);
+    }
+  } else if (processed != WebInputEventResult::kNotHandled) {
+    LOG(INFO) << "input event not handled by webkit: "
+              << WebInputEvent::GetName(input_event.GetType())
+              << ", processed:" << static_cast<int32_t>(processed);
+  }
+#endif  // HW_WEBVIEW_LOG_MESSAGE_HANDLER || HW_WEBVIEW_BASE
 
   // Ensure all injected scrolls were handled or queue up - any remaining
   // injected scrolls at this point would not be processed.
