@@ -889,6 +889,7 @@ void WebMediaPlayerImpl::DoLoad(LoadType load_type,
 
 #if defined(OHOS_CUSTOM_VIDEO_PLAYER)
   if (loaded_url_.SchemeIs(media::remoting::kRemotingScheme)) {
+    LOG(INFO) << "disable custom renderer for remote scheme";
     should_create_custom_renderer_ = false;
     should_overlay_ = false;
   }
@@ -1956,7 +1957,8 @@ void WebMediaPlayerImpl::RestartForHls() {
 
 #if defined(OHOS_CUSTOM_VIDEO_PLAYER)
 void WebMediaPlayerImpl::RestartForPrimitive() {
-  DVLOG(1) << __func__;
+  LOG(INFO) << "RestartForPrimitive, primitive_renderer_type_["
+            << GetRendererName(primitive_renderer_type_) << "]";
   DCHECK(main_task_runner_->BelongsToCurrentThread());
   should_create_custom_renderer_= false;
   should_overlay_ = false;
