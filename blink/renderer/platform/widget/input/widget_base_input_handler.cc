@@ -535,7 +535,7 @@ void WidgetBaseInputHandler::HandleInputEvent(
   if ((*base::CommandLine::ForCurrentProcess())
           .HasSwitch(switches::kHwWebviewLogMessageHandler)) {
     if (processed != WebInputEventResult::kNotHandled) {
-      LOG(RENDERER) << "input event not handled by webkit: "
+      LOG(INFO) << "input event not handled by webkit: "
                     << WebInputEvent::GetName(input_event.GetType())
                     << ", processed:" << static_cast<int32_t>(processed);
     }
