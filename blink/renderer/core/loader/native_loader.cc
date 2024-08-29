@@ -49,11 +49,6 @@ namespace blink {
 
 namespace {
 
-std::ostream& operator<<(std::ostream& stream,
-                         NativeLoader const& native_loader) {
-  return stream << static_cast<void const*>(&native_loader);
-}
-
 float PageConstraintInitalScale(const Document& document) {
   float scale = 1.0;
   if (auto* page = document.GetPage()) {
@@ -131,14 +126,6 @@ LocalFrame* NativeLoader::CurrentFrame() {
 
 void NativeLoader::ScheduleLoadResource() {
   LOG(INFO) << "NativeEmbed NativeLoader::ScheduleLoadResource";
-  LoadTimerFired(nullptr);
-}
-
-void NativeLoader::LoadTimerFired(TimerBase*) {
-  DVLOG(3) << "LoadTimerFired(" << *this << ")";
-  LOG(INFO) << "NativeEmbed NativeLoader::LoadTimerFired";
-
-  DCHECK(IsMainThread());
   LoadResource(CurrentFrame());
 }
 

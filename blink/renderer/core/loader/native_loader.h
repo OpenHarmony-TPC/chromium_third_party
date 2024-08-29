@@ -111,8 +111,6 @@ class CORE_EXPORT NativeLoader
   // error to call this method before having access to the document's frame.
   media::mojom::blink::NativeBridgeHost& GetNativeBridgeHostRemote();
 
-  void LoadTimerFired(TimerBase*);
-
   void LoadResource(LocalFrame* frame);
   void ClearNativeResource();
 
