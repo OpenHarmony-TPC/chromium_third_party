@@ -171,5 +171,28 @@ TEST_F(SchemeRegistryTest, CodeCacheWithHashing) {
       SchemeRegistry::SchemeSupportsCodeCacheWithHashing(kChromeUIScheme));
 }
 
+#if BUILDFLAG(IS_OHOS)
+TEST_F(SchemeRegistryTest, CodeCacheWithResponseTime) {
+  const char* kChromeUIScheme = "chrome";
+  EXPECT_FALSE(SchemeRegistry::SchemeSupportsCodeCacheWithResponseTime(""));
+  EXPECT_FALSE(SchemeRegistry::SchemeSupportsCodeCacheWithResponseTime(kTestScheme));
+  EXPECT_FALSE(
+      SchemeRegistry::SchemeSupportsCodeCacheWithResponseTime(kChromeUIScheme));
+
+  SchemeRegistry::RegisterURLSchemeAsSupportingCodeCacheWithResponseTime(kTestScheme);
+
+  EXPECT_TRUE(SchemeRegistry::SchemeSupportsCodeCacheWithResponseTime(kTestScheme));
+  EXPECT_FALSE(
+      SchemeRegistry::SchemeSupportsCodeCacheWithResponseTime(kChromeUIScheme));
+
+  SchemeRegistry::RegisterURLSchemeAsSupportingCodeCacheWithResponseTime(kChromeUIScheme);
+
+  EXPECT_TRUE(SchemeRegistry::SchemeSupportsCodeCacheWithResponseTime(kTestScheme));
+  EXPECT_TRUE(
+      SchemeRegistry::SchemeSupportsCodeCacheWithResponseTime(kChromeUIScheme));
+}
+
+#endif
+
 }  // namespace
 }  // namespace blink
