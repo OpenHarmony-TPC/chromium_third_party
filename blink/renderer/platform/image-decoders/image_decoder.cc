@@ -47,7 +47,7 @@
 #if BUILDFLAG(ENABLE_AV1_DECODER)
 #include "third_party/blink/renderer/platform/image-decoders/avif/avif_image_decoder.h"
 #endif
-#if BUILDFLAG(ENABLE_HEIF_SUPPORT)
+#if BUILDFLAG(ENABLE_HEIF_DECODER)
 #include "third_party/blink/renderer/platform/image-decoders/heif/heif_image_decoder.h"
 #endif
 
@@ -72,7 +72,7 @@ cc::ImageType FileExtensionToImageType(String image_extension) {
   if (image_extension == "avif")
     return cc::ImageType::kAVIF;
 #endif
-#if BUILDFLAG(ENABLE_HEIF_SUPPORT)
+#if BUILDFLAG(ENABLE_HEIF_DECODER)
   if (image_extension == "heif")
     return cc::ImageType::kHEIF;
 #endif
@@ -182,7 +182,7 @@ String SniffMimeTypeInternal(scoped_refptr<SegmentReader> reader) {
   if (AVIFImageDecoder::MatchesAVIFSignature(fast_reader))
     return "image/avif";
 #endif
-#if BUILDFLAG(ENABLE_HEIF_SUPPORT)
+#if BUILDFLAG(ENABLE_HEIF_DECODER)
   if (HEIFImageDecoder::MatchesHeifSignature(reader->GetAsSkData())) {
     return "image/heif";
   }
@@ -271,7 +271,7 @@ std::unique_ptr<ImageDecoder> ImageDecoder::CreateByMimeType(
         alpha_option, high_bit_depth_decoding_option, color_behavior,
         max_decoded_bytes, animation_option);
 #endif
-#if BUILDFLAG(ENABLE_HEIF_SUPPORT)
+#if BUILDFLAG(ENABLE_HEIF_DECODER)
   } else if (mime_type == "image/heif") {
     decoder = std::make_unique<HEIFImageDecoder>(
         alpha_option, high_bit_depth_decoding_option, color_behavior,
