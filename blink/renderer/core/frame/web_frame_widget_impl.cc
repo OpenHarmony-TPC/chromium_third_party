@@ -2171,7 +2171,12 @@ bool WebFrameWidgetImpl::ScrollFocusedEditableElementIntoView() {
   TouchAction action = touch_action_util::ComputeEffectiveTouchAction(*element);
   params->for_focused_editable->can_zoom =
       static_cast<int>(action) & static_cast<int>(TouchAction::kPinchZoom);
-
+#if BUILDFLAG(IS_OHOS)
+  WebViewImpl* web_view = View();
+  if (web_view && web_view->SettingsImpl() && params->for_focused_editable->can_zoom) {
+    params->for_focused_editable->can_zoom = !web_view->SettingsImpl()->NativeEmbedModeEnabled();
+  }
+#endif
   PhysicalRect absolute_element_bounds;
   PhysicalRect absolute_caret_bounds;
 
