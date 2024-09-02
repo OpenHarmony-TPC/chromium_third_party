@@ -154,7 +154,10 @@ void NativeLoader::OnCreateNativeSurface(int native_embed_id,
   if (bounding_rect_.IsEmpty()) {
     plugin_element_->GetDocument().UpdateStyleAndLayoutForNode(
         plugin_element_, DocumentUpdateReason::kPlugin);
-    bounding_rect_ = plugin_element_->PixelSnappedBoundingBox();
+    if (auto* layout_object = plugin_element_->GetLayoutObject()) {
+      const auto& replaced = To<LayoutReplaced>(layout_object);
+      bounding_rect_ = ToPixelSnappedRect(replaced->ReplacedContentRect());
+    }
     if (bounding_rect_.IsEmpty()) {
       first_update_rect_ = false;
     }
