@@ -31,11 +31,21 @@ const char kStylesheetAcceptHeader[] = "text/css,*/*;q=0.1";
 
 #if BUILDFLAG(IS_OHOS)
 #if BUILDFLAG(ENABLE_AV1_DECODER)
+#if BUILDFLAG(ENABLE_HEIF_DECODER)
 constexpr char kImageAcceptHeader[] =
     "image/avif,image/heif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8";
 #else
 constexpr char kImageAcceptHeader[] =
+    "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8";
+#endif
+#else
+#if BUILDFLAG(ENABLE_HEIF_DECODER)
+constexpr char kImageAcceptHeader[] =
     "image/heif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8";
+#else
+constexpr char kImageAcceptHeader[] =
+    "image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8";
+#endif
 #endif  // BUILDFLAG(ENABLE_AV1_DECODER)
 #else
 #if BUILDFLAG(ENABLE_AV1_DECODER)
