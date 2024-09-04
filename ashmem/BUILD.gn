@@ -23,6 +23,6 @@ if (is_android) {
       "ohos_ashmem.cc",
     ]
 
-    deps = [ "//ohos_glue:ohos_adapter_glue_source" ]
+    deps = [ "//ohos_adapter:nweb_ohos_adapter" ]
   }
 }
