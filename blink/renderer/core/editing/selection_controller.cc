@@ -1565,6 +1565,12 @@ bool SelectionController::HandleGestureTapIfSelectionExist(
   if (!Selection().Contains(v_point)) {
     LOG(INFO) << "Tap outside the selected range to clear selection";
     frame_->Selection().Clear();
+  } else {
+    WebLocalFrameImpl* web_local_frame = WebLocalFrameImpl::FromFrame(frame_);
+    if (web_local_frame && web_local_frame->Client()) {
+      LOG(INFO) << "Tap within the selected range to change visibility of quick menu";
+      web_local_frame->Client()->ChangeVisibilityOfQuickMenu();
+    }
   }
   if (mouse_menu_show_) {
     mouse_menu_show_ = false;
