@@ -581,8 +581,13 @@ void PannerHandler::CalculateAzimuthElevation(
   // value when one of the vectors has zero length.  We know here that
   // `projected_source` and `listener_right` are "normalized", so the dot
   // product is good enough.
+#ifdef OHOS_DRAG_DROP
+  double cos_value = (double)ClampTo(gfx::DotProduct(projected_source, listener_right), -1.0f, 1.0f);
+  double azimuth = Rad2deg(acos(cos_value));
+#else
   double azimuth = Rad2deg(acos(
       ClampTo(gfx::DotProduct(projected_source, listener_right), -1.0f, 1.0f)));
+#endif
   FixNANs(azimuth);  // avoid illegal values
 
   // Source  in front or behind the listener
