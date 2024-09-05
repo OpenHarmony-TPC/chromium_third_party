@@ -312,7 +312,7 @@ struct ThreadPriorityTestParam {
   const base::ThreadPriorityForTest expected_priority;
 };
 
-#if BUILDFLAG(IS_OHOS)
+#if defined(OHOS_UNITTESTS)
 constexpr ThreadPriorityTestParam kThreadPriorityTestParams[] = {
     // RT thread enabled by Finch.
     {false, true, true, base::ThreadPriorityForTest::kRealtimeAudio},
