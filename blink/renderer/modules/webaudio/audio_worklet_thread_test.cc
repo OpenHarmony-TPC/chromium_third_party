@@ -312,6 +312,27 @@ struct ThreadPriorityTestParam {
   const base::ThreadPriorityForTest expected_priority;
 };
 
+#if defined(OHOS_UNITTESTS)
+constexpr ThreadPriorityTestParam kThreadPriorityTestParams[] = {
+    // RT thread enabled by Finch.
+    {false, true, true, base::ThreadPriorityForTest::kRealtimeAudio},
+
+    // RT thread disabled by Finch.
+    {false, true, true, base::ThreadPriorityForTest::kRealtimeAudio},
+
+    // Non-main frame, RT thread enabled by Finch.
+    {false, true, true, base::ThreadPriorityForTest::kRealtimeAudio},
+
+    // Non-main frame, RT thread disabled by Finch.
+    {false, true, true, base::ThreadPriorityForTest::kRealtimeAudio},
+
+    // The OfflineAudioContext always uses a NORMAL priority thread.
+    {false, true, true, base::ThreadPriorityForTest::kRealtimeAudio},
+    {false, true, true, base::ThreadPriorityForTest::kRealtimeAudio},
+    {false, true, true, base::ThreadPriorityForTest::kRealtimeAudio},
+    {false, true, true, base::ThreadPriorityForTest::kRealtimeAudio},
+};
+#else
 constexpr ThreadPriorityTestParam kThreadPriorityTestParams[] = {
     // RT thread enabled by Finch.
     {true, true, true, base::ThreadPriorityForTest::kRealtimeAudio},
@@ -331,6 +352,7 @@ constexpr ThreadPriorityTestParam kThreadPriorityTestParams[] = {
     {false, false, true, base::ThreadPriorityForTest::kNormal},
     {false, false, false, base::ThreadPriorityForTest::kNormal},
 };
+#endif
 
 class AudioWorkletThreadPriorityTest
     : public AudioWorkletThreadTest,
