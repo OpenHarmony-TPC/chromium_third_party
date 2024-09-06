@@ -184,12 +184,12 @@ void WebNativeBridgeImpl::OnSurfaceDestroyed() {
   client_->OnDestroyNativeSurface();
 }
 
-void WebNativeBridgeImpl::OnLayerRectVisibleChange(bool visibility) {
+void WebNativeBridgeImpl::OnLayerRectVisibilityChange(bool visibility) {
   DCHECK(main_task_runner_->BelongsToCurrentThread());
-  LOG(INFO) << "[NativeEmbed] OnLayerRectVisibleChange: "
+  LOG(INFO) << "[NativeEmbed] OnLayerRectVisibilityChange: "
              << visibility;
 
-  client_->OnLayerRectVisibleChange(visibility);
+  client_->OnLayerRectVisibilityChange(visibility);
 }
 
 void WebNativeBridgeImpl::OnLayerRectChange(const gfx::Rect& rect) {
@@ -213,11 +213,11 @@ void WebNativeBridgeImpl::OnSetLayer() {
   media::RectChangedCB rect_change_cb = base::BindRepeating(
       &WebNativeBridgeImpl::OnLayerRectChange, base::Unretained(this));
 
-  media::RectVisibleChangedCB rect_visible_change_cb = base::BindRepeating(
-      &WebNativeBridgeImpl::OnLayerRectVisibleChange, base::Unretained(this));
+  media::RectVisibilityChangedCB rect_visibility_change_cb = base::BindRepeating(
+      &WebNativeBridgeImpl::OnLayerRectVisibilityChange, base::Unretained(this));
 
   video_layer_ = cc::VideoLayer::Create(
-      compositor_.get(), media::kNoTransformation, std::move(rect_change_cb), std::move(rect_visible_change_cb));
+      compositor_.get(), media::kNoTransformation, std::move(rect_change_cb), std::move(rect_visibility_change_cb));
   client_->SetCcLayer(video_layer_.get());
 }
 
