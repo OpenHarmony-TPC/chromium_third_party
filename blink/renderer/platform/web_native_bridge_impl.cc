@@ -193,6 +193,14 @@ void WebNativeBridgeImpl::OnLayerRectChange(const gfx::Rect& rect) {
   layer_rect_ = rect;
 }
 
+void WebNativeBridgeImpl::OnLayerRectVisibilityChange(bool visibility) {
+  DCHECK(main_task_runner_->BelongsToCurrentThread());
+  LOG(INFO) << "[NativeEmbed] OnLayerRectVisibilityChange: "
+             << visibility;
+
+  client_->OnLayerRectVisibilityChange(visibility);
+}
+
 gfx::Size WebNativeBridgeImpl::NaturalSize() const {
   return layer_rect_.size();
 }
@@ -204,9 +212,11 @@ void WebNativeBridgeImpl::OnSetLayer() {
   DCHECK(!video_layer_);
   media::WebRectChangedCB rect_change_cb = base::BindRepeating(
       &WebNativeBridgeImpl::OnLayerRectChange, base::Unretained(this));
+  media::RectVisibilityChangedCB rect_visibility_change_cb = base::BindRepeating(
+      &WebNativeBridgeImpl::OnLayerRectVisibilityChange, base::Unretained(this));
 
   video_layer_ = cc::VideoLayer::Create(
-      compositor_.get(), media::kNoTransformation, std::move(rect_change_cb));
+      compositor_.get(), media::kNoTransformation, std::move(rect_change_cb), std::move(rect_visibility_change_cb));
   client_->SetCcLayer(video_layer_.get());
 }
 

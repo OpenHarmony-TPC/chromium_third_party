@@ -74,6 +74,7 @@ class BLINK_PLATFORM_EXPORT WebNativeBridgeImpl
 
   void StartPipeline() override;
   void OnLayerRectChange(const gfx::Rect& rect) override;
+  void OnLayerRectVisibilityChange(bool visibility) override;
   int GetDelegateId() override { return delegate_id_; }
   gfx::Size NaturalSize() const override;
 
