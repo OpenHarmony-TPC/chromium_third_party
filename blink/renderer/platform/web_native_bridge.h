@@ -31,7 +31,7 @@ class BLINK_PLATFORM_EXPORT WebNativeBridge {
 
   virtual void OnLayerRectChange(const gfx::Rect& rect) = 0;
 
-  virtual void OnLayerRectVisibleChange(bool visibility) = 0;
+   virtual void OnLayerRectVisibilityChange(bool visibility) = 0;
 
   virtual int GetDelegateId() { return -1; }
 

@@ -196,12 +196,19 @@ void NativeLoader::OnCreateNativeSurface(int native_embed_id,
     // here.
     observer->OnCreateNativeSurface(std::move(embed_info));
   }
+
+  if (first_update_visibility) {
+    OnLayerRectVisibilityChange(visibility_);
+  }
 }
 
-
-void NativeLoader::OnLayerRectVisibleChange(bool visibility) {
-  for (auto& observer : native_bridge_observer_remote_set_->Value()) {
-    observer->OnLayerRectVisibleChange(visibility);
+void NativeLoader::OnLayerRectVisibilityChange(bool visibility) {
+  visibility_ = visibility;
+  first_update_visibility = true;
+  if(native_embed_id_ != -1) {
+    for (auto& observer : native_bridge_observer_remote_set_->Value()) {
+      observer->OnLayerRectVisibilityChange(visibility_, native_embed_id_);
+    }
   }
 }
 
