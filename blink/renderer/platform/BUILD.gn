@@ -2270,6 +2270,7 @@ source_set("blink_platform_unittests_sources") {
     "widget/input/scroll_predictor_unittest.cc",
     "widget/input/software_compositor_proxy_ohos_unittest.cc",
     "widget/input/widget_input_handler_manager_unittest.cc",
+    "widget/input/elastic_overscroll_controller_unittest.cc"
   ]
 
   if (is_android) {
