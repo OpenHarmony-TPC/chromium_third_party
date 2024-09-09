@@ -69,3 +69,61 @@ component("freetype_harfbuzz") {
     public_deps += [ "//third_party/harfbuzz-ng:harfbuzz_source" ]
   }
 }
+
+config("huawei_securec_include_config") {
+  include_dirs = [ "//third_party/bounds_checking_function/include" ]
+  cflags = [ "-Wno-implicit-fallthrough" ]
+}
+
+source_set("huawei_securec") {
+  sources = [
+    "bounds_checking_function/include/securec.h",
+    "bounds_checking_function/include/securectype.h",
+    "bounds_checking_function/src/fscanf_s.c",
+    "bounds_checking_function/src/fwscanf_s.c",
+    "bounds_checking_function/src/gets_s.c",
+    "bounds_checking_function/src/input.inl",
+    "bounds_checking_function/src/memcpy_s.c",
+    "bounds_checking_function/src/memmove_s.c",
+    "bounds_checking_function/src/memset_s.c",
+    "bounds_checking_function/src/output.inl",
+    "bounds_checking_function/src/scanf_s.c",
+    "bounds_checking_function/src/secinput.h",
+    "bounds_checking_function/src/securecutil.c",
+    "bounds_checking_function/src/securecutil.h",
+    "bounds_checking_function/src/secureinput_a.c",
+    "bounds_checking_function/src/secureinput_w.c",
+    "bounds_checking_function/src/secureprintoutput.h",
+    "bounds_checking_function/src/secureprintoutput_a.c",
+    "bounds_checking_function/src/secureprintoutput_w.c",
+    "bounds_checking_function/src/snprintf_s.c",
+    "bounds_checking_function/src/sprintf_s.c",
+    "bounds_checking_function/src/sscanf_s.c",
+    "bounds_checking_function/src/strcat_s.c",
+    "bounds_checking_function/src/strcpy_s.c",
+    "bounds_checking_function/src/strncat_s.c",
+    "bounds_checking_function/src/strncpy_s.c",
+    "bounds_checking_function/src/strtok_s.c",
+    "bounds_checking_function/src/swprintf_s.c",
+    "bounds_checking_function/src/swscanf_s.c",
+    "bounds_checking_function/src/vfscanf_s.c",
+    "bounds_checking_function/src/vfwscanf_s.c",
+    "bounds_checking_function/src/vscanf_s.c",
+    "bounds_checking_function/src/vsnprintf_s.c",
+    "bounds_checking_function/src/vsprintf_s.c",
+    "bounds_checking_function/src/vsscanf_s.c",
+    "bounds_checking_function/src/vswprintf_s.c",
+    "bounds_checking_function/src/vswscanf_s.c",
+    "bounds_checking_function/src/vwscanf_s.c",
+    "bounds_checking_function/src/wcscat_s.c",
+    "bounds_checking_function/src/wcscpy_s.c",
+    "bounds_checking_function/src/wcsncat_s.c",
+    "bounds_checking_function/src/wcsncpy_s.c",
+    "bounds_checking_function/src/wcstok_s.c",
+    "bounds_checking_function/src/wmemcpy_s.c",
+    "bounds_checking_function/src/wmemmove_s.c",
+    "bounds_checking_function/src/wscanf_s.c",
+  ]
+
+  public_configs = [ ":huawei_securec_include_config" ]
+}
