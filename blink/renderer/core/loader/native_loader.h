@@ -77,6 +77,7 @@ class CORE_EXPORT NativeLoader
   void OnCreateNativeSurface(int native_embed_id,
                              RectChangeCB rect_changed_cb) final;
   void OnLayerRectChange(const gfx::Rect& rect) final;
+  void OnLayerRectVisibilityChange(bool visibility) final;
   void OnDestroyNativeSurface() final;
   void Repaint() final;
   void SetCcLayer(cc::Layer*) final;
@@ -143,6 +144,8 @@ class CORE_EXPORT NativeLoader
   std::unique_ptr<WebNativeBridge> web_native_bridge_;
   int native_embed_id_;
   bool first_update_rect_ = false;
+  bool visibility_ = false;
+  bool first_update_visibility = false;
 
   Member<DisallowNewWrapper<
       HeapMojoAssociatedRemote<media::mojom::blink::NativeBridgeHost>>>
