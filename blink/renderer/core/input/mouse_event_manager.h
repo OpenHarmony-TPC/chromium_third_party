@@ -160,6 +160,7 @@ class CORE_EXPORT MouseEventManager final
   void CreateOverlayCallback();
   bool GetOverlayInProgress();
   void SetOverlayInProgress(bool flag);
+  void SetOverlayInProgressOnly(bool flag);
   template <typename T>
   void HandleCreateOverlay(T const& targeted_event);
 #endif

@@ -1258,6 +1258,11 @@ void MouseEventManager::SetOverlayInProgress(bool flag) {
   }
 }
 
+void MouseEventManager::SetOverlayInProgressOnly(bool flag) {
+  LOG(INFO) << "MouseEventManager::SetOverlayInProgressOnly, flag == " << flag;
+  overlay_in_progress_ = flag;
+}
+
 template <typename T>
 void MouseEventManager::HandleCreateOverlay(T const& targeted_event) {
   if (!frame_ || !frame_->View()) {
