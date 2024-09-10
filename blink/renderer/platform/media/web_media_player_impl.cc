@@ -3784,6 +3784,11 @@ bool WebMediaPlayerImpl::ShouldPausePlaybackWhenHidden() const {
           ? HasUnmutedAudio() || audio_source_provider_->IsAudioBeingCaptured()
           : HasAudio();
 
+  // Expect that video will pause after switching to the background while loading.
+  if (HasVideo && pipeline_metadata_.natural_size.IsEmpty()) {
+    return true;
+  }       
+
   // Audio only stream is allowed to play when in background.
   if (!HasVideo() && preserve_audio)
     return false;
