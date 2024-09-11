@@ -848,10 +848,10 @@ void LocalFrameView::PerformLayout() {
     if (document_element && document_element->GetLayoutObject()) {
       html_box = To<LayoutBox>(document_element->GetLayoutObject());
     }
-    if (html_box && html_box->FirstChildBox()) {
+    if (html_box && IsA<LayoutBox>(html_box) && html_box->FirstChildBox()) {
       body_box = html_box->FirstChildBox();
     }
-    if (body_box && (body_box->GetLayoutResults().size() > 0)) {
+    if (body_box && IsA<LayoutBox>(body_box) && (body_box->GetLayoutResults().size() > 0)) {
       body_height = body_box->ScrollHeight().ToInt();
     } else {
       body_height = -1;
