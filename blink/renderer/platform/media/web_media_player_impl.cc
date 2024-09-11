@@ -3785,7 +3785,7 @@ bool WebMediaPlayerImpl::ShouldPausePlaybackWhenHidden() const {
           : HasAudio();
 
   // Expect that video will pause after switching to the background while loading.
-  if (HasVideo && pipeline_metadata_.natural_size.IsEmpty()) {
+  if (HasVideo() && pipeline_metadata_.natural_size.IsEmpty()) {
     return true;
   }       
 
