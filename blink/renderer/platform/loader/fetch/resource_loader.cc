@@ -1443,6 +1443,9 @@ void ResourceLoader::RequestSynchronously(const ResourceRequestHead& request) {
   scoped_refptr<EncodedFormData> form_body = request_body_.FormBody();
   PopulateResourceRequest(request, std::move(request_body_),
                           network_resource_request.get());
+#if BUILDFLAG(IS_OHOS)
+  network_resource_request->request_id_ = resource_->request_id_;
+#endif
   if (form_body)
     request_body_ = ResourceRequestBody(std::move(form_body));
   WebURLResponse response_out;

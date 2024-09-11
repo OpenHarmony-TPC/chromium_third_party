@@ -59,6 +59,9 @@
 #include "third_party/blink/public/platform/web_code_cache_loader.h"
 #include "third_party/blink/public/platform/web_url.h"
 #include "third_party/blink/public/platform/web_url_request.h"
+#if BUILDFLAG(IS_OHOS)
+#include "third_party/blink/public/platform/web_url_request_util.h"
+#endif
 #include "third_party/blink/renderer/platform/bindings/script_forbidden_scope.h"
 #include "third_party/blink/renderer/platform/heap/garbage_collected.h"
 #include "third_party/blink/renderer/platform/instrumentation/histogram.h"
@@ -1224,9 +1227,12 @@ Resource* ResourceFetcher::RequestResource(FetchParameters& params,
         }
       },
       base::TimeTicks::Now(), params.Url().ProtocolIsData()));
+#if BUILDFLAG(IS_OHOS)
+  int request_id = GenerateRequestId();
   TRACE_EVENT2("blink,blink.resource", "ResourceFetcher::requestResource",
-               "url", params.Url().ElidedString().Utf8(), "method", params.GetResourceRequest().HttpMethod().Utf8());
-
+               "url", params.Url().ElidedString().Utf8() + " | method=" + params.GetResourceRequest().HttpMethod().Utf8(),
+               "id", request_id);
+#endif
   // |resource_request|'s origin can be null here, corresponding to the "client"
   // value in the spec. In that case client's origin is used.
   if (!resource_request.RequestorOrigin()) {
@@ -1412,6 +1418,9 @@ Resource* ResourceFetcher::RequestResource(FetchParameters& params,
                         WrapWeakPersistent(this), base::TimeTicks::Now(),
                         resource_request.GetRequestDestination()));
     }
+#if BUILDFLAG(IS_OHOS)
+    resource->request_id_ = request_id;
+#endif
     if (!StartLoad(resource,
                    std::move(params.MutableResourceRequest().MutableBody()),
                    load_blocking_policy, params.GetRenderBlockingBehavior())) {
