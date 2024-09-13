@@ -185,7 +185,7 @@ class CORE_EXPORT FrameSelection final
   // the frame you entirely selected.
   void SelectFrameElementInParentIfFullySelected();
 
-  bool Contains(const PhysicalOffset&);
+  bool Contains(const PhysicalOffset&, bool contains_boundaries = true);
 
   bool Modify(SelectionModifyAlteration,
               SelectionModifyDirection,
