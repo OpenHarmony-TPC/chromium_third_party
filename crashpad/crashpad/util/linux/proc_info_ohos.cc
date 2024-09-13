@@ -14,6 +14,7 @@
  */
 
 #include "proc_info_ohos.h"
+#include "third_party/bounds_checking_function/include/securec.h"
 
 #include <cctype>
 #include <cerrno>
@@ -60,7 +61,7 @@ static bool GetProcStatusByPath(struct ProcInfo& procInfo, const std::string& pa
 
         if (strncmp(buf, PID_STR_NAME, strlen(PID_STR_NAME)) == 0) {
             // Pid:   1892
-            if (sscanf(buf, "%*[^0-9]%d", &pid) != ARGS_COUNT_ONE) {
+            if (sscanf_s(buf, "%*[^0-9]%d", &pid) != ARGS_COUNT_ONE) {
                 procInfo.pid = getpid();
             } else {
                 procInfo.pid = pid;
@@ -71,7 +72,7 @@ static bool GetProcStatusByPath(struct ProcInfo& procInfo, const std::string& pa
 
         if (strncmp(buf, PPID_STR_NAME, strlen(PPID_STR_NAME)) == 0) {
             // PPid:   240
-            if (sscanf(buf, "%*[^0-9]%d", &ppid) != ARGS_COUNT_ONE) {
+            if (sscanf_s(buf, "%*[^0-9]%d", &ppid) != ARGS_COUNT_ONE) {
                 procInfo.ppid = getppid();
             } else {
                 procInfo.ppid = ppid;
@@ -81,7 +82,7 @@ static bool GetProcStatusByPath(struct ProcInfo& procInfo, const std::string& pa
 
         if (strncmp(buf, NSPID_STR_NAME, strlen(NSPID_STR_NAME)) == 0) {
             // NSpid:  1892    1
-            if (sscanf(buf, "%*[^0-9]%d%*[^0-9]%d", &pid, &nsPid) != ARGS_COUNT_TWO) {
+            if (sscanf_s(buf, "%*[^0-9]%d%*[^0-9]%d", &pid, &nsPid) != ARGS_COUNT_TWO) {
                 procInfo.ns = false;
                 procInfo.nsPid = pid;
             } else {
@@ -101,7 +102,14 @@ static int BufferAppendV(char *buf, int size, const char *fmt, va_list ap)
     if (buf == nullptr || size <= 0) {
         return -1;
     }
-    int ret = vsnprintf(buf, size, fmt, ap);
+
+    int ret = vsnprintf_s(buf, (size_t)size, (size_t)(size - 1), fmt, ap);
+
+    if (ret == -1) {
+        buf[size - 1] = '\0';
+        return size - 1;
+    }
+    
     return ret;
 }
 
@@ -191,7 +199,7 @@ bool ReadDirFilesByPid(const int& pid, std::vector<std::string>& files)
 {
     char path[PATH_LEN] = {0};
 
-    if (snprintf(path, sizeof(path), "/proc/%d/task", pid) <= 0) {
+    if (snprintf_s(path, sizeof(path), sizeof(path) - 1, "/proc/%d/task", pid) <= 0) {
         return false;
     }
 
