@@ -516,7 +516,6 @@ class BLINK_EXPORT WebLocalFrameClient {
 
 #if defined(OHOS_CLIPBOARD)
   virtual void MouseSelectMenuShow(bool show) {}
-  virtual void ChangeVisibilityOfQuickMenu() {}
 #endif
 
 #ifdef OHOS_DRAG_DROP
