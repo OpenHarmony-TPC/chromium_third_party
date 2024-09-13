@@ -668,7 +668,7 @@ void FrameSelection::PaintCaret(GraphicsContext& context,
   frame_caret_->PaintCaret(context, paint_offset);
 }
 
-bool FrameSelection::Contains(const PhysicalOffset& point) {
+bool FrameSelection::Contains(const PhysicalOffset& point, bool contains_boundaries) {
   if (!GetDocument().GetLayoutView())
     return false;
 
@@ -704,6 +704,10 @@ bool FrameSelection::Contains(const PhysicalOffset& point) {
   const PositionInFlatTree& start = visible_start.DeepEquivalent();
   const PositionInFlatTree& end = visible_end.DeepEquivalent();
   const PositionInFlatTree& pos = pos_with_affinity.GetPosition();
+
+  if (!contains_boundaries) {
+    return start.CompareTo(pos) < 0 && pos.CompareTo(end) < 0;
+  }
   return start.CompareTo(pos) <= 0 && pos.CompareTo(end) <= 0;
 }
 
