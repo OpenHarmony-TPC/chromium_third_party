@@ -490,7 +490,7 @@ PhysicalRect LayoutBoxModelObject::PhysicalVisualOverflowRectIncludingFilters()
     const {
   NOT_DESTROYED();
   PhysicalRect bounds_rect = PhysicalVisualOverflowRect();
-  if (!StyleRef().HasFilter())
+  if (!HasReflection() && !StyleRef().HasFilter())
     return bounds_rect;
   gfx::RectF float_rect(bounds_rect);
   gfx::RectF filter_reference_box = Layer()->FilterReferenceBox();
