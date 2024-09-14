@@ -184,8 +184,11 @@ class CORE_EXPORT FrameSelection final
   // Call this after doing user-triggered selections to make it easy to delete
   // the frame you entirely selected.
   void SelectFrameElementInParentIfFullySelected();
-
+#ifdef OHOS_CLIPBOARD
   bool Contains(const PhysicalOffset&, bool contains_boundaries = true);
+#else
+  bool Contains(const PhysicalOffset&);
+#endif
 
   bool Modify(SelectionModifyAlteration,
               SelectionModifyDirection,
