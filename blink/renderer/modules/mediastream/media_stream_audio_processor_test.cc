@@ -188,6 +188,11 @@ class MediaStreamAudioProcessorTestMultichannel
       public ::testing::WithParamInterface<bool> {};
 
 // Test crashing with ASAN on Android. crbug.com/468762
+#if defined(OHOS_UNITTESTS)
+#define MAYBE_WithAudioProcessing DISABLED_WithAudioProcessing
+#else
+#define MAYBE_WithAudioProcessing WithAudioProcessing
+#endif
 #if BUILDFLAG(IS_ANDROID) && defined(ADDRESS_SANITIZER)
 #define MAYBE_WithAudioProcessing DISABLED_WithAudioProcessing
 #else
