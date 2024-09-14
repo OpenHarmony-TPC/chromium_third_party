@@ -67,9 +67,11 @@ bool ReadLinkEntry(const ProcessMemoryRange& memory,
   }
 
   std::string name;
+  #if !defined(OHOS_CRASHPAD)
   if (!memory.ReadCStringSizeLimited(entry.l_name, 4096, &name)) {
     name.clear();
   }
+  #endif
 
   entry_out->load_bias = entry.l_addr;
   entry_out->dynamic_array = entry.l_ld;

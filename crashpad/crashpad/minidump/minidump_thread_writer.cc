@@ -147,6 +147,14 @@ void MinidumpThreadListWriter::InitializeFromSnapshot(
   BuildMinidumpThreadIDMap(thread_snapshots, thread_id_map);
 
   for (const ThreadSnapshot* thread_snapshot : thread_snapshots) {
+    #if defined(OHOS_CRASHPAD)
+    constexpr int32_t MAXSIZE = 102400;
+    if (thread_snapshot->Stack()->Size() > MAXSIZE) {
+      LOG(ERROR) << "thread stack too large, dropped!! threadid:" << thread_snapshot->ThreadID() << " name:"
+        << thread_snapshot->ThreadName();
+      continue;
+    }
+    #endif
     auto thread = std::make_unique<MinidumpThreadWriter>();
     thread->InitializeFromSnapshot(thread_snapshot, thread_id_map);
     AddThread(std::move(thread));
