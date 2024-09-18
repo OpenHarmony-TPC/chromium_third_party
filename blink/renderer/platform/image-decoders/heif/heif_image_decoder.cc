@@ -35,6 +35,7 @@
 #include "third_party/blink/renderer/platform/image-decoders/image_decoder.h"
 #include "third_party/ohos_ndk/includes/ohos_adapter/ohos_adapter_helper.h"
 #include "third_party/skia/include/core/SkColorSpace.h"
+#include "third_party/bounds_checking_function/include/securec.h"
 
 #if defined(ARCH_CPU_BIG_ENDIAN)
 #error Blink assumes a little-endian target.
@@ -130,8 +131,9 @@ bool CheckFormat(const void* header_data, uint32_t data_size) {
   }
 
   uint32_t tmp_buff[kHeaderSize];
-  // TODO: Use memcpy_s.
-  memcpy(tmp_buff, header_data, kHeaderSize);
+  if (memcpy_s(tmp_buff, kHeaderSize, header_data, kHeaderSize) != EOK) {
+    return false;
+  }
 
   const uint32_t* ptr = reinterpret_cast<const uint32_t*>(tmp_buff);
   uint64_t chunk_size = EndianSwap32(ptr[0]);  // first item
