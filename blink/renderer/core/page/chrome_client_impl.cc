@@ -703,7 +703,11 @@ ColorChooser* ChromeClientImpl::OpenColorChooser(
     const Color&) {
   NotifyPopupOpeningObservers();
   ColorChooserUIController* controller = nullptr;
-
+#if BUILDFLAG(IS_OHOS)
+  LOG(ERROR) << "ChromeClientImpl::OpenColorChooser";
+  controller =
+      MakeGarbageCollected<ColorChooserUIController>(frame, chooser_client);
+#else
   if (RuntimeEnabledFeatures::PagePopupEnabled()) {
     controller = MakeGarbageCollected<ColorChooserPopupUIController>(
         frame, this, chooser_client);
@@ -714,6 +718,7 @@ ColorChooser* ChromeClientImpl::OpenColorChooser(
     controller =
         MakeGarbageCollected<ColorChooserUIController>(frame, chooser_client);
   }
+#endif
   controller->OpenUI();
   return controller;
 }
