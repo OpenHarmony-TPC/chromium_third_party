@@ -1567,10 +1567,14 @@ bool SelectionController::HandleGestureTapIfSelectionExist(
   bool ret = false;
   if (!Selection().Contains(v_point, false)) {
     LOG(INFO) << "Tap outside the selected range to clear selection";
-    if (!range.IsNull()) {
-        web_local_frame->SelectRange(blink::WebRange(range.EndOffset(), 0),
-                                      blink::WebLocalFrame::kHideSelectionHandle,
-                                      mojom::blink::SelectionMenuBehavior::kHide);
+    if (web_local_frame) {
+      const blink::WebRange& range =
+        web_local_frame->GetInputMethodController()->GetSelectionOffsets();
+        if (!range.IsNull()) {
+          web_local_frame->SelectRange(blink::WebRange(range.EndOffset(), 0),
+                                       blink::WebLocalFrame::kHideSelectionHandle,
+                                       mojom::blink::SelectionMenuBehavior::kHide);
+        }
     }
   } else if (web_local_frame && web_local_frame->Client()) {
     LOG(INFO) << "Tap within the selected range to change visibility of quick menu";
