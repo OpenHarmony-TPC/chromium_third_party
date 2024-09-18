@@ -1228,7 +1228,7 @@ Resource* ResourceFetcher::RequestResource(FetchParameters& params,
       },
       base::TimeTicks::Now(), params.Url().ProtocolIsData()));
 #if BUILDFLAG(IS_OHOS)
-  int request_id = GenerateRequestId();
+  int request_id_perf_stat = GenerateRequestId();
   TRACE_EVENT2("blink,blink.resource", "ResourceFetcher::requestResource",
                "url", params.Url().ElidedString().Utf8() + " | method=" + params.GetResourceRequest().HttpMethod().Utf8(),
                "id", request_id);
@@ -1419,7 +1419,7 @@ Resource* ResourceFetcher::RequestResource(FetchParameters& params,
                         resource_request.GetRequestDestination()));
     }
 #if BUILDFLAG(IS_OHOS)
-    resource->request_id_ = request_id;
+    resource->request_id_perf_stat_ = request_id_perf_stat;
 #endif
     if (!StartLoad(resource,
                    std::move(params.MutableResourceRequest().MutableBody()),

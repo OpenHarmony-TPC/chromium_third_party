@@ -254,8 +254,8 @@ int ResourceRequestSender::SendAsync(
   int request_id = GenerateRequestId();
 #if BUILDFLAG(IS_OHOS)
   TRACE_EVENT2("loading", "ResourceRequestSender::SendSync",
-               "start_id", std::to_string(request->request_id_),
-               "request_id", std::to_string(request_id));
+               "start_id", request->request_id_perf_stat_,
+               "request_id", request_id);
   request->is_sync_mode = is_sync_mode;
   LOG(DEBUG) << "intercept ResourceRequestSender::SendAsync, request->is_sync_mode=" << request->is_sync_mode;
 #endif

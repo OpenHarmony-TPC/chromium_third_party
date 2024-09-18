@@ -1444,7 +1444,7 @@ void ResourceLoader::RequestSynchronously(const ResourceRequestHead& request) {
   PopulateResourceRequest(request, std::move(request_body_),
                           network_resource_request.get());
 #if BUILDFLAG(IS_OHOS)
-  network_resource_request->request_id_ = resource_->request_id_;
+  network_resource_request->request_id_perf_stat_ = resource_->request_id_perf_stat_;
 #endif
   if (form_body)
     request_body_ = ResourceRequestBody(std::move(form_body));

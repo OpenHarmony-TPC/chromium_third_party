@@ -157,7 +157,7 @@ class PLATFORM_EXPORT Resource : public GarbageCollected<Resource>,
   ~Resource() override;
 
 #if BUILDFLAG(IS_OHOS)
-  int request_id_;
+  int request_id_perf_stat_;
 #endif
 
   void Trace(Visitor*) const override;
