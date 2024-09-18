@@ -601,6 +601,8 @@ crashpad_static_library("util") {
     "$mini_chromium_source_parent:chromeos_buildflags",
   ]
 
+  deps += ["//third_party:huawei_securec" ]
+
   configs = [ "../build:flock_always_supported_defines" ]
 
   if (crashpad_is_mac || crashpad_is_ios) {

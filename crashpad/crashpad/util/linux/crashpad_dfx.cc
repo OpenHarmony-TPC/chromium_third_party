@@ -38,6 +38,7 @@
 #include "crashpad_dfx.h"
 #include "crashpad_dfx_elf_define.h"
 #include "third_party/ohos_ndk/includes/ohos_adapter/ohos_adapter_helper.h"
+#include "third_party/bounds_checking_function/include/securec.h"
 
 // For process crash constants
 constexpr char BUNDLE_NAME[] = "BUNDLE_NAME";
@@ -87,31 +88,37 @@ uid_t CrashpadDfx::GetEffectiveProcessUID() {
 }
 
 // for get process_crash BUILDID
-std::string CrashpadDfx::GetBuildId(const uint64_t noteAddr,const uint64_t noteSize) {
+std::string CrashpadDfx::GetBuildId(const uint64_t noteAddr, const uint64_t noteSize) {
     uint64_t tmp;
     if (__builtin_add_overflow(noteAddr, noteSize, &tmp)) {
-        LOG(ERROR) << "noteAddr overflow";
+        LOG(WARNING) << "noteAddr overflow";
         return "";
     }
     uint64_t offset = 0;
     while (offset < noteSize) {
         ElfW(Nhdr) nhdr;
         if (noteSize - offset < sizeof(nhdr)) {
-            LOG(ERROR) << "Insufficient space for reading nhdr at offset " << offset;
+            LOG(WARNING) << "Insufficient space for reading nhdr at offset " << offset;
             return "";
         }
-        memcpy(&nhdr, reinterpret_cast<void*>(noteAddr + offset), sizeof(nhdr));
+        if (memcpy_s(&nhdr, sizeof(nhdr), reinterpret_cast<const void*>(noteAddr + offset), sizeof(nhdr)) != EOK) {
+            LOG(WARNING) << "Failed to copy note header at offset " << offset;
+            return "";
+        }
         LOG(DEBUG) << "Note header read at offset " << offset << ": namesz=" << nhdr.n_namesz 
         << ", descsz=" << nhdr.n_descsz << ", type=" << nhdr.n_type;
         offset += sizeof(nhdr);
 
         if (noteSize - offset < nhdr.n_namesz) {
-            LOG(ERROR) << "Insufficient space for reading note name at offset " << offset;
+            LOG(WARNING) << "Insufficient space for reading note name at offset " << offset;
             return "";
         }
 
         std::string name(nhdr.n_namesz, '\0');
-        memcpy(&(name[0]), reinterpret_cast<void*>(noteAddr + offset), nhdr.n_namesz);
+        if (memcpy_s(&(name[0]), name.size(), reinterpret_cast<const void*>(noteAddr + offset), nhdr.n_namesz) != EOK) {
+            LOG(WARNING) << "Failed to copy note name at offset " << offset;
+            return "";
+        }
         if (name.back() == '\0') {
             name.resize(name.size() - 1); // Trim trailing '\0'
         }
@@ -119,16 +126,22 @@ std::string CrashpadDfx::GetBuildId(const uint64_t noteAddr,const uint64_t noteS
 
         if (name == "GNU" && nhdr.n_type == NT_GNU_BUILD_ID) {
             if (noteSize - offset < nhdr.n_descsz || nhdr.n_descsz == 0) {
-                LOG(ERROR) << "Insufficient space for reading build ID at offset " << offset;
+                LOG(WARNING) << "Insufficient space for reading build ID at offset " << offset;
                 return "";
             }
             std::string buildIdRaw(nhdr.n_descsz, '\0');
-            memcpy(&buildIdRaw[0], reinterpret_cast<void*>(noteAddr + offset), nhdr.n_descsz);
+            if (memcpy_s(&buildIdRaw[0], buildIdRaw.size(), reinterpret_cast<const void*>(noteAddr + offset), nhdr.n_descsz) != EOK) {
+                LOG(WARNING) << "Failed to copy build ID at offset " << offset;
+                return "";
+            }
 
             std::string buildIdHex;
             for (unsigned char c : buildIdRaw) {
                 char hex[3];
-                snprintf(hex, sizeof(hex), "%02x", c);
+                if (snprintf_s(hex, sizeof(hex), sizeof(hex) - 1, "%02x", c) < 0) {
+                    LOG(WARNING) << "Failed to convert byte to hex";
+                    continue;
+                }
                 buildIdHex += hex;
             }
             LOG(INFO) << "Build ID extracted successfully: " << buildIdHex;
@@ -137,7 +150,7 @@ std::string CrashpadDfx::GetBuildId(const uint64_t noteAddr,const uint64_t noteS
 
         offset += (nhdr.n_descsz + 3) & ~3; // Align to 4 bytes
     }
-    LOG(DEBUG) << "No GNU build ID found.";
+    LOG(WARNING) << "Build ID not found";
     return "";
 }
 
@@ -145,20 +158,20 @@ std::string CrashpadDfx::GetBuildIdFromSO(const std::string& soFilePath) {
     LOG(DEBUG) << "Attempting to open file: " << soFilePath;
     int fd = open(soFilePath.c_str(), O_RDONLY);
     if (fd < 0) {
-        LOG(ERROR) << "Failed to open file: " << soFilePath << ". Error: " << strerror(errno);
+        LOG(WARNING) << "Failed to open file: " << soFilePath << ". Error: " << strerror(errno);
         return "";
     }
 
     struct stat stat_buf;
     if (fstat(fd, &stat_buf) < 0) {
-        LOG(ERROR) << "Failed to get file size: " << soFilePath << ". Error: " << strerror(errno);
+        LOG(WARNING) << "Failed to get file size: " << soFilePath << ". Error: " << strerror(errno);
         close(fd);
         return "";
     }
 
     void* mapped = mmap(nullptr, stat_buf.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
     if (mapped == MAP_FAILED) {
-        LOG(ERROR) << "Failed to map file: " << soFilePath << ". Error: " << strerror(errno);
+        LOG(WARNING) << "Failed to map file: " << soFilePath << ". Error: " << strerror(errno);
         close(fd);
         return "";
     }
@@ -214,7 +227,6 @@ std::string CrashpadDfx::RetrieveBuildId() {
 }
 
 std::string CrashpadDfx::GenerateFileName() {
-    // 获取有效的进程 UID
     g_process_uid = GetEffectiveProcessUID();
     std::string buildID = RetrieveBuildId();
     return buildID;
@@ -227,7 +239,7 @@ std::string CrashpadDfx::GetProcessBundleName() {
         LOG(ERROR) << "CommandLine object is null. Cannot retrieve bundle name.";
         return "";
     }
- 
+
     if (command_line->HasSwitch("bundle-name")) {
         std::string bundle_name = command_line->GetSwitchValueASCII("bundle-name");
         if (bundle_name.empty()) {
