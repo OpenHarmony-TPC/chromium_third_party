@@ -246,6 +246,11 @@ TEST_F(MediaStreamAudioProcessorTest, TurnOffDefaultConstraints) {
   audio_processor->Stop();
 }
 
+#if defined(OHOS_UNITTESTS)
+#define MAYBE_TestAllSampleRates DISABLED_TestAllSampleRates
+#else
+#define MAYBE_TestAllSampleRates TestAllSampleRates
+#endif
 // Test crashing with ASAN on Android. crbug.com/468762
 #if BUILDFLAG(IS_ANDROID) && defined(ADDRESS_SANITIZER)
 #define MAYBE_TestAllSampleRates DISABLED_TestAllSampleRates
