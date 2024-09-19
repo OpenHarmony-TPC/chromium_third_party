@@ -4405,5 +4405,29 @@ INSTANTIATE_TEST_SUITE_P(All,
                          kTestCombinations,
                          kSuffixGenerator);
 
+class InputHandlerTest : public ::testing::Test {
+ protected:
+  void SetUp() override {}
+  void TearDown() override {}
+};
+
+TEST_F(InputHandlerTest, IsTouchEventType01) {
+  auto result =
+      WebInputEvent::IsTouchEventType(WebInputEvent::Type::kTouchCancel);
+  EXPECT_EQ(result, true);
+}
+
+TEST_F(InputHandlerTest, IsSameEventType01) {
+  auto result =
+      WebInputEvent::IsMouseEventType(WebInputEvent::Type::kTouchCancel);
+  EXPECT_EQ(result, false);
+}
+
+TEST_F(InputHandlerTest, IsSameEventType02) {
+  auto result = WebInputEvent::IsMouseEventType(
+      WebInputEvent::Type::kPointerCausedUaAction);
+  EXPECT_EQ(result, false);
+}
+
 }  // namespace test
 }  // namespace blink
