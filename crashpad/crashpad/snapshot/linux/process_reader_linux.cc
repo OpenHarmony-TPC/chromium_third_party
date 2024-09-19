@@ -545,11 +545,15 @@ void ProcessReaderLinux::InitializeModules() {
 
     Module module = {};
     std::string soname;
+    #if defined(OHOS_CRASHPAD)
+    module.name = module_mapping->name;
+    #else
     if (elf_reader->SoName(&soname) && !soname.empty()) {
       module.name = soname;
     } else {
       module.name = !entry.name.empty() ? entry.name : module_mapping->name;
     }
+    #endif
     module.elf_reader = elf_reader.get();
     module.type = loader_base && elf_reader->Address() == loader_base
                       ? ModuleSnapshot::kModuleTypeDynamicLoader
