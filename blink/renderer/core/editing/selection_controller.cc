@@ -60,7 +60,6 @@
 #include "third_party/blink/renderer/core/page/focus_controller.h"
 #include "third_party/blink/renderer/core/page/page.h"
 #include "third_party/blink/renderer/core/paint/paint_layer.h"
-#include "third_party/blink/renderer/core/frame/web_frame_widget_impl.h"
 #include "ui/gfx/geometry/point_conversions.h"
 
 #ifdef OHOS_EX_FREE_COPY
@@ -71,6 +70,7 @@
 #if defined(OHOS_CLIPBOARD)
 #include "third_party/blink/public/web/web_local_frame_client.h"
 #include "third_party/blink/renderer/core/frame/web_local_frame_impl.h"
+#include "third_party/blink/renderer/core/frame/web_frame_widget_impl.h"
 #endif
 
 namespace blink {
@@ -1565,7 +1565,7 @@ bool SelectionController::HandleGestureTapIfSelectionExist(
       gfx::ToFlooredPoint(event.Event().PositionInRootFrame())));
   WebLocalFrameImpl* web_local_frame = WebLocalFrameImpl::FromFrame(frame_);
   bool ret = false;
-  if (!Selection().Contains(v_point)) {
+  if (!Selection().Contains(v_point, false)) {
     LOG(INFO) << "Tap outside the selected range to clear selection";
     if (web_local_frame) {
       const blink::WebRange& range =
