@@ -156,6 +156,10 @@ class PLATFORM_EXPORT Resource : public GarbageCollected<Resource>,
   Resource& operator=(const Resource&) = delete;
   ~Resource() override;
 
+#if BUILDFLAG(IS_OHOS)
+  int request_id_perf_stat_;
+#endif
+
   void Trace(Visitor*) const override;
 
   virtual WTF::TextEncoding Encoding() const { return WTF::TextEncoding(); }

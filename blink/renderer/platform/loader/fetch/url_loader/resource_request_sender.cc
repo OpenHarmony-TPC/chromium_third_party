@@ -253,6 +253,9 @@ int ResourceRequestSender::SendAsync(
   // Compute a unique request_id for this renderer process.
   int request_id = GenerateRequestId();
 #if BUILDFLAG(IS_OHOS)
+  TRACE_EVENT2("loading", "ResourceRequestSender::SendSync",
+               "start_id", request->request_id_perf_stat_,
+               "request_id", request_id);
   request->is_sync_mode = is_sync_mode;
   LOG(DEBUG) << "intercept ResourceRequestSender::SendAsync, request->is_sync_mode=" << request->is_sync_mode;
 #endif
