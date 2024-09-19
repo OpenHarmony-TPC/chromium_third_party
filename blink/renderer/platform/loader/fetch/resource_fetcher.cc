@@ -1231,7 +1231,7 @@ Resource* ResourceFetcher::RequestResource(FetchParameters& params,
   int request_id_perf_stat = GenerateRequestId();
   TRACE_EVENT2("blink,blink.resource", "ResourceFetcher::requestResource",
                "url", params.Url().ElidedString().Utf8() + " | method=" + params.GetResourceRequest().HttpMethod().Utf8(),
-               "id", request_id);
+               "id", request_id_perf_stat);
 #endif
   // |resource_request|'s origin can be null here, corresponding to the "client"
   // value in the spec. In that case client's origin is used.
