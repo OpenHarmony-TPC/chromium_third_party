@@ -57,6 +57,11 @@ float PageConstraintInitalScale(const Document& document) {
   return scale;
 }
 
+gfx::Rect BoundsToViewport(const gfx::Rect& bounding_rect_, const Document& document) {
+  return gfx::Rect(bounding_rect_.origin(), gfx::ScaleToCeiledSize(
+      bounding_rect_.size(), PageConstraintInitalScale(document)))
+}
+
 }  // anonymous namespace
 
 NativeLoader::NativeLoader(HTMLPlugInElement* plugin_element)
@@ -171,8 +176,7 @@ void NativeLoader::OnCreateNativeSurface(int native_embed_id,
   auto embed_info = media::mojom::blink::NativeEmbedInfo::New();
   auto* frame = CurrentFrame();
   if (frame && frame->View()) {
-    auto bounds_to_viewport =
-        frame->View()->FrameToViewport(PluginBoundingRect());
+    auto bounds_to_viewport = BoundsToViewport(bounding_rect_, plugin_element_->GetDocument());
     // We will use the position relative to visual viewport.
     bounding_rect_.set_origin(bounds_to_viewport.origin());
     embed_info->rect = bounds_to_viewport;
@@ -219,8 +223,7 @@ void NativeLoader::UpdateSize(gfx::Size size) {
   }
   if (PluginBoundingRect().size() != size) {
     if (!bounding_rect_changed_cb_.is_null()) {
-      bounding_rect_changed_cb_.Run(gfx::ScaleToEnclosingRect(
-          bounding_rect_, PageConstraintInitalScale(plugin_element_->GetDocument())), true);
+      bounding_rect_changed_cb_.Run(BoundsToViewport(bounding_rect_, plugin_element_->GetDocument()), true);
     }
   }
 }
@@ -231,16 +234,10 @@ void NativeLoader::OnLayerRectChange(const gfx::Rect& rect) {
     return;
   }
 
-  if (first_update_rect_) {
-    first_update_rect_ = false;
-    return;
-  }
-
   if (PluginBoundingRect().size() != rect.size()) {
     bounding_rect_ = rect;
     if (!bounding_rect_changed_cb_.is_null()) {
-      bounding_rect_changed_cb_.Run(gfx::ScaleToEnclosingRect(
-          bounding_rect_, PageConstraintInitalScale(plugin_element_->GetDocument())), true);
+      bounding_rect_changed_cb_.Run(BoundsToViewport(bounding_rect_, plugin_element_->GetDocument()), true);
     }
   } else {
     bounding_rect_.set_origin(rect.origin());
