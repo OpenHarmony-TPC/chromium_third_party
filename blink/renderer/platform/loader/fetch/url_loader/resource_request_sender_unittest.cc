@@ -2,7 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#define private public
 #include "third_party/blink/renderer/platform/loader/fetch/url_loader/resource_request_sender.h"
+#undef private
 
 #include <stddef.h>
 #include <stdint.h>
@@ -351,6 +353,31 @@ TEST_F(CompletionTimeConversionTest, Convert) {
               base::Milliseconds(15));
 
   EXPECT_EQ(completion_time(), request_start() + base::Milliseconds(3));
+}
+
+TEST_F(ResourceRequestSenderTest, OnTransferDataWithSharedMemory001) {
+  base::ReadOnlySharedMemoryRegion region;
+  uint64_t buffer_size = 1024;
+  resource_request_sender_->request_info_ = nullptr;
+  resource_request_sender_->OnTransferDataWithSharedMemory(std::move(region),
+                                                           buffer_size);
+  EXPECT_EQ(resource_request_sender_->request_info_, nullptr);
+}
+
+TEST_F(CompletionTimeConversionTest, OnTransferDataWithSharedMemory002) {
+  mock_client_ = base::MakeRefCounted<MockRequestClient>();
+  base::ReadOnlySharedMemoryRegion region;
+  uint64_t buffer_size = 1024;
+  network::mojom::RequestDestination destination =
+      network::mojom::RequestDestination::kDocument;
+  const KURL request_url("http://example.com");
+  std::unique_ptr<ResourceLoadInfoNotifierWrapper> notifier;
+  resource_request_sender_->request_info_ =
+      std::make_unique<ResourceRequestSender::PendingRequestInfo>(
+          mock_client_, destination, request_url, std::move(notifier));
+  resource_request_sender_->OnTransferDataWithSharedMemory(std::move(region),
+                                                           buffer_size);
+  EXPECT_NE(resource_request_sender_->request_info_, nullptr);
 }
 
 }  // namespace blink
