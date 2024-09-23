@@ -70,6 +70,7 @@
 #if defined(OHOS_CLIPBOARD)
 #include "third_party/blink/public/web/web_local_frame_client.h"
 #include "third_party/blink/renderer/core/frame/web_local_frame_impl.h"
+#include "third_party/blink/renderer/core/frame/web_frame_widget_impl.h"
 #endif
 
 namespace blink {
@@ -1562,21 +1563,29 @@ bool SelectionController::HandleGestureTapIfSelectionExist(
   }
   const PhysicalOffset v_point(view->ConvertFromRootFrame(
       gfx::ToFlooredPoint(event.Event().PositionInRootFrame())));
-  if (!Selection().Contains(v_point)) {
+  WebLocalFrameImpl* web_local_frame = WebLocalFrameImpl::FromFrame(frame_);
+  bool ret = false;
+  if (!Selection().Contains(v_point, false)) {
     LOG(INFO) << "Tap outside the selected range to clear selection";
-    frame_->Selection().Clear();
-  } else {
-    WebLocalFrameImpl* web_local_frame = WebLocalFrameImpl::FromFrame(frame_);
-    if (web_local_frame && web_local_frame->Client()) {
-      LOG(INFO) << "Tap within the selected range to change visibility of quick menu";
-      web_local_frame->Client()->ChangeVisibilityOfQuickMenu();
+    if (web_local_frame) {
+      const blink::WebRange& range =
+        web_local_frame->GetInputMethodController()->GetSelectionOffsets();
+        if (!range.IsNull()) {
+          web_local_frame->SelectRange(blink::WebRange(range.EndOffset(), 0),
+                                       blink::WebLocalFrame::kHideSelectionHandle,
+                                       mojom::blink::SelectionMenuBehavior::kHide);
+        }
     }
+  } else if (web_local_frame && web_local_frame->Client()) {
+    LOG(INFO) << "Tap within the selected range to change visibility of quick menu";
+    web_local_frame->Client()->ChangeVisibilityOfQuickMenu();
+    ret = true;
   }
   if (mouse_menu_show_) {
     mouse_menu_show_ = false;
     MouseSelectMenuShow(false);
   }
-  return true;
+  return ret;
 }
 #endif  // OHOS_CLIPBOARD
 
