@@ -59,7 +59,7 @@ float PageConstraintInitalScale(const Document& document) {
 
 gfx::Rect BoundsToViewport(const gfx::Rect& bounding_rect_, const Document& document) {
   return gfx::Rect(bounding_rect_.origin(), gfx::ScaleToCeiledSize(
-      bounding_rect_.size(), PageConstraintInitalScale(document)))
+      bounding_rect_.size(), PageConstraintInitalScale(document)));
 }
 
 }  // anonymous namespace
