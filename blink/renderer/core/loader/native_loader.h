@@ -143,7 +143,6 @@ class CORE_EXPORT NativeLoader
 
   std::unique_ptr<WebNativeBridge> web_native_bridge_;
   int native_embed_id_;
-  bool first_update_rect_ = false;
   bool visibility_ = false;
   bool first_update_visibility = false;
 
