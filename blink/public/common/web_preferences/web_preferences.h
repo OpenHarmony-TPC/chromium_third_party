@@ -243,6 +243,7 @@ struct BLINK_COMMON_EXPORT WebPreferences {
   GURL web_app_scope;
 
 #if BUILDFLAG(IS_ANDROID) || BUILDFLAG(IS_OHOS)
+  float text_zoom_factor;
   float font_scale_factor;
   float device_scale_adjustment;
   bool force_enable_zoom;

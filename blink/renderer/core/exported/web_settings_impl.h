@@ -253,6 +253,7 @@ class CORE_EXPORT WebSettingsImpl final : public WebSettings {
   void RegisterNativeEmbedRule(const WebString& tag,
                                const WebString& type) override;
   void SetDrawMode(int) override;
+  void SetTextZoomFactor(float factor) override;
 #endif
 
 #if defined(OHOS_CUSTOM_VIDEO_PLAYER)
