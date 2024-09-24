@@ -535,6 +535,10 @@ struct BLINK_COMMON_EXPORT StructTraits<blink::mojom::WebPreferencesDataView,
   }
 
 #if BUILDFLAG(IS_ANDROID) || BUILDFLAG(IS_OHOS)
+  static float text_zoom_factor(const blink::web_pref::WebPreferences& r) {
+    return r.text_zoom_factor;
+  }
+
   static float font_scale_factor(const blink::web_pref::WebPreferences& r) {
     return r.font_scale_factor;
   }

@@ -256,6 +256,8 @@ class BLINK_PLATFORM_EXPORT Platform {
 
 #if BUILDFLAG(IS_OHOS)
   virtual int32_t GetDrawMode() { return 0; }
+
+  virtual float GetTextZoomFactor() { return 1.0f; }
 #endif
 
 

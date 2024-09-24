@@ -313,6 +313,9 @@ struct WebPreferences {
   // Representation of the Web App Manifest scope if any.
   url.mojom.Url web_app_scope;
 
+  // [EnableIf=is_ohos]
+  float text_zoom_factor;
+
   // [EnableIf=is_android]
   float font_scale_factor;
 
