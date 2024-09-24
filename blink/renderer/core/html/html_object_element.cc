@@ -433,7 +433,9 @@ ParamMap HTMLObjectElement::ParamList() {
   ParamMap param_map;
   for (Node* child = firstChild(); child; child = child->nextSibling()) {
     if (auto* param = DynamicTo<HTMLParamElement>(*child)) {
-      param_map.insert(param->GetName(), param->Value());
+      if (!param->Value().IsNull() && !param->GetName().IsNull()) {
+        param_map.insert(param->GetName(), param->Value());
+      }
     }
   }
   return param_map;
