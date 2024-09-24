@@ -207,6 +207,7 @@ WebPreferences::WebPreferences()
       text_autosizing_enabled(false),
 #else
       text_autosizing_enabled(true),
+      text_zoom_factor(1.0f),
       font_scale_factor(1.0f),
       device_scale_adjustment(1.0f),
       force_enable_zoom(false),

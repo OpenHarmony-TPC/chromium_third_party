@@ -536,6 +536,10 @@ void WebSettingsImpl::RegisterNativeEmbedRule(const WebString& tag,
 void WebSettingsImpl::SetDrawMode(int mode) {
   settings_->SetDrawMode(mode);
 }
+
+void WebSettingsImpl::SetTextZoomFactor(float factor) {
+  settings_->SetTextZoomFactor(factor);
+}
 #endif
 
 void WebSettingsImpl::SetMockGestureTapHighlightsEnabled(bool enabled) {
