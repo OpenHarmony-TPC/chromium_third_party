@@ -646,10 +646,12 @@ void VideoFrameSubmitter::UpdateSubmissionState() {
     //
     // If there are any in-flight empty frame requests, this cancels them. We
     // want to wait until any group of state changes stabilizes.
+#if !BUILDFLAG(IS_OHOS)     
     empty_frame_timer_.Start(
         FROM_HERE, base::Milliseconds(500),
         base::BindOnce(&VideoFrameSubmitter::SubmitEmptyFrameIfNeeded,
                        base::Unretained(this)));
+#endif                       
   }
 }
 
