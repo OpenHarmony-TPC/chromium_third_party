@@ -1378,6 +1378,16 @@ void LocalFrame::SetTextZoomFactor(float factor) {
 
 void LocalFrame::SetPageAndTextZoomFactors(float page_zoom_factor,
                                            float text_zoom_factor) {
+#if BUILDFLAG(IS_OHOS)
+  Page* page = GetPage();
+  if (!page)
+    return;
+
+  text_zoom_factor = page->GetSettings().GetTextZoomFactor();
+  if (page_zoom_factor_ == page_zoom_factor &&
+      text_zoom_factor_ == text_zoom_factor)
+    return;
+#else
   if (page_zoom_factor_ == page_zoom_factor &&
       text_zoom_factor_ == text_zoom_factor)
     return;
@@ -1385,6 +1395,7 @@ void LocalFrame::SetPageAndTextZoomFactors(float page_zoom_factor,
   Page* page = GetPage();
   if (!page)
     return;
+#endif
 
   Document* document = GetDocument();
   if (!document)

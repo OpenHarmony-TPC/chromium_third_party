@@ -180,6 +180,7 @@ bool StructTraits<blink::mojom::WebPreferencesDataView,
   out->fullscreen_supported = data.fullscreen_supported();
   out->text_autosizing_enabled = data.text_autosizing_enabled();
 #if BUILDFLAG(IS_ANDROID) || BUILDFLAG(IS_OHOS)
+  out->text_zoom_factor = data.text_zoom_factor();
   out->font_scale_factor = data.font_scale_factor();
   out->device_scale_adjustment = data.device_scale_adjustment();
   out->force_enable_zoom = data.force_enable_zoom();
