@@ -1981,6 +1981,24 @@ void WebView::ApplyWebPreferences(const web_pref::WebPreferences& prefs,
   settings->SetCustomVideoPlayerEnabled(prefs.custom_video_player_enable);
   settings->SetCustomVideoPlayerOverlay(prefs.custom_video_player_overlay);
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
+
+#if BUILDFLAG(IS_OHOS)
+  settings->SetTextZoomFactor(prefs.text_zoom_factor);
+  const auto* main_frame = web_view->MainFrame();
+  if (main_frame) {
+    auto* local_main_frame = DynamicTo<WebLocalFrameImpl>(main_frame);
+    if (local_main_frame && local_main_frame->FrameWidget()) {
+      local_main_frame->FrameWidget()->SetTextZoomFactor(prefs.text_zoom_factor);
+    }
+    for (const auto* frame = main_frame->FirstChild(); frame;
+         frame = frame->NextSibling()) {
+      auto* web_local_frame = DynamicTo<WebLocalFrameImpl>(frame);
+      if (web_local_frame && web_local_frame->FrameWidget()) {
+        web_local_frame->FrameWidget()->SetTextZoomFactor(prefs.text_zoom_factor);
+      }
+    }
+  }
+#endif
 }
 
 void WebViewImpl::ThemeChanged() {
