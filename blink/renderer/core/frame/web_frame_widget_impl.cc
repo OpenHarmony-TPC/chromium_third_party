@@ -2700,10 +2700,10 @@ WebInputEventResult WebFrameWidgetImpl::DispatchBufferedTouchEvents() {
       .DispatchBufferedTouchEvents();
 }
 
-void WebFrameWidgetImpl::DisableFlingBoost() {
-    OHOS::NWeb::OhosAdapterHelper::GetInstance().
-        CreateSocPerfClientAdapter()
-        ->ApplySocPerfConfigByIdEx(OHOS::NWeb::SocPerfClientAdapter::SOC_PERF_WEB_GESTURE_ID, false);
+void WebFrameWidgetImpl::DisableBoost() {
+  OHOS::NWeb::OhosAdapterHelper::GetInstance().
+    CreateSocPerfClientAdapter()
+    ->ApplySocPerfConfigByIdEx(OHOS::NWeb::SocPerfClientAdapter::SOC_PERF_WEB_GESTURE_ID, false);
 }
 
 WebInputEventResult WebFrameWidgetImpl::HandleInputEvent(
@@ -2726,9 +2726,8 @@ WebInputEventResult WebFrameWidgetImpl::HandleInputEvent(
       ->ApplySocPerfConfigByIdEx(OHOS::NWeb::SocPerfClientAdapter::SOC_PERF_WEB_GESTURE_ID, true);
 
     base::SingleThreadTaskRunner::GetCurrentDefault()
-    ->PostDelayedTask(FROM_HERE, WTF::BindOnce(&WebFrameWidgetImpl::DisableFlingBoost, 
-    WrapWeakPersistent(this)), base::Milliseconds(disableDelayStopTime);
-
+      ->PostDelayedTask(FROM_HERE, WTF::BindOnce(&WebFrameWidgetImpl::DisableBoost, 
+      WrapWeakPersistent(this)), base::Milliseconds(disableDelayStopTime);
   }
 
   // Clients shouldn't be dispatching events to a provisional frame but this
