@@ -167,7 +167,7 @@
 
 namespace {
 #if BUILDFLAG(IS_OHOS)
-  constexpr int disableDelayStopTime = 300;
+  constexpr int disableDelayTime = 300;
 #endif
 }
 namespace WTF {
@@ -2701,8 +2701,7 @@ WebInputEventResult WebFrameWidgetImpl::DispatchBufferedTouchEvents() {
 }
 
 void WebFrameWidgetImpl::DisableBoost() {
-  OHOS::NWeb::OhosAdapterHelper::GetInstance().
-    CreateSocPerfClientAdapter()
+  OHOS::NWeb::OhosAdapterHelper::GetInstance().CreateSocPerfClientAdapter()
     ->ApplySocPerfConfigByIdEx(OHOS::NWeb::SocPerfClientAdapter::SOC_PERF_WEB_GESTURE_ID, false);
 }
 
@@ -2721,13 +2720,12 @@ WebInputEventResult WebFrameWidgetImpl::HandleInputEvent(
   }
 
   if (input_event.GetType() == WebInputEvent::Type::kRawKeyDown) {
-    OHOS::NWeb::OhosAdapterHelper::GetInstance().
-      CreateSocPerfClientAdapter()
+    OHOS::NWeb::OhosAdapterHelper::GetInstance().CreateSocPerfClientAdapter()
       ->ApplySocPerfConfigByIdEx(OHOS::NWeb::SocPerfClientAdapter::SOC_PERF_WEB_GESTURE_ID, true);
 
     base::SingleThreadTaskRunner::GetCurrentDefault()
       ->PostDelayedTask(FROM_HERE, WTF::BindOnce(&WebFrameWidgetImpl::DisableBoost, 
-      WrapWeakPersistent(this)), base::Milliseconds(disableDelayStopTime);
+      WrapWeakPersistent(this)), base::Milliseconds(disableDelayTime);
   }
 
   // Clients shouldn't be dispatching events to a provisional frame but this
