@@ -167,7 +167,7 @@ class AudioParamHandler final : public ThreadSafeRefCounted<AudioParamHandler>,
     return intrinsic_value_.load(std::memory_order_relaxed);
   }
 
- base::Lock& RateLock() const { return rate_lock_; }
+  base::Lock& RateLock() const { return rate_lock_; }
 
  private:
   AudioParamHandler(BaseAudioContext&,
