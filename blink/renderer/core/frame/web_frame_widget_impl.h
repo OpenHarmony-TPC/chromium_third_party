@@ -432,7 +432,7 @@ class CORE_EXPORT WebFrameWidgetImpl
   void DidNativeEmbedEvent(const WebPointerEvent& web_pointer_event, std::string embedId,
                         PhysicalOffset& offset, bool isCancel);
   void TouchHitTest(const WebPointerEvent& event, size_t i) override;
-  void DisableFlingBoost();
+  void DisableBoost();
 #endif
   // WidgetBaseClient overrides:
   void OnCommitRequested() override;
