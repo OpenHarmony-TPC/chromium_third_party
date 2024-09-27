@@ -165,6 +165,11 @@
 #include "third_party/blink/renderer/core/layout/layout_view.h"
 #endif
 
+namespace {
+#if BUILDFLAG(IS_OHOS)
+  constexpr int disableDelayTime = 300;
+#endif
+}
 namespace WTF {
 
 template <>
@@ -2695,6 +2700,11 @@ WebInputEventResult WebFrameWidgetImpl::DispatchBufferedTouchEvents() {
       .DispatchBufferedTouchEvents();
 }
 
+void WebFrameWidgetImpl::DisableBoost() {
+  OHOS::NWeb::OhosAdapterHelper::GetInstance().CreateSocPerfClientAdapter()
+    ->ApplySocPerfConfigByIdEx(OHOS::NWeb::SocPerfClientAdapter::SOC_PERF_WEB_GESTURE_ID, false);
+}
+
 WebInputEventResult WebFrameWidgetImpl::HandleInputEvent(
     const WebCoalescedInputEvent& coalesced_event) {
   const WebInputEvent& input_event = coalesced_event.Event();
@@ -2707,6 +2717,15 @@ WebInputEventResult WebFrameWidgetImpl::HandleInputEvent(
       input_event.GetType() == WebInputEvent::Type::kKeyUp) {
     base::ohos::TouchObserver::GetInstance().
       SetTouchUpTime(::base::subtle::TimeTicksNowIgnoringOverride().since_origin().InNanoseconds());
+  }
+
+  if (input_event.GetType() == WebInputEvent::Type::kRawKeyDown) {
+    OHOS::NWeb::OhosAdapterHelper::GetInstance().CreateSocPerfClientAdapter()
+      ->ApplySocPerfConfigByIdEx(OHOS::NWeb::SocPerfClientAdapter::SOC_PERF_WEB_GESTURE_ID, true);
+
+    base::SingleThreadTaskRunner::GetCurrentDefault()
+      ->PostDelayedTask(FROM_HERE, WTF::BindOnce(&WebFrameWidgetImpl::DisableBoost, 
+      WrapWeakPersistent(this)), base::Milliseconds(disableDelayTime));
   }
 
   // Clients shouldn't be dispatching events to a provisional frame but this

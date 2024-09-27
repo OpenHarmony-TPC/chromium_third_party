@@ -41,6 +41,7 @@
 #include "cc/input/overscroll_behavior.h"
 #include "cc/trees/layer_tree_host.h"
 #include "cc/trees/paint_holding_reason.h"
+#include "ohos_adapter_helper.h"
 #include "services/viz/public/mojom/hit_test/input_target_client.mojom-blink.h"
 #include "third_party/blink/public/common/input/web_coalesced_input_event.h"
 #include "third_party/blink/public/common/input/web_gesture_device.h"
@@ -432,6 +433,7 @@ class CORE_EXPORT WebFrameWidgetImpl
   void DidNativeEmbedEvent(const WebPointerEvent& web_pointer_event, std::string embedId,
                         PhysicalOffset& offset, bool isCancel);
   void TouchHitTest(const WebPointerEvent& event, size_t i) override;
+  void DisableBoost();
 #endif
   // WidgetBaseClient overrides:
   void OnCommitRequested() override;
