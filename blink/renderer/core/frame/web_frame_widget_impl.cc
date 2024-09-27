@@ -2725,7 +2725,7 @@ WebInputEventResult WebFrameWidgetImpl::HandleInputEvent(
 
     base::SingleThreadTaskRunner::GetCurrentDefault()
       ->PostDelayedTask(FROM_HERE, WTF::BindOnce(&WebFrameWidgetImpl::DisableBoost, 
-      WrapWeakPersistent(this)), base::Milliseconds(disableDelayTime);
+      WrapWeakPersistent(this)), base::Milliseconds(disableDelayTime));
   }
 
   // Clients shouldn't be dispatching events to a provisional frame but this
