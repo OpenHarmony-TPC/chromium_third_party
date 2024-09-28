@@ -710,6 +710,10 @@ class CORE_EXPORT WebFrameWidgetImpl
  private:
   friend class WebViewImpl;
   friend class ReportTimeSwapPromise;
+  
+#if BUILDFLAG(IS_OHOS)
+  int64_t rawKeyDownTime_ = 0;
+#endif
 
   void NotifySwapAndPresentationTime(PromiseCallbacks callbacks);
 
