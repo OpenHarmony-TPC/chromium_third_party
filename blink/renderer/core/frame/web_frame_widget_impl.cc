@@ -2699,11 +2699,16 @@ WebInputEventResult WebFrameWidgetImpl::DispatchBufferedTouchEvents() {
       ->GetEventHandler()
       .DispatchBufferedTouchEvents();
 }
-
-void WebFrameWidgetImpl::DisableBoost() {
-  OHOS::NWeb::OhosAdapterHelper::GetInstance().CreateSocPerfClientAdapter()
-    ->ApplySocPerfConfigByIdEx(OHOS::NWeb::SocPerfClientAdapter::SOC_PERF_WEB_GESTURE_ID, false);
-}
+#if BUILDFLAG(IS_OHOS)
+  void WebFrameWidgetImpl::DisableBoost() {
+    rawKeyDownTime_--;
+    if(rawKeyDownTime_ <= 0) {
+    OHOS::NWeb::OhosAdapterHelper::GetInstance().CreateSocPerfClientAdapter()
+        ->ApplySocPerfConfigByIdEx(OHOS::NWeb::SocPerfClientAdapter::SOC_PERF_WEB_GESTURE_ID, false);
+    rawKeyDownTime_ = 0;
+    }
+  }
+#endif
 
 WebInputEventResult WebFrameWidgetImpl::HandleInputEvent(
     const WebCoalescedInputEvent& coalesced_event) {
@@ -2722,7 +2727,7 @@ WebInputEventResult WebFrameWidgetImpl::HandleInputEvent(
   if (input_event.GetType() == WebInputEvent::Type::kRawKeyDown) {
     OHOS::NWeb::OhosAdapterHelper::GetInstance().CreateSocPerfClientAdapter()
       ->ApplySocPerfConfigByIdEx(OHOS::NWeb::SocPerfClientAdapter::SOC_PERF_WEB_GESTURE_ID, true);
-
+    rawKeyDownTime_++;
     base::SingleThreadTaskRunner::GetCurrentDefault()
       ->PostDelayedTask(FROM_HERE, WTF::BindOnce(&WebFrameWidgetImpl::DisableBoost, 
       WrapWeakPersistent(this)), base::Milliseconds(disableDelayTime));
