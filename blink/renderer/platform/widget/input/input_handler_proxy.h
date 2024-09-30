@@ -245,6 +245,9 @@ class PLATFORM_EXPORT InputHandlerProxy : public cc::InputHandlerClient,
 #endif
 #if defined(OHOS_INPUT_EVENTS)
   void SetOverscrollMode(int mode);
+#if defined(OHOS_GET_SCROLL_OFFSET)
+  gfx::Vector2dF GetOverScrollOffset();
+#endif
 #endif
 
   // SnapFlingClient implementation.
