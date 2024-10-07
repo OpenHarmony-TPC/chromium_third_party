@@ -607,6 +607,9 @@ bool DrawingBuffer::FinishPrepareTransferableResourceGpu(
         color_buffer_for_mailbox->format,
         color_buffer_for_mailbox->is_overlay_candidate);
     out_resource->color_space = color_buffer_for_mailbox->color_space;
+    if (webgl_version_ > kWebGL1) {
+      out_resource->enable_defer_impl_invalidation_workaround = want_depth_;
+    }
     // This holds a ref on the DrawingBuffer that will keep it alive until the
     // mailbox is released (and while the release callback is running).
     auto func = base::BindOnce(&DrawingBuffer::NotifyMailboxReleasedGpu,

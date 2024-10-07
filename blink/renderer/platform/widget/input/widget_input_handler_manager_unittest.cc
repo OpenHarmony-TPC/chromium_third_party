@@ -111,6 +111,7 @@ class LayerTreeHostImplClientMock : public cc::LayerTreeHostImplClient {
   void SetNeedsPrepareTilesOnImplThread();
   void SetVideoNeedsBeginFrames(bool needs_begin_frames);
   void SetDeferBeginMainFrameFromImpl(bool defer_begin_main_frame);
+  void SetDeferInvalidationForFastMainFrameFromImpl(bool defer_invalidation_for_fast_main_frame);
   bool IsInsideDraw();
   void RenewTreePriority();
   void PostDelayedAnimationTaskOnImplThread(base::OnceClosure task,
@@ -159,6 +160,7 @@ void LayerTreeHostImplClientMock::SetVideoNeedsBeginFrames(
     bool needs_begin_frames) {}
 void LayerTreeHostImplClientMock::SetDeferBeginMainFrameFromImpl(
     bool defer_begin_main_frame) {}
+void SetDeferInvalidationForFastMainFrameFromImpl(bool defer_invalidation_for_fast_main_frame) {};
 bool LayerTreeHostImplClientMock::IsInsideDraw() {
   return true;
 }
