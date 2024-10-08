@@ -63,6 +63,7 @@
 #include "third_party/blink/renderer/platform/wtf/text/text_encoding.h"
 #if BUILDFLAG(IS_OHOS)
 #include "cef/libcef/common/soc_perf_util.h"
+#include "ohos_adapter_helper.h"
 #endif
 
 namespace blink {
@@ -72,6 +73,10 @@ namespace {
 // Used to throw an exception before we exceed the C++ stack and crash.
 // This limit was arrived at arbitrarily. crbug.com/449744
 const int kMaxRecursionDepth = 44;
+const bool cacheOnIdleEnabledFromSystem =
+    OHOS::NWeb::OhosAdapterHelper::GetInstance()
+        .GetSystemPropertiesInstance()
+        .GetBoolParameter("web.webCacheOnIdle.enable", true);
 
 // In order to make sure all pending messages to be processed in
 // v8::Function::Call, we don't call throwStackOverflowException
@@ -535,9 +540,15 @@ ScriptEvaluationResult V8ScriptRunner::CompileAndRunScript(
           cache_handler) {
         cache_handler->WillProduceCodeCache();
       }
+
+      bool cacheOnIdleEnabled =
+          cacheOnIdleEnabledFromSystem &&
+          base::FeatureList::IsEnabled(features::kCacheCodeOnIdle);
+      LOG(DEBUG) << "V8ScriptRunner::CompileAndRunScript cacheOnIdleEnabled: "
+                 << (cacheOnIdleEnabled ? "YES" : "NO");
       if (produce_cache_options ==
               V8CodeCache::ProduceCacheOptions::kProduceCodeCache &&
-          base::FeatureList::IsEnabled(features::kCacheCodeOnIdle) &&
+          cacheOnIdleEnabled &&
           (features::kCacheCodeOnIdleDelayServiceWorkerOnlyParam.Get()
                ? execution_context->IsServiceWorkerGlobalScope()
                : true)) {
