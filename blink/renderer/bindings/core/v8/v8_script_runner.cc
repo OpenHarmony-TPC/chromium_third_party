@@ -76,7 +76,7 @@ const int kMaxRecursionDepth = 44;
 const bool cacheOnIdleEnabledFromSystem =
     OHOS::NWeb::OhosAdapterHelper::GetInstance()
         .GetSystemPropertiesInstance()
-        .GetBoolParameter("web.webCacheOnIdle.enable".true);
+        .GetBoolParameter("web.webCacheOnIdle.enable", true);
 
 // In order to make sure all pending messages to be processed in
 // v8::Function::Call, we don't call throwStackOverflowException
