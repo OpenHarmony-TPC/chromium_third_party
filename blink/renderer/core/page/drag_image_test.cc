@@ -142,10 +142,17 @@ TEST(DragImageTest, TrimWhitespace) {
   font_description.SetWeight(NormalWeightValue());
   font_description.SetStyle(NormalSlopeValue());
 
+#ifdef OHOS_DRAG_DROP
+  std::unique_ptr<DragImage> test_image =
+      DragImage::Create(url, test_label, font_description, device_scale_factor, false);
+  std::unique_ptr<DragImage> expected_image = DragImage::Create(
+      url, expected_label, font_description, device_scale_factor, false);
+#else
   std::unique_ptr<DragImage> test_image =
       DragImage::Create(url, test_label, font_description, device_scale_factor);
   std::unique_ptr<DragImage> expected_image = DragImage::Create(
       url, expected_label, font_description, device_scale_factor);
+#endif
 
   EXPECT_EQ(test_image->Size().width(), expected_image->Size().width());
 }
