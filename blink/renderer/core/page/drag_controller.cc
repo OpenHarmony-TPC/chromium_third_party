@@ -1279,8 +1279,15 @@ std::unique_ptr<DragImage> DragImageForLink(const KURL& link_url,
   FontDescription font_description;
   LayoutTheme::GetTheme().SystemFont(blink::CSSValueID::kNone, font_description,
                                      document);
+#ifdef OHOS_DRAG_DROP
+  auto doc = const_cast<Document*>(document);
+  bool is_force_dark_mode = doc ? doc->GetStyleEngine().GetForceDarkModeEnabled() : false;
+  return DragImage::Create(link_url, link_text, font_description,
+                           device_scale_factor, is_force_dark_mode);
+#else
   return DragImage::Create(link_url, link_text, font_description,
                            device_scale_factor);
+#endif
 }
 
 gfx::Rect DragRectForLink(const DragImage* link_image,
