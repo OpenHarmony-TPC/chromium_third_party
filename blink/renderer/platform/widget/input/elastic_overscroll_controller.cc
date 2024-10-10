@@ -137,8 +137,10 @@ void ElasticOverscrollController::ObserveGestureEventAndResult(
     case WebInputEvent::Type::kGestureScrollBegin: {
       received_overscroll_update_ = false;
       overscroll_behavior_ = cc::OverscrollBehavior();
+#if !defined(OHOS_INPUT_EVENTS)
       if (gesture_event.data.scroll_begin.synthetic)
         return;
+#endif
 
       bool enter_momentum = gesture_event.data.scroll_begin.inertial_phase ==
                             WebGestureEvent::InertialPhaseState::kMomentum;
@@ -161,8 +163,10 @@ void ElasticOverscrollController::ObserveGestureEventAndResult(
       break;
     }
     case WebInputEvent::Type::kGestureScrollEnd: {
+#if !defined(OHOS_INPUT_EVENTS)
       if (gesture_event.data.scroll_end.synthetic)
         return;
+#endif
       ObserveRealScrollEnd(event_timestamp);
       break;
     }
@@ -177,8 +181,14 @@ void ElasticOverscrollController::UpdateVelocity(
   float time_delta =
       (event_timestamp - last_scroll_event_timestamp_).InSecondsF();
   if (time_delta < kScrollVelocityZeroingTimeout && time_delta > 0) {
+#if defined(OHOS_INPUT_EVENTS)
+    scroll_velocity_ = gfx::Vector2dF(
+        CanScrollHorizontally() ? event_delta.x() / time_delta : 0,
+        event_delta.y() / time_delta);
+#else
     scroll_velocity_ = gfx::Vector2dF(event_delta.x() / time_delta,
                                       event_delta.y() / time_delta);
+#endif
   } else {
     scroll_velocity_ = gfx::Vector2dF();
   }
@@ -235,7 +245,7 @@ void ElasticOverscrollController::Overscroll(
       adjusted_overscroll_delta.set_x(0);
 #if defined(OHOS_INPUT_EVENTS)
     if (!CanScrollVertically() && CanScrollHorizontally())
-#else    
+#else
     if (!CanScrollVertically())
 #endif
       adjusted_overscroll_delta.set_y(0);
@@ -347,10 +357,6 @@ void ElasticOverscrollController::Animate(base::TimeTicks time) {
 #if defined(OHOS_INPUT_EVENTS)
   if (!CanScrollHorizontally()) {
     new_stretch_amount.set_x(0);
-  }
- 
-  if (!CanScrollVertically()) {
-    new_stretch_amount.set_y(0);
   }
 #endif
   stretch_scroll_force_ =

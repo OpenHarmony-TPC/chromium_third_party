@@ -461,6 +461,13 @@ void WorkerOrWorkletGlobalScope::Dispose() {
   script_controller_->Dispose();
   script_controller_.Clear();
 
+#ifdef OHOS_LOG_MESSAGE
+  if (resource_fetchers_.size()) {
+    LOG(INFO) << "Worker or WorkletGlobalScope Dispose, the size of resource_fetchers_: "
+              << resource_fetchers_.size();
+  }
+#endif
+
   for (ResourceFetcher* resource_fetcher : resource_fetchers_) {
     resource_fetcher->StopFetching();
     resource_fetcher->ClearContext();

@@ -37,6 +37,10 @@ class CORE_EXPORT DisplayCutoutClientImpl final
 
   void Trace(Visitor*) const;
 
+#ifdef OHOS_DISPLAY_CUTOUT
+  static void UpdateSafeArea(LocalFrame* frame);
+#endif
+
  private:
   Member<LocalFrame> frame_;
 

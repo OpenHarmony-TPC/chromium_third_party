@@ -100,6 +100,10 @@ class CORE_EXPORT MouseEventManager final
 
   DragState& GetDragState();
 
+#ifdef OHOS_DRAG_DROP
+  bool IsDraging();
+#endif
+
   void FocusDocumentView();
 
   // Resets the state that indicates the next events could cause a drag. It is
@@ -156,6 +160,8 @@ class CORE_EXPORT MouseEventManager final
   void CreateOverlayCallback();
   bool GetOverlayInProgress();
   void SetOverlayInProgress(bool flag);
+  void SetOverlayInProgressOnly(bool flag);
+  void OnDestroyImageAnalyzerOverlay();
   template <typename T>
   void HandleCreateOverlay(T const& targeted_event);
 #endif

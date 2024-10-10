@@ -78,7 +78,7 @@ class CORE_EXPORT ScriptResource final : public TextResource {
 #if BUILDFLAG(IS_OHOS)
   static ScriptResource* CreateForOfflineResource(const KURL& kurl,
                                                   const KURL& origin_url,
-                                                  const ResourceResponse& response,
+                                                  ResourceResponse response,
                                                   const bool is_module);
 #endif
 

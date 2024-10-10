@@ -1690,7 +1690,7 @@ int32_t RTCVideoEncoder::InitializeEncoder(
   DCHECK_CALLED_ON_VALID_SEQUENCE(webrtc_sequence_checker_);
   TRACE_EVENT1("webrtc", "RTCVideoEncoder::InitEncode", "config",
                vea_config.AsHumanReadableString());
-  DVLOG(1) << __func__ << ": config=" << vea_config.AsHumanReadableString();
+  LOG(INFO) << __func__ << ": config=" << vea_config.AsHumanReadableString();
   auto init_start = base::TimeTicks::Now();
   // This wait is necessary because this task is completed in GPU process
   // asynchronously but WebRTC API is synchronous.

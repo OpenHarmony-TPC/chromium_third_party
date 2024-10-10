@@ -394,6 +394,14 @@ void FontCache::CrashWithFontInfo(const FontDescription* font_description) {
   base::debug::Alias(&is_test_font_mgr);
   base::debug::Alias(&num_families);
 
+#if BUILDFLAG(IS_OHOS)
+  LOG(ERROR) << __func__ << " [forfontcrash] font_mgr:" << font_mgr << " "
+             << static_font_mgr << " " << skia_default_font_mgr
+             << " test_font_mgr:" << is_test_font_mgr
+             << " num_families:" << num_families << " "
+             << font_description->ToString();
+#endif
+
   CHECK(false);
 }
 

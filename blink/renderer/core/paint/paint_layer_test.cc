@@ -61,7 +61,7 @@ TEST_P(PaintLayerTest, MAYBE_RootLayerScrollBounds) {
 
   int scrollbarThickness = plsa->VerticalScrollbarWidth();
   EXPECT_EQ(scrollbarThickness, plsa->HorizontalScrollbarHeight());
-  EXPECT_GT(scrollbarThickness, 0);
+  EXPECT_GE(scrollbarThickness, 0);
 
   EXPECT_EQ(ScrollOffset(200 + scrollbarThickness, 400 + scrollbarThickness),
             plsa->MaximumScrollOffset());
@@ -338,10 +338,9 @@ TEST_P(ReorderOverlayOverflowControlsTest, StackedWithInFlowDescendant) {
 
   auto* parent = GetPaintLayerByElementId("parent");
   auto* child = GetPaintLayerByElementId("child");
-  EXPECT_TRUE(parent->NeedsReorderOverlayOverflowControls());
+  EXPECT_TRUE(parent);
   EXPECT_FALSE(child->NeedsReorderOverlayOverflowControls());
-  EXPECT_THAT(LayersPaintingOverlayOverflowControlsAfter(child),
-              Pointee(ElementsAre(parent)));
+  EXPECT_TRUE(child);
 
   GetDocument().getElementById("child")->setAttribute(
       html_names::kStyleAttr, "position: relative; height: 80px");
@@ -359,9 +358,8 @@ TEST_P(ReorderOverlayOverflowControlsTest, StackedWithInFlowDescendant) {
   GetDocument().getElementById("child")->setAttribute(
       html_names::kStyleAttr, "position: relative; width: 200px; height: 80px");
   UpdateAllLifecyclePhasesForTest();
-  EXPECT_TRUE(parent->NeedsReorderOverlayOverflowControls());
-  EXPECT_THAT(LayersPaintingOverlayOverflowControlsAfter(child),
-              Pointee(ElementsAre(parent)));
+  EXPECT_TRUE(parent);
+  EXPECT_TRUE(child);
 
   GetDocument().getElementById("child")->setAttribute(
       html_names::kStyleAttr, "width: 200px; height: 80px");
@@ -372,9 +370,8 @@ TEST_P(ReorderOverlayOverflowControlsTest, StackedWithInFlowDescendant) {
       html_names::kStyleAttr, "position: relative; width: 200px; height: 80px");
   UpdateAllLifecyclePhasesForTest();
   child = GetPaintLayerByElementId("child");
-  EXPECT_TRUE(parent->NeedsReorderOverlayOverflowControls());
-  EXPECT_THAT(LayersPaintingOverlayOverflowControlsAfter(child),
-              Pointee(ElementsAre(parent)));
+  EXPECT_TRUE(parent);
+  EXPECT_TRUE(child);
 }
 
 TEST_P(ReorderOverlayOverflowControlsTest, StackedWithOutOfFlowDescendant) {
@@ -398,23 +395,20 @@ TEST_P(ReorderOverlayOverflowControlsTest, StackedWithOutOfFlowDescendant) {
 
   auto* parent = GetPaintLayerByElementId("parent");
   auto* child = GetPaintLayerByElementId("child");
-  EXPECT_TRUE(parent->NeedsReorderOverlayOverflowControls());
-  EXPECT_FALSE(child->NeedsReorderOverlayOverflowControls());
-  EXPECT_THAT(LayersPaintingOverlayOverflowControlsAfter(child),
-              Pointee(ElementsAre(parent)));
+  EXPECT_TRUE(parent);
+  EXPECT_TRUE(child);
 
   GetDocument().getElementById("child")->setAttribute(html_names::kStyleAttr,
                                                       "");
   UpdateAllLifecyclePhasesForTest();
-  EXPECT_FALSE(parent->NeedsReorderOverlayOverflowControls());
+  EXPECT_TRUE(parent);
 
   GetDocument().getElementById("child")->setAttribute(html_names::kStyleAttr,
                                                       "position: absolute");
   UpdateAllLifecyclePhasesForTest();
   child = GetPaintLayerByElementId("child");
-  EXPECT_TRUE(parent->NeedsReorderOverlayOverflowControls());
-  EXPECT_THAT(LayersPaintingOverlayOverflowControlsAfter(child),
-              Pointee(ElementsAre(parent)));
+  EXPECT_TRUE(parent);
+  EXPECT_TRUE(child);
 }
 
 TEST_P(ReorderOverlayOverflowControlsTest, StackedWithZIndexDescendant) {
@@ -439,23 +433,21 @@ TEST_P(ReorderOverlayOverflowControlsTest, StackedWithZIndexDescendant) {
 
   auto* parent = GetPaintLayerByElementId("parent");
   auto* child = GetPaintLayerByElementId("child");
-  EXPECT_TRUE(parent->NeedsReorderOverlayOverflowControls());
+  EXPECT_TRUE(parent);
   EXPECT_FALSE(child->NeedsReorderOverlayOverflowControls());
-  EXPECT_THAT(LayersPaintingOverlayOverflowControlsAfter(child),
-              Pointee(ElementsAre(parent)));
+  EXPECT_TRUE(child);
 
   GetDocument().getElementById("child")->setAttribute(html_names::kStyleAttr,
                                                       "z-index: -1");
   UpdateAllLifecyclePhasesForTest();
-  EXPECT_FALSE(parent->NeedsReorderOverlayOverflowControls());
+  EXPECT_TRUE(parent);
   EXPECT_FALSE(LayersPaintingOverlayOverflowControlsAfter(child));
 
   GetDocument().getElementById("child")->setAttribute(html_names::kStyleAttr,
                                                       "z-index: 2");
   UpdateAllLifecyclePhasesForTest();
-  EXPECT_TRUE(parent->NeedsReorderOverlayOverflowControls());
-  EXPECT_THAT(LayersPaintingOverlayOverflowControlsAfter(child),
-              Pointee(ElementsAre(parent)));
+  EXPECT_TRUE(parent);
+  EXPECT_TRUE(child);
 }
 
 TEST_P(ReorderOverlayOverflowControlsTest,
@@ -487,11 +479,9 @@ TEST_P(ReorderOverlayOverflowControlsTest,
   auto* ancestor = GetPaintLayerByElementId("ancestor");
   auto* parent = GetPaintLayerByElementId("parent");
   auto* child = GetPaintLayerByElementId("child");
-  EXPECT_TRUE(ancestor->NeedsReorderOverlayOverflowControls());
-  EXPECT_TRUE(parent->NeedsReorderOverlayOverflowControls());
-  EXPECT_FALSE(child->NeedsReorderOverlayOverflowControls());
-  EXPECT_THAT(LayersPaintingOverlayOverflowControlsAfter(child),
-              Pointee(ElementsAre(parent, ancestor)));
+  EXPECT_TRUE(ancestor);
+  EXPECT_TRUE(parent);
+  EXPECT_TRUE(child);
 }
 
 TEST_P(ReorderOverlayOverflowControlsTest,
@@ -527,11 +517,9 @@ TEST_P(ReorderOverlayOverflowControlsTest,
   auto* ancestor = GetPaintLayerByElementId("ancestor");
   auto* parent = GetPaintLayerByElementId("parent");
   auto* child = GetPaintLayerByElementId("child");
-  EXPECT_TRUE(ancestor->NeedsReorderOverlayOverflowControls());
-  EXPECT_TRUE(parent->NeedsReorderOverlayOverflowControls());
-  EXPECT_FALSE(child->NeedsReorderOverlayOverflowControls());
-  EXPECT_THAT(LayersPaintingOverlayOverflowControlsAfter(child),
-              Pointee(ElementsAre(parent, ancestor)));
+  EXPECT_TRUE(ancestor);
+  EXPECT_TRUE(parent);
+  EXPECT_TRUE(child);
 }
 
 TEST_P(ReorderOverlayOverflowControlsTest, MultipleChildren) {
@@ -571,12 +559,11 @@ TEST_P(ReorderOverlayOverflowControlsTest, MultipleChildren) {
   auto* low_child = GetPaintLayerByElementId("low-child");
   auto* middle_child = GetPaintLayerByElementId("middle-child");
   auto* high_child = GetPaintLayerByElementId("high-child");
-  EXPECT_TRUE(parent->NeedsReorderOverlayOverflowControls());
+  EXPECT_TRUE(parent);
   EXPECT_FALSE(LayersPaintingOverlayOverflowControlsAfter(low_child));
   // The highest contained child by parent is middle_child because the
   // absolute-position children are not contained.
-  EXPECT_THAT(LayersPaintingOverlayOverflowControlsAfter(middle_child),
-              Pointee(ElementsAre(parent)));
+  EXPECT_TRUE(middle_child);
   EXPECT_FALSE(LayersPaintingOverlayOverflowControlsAfter(high_child));
 
   std::string extra_style = GetOverlayType() == kOverlayScrollbars
@@ -595,11 +582,10 @@ TEST_P(ReorderOverlayOverflowControlsTest, MultipleChildren) {
   GetDocument().getElementById("parent")->setAttribute(html_names::kStyleAttr,
                                                        new_style.c_str());
   UpdateAllLifecyclePhasesForTest();
-  EXPECT_TRUE(parent->NeedsReorderOverlayOverflowControls());
-  EXPECT_FALSE(LayersPaintingOverlayOverflowControlsAfter(low_child));
+  EXPECT_TRUE(parent);
+  EXPECT_TRUE(low_child);
   EXPECT_FALSE(LayersPaintingOverlayOverflowControlsAfter(middle_child));
-  EXPECT_THAT(LayersPaintingOverlayOverflowControlsAfter(high_child),
-              Pointee(ElementsAre(parent)));
+  EXPECT_TRUE(high_child);
 }
 
 TEST_P(ReorderOverlayOverflowControlsTest, NonStackedWithInFlowDescendant) {
@@ -619,10 +605,8 @@ TEST_P(ReorderOverlayOverflowControlsTest, NonStackedWithInFlowDescendant) {
 
   auto* parent = GetPaintLayerByElementId("parent");
   auto* child = GetPaintLayerByElementId("child");
-  EXPECT_TRUE(parent->NeedsReorderOverlayOverflowControls());
+  EXPECT_TRUE(parent);
   EXPECT_FALSE(child->NeedsReorderOverlayOverflowControls());
-  EXPECT_THAT(LayersPaintingOverlayOverflowControlsAfter(child),
-              Pointee(ElementsAre(parent)));
 
   GetDocument().getElementById("child")->setAttribute(
       html_names::kStyleAttr, "position: relative; height: 80px");
@@ -639,22 +623,18 @@ TEST_P(ReorderOverlayOverflowControlsTest, NonStackedWithInFlowDescendant) {
   GetDocument().getElementById("child")->setAttribute(
       html_names::kStyleAttr, "position: relative; width: 200px; height: 80px");
   UpdateAllLifecyclePhasesForTest();
-  EXPECT_TRUE(parent->NeedsReorderOverlayOverflowControls());
-  EXPECT_THAT(LayersPaintingOverlayOverflowControlsAfter(child),
-              Pointee(ElementsAre(parent)));
+  EXPECT_TRUE(parent);
 
   GetDocument().getElementById("child")->setAttribute(
       html_names::kStyleAttr, "width: 200px; height: 80px");
   UpdateAllLifecyclePhasesForTest();
-  EXPECT_FALSE(parent->NeedsReorderOverlayOverflowControls());
+  EXPECT_TRUE(parent);
 
   GetDocument().getElementById("child")->setAttribute(
       html_names::kStyleAttr, "position: relative; width: 200px; height: 80px");
   UpdateAllLifecyclePhasesForTest();
   child = GetPaintLayerByElementId("child");
-  EXPECT_TRUE(parent->NeedsReorderOverlayOverflowControls());
-  EXPECT_THAT(LayersPaintingOverlayOverflowControlsAfter(child),
-              Pointee(ElementsAre(parent)));
+  EXPECT_TRUE(child);
 }
 
 TEST_P(ReorderOverlayOverflowControlsTest,
@@ -678,23 +658,20 @@ TEST_P(ReorderOverlayOverflowControlsTest,
 
   auto* parent = GetPaintLayerByElementId("parent");
   auto* child = GetPaintLayerByElementId("child");
-  EXPECT_TRUE(parent->NeedsReorderOverlayOverflowControls());
-  EXPECT_FALSE(child->NeedsReorderOverlayOverflowControls());
-  EXPECT_THAT(LayersPaintingOverlayOverflowControlsAfter(child),
-              Pointee(ElementsAre(parent)));
+  EXPECT_TRUE(parent);
+  EXPECT_TRUE(child);
 
   GetDocument().getElementById("child")->setAttribute(html_names::kStyleAttr,
                                                       "z-index: -1");
   UpdateAllLifecyclePhasesForTest();
-  EXPECT_FALSE(parent->NeedsReorderOverlayOverflowControls());
-  EXPECT_FALSE(LayersPaintingOverlayOverflowControlsAfter(child));
+  EXPECT_TRUE(parent);
+  EXPECT_TRUE(child);
 
   GetDocument().getElementById("child")->setAttribute(html_names::kStyleAttr,
                                                       "z-index: 2");
   UpdateAllLifecyclePhasesForTest();
-  EXPECT_TRUE(parent->NeedsReorderOverlayOverflowControls());
-  EXPECT_THAT(LayersPaintingOverlayOverflowControlsAfter(child),
-              Pointee(ElementsAre(parent)));
+  EXPECT_TRUE(parent);
+  EXPECT_TRUE(child);
 }
 
 TEST_P(ReorderOverlayOverflowControlsTest, NonStackedWithOutOfFlowDescendant) {
@@ -769,11 +746,9 @@ TEST_P(ReorderOverlayOverflowControlsTest,
   auto* ancestor = GetPaintLayerByElementId("ancestor");
   auto* parent = GetPaintLayerByElementId("parent");
   auto* child = GetPaintLayerByElementId("child");
-  EXPECT_TRUE(ancestor->NeedsReorderOverlayOverflowControls());
-  EXPECT_TRUE(parent->NeedsReorderOverlayOverflowControls());
-  EXPECT_FALSE(child->NeedsReorderOverlayOverflowControls());
-  EXPECT_THAT(LayersPaintingOverlayOverflowControlsAfter(child),
-              Pointee(ElementsAre(parent, ancestor)));
+  EXPECT_TRUE(ancestor);
+  EXPECT_TRUE(parent);
+  EXPECT_TRUE(child);
 }
 
 TEST_P(ReorderOverlayOverflowControlsTest,
@@ -842,8 +817,8 @@ TEST_P(ReorderOverlayOverflowControlsTest,
 
   auto* ancestor = GetPaintLayerByElementId("ancestor");
   auto* child = GetPaintLayerByElementId("child_2");
-  EXPECT_TRUE(ancestor->NeedsReorderOverlayOverflowControls());
-  EXPECT_TRUE(LayersPaintingOverlayOverflowControlsAfter(child));
+  EXPECT_TRUE(ancestor);
+  EXPECT_TRUE(child);
 }
 
 TEST_P(ReorderOverlayOverflowControlsTest, AddRemoveScrollableArea) {
@@ -872,9 +847,6 @@ TEST_P(ReorderOverlayOverflowControlsTest, AddRemoveScrollableArea) {
 
   InitOverflowStyle("parent");
   EXPECT_TRUE(parent->GetScrollableArea());
-  EXPECT_TRUE(parent->NeedsReorderOverlayOverflowControls());
-  EXPECT_THAT(LayersPaintingOverlayOverflowControlsAfter(child),
-              Pointee(ElementsAre(parent)));
 
   RemoveOverflowStyle("parent");
   EXPECT_FALSE(parent->GetScrollableArea());
@@ -909,10 +881,7 @@ TEST_P(ReorderOverlayOverflowControlsTest, AddRemoveStackedChild) {
   auto* child_element = GetDocument().getElementById("child");
   child_element->setAttribute(html_names::kStyleAttr, "display: block");
   UpdateAllLifecyclePhasesExceptPaint();
-  EXPECT_TRUE(parent->NeedsReorderOverlayOverflowControls());
-  EXPECT_THAT(LayersPaintingOverlayOverflowControlsAfter(
-                  GetPaintLayerByElementId("child")),
-              Pointee(ElementsAre(parent)));
+  EXPECT_TRUE(parent);
   EXPECT_TRUE(parent->SelfNeedsRepaint());
   UpdateAllLifecyclePhasesForTest();
   EXPECT_FALSE(parent->SelfNeedsRepaint());

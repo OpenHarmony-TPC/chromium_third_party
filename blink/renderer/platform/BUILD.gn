@@ -1840,6 +1840,13 @@ component("platform") {
     deps += [ "//third_party/libavif" ]
   }
 
+  if (is_ohos) {
+    sources += [
+      "image-decoders/heif/heif_image_decoder.cc",
+      "image-decoders/heif/heif_image_decoder.h",
+    ]
+  }
+
   if (current_cpu == "x86" || current_cpu == "x64") {
     deps += [ ":blink_x86_avx" ]
     sources += [ "audio/cpu/x86/delay_sse2.cc" ]
@@ -2261,6 +2268,8 @@ source_set("blink_platform_unittests_sources") {
     "widget/input/main_thread_event_queue_unittest.cc",
     "widget/input/prediction/filter_factory_unittests.cc",
     "widget/input/scroll_predictor_unittest.cc",
+    "widget/input/software_compositor_proxy_ohos_unittest.cc",
+    "widget/input/widget_input_handler_manager_unittest.cc",
   ]
 
   if (is_android) {
@@ -2287,15 +2296,6 @@ source_set("blink_platform_unittests_sources") {
   }
 
   sources += [ "testing/run_all_tests.cc" ]
-  if (ohos_unittests) {
-    sources += [
-      "//cef/libcef/common/soc_perf_util.cc",
-      "//content/browser/browser_thread_impl.cc",
-      "//content/browser/scheduler/browser_task_executor.cc",
-      "//content/public/renderer/render_thread.cc",
-      "//content/child/child_thread_impl.cc",
-    ]
-  }
 
   configs += [
     ":blink_platform_pch",
@@ -2353,9 +2353,9 @@ source_set("blink_platform_unittests_sources") {
   ]
 
   if (ohos_unittests) {
-    deps +=[
-      "//cef/libcef/common/mojom"
-      ]
+    deps += [
+      "//cef:libcef_static",
+    ]
   }
 
   deps += [ ":bridge_ice_controller_tests" ]

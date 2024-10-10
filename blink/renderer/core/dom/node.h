@@ -374,6 +374,11 @@ class CORE_EXPORT Node : public EventTarget {
   virtual bool IsMediaRemotingInterstitial() const { return false; }
   virtual bool IsPictureInPictureInterstitial() const { return false; }
 
+#ifdef OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
+  virtual bool ShouldInterceptHitTest() const { return false; }
+  virtual bool ShouldOverlay() const { return false; }
+#endif // OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
+
   // Traverses the ancestors of this node and returns true if any of them are
   // either a MediaControlElement or MediaControls.
   bool HasMediaControlAncestor() const;

@@ -499,6 +499,25 @@ void Page::SetUserAgentPageScaleConstraints(
   root_view->SetNeedsLayout();
 }
 
+#if BUILDFLAG(IS_OHOS)
+void Page::ResetPageScaleConstraints(bool constraint_for_mobile) {
+  if (constraint_for_mobile) {
+    SetDefaultPageScaleLimits(0.25f, 5.0f);
+  } else {
+    SetDefaultPageScaleLimits(1.0f, 4.0f);
+  }
+
+  PageScaleConstraints constraints =
+        GetPageScaleConstraintsSet().UserAgentConstraints();
+  constraints.minimum_scale =
+            GetPageScaleConstraintsSet().DefaultConstraints().minimum_scale;
+  constraints.maximum_scale =
+          GetPageScaleConstraintsSet().DefaultConstraints().maximum_scale;
+
+  SetUserAgentPageScaleConstraints(constraints);
+}
+#endif
+
 void Page::SetPageScaleFactor(float scale) {
   GetVisualViewport().SetScale(scale);
 }
@@ -1144,6 +1163,15 @@ void Page::UpdateLifecycle(LocalFrame& root,
     Animator().UpdateAllLifecyclePhases(root, reason);
   }
 }
+
+#ifdef OHOS_DISPLAY_CUTOUT
+gfx::Insets Page::SafeAreaScaled() const {
+  if (PageScaleFactor() == 0.0f) {
+    return safe_area_;
+  }
+  return gfx::ScaleToFlooredInsets(safe_area_, 1 / PageScaleFactor());
+}
+#endif
 
 template class CORE_TEMPLATE_EXPORT Supplement<Page>;
 

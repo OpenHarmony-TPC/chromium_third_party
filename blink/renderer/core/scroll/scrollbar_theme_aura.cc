@@ -179,9 +179,11 @@ int ScrollbarThemeAura::ScrollbarThickness(float scale_from_dip,
       WebThemeEngineHelper::GetNativeThemeEngine()->GetSize(
           WebThemeEngine::kPartScrollbarVerticalTrack);
 
+#ifdef OHOS_SCROLLBAR
   if (!OverlayScrollbarsEnabled()) {
     return kScrollbarForceThicknessForWeb;
   }
+#endif
   return scrollbar_size.width() * Proportion(scrollbar_width) * scale_from_dip;
 }
 

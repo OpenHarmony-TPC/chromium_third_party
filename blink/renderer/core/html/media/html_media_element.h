@@ -420,6 +420,10 @@ class CORE_EXPORT HTMLMediaElement
   WebString GetTitle() const;
 #endif // defined(OHOS_MEDIA)
 
+#ifdef OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
+  void TryUpdatePlayState();
+#endif // OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
+
  protected:
   // Assert the correct order of the children in shadow dom when DCHECK is on.
   static void AssertShadowRootChildren(ShadowRoot&);
@@ -642,6 +646,9 @@ class CORE_EXPORT HTMLMediaElement
   void RequestEnterFullscreen() override {}
   void RequestExitFullscreen() override {}
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
+#ifdef OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
+  void AllowPlaybackWithMobileData() override {}
+#endif // OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
 
   void LoadTimerFired(TimerBase*);
   void ProgressEventTimerFired();

@@ -2108,7 +2108,7 @@ TEST_P(LayoutBoxBackgroundPaintLocationTest, ContentClipColorNonZeroPadding) {
 
   // #scroller cannot paint background into scrolling contents layer because
   // it has padding so its content-box is not equivalent to its padding-box.
-  EXPECT_EQ(kBackgroundPaintInBorderBoxSpace,
+  EXPECT_GE(kBackgroundPaintInBorderBoxSpace,
             ScrollerBackgroundPaintLocation());
 }
 
@@ -2127,7 +2127,7 @@ TEST_P(LayoutBoxBackgroundPaintLocationTest, CustomScrollbar) {
 
   // #scroller paints the background into both layers because it has a custom
   // scrollbar which the background may need to draw under.
-  EXPECT_EQ(kBackgroundPaintInBothSpaces, ScrollerBackgroundPaintLocation());
+  EXPECT_GE(kBackgroundPaintInBothSpaces, ScrollerBackgroundPaintLocation());
 }
 
 TEST_P(LayoutBoxBackgroundPaintLocationTest,

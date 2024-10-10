@@ -131,7 +131,7 @@ FeatureNames FeatureToNames(WebSchedulerTrackedFeature feature) {
     case WebSchedulerTrackedFeature::kEnableCacheNativeEmbed:
       return {"EnableCacheNativeEmbed", "enable native embed to bfcache"};
     case WebSchedulerTrackedFeature::kEnableCacheMediaTakeOver:
-      return {"EnableCacheMediaIntercept", "enable media take over to bfcache"};
+      return {"EnableCacheMediaTakeOver", "enable media take over to bfcache"};
 #endif
   }
   return {};

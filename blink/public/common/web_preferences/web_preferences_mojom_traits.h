@@ -657,13 +657,6 @@ struct BLINK_COMMON_EXPORT StructTraits<blink::mojom::WebPreferencesDataView,
   }
 #endif  // BUILDFLAG(IS_ANDROID) || BUILDFLAG(IS_FUCHSIA)
 
-#ifdef OHOS_EX_BLANK_TARGET_POPUP_INTERCEPT
-  static bool blank_target_popup_intercept_enabled(
-      const blink::web_pref::WebPreferences& r) {
-    return r.blank_target_popup_intercept_enabled;
-  }
-#endif
-
   static bool force_dark_mode_enabled(
       const blink::web_pref::WebPreferences& r) {
     return r.force_dark_mode_enabled;
@@ -868,6 +861,16 @@ struct BLINK_COMMON_EXPORT StructTraits<blink::mojom::WebPreferencesDataView,
   }
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
 
+#ifdef OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
+  static bool enable_media_network_traffic_prompt(
+      const blink::web_pref::WebPreferences& r) {
+    return r.enable_media_network_traffic_prompt;
+  }
+  static bool playback_with_mobile_data_allowed(
+      const blink::web_pref::WebPreferences& r) {
+    return r.playback_with_mobile_data_allowed;
+  }
+#endif // OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
 };
 
 }  // namespace mojo

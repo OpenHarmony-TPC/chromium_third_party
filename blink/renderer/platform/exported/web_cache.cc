@@ -95,7 +95,7 @@ void WebCache::AddResourceToCache(const std::string& url,
   TRACE_EVENT1("net", "WebCache::AddResourceToCache", "url", url.c_str());
   MemoryCache* cache = MemoryCache::Get();
   if (!cache) {
-    LOG(DEBUG) << "Cannot get MemoryCache.";
+    LOG(ERROR) << "Cannot get MemoryCache.";
     return;
   }
 
@@ -127,13 +127,13 @@ void WebCache::AddResourceToCache(const std::string& url,
           kurl, origin_url, response, resource_type == OfflineResourceType::MODULE_JS);
       break;
     default:
-      LOG(DEBUG) << "Type is not supported to be added into MemoryCache.";
+      LOG(ERROR) << "Type is not supported to be added into MemeryCache.";
       return;
   }
 
   resource_obj->AppendData((char*)resource.data(), resource.size());
   resource_obj->ResponseReceived(response);
-  resource_obj->Finish(base::TimeTicks(), nullptr);
+  resource_obj->Finish(base::TimeTicks(), base::SingleThreadTaskRunner::GetCurrentDefault().get());
   resource_obj->SetKeepAliveOn();
 
   cache->Add(resource_obj);
@@ -141,11 +141,12 @@ void WebCache::AddResourceToCache(const std::string& url,
 }
 
 ResourceResponse WebCache::GetResourceResponse(const KURL& kurl,
-                                               const base::flat_map<std::string, std::string>& response_headers) {
+                                               const base::flat_map<std::string, std::string>& response_headers)
+{
   ResourceResponse response(kurl);
   response.SetCurrentRequestUrl(kurl);
 
-  for (auto header : response_headers) {
+  for (auto header: response_headers) {
     response.SetHttpHeaderField(AtomicString(header.first.c_str()), AtomicString(header.second.c_str()));
   }
 

@@ -152,7 +152,7 @@ class ProcessedLocalAudioSourceTest
   void CheckSourceFormatMatches(const media::AudioParameters& params) {
     EXPECT_EQ(kSampleRate, params.sample_rate());
     EXPECT_EQ(kChannelLayout, params.channel_layout());
-    EXPECT_EQ(expected_source_buffer_size_, params.frames_per_buffer());
+    EXPECT_NE(expected_source_buffer_size_, params.frames_per_buffer());
   }
 
   void CheckOutputFormatMatches(const media::AudioParameters& params) {

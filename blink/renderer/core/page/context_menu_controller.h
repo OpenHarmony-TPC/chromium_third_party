@@ -135,6 +135,9 @@ class CORE_EXPORT ContextMenuController final
   GURL GetChildImageUrlFromElement(const blink::WebElement& element, gfx::Point point);
 #endif
 
+#ifdef OHOS_EX_FREE_COPY
+  bool ShouldShowFreeCopyMenu(const HitTestResult& result);
+#endif
   bool ShouldShowContextMenuFromTouch(const ContextMenuData&);
 
   Node* GetContextMenuNodeWithImageContents();

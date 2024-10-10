@@ -12,7 +12,7 @@ namespace {
 
 #if defined(OHOS_INPUT_EVENTS)
 // Used to determine how far the scroller is allowed to stretch.
-constexpr double kOverscrollBoundaryMultiplier = 0.3f;
+constexpr double kOverscrollBoundaryMultiplier = 0.57f;
 
 // Maximum duration for the bounce back animation.
 constexpr double kBounceBackMaxDurationMilliseconds = 500.0;
@@ -259,7 +259,8 @@ ElasticOverscrollControllerBezier::StretchAmountForAccumulatedOverscroll(
         tanh(2 * accumulated_overscroll.y() / scroll_bounds().height()) *
         overscroll_boundary.y());
   }
-
+  LOG(DEBUG)<<"OverScroll width hand scroll x is "<<(overbounce_distance.x());
+  LOG(DEBUG)<<"OverScroll width hand scroll y is "<<(overbounce_distance.y());  
   return overbounce_distance;
 }
 
@@ -286,7 +287,8 @@ ElasticOverscrollControllerBezier::AccumulatedOverscrollForStretchAmount(
     float atanh_value = atanh(stretch_amount.y() / overscroll_boundary.y());
     overscrolled_amount.set_y((atanh_value / 2) * scroll_bounds().height());
   }
-
+  LOG(DEBUG)<<"OverScroll leave hand scroll x is "<<(overscrolled_amount.x());
+  LOG(DEBUG)<<"OverScroll leave hand scroll y is "<<(overscrolled_amount.y());
   return overscrolled_amount;
 }
 }  // namespace blink

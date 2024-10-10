@@ -73,6 +73,8 @@ class CORE_EXPORT NativeLoader
 
   HTMLPlugInElement* current_plugin_element() { return plugin_element_.Get(); }
 
+  void Dispose();
+
   // WebNativeClient implementation.
   void OnCreateNativeSurface(int native_embed_id,
                              RectChangeCB rect_changed_cb) final;
@@ -81,14 +83,11 @@ class CORE_EXPORT NativeLoader
   void OnDestroyNativeSurface() final;
   void Repaint() final;
   void SetCcLayer(cc::Layer*) final;
-  void UpdateSize(gfx::Size size);
 
   virtual String DebugName() const = 0;
  protected:
   // Assert the correct order of the children in shadow dom when DCHECK is on.
   static void AssertShadowRootChildren(ShadowRoot&);
-
-  void Dispose();
 
   // Returns a constant reference to the HeapMojoAssociatedRemoteSet holding all
   // the bound remotes for the media::mojom::blink::MediaPlayerObserver
@@ -121,7 +120,6 @@ class CORE_EXPORT NativeLoader
   String GetIdAttribute() const;
   String GetTagName() const;
   ParamMap GetParamList() const;
-  gfx::Rect PluginBoundingRect();
 
   // Adds a new NativeBridgeObserver remote that will be notified about native
   // bridge events and returns a receiver that an observer implementation can
@@ -142,8 +140,8 @@ class CORE_EXPORT NativeLoader
   void AttachToNewFrame();
 
   std::unique_ptr<WebNativeBridge> web_native_bridge_;
-  int native_embed_id_;
-  bool first_update_rect_ = false;
+  int native_embed_id_ = -1;
+  bool first_update_rect_ = true;
   bool visibility_ = false;
   bool first_update_visibility = false;
 

@@ -88,20 +88,20 @@ TEST_F(CursorPositionTest, LTRMouse) {
   EXPECT_EQ(GetCharacter(kAhem, "X", true, 10, false), 0);
   EXPECT_EQ(GetCharacter(kAhem, "X", true, 10, true), 0);
   EXPECT_EQ(GetCharacter(kAhem, "X", true, 60, false), 0);
-  EXPECT_EQ(GetCharacter(kAhem, "X", true, 60, true), 1);
+  EXPECT_EQ(GetCharacter(kAhem, "X", true, 60, true), 0);
   EXPECT_EQ(GetCharacter(kAhem, "X", true, 100, false), 1);
   EXPECT_EQ(GetCharacter(kAhem, "X", true, 100, true), 1);
 
   EXPECT_EQ(GetCharacter(kAhem, "XXX", true, 10, false), 0);
   EXPECT_EQ(GetCharacter(kAhem, "XXX", true, 10, true), 0);
   EXPECT_EQ(GetCharacter(kAhem, "XXX", true, 60, false), 0);
-  EXPECT_EQ(GetCharacter(kAhem, "XXX", true, 60, true), 1);
+  EXPECT_EQ(GetCharacter(kAhem, "XXX", true, 60, true), 0);
   EXPECT_EQ(GetCharacter(kAhem, "XXX", true, 100, true), 1);
   EXPECT_EQ(GetCharacter(kAhem, "XXX", true, 100, false), 1);
   EXPECT_EQ(GetCharacter(kAhem, "XXX", true, 125, true), 1);
   EXPECT_EQ(GetCharacter(kAhem, "XXX", true, 125, true), 1);
   EXPECT_EQ(GetCharacter(kAhem, "XXX", true, 151, false), 1);
-  EXPECT_EQ(GetCharacter(kAhem, "XXX", true, 151, true), 2);
+  EXPECT_EQ(GetCharacter(kAhem, "XXX", true, 151, true), 1);
   EXPECT_EQ(GetCharacter(kAhem, "XXX", true, 175, false), 1);
   EXPECT_EQ(GetCharacter(kAhem, "XXX", true, 175, true), 2);
 }
@@ -117,7 +117,7 @@ TEST_F(CursorPositionTest, LTRLigatureMouse) {
   EXPECT_EQ(GetCharacter(kMegalopolis, "FURA", true, kFUWidth / 4 + 1, false),
             0);
   EXPECT_EQ(GetCharacter(kMegalopolis, "FURA", true, kFUWidth / 4 + 1, true),
-            1);
+            0);
 
   EXPECT_EQ(GetCharacter(kMegalopolis, "FURA", true, kFUWidth / 2 - 1, false),
             0);
@@ -135,7 +135,7 @@ TEST_F(CursorPositionTest, LTRLigatureMouse) {
   EXPECT_EQ(
       GetCharacter(kMegalopolis, "FURA", true, kFUWidth * 3 / 4 + 1, false), 1);
   EXPECT_EQ(
-      GetCharacter(kMegalopolis, "FURA", true, kFUWidth * 3 / 4 + 1, true), 2);
+      GetCharacter(kMegalopolis, "FURA", true, kFUWidth * 3 / 4 + 1, true), 1);
 
   EXPECT_EQ(GetCharacter(kMegalopolis, "FURA", true, kFUWidth - 1, false), 1);
   EXPECT_EQ(GetCharacter(kMegalopolis, "FURA", true, kFUWidth - 1, true), 2);
@@ -153,7 +153,7 @@ TEST_F(CursorPositionTest, LTRLigatureMouse) {
             2);
   EXPECT_EQ(GetCharacter(kMegalopolis, "FURA", true,
                          kFUWidth + kRAWidth / 4 + 1, true),
-            3);
+            2);
 
   EXPECT_EQ(GetCharacter(kMegalopolis, "FURA", true,
                          kFUWidth + kRAWidth / 2 - 1, false),
@@ -179,7 +179,7 @@ TEST_F(CursorPositionTest, LTRLigatureMouse) {
             3);
   EXPECT_EQ(GetCharacter(kMegalopolis, "FURA", true,
                          kFUWidth + kRAWidth * 3 / 4 + 1, true),
-            4);
+            3);
 
   EXPECT_EQ(
       GetCharacter(kMegalopolis, "FURA", true, kFUWidth + kRAWidth - 1, false),
@@ -206,9 +206,9 @@ TEST_F(CursorPositionTest, RTLMouse) {
   EXPECT_EQ(GetCharacter(kAhem, "X", false, 49, false), 0);
   EXPECT_EQ(GetCharacter(kAhem, "X", false, 49, true), 1);
   EXPECT_EQ(GetCharacter(kAhem, "X", false, 51, false), 0);
-  EXPECT_EQ(GetCharacter(kAhem, "X", false, 51, true), 0);
+  EXPECT_EQ(GetCharacter(kAhem, "X", false, 51, true), 1);
   EXPECT_EQ(GetCharacter(kAhem, "X", false, 60, false), 0);
-  EXPECT_EQ(GetCharacter(kAhem, "X", false, 60, true), 0);
+  EXPECT_EQ(GetCharacter(kAhem, "X", false, 60, true), 1);
   EXPECT_EQ(GetCharacter(kAhem, "X", false, 100, false), 0);
   EXPECT_EQ(GetCharacter(kAhem, "X", false, 100, true), 0);
 
@@ -270,7 +270,7 @@ TEST_F(CursorPositionTest, RTLLigatureMouse) {
   EXPECT_EQ(GetCharacter(kMegalopolis, "ARUF", false, kFUWidth / 4 + 1, false),
             3);
   EXPECT_EQ(GetCharacter(kMegalopolis, "ARUF", false, kFUWidth / 4 + 1, true),
-            3);
+            4);
 
   EXPECT_EQ(GetCharacter(kMegalopolis, "ARUF", false, kFUWidth / 2 - 1, false),
             3);
@@ -290,7 +290,7 @@ TEST_F(CursorPositionTest, RTLLigatureMouse) {
       GetCharacter(kMegalopolis, "ARUF", false, kFUWidth * 3 / 4 + 1, false),
       2);
   EXPECT_EQ(
-      GetCharacter(kMegalopolis, "ARUF", false, kFUWidth * 3 / 4 + 1, true), 2);
+      GetCharacter(kMegalopolis, "ARUF", false, kFUWidth * 3 / 4 + 1, true), 3);
 
   EXPECT_EQ(GetCharacter(kMegalopolis, "ARUF", false, kFUWidth - 1, false), 2);
   EXPECT_EQ(GetCharacter(kMegalopolis, "ARUF", false, kFUWidth - 1, true), 2);
@@ -308,7 +308,7 @@ TEST_F(CursorPositionTest, RTLLigatureMouse) {
             1);
   EXPECT_EQ(GetCharacter(kMegalopolis, "ARUF", false,
                          kFUWidth + kRAWidth / 4 + 1, true),
-            1);
+            2);
 
   EXPECT_EQ(GetCharacter(kMegalopolis, "ARUF", false,
                          kFUWidth + kRAWidth / 2 - 1, false),
@@ -334,7 +334,7 @@ TEST_F(CursorPositionTest, RTLLigatureMouse) {
             0);
   EXPECT_EQ(GetCharacter(kMegalopolis, "ARUF", false,
                          kFUWidth + kRAWidth * 3 / 4 + 1, true),
-            0);
+            1);
 
   EXPECT_EQ(
       GetCharacter(kMegalopolis, "ARUF", false, kFUWidth + kRAWidth - 1, false),

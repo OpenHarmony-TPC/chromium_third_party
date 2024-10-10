@@ -220,8 +220,6 @@ class TestWebFrameWidgetHost : public mojom::blink::WidgetHost,
 #if defined(OHOS_UNITTESTS)
   void DidNativeEmbedEvent(mojom::blink::NativeEmbedTouchEventPtr event) override {}
   void GetWordSelection(const WTF::String& text, int8_t offset, GetWordSelectionCallback callback) override {}
-  void CreateOverlay(const ::SkBitmap& image, const ::gfx::Rect& image_rect,
-  const ::gfx::Point& touch_point) override {}
 #endif // OHOS_UNITTESTS
  private:
   size_t cursor_set_count_ = 0;

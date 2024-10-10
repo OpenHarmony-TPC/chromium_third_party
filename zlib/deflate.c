@@ -227,6 +227,8 @@ int ZEXPORT deflateInit_(strm, level, version, stream_size)
     /* To do: ignore strm->next_in if we use it as window */
 }
 
+#define WINDOW_PADDING 8
+
 /* ========================================================================= */
 int ZEXPORT deflateInit2_(strm, level, method, windowBits, memLevel, strategy,
                   version, stream_size)
@@ -239,7 +241,6 @@ int ZEXPORT deflateInit2_(strm, level, method, windowBits, memLevel, strategy,
     const char *version;
     int stream_size;
 {
-    unsigned window_padding = 8;
     deflate_state *s;
     int wrap = 1;
     static const char my_version[] = ZLIB_VERSION;
@@ -331,11 +332,11 @@ int ZEXPORT deflateInit2_(strm, level, method, windowBits, memLevel, strategy,
     s->hash_shift =  ((s->hash_bits + MIN_MATCH-1) / MIN_MATCH);
 
     s->window = (Bytef *) ZALLOC(strm,
-                                 s->w_size + window_padding,
+                                 s->w_size + WINDOW_PADDING,
                                  2*sizeof(Byte));
     /* Avoid use of unitialized values in the window, see crbug.com/1137613 and
      * crbug.com/1144420 */
-    zmemzero(s->window, (s->w_size + window_padding) * (2 * sizeof(Byte)));
+    zmemzero(s->window, (s->w_size + WINDOW_PADDING) * (2 * sizeof(Byte)));
     s->prev   = (Posf *)  ZALLOC(strm, s->w_size, sizeof(Pos));
     /* Avoid use of uninitialized value, see:
      * https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=11360
@@ -1201,7 +1202,9 @@ int ZEXPORT deflateCopy(dest, source)
     zmemcpy((voidpf)ds, (voidpf)ss, sizeof(deflate_state));
     ds->strm = dest;
 
-    ds->window = (Bytef *) ZALLOC(dest, ds->w_size, 2*sizeof(Byte));
+    ds->window = (Bytef *) ZALLOC(dest,
+                                  ds->w_size + WINDOW_PADDING,
+                                  2*sizeof(Byte));
     ds->prev   = (Posf *)  ZALLOC(dest, ds->w_size, sizeof(Pos));
     ds->head   = (Posf *)  ZALLOC(dest, ds->hash_size, sizeof(Pos));
     ds->pending_buf = (uchf *) ZALLOC(dest, ds->lit_bufsize, 4);
@@ -1212,7 +1215,8 @@ int ZEXPORT deflateCopy(dest, source)
         return Z_MEM_ERROR;
     }
     /* following zmemcpy do not work for 16-bit MSDOS */
-    zmemcpy(ds->window, ss->window, ds->w_size * 2 * sizeof(Byte));
+    zmemcpy(ds->window, ss->window,
+            (ds->w_size + WINDOW_PADDING) * 2 * sizeof(Byte));
     zmemcpy((voidpf)ds->prev, (voidpf)ss->prev, ds->w_size * sizeof(Pos));
     zmemcpy((voidpf)ds->head, (voidpf)ss->head, ds->hash_size * sizeof(Pos));
     zmemcpy(ds->pending_buf, ss->pending_buf, (uInt)ds->pending_buf_size);

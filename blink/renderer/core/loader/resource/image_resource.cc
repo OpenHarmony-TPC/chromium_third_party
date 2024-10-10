@@ -245,9 +245,9 @@ ImageResource* ImageResource::CreateForOfflineResource(const KURL& kurl,
   ResourceRequest request(kurl);
   request.SetInspectorId(CreateUniqueIdentifier());
   request.SetRequestorOrigin(SecurityOrigin::Create(origin_url));
-
+  
   ResourceLoaderOptions options(nullptr);
-
+  
   auto image_resource = MakeGarbageCollected<ImageResource>(
       request, options, ImageResourceContent::CreateNotStarted());
 

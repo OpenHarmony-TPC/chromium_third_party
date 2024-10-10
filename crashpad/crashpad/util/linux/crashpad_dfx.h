@@ -15,12 +15,12 @@
 #if defined(OHOS_CRASHPAD)
 #include <stdint.h>
 #include <time.h>
-
+ 
 #include <map>
 #include <memory>
 #include <string>
 #include <vector>
-
+ 
 #include "base/files/file_path.h"
 #include "util/file/file_io.h"
 #include "util/file/file_reader.h"
@@ -28,16 +28,17 @@
 #include "util/file/scoped_remove_file.h"
 #include "util/misc/metrics.h"
 #include "util/misc/uuid.h"
-
+ 
 namespace crashpad {
-
+ 
 class CrashpadDfx {
-
+ 
 public:
-
-    static void ReportProcessCrash(const std::string process_type,
-                                    const std::string happen_time,
-                                    const std::string package_name);
+ 
+    static void ProcessCrashReport(const std::string process_type,
+                                   const std::string happen_time,
+                                   const std::string bundle_name,
+                                   const std::string error_reason);
     static std::string GetProcessBundleName();
     static std::string GetCurrentTime();
     static std::string UpdateCrashDumpPathSuffix();

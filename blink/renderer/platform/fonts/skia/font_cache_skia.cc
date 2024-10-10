@@ -58,6 +58,10 @@
 #error This file should not be used by MacOS.
 #endif
 
+#if BUILDFLAG(IS_OHOS)
+constexpr SkFourByteTag kWghtTag = SkSetFourByteTag('w', 'g', 'h', 't');
+#endif
+
 namespace blink {
 
 AtomicString ToAtomicString(const SkString& str) {
@@ -204,6 +208,9 @@ scoped_refptr<SimpleFontData> FontCache::GetLastResortFallbackFont(
         GetFontPlatformData(description, ohos_sans_creation_params,
                             AlternateFontName::kLastResort);
   }
+  if (!font_platform_data) {
+    LOG(ERROR) << __func__ << " [forfontcrash] no font_platform_data";
+  }
 #endif
 
   DCHECK(font_platform_data);
@@ -245,8 +252,45 @@ sk_sp<SkTypeface> FontCache::CreateTypeface(
   // TODO(https://crbug.com/1425390: Assign FontCache::font_manager_ in the
   // ctor.
   auto font_manager = font_manager_ ? font_manager_ : SkFontMgr::RefDefault();
-  return sk_sp<SkTypeface>(font_manager->matchFamilyStyle(
+  auto typeface = sk_sp<SkTypeface>(font_manager->matchFamilyStyle(
       name.empty() ? nullptr : name.c_str(), font_description.SkiaFontStyle()));
+#if BUILDFLAG(IS_OHOS)
+  if (!typeface) {
+    return nullptr;
+  }
+
+  int existing_axes = typeface->getVariationDesignPosition(nullptr, 0);
+  if (existing_axes <= 0)
+    return typeface;
+
+  Vector<SkFontArguments::VariationPosition::Coordinate> coordinates_to_set;
+  coordinates_to_set.resize(existing_axes);
+
+  if (typeface->getVariationDesignPosition(coordinates_to_set.data(),
+                                           existing_axes) != existing_axes) {
+    return typeface;
+  }
+  bool hasChanged = false;
+  for (auto& coordinate : coordinates_to_set) {
+    if (coordinate.axis == kWghtTag) {
+      coordinate.value = SkFloatToScalar(font_description.SkiaFontStyle().weight());
+      hasChanged = true;
+    }
+  }
+  if (!hasChanged) {
+    SkFontArguments::VariationPosition::Coordinate coordinate;
+    coordinate.axis = kWghtTag;
+    coordinate.value = SkFloatToScalar(font_description.SkiaFontStyle().weight());
+    coordinates_to_set.push_back(coordinate);
+  }
+  SkFontArguments::VariationPosition variation_design_position{
+      coordinates_to_set.data(), static_cast<int>(coordinates_to_set.size())};
+  SkFontArguments fontArgs;
+  fontArgs.setVariationDesignPosition(variation_design_position);
+  return typeface->makeClone(fontArgs);
+#else
+  return typeface;
+#endif
 }
 
 #if !BUILDFLAG(IS_WIN)

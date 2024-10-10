@@ -13,6 +13,8 @@
 #endif
 
 #include <new>
+#include <string>
+#include <vector>
 
 
 #if defined(_WIN_ALL) || defined(_EMX)

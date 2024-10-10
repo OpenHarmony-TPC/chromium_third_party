@@ -20,8 +20,8 @@ enum WebMenuSourceType {
   kMenuSourceAdjustSelection,
   kMenuSourceAdjustSelectionReset,
 #ifdef OHOS_EX_FREE_COPY
-  kMenuSourceSelectAndCopy,
-  kMenuSourceTypeLast = kMenuSourceSelectAndCopy
+  kMenuSourceShowFreeCopyMenu,
+  kMenuSourceTypeLast = kMenuSourceShowFreeCopyMenu
 #else
   kMenuSourceTypeLast = kMenuSourceAdjustSelectionReset
 #endif

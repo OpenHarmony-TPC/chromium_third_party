@@ -321,7 +321,8 @@ class CORE_EXPORT ChromeClientImpl final : public ChromeClient {
                      const SkBitmap& image,
                      const gfx::Rect& image_rect,
                      const gfx::Point& touch_point,
-                     OnTextSelectedCallback callback) override;
+                     OnTextSelectedCallback callback,
+                     OnDestroyImageAnalyzerOverlayCallback destroy_callback) override;
 #endif
  private:
   bool IsChromeClientImpl() const override { return true; }

@@ -51,7 +51,7 @@ static void AccumulateArrayBuffersForAllWorlds(
   if (!object->has_non_main_world_wrappers() && IsMainThread()) {
     const DOMWrapperWorld& world = DOMWrapperWorld::MainWorld();
     v8::Local<v8::Object> wrapper = world.DomDataStore().Get(const_cast<DOMArrayBuffer*>(object), isolate);
-    if (!wrapper.IsEmpty()){
+    if (!wrapper.IsEmpty()) {
       buffers.push_back(v8::Local<v8::ArrayBuffer>::Cast(wrapper));
     }
     return;

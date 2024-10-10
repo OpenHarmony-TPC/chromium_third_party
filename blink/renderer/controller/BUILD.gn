@@ -189,6 +189,12 @@ test("blink_unittests") {
       "//build/config/fuchsia/test/mark_vmo_executable.shard.test-cml",
     ]
   }
+
+  if (is_ohos) {
+    deps += [
+      "//cef:libcef_static",
+    ]
+  }
 }
 
 test("blink_perf_tests") {
@@ -262,12 +268,6 @@ source_set("blink_unittests_sources") {
     ]
   }
 
-  if (ohos_unittests) {
-    sources += [
-      "//cef/libcef/common/soc_perf_util.cc",
-    ]
-  }
-
   if (is_linux || is_chromeos || is_android || is_apple || is_win) {
     sources += [
       "highest_pmf_reporter_test.cc",
@@ -302,12 +302,6 @@ source_set("blink_unittests_sources") {
     "//url",
     "//v8",
   ]
-
-  if (ohos_unittests) {
-    deps +=[
-      "//cef/libcef/common/mojom"
-      ]
-  }
 
   configs += [
     "//third_party/blink/renderer:config",

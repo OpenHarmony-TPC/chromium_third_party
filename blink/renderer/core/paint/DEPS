@@ -7,6 +7,8 @@ include_rules = [
     # Hash function access
     "+base/hash/hash.h",
     "+components/shared_highlighting/core/common",
+    # Hash function access
+    "+base/hash/hash.h",
 ]
 
 specific_include_rules = {

@@ -405,6 +405,8 @@ float PageConstraintInitalScale(const Document& document) {
   float scale = 1.0;
   if (auto* page = document.GetPage()) {
     scale = page->GetPageScaleConstraintsSet().FinalConstraints().initial_scale;
+  } else {
+    LOG(INFO) << "using default scale 1.0";
   }
   return scale;
 }
@@ -1379,7 +1381,7 @@ void HTMLMediaElement::LoadResource(const WebMediaPlayerSource& source,
     DCHECK(IsSafeToLoadURL(url, kComplain));
     DVLOG(3) << "loadResource(" << *this << ", " << UrlForLoggingMedia(url)
              << ", " << content_type << ")";
-#if defined(OHOS_MEDIA)
+#ifdef OHOS_MEDIA
   } else {
     LOG(WARNING) << "OhMedia::LoadResource source is not url";
 #endif // OHOS_MEDIA
@@ -1964,9 +1966,9 @@ void HTMLMediaElement::MediaLoadingFailed(WebMediaPlayer::NetworkState error,
   DVLOG(3) << "MediaLoadingFailed(" << *this << ", " << int{error}
            << ", message='" << input_message << "')";
 
-#if defined(OHOS_MEDIA)
-  LOG(INFO) << "OhMedia::MediaLoadingFailed error = " << int{error}
-            << ", message='" << input_message << "')";
+#ifdef OHOS_MEDIA
+  LOG(INFO) << "OhMedia::MediaLoadingFailed error = " << (int)error
+            << ", input_message = " << input_message << ")";
 #endif // OHOS_MEDIA
 
   bool should_be_opaque = MediaShouldBeOpaque();
@@ -2940,7 +2942,7 @@ void HTMLMediaElement::PlayInternal() {
 void HTMLMediaElement::pause() {
   DVLOG(2) << "pause(" << *this << ")";
 
-#if defined(OHOS_MEDIA)
+#ifdef OHOS_MEDIA
   LOG(WARNING) << "OhMedia::pause";
 #endif // OHOS_MEDIA
 
@@ -4004,7 +4006,7 @@ void HTMLMediaElement::UpdatePlayState(bool pause_speech /* = true */) {
     }
   }
   LOG(WARNING) << "OhMedia::UpdatePlayState should_be_playing = "
-               << should_be_playing << ", is_playing" << is_playing;
+               << should_be_playing << ",is_playing = " << is_playing;
 #endif  // OHOS_MEDIA_POLICY
 
   if (should_be_playing) {
@@ -5226,6 +5228,7 @@ gfx::Rect HTMLMediaElement::GetVideoRect() {
     return gfx::Rect(ToFlooredPoint(layout_box->Location()),
         ToFlooredSize(layout_box->Size()));
   }
+  LOG(INFO) << "using default vidoe size";
   return gfx::Rect(LayoutReplaced::kDefaultWidth,
         LayoutReplaced::kDefaultHeight);
 }
@@ -5247,6 +5250,12 @@ void HTMLMediaElement::FullscreenChanged(bool is_fullscreen) {
   }
 }
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
+
+#ifdef OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
+void HTMLMediaElement::TryUpdatePlayState() {
+  UpdatePlayState();
+}
+#endif // OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
 
 STATIC_ASSERT_ENUM(WebMediaPlayer::kReadyStateHaveNothing,
                    HTMLMediaElement::kHaveNothing);

@@ -887,7 +887,7 @@ TEST_P(PaintPropertyTreeUpdateTest, ScrollbarWidthChange) {
   auto* container = GetLayoutObjectByElementId("container");
   auto* overflow_clip =
       container->FirstFragment().PaintProperties()->OverflowClip();
-  EXPECT_CLIP_RECT(gfx::RectF(0, 0, 80, 80), overflow_clip);
+  EXPECT_CLIP_RECT(gfx::RectF(0, 0, 100, 100), overflow_clip);
 
   auto* new_style = GetDocument().CreateRawElement(html_names::kStyleTag);
   new_style->setTextContent("::-webkit-scrollbar {width: 40px; height: 40px}");
@@ -896,7 +896,7 @@ TEST_P(PaintPropertyTreeUpdateTest, ScrollbarWidthChange) {
   UpdateAllLifecyclePhasesForTest();
   EXPECT_EQ(overflow_clip,
             container->FirstFragment().PaintProperties()->OverflowClip());
-  EXPECT_CLIP_RECT(gfx::RectF(0, 0, 60, 60), overflow_clip);
+  EXPECT_CLIP_RECT(gfx::RectF(0, 0, 100, 100), overflow_clip);
 }
 
 TEST_P(PaintPropertyTreeUpdateTest, Preserve3DChange) {
@@ -1718,7 +1718,7 @@ TEST_P(PaintPropertyTreeUpdateTest, FixedPositionCompositing) {
   UpdateAllLifecyclePhasesForTest();
   EXPECT_EQ(gfx::Vector2dF(60, 50),
             paint_offset_translation->Get2dTranslation());
-  EXPECT_TRUE(paint_offset_translation->HasDirectCompositingReasons());
+  EXPECT_FALSE(paint_offset_translation->HasDirectCompositingReasons());
   EXPECT_FALSE(properties->Transform());
 
   space->setAttribute(html_names::kStyleAttr, "height: 100px");

@@ -127,10 +127,10 @@ void PaintTiming::MarkFirstContentfulPaint() {
     return;
   if (IgnorePaintTimingScope::IgnoreDepth() > 0)
     return;
-  SetFirstContentfulPaint(clock_->NowTicks());
 #ifdef OHOS_LOG_MESSAGE
   LOG(INFO) << "event_message: MarkFirstContentfulPaint";
 #endif
+  SetFirstContentfulPaint(clock_->NowTicks());
 }
 
 void PaintTiming::MarkFirstImagePaint() {

@@ -474,7 +474,7 @@ bool MixedContentChecker::ShouldBlockFetch(
         allowed = !strict_mode;
       } else {
         allowed = !strict_mode && !GURL(url).HostIsIPAddress();
-      }
+      };
 #else
       allowed = !strict_mode && !GURL(url).HostIsIPAddress();
 #endif

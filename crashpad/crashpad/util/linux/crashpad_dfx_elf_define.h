@@ -13,14 +13,14 @@
  * limitations under the License.
  */
 #if defined(OHOS_CRASHPAD)
-
+ 
 #include <cinttypes>
 #include <string>
 #if !is_mingw
 #include <elf.h>
 #include <link.h>
 #endif
-
+ 
 namespace crashpad_dfx {
 static const std::string NOTE_GNU_BUILD_ID = ".note.gnu.build-id";
 static const std::string NOTES = ".notes";
@@ -35,7 +35,7 @@ static const std::string SYMTAB = ".symtab";
 static const std::string DYNSYM = ".dynsym";
 static const std::string DYNSTR = ".dynstr";
 static const std::string PLT = ".plt";
-
+ 
 struct ElfLoadInfo {
     uint64_t offset = 0;
     uint64_t tableVaddr = 0;
@@ -43,7 +43,7 @@ struct ElfLoadInfo {
     uint64_t align = 0;
     uint64_t mmapLen = 0;
 };
-
+ 
 struct ElfSymbol {
     std::string nameStr = "";
     uint32_t name = 0;
@@ -53,7 +53,7 @@ struct ElfSymbol {
     uint64_t value = 0;
     uint64_t size = 0;
 };
-
+ 
 struct ElfShdr {
     uint32_t	name = 0;       // Section name (string tbl index)
     uint32_t	type = 0;       // Section type
@@ -66,14 +66,14 @@ struct ElfShdr {
     uint64_t	addrAlign = 0;  // Section alignment
     uint64_t	entSize = 0;    // Entry size if section holds table
 };
-
+ 
 struct ShdrInfo {
     uint64_t addr = 0;
     uint64_t entSize = 0;
     uint64_t offset = 0;
     uint64_t size = 0;
 };
-
+ 
 struct __attribute__((packed)) DwarfEhFrameHdr {
     unsigned char version = 0;
     unsigned char ehFramePtrEnc = 0;
@@ -81,11 +81,11 @@ struct __attribute__((packed)) DwarfEhFrameHdr {
     unsigned char tableEnc = 0;
     ElfW(Addr) ehFrame;
 };
-
+ 
 struct MiniDebugInfo {
     uint64_t offset = 0;
     uintptr_t size = 0;
 };
-
+ 
 } // namespace crashpad_dfx
 #endif

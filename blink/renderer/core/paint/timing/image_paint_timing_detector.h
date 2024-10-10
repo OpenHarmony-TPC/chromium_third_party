@@ -137,7 +137,7 @@ class CORE_EXPORT ImageRecordsManager {
     return recorded_images_.Contains(record_id_hash);
   }
 
- void NotifyImageFinished(MediaRecordIdHash record_id_hash) {
+  void NotifyImageFinished(MediaRecordIdHash record_id_hash) {
     // TODO(npm): Ideally NotifyImageFinished() would only be called when the
     // record has not yet been inserted in |image_finished_times_| but that's
     // not currently the case. If we plumb some information from
@@ -186,7 +186,7 @@ class CORE_EXPORT ImageRecordsManager {
       const gfx::Rect& frame_visual_rect,
       const gfx::RectF& root_visual_rect,
       bool is_loaded_after_mouseover);
- inline void QueueToMeasurePaintTime(MediaRecordIdHash record_id_hash,
+  inline void QueueToMeasurePaintTime(MediaRecordIdHash record_id_hash,
                                       base::WeakPtr<ImageRecord>& record,
                                       unsigned current_frame_index) {
     record->frame_index = current_frame_index;
