@@ -59,10 +59,18 @@ class CORE_EXPORT DragImage {
       float opacity = 1,
       gfx::Vector2dF image_scale = gfx::Vector2dF(1, 1));
 
+#ifdef OHOS_DRAG_DROP
+  static std::unique_ptr<DragImage> Create(const KURL&,
+                                           const String& label,
+                                           const FontDescription& system_font,
+                                           float device_scale_factor,
+                                           bool is_force_dark_mode);
+#else
   static std::unique_ptr<DragImage> Create(const KURL&,
                                            const String& label,
                                            const FontDescription& system_font,
                                            float device_scale_factor);
+#endif
 
   DragImage(const DragImage&) = delete;
   DragImage& operator=(const DragImage&) = delete;
