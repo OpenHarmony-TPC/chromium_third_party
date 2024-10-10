@@ -911,7 +911,12 @@ BASE_FEATURE(kResamplingScrollEvents,
 
 BASE_FEATURE(kFilteringScrollPrediction,
              "FilteringScrollPrediction",
-             base::FEATURE_DISABLED_BY_DEFAULT);
+             base::FEATURE_ENABLED_BY_DEFAULT);
+
+const base::FeatureParam<std::string> kScrollPredictionFilter(
+    &kFilteringScrollPrediction,
+    "filter",
+    "one_euro_filter");
 
 BASE_FEATURE(kKalmanHeuristics,
              "KalmanHeuristics",

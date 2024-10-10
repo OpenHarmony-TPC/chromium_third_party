@@ -367,6 +367,9 @@ BLINK_COMMON_EXPORT BASE_DECLARE_FEATURE(kResamplingScrollEvents);
 // param.
 BLINK_COMMON_EXPORT BASE_DECLARE_FEATURE(kFilteringScrollPrediction);
 
+BLINK_COMMON_EXPORT
+extern const base::FeatureParam<std::string> kScrollPredictionFilter;
+
 // Enables changing the influence of acceleration based on change of direction.
 BLINK_COMMON_EXPORT BASE_DECLARE_FEATURE(kKalmanHeuristics);
 
