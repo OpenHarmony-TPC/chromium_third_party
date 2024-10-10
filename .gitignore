@@ -291,3 +291,5 @@
 /node/__pycache__/
 /ply/__pycache__/
 /pyjson5/src/json5/__pycache__/
+#bounds_checking
+/bounds_checking_function
