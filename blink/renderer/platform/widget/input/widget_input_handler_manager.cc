@@ -1268,6 +1268,11 @@ void WidgetInputHandlerManager::TriggerVsyncImplTask() {
     input_handler_proxy_->TriggerVsyncImplTask();
   }
 }
+
+void WidgetInputHandlerManager::SetNativeEmbedMode(bool flag) {
+  input_handler_proxy_->SetNativeEmbedMode(flag);
+}
+
 #endif
 
 #if defined(OHOS_INPUT_EVENTS)
