@@ -449,10 +449,12 @@ void InputHandlerProxy::SendNativeEvent(const WebTouchEvent& touch_event,
     int layer_id = native_id_map_[id];
     cc::LayerImpl* layer_impl = input_handler_->GetLayerImplById(layer_id);
     if (layer_impl) {
+      if (type == WebInputEvent::Type::kTouchStart) {
+        nativeRect_ = layer_impl->GetNativeRect();
+      }
       embed_id_ = std::to_string(layer_impl->native_embed_id());
-      gfx::RectF nativeRect = layer_impl->GetNativeRect();
-      x = x - nativeRect.x();
-      y = y - nativeRect.y();
+      x = x - nativeRect_.x();
+      y = y - nativeRect_.y();
       LOG(DEBUG)<<"[NativeEmbed] SendNativeEvent x = "<< x << ", y = " << y;
       client_->DidNativeEmbedEvent(type, embed_id_, id, x, y);
     } else {
