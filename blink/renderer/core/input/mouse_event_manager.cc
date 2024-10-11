@@ -929,15 +929,6 @@ bool MouseEventManager::HandleDrag(const MouseEventWithHitTestResults& event,
     return true;
   }
 
-  //DTS2021090714050
-  //Notify to UI, dismissed the contextmenu popup window.
-  #ifdef OHOS_DRAG_DROP
-    WebLocalFrameImpl* selected_web_frame = WebLocalFrameImpl::FromFrame(frame_);
-    if (selected_web_frame && selected_web_frame->Client()){
-      LOG(INFO) << "clear context menu popup for drag";
-      selected_web_frame->Client()->ClearContextMenu();
-    }
-  #endif //OHOS_DRAG_DROP
   if (!TryStartDrag(event)) {
     // Something failed to start the drag, clean up.
     ClearDragDataTransfer();
