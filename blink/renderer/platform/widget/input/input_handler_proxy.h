@@ -460,6 +460,7 @@ class PLATFORM_EXPORT InputHandlerProxy : public cc::InputHandlerClient,
   WebTouchEvent start_touch_event_;
   std::unordered_map<size_t, int> native_id_map_;
   bool native_enabled_ = false;
+  gfx::RectF nativeRect_;
 #endif
 };
 
