@@ -492,8 +492,11 @@ bool InputHandlerProxy::DidNativeEmbedEvent(const WebInputEvent& event) {
         result = true;
         continue;
       }
+      if (!native_enabled_) {
+        continue;
+      }
       cc::LayerImpl* native_layer_impl = input_handler_->GetNativeLayerImpl(gfx::Point(x, y));
-      if (native_layer_impl && native_enabled_) {
+      if (native_layer_impl) {
         start_touch_event_ = touch_event;
         const WebTouchPoint& touch_point = touch_event.touches[i];
         WebPointerEvent pointer_event = WebPointerEvent(touch_event, touch_point);
@@ -518,7 +521,7 @@ bool InputHandlerProxy::DidNativeEmbedEvent(const WebInputEvent& event) {
 }
 
 void InputHandlerProxy::SetGestureEventResult(bool result) {
-  LOG(DEBUG)<<"[NativeEmbed] SetGestureEventResult result is : "<<result;
+  LOG(DEBUG)<<"[NativeEmbed] SetGestureEventResult result is : " << result;
   if (native_event_queue_->empty()) {
     LOG(DEBUG)<<"[NativeEmbed] native_event_queue_ is empty";
     return;
@@ -539,7 +542,7 @@ void InputHandlerProxy::TriggerVsyncImplTask()
 
 void InputHandlerProxy::SetNativeEmbedMode(bool flag) {
   native_enabled_ = flag;
-  LOG(DEBUG)<<"[NativeEmbed] SetNativeEmbedMode native_enabled_ is : "<<native_enabled_;
+  LOG(DEBUG)<<"[NativeEmbed] SetNativeEmbedMode native_enabled_ is : " << native_enabled_;
 }
 #endif
 
