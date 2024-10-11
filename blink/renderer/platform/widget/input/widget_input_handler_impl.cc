@@ -265,7 +265,9 @@ void WidgetInputHandlerImpl::TriggerVsyncImplTask() {
 }
 
 void WidgetInputHandlerImpl::SetNativeEmbedMode(bool flag) {
-  input_handler_manager_->SetNativeEmbedMode(flag);
+  if (input_handler_manager_) {
+    input_handler_manager_->SetNativeEmbedMode(flag);
+  }
 }
 #endif
 
