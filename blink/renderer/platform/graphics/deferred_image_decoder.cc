@@ -199,7 +199,7 @@ sk_sp<PaintImageGenerator> DeferredImageDecoder::CreateGenerator() {
   DCHECK(image_metadata_);
   image_metadata_->all_data_received_prior_to_decode =
       !incremental_decode_needed_.value();
-#if BUILDFLAG(IS_OHOS)
+#if BUILDFLAG(ENABLE_HEIF_DECODER)
   if (image_type == "heif") {
     // Heif image only supports hardware decode now. We need to trigger the task
     // by updating all_data_received_prior_to_decode flag even if it is not the

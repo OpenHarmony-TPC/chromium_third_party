@@ -1840,7 +1840,7 @@ component("platform") {
     deps += [ "//third_party/libavif" ]
   }
 
-  if (is_ohos) {
+  if (enable_heif_decoder) {
     sources += [
       "image-decoders/heif/heif_image_decoder.cc",
       "image-decoders/heif/heif_image_decoder.h",
