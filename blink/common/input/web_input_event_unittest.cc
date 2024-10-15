@@ -2,7 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#if defined(OHOS_UNITTESTS)
+#define protected public
 #include "third_party/blink/public/common/input/web_input_event.h"
+#undef protected
+#else  // OHOS_UNITTESTS
+#include "third_party/blink/public/common/input/web_input_event.h"
+#endif  // OHOS_UNITTESTS
+
 #include "testing/gtest/include/gtest/gtest.h"
 #include "third_party/blink/public/common/input/web_gesture_event.h"
 #include "third_party/blink/public/common/input/web_mouse_wheel_event.h"
@@ -248,5 +255,14 @@ TEST(WebInputEventTest, PointerEventCoalescing) {
   event_to_be_coalesced.SetModifiers(WebInputEvent::kControlKey);
   EXPECT_FALSE(coalesced_event.CanCoalesce(event_to_be_coalesced));
 }
+
+#if defined(OHOS_UNITTESTS)
+TEST(WebInputEventTest, GetTypeAsUiEventType) {
+  WebMouseEvent coalesced_event = CreateWebMouseMoveEvent();
+  coalesced_event.type_ = WebInputEvent::Type::kGestureDragLongPress;
+  auto result = coalesced_event.WebInputEvent::GetTypeAsUiEventType();
+  EXPECT_EQ(result, ui::EventType::ET_GESTURE_DRAG_LONG_PRESS);
+}
+#endif  // OHOS_UNITTESTS
 
 }  // namespace blink

@@ -13,21 +13,27 @@
  * limitations under the License.
  */
 
+#if defined(OHOS_UNITTESTS)
+#define private public
 #include "third_party/blink/renderer/platform/widget/input/software_compositor_proxy_ohos.h"
+#undef private
+#include "software_compositor_proxy_ohos.cc"
+#include "testing/gmock/include/gmock/gmock.h"
+#include "testing/gtest/include/gtest/gtest.h"
+#else  // OHOS_UNITTESTS
+#include "third_party/blink/renderer/platform/widget/input/software_compositor_proxy_ohos.h"
+#endif  // OHOS_UNITTESTS
 
 #include "base/functional/bind.h"
 #include "base/logging.h"
 #include "base/memory/shared_memory_mapping.h"
 
+#include "cc/mojo_embedder/software_compositor_renderer_ohos.h"
+#include "components/viz/common/quads/compositor_frame.h"
 #include "third_party/skia/include/core/SkBitmap.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkImageInfo.h"
 #include "third_party/skia/include/core/SkRegion.h"
-
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
-#include "cc/mojo_embedder/software_compositor_renderer_ohos.h"
-#include "components/viz/common/quads/compositor_frame.h"
 
 namespace blink {
 namespace {
@@ -43,6 +49,7 @@ class SoftwareCompositorProxyOhosTest : public testing::Test {
   void SetUp();
   void TearDown();
 };
+
 void SoftwareCompositorProxyOhosTest::SetUpTestCase(void) {}
 
 void SoftwareCompositorProxyOhosTest::TearDownTestCase(void) {}
@@ -133,4 +140,23 @@ TEST_F(SoftwareCompositorProxyOhosTest, DrawRect) {
   EXPECT_DEATH(g_softwareCompositor->DrawRect(rect),
                "software render init error");
 }
+
+#if defined(OHOS_UNITTESTS)
+TEST_F(SoftwareCompositorProxyOhosTest, DemandDrawSwAsync001) {
+  gfx::SizeF size(800.0f, 600.0f);
+  gfx::PointF offset(10.0f, 20.0f);
+  DemandDrawSwAsyncCallback callback = base::BindOnce([](bool lost) {});
+  mojom::blink::SoftwareCompositorDemandDrawSwParamsPtr params =
+      mojom::blink::SoftwareCompositorDemandDrawSwParams::New(size, offset);
+  size_t buffer_size = params->size.width() * params->size.height() * 4;
+  base::WritableSharedMemoryMapping shm_mapping;
+  g_softwareCompositor->software_draw_shm_ =
+      std::make_unique<SoftwareCompositorProxyOhos::SharedMemoryWithSize>(
+          std::move(shm_mapping), buffer_size);
+  ASSERT_EQ(g_softwareCompositor->software_render_, nullptr);
+  g_softwareCompositor->DemandDrawSwAsync(std::move(params),
+                                          std::move(callback));
+}
+#endif  // OHOS_UNITTESTS
+
 }  // namespace blink
