@@ -476,7 +476,7 @@ bool InputHandlerProxy::DidNativeEmbedEvent(const WebInputEvent& event) {
   }
   const WebTouchEvent& touch_event = static_cast<const WebTouchEvent&>(event);
   bool result = false;
-  for(size_t i = 0; i < touch_event.touches_length; ++i) {
+  for (size_t i = 0; i < touch_event.touches_length; ++i) {
     WebTouchPoint::State state = touch_event.touches[i].state;
     float x = touch_event.touches[i].PositionInWidget().x();
     float y = touch_event.touches[i].PositionInWidget().y();
@@ -485,7 +485,7 @@ bool InputHandlerProxy::DidNativeEmbedEvent(const WebInputEvent& event) {
     if (!IsSameEventType(event.GetType(), state)) {
       continue;
     }
-    if(event.GetType() == WebInputEvent::Type::kTouchStart) {
+    if (event.GetType() == WebInputEvent::Type::kTouchStart) {
       cc::LayerImpl* video_layer_impl = input_handler_->GetLayerImplIsHitByPoint(gfx::Point(x, y));
       if (video_layer_impl && video_layer_impl->ShouldInterceptTouchEvent()) {
         native_id_map_[id] = video_layer_impl->id();
@@ -505,6 +505,7 @@ bool InputHandlerProxy::DidNativeEmbedEvent(const WebInputEvent& event) {
         client_->TouchHitTest(pointer_event, id);
         result = true;
       } else {
+        SendNativeEvent(touch_event, event.GetType(), i, false);
         native_map_[id] = false;
         result = false;
       }
