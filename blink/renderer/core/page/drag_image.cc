@@ -172,10 +172,18 @@ std::unique_ptr<DragImage> DragImage::CreateClippedByVisualViewport(
 #endif
 
 // static
+#ifdef OHOS_DRAG_DROP
+std::unique_ptr<DragImage> DragImage::Create(const KURL& url,
+                                             const String& in_label,
+                                             const FontDescription& system_font,
+                                             float device_scale_factor,
+                                             bool is_force_dark_mode) {
+#else
 std::unique_ptr<DragImage> DragImage::Create(const KURL& url,
                                              const String& in_label,
                                              const FontDescription& system_font,
                                              float device_scale_factor) {
+#endif
   const Font label_font = DeriveDragLabelFont(kDragLinkLabelFontSize,
                                               BoldWeightValue(), system_font);
   const SimpleFontData* label_font_data = label_font.PrimaryFont();
@@ -271,6 +279,11 @@ std::unique_ptr<DragImage> DragImage::Create(const KURL& url,
 
   // Draw the text
   cc::PaintFlags text_paint;
+#ifdef OHOS_DRAG_DROP
+  if (is_force_dark_mode) {
+    text_paint.setColor(0xFFFFFFFF);
+  }
+#endif
   if (draw_url_string) {
     if (clip_url_string)
       url_string = StringTruncator::CenterTruncate(
