@@ -505,6 +505,7 @@ bool InputHandlerProxy::DidNativeEmbedEvent(const WebInputEvent& event) {
         client_->TouchHitTest(pointer_event, id);
         result = true;
       } else {
+        SendNativeEvent(touch_event, event.GetType(), i, false);
         native_map_[id] = false;
         result = false;
       }
