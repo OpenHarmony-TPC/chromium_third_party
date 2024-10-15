@@ -238,7 +238,7 @@ void NativeLoader::OnLayerRectChange(const gfx::Rect& rect) {
   if (PluginBoundingRect().size() != rect.size()) {
     bounding_rect_ = rect;
     if (!bounding_rect_changed_cb_.is_null()) {
-      bounding_rect_changed_cb_.Run(BoundsToViewport(bounding_rect_, plugin_element_->GetDocument()));
+      bounding_rect_changed_cb_.Run(BoundsToViewport(bounding_rect_, plugin_element_->GetDocument()), true);
     }
   } else {
     bounding_rect_.set_origin(rect.origin());
