@@ -711,7 +711,7 @@ bool FrameSelection::Contains(const PhysicalOffset& point) {
 
 #ifdef OHOS_CLIPBOARD
     if (!contains_boundaries) {
-    return start.CompareTo(pos) < 0 && pos.CompareTo(end) < 0;
+      return start.CompareTo(pos) < 0 && pos.CompareTo(end) < 0;
   }
 #endif
   return start.CompareTo(pos) <= 0 && pos.CompareTo(end) <= 0;

@@ -41,7 +41,7 @@ const char* const kSupportedImageTypes[] = {
 #if BUILDFLAG(ENABLE_AV1_DECODER)
     "image/avif",
 #endif
-#if BUILDFLAG(ENABLE_HEIF_DECODER)
+#if BUILDFLAG(IS_OHOS)
     "image/heif",
     "image/heic",
     "image/hevc",
