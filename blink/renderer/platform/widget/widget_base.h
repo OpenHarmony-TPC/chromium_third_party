@@ -386,6 +386,9 @@ class PLATFORM_EXPORT WidgetBase : public mojom::blink::Widget,
 #if defined(OHOS_INPUT_EVENTS)
   void SetZoomLevel(float magnify_delta, const gfx::Point& anchor);
   void SetOverscrollMode(int mode);
+#if defined(OHOS_GET_SCROLL_OFFSET)
+  gfx::Vector2dF GetOverScrollOffset();
+#endif
 #endif  // defined(OHOS_INPUT_EVENTS)
 
 #if BUILDFLAG(IS_OHOS)
