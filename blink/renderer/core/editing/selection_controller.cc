@@ -63,7 +63,9 @@
 #include "ui/gfx/geometry/point_conversions.h"
 
 #ifdef OHOS_EX_FREE_COPY
+#include "third_party/blink/renderer/core/html/forms/text_control_element.h"
 #include "third_party/blink/renderer/core/input/context_menu_allowed_scope.h"
+#include "third_party/blink/renderer/core/input_type_names.h"
 #include "third_party/blink/renderer/core/page/chrome_client.h"
 #endif
 
@@ -750,8 +752,11 @@ bool SelectionController::SelectClosestWordFromHitTestResult(
             << ", end: "
             << static_cast<int>(select.at(1) - temp_offset + offset);
   SelectionInFlatTree temp_selection;
+  TextControlElement* text_control =
+      EnclosingTextControl(GetSelectionInDOMTree().Base());
   if (pos.IsNotNull()) {
-    if (select.at(0) != -1 && select.at(1) != -1) {
+    if (select.at(0) != -1 && select.at(1) != -1 &&
+      text_control && text_control->type() != input_type_names::kPassword) {
       temp_selection =
           SelectionInFlatTree::Builder()
               .Collapse(
