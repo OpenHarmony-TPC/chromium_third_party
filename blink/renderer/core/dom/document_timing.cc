@@ -35,11 +35,10 @@ void DocumentTiming::MarkDomLoading() {
 #if BUILDFLAG(IS_OHOS)
   TRACE_EVENT1("navigation", "PAGE_LOAD_TIME",
                "domLoading", dom_loading_);
-#else
+#endif
   TRACE_EVENT_MARK_WITH_TIMESTAMP1("blink.user_timing,rail", "domLoading",
                                    dom_loading_, "frame",
                                    GetFrameIdForTracing(GetFrame()));
-#endif
   NotifyDocumentTimingChanged();
 }
 
@@ -48,11 +47,10 @@ void DocumentTiming::MarkDomInteractive() {
 #if BUILDFLAG(IS_OHOS)
   TRACE_EVENT1("navigation", "PAGE_LOAD_TIME",
                "domInteractive", dom_interactive_);
-#else
+#endif
   TRACE_EVENT_MARK_WITH_TIMESTAMP1("blink.user_timing,rail", "domInteractive",
                                    dom_interactive_, "frame",
                                    GetFrameIdForTracing(GetFrame()));
-#endif
   NotifyDocumentTimingChanged();
 }
 
@@ -61,12 +59,11 @@ void DocumentTiming::MarkDomContentLoadedEventStart() {
 #if BUILDFLAG(IS_OHOS)
   TRACE_EVENT1("navigation", "PAGE_LOAD_TIME",
                "domContentLoadedEventStart", dom_content_loaded_event_start_);
-#else
+#endif
   TRACE_EVENT_MARK_WITH_TIMESTAMP1("blink.user_timing,rail",
                                    "domContentLoadedEventStart",
                                    dom_content_loaded_event_start_, "frame",
                                    GetFrameIdForTracing(GetFrame()));
-#endif
   NotifyDocumentTimingChanged();
 }
 
@@ -75,11 +72,10 @@ void DocumentTiming::MarkDomContentLoadedEventEnd() {
 #if BUILDFLAG(IS_OHOS)
   TRACE_EVENT1("navigation", "PAGE_LOAD_TIME",
                "domContentLoadedEventEnd", dom_content_loaded_event_end_);
-#else
+#endif
   TRACE_EVENT_MARK_WITH_TIMESTAMP1(
       "blink.user_timing,rail", "domContentLoadedEventEnd",
       dom_content_loaded_event_end_, "frame", GetFrameIdForTracing(GetFrame()));
-#endif
   InteractiveDetector* interactive_detector(
       InteractiveDetector::From(*document_));
   if (interactive_detector) {
