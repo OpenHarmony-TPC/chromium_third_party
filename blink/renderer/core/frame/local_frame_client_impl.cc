@@ -956,8 +956,7 @@ std::unique_ptr<WebMediaPlayer> LocalFrameClientImpl::CreateWebMediaPlayer(
 }
 
 #if BUILDFLAG(IS_OHOS)
-std::unique_ptr<WebNativeBridge>
-LocalFrameClientImpl::CreateWebNativeBridge(
+std::unique_ptr<WebNativeBridge> LocalFrameClientImpl::CreateWebNativeBridge(
     NativeLoader& native_loader,
     WebNativeClient* client) {
   WebLocalFrameImpl* web_frame =

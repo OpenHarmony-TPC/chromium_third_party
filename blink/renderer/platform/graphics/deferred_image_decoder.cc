@@ -199,6 +199,14 @@ sk_sp<PaintImageGenerator> DeferredImageDecoder::CreateGenerator() {
   DCHECK(image_metadata_);
   image_metadata_->all_data_received_prior_to_decode =
       !incremental_decode_needed_.value();
+#if BUILDFLAG(ENABLE_HEIF_DECODER)
+  if (image_type == "heif") {
+    // Heif image only supports hardware decode now. We need to trigger the task
+    // by updating all_data_received_prior_to_decode flag even if it is not the
+    // first decoding and the task can only trigger when all data is received.
+    image_metadata_->all_data_received_prior_to_decode = all_data_received_;
+  }
+#endif
 
   auto generator = DecodingImageGenerator::Create(
       frame_generator_, info, std::move(segment_reader), std::move(frames),

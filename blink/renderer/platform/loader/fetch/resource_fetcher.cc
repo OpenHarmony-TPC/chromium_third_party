@@ -1224,9 +1224,10 @@ Resource* ResourceFetcher::RequestResource(FetchParameters& params,
         }
       },
       base::TimeTicks::Now(), params.Url().ProtocolIsData()));
+#if BUILDFLAG(IS_OHOS)
   TRACE_EVENT2("blink,blink.resource", "ResourceFetcher::requestResource",
                "url", params.Url().ElidedString().Utf8(), "method", params.GetResourceRequest().HttpMethod().Utf8());
-
+#endif
   // |resource_request|'s origin can be null here, corresponding to the "client"
   // value in the spec. In that case client's origin is used.
   if (!resource_request.RequestorOrigin()) {
@@ -2645,6 +2646,14 @@ void ResourceFetcher::StopFetchingInternal(StopFetchingTarget target) {
       loaders_to_cancel.push_back(loader);
     }
   }
+
+#ifdef OHOS_LOG_MESSAGE
+  if (loaders_to_cancel.size()) {
+    LOG(INFO) << "Resource fetcher StopFetchingInternal, the size of loaders_to_cancel: "
+              << loaders_to_cancel.size() << ", target: "
+              << static_cast<int>(target);
+  }
+#endif
 
   for (const auto& loader : loaders_to_cancel) {
     if (loaders_.Contains(loader) || non_blocking_loaders_.Contains(loader))

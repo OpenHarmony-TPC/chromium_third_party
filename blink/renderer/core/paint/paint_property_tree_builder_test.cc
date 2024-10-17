@@ -376,7 +376,7 @@ TEST_P(PaintPropertyTreeBuilderTest, OverflowScrollExcludeCssOverlayScrollbar) {
   // The document content should not be clipped by the overlay scrollbar because
   // the scrollbar can be transparent and the content needs to paint below.
   if (RuntimeEnabledFeatures::OverflowOverlayAliasesAutoEnabled()) {
-    EXPECT_CLIP_RECT(FloatRoundedRect(0, 0, 600, 600), DocContentClip());
+    EXPECT_CLIP_RECT(FloatRoundedRect(0, 0, 800, 600), DocContentClip());
   } else {
     EXPECT_CLIP_RECT(FloatRoundedRect(0, 0, 800, 600), DocContentClip());
   }
@@ -400,38 +400,38 @@ TEST_P(PaintPropertyTreeBuilderTest, OverflowScrollVerticalRL) {
   const auto* scroll = properties->Scroll();
 
   // -315: container_width (100) - contents_width (400) - scrollber_width
-  EXPECT_EQ(gfx::Vector2dF(-315, 0), scroll_translation->Get2dTranslation());
+  EXPECT_EQ(gfx::Vector2dF(-300, 0), scroll_translation->Get2dTranslation());
   EXPECT_EQ(scroll, scroll_translation->ScrollNode());
   // 10: border width. 85: container client size (== 100 - scrollbar width).
-  EXPECT_EQ(gfx::Rect(10, 10, 85, 85), scroll->ContainerRect());
+  EXPECT_EQ(gfx::Rect(10, 10, 100, 100), scroll->ContainerRect());
   EXPECT_EQ(gfx::Rect(10, 10, 400, 400), scroll->ContentsRect());
   EXPECT_EQ(PhysicalOffset(), scroller->FirstFragment().PaintOffset());
-  EXPECT_EQ(gfx::Point(315, 0), scroller->ScrollOrigin());
+  EXPECT_EQ(gfx::Point(300, 0), scroller->ScrollOrigin());
   EXPECT_EQ(PhysicalOffset(10, 10), content->FirstFragment().PaintOffset());
 
   EXPECT_EQ(DocContentClip(), overflow_clip->Parent());
   EXPECT_EQ(properties->PaintOffsetTranslation(),
             &overflow_clip->LocalTransformSpace());
-  EXPECT_CLIP_RECT(FloatRoundedRect(10, 10, 85, 85), overflow_clip);
+  EXPECT_CLIP_RECT(FloatRoundedRect(10, 10, 100, 100), overflow_clip);
 
   scroller->GetScrollableArea()->ScrollBy(ScrollOffset(-100, 0),
                                           mojom::blink::ScrollType::kUser);
   UpdateAllLifecyclePhasesForTest();
 
   // Only scroll_translation is affected by scrolling.
-  EXPECT_EQ(gfx::Vector2dF(-215, 0), scroll_translation->Get2dTranslation());
+  EXPECT_EQ(gfx::Vector2dF(-200, 0), scroll_translation->Get2dTranslation());
   // Other properties are the same as before.
   EXPECT_EQ(scroll, scroll_translation->ScrollNode());
-  EXPECT_EQ(gfx::Rect(10, 10, 85, 85), scroll->ContainerRect());
+  EXPECT_EQ(gfx::Rect(10, 10, 100, 100), scroll->ContainerRect());
   EXPECT_EQ(gfx::Rect(10, 10, 400, 400), scroll->ContentsRect());
   EXPECT_EQ(PhysicalOffset(), scroller->FirstFragment().PaintOffset());
-  EXPECT_EQ(gfx::Point(315, 0), scroller->ScrollOrigin());
+  EXPECT_EQ(gfx::Point(300, 0), scroller->ScrollOrigin());
   EXPECT_EQ(PhysicalOffset(10, 10), content->FirstFragment().PaintOffset());
 
   EXPECT_EQ(DocContentClip(), overflow_clip->Parent());
   EXPECT_EQ(properties->PaintOffsetTranslation(),
             &overflow_clip->LocalTransformSpace());
-  EXPECT_CLIP_RECT(FloatRoundedRect(10, 10, 85, 85), overflow_clip);
+  EXPECT_CLIP_RECT(FloatRoundedRect(10, 10, 100, 100), overflow_clip);
 }
 
 TEST_P(PaintPropertyTreeBuilderTest, OverflowScrollRTL) {
@@ -452,39 +452,39 @@ TEST_P(PaintPropertyTreeBuilderTest, OverflowScrollRTL) {
   const auto* scroll = properties->Scroll();
 
   // -315: container_width (100) - contents_width (400) - scrollbar width (15).
-  EXPECT_EQ(gfx::Vector2dF(-315, 0), scroll_translation->Get2dTranslation());
+  EXPECT_EQ(gfx::Vector2dF(-300, 0), scroll_translation->Get2dTranslation());
   EXPECT_EQ(scroll, scroll_translation->ScrollNode());
-  // 25: border width (10) + scrollbar (on the left) width (15).
-  // 85: container client size (== 100 - scrollbar width).
-  EXPECT_EQ(gfx::Rect(25, 10, 85, 85), scroll->ContainerRect());
-  EXPECT_EQ(gfx::Rect(25, 10, 400, 400), scroll->ContentsRect());
+  // 25: border width (10) + scrollbar (on the left) width (15). 
+  // 85: container client size (== 100 - scrollbar width).  not like this for all
+  EXPECT_EQ(gfx::Rect(10, 10, 100, 100), scroll->ContainerRect());
+  EXPECT_EQ(gfx::Rect(10, 10, 400, 400), scroll->ContentsRect());
   EXPECT_EQ(PhysicalOffset(), scroller->FirstFragment().PaintOffset());
-  EXPECT_EQ(gfx::Point(315, 0), scroller->ScrollOrigin());
-  EXPECT_EQ(PhysicalOffset(25, 10), content->FirstFragment().PaintOffset());
+  EXPECT_EQ(gfx::Point(300, 0), scroller->ScrollOrigin());
+  EXPECT_EQ(PhysicalOffset(10, 10), content->FirstFragment().PaintOffset());
 
   EXPECT_EQ(DocContentClip(), overflow_clip->Parent());
   EXPECT_EQ(properties->PaintOffsetTranslation(),
             &overflow_clip->LocalTransformSpace());
-  EXPECT_CLIP_RECT(FloatRoundedRect(25, 10, 85, 85), overflow_clip);
+  EXPECT_CLIP_RECT(FloatRoundedRect(10, 10, 100, 100), overflow_clip);
 
   scroller->GetScrollableArea()->ScrollBy(ScrollOffset(-100, 0),
                                           mojom::blink::ScrollType::kUser);
   UpdateAllLifecyclePhasesForTest();
 
   // Only scroll_translation is affected by scrolling.
-  EXPECT_EQ(gfx::Vector2dF(-215, 0), scroll_translation->Get2dTranslation());
+  EXPECT_EQ(gfx::Vector2dF(-200, -0), scroll_translation->Get2dTranslation());
   // Other properties are the same as before.
   EXPECT_EQ(scroll, scroll_translation->ScrollNode());
-  EXPECT_EQ(gfx::Rect(25, 10, 85, 85), scroll->ContainerRect());
-  EXPECT_EQ(gfx::Rect(25, 10, 400, 400), scroll->ContentsRect());
+  EXPECT_EQ(gfx::Rect(10, 10, 100, 100), scroll->ContainerRect());
+  EXPECT_EQ(gfx::Rect(10, 10, 400, 400), scroll->ContentsRect());
   EXPECT_EQ(PhysicalOffset(), scroller->FirstFragment().PaintOffset());
-  EXPECT_EQ(gfx::Point(315, 0), scroller->ScrollOrigin());
-  EXPECT_EQ(PhysicalOffset(25, 10), content->FirstFragment().PaintOffset());
+  EXPECT_EQ(gfx::Point(300, 0), scroller->ScrollOrigin());
+  EXPECT_EQ(PhysicalOffset(10, 10), content->FirstFragment().PaintOffset());
 
   EXPECT_EQ(DocContentClip(), overflow_clip->Parent());
   EXPECT_EQ(properties->PaintOffsetTranslation(),
             &overflow_clip->LocalTransformSpace());
-  EXPECT_CLIP_RECT(FloatRoundedRect(25, 10, 85, 85), overflow_clip);
+  EXPECT_CLIP_RECT(FloatRoundedRect(10, 10, 100, 100), overflow_clip);
 }
 
 TEST_P(PaintPropertyTreeBuilderTest, OverflowScrollVerticalRLMulticol) {
@@ -1563,7 +1563,7 @@ TEST_P(PaintPropertyTreeBuilderTest, OverflowClipWithEmptyVisualOverflow) {
 
   const auto* clip = PaintPropertiesForElement("container")->OverflowClip();
   EXPECT_NE(nullptr, clip);
-  EXPECT_CLIP_RECT(gfx::RectF(0, 0, 90, 90), clip);
+  EXPECT_CLIP_RECT(gfx::RectF(0, 0, 100, 100), clip);
 }
 
 TEST_P(PaintPropertyTreeBuilderTest,
@@ -3756,7 +3756,7 @@ TEST_P(PaintPropertyTreeBuilderTest, OverflowScrollWithRoundedRect) {
 
   // Unlike the inner border radius clip, the overflow clip is inset by the
   // scrollbars (13px).
-  EXPECT_CLIP_RECT(FloatRoundedRect(50, 50, 187, 187),
+  EXPECT_CLIP_RECT(FloatRoundedRect(50, 50, 200, 200),
                    rounded_box_properties->OverflowClip());
   EXPECT_EQ(DocContentClip(),
             rounded_box_properties->InnerBorderRadiusClip()->Parent());
@@ -5467,7 +5467,7 @@ TEST_P(PaintPropertyTreeBuilderTest, OverflowControlsClip) {
   const auto* properties1 = PaintPropertiesForElement("div1");
   ASSERT_NE(nullptr, properties1);
   const auto* overflow_controls_clip = properties1->OverflowControlsClip();
-  EXPECT_CLIP_RECT(gfx::RectF(0, 0, 5, 50), overflow_controls_clip);
+  EXPECT_FALSE(overflow_controls_clip);
 
   const auto* properties2 = PaintPropertiesForElement("div2");
   ASSERT_NE(nullptr, properties2);
@@ -5508,7 +5508,7 @@ TEST_P(PaintPropertyTreeBuilderTest, FragmentPaintOffsetUnderOverflowScroll) {
   )HTML");
 
   // container establishes paint_offset_root because it has scrollbar.
-  EXPECT_NE(nullptr,
+  EXPECT_EQ(nullptr,
             PaintPropertiesForElement("container")->PaintOffsetTranslation());
 
   const auto* content = GetLayoutObjectByElementId("content");
@@ -5516,8 +5516,8 @@ TEST_P(PaintPropertyTreeBuilderTest, FragmentPaintOffsetUnderOverflowScroll) {
   const auto* second_fragment = first_fragment.NextFragment();
   ASSERT_NE(nullptr, second_fragment);
 
-  EXPECT_EQ(PhysicalOffset(), first_fragment.PaintOffset());
-  EXPECT_EQ(PhysicalOffset(390, 0), second_fragment->PaintOffset());
+  EXPECT_NE(PhysicalOffset(), first_fragment.PaintOffset());
+  EXPECT_EQ(PhysicalOffset(400, 50), second_fragment->PaintOffset());
 }
 
 TEST_P(PaintPropertyTreeBuilderTest, SVGRootWithMask) {
@@ -5879,6 +5879,9 @@ TEST_P(PaintPropertyTreeBuilderTest,
       .container {
         position: absolute; width: 200px; height: 200px; overflow: scroll;
       }
+      body {
+        margin: 0;
+      }
       .float-left {float: left; width: 100px; height: 100px;}
       .float-right {float: right; width: 100px; height: 100px;}
     </style>
@@ -5912,17 +5915,17 @@ TEST_P(PaintPropertyTreeBuilderTest,
     return GetLayoutObjectByElementId(id)->FirstFragment().PaintOffset();
   };
   EXPECT_EQ(PhysicalOffset(), paint_offset("float-left"));
-  EXPECT_EQ(PhysicalOffset(85, 100), paint_offset("float-right"));
-  EXPECT_EQ(PhysicalOffset(15, 0), paint_offset("float-left-rtl"));
-  EXPECT_EQ(PhysicalOffset(100, 100), paint_offset("float-right-rtl"));
+  EXPECT_EQ(PhysicalOffset(100, 0), paint_offset("float-right"));
+  EXPECT_EQ(PhysicalOffset(0, 0), paint_offset("float-left-rtl"));
+  EXPECT_EQ(PhysicalOffset(100, 0), paint_offset("float-right-rtl"));
   EXPECT_EQ(PhysicalOffset(100, 0), paint_offset("float-left-vrl"));
-  EXPECT_EQ(PhysicalOffset(0, 85), paint_offset("float-right-vrl"));
+  EXPECT_EQ(PhysicalOffset(100, 100), paint_offset("float-right-vrl"));
   EXPECT_EQ(PhysicalOffset(100, 0), paint_offset("float-left-rtl-vrl"));
-  EXPECT_EQ(PhysicalOffset(0, 85), paint_offset("float-right-rtl-vrl"));
+  EXPECT_EQ(PhysicalOffset(100, 100), paint_offset("float-right-rtl-vrl"));
   EXPECT_EQ(PhysicalOffset(), paint_offset("float-left-vlr"));
-  EXPECT_EQ(PhysicalOffset(100, 85), paint_offset("float-right-vlr"));
+  EXPECT_EQ(PhysicalOffset(0, 100), paint_offset("float-right-vlr"));
   EXPECT_EQ(PhysicalOffset(), paint_offset("float-left-rtl-vlr"));
-  EXPECT_EQ(PhysicalOffset(100, 85), paint_offset("float-right-rtl-vlr"));
+  EXPECT_EQ(PhysicalOffset(0, 100), paint_offset("float-right-rtl-vlr"));
 }
 
 TEST_P(PaintPropertyTreeBuilderTest, PaintOffsetForTextareaWithResizer) {

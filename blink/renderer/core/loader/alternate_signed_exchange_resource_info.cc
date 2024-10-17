@@ -29,9 +29,15 @@ constexpr char kAllowedAltSxg[] = "allowed-alt-sxg";
 const char kDefaultAcceptHeader[] = "*/*";
 const char kStylesheetAcceptHeader[] = "text/css,*/*;q=0.1";
 
-#if BUILDFLAG(ENABLE_AV1_DECODER)
+#if BUILDFLAG(ENABLE_HEIF_DECODER) && BUILDFLAG(ENABLE_AV1_DECODER)
+constexpr char kImageAcceptHeader[] =
+    "image/avif,image/heif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8";
+#elif BUILDFLAG(ENABLE_AV1_DECODER)
 constexpr char kImageAcceptHeader[] =
     "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8";
+#elif BUILDFLAG(ENABLE_HEIF_DECODER)
+constexpr char kImageAcceptHeader[] =
+    "image/heif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8";
 #else
 constexpr char kImageAcceptHeader[] =
     "image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8";

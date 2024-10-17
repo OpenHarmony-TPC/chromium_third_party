@@ -1235,7 +1235,8 @@ void WidgetInputHandlerManager::UpdateBrowserControlsState(
 void WidgetInputHandlerManager::DidNativeEmbedEvent(blink::WebInputEvent::Type type,
                                                     std::string embedId,
                                                     int32_t id,
-                                                    float x,float y) {
+                                                    float x,
+                                                    float y) {
   main_thread_task_runner_->PostTask(
       FROM_HERE,
       base::BindOnce(&WidgetBase::DidNativeEmbedEvent, widget_, type, embedId, id, x, y));

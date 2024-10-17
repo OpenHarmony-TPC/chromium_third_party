@@ -1354,7 +1354,7 @@ CSSVariableData* StyleCascade::GetEnvironmentVariable(
       .GetStyleEngine()
       .EnsureEnvironmentVariables()
       .ResolveVariable(name, std::move(indices), !is_ua_scope);
-  LOG(INFO) << __func__ << " " << name << "=" << (result ? result->OriginalText().Utf8() : std::string("null")); 
+  LOG(DEBUG) << __func__ << " " << name << "=" << (result ? result->OriginalText().Utf8() : std::string("null"));
   return result;
 #else
   return state_.GetDocument()

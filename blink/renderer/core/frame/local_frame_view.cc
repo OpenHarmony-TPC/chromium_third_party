@@ -848,10 +848,10 @@ void LocalFrameView::PerformLayout() {
     if (document_element && document_element->GetLayoutObject()) {
       html_box = To<LayoutBox>(document_element->GetLayoutObject());
     }
-    if (html_box && html_box->FirstChildBox()) {
+    if (html_box && IsA<LayoutBox>(html_box) && html_box->FirstChildBox()) {
       body_box = html_box->FirstChildBox();
     }
-    if (body_box && (body_box->GetLayoutResults().size() > 0)) {
+    if (body_box && IsA<LayoutBox>(body_box) && (body_box->GetLayoutResults().size() > 0)) {
       body_height = body_box->ScrollHeight().ToInt();
     } else {
       body_height = -1;
@@ -2687,7 +2687,7 @@ void LocalFrameView::UpdateCompositedSelectionIfNeed() {
   }
   gfx::Rect clipped_selection_bounds =
       local_frame->Selection().ClippedSelectionBoundsInRootFrame();
-  if(!clipped_selection_bounds.IsEmpty()) {
+  if (!clipped_selection_bounds.IsEmpty()) {
     if (auto* frame_widget = local_frame->GetWidgetForLocalRoot()) {
       frame_widget->RegisterClippedVisualViewportSelectionBounds(
         clipped_selection_bounds);
@@ -3072,7 +3072,7 @@ void LocalFrameView::PushPaintArtifactToCompositor(bool repainted) {
 
   if (!paint_artifact_compositor_) {
     paint_artifact_compositor_ = std::make_unique<PaintArtifactCompositor>(
-        page->GetScrollingCoordinator()->GetWeakPtr());
+        page->GetScrollingCoordinator()->GetScrollCallbacks());
     page->GetChromeClient().AttachRootLayer(
         paint_artifact_compositor_->RootLayer(), &GetFrame());
   }
@@ -4311,21 +4311,29 @@ void LocalFrameView::CollectAnnotatedRegions(
 bool LocalFrameView::UpdateViewportIntersectionsForSubtree(
     unsigned parent_flags,
     absl::optional<base::TimeTicks>& monotonic_time) {
+  // This will be recomputed, but default to the previous computed value if
+  // there's an early return.
+  bool needs_occlusion_tracking = false;
+  IntersectionObserverController* controller =
+      GetFrame().GetDocument()->GetIntersectionObserverController();
+  if (controller) {
+    needs_occlusion_tracking = controller->NeedsOcclusionTracking();
+  }
+
   // TODO(dcheng): Since LocalFrameView tree updates are deferred, FrameViews
   // might still be in the LocalFrameView hierarchy even though the associated
   // Document is already detached. Investigate if this check and a similar check
   // in lifecycle updates are still needed when there are no more deferred
   // LocalFrameView updates: https://crbug.com/561683
-  if (!GetFrame().GetDocument()->IsActive())
-    return false;
+  if (!GetFrame().GetDocument()->IsActive()){
+    return needs_occlusion_tracking;
+  }
 
   unsigned flags = GetIntersectionObservationFlags(parent_flags);
-  bool needs_occlusion_tracking = false;
 
   if (!NeedsLayout() || IsDisplayLocked()) {
     // Notify javascript IntersectionObservers
-    if (IntersectionObserverController* controller =
-            GetFrame().GetDocument()->GetIntersectionObserverController()) {
+    if (controller) {
       needs_occlusion_tracking |= controller->ComputeIntersections(
           flags, GetUkmAggregator(), monotonic_time);
     }

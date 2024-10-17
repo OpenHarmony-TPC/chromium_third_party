@@ -64,7 +64,8 @@ NavigationPolicy NavigationPolicyFromEventModifiers(int16_t button,
     return shift ? kNavigationPolicyNewForegroundTab
                  : kNavigationPolicyNewBackgroundTab;
   }
-  return shift ? kNavigationPolicyNewWindow : kNavigationPolicyDownload;
+  LOG(INFO) << "navigation policy from event modifiers " << shift;
+  return shift ? kNavigationPolicyNewWindow : kNavigationPolicyCurrentTab;
 }
 
 NavigationPolicy NavigationPolicyFromEventInternal(const Event* event) {

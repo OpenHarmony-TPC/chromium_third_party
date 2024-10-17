@@ -890,15 +890,13 @@ void ChromeClientImpl::EnterFullscreen(
     const FullscreenOptions* options,
     FullscreenRequestType request_type
 #if defined(OHOS_MEDIA)
-    ,
-    const absl::optional<gfx::Size>& video_natural_size
+    , const absl::optional<gfx::Size>& video_natural_size
 #endif  // defined(OHOS_MEDIA)
 ) {
   DCHECK(web_view_);
   web_view_->EnterFullscreen(frame, options, request_type
 #if defined(OHOS_MEDIA)
-                             ,
-                             video_natural_size
+                             , video_natural_size
 #endif  // defined(OHOS_MEDIA)
   );
 }
@@ -1455,9 +1453,11 @@ void ChromeClientImpl::CreateOverlay(LocalFrame* frame,
                                      const SkBitmap& image,
                                      const gfx::Rect& image_rect,
                                      const gfx::Point& touch_point,
-                                     OnTextSelectedCallback callback) {
+                                     OnTextSelectedCallback callback,
+                                     OnDestroyImageAnalyzerOverlayCallback destroy_callback) {
   WebLocalFrameImpl* web_frame = WebLocalFrameImpl::FromFrame(frame);
-  web_frame->LocalRootFrameWidget()->CreateOverlay(image, image_rect, touch_point, std::move(callback));
+  web_frame->LocalRootFrameWidget()->CreateOverlay(image, image_rect, touch_point, std::move(callback),
+    std::move(destroy_callback));
 }
 #endif
 

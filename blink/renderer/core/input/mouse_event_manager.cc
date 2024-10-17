@@ -1118,6 +1118,13 @@ DragState& MouseEventManager::GetDragState() {
   return frame_->GetPage()->GetDragController().GetDragState();
 }
 
+#ifdef OHOS_DRAG_DROP
+bool MouseEventManager::IsDraging() {
+  DCHECK(frame_->GetPage());
+  return frame_->GetPage()->GetDragController().IsDraging();
+}
+#endif
+
 void MouseEventManager::ResetDragSource() {
   // Check validity of drag source.
   if (!frame_->GetPage())
@@ -1251,12 +1258,22 @@ void MouseEventManager::SetOverlayInProgress(bool flag) {
   }
 }
 
+void MouseEventManager::SetOverlayInProgressOnly(bool flag) {
+  LOG(INFO) << "MouseEventManager::SetOverlayInProgressOnly, flag == " << flag;
+  overlay_in_progress_ = flag;
+}
+
+void MouseEventManager::OnDestroyImageAnalyzerOverlay() {
+  LOG(INFO) << "MouseEventManager::OnDestroyImageAnalyzerOverlay";
+  overlay_in_progress_ = false;
+  last_analyzed_image_ = nullptr;
+}
+
 template <typename T>
 void MouseEventManager::HandleCreateOverlay(T const& targeted_event) {
   if (!frame_ || !frame_->View()) {
     return;
   }
-
   HitTestLocation location(frame_->View()->ConvertFromRootFrame(
       gfx::ToFlooredPoint(targeted_event.PositionInRootFrame())));
   HitTestResult hit_test_result =
@@ -1268,6 +1285,12 @@ void MouseEventManager::HandleCreateOverlay(T const& targeted_event) {
       image == last_analyzed_image_) {
     LOG(INFO) << "MouseEventManager::HandleCreateOverlay, invalid or has no image";
     return;
+  }
+  if (hit_test_result.InnerNode() && hit_test_result.InnerNode()->GetLayoutObject()) {
+    if (!hit_test_result.InnerNode()->GetLayoutObject()->StyleRef().IsSelectable()) {
+      LOG(INFO) << "MouseEventManager::HandleCreateOverlay image is not selectable";
+      return;
+    }
   }
   overlay_in_progress_ = false;
   last_analyzed_image_ = image;
@@ -1289,7 +1312,8 @@ void MouseEventManager::HandleCreateOverlay(T const& targeted_event) {
         bm,
         image_rect,
         gfx::Point(touch_point.x() - image_rect.x(), touch_point.y() - image_rect.y()),
-        base::BindRepeating(&MouseEventManager::SetOverlayInProgress, weak_ptr_factory_.GetWeakPtr()));
+        base::BindRepeating(&MouseEventManager::SetOverlayInProgress, weak_ptr_factory_.GetWeakPtr()),
+        base::BindRepeating(&MouseEventManager::OnDestroyImageAnalyzerOverlay, weak_ptr_factory_.GetWeakPtr()));
   }
 }
 #endif

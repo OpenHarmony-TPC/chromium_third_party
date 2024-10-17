@@ -99,7 +99,7 @@ class PLATFORM_EXPORT FrameWidgetInputHandlerImpl
   void MoveCaret(const gfx::Point& point) override;
 
 #if defined(OHOS_EX_FREE_COPY)
-  void SelectAndCopy() override;
+  void ShowFreeCopyMenu() override;
 #endif
  private:
   enum class UpdateState { kNone, kIsPasting, kIsSelectingRange };

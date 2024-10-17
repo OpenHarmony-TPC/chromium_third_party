@@ -229,10 +229,10 @@ int ResourceRequestSender::SendAsync(
     std::unique_ptr<ResourceLoadInfoNotifierWrapper>
         resource_load_info_notifier_wrapper,
 #if BUILDFLAG(IS_OHOS)
-    BackForwardCacheLoaderHelper* back_forward_cache_loader_helper,
-    bool is_sync_mode) {
+      BackForwardCacheLoaderHelper* back_forward_cache_loader_helper,
+      bool is_sync_mode) {
 #else
-    BackForwardCacheLoaderHelper* back_forward_cache_loader_helper) {
+      BackForwardCacheLoaderHelper* back_forward_cache_loader_helper) {
 #endif
   CheckSchemeForReferrerPolicy(*request);
 
@@ -448,11 +448,18 @@ void ResourceRequestSender::OnReceivedResponse(
 }
 
 #if BUILDFLAG(IS_OHOS)
-void ResourceRequestSender::OnTransferDataWithSharedMemory(base::ReadOnlySharedMemoryRegion region, uint64_t buffer_size) {
+void ResourceRequestSender::OnTransferDataWithSharedMemory(
+    base::ReadOnlySharedMemoryRegion region,
+    uint64_t buffer_size) {
   if(!request_info_) {
     return;
   }
   LOG(DEBUG) << "intercept ResourceRequestSender::OnTransferDataWithSharedMemory, buffer_size=" << buffer_size;
+  if (request_info_->resource_load_info_notifier_wrapper) {
+    request_info_->resource_load_info_notifier_wrapper->SetUsedSharedMemory();
+  } else {
+    LOG(ERROR) << "resource load info notifier wrapper is nullptr";
+  }
   request_info_->client->OnTransferDataWithSharedMemory(std::move(region), buffer_size);
 }
 #endif

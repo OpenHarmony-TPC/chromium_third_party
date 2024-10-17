@@ -145,10 +145,12 @@ mojo::ScopedDataPipeConsumerHandle BufferingBytesConsumer::DrainAsDataPipe() {
 }
 
 void BufferingBytesConsumer::SetClient(BytesConsumer::Client* client) {
+  DCHECK_CALLED_ON_VALID_SEQUENCE(sequence_checker_);
   client_ = client;
 }
 
 void BufferingBytesConsumer::ClearClient() {
+  DCHECK_CALLED_ON_VALID_SEQUENCE(sequence_checker_);
   client_ = nullptr;
 }
 
@@ -181,6 +183,7 @@ void BufferingBytesConsumer::OnTimerFired(TimerBase*) {
 }
 
 void BufferingBytesConsumer::OnStateChange() {
+  DCHECK_CALLED_ON_VALID_SEQUENCE(sequence_checker_);
   BytesConsumer::Client* client = client_;
   BufferData();
   if (client)

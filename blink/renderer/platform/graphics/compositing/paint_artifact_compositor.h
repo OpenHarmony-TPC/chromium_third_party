@@ -40,6 +40,12 @@ class ContentLayerClientImpl;
 class JSONObject;
 class SynthesizedClip;
 
+#ifdef OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
+class HitTestLocation;
+class HitTestResult;
+class LayoutObject;
+#endif // OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
+
 using CompositorScrollCallbacks = cc::ScrollCallbacks;
 
 // This enum is used for histograms and should not be renumbered (see:
@@ -269,6 +275,13 @@ class PLATFORM_EXPORT PaintArtifactCompositor final
   // found by `element_id`.
   bool SetScrollbarNeedsDisplay(CompositorElementId element_id);
 
+#ifdef OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
+  bool TryHitTest(const HitTestLocation& location,
+                  HitTestResult& result,
+                  LayoutObject* ancestor);
+  bool HasOverlayLayes();
+#endif // OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
+
  private:
   void UpdateCompositorViewportProperties(const ViewportProperties&,
                                           PropertyTreeManager&,
@@ -365,6 +378,10 @@ class PLATFORM_EXPORT PaintArtifactCompositor final
   using PendingLayers = Vector<PendingLayer, 0>;
   class OldPendingLayerMatcher;
   PendingLayers pending_layers_;
+
+#ifdef OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
+  cc::LayerList overlay_cc_layers_;
+#endif // OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
 
   // ScrollTranslationNodes of the PaintArtifact that are painted.
   // This member variable is only used in PaintArtifactCompositor::Update.

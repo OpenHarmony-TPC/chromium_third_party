@@ -18,6 +18,7 @@
       <include name="IDR_UASTYLE_MEDIA_CONTROLS_OHOS_CSS" file="mediaControls_ohos.css" type="BINDATA" />
       <include name="IDR_SHADOWSTYLE_MEDIA_CONTROLS_ANIMATED_ARROW_CSS" file="mediaControls_animated_arrow.css" type="BINDATA" />
       <include name="IDR_SHADOWSTYLE_MEDIA_CONTROLS_SCRUBBING_MESSAGE_CSS" file="mediaControls_scrubbing_message.css" type="BINDATA" />
+      <include name="IDR_SHADOWSTYLE_MEDIA_CONTROLS_MOBILE_DATA_PROMPT_CSS" file="mediaControls_mobile_data_prompt.css" type="BINDATA" />
       <include name="IDR_MEDIA_CONTROLS_JUMP_SVG" file="jump_image.svg" type="BINDATA" />
       <include name="IDR_MEDIA_CONTROLS_ARROW_RIGHT_SVG" file="ic_arrow_right.svg" type="BINDATA" />
       <include name="IDR_MEDIA_CONTROLS_ARROW_LEFT_SVG" file="ic_arrow_left.svg" type="BINDATA" />

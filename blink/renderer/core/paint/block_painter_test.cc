@@ -195,12 +195,12 @@ TEST_P(BlockPainterTest, WheelEventRectPaintCaching) {
 TEST_P(BlockPainterTest, BlockingWheelRectScrollingContents) {
   SetBodyInnerHTML(R"HTML(
     <style>
-      ::-webkit-scrollbar { display: none; }
       body { margin: 0; }
       #scroller {
         width: 100px;
         height: 100px;
         overflow: scroll;
+        display: flex;
         will-change: transform;
         background-color: blue;
       }
@@ -228,18 +228,17 @@ TEST_P(BlockPainterTest, BlockingWheelRectScrollingContents) {
   EXPECT_THAT(
       ContentDisplayItems(),
       ElementsAre(VIEW_SCROLLING_BACKGROUND_DISPLAY_ITEM,
-                  IsSameId(scroller->Id(), kBackgroundType),
                   IsSameId(scroller_scrolling_client.Id(), kBackgroundType)));
   EXPECT_THAT(
-      ContentPaintChunks(),
-      ElementsAre(
-          VIEW_SCROLLING_BACKGROUND_CHUNK_COMMON,
-          IsPaintChunk(1, 2),  // scroller background.
-          IsPaintChunk(2, 2),  // scroller scroll hit test.
-          IsPaintChunk(
-              2, 3,
-              PaintChunk::Id(scroller->Id(), kScrollingBackgroundChunkType),
-              scroller->FirstFragment().ContentsProperties(), &hit_test_data)));
+    ContentPaintChunks(),
+    ElementsAre(
+        VIEW_SCROLLING_BACKGROUND_CHUNK_COMMON,
+        IsPaintChunk(1, 1),  // scroller background.
+        IsPaintChunk(1, 1),  // scroller scroll hit test.
+        IsPaintChunk(
+            1, 2,
+            PaintChunk::Id(scroller->Id(), kScrollingBackgroundChunkType),
+            scroller->FirstFragment().ContentsProperties(), &hit_test_data)));
 }
 
 TEST_P(BlockPainterTest, WheelEventRectPaintChunkChanges) {
@@ -461,16 +460,15 @@ TEST_P(BlockPainterTest, TouchActionRectScrollingContents) {
   EXPECT_THAT(
       ContentDisplayItems(),
       ElementsAre(VIEW_SCROLLING_BACKGROUND_DISPLAY_ITEM,
-                  IsSameId(scroller->Id(), kBackgroundType),
                   IsSameId(scroller_scrolling_client.Id(), kBackgroundType)));
   EXPECT_THAT(
       ContentPaintChunks(),
       ElementsAre(
           VIEW_SCROLLING_BACKGROUND_CHUNK_COMMON,
-          IsPaintChunk(1, 2),  // scroller background.
-          IsPaintChunk(2, 2),  // scroller scroll hit test.
+          IsPaintChunk(1, 1),  // scroller background.
+          IsPaintChunk(1, 1),  // scroller scroll hit test.
           IsPaintChunk(
-              2, 3,
+              1, 2,
               PaintChunk::Id(scroller->Id(), kScrollingBackgroundChunkType),
               scroller->FirstFragment().ContentsProperties(), &hit_test_data)));
 }

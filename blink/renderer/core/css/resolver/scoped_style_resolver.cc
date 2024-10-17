@@ -80,6 +80,32 @@ void ScopedStyleResolver::AddFontFaceRules(const RuleSet& rule_set) {
   // TODO(crbug.com/336876): We don't add @font-face rules of scoped style
   // sheets for the moment.
   if (!GetTreeScope().RootNode().IsDocumentNode()) {
+#ifdef OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
+    bool should_add_rules = false;
+    if (GetTreeScope().RootNode().IsShadowRoot()) {
+      auto* shadow_root = DynamicTo<ShadowRoot>(&GetTreeScope().RootNode());
+      if (shadow_root) {
+        should_add_rules = shadow_root->IsUserAgent() &&
+            shadow_root->host().IsMediaElement();
+      }
+    }
+    if (should_add_rules) {
+      Document& document = GetTreeScope().GetDocument();
+      CSSFontSelector* css_font_selector =
+          document.GetStyleEngine().GetFontSelector();
+      const HeapVector<Member<StyleRuleFontFace>> font_face_rules =
+          rule_set.FontFaceRules();
+      for (auto& font_face_rule : font_face_rules) {
+        if (FontFace* font_face = FontFace::Create(&document, font_face_rule,
+                                                   false /* is_user_style */)) {
+          css_font_selector->GetFontFaceCache()->Add(font_face_rule, font_face);
+        }
+      }
+      if (font_face_rules.size()) {
+        document.GetStyleResolver().InvalidateMatchedPropertiesCache();
+      }
+    }
+#endif // OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
     return;
   }
 

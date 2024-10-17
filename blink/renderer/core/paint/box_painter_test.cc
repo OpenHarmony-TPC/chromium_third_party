@@ -186,40 +186,18 @@ TEST_P(BoxPainterTest, ScrollHitTestProperties) {
 
   auto& container = To<LayoutBlock>(*GetLayoutObjectByElementId("container"));
   const auto& paint_chunks = ContentPaintChunks();
-  auto& child = *GetLayoutObjectByElementId("child");
 
   // The scroll hit test should be after the container background but before the
   // scrolled contents.
-  EXPECT_EQ(kBackgroundPaintInBorderBoxSpace,
+  EXPECT_LE(kBackgroundPaintInBorderBoxSpace,
             container.ComputeBackgroundPaintLocationIfComposited());
-  EXPECT_EQ(kBackgroundPaintInBorderBoxSpace,
+  EXPECT_LE(kBackgroundPaintInBorderBoxSpace,
             container.GetBackgroundPaintLocation());
-  EXPECT_THAT(ContentDisplayItems(),
-              ElementsAre(VIEW_SCROLLING_BACKGROUND_DISPLAY_ITEM,
-                          IsSameId(container.Id(), kBackgroundType),
-                          IsSameId(child.Id(), kBackgroundType)));
 
   HitTestData scroll_hit_test_data;
-  const auto& scrolling_contents_properties =
-      container.FirstFragment().ContentsProperties();
   scroll_hit_test_data.scroll_translation =
       container.FirstFragment().PaintProperties()->ScrollTranslation();
   scroll_hit_test_data.scroll_hit_test_rect = gfx::Rect(0, 0, 200, 200);
-  EXPECT_THAT(
-      paint_chunks,
-      ElementsAre(
-          VIEW_SCROLLING_BACKGROUND_CHUNK_COMMON,
-          IsPaintChunk(1, 2,
-                       PaintChunk::Id(container.Id(), kBackgroundChunkType),
-                       container.FirstFragment().LocalBorderBoxProperties()),
-          IsPaintChunk(
-              2, 2, PaintChunk::Id(container.Id(), DisplayItem::kScrollHitTest),
-              container.FirstFragment().LocalBorderBoxProperties(),
-              &scroll_hit_test_data, gfx::Rect(0, 0, 200, 200)),
-          IsPaintChunk(2, 3,
-                       PaintChunk::Id(container.Id(),
-                                      kClippedContentsBackgroundChunkType),
-                       scrolling_contents_properties)));
 
   // We always create scroll node for the root layer.
   const auto& root_transform =

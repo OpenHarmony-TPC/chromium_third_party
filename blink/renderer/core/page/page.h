@@ -61,6 +61,10 @@
 #include "third_party/blink/renderer/platform/wtf/forward.h"
 #include "third_party/blink/renderer/platform/wtf/text/wtf_string.h"
 
+#ifdef OHOS_DISPLAY_CUTOUT
+#include "ui/gfx/geometry/insets.h"
+#endif
+
 namespace cc {
 class AnimationHost;
 }
@@ -313,6 +317,10 @@ class CORE_EXPORT Page final : public GarbageCollected<Page>,
   void SetDefaultPageScaleLimits(float min_scale, float max_scale);
   void SetUserAgentPageScaleConstraints(
       const PageScaleConstraints& new_constraints);
+#if BUILDFLAG(IS_OHOS)
+  // Ignore shrinks_viewport_contents_to_fit if browser zoom works.
+  void ResetPageScaleConstraints(bool constraint_for_mobile);
+#endif
 
 #if DCHECK_IS_ON()
   void SetIsPainting(bool painting) { is_painting_ = painting; }
@@ -423,6 +431,11 @@ class CORE_EXPORT Page final : public GarbageCollected<Page>,
   V8CrowdsourcedCompileHintsProducer& GetV8CrowdsourcedCompileHintsProducer() {
     return *v8_compile_hints_;
   }
+
+#ifdef OHOS_DISPLAY_CUTOUT
+  gfx::Insets SafeAreaScaled() const;
+  void SetSafeArea(gfx::Insets safe_area) { safe_area_ = safe_area; }
+#endif
 
  private:
   friend class ScopedPagePauser;
@@ -566,6 +579,10 @@ class CORE_EXPORT Page final : public GarbageCollected<Page>,
   // only set for the MPArch implementation and is true when the corresponding
   // browser side FrameTree has the FrameTree::Type of kFencedFrame.
   bool is_fenced_frame_tree_ = false;
+
+#ifdef OHOS_DISPLAY_CUTOUT
+  gfx::Insets safe_area_;
+#endif
 
   // This tracks the mode that the fenced frame is set to.
   blink::FencedFrame::DeprecatedFencedFrameMode fenced_frame_mode_ =

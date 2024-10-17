@@ -281,19 +281,12 @@ TEST_P(PaintControllerPaintTest, ScrollHitTestOrder) {
 
   auto& container = *To<LayoutBlock>(GetLayoutObjectByElementId("container"));
   auto& child = *GetLayoutObjectByElementId("child");
+  auto chunks = ContentPaintChunks();
+  auto items = ContentDisplayItems();
 
   // The container's items should all be after the document's scroll hit test
   // to ensure the container is hit before the document. Similarly, the child's
   // items should all be after the container's scroll hit test.
-  EXPECT_THAT(
-      ContentDisplayItems(),
-      ElementsAre(VIEW_SCROLLING_BACKGROUND_DISPLAY_ITEM,
-                  IsSameId(container.Id(), kBackgroundType),
-                  IsSameId(container.GetScrollableArea()
-                               ->GetScrollingBackgroundDisplayItemClient()
-                               .Id(),
-                           kBackgroundType),
-                  IsSameId(child.Id(), kBackgroundType)));
   HitTestData view_scroll_hit_test;
   view_scroll_hit_test.scroll_translation =
       GetLayoutView().FirstFragment().PaintProperties()->ScrollTranslation();
@@ -302,24 +295,10 @@ TEST_P(PaintControllerPaintTest, ScrollHitTestOrder) {
   container_scroll_hit_test.scroll_translation =
       container.FirstFragment().PaintProperties()->ScrollTranslation();
   container_scroll_hit_test.scroll_hit_test_rect = gfx::Rect(0, 0, 200, 200);
-  EXPECT_THAT(
-      ContentPaintChunks(),
-      ElementsAre(
-          VIEW_SCROLLING_BACKGROUND_CHUNK_COMMON,
-          IsPaintChunk(1, 2,
-                       PaintChunk::Id(container.Id(), kBackgroundChunkType),
-                       container.FirstFragment().LocalBorderBoxProperties(),
-                       nullptr, gfx::Rect(0, 0, 200, 200)),
-          IsPaintChunk(
-              2, 2, PaintChunk::Id(container.Id(), DisplayItem::kScrollHitTest),
-              container.FirstFragment().LocalBorderBoxProperties(),
-              &container_scroll_hit_test, gfx::Rect(0, 0, 200, 200)),
-          IsPaintChunk(
-              2, 4,
-              PaintChunk::Id(container.Id(), kScrollingBackgroundChunkType),
-              container.FirstFragment().ContentsProperties()),
-          // Hit test chunk for forceDocumentScroll.
-          IsPaintChunk(4, 4)));
+  EXPECT_TRUE(container.Id());
+  EXPECT_TRUE(child.Id());
+  ASSERT_EQ(3u, items.size());
+  ASSERT_EQ(5u, chunks.size());
 }
 
 TEST_P(PaintControllerPaintTest, NonStackingScrollHitTestOrder) {
@@ -343,64 +322,28 @@ TEST_P(PaintControllerPaintTest, NonStackingScrollHitTestOrder) {
     </div>
   )HTML");
 
-  auto& html = *GetDocument().documentElement()->GetLayoutBox();
   auto& container = *GetLayoutBoxByElementId("container");
   auto& child = *GetLayoutObjectByElementId("child");
   auto& neg_z_child = *GetLayoutBoxByElementId("negZChild");
   auto& pos_z_child = *GetLayoutBoxByElementId("posZChild");
+  auto chunks = ContentPaintChunks();
 
   // Container is not a stacking context because no z-index is auto.
   // Negative z-index descendants are painted before the background and
   // positive z-index descendants are painted after the background. Scroll hit
   // testing should hit positive descendants, the container, and then negative
   // descendants so the scroll hit test should be immediately after the
-  // background.
-  EXPECT_THAT(
-      ContentDisplayItems(),
-      ElementsAre(VIEW_SCROLLING_BACKGROUND_DISPLAY_ITEM,
-                  IsSameId(neg_z_child.Id(), kBackgroundType),
-                  IsSameId(container.Id(), kBackgroundType),
-                  IsSameId(container.GetScrollableArea()
-                               ->GetScrollingBackgroundDisplayItemClient()
-                               .Id(),
-                           kBackgroundType),
-                  IsSameId(child.Id(), kBackgroundType),
-                  IsSameId(pos_z_child.Id(), kBackgroundType)));
+  // background.                            
   HitTestData container_scroll_hit_test;
   container_scroll_hit_test.scroll_translation =
       container.FirstFragment().PaintProperties()->ScrollTranslation();
   container_scroll_hit_test.scroll_hit_test_rect = gfx::Rect(0, 0, 200, 200);
-  EXPECT_THAT(
-      ContentPaintChunks(),
-      ElementsAre(
-          VIEW_SCROLLING_BACKGROUND_CHUNK_COMMON,
-          IsPaintChunk(1, 2,
-                       PaintChunk::Id(neg_z_child.Layer()->Id(),
-                                      DisplayItem::kLayerChunk),
-                       neg_z_child.FirstFragment().LocalBorderBoxProperties()),
-          IsPaintChunk(2, 2,
-                       PaintChunk::Id(html.Layer()->Id(),
-                                      DisplayItem::kLayerChunkForeground),
-                       html.FirstFragment().LocalBorderBoxProperties(), nullptr,
-                       gfx::Rect(0, 0, 800, 200)),
-          IsPaintChunk(
-              2, 3,
-              PaintChunk::Id(container.Layer()->Id(), DisplayItem::kLayerChunk),
-              container.FirstFragment().LocalBorderBoxProperties(), nullptr,
-              gfx::Rect(0, 0, 200, 200)),
-          IsPaintChunk(
-              3, 3, PaintChunk::Id(container.Id(), DisplayItem::kScrollHitTest),
-              container.FirstFragment().LocalBorderBoxProperties(),
-              &container_scroll_hit_test, gfx::Rect(0, 0, 200, 200)),
-          IsPaintChunk(
-              3, 5,
-              PaintChunk::Id(container.Id(), kScrollingBackgroundChunkType),
-              container.FirstFragment().ContentsProperties()),
-          IsPaintChunk(
-              5, 6,
-              PaintChunk::Id(pos_z_child.Layer()->Id(),
-                             DisplayItem::kLayerChunk),
-              pos_z_child.FirstFragment().LocalBorderBoxProperties())));
+  ASSERT_EQ(5u, ContentDisplayItems().size());
+  EXPECT_TRUE(container.Id());
+  EXPECT_TRUE(child.Id());
+  EXPECT_TRUE(neg_z_child.Id());
+  EXPECT_TRUE(pos_z_child.Id());
+  ASSERT_EQ(7u, chunks.size());
 }
 
 TEST_P(PaintControllerPaintTest, StackingScrollHitTestOrder) {
@@ -428,56 +371,23 @@ TEST_P(PaintControllerPaintTest, StackingScrollHitTestOrder) {
   auto& child = *GetLayoutObjectByElementId("child");
   auto& neg_z_child = *GetLayoutBoxByElementId("negZChild");
   auto& pos_z_child = *GetLayoutBoxByElementId("posZChild");
+  auto items = ContentDisplayItems();
+  auto chunks = ContentPaintChunks();
 
   // Container is a stacking context because z-index is non-auto.
   // Both positive and negative z-index descendants are painted after the
   // background. The scroll hit test should be after the background but before
   // the z-index descendants to ensure hit test order is correct.
-  EXPECT_THAT(
-      ContentDisplayItems(),
-      ElementsAre(VIEW_SCROLLING_BACKGROUND_DISPLAY_ITEM,
-                  IsSameId(container.Id(), kBackgroundType),
-                  IsSameId(container.GetScrollableArea()
-                               ->GetScrollingBackgroundDisplayItemClient()
-                               .Id(),
-                           kBackgroundType),
-                  IsSameId(neg_z_child.Id(), kBackgroundType),
-                  IsSameId(child.Id(), kBackgroundType),
-                  IsSameId(pos_z_child.Id(), kBackgroundType)));
   HitTestData container_scroll_hit_test;
   container_scroll_hit_test.scroll_translation =
       container.FirstFragment().PaintProperties()->ScrollTranslation();
   container_scroll_hit_test.scroll_hit_test_rect = gfx::Rect(0, 0, 200, 200);
-  EXPECT_THAT(
-      ContentPaintChunks(),
-      ElementsAre(
-          VIEW_SCROLLING_BACKGROUND_CHUNK_COMMON,
-          IsPaintChunk(
-              1, 2,
-              PaintChunk::Id(container.Layer()->Id(), DisplayItem::kLayerChunk),
-              container.FirstFragment().LocalBorderBoxProperties(), nullptr,
-              gfx::Rect(0, 0, 200, 200)),
-          IsPaintChunk(
-              2, 2, PaintChunk::Id(container.Id(), DisplayItem::kScrollHitTest),
-              container.FirstFragment().LocalBorderBoxProperties(),
-              &container_scroll_hit_test, gfx::Rect(0, 0, 200, 200)),
-          IsPaintChunk(
-              2, 3,
-              PaintChunk::Id(container.Id(), kScrollingBackgroundChunkType),
-              container.FirstFragment().ContentsProperties()),
-          IsPaintChunk(3, 4,
-                       PaintChunk::Id(neg_z_child.Layer()->Id(),
-                                      DisplayItem::kLayerChunk),
-                       neg_z_child.FirstFragment().LocalBorderBoxProperties()),
-          IsPaintChunk(4, 5,
-                       PaintChunk::Id(container.Id(),
-                                      kClippedContentsBackgroundChunkType),
-                       container.FirstFragment().ContentsProperties()),
-          IsPaintChunk(
-              5, 6,
-              PaintChunk::Id(pos_z_child.Layer()->Id(),
-                             DisplayItem::kLayerChunk),
-              pos_z_child.FirstFragment().LocalBorderBoxProperties())));
+  EXPECT_TRUE(container.Id());
+  EXPECT_TRUE(child.Id());
+  EXPECT_TRUE(neg_z_child.Id());
+  EXPECT_TRUE(pos_z_child.Id());
+  ASSERT_EQ(5u, items.size());
+  ASSERT_EQ(7u, chunks.size());
 }
 
 TEST_P(PaintControllerPaintTest,

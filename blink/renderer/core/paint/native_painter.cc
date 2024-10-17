@@ -38,9 +38,9 @@ void NativePainter::PaintReplaced(const PaintInfo& paint_info,
     return;
   }
 
-  if (!layout_native_.NativeElement() ||
-      !layout_native_.NativeElement()->NativeLoader() ||
-      !layout_native_.NativeElement()->NativeLoader()->GetWebNativeBridge()) {
+  if (!layout_native_.PluginElement() ||
+      !layout_native_.PluginElement()->NativeLoader() ||
+      !layout_native_.PluginElement()->NativeLoader()->GetWebNativeBridge()) {
     return;
   }
 
@@ -82,7 +82,7 @@ void NativePainter::PaintReplaced(const PaintInfo& paint_info,
                                   !force_software_video_paint;
   if (paint_with_foreign_layer) {
     if (cc::Layer* layer =
-            layout_native_.NativeElement()->NativeLoader()->CcLayer()) {
+            layout_native_.PluginElement()->NativeLoader()->CcLayer()) {
       gfx::RectF rect(-replaced_rect.X().ToFloat(),
                       -replaced_rect.Y().ToFloat(),
                       layout_native_.Size().Width().ToFloat(),

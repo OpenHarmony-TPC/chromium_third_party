@@ -517,7 +517,7 @@ DocumentLoader::DocumentLoader(
           params_->origin_agent_cluster_left_as_default),
       is_cross_site_cross_browsing_context_group_(
           params_->is_cross_site_cross_browsing_context_group),
-      should_have_sticky_user_activation_(
+	  should_have_sticky_user_activation_(
           params_->should_have_sticky_user_activation),
       navigation_api_back_entries_(params_->navigation_api_back_entries),
       navigation_api_forward_entries_(params_->navigation_api_forward_entries),
@@ -1653,6 +1653,11 @@ void DocumentLoader::SetDefersLoading(LoaderFreezeMode mode) {
 
 void DocumentLoader::DetachFromFrame(bool flush_microtask_queue) {
   DCHECK(frame_);
+
+#ifdef OHOS_LOG_MESSAGE
+  LOG(INFO) << "Document loader DetachFromFrame, url: ***";
+#endif
+
   StopLoading();
   // `frame_` may become null because this method can get re-entered. If it
   // is null we've already run the code below so just return early.
@@ -1854,6 +1859,11 @@ void DocumentLoader::StartLoadingResponse() {
   // always be a frame here.
   if (frame_ && frame_->GetDocument()->IsMediaDocument()) {
     parser_->Finish();
+
+#ifdef OHOS_LOG_MESSAGE
+    LOG(INFO) << "Document loader StartLoadingResponse, url: ***";
+#endif
+
     StopLoading();
     return;
   }
@@ -2580,6 +2590,7 @@ void DocumentLoader::CommitNavigation() {
   } else {
     frame_->SetStickyUserActivationState();
   }
+
   // The DocumentLoader was flagged as activated if it needs to notify the frame
   // that it was activated before navigation. Update the frame state based on
   // the new value.

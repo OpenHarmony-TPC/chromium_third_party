@@ -1579,7 +1579,7 @@ void WidgetBase::OnImeEventGuardFinish(ImeEventGuard* guard) {
   // are ignored. These must explicitly be updated once finished handling the
   // ime event.
   UpdateSelectionBounds();
-#if BUILDFLAG(IS_ANDROID) || BUILDFLAG(IS_IOS)
+#if BUILDFLAG(IS_ANDROID) || BUILDFLAG(IS_IOS) || BUILDFLAG(IS_OHOS)
   if (guard->show_virtual_keyboard())
     ShowVirtualKeyboard();
   else

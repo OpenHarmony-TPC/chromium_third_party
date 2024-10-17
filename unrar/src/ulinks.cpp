@@ -45,7 +45,8 @@ static bool IsFullPath(const char *PathA) // Unix ASCII version.
 }
 
 
-bool ExtractUnixLink30(CommandData *Cmd,ComprDataIO &DataIO,Archive &Arc,const wchar *LinkName)
+static bool ExtractUnixLink30(CommandData *Cmd,ComprDataIO &DataIO,Archive &Arc,
+                              const wchar *LinkName,bool &UpLink)
 {
   char Target[NM];
   if (IsLink(Arc.FileHead.FileAttr))
@@ -75,13 +76,14 @@ bool ExtractUnixLink30(CommandData *Cmd,ComprDataIO &DataIO,Archive &Arc,const w
     if (!Cmd->AbsoluteLinks && (*TargetW==0 || IsFullPath(TargetW) ||
         !IsRelativeSymlinkSafe(Cmd,Arc.FileHead.FileName,LinkName,TargetW)))
       return false;
+    UpLink=strstr(Target,"..")!=NULL;
     return UnixSymlink(Target,LinkName,&Arc.FileHead.mtime,&Arc.FileHead.atime);
   }
   return false;
 }
 
 
-bool ExtractUnixLink50(CommandData *Cmd,const wchar *Name,FileHeader *hd)
+static bool ExtractUnixLink50(CommandData *Cmd,const wchar *Name,FileHeader *hd)
 {
   char Target[NM];
   WideToChar(hd->RedirName,Target,ASIZE(Target));

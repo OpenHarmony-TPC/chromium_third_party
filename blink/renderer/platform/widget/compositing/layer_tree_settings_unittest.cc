@@ -14,22 +14,22 @@ namespace blink {
 TEST(LayerTreeSettings, IgnoreGivenMemoryPolicy) {
   auto policy =
       GetGpuMemoryPolicy(cc::ManagedMemoryPolicy(256), gfx::Size(), 1.f);
-  EXPECT_EQ(512u * 1024u * 1024u, policy.bytes_limit_when_visible);
-  EXPECT_EQ(gpu::MemoryAllocation::CUTOFF_ALLOW_NICE_TO_HAVE,
+  EXPECT_EQ(512u * 1024u * 1024u / 2u, policy.bytes_limit_when_visible);
+  EXPECT_EQ(gpu::MemoryAllocation::CUTOFF_ALLOW_EVERYTHING,
             policy.priority_cutoff_when_visible);
 }
 
 TEST(LayerTreeSettings, LargeScreensUseMoreMemory) {
   auto policy = GetGpuMemoryPolicy(cc::ManagedMemoryPolicy(256),
                                    gfx::Size(4096, 2160), 1.f);
-  EXPECT_EQ(2u * 512u * 1024u * 1024u, policy.bytes_limit_when_visible);
-  EXPECT_EQ(gpu::MemoryAllocation::CUTOFF_ALLOW_NICE_TO_HAVE,
+  EXPECT_EQ(2u * 512u * 1024u * 1024u / 4u, policy.bytes_limit_when_visible);
+  EXPECT_EQ(gpu::MemoryAllocation::CUTOFF_ALLOW_EVERYTHING,
             policy.priority_cutoff_when_visible);
 
   policy = GetGpuMemoryPolicy(cc::ManagedMemoryPolicy(256),
                               gfx::Size(2048, 1080), 2.f);
-  EXPECT_EQ(2u * 512u * 1024u * 1024u, policy.bytes_limit_when_visible);
-  EXPECT_EQ(gpu::MemoryAllocation::CUTOFF_ALLOW_NICE_TO_HAVE,
+  EXPECT_EQ(2u * 512u * 1024u * 1024u / 4u, policy.bytes_limit_when_visible);
+  EXPECT_EQ(gpu::MemoryAllocation::CUTOFF_ALLOW_EVERYTHING,
             policy.priority_cutoff_when_visible);
 }
 #endif

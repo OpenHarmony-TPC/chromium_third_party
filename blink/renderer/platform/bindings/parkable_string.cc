@@ -885,7 +885,7 @@ ParkableString::ParkableString(scoped_refptr<StringImpl>&& impl, bool is_parkabl
     impl_ = nullptr;
     return;
   }
-
+ 
   if (is_parkable) {
     impl_ = ParkableStringManager::Instance().Add(std::move(impl),
                                                   nullptr);

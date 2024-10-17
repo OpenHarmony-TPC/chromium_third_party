@@ -112,7 +112,7 @@ ScriptResource* ScriptResource::CreateForTest(
 #if BUILDFLAG(IS_OHOS)
 ScriptResource* ScriptResource::CreateForOfflineResource(const KURL& kurl,
                                                          const KURL& origin_url,
-                                                         const ResourceResponse& response,
+                                                         ResourceResponse response,
                                                          const bool is_module) {
   ResourceRequest request(kurl);
   if (is_module) {
@@ -129,12 +129,12 @@ ScriptResource* ScriptResource::CreateForOfflineResource(const KURL& kurl,
   }
 
   request.SetRequestorOrigin(SecurityOrigin::Create(origin_url));
-
+  
   ResourceLoaderOptions options(nullptr);
-
+  
   TextResourceDecoderOptions decoder_options(
-      TextResourceDecoderOptions::kCSSContent, UTF8Encoding());
-
+      TextResourceDecoderOptions::kPlainTextContent, UTF8Encoding());
+  
   auto script_type = is_module ?
       mojom::blink::ScriptType::kModule :
       mojom::blink::ScriptType::kClassic;

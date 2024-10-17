@@ -125,16 +125,6 @@ class CORE_EXPORT Settings {
   }
 #endif
 
-#ifdef OHOS_EX_BLANK_TARGET_POPUP_INTERCEPT
-  void EnableBlankTargetPopupIntercept(bool enabled) {
-    blank_target_popup_intercept_enabled_ = enabled;
-  }
-
-  bool IsBlankTargetPopupInterceptEnabled() const {
-    return blank_target_popup_intercept_enabled_;
-  }
-#endif
-
   void SetDelegate(SettingsDelegate*);
 
 #if defined(OHOS_CLIPBOARD)
@@ -148,19 +138,34 @@ class CORE_EXPORT Settings {
 #endif // defined(OHOS_CLIPBOARD)
 
 #if defined(OHOS_CUSTOM_VIDEO_PLAYER)
-void SetCustomVideoPlayerEnabled(bool enable) {
-  custom_video_player_enabled_ = enable;
-}
-bool IsCustomVideoPlayerEnabled() const {
-  return custom_video_player_enabled_;
-}
-void SetCustomVideoPlayerOverlay(bool overlay) {
-  custom_video_player_overlay_ = overlay;
-}
-bool IsCustomVideoPlayerOverlay() const {
-  return custom_video_player_overlay_;
-}
+  void SetCustomVideoPlayerEnabled(bool enable) {
+    custom_video_player_enabled_ = enable;
+  }
+  bool IsCustomVideoPlayerEnabled() const {
+    return custom_video_player_enabled_;
+  }
+  void SetCustomVideoPlayerOverlay(bool overlay) {
+    custom_video_player_overlay_ = overlay;
+  }
+  bool IsCustomVideoPlayerOverlay() const {
+    return custom_video_player_overlay_;
+  }
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
+
+#ifdef OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
+  void SetMediaNetworkTrafficPromptEnabled(bool enable) {
+    media_network_traffic_prompt_enabled_ = enable;
+  }
+  bool IsMediaNetworkTrafficPromptEnabled() {
+    return media_network_traffic_prompt_enabled_;
+  }
+  void SetPlaybackWithMobileDataAllowed(bool allowed) {
+    playback_with_mobile_data_allowed_ = allowed;
+  }
+  bool IsPlaybackWithMobileDataAllowed() {
+    return playback_with_mobile_data_allowed_;
+  }
+#endif // OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
 
  private:
   void Invalidate(SettingsDelegate::ChangeType);
@@ -186,10 +191,6 @@ bool IsCustomVideoPlayerOverlay() const {
   bool contextmenu_customization_enabled_ = false;
 #endif  // OHOS_EX_FREE_COPY
 
-#ifdef OHOS_EX_BLANK_TARGET_POPUP_INTERCEPT
-  bool blank_target_popup_intercept_enabled_ = true;
-#endif
-
 #if BUILDFLAG(IS_OHOS)
   std::map<WebString, WebString> embed_rule_;
 #endif
@@ -202,6 +203,11 @@ bool IsCustomVideoPlayerOverlay() const {
   bool custom_video_player_enabled_ = false;
   bool custom_video_player_overlay_ = false;
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
+
+#ifdef OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
+  bool media_network_traffic_prompt_enabled_ = false;
+  bool playback_with_mobile_data_allowed_ = false;
+#endif // OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
 };
 
 }  // namespace blink

@@ -1069,7 +1069,7 @@ bool RTCPeerConnectionHandler::Initialize(
   if (!client_on_stack) {
     return false;
   }
-  
+
   DCHECK(frame);
   frame_ = frame;
   peer_connection_tracker_ = PeerConnectionTracker::From(*frame);

@@ -264,7 +264,8 @@ class CORE_EXPORT EmptyChromeClient : public ChromeClient {
                      const SkBitmap& image,
                      const gfx::Rect& image_rect,
                      const gfx::Point& touch_point,
-                     OnTextSelectedCallback callback) override {}
+                     OnTextSelectedCallback callback,
+                     OnDestroyImageAnalyzerOverlayCallback destroy_callback) override {}
 #endif
  private:
   const display::ScreenInfos empty_screen_infos_{display::ScreenInfo()};

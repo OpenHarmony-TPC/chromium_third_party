@@ -119,8 +119,7 @@ BaseFetchContext::CanRequestBasedOnSubresourceFilterOnly(
                               ResourceRequestBlockedReason::kSubresourceFilter,
                               type);
     }
-    LOG(INFO) << "[User AdBlock] Subresource request blocked : "
-              << url.GetString().Utf8();
+    LOG(INFO) << "[User AdBlock] Subresource request blocked : ***";
     return ResourceRequestBlockedReason::kSubresourceFilter;
   }
 #endif
@@ -726,23 +725,20 @@ BaseFetchContext::CanRequestInternal(
   if ((GetSubresourceFilter() &&
        !GetSubresourceFilter()->AllowLoad(url, request_context,
                                           reporting_disposition))) {
-    LOG(WARNING) << "[AdBlock] Subresource request blocked : "
-                 << url.GetString().Utf8();
+    LOG(WARNING) << "[AdBlock] Subresource request blocked : ***";
     return ResourceRequestBlockedReason::kSubresourceFilter;
   }
   if ((GetUserSubresourceFilter() &&
        !GetUserSubresourceFilter()->AllowLoad(url, request_context,
                                               reporting_disposition))) {
-    LOG(WARNING) << "[User AdBlock] Subresource request blocked : "
-                 << url.GetString().Utf8();
+    LOG(WARNING) << "[User AdBlock] Subresource request blocked : ***";
     return ResourceRequestBlockedReason::kSubresourceFilter;
   }
 #else
   if (GetSubresourceFilter()) {
     if (!GetSubresourceFilter()->AllowLoad(url, request_context,
                                            reporting_disposition)) {
-      LOG(WARNING) << "[AdBlock] Subresource request blocked : "
-                   << url.GetString().Utf8();
+      LOG(WARNING) << "[AdBlock] Subresource request blocked : ***";
       return ResourceRequestBlockedReason::kSubresourceFilter;
     }
   }

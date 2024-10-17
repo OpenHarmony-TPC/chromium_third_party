@@ -64,11 +64,6 @@ class MockBaseFetchContext final : public BaseFetchContext {
       const override {
     return SecurityOrigin::CreateUniqueOpaque();
   }
-#ifdef OHOS_ARKWEB_ADBLOCK
-  SubresourceFilter* GetUserSubresourceFilter() const override {
-    return {};
-  }
-#endif
   bool AllowScriptFromSource(const KURL&) const override { return false; }
   SubresourceFilter* GetSubresourceFilter() const override { return nullptr; }
   bool ShouldBlockRequestByInspector(const KURL&) const override {

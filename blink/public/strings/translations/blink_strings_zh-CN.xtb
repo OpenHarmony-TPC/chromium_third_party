@@ -178,4 +178,8 @@
 <translation id="916607977885256133">画中画</translation>
 <translation id="945780513535800434">已部分选中</translation>
 <translation id="954003015749068518">进入“画中画”模式</translation>
+
+<translation id="IDS_PLAYBACK_WILL_USING_MOBILE_DATA">当前为移动数据网络，播放将消耗流量</translation>
+<translation id="IDS_CONTINUE_PLAYING">继续播放</translation>
+<translation id="IDS_PLAYING_USING_MOBILE_DATA">正在使用移动数据播放</translation>
 </translationbundle>

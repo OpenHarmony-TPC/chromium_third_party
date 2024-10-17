@@ -414,6 +414,7 @@ scoped_refptr<CachedMetadata> V8CodeCache::GenerateFullCodeCache(
   return cached_metadata;
 }
 
+#if BUILDFLAG(IS_OHOS)
 V8CodeCache::CacheError V8CodeCache::GenerateCodeCache(
     ScriptState* script_state,
     const String& url,
@@ -436,11 +437,9 @@ V8CodeCache::CacheError V8CodeCache::GenerateCodeCache(
 
   V8CodeCache::CacheError error = GenerateCodeCacheInternal(
       script_state, script, source_url, cache_handler, cache_options);
-  LOG(ERROR) << "Generate code cache end. Error code: " << static_cast<int>(error) << ". url: " << url;
   return error;
 }
 
-#if BUILDFLAG(IS_OHOS)
 V8CodeCache::CacheError V8CodeCache::GenerateCodeCacheInternal(
     ScriptState* script_state,
     const String& script_string,
@@ -475,11 +474,11 @@ V8CodeCache::CacheError V8CodeCache::GenerateCodeCacheInternal(
   ProduceCacheInternal(
       isolate, code_cache_host, unbound_script,
       cache_handler, script_string.length(), source_url,
-      text_position, "v8.compile", V8CodeCache::ProduceCacheOptions::kSetTimeStamp);
+      text_position, "v8.precompile", V8CodeCache::ProduceCacheOptions::kSetTimeStamp);
   ProduceCacheInternal(
       isolate, code_cache_host, unbound_script,
       cache_handler, script_string.length(), source_url,
-      text_position, "v8.compile", V8CodeCache::ProduceCacheOptions::kProduceCodeCache);
+      text_position, "v8.precompile", V8CodeCache::ProduceCacheOptions::kProduceCodeCache);
 
   return V8CodeCache::CacheError::kNoError;
 }

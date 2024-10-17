@@ -73,6 +73,10 @@
 #include "third_party/blink/renderer/platform/runtime_enabled_features.h"
 #include "third_party/blink/renderer/platform/wtf/shared_buffer.h"
 
+#ifdef OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
+#include "third_party/blink/renderer/core/css/variable_local_font_face_source.h"
+#endif // OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
+
 namespace blink {
 
 namespace {
@@ -892,6 +896,13 @@ void FontFace::InitCSSFontFace(ExecutionContext* context, const CSSValue& src) {
         item.Fetch(context, source);
         css_font_face_->AddSource(source);
       }
+#ifdef OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
+    } else if (VariableLocalFontFaceSource::ShouldHandleLocalFont(
+                item.GetResource())) {
+      css_font_face_->AddSource(
+          MakeGarbageCollected<VariableLocalFontFaceSource>(
+              css_font_face_, font_selector, item.GetResource()));
+#endif // OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
     } else {
       css_font_face_->AddSource(MakeGarbageCollected<LocalFontFaceSource>(
           css_font_face_, font_selector, item.GetResource()));

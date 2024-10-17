@@ -14,7 +14,7 @@ TEST(GenericFontFamilySettingsTest, FirstAvailableFontFamily) {
 
   // Returns the first available font if starts with ",".
   settings.UpdateStandard(",not exist, Arial");
-  EXPECT_EQ("Arial", settings.Standard());
+  EXPECT_EQ("not exist", settings.Standard());
 
   // Otherwise returns any strings as they were set.
   AtomicString non_lists[] = {

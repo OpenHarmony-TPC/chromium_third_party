@@ -175,7 +175,9 @@ SyncLoadContext::SyncLoadContext(
                                               timeout)) {
 
 #if BUILDFLAG(IS_OHOS)
-  LOG(DEBUG) << "SyncLoadContext pid=" << base::GetCurrentProcId() << ", main thread tid=" << base::GetCurrentRealPid() << ", real tid=" << base::PlatformThread::CurrentRealId();
+  LOG(DEBUG) << "SyncLoadContext pid=" << base::GetCurrentProcId()
+             << ", main thread tid=" << base::GetCurrentRealPid()
+             << ", real tid=" << base::PlatformThread::CurrentRealId();
   BindRemote(render_thread);
 
   if (report_manager_) {
@@ -265,7 +267,7 @@ void SyncLoadContext::OnReceivedResponse(
 #if BUILDFLAG(IS_OHOS)
 void SyncLoadContext::OnTransferDataWithSharedMemory(base::ReadOnlySharedMemoryRegion region, uint64_t buffer_size) {
   TRACE_EVENT0("loading", "SyncLoadContext::OnTransferDataWithSharedMemory");
-  LOG(DEBUG) << "shared-memory SyncLoadContext::OnTransferDataWithSharedMemory+++, buffer_size=" << buffer_size;
+  LOG(DEBUG) << "shared-memory SyncLoadContext::OnTransferDataWithSharedMemory+++, buffer_size:" << buffer_size;
   if (!region.IsValid()) {
     LOG(ERROR) << "shared-memory region is invalid";
     response_->error_code = net::ERR_FAILED;
@@ -281,6 +283,7 @@ void SyncLoadContext::OnTransferDataWithSharedMemory(base::ReadOnlySharedMemoryR
   }
   const char* buffer = mapping.GetMemoryAs<char>();
   size_t buffer_len = static_cast<size_t>(buffer_size);
+  LOG(DEBUG) << "shared-memory SyncLoadContext::OnTransferDataWithSharedMemory, buffer_len:" << buffer_len;
   if (!response_->data) {
     response_->data = SharedBuffer::Create(buffer, buffer_len);
   } else {
@@ -303,7 +306,7 @@ void SyncLoadContext::OnTransferDataWithSharedMemory(base::ReadOnlySharedMemoryR
   response_->head->encoded_body_length =
       network::mojom::EncodedBodyLength::New(status.encoded_body_length);
   CompleteRequest();
-  LOG(DEBUG) << "shared-memory SyncLoadContext::OnTransferDataWithSharedMemory---, buffer_size=" << buffer_size;
+  LOG(DEBUG) << "shared-memory SyncLoadContext::OnTransferDataWithSharedMemory---, buffer_size:" << buffer_size;
 }
 #endif
 

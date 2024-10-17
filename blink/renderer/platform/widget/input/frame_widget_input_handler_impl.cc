@@ -483,7 +483,7 @@ FrameWidgetInputHandlerImpl::HandlingState::~HandlingState() {
 }
 
 #if defined(OHOS_EX_FREE_COPY)
-void FrameWidgetInputHandlerImpl::SelectAndCopy() {
+void FrameWidgetInputHandlerImpl::ShowFreeCopyMenu() {
   RunOnMainThread(base::BindOnce(
       [](base::WeakPtr<WidgetBase> widget,
          base::WeakPtr<mojom::blink::FrameWidgetInputHandler> handler) {
@@ -491,7 +491,7 @@ void FrameWidgetInputHandlerImpl::SelectAndCopy() {
         if (!widget) {
           return;
         }
-        handler->SelectAndCopy();
+        handler->ShowFreeCopyMenu();
       },
       widget_, main_thread_frame_widget_input_handler_));
 }

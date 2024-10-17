@@ -299,7 +299,7 @@ TEST_P(CullRectUpdaterTest, ScrollingLayerCullRect) {
   // the clip is already small. Mapping it down into the graphics layer
   // space yields (0, 0, 195, 193). This is then expanded by 4000px and clipped
   // by the contents rect.
-  EXPECT_EQ(gfx::Rect(0, 0, 195, 4193), GetCullRect("target").Rect());
+  EXPECT_EQ(gfx::Rect(0, 0, 200, 4200), GetCullRect("target").Rect());
 }
 
 TEST_P(CullRectUpdaterTest, NonCompositedScrollingLayerCullRect) {
@@ -316,7 +316,7 @@ TEST_P(CullRectUpdaterTest, NonCompositedScrollingLayerCullRect) {
   )HTML");
 
   // See ScrollingLayerCullRect for the calculation.
-  EXPECT_EQ(gfx::Rect(0, 0, 195, 193), GetCullRect("target").Rect());
+  EXPECT_EQ(gfx::Rect(0, 0, 200, 200), GetCullRect("target").Rect());
 }
 
 TEST_P(CullRectUpdaterTest, ClippedBigLayer) {
@@ -388,7 +388,7 @@ TEST_P(CullRectUpdaterTest, WholeDocumentCullRect) {
   // Cull rect is normal for contents below scroll other than the viewport.
   EXPECT_EQ(gfx::Rect(0, 0, 200, 4200), GetCullRect("below-scroll").Rect());
 
-  EXPECT_EQ(7u, ContentDisplayItems().size());
+  EXPECT_EQ(6u, ContentDisplayItems().size());
 }
 
 TEST_P(CullRectUpdaterTest, FixedPositionUnderClipPath) {

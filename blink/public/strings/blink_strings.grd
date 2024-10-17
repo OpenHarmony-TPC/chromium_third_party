@@ -891,6 +891,17 @@ below:
       <message name="CONTENT_INVALID_GRAMMAR" desc="Error message for aria-invalid = grammar">
         Invalid grammar
       </message>
+
+      <!-- ohos -->
+      <message name="IDS_PLAYBACK_WILL_USING_MOBILE_DATA" use_name_for_id = "true" desc="video playback will using mobile data">
+        Currently on a mobile data network, playback will consume traffic
+      </message>
+      <message name="IDS_CONTINUE_PLAYING" use_name_for_id = "true" desc="continue playing">
+        Continue playing
+      </message>
+      <message name="IDS_PLAYING_USING_MOBILE_DATA" use_name_for_id = "true" desc="video playback is using mobile data">
+        Playing using mobile data
+      </message>
     </messages>
   </release>
 </grit>

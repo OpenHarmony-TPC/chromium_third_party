@@ -514,16 +514,18 @@ struct WebPreferences {
   [EnableIf=is_ohos]
   bool pinch_smooth_mode;
 
-  // #if defined(OHOS_EX_BLANK_TARGET_POPUP_INTERCEPT)
-  [EnableIf=ohos_ex_blank_target_popup_intercept]
-  bool blank_target_popup_intercept_enabled = true;
-  // #endif
-
   // #if defined(OHOS_CUSTOM_VIDEO_PLAYER)
   [EnableIf=ohos_custom_video_player]
   bool custom_video_player_enable = false;
   [EnableIf=ohos_custom_video_player]
   bool custom_video_player_overlay = false;
   // #endif OHOS_CUSTOM_VIDEO_PLAYER
+
+  // #ifdef OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
+  [EnableIf=ohos_media_network_traffic_prompt]
+  bool enable_media_network_traffic_prompt = false;
+  [EnableIf=ohos_media_network_traffic_prompt]
+  bool playback_with_mobile_data_allowed = false;
+  // #endif OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
 };
 

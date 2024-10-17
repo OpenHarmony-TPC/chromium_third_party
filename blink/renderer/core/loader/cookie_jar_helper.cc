@@ -68,7 +68,7 @@ bool CookieJarHelper::IPCNeeded(CookieBackend* backend) {
   buffer_ = mojo::SharedBufferHandle::Create(sizeof(bool));
   if (buffer_.is_valid()) {
     mapping_ = buffer_->Map(sizeof(bool));
-    auto handle = 
+    auto handle =
         buffer_->Clone(mojo::SharedBufferHandle::AccessMode::READ_WRITE);
     backend->get()->RegisterCookieChangeObserver(
         cookie_url, document_->SiteForCookies(), document_->TopFrameOrigin(),
@@ -90,7 +90,6 @@ void CookieJarHelper::NoticeCookieChanged() {
   *cookie_changed = true;
 }
 
-
 CookieJarHelper::ShmRegisterRecord*
 CookieJarHelper::getOrCreateShmRegisterRecord() {
   for (auto item : shm_record_list_) {
@@ -100,7 +99,7 @@ CookieJarHelper::getOrCreateShmRegisterRecord() {
           return item;
         }
   }
-  CookieJarHelper::ShmRegisterRecord* record = 
+  CookieJarHelper::ShmRegisterRecord* record =
       new CookieJarHelper::ShmRegisterRecord(
           document_->CookieURL(), document_->SiteForCookies(),
           document_->TopFrameOrigin());
