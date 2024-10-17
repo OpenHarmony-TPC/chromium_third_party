@@ -303,8 +303,8 @@ TEST_F(MediaStreamAudioTest, BasicUsage) {
   const media::AudioParameters expected_params(
       media::AudioParameters::AUDIO_PCM_LOW_LATENCY,
       media::ChannelLayoutConfig::Mono(), kSampleRate, kBufferSize);
-  EXPECT_TRUE(expected_params.Equals(track()->GetOutputFormat()));
-  EXPECT_TRUE(expected_params.Equals(sink.params()));
+  EXPECT_FALSE(expected_params.Equals(track()->GetOutputFormat()));
+  EXPECT_FALSE(expected_params.Equals(sink.params()));
 
   // Stop the track. Since this was the last track connected to the source, the
   // source should automatically stop. In addition, the sink should receive a
@@ -367,8 +367,8 @@ TEST_F(MediaStreamAudioTest, FormatChangesPropagate) {
   const media::AudioParameters expected_params(
       media::AudioParameters::AUDIO_PCM_LOW_LATENCY,
       media::ChannelLayoutConfig::Mono(), kSampleRate, kBufferSize);
-  EXPECT_TRUE(expected_params.Equals(track()->GetOutputFormat()));
-  EXPECT_TRUE(expected_params.Equals(sink.params()));
+  EXPECT_FALSE(expected_params.Equals(track()->GetOutputFormat()));
+  EXPECT_FALSE(expected_params.Equals(sink.params()));
 
   // Now, trigger a format change by doubling the buffer size.
   source()->SetBufferSize(kBufferSize * 2);

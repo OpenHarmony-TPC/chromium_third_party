@@ -208,6 +208,10 @@ class CORE_EXPORT HitTestResult {
   // the return value is const.
   const NodeSet& ListBasedTestResult() const;
 
+#ifdef OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
+  NodeSet& MutableListBasedTestResult();  // See above.
+#endif // OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
+
   // Collapse the rect-based test result into a single target at the specified
   // location.
   HitTestLocation ResolveRectBasedTest(
@@ -221,7 +225,9 @@ class CORE_EXPORT HitTestResult {
 #endif
 
  private:
+#ifndef OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
   NodeSet& MutableListBasedTestResult();  // See above.
+#endif // !OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
   HTMLMediaElement* MediaElement() const;
   std::tuple<bool, ListBasedHitTestBehavior>
   AddNodeToListBasedTestResultInternal(Node* node,

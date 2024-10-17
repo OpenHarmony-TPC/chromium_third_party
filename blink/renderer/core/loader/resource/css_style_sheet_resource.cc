@@ -82,9 +82,9 @@ CSSStyleSheetResource* CSSStyleSheetResource::CreateForOfflineResource(
   ResourceRequest request(kurl);
   request.SetRequestorOrigin(SecurityOrigin::Create(origin_url));
   request.SetCredentialsMode(network::mojom::CredentialsMode::kInclude);
-
+  
   ResourceLoaderOptions options(nullptr);
-
+  
   TextResourceDecoderOptions decoder_options(
       TextResourceDecoderOptions::kCSSContent, UTF8Encoding());
 

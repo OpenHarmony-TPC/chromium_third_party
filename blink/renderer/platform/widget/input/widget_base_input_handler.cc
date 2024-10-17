@@ -309,7 +309,7 @@ void WidgetBaseInputHandler::HandleInputEvent(
       weak_ptr_factory_.GetWeakPtr();
   HandlingState handling_state(weak_self, IsTouchStartOrMove(input_event));
 
-#if BUILDFLAG(IS_ANDROID)
+#if BUILDFLAG(IS_ANDROID) || BUILDFLAG(IS_OHOS)
   ImeEventGuard guard(widget_->GetWeakPtr());
 #endif
 
@@ -445,6 +445,7 @@ void WidgetBaseInputHandler::HandleInputEvent(
                                 std::move(handling_state.event_overscroll()),
                                 std::move(handling_state.touch_action()));
       }
+      LOG(INFO) << "Input handler destroyed when:" << WebInputEvent::GetName(input_event.GetType());
       return;
     }
   }
@@ -529,6 +530,12 @@ void WidgetBaseInputHandler::HandleInputEvent(
     widget_->client()->FocusChangeComplete();
   }
 #endif
+
+if (processed != WebInputEventResult::kNotHandled) {
+  LOG(INFO) << "input event not handled by webkit: "
+            << WebInputEvent::GetName(input_event.GetType())
+            << ", processed:" << static_cast<int32_t>(processed);
+}
 
   // Ensure all injected scrolls were handled or queue up - any remaining
   // injected scrolls at this point would not be processed.

@@ -66,11 +66,6 @@
 #include "third_party/blink/renderer/platform/weborigin/security_policy.h"
 #include "ui/gfx/geometry/point_conversions.h"
 
-#ifdef OHOS_EX_BLANK_TARGET_POPUP_INTERCEPT
-#include "base/command_line.h"
-#include "content/public/common/content_switches.h"
-#endif
-
 namespace blink {
 
 namespace {
@@ -429,35 +424,6 @@ void HTMLAnchorElement::SendPings(const KURL& destination_url) const {
   }
 }
 
-#ifdef OHOS_EX_BLANK_TARGET_POPUP_INTERCEPT
-bool ShouldFixedTargetToTop(LocalFrame* frame) {
-  bool should_fixed_target_to_top = false;
-  if (!frame) {
-    return should_fixed_target_to_top;
-  }
-
-  if (frame->GetSettings() &&
-      !frame->GetSettings()->IsBlankTargetPopupInterceptEnabled()) {
-    return false;
-  }
-
-  if (frame->IsMainFrame()) {
-    should_fixed_target_to_top = true;
-  } else if (!frame->DomWindow()->IsSandboxed(
-                 network::mojom::blink::WebSandboxFlags::kTopNavigation) ||
-             !frame->DomWindow()->IsSandboxed(
-                 network::mojom::blink::WebSandboxFlags::
-                     kTopNavigationByUserActivation)) {
-    LOG(INFO) << "ShouldFixedTargetToTop: the frame is not MainFrame. "
-                 "The flag of 'allow-top-navigation' or "
-                 "'allow-top-navigation-by-user-activation' is set.";
-    should_fixed_target_to_top = true;
-  }
-
-  return should_fixed_target_to_top;
-}
-#endif
-
 void HTMLAnchorElement::HandleClick(Event& event) {
   event.SetDefaultHandled();
 
@@ -578,20 +544,6 @@ void HTMLAnchorElement::HandleClick(Event& event) {
           : mojom::blink::TriggeringEventInfo::kFromUntrustedEvent);
   frame_request.SetInputStartTime(event.PlatformTimeStamp());
 
-#ifdef OHOS_EX_BLANK_TARGET_POPUP_INTERCEPT
-  AtomicString fixed_target;
-  if ((*base::CommandLine::ForCurrentProcess())
-          .HasSwitch(switches::kForBrowser)) {
-    if (!frame->Tree().FindFrameByName(target)) {
-      if (ShouldFixedTargetToTop(frame)) {
-        LOG(WARNING)
-            << "HTMLAnchorElement::HandleClick has fixed target frame to _top";
-        fixed_target = "_top";
-      }
-    }
-  }
-#endif
-
   frame->MaybeLogAdClickNavigation();
 
   if (const AtomicString& attribution_src =
@@ -612,15 +564,6 @@ void HTMLAnchorElement::HandleClick(Event& event) {
             /*navigation_url=*/completed_url, attribution_src,
             /*element=*/this));
   }
-
-#ifdef OHOS_EX_BLANK_TARGET_POPUP_INTERCEPT
-  if ((*base::CommandLine::ForCurrentProcess())
-          .HasSwitch(switches::kForBrowser)) {
-    fixed_target = fixed_target.IsNull() ? target : fixed_target;
-  } else {
-    fixed_target = target;
-  }
-#endif
 
   Frame* target_frame =
       frame->Tree().FindOrCreateFrameForNavigation(frame_request, target).frame;

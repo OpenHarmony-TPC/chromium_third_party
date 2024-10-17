@@ -131,6 +131,7 @@ const int kResizerControlExpandRatioForTouch = 2;
 const int kResizerControlReduceRatioForPcOhos = 2;
 const int kResizerControlReduceRatioForOhos = 6;
 const int kMaxScrollbarThicknessForOhos = 20;
+const int kScrollbarMargin = 4;
 #endif
 
 PaintLayerScrollableArea::PaintLayerScrollableArea(PaintLayer& layer)
@@ -1405,6 +1406,22 @@ gfx::Rect PaintLayerScrollableArea::RectForHorizontalScrollbar() const {
 
   const gfx::Rect& scroll_corner = ScrollCornerRect();
   gfx::Size border_box_size = PixelSnappedBorderBoxSize();
+
+#ifdef OHOS_SCROLLBAR
+  int marginBottom = 0;
+  if (HorizontalScrollbar()->IsOverlayScrollbar()) {
+    marginBottom = ScaleFromDIP() * kScrollbarMargin;
+  }
+  return gfx::Rect(
+      HorizontalScrollbarStart(),
+      border_box_size.height() - GetLayoutBox()->BorderBottom().ToInt() -
+          HorizontalScrollbar()->ScrollbarThickness() - marginBottom,
+      border_box_size.width() -
+          (GetLayoutBox()->BorderLeft() + GetLayoutBox()->BorderRight())
+              .ToInt() -
+          scroll_corner.width(),
+      HorizontalScrollbar()->ScrollbarThickness());
+#else  
   return gfx::Rect(
       HorizontalScrollbarStart(),
       border_box_size.height() - GetLayoutBox()->BorderBottom().ToInt() -
@@ -1414,6 +1431,7 @@ gfx::Rect PaintLayerScrollableArea::RectForHorizontalScrollbar() const {
               .ToInt() -
           scroll_corner.width(),
       HorizontalScrollbar()->ScrollbarThickness());
+#endif
 }
 
 gfx::Rect PaintLayerScrollableArea::RectForVerticalScrollbar() const {
@@ -1433,9 +1451,20 @@ gfx::Rect PaintLayerScrollableArea::RectForVerticalScrollbar() const {
 int PaintLayerScrollableArea::VerticalScrollbarStart() const {
   if (GetLayoutBox()->ShouldPlaceBlockDirectionScrollbarOnLogicalLeft())
     return GetLayoutBox()->BorderLeft().ToInt();
+#ifdef OHOS_SCROLLBAR
+  int marginRight = 0;
+  if (VerticalScrollbar()->IsOverlayScrollbar()) {
+    marginRight = ScaleFromDIP() * kScrollbarMargin;
+  }
+  return PixelSnappedBorderBoxSize().width() -
+         GetLayoutBox()->BorderRight().ToInt() -
+         VerticalScrollbar()->ScrollbarThickness() -
+         marginRight;
+#else  
   return PixelSnappedBorderBoxSize().width() -
          GetLayoutBox()->BorderRight().ToInt() -
          VerticalScrollbar()->ScrollbarThickness();
+#endif
 }
 
 int PaintLayerScrollableArea::HorizontalScrollbarStart() const {
@@ -2411,6 +2440,7 @@ PhysicalRect PaintLayerScrollableArea::ScrollIntoView(
       scroll_snapport_rect, local_expose_rect, *params->align_x.get(),
       *params->align_y.get(), GetScrollOffset());
 #endif
+
   ScrollOffset new_scroll_offset(
       ClampScrollOffset(gfx::ToRoundedVector2d(target_offset)));
 
@@ -3232,17 +3262,17 @@ int32_t PaintLayerScrollableArea::ClampScrollOffsetLimit(int32_t scroll_offset_l
   // 1. root frame可以scroll时不处理paint layer的滚动,以防止元素整体上移
   if (GetLayoutBox() && GetLayoutBox()->GetFrameView() &&
     Layer() && Layer()->Size().Height() < ScrollHeight()) {
-      LocalFrameView* parentFrameView = GetLayoutBox()->GetFrameView();
-      while (parentFrameView && parentFrameView->ParentFrameView()) {
-        parentFrameView = parentFrameView->ParentFrameView();
-      }
-      ScrollableArea* scrollableArea =
-          (parentFrameView ? parentFrameView->GetScrollableArea() : nullptr);
-      if (scrollableArea &&
-          scrollableArea->MaximumScrollOffset() !=
-              scrollableArea->MinimumScrollOffset()) {
-        return 0;
-      }
+    LocalFrameView* parentFrameView = GetLayoutBox()->GetFrameView();
+    while (parentFrameView && parentFrameView->ParentFrameView()) {
+      parentFrameView = parentFrameView->ParentFrameView();
+    }
+    ScrollableArea* scrollableArea =
+        (parentFrameView ? parentFrameView->GetScrollableArea() : nullptr);
+    if (scrollableArea &&
+        scrollableArea->MaximumScrollOffset() !=
+            scrollableArea->MinimumScrollOffset()) {
+      return 0;
+    }
   }
 
   // 2. 当前root layer无法scroll时也不处理paint layer的滚动,以防止元素整体上移

@@ -110,10 +110,6 @@ class CORE_EXPORT HTMLPlugInElement
 
   bool CheckNativeType(const char* key) const;
 
-  bool ShouldLoadForNative() const {
-    return IsNativeType() && GetObjectContentType() == ObjectContentType::kNone;
-  }
-
   HTMLNativeLoader* NativeLoader() const { return native_loader_.Get(); }
 #endif
 

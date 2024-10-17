@@ -910,7 +910,7 @@ void MediaControlsImpl::Reset() {
 
   // If the player has entered an error state, force it into the paused state.
   if (MediaElement().error()) {
-#if defined(OHOS_MEDIA)
+#ifdef OHOS_MEDIA
     LOG(INFO) << "OhMedia::pause";
 #endif // OHOS_MEDIA
     MediaElement().pause();
@@ -1056,9 +1056,10 @@ void MediaControlsImpl::MaybeShowOverlayPlayButton() {
 }
 
 void MediaControlsImpl::MakeOpaque() {
-#if defined(OHOS_MEDIA)
+#ifdef OHOS_MEDIA
   LOG(WARNING) << "OhMedia::MakeOpaque";
 #endif // OHOS_MEDIA
+
   ShowCursor();
 #if defined(OHOS_MEDIA)
   if (MediaElement().IsFullscreen()) {

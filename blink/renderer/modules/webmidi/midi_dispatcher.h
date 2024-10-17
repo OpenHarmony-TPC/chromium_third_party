@@ -17,7 +17,7 @@ namespace blink {
 class MIDIDispatcher : public GarbageCollected<MIDIDispatcher>,
                        public midi::mojom::blink::MidiSessionClient {
  public:
-  class Client {
+  class Client : public GarbageCollectedMixin {
    public:
     virtual void DidAddInputPort(const String& id,
                                  const String& manufacturer,
@@ -68,7 +68,7 @@ class MIDIDispatcher : public GarbageCollected<MIDIDispatcher>,
   void Trace(Visitor* visitor) const;
 
  private:
-  Client* client_ = nullptr;
+  Member<Client> client_;
 
   bool initialized_ = false;
 

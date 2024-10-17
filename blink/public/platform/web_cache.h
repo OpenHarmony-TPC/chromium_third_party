@@ -65,7 +65,7 @@ class BLINK_PLATFORM_EXPORT WebCache {
   static void GetResourceTypeStats(WebCacheResourceTypeStats*);
 
 #if BUILDFLAG(IS_OHOS)
-  // Add offline resource into MemoryCache.
+  // Add resource into MemoryCache
   static void AddResourceToCache(
       const std::string& url,
       const std::string& origin,

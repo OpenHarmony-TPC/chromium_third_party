@@ -57,7 +57,7 @@ source_set("libfuzzer") {
 # Depend on this if you wish for libfuzzer to provide the main()
 # function for your target.
 source_set("libfuzzer_main") {
-  deps = [ ":libfuzzer" ]
+  #deps = [ ":libfuzzer" ]
   configs -= fuzzing_engine_remove_configs
   configs += fuzzing_engine_add_configs
   sources = []

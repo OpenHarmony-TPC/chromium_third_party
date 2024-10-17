@@ -147,6 +147,9 @@ interface FrameWidget {
   
   [EnableIf=ohos_ai]
   OnTextSelected(bool flag);
+
+  [EnableIf=ohos_ai]
+  OnDestroyImageAnalyzerOverlay();
 };
 
 // Implemented in Browser, this interface defines frame-widget-specific methods that

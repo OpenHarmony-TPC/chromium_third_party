@@ -1117,6 +1117,11 @@ void FrameLoader::CommitNavigation(
     // document.
     if (commit_reason == CommitReason::kXSLT && document_loader_)
       document_loader_->SetSentDidFinishLoad();
+
+#ifdef OHOS_LOG_MESSAGE
+    LOG(INFO) << "Frame loader CommitNavigation, url: ***";
+#endif
+
     if (!DetachDocument()) {
       DCHECK(!is_provisional);
       return;
@@ -1234,8 +1239,17 @@ void FrameLoader::StopAllLoaders(bool abort_client) {
 
   frame_->GetDocument()->CancelParsing();
   frame_->DomWindow()->navigation()->InformAboutCanceledNavigation();
+
+#ifdef OHOS_LOG_MESSAGE
+  if (document_loader_) {
+    LOG(INFO) << "Frame loader StopAllLoaders, url: ***";
+    document_loader_->StopLoading();
+  }
+#else
   if (document_loader_)
     document_loader_->StopLoading();
+#endif
+
   if (abort_client)
     CancelClientNavigation();
   else

@@ -38,6 +38,13 @@
 #include "third_party/blink/renderer/platform/wtf/hash_set.h"
 #include "ui/gfx/geometry/rect.h"
 
+#ifdef OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
+#include "third_party/blink/renderer/core/dom/dom_node_ids.h"
+#include "third_party/blink/renderer/core/layout/hit_test_location.h"
+#include "third_party/blink/renderer/core/layout/layout_box_model_object.h"
+#include "third_party/blink/renderer/core/paint/paint_layer.h"
+#endif // OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
+
 namespace blink {
 
 // cc property trees make use of a sequence number to identify when tree
@@ -860,6 +867,7 @@ void PaintArtifactCompositor::Update(
     // We need additional bookkeeping for backdrop-filter mask.
     if (effect.RequiresCompositingForBackdropFilterMask() &&
         effect.CcNodeId(g_s_property_tree_sequence_number) == effect_id) {
+      CHECK(pending_layer.GetContentLayerClient());
       static_cast<cc::PictureLayer&>(layer).SetIsBackdropFilterMask(true);
       layer.SetElementId(effect.GetCompositorElementId());
       auto& effect_tree = host->property_trees()->effect_tree_mutable();
@@ -876,15 +884,36 @@ void PaintArtifactCompositor::Update(
         property_tree_manager.EnsureCompositorScrollAndTransformNode(
             scroll_translation);
 
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER) || defined(OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT)
+    bool should_at_top_in_z_order = false;
 #if defined(OHOS_CUSTOM_VIDEO_PLAYER)
-    if (layer.ShouldOverlay()) {
+    if (!should_at_top_in_z_order) {
+      should_at_top_in_z_order = layer.ShouldOverlay();
+    }
+#endif // OHOS_CUSTOM_VIDEO_PLAYER
+#if defined(OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT)
+    if (!should_at_top_in_z_order) {
+      DisplayItemClient* display_item_client =
+          reinterpret_cast<DisplayItemClient*>(
+              pending_layer.FirstPaintChunk().id.client_id);
+      if (display_item_client) {
+        Node* node = DOMNodeIds::NodeForId(display_item_client->OwnerNodeId());
+        if (node && node->ShouldOverlay()) {
+          if (node->GetLayoutObject()->HasNonZeroEffectiveOpacity()) {
+            should_at_top_in_z_order = true;
+          }
+        }
+      }
+    }
+#endif // OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
+    if (should_at_top_in_z_order) {
       layer_list_builder_for_video.Add(&layer);
     } else {
       layer_list_builder.Add(&layer);
     }
 #else
     layer_list_builder.Add(&layer);
-#endif // OHOS_CUSTOM_VIDEO_PLAYER
+#endif // OHOS_CUSTOM_VIDEO_PLAYER || OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
 
     layer.set_property_tree_sequence_number(
         root_layer_->property_tree_sequence_number());
@@ -907,10 +936,11 @@ void PaintArtifactCompositor::Update(
   }
 
 #if defined(OHOS_CUSTOM_VIDEO_PLAYER)
-  auto video_layers = layer_list_builder_for_video.Finalize();
-  for (const auto& video_layer : video_layers) {
+  overlay_cc_layers_ = layer_list_builder_for_video.Finalize();
+  for (const auto& video_layer : overlay_cc_layers_) {
     layer_list_builder.Add(video_layer);
   }
+  std::reverse(overlay_cc_layers_.begin(), overlay_cc_layers_.end());
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
 
   if (unification_enabled) {
@@ -1423,5 +1453,61 @@ void PaintArtifactCompositor::SetNeedsUpdate(
         PaintArtifactCompositorUpdateReason::kCount);
   }
 }
+
+#ifdef OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
+bool PaintArtifactCompositor::TryHitTest(const HitTestLocation& location,
+                                         HitTestResult& result,
+                                         LayoutObject* ancestor) {
+  for (auto& cc_layer : overlay_cc_layers_) {
+    for (auto& pending_layer : pending_layers_) {
+      if (cc_layer.get() != &(pending_layer.CcLayer())) {
+        continue;
+      }
+      DisplayItemClient* display_item_client =
+          reinterpret_cast<DisplayItemClient*>(
+              pending_layer.FirstPaintChunk().id.client_id);
+      if (!display_item_client) {
+        break;
+      }
+      Node* node = DOMNodeIds::NodeForId(display_item_client->OwnerNodeId());
+      if (!node) {
+        break;
+      }
+      LayoutBoxModelObject* layout_object = node->GetLayoutBoxModelObject();
+      if (!layout_object) {
+        break;
+      }
+      LayoutObject* parent = layout_object;
+      while (parent != ancestor && parent != nullptr) {
+        parent = parent->Parent();
+      }
+      if (parent != ancestor) {
+        break;
+      }
+      PhysicalOffset new_point =
+          layout_object->AbsoluteToLocalPoint(location.Point());
+      HitTestLocation new_hit_test_location(new_point);
+      HitTestRequest::HitTestRequestType new_hit_type =
+          result.GetHitTestRequest().GetType() |
+          HitTestRequest::kIgnorePointerEventsNone;
+      new_hit_type = new_hit_type & ~HitTestRequest::kListBased;
+      new_hit_type = new_hit_type & ~HitTestRequest::kPenetratingList;
+      HitTestResult new_result(HitTestRequest(new_hit_type), location);
+      auto hit = layout_object->HitTestAllPhases(
+          new_result, new_hit_test_location, {});
+      if (hit) {
+        result.SetNodeAndPosition(
+            new_result.InnerNode(), new_result.LocalPoint());
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+bool PaintArtifactCompositor::HasOverlayLayes() {
+  return !overlay_cc_layers_.empty();
+}
+#endif // OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
 
 }  // namespace blink

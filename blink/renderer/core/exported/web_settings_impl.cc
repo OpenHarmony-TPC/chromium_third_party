@@ -513,12 +513,6 @@ void WebSettingsImpl::SetContextMenuCustomization(bool enabled) {
 }
 #endif
 
-#ifdef OHOS_EX_BLANK_TARGET_POPUP_INTERCEPT
-void WebSettingsImpl::EnableBlankTargetPopupIntercept(bool enabled) {
-  settings_->EnableBlankTargetPopupIntercept(enabled);
-}
-#endif
-
 #if BUILDFLAG(IS_OHOS)
 void WebSettingsImpl::SetNativeEmbedModeEnabled(bool enabled) {
   settings_->SetNativeEmbedModeEnabled(enabled);
@@ -528,7 +522,6 @@ void WebSettingsImpl::RegisterNativeEmbedRule(const WebString& tag,
                                               const WebString& type) {
   settings_->RegisterNativeEmbedRule(tag, type);
 }
-
 void WebSettingsImpl::SetDrawMode(int mode) {
   settings_->SetDrawMode(mode);
 }
@@ -862,4 +855,13 @@ void WebSettingsImpl::SetCustomVideoPlayerOverlay(bool overlay) {
   settings_->SetCustomVideoPlayerOverlay(overlay);
 }
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
+
+#ifdef OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
+void WebSettingsImpl::SetMediaNetworkTrafficPromptEnabled(bool enable) {
+  settings_->SetMediaNetworkTrafficPromptEnabled(enable);
+}
+void WebSettingsImpl::SetPlaybackWithMobileDataAllowed(bool allowed) {
+  settings_->SetPlaybackWithMobileDataAllowed(allowed);
+}
+#endif // OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
 }  // namespace blink

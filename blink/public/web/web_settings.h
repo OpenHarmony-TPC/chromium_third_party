@@ -187,9 +187,6 @@ class WebSettings {
 #if defined(OHOS_EX_FREE_COPY)
   virtual void SetContextMenuCustomization(bool) = 0;
 #endif
-#ifdef OHOS_EX_BLANK_TARGET_POPUP_INTERCEPT
-  virtual void EnableBlankTargetPopupIntercept(bool) = 0;
-#endif  // OHOS_EX_BLANK_TARGET_POPUP_INTERCEPT
   virtual void SetPasswordEchoDurationInSeconds(double) = 0;
   virtual void SetPasswordEchoEnabled(bool) = 0;
   virtual void SetPluginsEnabled(bool) = 0;
@@ -311,6 +308,11 @@ class WebSettings {
   virtual void SetCustomVideoPlayerEnabled(bool enable) = 0;
   virtual void SetCustomVideoPlayerOverlay(bool overlay) = 0;
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
+
+#ifdef OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
+  virtual void SetMediaNetworkTrafficPromptEnabled(bool enable) = 0;
+  virtual void SetPlaybackWithMobileDataAllowed(bool allowed) = 0;
+#endif // OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
 
  protected:
   ~WebSettings() = default;

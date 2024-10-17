@@ -159,6 +159,8 @@ void SurfaceLayerBridge::SetVideoRectChangeCallback(
     cc::SurfaceLayer::RectChangeCallback callback) {
   if (surface_layer_) {
     surface_layer_->SetVideoRectChangeCallback(std::move(callback));
+  } else {
+    LOG(WARNING) << "SetVideoRectChangeCallback, surface_layer_ is null";
   }
 }
 #endif // OHOS_CUSTOM_VIDEO_PLAYER

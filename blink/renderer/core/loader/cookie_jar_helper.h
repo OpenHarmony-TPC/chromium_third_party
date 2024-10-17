@@ -20,7 +20,7 @@ namespace blink {
 
 class CookieJarHelper {
  public:
-  using CookieBackend = 
+  using CookieBackend =
     HeapMojoRemote<network::mojom::blink::RestrictedCookieManager>;
 
   explicit CookieJarHelper(Document* document);

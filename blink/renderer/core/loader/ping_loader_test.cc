@@ -182,7 +182,6 @@ TEST_F(PingLoaderTest, FrameAncestorsViolationHasOpaqueOrigin) {
   EXPECT_EQ(request.HttpHeaderField(AtomicString("Origin")), String());
 }
 
-
 TEST_F(PingLoaderTest, BeaconPriority) {
   SetDocumentURL(KURL("https://localhost/foo.html"));
 

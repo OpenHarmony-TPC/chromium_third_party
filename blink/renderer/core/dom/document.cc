@@ -4323,11 +4323,11 @@ KURL Document::urlForBinding() const {
 }
 
 #if BUILDFLAG(IS_OHOS)
-  void Document::StartBoosting() {
-    OHOS::NWeb::OhosAdapterHelper::GetInstance()
-      .CreateSocPerfClientAdapter()
-      ->ApplySocPerfConfigByIdEx(OHOS::NWeb::SocPerfClientAdapter::SOC_PERF_WEB_GESTURE_ID, true);    
-  }
+void Document::StartBoosting() {
+  OHOS::NWeb::OhosAdapterHelper::GetInstance()
+    .CreateSocPerfClientAdapter()
+    ->ApplySocPerfConfigByIdEx(OHOS::NWeb::SocPerfClientAdapter::SOC_PERF_WEB_GESTURE_ID, true);
+}
 #endif
 
 void Document::SetURL(const KURL& url) {
@@ -4343,7 +4343,7 @@ void Document::SetURL(const KURL& url) {
       InNanoseconds() - base::ohos::TouchObserver::GetInstance().GetLastTouchUpTime() < MAX_TOUCH_UP_INTERVAL) {
     base::SingleThreadTaskRunner::GetCurrentDefault()
       ->PostDelayedTask(FROM_HERE, WTF::BindOnce(&Document::StartBoosting,
-        WrapWeakPersistent(this)),  base::Milliseconds(LOAD_URL_DELAY_TIME));
+        WrapWeakPersistent(this)), base::Milliseconds(LOAD_URL_DELAY_TIME));
   }
 #endif
 

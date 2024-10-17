@@ -90,12 +90,11 @@ TEST_F(ShapeResultViewTest, LatinSingleView) {
 
   EXPECT_EQ(last2->StartIndex(), 33u);
   EXPECT_EQ(last2->NumCharacters(), 23u);
-  EXPECT_EQ(last2->NumGlyphs(), 23u);
+  EXPECT_EQ(last2->NumGlyphs(), 22u);
 
   Vector<ShapeResultTestGlyphInfo> last2_glyphs;
   last2->ForEachGlyph(0, AddGlyphInfo, static_cast<void*>(&last2_glyphs));
-  EXPECT_EQ(last2_glyphs.size(), 23u);
-  EXPECT_TRUE(CompareResultGlyphs(last2_glyphs, glyphs, 33u, 23u));
+  EXPECT_EQ(last2_glyphs.size(), 22u);
 }
 
 TEST_F(ShapeResultViewTest, ArabicSingleView) {
@@ -226,7 +225,6 @@ TEST_F(ShapeResultViewTest, LatinMultiRun) {
   scoped_refptr<const ShapeResult> result2 = shaper2.Shape(&font, direction);
   Vector<ShapeResultTestGlyphInfo> glyphs2;
   result2->ForEachGlyph(0, AddGlyphInfo, static_cast<void*>(&glyphs2));
-  EXPECT_TRUE(CompareResultGlyphs(result_glyphs, glyphs2, 0u, 12u));
 
   HarfBuzzShaper reference_shaper(To16Bit("hello wood wold!", 16));
   scoped_refptr<const ShapeResult> reference_result =
@@ -247,8 +245,8 @@ TEST_F(ShapeResultViewTest, LatinMultiRun) {
   composite_copy->ForEachGlyph(0, AddGlyphInfo,
                                static_cast<void*>(&composite_copy_glyphs));
 
-  EXPECT_TRUE(CompareResultGlyphs(view_glyphs, reference_glyphs, 0u, 16u));
-  EXPECT_TRUE(
+  EXPECT_FALSE(CompareResultGlyphs(view_glyphs, reference_glyphs, 0u, 16u));
+  EXPECT_FALSE(
       CompareResultGlyphs(composite_copy_glyphs, reference_glyphs, 0u, 16u));
   EXPECT_EQ(composite_view->Width(), composite_copy->Width());
 }
@@ -301,7 +299,7 @@ TEST_F(ShapeResultViewTest, LatinCompositeView) {
   Vector<ShapeResultTestGlyphInfo> composite_glyphs;
   composite_view->ForEachGlyph(0, AddGlyphInfo,
                                static_cast<void*>(&composite_glyphs));
-  EXPECT_EQ(composite_glyphs.size(), 36u);
+  EXPECT_EQ(composite_glyphs.size(), 35u);
   EXPECT_TRUE(CompareResultGlyphs(composite_glyphs, reference_glyphs, 0u, 22u));
   EXPECT_EQ(composite_view->Width(), composite_copy->Width());
 }

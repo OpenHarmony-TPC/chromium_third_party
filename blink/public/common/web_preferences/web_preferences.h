@@ -291,9 +291,6 @@ struct BLINK_COMMON_EXPORT WebPreferences {
   bool disable_webauthn = false;
 #endif  // BUILDFLAG(IS_ANDROID) || BUILDFLAG(IS_FUCHSIA)
 
-#ifdef OHOS_EX_BLANK_TARGET_POPUP_INTERCEPT
-  bool blank_target_popup_intercept_enabled = true;
-#endif
   // Enable forcibly modifying content rendering to result in a light on dark
   // color scheme.
   bool force_dark_mode_enabled = false;
@@ -418,6 +415,11 @@ struct BLINK_COMMON_EXPORT WebPreferences {
   bool custom_video_player_enable = false;
   bool custom_video_player_overlay = false;
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
+
+#ifdef OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
+  bool enable_media_network_traffic_prompt = false;
+  bool playback_with_mobile_data_allowed = false;
+#endif // OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
 
   // We try to keep the default values the same as the default values in
   // chrome, except for the cases where it would require lots of extra work for

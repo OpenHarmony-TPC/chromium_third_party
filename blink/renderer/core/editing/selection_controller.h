@@ -106,7 +106,7 @@ class CORE_EXPORT SelectionController final
 
   Document& GetDocument() const;
 
-#if defined(OHOS_CLIPBOARD)
+#ifdef OHOS_CLIPBOARD
   bool MouseSelectMenuShow(bool show);
 #endif
 

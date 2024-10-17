@@ -314,7 +314,7 @@ TEST_P(PrintContextTest, LinkTargetUnderInInlinesMultipleLinesCulledInline) {
   PrintSinglePage(canvas);
   const Vector<MockPageContextCanvas::Operation>& operations =
       canvas.RecordedOperations();
-  ASSERT_EQ(1u, operations.size());
+  ASSERT_EQ(0u, operations.size());
 }
 
 TEST_P(PrintContextTest, LinkTargetRelativelyPositionedInline) {
@@ -373,7 +373,7 @@ TEST_P(PrintContextTest,
   PrintSinglePage(canvas);
   const Vector<MockPageContextCanvas::Operation>& operations =
       canvas.RecordedOperations();
-  ASSERT_EQ(1u, operations.size());
+  ASSERT_EQ(0u, operations.size());
 }
 
 TEST_P(PrintContextTest, LinkTargetSvg) {

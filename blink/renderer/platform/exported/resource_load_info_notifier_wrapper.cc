@@ -19,6 +19,10 @@
 #include "third_party/blink/public/mojom/loader/resource_load_info_notifier.mojom.h"
 #include "third_party/blink/public/platform/weak_wrapper_resource_load_info_notifier.h"
 
+#if BUILDFLAG(IS_OHOS)
+#include "base/debug/dump_without_crashing.h"
+#endif  // BUILDFLAG(IS_OHOS)
+
 namespace blink {
 
 ResourceLoadInfoNotifierWrapper::ResourceLoadInfoNotifierWrapper(
@@ -204,6 +208,11 @@ void ResourceLoadInfoNotifierWrapper::NotifyResourceLoadCompleted(
 void ResourceLoadInfoNotifierWrapper::NotifyResourceLoadCanceled(
     int net_error) {
   DCHECK_CALLED_ON_VALID_THREAD(thread_checker_);
+  if (!resource_load_info_) {
+    LOG(ERROR) << "used shared memory : " << used_shared_memory_;
+    base::debug::DumpWithoutCrashing();
+    return;
+  }
   RecordLoadHistograms(url::Origin::Create(resource_load_info_->final_url),
                        resource_load_info_->request_destination, net_error);
 

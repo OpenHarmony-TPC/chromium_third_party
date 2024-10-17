@@ -4,9 +4,11 @@
 
 #include "third_party/blink/renderer/modules/webusb/usb_device.h"
 
+#include <limits>
 #include <utility>
 
 #include "base/containers/span.h"
+#include "third_party/abseil-cpp/absl/types/optional.h"
 #include "third_party/blink/public/platform/platform.h"
 #include "third_party/blink/renderer/bindings/core/v8/script_promise.h"
 #include "third_party/blink/renderer/bindings/core/v8/script_promise_resolver.h"
@@ -637,14 +639,14 @@ ScriptPromise USBDevice::isochronousTransferOut(
   if (data.ByteLength() > std::numeric_limits<wtf_size_t>::max()) {
     exception_state.ThrowDOMException(DOMExceptionCode::kDataError,
                                       kBufferTooBig);
-    }
+	 }
+
   absl::optional<uint32_t> total_bytes = TotalPacketLength(packet_lengths);
   if (!total_bytes.has_value()) {
     exception_state.ThrowDOMException(DOMExceptionCode::kDataError,
                                       kPacketLengthsTooBig);
     return ScriptPromise();
   }
-
   if (total_bytes.value() != data.ByteLength()) {
     exception_state.ThrowDOMException(DOMExceptionCode::kDataError,
                                       kBufferSizeMismatch);

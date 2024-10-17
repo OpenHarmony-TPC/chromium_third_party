@@ -604,7 +604,7 @@ void URLLoader::LoadAsynchronously(
     std::unique_ptr<ResourceLoadInfoNotifierWrapper>
         resource_load_info_notifier_wrapper,
     URLLoaderClient* client) {
-  LOG(DEBUG) << "intercept URLLoader::LoadASynchronously+++";
+  LOG(DEBUG) << "intercept URLLoader::LoadAsynchronously+++";
   if (!context_) {
     return;
   }
@@ -618,7 +618,7 @@ void URLLoader::LoadAsynchronously(
                   /*pass_response_pipe_to_client=*/false, no_mime_sniffing,
                   base::TimeDelta(), nullptr,
                   std::move(resource_load_info_notifier_wrapper));
-  LOG(DEBUG) << "intercept URLLoader::LoadASynchronously---";
+  LOG(DEBUG) << "intercept URLLoader::LoadAsynchronously---";
 }
 
 void URLLoader::Cancel() {

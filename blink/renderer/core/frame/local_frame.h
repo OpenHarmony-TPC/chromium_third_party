@@ -1141,6 +1141,11 @@ class CORE_EXPORT LocalFrame final
       window_controls_overlay_changed_delegate_;
 #endif
 
+#if BUILDFLAG(IS_OHOS)
+  bool scale_limits_max_changed_ = false;
+  bool scale_limits_min_changed_ = false;
+#endif
+
   // The evidence for or against a frame being an ad frame. `absl::nullopt` if
   // not yet set or if the frame is a subfiltering root frame. (Only non-root
   // frames can be tagged as ad frames.) This is per-frame (as opposed to

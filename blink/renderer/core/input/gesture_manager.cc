@@ -182,6 +182,9 @@ WebInputEventResult GestureManager::HandleGestureEventInFrame(
     case WebInputEvent::Type::kGestureTwoFingerTap:
       return HandleGestureTwoFingerTap(targeted_event);
     case WebInputEvent::Type::kGestureTapCancel:
+#ifdef OHOS_AI
+      mouse_event_manager_->SetOverlayInProgressOnly(false);
+#endif
     case WebInputEvent::Type::kGestureTapUnconfirmed:
       break;
     default:

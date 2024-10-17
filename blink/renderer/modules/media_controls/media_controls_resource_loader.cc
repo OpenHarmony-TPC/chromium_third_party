@@ -111,4 +111,12 @@ void MediaControlsResourceLoader::InjectMediaControlsUAStyleSheet() {
     default_style_sheets.SetMediaControlsStyleSheetLoader(std::move(loader));
 }
 
+#ifdef OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
+// static
+String MediaControlsResourceLoader::GetMobileDataPromptStyleSheet() {
+  return UncompressResourceAsString(
+      IDR_SHADOWSTYLE_MEDIA_CONTROLS_MOBILE_DATA_PROMPT_CSS);
+}
+#endif // OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
+
 }  // namespace blink

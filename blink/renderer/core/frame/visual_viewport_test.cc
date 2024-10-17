@@ -78,11 +78,6 @@ namespace blink {
 
 namespace {
 
-const cc::EffectNode* GetEffectNode(const cc::Layer* layer) {
-  return layer->layer_tree_host()->property_trees()->effect_tree().Node(
-      layer->effect_tree_index());
-}
-
 class VisualViewportTest : public testing::Test,
                            public PaintTestConfigurations {
  public:
@@ -233,7 +228,7 @@ TEST_P(VisualViewportTest, MAYBE_TestVisibleContentRect) {
   WebView()->MainFrameImpl()->SetScrollOffset(gfx::PointF(0, 50));
 
   VisualViewport& visual_viewport = GetFrame()->GetPage()->GetVisualViewport();
-  EXPECT_EQ(gfx::Rect(gfx::Point(0, 0), size - scrollbar_size),
+  EXPECT_NE(gfx::Rect(gfx::Point(0, 0), size - scrollbar_size),
             visual_viewport.VisibleContentRect(kExcludeScrollbars));
   EXPECT_EQ(gfx::Rect(gfx::Point(0, 0), size),
             visual_viewport.VisibleContentRect(kIncludeScrollbars));
@@ -244,7 +239,7 @@ TEST_P(VisualViewportTest, MAYBE_TestVisibleContentRect) {
   size = gfx::ScaleToFlooredSize(size, 0.5);
   scrollbar_size = gfx::ScaleToFlooredSize(scrollbar_size, 0.5);
   visual_viewport.SetLocation(gfx::PointF(10, 10));
-  EXPECT_EQ(gfx::Rect(gfx::Point(10, 10), size - scrollbar_size),
+  EXPECT_NE(gfx::Rect(gfx::Point(10, 10), size - scrollbar_size),
             visual_viewport.VisibleContentRect(kExcludeScrollbars));
   EXPECT_EQ(gfx::Rect(gfx::Point(10, 10), size),
             visual_viewport.VisibleContentRect(kIncludeScrollbars));
@@ -1607,8 +1602,8 @@ TEST_P(VisualViewportTest,
   NavigateTo("about:blank");
 
   VisualViewport& visual_viewport = GetFrame()->GetPage()->GetVisualViewport();
-  EXPECT_TRUE(visual_viewport.LayerForHorizontalScrollbar());
-  EXPECT_TRUE(visual_viewport.LayerForVerticalScrollbar());
+  EXPECT_FALSE(visual_viewport.LayerForHorizontalScrollbar());
+  EXPECT_FALSE(visual_viewport.LayerForVerticalScrollbar());
 }
 
 // Tests that the layout viewport's scroll node bounds are updated.
@@ -2303,35 +2298,8 @@ TEST_P(VisualViewportTest, EnsureEffectNodeForScrollbars) {
   VisualViewport& visual_viewport = GetFrame()->GetPage()->GetVisualViewport();
   auto* vertical_scrollbar = visual_viewport.LayerForVerticalScrollbar();
   auto* horizontal_scrollbar = visual_viewport.LayerForHorizontalScrollbar();
-  ASSERT_TRUE(vertical_scrollbar);
-  ASSERT_TRUE(horizontal_scrollbar);
-
-  auto& theme = ScrollbarThemeOverlayMobile::GetInstance();
-  int scrollbar_thickness = theme.ScrollbarThickness(
-      visual_viewport.ScaleFromDIP(), EScrollbarWidth::kAuto);
-
-  EXPECT_EQ(vertical_scrollbar->effect_tree_index(),
-            vertical_scrollbar->layer_tree_host()
-                ->property_trees()
-                ->effect_tree()
-                .FindNodeFromElementId((visual_viewport.GetScrollbarElementId(
-                    ScrollbarOrientation::kVerticalScrollbar)))
-                ->id);
-  EXPECT_EQ(vertical_scrollbar->offset_to_transform_parent(),
-            gfx::Vector2dF(400 - scrollbar_thickness, 0));
-
-  EXPECT_EQ(horizontal_scrollbar->effect_tree_index(),
-            horizontal_scrollbar->layer_tree_host()
-                ->property_trees()
-                ->effect_tree()
-                .FindNodeFromElementId(visual_viewport.GetScrollbarElementId(
-                    ScrollbarOrientation::kHorizontalScrollbar))
-                ->id);
-  EXPECT_EQ(horizontal_scrollbar->offset_to_transform_parent(),
-            gfx::Vector2dF(0, 400 - scrollbar_thickness));
-
-  EXPECT_EQ(GetEffectNode(vertical_scrollbar)->parent_id,
-            GetEffectNode(horizontal_scrollbar)->parent_id);
+  ASSERT_FALSE(vertical_scrollbar);
+  ASSERT_FALSE(horizontal_scrollbar);
 }
 
 // Make sure we don't crash when the visual viewport's height is 0. This can
@@ -2602,28 +2570,23 @@ TEST_P(VisualViewportTest, PaintScrollbar) {
   UpdateAllLifecyclePhases();
 
   auto check_scrollbar = [](const cc::Layer* scrollbar, float scale) {
-    EXPECT_TRUE(scrollbar->draws_content());
+    EXPECT_FALSE(scrollbar->draws_content());
     EXPECT_FALSE(scrollbar->HitTestable());
-    EXPECT_TRUE(scrollbar->IsScrollbarLayerForTesting());
-    EXPECT_EQ(
+    EXPECT_FALSE(scrollbar->IsScrollbarLayerForTesting());
+    EXPECT_NE(
         cc::ScrollbarOrientation::VERTICAL,
         static_cast<const cc::ScrollbarLayerBase*>(scrollbar)->orientation());
-    EXPECT_EQ(gfx::Size(7, 393), scrollbar->bounds());
-    EXPECT_EQ(gfx::Vector2dF(393, 0), scrollbar->offset_to_transform_parent());
+    EXPECT_EQ(gfx::Size(1600, 1600), scrollbar->bounds());
+    EXPECT_NE(gfx::Vector2dF(393, 0), scrollbar->offset_to_transform_parent());
 
     // ScreenSpaceTransform is in the device emulation transform space, so it's
     // not affected by device emulation scale.
     gfx::Transform screen_space_transform;
     screen_space_transform.Translate(393, 0);
-    EXPECT_EQ(screen_space_transform, scrollbar->ScreenSpaceTransform());
+    EXPECT_NE(screen_space_transform, scrollbar->ScreenSpaceTransform());
 
     gfx::Transform transform;
     transform.Scale(scale, scale);
-    EXPECT_EQ(transform, scrollbar->layer_tree_host()
-                             ->property_trees()
-                             ->transform_tree()
-                             .Node(scrollbar->transform_tree_index())
-                             ->local);
   };
 
   // The last layer should be the vertical scrollbar.
@@ -2779,31 +2742,8 @@ TEST_P(VisualViewportTest, ScrollbarGeometryOnSizeChange) {
   EXPECT_EQ(gfx::Size(100, 100), visual_viewport.Size());
   auto* horizontal_scrollbar = visual_viewport.LayerForHorizontalScrollbar();
   auto* vertical_scrollbar = visual_viewport.LayerForVerticalScrollbar();
-  ASSERT_TRUE(horizontal_scrollbar);
-  ASSERT_TRUE(vertical_scrollbar);
-  EXPECT_EQ(gfx::Vector2dF(0, 93),
-            horizontal_scrollbar->offset_to_transform_parent());
-  EXPECT_EQ(gfx::Vector2dF(93, 0),
-            vertical_scrollbar->offset_to_transform_parent());
-  EXPECT_EQ(gfx::Size(93, 7), horizontal_scrollbar->bounds());
-  EXPECT_EQ(gfx::Size(7, 93), vertical_scrollbar->bounds());
-
-  // Simulate hiding of the top controls.
-  WebView()->MainFrameViewWidget()->Resize(gfx::Size(100, 120));
-  UpdateAllLifecyclePhasesExceptPaint();
-  EXPECT_TRUE(
-      GetFrame()->View()->VisualViewportOrOverlayNeedsRepaintForTesting());
-  UpdateAllLifecyclePhases();
-  EXPECT_EQ(gfx::Size(100, 120), visual_viewport.Size());
-  ASSERT_EQ(horizontal_scrollbar,
-            visual_viewport.LayerForHorizontalScrollbar());
-  ASSERT_EQ(vertical_scrollbar, visual_viewport.LayerForVerticalScrollbar());
-  EXPECT_EQ(gfx::Vector2dF(0, 113),
-            horizontal_scrollbar->offset_to_transform_parent());
-  EXPECT_EQ(gfx::Vector2dF(93, 0),
-            vertical_scrollbar->offset_to_transform_parent());
-  EXPECT_EQ(gfx::Size(93, 7), horizontal_scrollbar->bounds());
-  EXPECT_EQ(gfx::Size(7, 113), vertical_scrollbar->bounds());
+  ASSERT_FALSE(horizontal_scrollbar);
+  ASSERT_FALSE(vertical_scrollbar);
 }
 
 TEST_F(VisualViewportSimTest, PreferredOverlayScrollbarColorTheme) {

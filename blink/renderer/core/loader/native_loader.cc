@@ -144,14 +144,6 @@ void NativeLoader::LoadResource(LocalFrame* frame) {
   web_native_bridge_->StartPipeline();
 }
 
-gfx::Rect NativeLoader::PluginBoundingRect() {
-  if (bounding_rect_.IsEmpty()) {
-    bounding_rect_ = plugin_element_->PixelSnappedBoundingBox();
-  }
-
-  return bounding_rect_;
-}
-
 void NativeLoader::OnCreateNativeSurface(int native_embed_id,
                                          RectChangeCB rect_changed_cb) {
   LOG(INFO) << "[NativeEmbed] NativeLoader::OnCreateNativeSurface";
@@ -159,10 +151,19 @@ void NativeLoader::OnCreateNativeSurface(int native_embed_id,
     return;
   }
 
-  if (PluginBoundingRect().IsEmpty()) {
+  if (bounding_rect_.IsEmpty()) {
     plugin_element_->GetDocument().UpdateStyleAndLayoutForNode(
         plugin_element_, DocumentUpdateReason::kPlugin);
+    if (auto* layout_object = plugin_element_->GetLayoutObject()) {
+      const auto& replaced = To<LayoutReplaced>(layout_object);
+      bounding_rect_ = ToPixelSnappedRect(replaced->ReplacedContentRect());
+    }
+    if (bounding_rect_.IsEmpty()) {
+      first_update_rect_ = false;
+    }
   }
+  LOG(INFO) << "NativeEmbed NativeLoader::OnCreateNativeSurface:"
+            << bounding_rect_.ToString();
 
   native_embed_id_ = native_embed_id;
   bounding_rect_changed_cb_ = rect_changed_cb;
@@ -172,12 +173,12 @@ void NativeLoader::OnCreateNativeSurface(int native_embed_id,
   auto* frame = CurrentFrame();
   if (frame && frame->View()) {
     auto bounds_to_viewport =
-        frame->View()->FrameToViewport(PluginBoundingRect());
+        frame->View()->FrameToViewport(bounding_rect_);
     // We will use the position relative to visual viewport.
     bounding_rect_.set_origin(bounds_to_viewport.origin());
     embed_info->rect = bounds_to_viewport;
     if (!bounding_rect_changed_cb_.is_null()) {
-      bounding_rect_changed_cb_.Run(bounds_to_viewport, false);
+      bounding_rect_changed_cb_.Run(bounds_to_viewport);
     }
   }
 
@@ -201,51 +202,40 @@ void NativeLoader::OnCreateNativeSurface(int native_embed_id,
   }
 }
 
+
 void NativeLoader::OnLayerRectVisibilityChange(bool visibility) {
   visibility_ = visibility;
   first_update_visibility = true;
-  if(native_embed_id_ != -1) {
+  if (native_embed_id_ != -1) {
     for (auto& observer : native_bridge_observer_remote_set_->Value()) {
       observer->OnLayerRectVisibilityChange(visibility_, native_embed_id_);
     }
   }
 }
 
-void NativeLoader::UpdateSize(gfx::Size size) {
-  String native_type = GetTypeAttribute();
-  LOG(INFO) << "NativeEmbed size:" << size.ToString() << ",native_type:" << native_type;
-  if (native_type == "native/video") {
-    return;
-  }
-  if (PluginBoundingRect().size() != size) {
-    if (!bounding_rect_changed_cb_.is_null()) {
-      bounding_rect_changed_cb_.Run(gfx::ScaleToEnclosingRect(
-          bounding_rect_, PageConstraintInitalScale(plugin_element_->GetDocument())), true);
-    }
-  }
-}
-
 void NativeLoader::OnLayerRectChange(const gfx::Rect& rect) {
-  if (PluginBoundingRect().ApproximatelyEqual(rect, 1) ||
-      !native_bridge_observer_remote_set_) {
-    return;
-  }
-
   if (first_update_rect_) {
     first_update_rect_ = false;
     return;
   }
 
-  if (PluginBoundingRect().size() != rect.size()) {
+  if (bounding_rect_.ApproximatelyEqual(rect, 1) ||
+      !native_bridge_observer_remote_set_) {
+    return;
+  }
+
+  if (bounding_rect_.size() != rect.size()) {
     bounding_rect_ = rect;
     if (!bounding_rect_changed_cb_.is_null()) {
       bounding_rect_changed_cb_.Run(gfx::ScaleToEnclosingRect(
-          bounding_rect_, PageConstraintInitalScale(plugin_element_->GetDocument())), true);
+          bounding_rect_, PageConstraintInitalScale(plugin_element_->GetDocument())));
     }
   } else {
     bounding_rect_.set_origin(rect.origin());
   }
 
+  LOG(INFO) << "NativeEmbed NativeLoader::OnLayerRectChange:"
+            << bounding_rect_.ToString();
   for (auto& observer : native_bridge_observer_remote_set_->Value()) {
     observer->OnEmbedRectChange(gfx::Rect(
         bounding_rect_.origin(),
@@ -290,7 +280,6 @@ void NativeLoader::SetCcLayer(cc::Layer* cc_layer) {
                << GetTypeAttribute();
     cc_layer_->SetMayContainNative(true);
     cc_layer_->SetNeedsPushProperties();
-    cc_layer_->SetIsNativeVideo(GetTypeAttribute() == "native/video");
   }
 }
 
