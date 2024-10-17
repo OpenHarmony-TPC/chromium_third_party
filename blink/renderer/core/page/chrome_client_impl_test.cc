@@ -196,7 +196,7 @@ TEST_F(FormSubmissionTest, FormGetSubmissionNewFrameUrlTest) {
   SubmitForm(*form_elem);
 #ifdef OHOS_EX_BLANK_TARGET_POPUP_INTERCEPT
   if ((*base::CommandLine::ForCurrentProcess())
-          .HasSwitch(switches::kForBrowser)) {
+          .HasSwitch(switches::kEnableNwebExBlankTargetPopup_intercept)) {
     EXPECT_TRUE(chrome_client_->GetLastUrl().IsEmpty());
   } else {
     EXPECT_EQ("foo=bar", chrome_client_->GetLastUrl().Query());

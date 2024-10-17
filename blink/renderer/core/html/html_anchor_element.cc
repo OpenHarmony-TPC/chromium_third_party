@@ -581,7 +581,7 @@ void HTMLAnchorElement::HandleClick(Event& event) {
 #ifdef OHOS_EX_BLANK_TARGET_POPUP_INTERCEPT
   AtomicString fixed_target;
   if ((*base::CommandLine::ForCurrentProcess())
-          .HasSwitch(switches::kForBrowser)) {
+          .HasSwitch(switches::kEnableNwebExBlankTargetPopup_intercept)) {
     if (!frame->Tree().FindFrameByName(target)) {
       if (ShouldFixedTargetToTop(frame)) {
         LOG(WARNING)
@@ -615,7 +615,7 @@ void HTMLAnchorElement::HandleClick(Event& event) {
 
 #ifdef OHOS_EX_BLANK_TARGET_POPUP_INTERCEPT
   if ((*base::CommandLine::ForCurrentProcess())
-          .HasSwitch(switches::kForBrowser)) {
+          .HasSwitch(switches::kEnableNwebExBlankTargetPopup_intercept)) {
     fixed_target = fixed_target.IsNull() ? target : fixed_target;
   } else {
     fixed_target = target;
