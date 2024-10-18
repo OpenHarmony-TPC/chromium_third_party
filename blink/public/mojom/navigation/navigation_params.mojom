@@ -285,7 +285,7 @@ struct CommonNavigationParams {
       network.mojom.RequestDestination.kEmpty;
 
   // Additional HTTP request headers.
-  [Enableif=is_ohos]
+  [EnableIf=is_ohos]
   string headers;
 };
 
