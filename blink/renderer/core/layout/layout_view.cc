@@ -70,6 +70,11 @@
 #include "third_party/blink/renderer/platform/fonts/font_cache.h"
 #endif
 
+#ifdef OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
+#include "third_party/blink/renderer/core/frame/settings.h"
+#include "third_party/blink/renderer/platform/graphics/compositing/paint_artifact_compositor.h"
+#endif // OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
+
 namespace blink {
 
 namespace {
@@ -176,6 +181,22 @@ bool LayoutView::HitTestNoLifecycleUpdate(const HitTestLocation& location,
     hit_layer = true;
     result = cache_result;
   } else {
+#ifdef OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
+    bool media_network_traffic_prompt_enabled =
+        GetDocument().GetSettings() &&
+        GetDocument().GetSettings()->IsMediaNetworkTrafficPromptEnabled();
+    if (media_network_traffic_prompt_enabled) {
+      LocalFrameView* frame_view = GetFrameView();
+      if (frame_view && frame_view->GetPaintArtifactCompositor()) {
+        hit_layer =
+            frame_view->GetPaintArtifactCompositor()->TryHitTest(location, result, this);
+        if (hit_layer) {
+          hit_test_cache_->AddCachedResult(location, result, dom_tree_version);
+          return hit_layer;
+        }
+      }
+    }
+#endif // OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
     LocalFrameView* frame_view = GetFrameView();
     PhysicalRect hit_test_area;
     if (frame_view) {

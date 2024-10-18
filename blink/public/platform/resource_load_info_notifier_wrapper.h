@@ -61,6 +61,7 @@ class BLINK_PLATFORM_EXPORT ResourceLoadInfoNotifierWrapper {
   void NotifyResourceLoadCompleted(
       const network::URLLoaderCompletionStatus& status);
   void NotifyResourceLoadCanceled(int net_error);
+  void SetUsedSharedMemory() { used_shared_memory_ = true; }
 
  private:
   THREAD_CHECKER(thread_checker_);
@@ -74,6 +75,8 @@ class BLINK_PLATFORM_EXPORT ResourceLoadInfoNotifierWrapper {
   // This struct holds the loading stats passed to
   // |weak_wrapper_resource_load_info_notifier_|.
   mojom::ResourceLoadInfoPtr resource_load_info_;
+
+  bool used_shared_memory_{false};
 };
 
 }  // namespace blink

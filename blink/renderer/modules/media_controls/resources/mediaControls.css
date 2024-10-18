@@ -107,6 +107,7 @@ video::-webkit-media-controls-panel {
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
+  align-items: center;
   user-select: none;
   z-index: 0;
   overflow: hidden;
@@ -166,7 +167,6 @@ video::-webkit-media-controls.sizing-large div[pseudo="-webkit-media-controls-pa
  * shown */
 video::-webkit-media-controls:not(.audio-only) div[pseudo="-webkit-media-controls-panel" i].scrubbing-message {
   background:
-    linear-gradient(to top, var(--gradient-steps)) repeat-x top left,
     linear-gradient(to bottom, var(--gradient-steps)) repeat-x bottom left;
 }
 
@@ -684,6 +684,7 @@ audio::-webkit-media-controls-timeline,
 video::-webkit-media-controls-timeline {
   appearance: -internal-media-control;
 
+  width: 100%;
   height: 4px;
   padding-left: 16px;
   padding-right: 16px;
@@ -1423,10 +1424,35 @@ video::-internal-media-controls-overlay-cast-button.on {
 
 video::-internal-media-controls-scrubbing-message {
   position: absolute;
-  top: 12px;
+  top: 20%;
   text-align: center;
-  width: 100%;
+  max-width: 100%;
+  border-radius: 18px;
   color: #FFFFFF;
+}
+
+video::-internal-media-controls-scrubbing-message::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 18px;
+  background-color: rgba(255, 255, 255, 0.2);
+  z-index: -1;
+}
+
+video::-internal-media-controls-scrubbing-message::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 18px;
+  background-color: rgba(0, 0, 0, 0.2);
+  z-index: -1;
 }
 
 .state-scrubbing input[pseudo="-webkit-media-controls-overlay-play-button" i] {
@@ -1678,4 +1704,54 @@ audio::-internal-media-controls-text-track-list {
       background: Window;
       border: 1px solid WindowText;
     }
+}
+
+/* ohos */
+video::-internal-mobile-data-prompt {
+  --ohos_id_color_mask_light: #000;
+  --ohos_id_color_text_primary_contrary: #fff;
+  --ohos_id_text_size_body2: 14px;
+  --ohos_id_text_size_button: 12px;
+  --ohos_id_text_font_family_regular: normal;
+  position: absolute;
+  left: 0;
+  top:0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  transform: translate3d(0,0,0);
+  background-color: var(--ohos_id_color_mask_light);
+  font-size: var(--ohos_id_text_size_body2);
+  font-weight: var(--ohos_id_text_font_family_regular);
+  color: var(--ohos_id_color_text_primary_contrary);
+  font-family: 'MobileDataPromptFont';
+}
+
+video::-internal-mobile-data-prompt-message {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-left: calc(clamp(0px, calc(100% - 599px), 1px) * 8 + 16px);
+  padding-right: calc(clamp(0px, calc(100% - 599px), 1px) * 8 + 16px);
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 16px;
+}
+
+video::-internal-mobile-data-prompt-button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(255,255,255,0.1);
+  border: 0px solid #000;
+  border-radius: 100px;
+  padding: 4px 8px;
+  height: 20px;
+  min-width: 72px;
+  max-width: 448px;
+  font-size: var(--ohos_id_text_size_button);
+  font-weight: 500;
 }

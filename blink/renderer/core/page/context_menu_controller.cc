@@ -95,9 +95,10 @@
 #include "third_party/blink/public/web/web_element_collection.h"
 #include "third_party/blink/renderer/core/css/css_image_value.h"
 #include "third_party/blink/renderer/core/css/css_uri_value.h"
+#include "third_party/blink/renderer/core/dom/node_computed_style.h"
+#include "third_party/blink/renderer/core/editing/visible_position.h"
 #include "third_party/blink/renderer/core/frame/settings.h"
 #include "third_party/blink/renderer/core/html/parser/html_parser_idioms.h"
-#include "third_party/blink/renderer/core/dom/node_computed_style.h"
 #endif
 
 namespace blink {
@@ -520,7 +521,6 @@ bool ContextMenuController::ShowContextMenu(LocalFrame* frame,
       if (IsHitTestStopNode(*node)) {
         break;
       }
-
       // the node is <IMG> , try to get image url.
       if (IsA<HTMLImageElement>(node)) {
         HTMLImageElement* img_element = To<HTMLImageElement>(node);
@@ -858,16 +858,14 @@ bool ContextMenuController::ShowContextMenu(LocalFrame* frame,
   bool contextmenu_customization_enabled =
       page_->GetSettings().IsContextMenuCustomizationEnabled();
   if (contextmenu_customization_enabled &&
-      source_type == kMenuSourceSelectAndCopy && data.selected_text.empty() &&
+      source_type == kMenuSourceShowFreeCopyMenu && data.selected_text.empty() &&
       !selected_frame->SelectedText().empty()) {
     data.selected_text = selected_frame->SelectedText().Utf8();
   }
 
   data.is_selectable = false;
-  if (contextmenu_customization_enabled && result.InnerNode() &&
-      result.InnerNode()->GetLayoutObject() &&
-      result.InnerNode()->GetLayoutObject()->IsSelectable()) {
-    data.is_selectable = true;
+  if (contextmenu_customization_enabled) {
+    data.is_selectable = ShouldShowFreeCopyMenu(result);
   }
 #endif
 
@@ -919,6 +917,29 @@ bool ContextMenuController::ShowContextMenu(LocalFrame* frame,
 
   return true;
 }
+
+#ifdef OHOS_EX_FREE_COPY
+bool ContextMenuController::ShouldShowFreeCopyMenu(
+    const HitTestResult& result) {
+  if (!result.InnerNode() || !result.InnerNode()->GetLayoutObject()) {
+    return false;
+  }
+  if (!result.InnerNode()->GetLayoutObject()->IsSelectable()) {
+    return false;
+  }
+  if (result.IsLiveLink()) {
+    const PositionInFlatTreeWithAffinity pos =
+        CreateVisiblePosition(FromPositionInDOMTree<EditingInFlatTreeStrategy>(
+                                  result.GetPosition()))
+            .ToPositionWithAffinity();
+    if (pos.IsNull() ||
+        !pos.AnchorNode()->IsDescendantOf(result.URLElement())) {
+      return false;
+    }
+  }
+  return true;
+}
+#endif
 
 #ifdef OHOS_CLIPBOARD
 GURL ContextMenuController::GetChildImageUrlFromElement(

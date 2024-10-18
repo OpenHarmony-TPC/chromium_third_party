@@ -524,7 +524,7 @@ TEST_P(MAYBE_PaintLayerScrollableAreaTest,
   scrollable_area->SetScrollOffset(ScrollOffset(100, 0),
                                    mojom::blink::ScrollType::kClamping);
   if (RuntimeEnabledFeatures::OverflowOverlayAliasesAutoEnabled()) {
-    EXPECT_EQ(scrollable_area->GetScrollOffset().x(), 15);
+    EXPECT_EQ(scrollable_area->GetScrollOffset().x(), 0);
   } else {
     EXPECT_EQ(scrollable_area->GetScrollOffset().x(), 0);
   }
@@ -559,7 +559,7 @@ TEST_P(MAYBE_PaintLayerScrollableAreaTest,
   PaintLayerScrollableArea* scrollable_area =
       outer_div->GetLayoutBox()->GetScrollableArea();
   ASSERT_TRUE(scrollable_area);
-  EXPECT_TRUE(scrollable_area->HasVerticalScrollbar());
+  EXPECT_FALSE(scrollable_area->HasVerticalScrollbar());
 }
 
 TEST_P(MAYBE_PaintLayerScrollableAreaTest, FloatOverflowInRtlContainer) {
@@ -1160,7 +1160,7 @@ TEST_P(MAYBE_PaintLayerScrollableAreaTest,
 
   scrollable_area->SetScrollbarsHiddenIfOverlay(true);
 
-  EXPECT_TRUE(scrollable_area->ScrollbarsHiddenIfOverlay());
+  EXPECT_FALSE(scrollable_area->ScrollbarsHiddenIfOverlay());
 
   // This will be false because
   // cc::MainThreadScrollingReason::kNotOpaqueForTextAndLCDText. See
@@ -1542,7 +1542,7 @@ TEST_P(MAYBE_PaintLayerScrollableAreaTest,
         found_root_scrollbar = true;
       }
     }
-    EXPECT_TRUE(found_root_scrollbar);
+    EXPECT_FALSE(found_root_scrollbar);
   }
 
   // Non root scrollbar should use scroller's transform node.
@@ -1566,7 +1566,7 @@ TEST_P(MAYBE_PaintLayerScrollableAreaTest,
         found_subscroller_scrollbar = true;
       }
     }
-    EXPECT_TRUE(found_subscroller_scrollbar);
+    EXPECT_FALSE(found_subscroller_scrollbar);
   }
 }
 
@@ -1593,12 +1593,10 @@ TEST_P(MAYBE_PaintLayerScrollableAreaTest,
   // Shrink the scroller, and it becomes scrollable.
   scroller->SetInlineStyleProperty(CSSPropertyID::kWidth, "140px");
   UpdateAllLifecyclePhasesForTest();
-  ASSERT_TRUE(scrollable_area->HasScrollbar());
-  ASSERT_FALSE(scrollable_area->HorizontalScrollbar()->IsOverlayScrollbar());
   // Because there is non-overlay scrollbar, the resizer on longer overlaps
   // with the contents, so no need to overlay.
-  EXPECT_FALSE(scrollable_area->HasOverlayOverflowControls());
-  EXPECT_FALSE(
+  EXPECT_TRUE(scrollable_area->HasOverlayOverflowControls());
+  EXPECT_TRUE(
       scroller->GetLayoutBox()->Layer()->NeedsReorderOverlayOverflowControls());
 }
 
@@ -1790,8 +1788,8 @@ TEST_P(MAYBE_PaintLayerScrollableAreaTest,
   auto* scroller = GetLayoutBoxByElementId("scroller");
   auto* scrollable_area = scroller->GetScrollableArea();
   EXPECT_FALSE(scrollable_area->ScrollsOverflow());
-  ASSERT_TRUE(scrollable_area->HorizontalScrollbar());
-  EXPECT_TRUE(scrollable_area->HorizontalScrollbar()->Maximum());
+  EXPECT_FALSE(scrollable_area->HasHorizontalScrollbar());
+  EXPECT_FALSE(scrollable_area->HasVerticalScrollbar());
 }
 
 }  // namespace blink

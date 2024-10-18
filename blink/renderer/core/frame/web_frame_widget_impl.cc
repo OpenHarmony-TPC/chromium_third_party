@@ -2698,7 +2698,8 @@ WebInputEventResult WebFrameWidgetImpl::HandleInputEvent(
   DCHECK(!WebInputEvent::IsTouchEventType(input_event.GetType()));
   CHECK(LocalRootImpl());
 
-  if (input_event.GetType() == WebInputEvent::Type::kPointerUp) {
+  if (input_event.GetType() == WebInputEvent::Type::kPointerUp ||
+      input_event.GetType() == WebInputEvent::Type::kKeyUp) {
     base::ohos::TouchObserver::GetInstance().
       SetTouchUpTime(::base::subtle::TimeTicksNowIgnoringOverride().since_origin().InNanoseconds());
   }
@@ -3683,7 +3684,7 @@ void WebFrameWidgetImpl::SetPanAction(mojom::blink::PanAction pan_action) {
 }
 
 void WebFrameWidgetImpl::DidHandleGestureEvent(const WebGestureEvent& event) {
-#if BUILDFLAG(IS_ANDROID) || defined(USE_AURA) || BUILDFLAG(IS_IOS)
+#if BUILDFLAG(IS_ANDROID) || defined(USE_AURA) || BUILDFLAG(IS_IOS) || BUILDFLAG(IS_OHOS)
   if (event.GetType() == WebInputEvent::Type::kGestureTap) {
     widget_base_->ShowVirtualKeyboard();
   } else if (event.GetType() == WebInputEvent::Type::kGestureLongPress) {
@@ -4249,7 +4250,6 @@ void WebFrameWidgetImpl::NotifyPageScaleFactorChanged(
 void WebFrameWidgetImpl::SetPinchSmoothMode(bool enable) {
   widget_base_->LayerTreeHost()->SetPinchSmoothMode(enable);
 }
-
 void WebFrameWidgetImpl::TouchHitTest(const WebPointerEvent& event,
                                       size_t finger_id) {
   WebPointerEvent transformed_event =
@@ -4809,7 +4809,7 @@ gfx::Vector2dF WebFrameWidgetImpl::GetOverScrollOffset() {
 #endif  // defined(OHOS_INPUT_EVENTS)
 
 #ifdef OHOS_EX_FREE_COPY
-void WebFrameWidgetImpl::SelectAndCopy() {
+void WebFrameWidgetImpl::ShowFreeCopyMenu() {
   WebLocalFrame* local_frame = FocusedWebLocalFrameInWidget();
   if (!local_frame) {
     return;
@@ -4833,14 +4833,22 @@ void WebFrameWidgetImpl::RegisterClippedVisualViewportSelectionBounds(
 void WebFrameWidgetImpl::CreateOverlay(const SkBitmap& image,
                                        const gfx::Rect& image_rect,
                                        const gfx::Point & touch_point,
-                                       OnTextSelectedCallback callback) {
+                                       OnTextSelectedCallback callback,
+                                       OnDestroyImageAnalyzerOverlayCallback destroy_callback) {
   on_text_selected_callback_ = std::move(callback);
+  on_destroy_image_overlay_callback_ = std::move(destroy_callback);
   GetAssociatedFrameWidgetHost()->CreateOverlay(image, image_rect, touch_point);
 }
 
 void WebFrameWidgetImpl::OnTextSelected(bool flag) {
   if (on_text_selected_callback_) {
     on_text_selected_callback_.Run(flag);
+  }
+}
+
+void WebFrameWidgetImpl::OnDestroyImageAnalyzerOverlay() {
+  if (on_destroy_image_overlay_callback_) {
+    on_destroy_image_overlay_callback_.Run();
   }
 }
 
@@ -4864,4 +4872,10 @@ void WebFrameWidgetImpl::GetScreenRect(GetScreenRectCallback callback) {
   std::move(callback).Run(screen_rect);
 }
 #endif
+
+#ifdef OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
+void WebFrameWidgetImpl::ShowToast(const cc::LayerTreeExtraState& state) {
+  widget_base_->LayerTreeHost()->ShowToast(state);
+}
+#endif // OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
 }  // namespace blink

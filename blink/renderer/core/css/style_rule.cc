@@ -33,6 +33,7 @@
 #include "third_party/blink/renderer/core/css/css_keyframes_rule.h"
 #include "third_party/blink/renderer/core/css/css_layer_block_rule.h"
 #include "third_party/blink/renderer/core/css/css_layer_statement_rule.h"
+#include "third_party/blink/renderer/core/css/css_markup.h"
 #include "third_party/blink/renderer/core/css/css_media_rule.h"
 #include "third_party/blink/renderer/core/css/css_namespace_rule.h"
 #include "third_party/blink/renderer/core/css/css_page_rule.h"
@@ -652,7 +653,7 @@ String StyleRuleBase::LayerNameAsString(
     if (result.length()) {
       result.Append(".");
     }
-    result.Append(part);
+    SerializeIdentifier(part, result);
   }
   return result.ReleaseString();
 }

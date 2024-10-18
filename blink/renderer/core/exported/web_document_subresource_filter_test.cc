@@ -43,51 +43,6 @@ class TestDocumentSubresourceFilter : public WebDocumentSubresourceFilter {
     return LoadPolicy::kAllow;
   }
 
-  #ifdef OHOS_ARKWEB_ADBLOCK
-  void ClearStatistics() override {}
-
-  std::unique_ptr<std::string> GetElementHidingSelectors(
-      const WebURL& document_url,
-      bool need_common_selectors) override {
-        return {};
-      }
-
-  bool HasGenericHideTypeOption(
-      const WebURL& document_url,
-      const url::Origin& parent_document_origin) override {
-        return false;
-      }
-
-  bool HasElemHideTypeOption(
-      const WebURL& document_url,
-      const url::Origin& parent_document_origin) override {
-        return false;
-      }
-
-  bool HasDocumentTypeOption(
-      const WebURL& document_url,
-      const url::Origin& parent_document_origin) override {
-        return false;
-      }
-
-  void DidMatchCssRule(const WebURL& document_url,
-                               const std::string& dom_path,
-                               //  unsigned rule_line_num = 0,
-                               bool is_for_report = false) override {}
-
-  void SetDidFinishLoad(bool did_load_finished) override {}
-
-  bool GetDidFinishLoad() override {
-    return false;
-  }
-
-  std::unique_ptr<std::vector<std::string>> GetUserDomPathSelectors(
-      const blink::WebURL& document_url,
-      bool need_generic_selectors) override {
-        return {};
-      }
-  #endif
-
   LoadPolicy GetLoadPolicyForWebSocketConnect(const WebURL& url) override {
     return kAllow;
   }

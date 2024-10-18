@@ -9,6 +9,12 @@ CmdExtract::CmdExtract(CommandData *Cmd)
   *DestFileName=0;
 
   TotalFileCount=0;
+
+  // Common for all archives involved. Set here instead of DoExtract()
+  // to use in unrar.dll too. Allows to avoid LinksToDirs() calls
+  // and save CPU time in no symlinks including ".." in target were extracted.
+  UpLinkExtracted=false;
+
   Unp=new Unpack(&DataIO);
 #ifdef RAR_SMP
   Unp->SetThreads(Cmd->Threads);
@@ -99,6 +105,8 @@ void CmdExtract::ExtractArchiveInit(Archive &Arc)
   AnySolidDataUnpackedWell=false;
 
   StartTime.SetCurrentTime();
+
+  LastCheckedSymlink.clear();
 }
 
 
@@ -523,6 +531,10 @@ bool CmdExtract::ExtractCurrentFile(Archive &Arc,size_t HeaderSize,bool &Repeat)
       wcsncpyz(DestFileName,Cmd->DllDestName,ASIZE(DestFileName));
 #endif
 
+    if (ExtrFile && Command!='P' && !Cmd->Test && !Cmd->AbsoluteLinks &&
+        UpLinkExtracted)
+      ExtrFile=LinksToDirs(DestFileName,Cmd->ExtrPath,LastCheckedSymlink);
+
     File CurFile;
 #if defined(CHROMIUM_UNRAR)
     // Since extraction is done in a sandbox, this must extract to the temp file
@@ -655,10 +667,22 @@ bool CmdExtract::ExtractCurrentFile(Archive &Arc,size_t HeaderSize,bool &Repeat)
 
         if (Type==FSREDIR_HARDLINK || Type==FSREDIR_FILECOPY)
         {
+          wchar RedirName[NM];
+
+          // 2022.11.15: Might be needed when unpacking WinRAR 5.0 links with
+          // Unix RAR. WinRAR 5.0 used \ path separators here, when beginning
+          // from 5.10 even Windows version uses / internally and converts
+          // them to \ when reading FHEXTRA_REDIR.
+          // We must perform this conversion before ConvertPath call,
+          // so paths mixing different slashes like \dir1/dir2\file are
+          // processed correctly.
+          SlashToNative(Arc.FileHead.RedirName,RedirName,ASIZE(RedirName));
+
+          ConvertPath(RedirName,RedirName,ASIZE(RedirName));
+
           wchar NameExisting[NM];
-          ExtrPrepareName(Arc,Arc.FileHead.RedirName,NameExisting,ASIZE(NameExisting));
+          ExtrPrepareName(Arc,RedirName,NameExisting,ASIZE(NameExisting));
           if (FileCreateMode && *NameExisting!=0) // *NameExisting can be 0 in case of excessive -ap switch.
-            if (Type==FSREDIR_HARDLINK)
               LinkSuccess=ExtractHardlink(DestFileName,NameExisting,ASIZE(NameExisting));
             else
               LinkSuccess=ExtractFileCopy(CurFile,Arc.FileName,DestFileName,NameExisting,ASIZE(NameExisting));
@@ -667,7 +691,22 @@ bool CmdExtract::ExtractCurrentFile(Archive &Arc,size_t HeaderSize,bool &Repeat)
           if (Type==FSREDIR_UNIXSYMLINK || Type==FSREDIR_WINSYMLINK || Type==FSREDIR_JUNCTION)
           {
             if (FileCreateMode)
-              LinkSuccess=ExtractSymlink(Cmd,DataIO,Arc,DestFileName);
+            {
+              bool UpLink;
+              LinkSuccess=ExtractSymlink(Cmd,DataIO,Arc,DestFileName,UpLink);
+              UpLinkExtracted|=LinkSuccess && UpLink;
+
+              // We do not actually need to reset the cache here if we cache
+              // only the single last checked path, because at this point
+              // it will always contain the link own path and link can't
+              // overwrite its parent folder. But if we ever decide to cache
+              // several already checked paths, we'll need to reset them here.
+              // Otherwise if no files were created in one of such paths,
+              // let's say because of file create error, it might be possible
+              // to overwrite the path with link and avoid checks. We keep this
+              // code here as a reminder in case of possible modifications.
+              LastCheckedSymlink.clear(); // Reset cache for safety reason.
+            }
           }
           else
           {
@@ -848,8 +887,6 @@ void CmdExtract::UnstoreFile(ComprDataIO &DataIO,int64 DestUnpSize)
 
 bool CmdExtract::ExtractFileCopy(File &New,wchar *ArcName,wchar *NameNew,wchar *NameExisting,size_t NameExistingSize)
 {
-  SlashToNative(NameExisting,NameExisting,NameExistingSize); // Not needed for RAR 5.1+ archives.
-
   File Existing;
   if (!Existing.WOpen(NameExisting))
   {
@@ -1105,6 +1142,8 @@ void CmdExtract::ExtrCreateDir(Archive &Arc,const wchar *ArcFileName)
     }
     if (!DirExist)
     {
+      if (!Cmd->AbsoluteLinks && UpLinkExtracted)
+        LinksToDirs(DestFileName,Cmd->ExtrPath,LastCheckedSymlink);
       CreatePath(DestFileName,true);
       MDCode=MakeDir(DestFileName,!Cmd->IgnoreGeneralAttr,Arc.FileHead.FileAttr);
       if (MDCode!=MKDIR_SUCCESS)
@@ -1196,6 +1235,8 @@ bool CmdExtract::ExtrCreateFile(Archive &Arc,File &CurFile)
 
           MakeNameUsable(DestFileName,true);
 
+          if (!Cmd->AbsoluteLinks && UpLinkExtracted)
+            LinksToDirs(DestFileName,Cmd->ExtrPath,LastCheckedSymlink);
           CreatePath(DestFileName,true);
           if (FileCreate(Cmd,&CurFile,DestFileName,ASIZE(DestFileName),&UserReject,Arc.FileHead.UnpSize,&Arc.FileHead.mtime,true))
           {

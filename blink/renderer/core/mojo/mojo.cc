@@ -119,7 +119,6 @@ void Mojo::bindInterface(ScriptState* script_state,
       && !base::EqualsCaseInsensitiveASCII(name.c_str(), kExtensionsMimeHandlerBeforeUnloadControl))
     return;
 #endif
-
   auto handle =
       mojo::ScopedMessagePipeHandle::From(request_handle->TakeHandle());
 

@@ -433,7 +433,7 @@ interface FrameWidgetInputHandler {
 
   // #if defined(OHOS_NWEB_EX)
   [EnableIf=ohos_ex_free_copy]
-  SelectAndCopy();
+  ShowFreeCopyMenu();
   // #endif
 
   // Requests the renderer to move the caret selection toward the point.

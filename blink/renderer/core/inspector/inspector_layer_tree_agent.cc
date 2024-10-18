@@ -305,6 +305,11 @@ void InspectorLayerTreeAgent::GatherLayers(
     return;
   if (layer->layer_tree_host()->is_hud_layer(layer))
     return;
+#ifdef OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
+  if (layer->layer_tree_host()->is_toast_layer(layer)) {
+    return;
+  }
+#endif // OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
   layers->emplace_back(BuildObjectForLayer(RootLayer(), layer));
   for (auto child : layer->children())
     GatherLayers(child.get(), layers);

@@ -184,8 +184,11 @@ class CORE_EXPORT FrameSelection final
   // Call this after doing user-triggered selections to make it easy to delete
   // the frame you entirely selected.
   void SelectFrameElementInParentIfFullySelected();
-
+#ifdef OHOS_CLIPBOARD
+  bool Contains(const PhysicalOffset&, bool contains_boundaries = true);
+#else
   bool Contains(const PhysicalOffset&);
+#endif
 
   bool Modify(SelectionModifyAlteration,
               SelectionModifyDirection,
@@ -328,7 +331,7 @@ class CORE_EXPORT FrameSelection final
   void Trace(Visitor*) const override;
 
 #ifdef OHOS_CLIPBOARD
-  bool IsSelectAll() { return is_select_all_; }
+  bool IsSelectAll() const { return is_select_all_; }
 #endif  // OHOS_CLIPBOARD
 
 #ifdef OHOS_DRAG_DROP

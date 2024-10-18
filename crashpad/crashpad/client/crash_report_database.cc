@@ -25,7 +25,7 @@
 #if defined(OHOS_CRASHPAD)
 #include "third_party/crashpad/crashpad/util/linux/crashpad_dfx.h"
 #endif
-
+ 
 #if defined(OHOS_CRASHPAD)
 std::string g_crash_dump_path_suffix = "";
 #endif

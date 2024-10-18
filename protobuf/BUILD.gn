@@ -213,9 +213,15 @@ static_library("protobuf_full") {
 
   # TODO(crbug.com/1338164): This ends up linking two copies of
   # protobuf_lite_sources in some targets, which is an ODR violation.
-  sources = protobuf_lite_sources + protobuf_sources + protobuf_headers
 
   deps = [ "//third_party/zlib" ]
+
+  if (is_component_build) {
+    sources = protobuf_lite_sources + protobuf_sources + protobuf_headers
+  } else {
+    sources = protobuf_sources + protobuf_headers
+    deps += [ ":protobuf_lite" ]
+  }
 
   if (is_android) {
     libs = [ "log" ]  # Used by src/google/protobuf/stubs/common.cc

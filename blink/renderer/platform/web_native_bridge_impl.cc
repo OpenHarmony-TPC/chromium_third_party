@@ -184,21 +184,21 @@ void WebNativeBridgeImpl::OnSurfaceDestroyed() {
   client_->OnDestroyNativeSurface();
 }
 
-void WebNativeBridgeImpl::OnLayerRectChange(const gfx::Rect& rect) {
-  DCHECK(main_task_runner_->BelongsToCurrentThread());
-  LOG(DEBUG) << "[NativeEmbed] OnLayerRectChange.";
-
-  client_->OnLayerRectChange(rect);
-
-  layer_rect_ = rect;
-}
-
 void WebNativeBridgeImpl::OnLayerRectVisibilityChange(bool visibility) {
   DCHECK(main_task_runner_->BelongsToCurrentThread());
   LOG(INFO) << "[NativeEmbed] OnLayerRectVisibilityChange: "
              << visibility;
 
   client_->OnLayerRectVisibilityChange(visibility);
+}
+
+void WebNativeBridgeImpl::OnLayerRectChange(const gfx::Rect& rect) {
+  DCHECK(main_task_runner_->BelongsToCurrentThread());
+  LOG(DEBUG) << "[NativeEmbed] WebNativeBridgeImpl::OnLayerRectChange";
+
+  client_->OnLayerRectChange(rect);
+
+  layer_rect_ = rect;
 }
 
 gfx::Size WebNativeBridgeImpl::NaturalSize() const {
@@ -210,8 +210,9 @@ void WebNativeBridgeImpl::OnSetLayer() {
   DVLOG(1) << __func__;
   DCHECK(main_task_runner_->BelongsToCurrentThread());
   DCHECK(!video_layer_);
-  media::WebRectChangedCB rect_change_cb = base::BindRepeating(
+  media::RectChangedCB rect_change_cb = base::BindRepeating(
       &WebNativeBridgeImpl::OnLayerRectChange, base::Unretained(this));
+
   media::RectVisibilityChangedCB rect_visibility_change_cb = base::BindRepeating(
       &WebNativeBridgeImpl::OnLayerRectVisibilityChange, base::Unretained(this));
 

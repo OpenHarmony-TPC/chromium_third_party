@@ -331,7 +331,6 @@ HitTestResult EventHandler::HitTestResultAtLocation(
     const LayoutObject* stop_node,
     bool no_lifecycle_update) {
   TRACE_EVENT0("blink", "EventHandler::HitTestResultAtLocation");
-
   // We always send HitTestResultAtLocation to the main frame if we have one,
   // otherwise we might hit areas that are obscured by higher frames.
   if (frame_->GetPage()) {
@@ -1105,7 +1104,12 @@ WebInputEventResult EventHandler::HandleMouseMoveOrLeaveEvent(
                                                             mev.InnerNode());
 
     LocalFrameView* view = frame_->View();
+#ifdef OHOS_DRAG_DROP
+    bool is_draging = mouse_event_manager_->IsDraging();
+    if ((!is_remote_frame || is_portal) && view && !is_draging) {
+#else
     if ((!is_remote_frame || is_portal) && view) {
+#endif
       absl::optional<ui::Cursor> optional_cursor =
           SelectCursor(mev.GetHitTestLocation(), mev.GetHitTestResult());
       if (optional_cursor.has_value()) {
@@ -2052,7 +2056,7 @@ WebInputEventResult EventHandler::SendContextMenuEvent(
   HitTestRequest request(HitTestRequest::kActive);
 #if defined(OHOS_EX_FREE_COPY)
   int hit_test_flag = 0;
-  if (event.menu_source_type == kMenuSourceSelectAndCopy) {
+  if (event.menu_source_type == kMenuSourceShowFreeCopyMenu) {
     hit_test_flag |= HitTestRequest::kReadOnly;
   } else {
     hit_test_flag |= HitTestRequest::kActive;
@@ -2181,7 +2185,7 @@ WebInputEventResult EventHandler::ShowNonLocatedContextMenu(
   HitTestRequest request(HitTestRequest::kActive);
 #if defined(OHOS_EX_FREE_COPY)
   HitTestRequest::HitTestRequestType hit_test_request_type = 0;
-  if (source_type == kMenuSourceSelectAndCopy) {
+  if (source_type == kMenuSourceShowFreeCopyMenu) {
     hit_test_request_type |= HitTestRequest::kReadOnly;
   } else {
     hit_test_request_type |= HitTestRequest::kActive;

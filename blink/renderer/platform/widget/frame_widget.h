@@ -29,6 +29,10 @@ class LayerTreeSettings;
 class LayerTreeDebugState;
 class PaintImage;
 struct ElementId;
+
+#ifdef OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
+class LayerTreeExtraState;
+#endif // OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
 }  // namespace cc
 
 namespace display {
@@ -307,6 +311,10 @@ class PLATFORM_EXPORT FrameWidget {
 #endif
 
   virtual void GetInputElementAttributes(HashMap<String, String>& attributes) const = 0;
+
+#ifdef OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
+  virtual void ShowToast(const cc::LayerTreeExtraState& state) = 0;
+#endif // OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
 };
 
 }  // namespace blink

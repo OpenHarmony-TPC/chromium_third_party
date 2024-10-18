@@ -102,10 +102,6 @@ bool StructTraits<blink::mojom::WebPreferencesDataView,
 #ifdef OHOS_SCROLLBAR
   out->scrollbar_color = data.scrollbar_color();
 #endif // OHOS_SCROLLBAR
-#ifdef OHOS_EX_BLANK_TARGET_POPUP_INTERCEPT
-  out->blank_target_popup_intercept_enabled =
-      data.blank_target_popup_intercept_enabled();
-#endif  // OHOS_EX_BLANK_TARGET_POPUP_INTERCEPT
   out->accelerated_2d_canvas_enabled = data.accelerated_2d_canvas_enabled();
   out->canvas_2d_layers_enabled = data.canvas_2d_layers_enabled();
   out->antialiased_2d_canvas_disabled = data.antialiased_2d_canvas_disabled();
@@ -264,6 +260,12 @@ bool StructTraits<blink::mojom::WebPreferencesDataView,
   out->custom_video_player_enable = data.custom_video_player_enable();
   out->custom_video_player_overlay = data.custom_video_player_overlay();
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
+#ifdef OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
+  out->enable_media_network_traffic_prompt =
+      data.enable_media_network_traffic_prompt();
+  out->playback_with_mobile_data_allowed =
+      data.playback_with_mobile_data_allowed();
+#endif // OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
   return true;
 }
 

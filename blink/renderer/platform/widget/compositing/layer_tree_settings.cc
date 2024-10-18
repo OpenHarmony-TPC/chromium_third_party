@@ -29,6 +29,7 @@
 #include "ui/native_theme/overlay_scrollbar_constants_aura.h"
 #ifdef OHOS_NWEB_EX
 #include "base/ohos/sys_info_utils.h"
+#include "content/public/common/content_switches.h"
 #endif
 
 namespace blink {
@@ -188,9 +189,16 @@ cc::ManagedMemoryPolicy GetGpuMemoryPolicy(
         std::min(actual.bytes_limit_when_visible,
                  static_cast<size_t>(2000 * 1024 * 1024));
     } else {
+#if BUILDFLAG(IS_OHOS)
+      // it needs more tile memory for foldable phone.
+      actual.bytes_limit_when_visible =
+        std::min(actual.bytes_limit_when_visible,
+                 static_cast<size_t>(1024 * 1024 * 1024));
+#else
       actual.bytes_limit_when_visible =
         std::min(actual.bytes_limit_when_visible,
                  static_cast<size_t>(256 * 1024 * 1024));
+#endif
     }
     
   }
@@ -348,11 +356,7 @@ cc::LayerTreeSettings GenerateLayerTreeSettings(
   settings.use_partial_raster = !cmd.HasSwitch(switches::kDisablePartialRaster);
   // Partial raster is not supported with RawDraw
   settings.use_partial_raster &= !::features::IsUsingRawDraw();
-#if defined(OHOS_INPUT_EVENTS)
-  settings.enable_elastic_overscroll = true;
-#else
   settings.enable_elastic_overscroll = platform->IsElasticOverscrollEnabled();
-#endif
   settings.resource_settings.use_gpu_memory_buffer_resources =
       cmd.HasSwitch(switches::kEnableGpuMemoryBufferCompositorResources);
   settings.use_painted_device_scale_factor = true;
@@ -532,8 +536,9 @@ cc::LayerTreeSettings GenerateLayerTreeSettings(
   if (base::CommandLine::ForCurrentProcess()->HasSwitch(
           ::switches::kForBrowser) &&
       !base::SysInfo::IsLowEndDevice()) {
-    bool excludable_devices = base::CommandLine::ForCurrentProcess()
-      ->HasSwitch(::switches::kEnableDeleteUnusedResourcesDelay);
+    bool excludable_devices =
+      base::ohos::IsTabletDevice() || base::ohos::IsPcDevice();
+
     settings.enable_delete_unused_resources_delay = !excludable_devices;
   }
 #endif

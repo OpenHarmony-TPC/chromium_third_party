@@ -454,11 +454,15 @@ void ResourceLoader::CodeCacheRequest::MaybeSendCachedCode(
         resource_response_time_.is_null() ||
         resource_response_time_ != cached_code_response_time_) {
       ClearCachedCodeIfPresent();
+      LOG(DEBUG) << "Cannot use code cache. timestamp not match. url: " << url_.GetString().Utf8().c_str() <<
+          ". resource_response_time_: " << resource_response_time_ <<
+          ". cached_code_response_time_: " << cached_code_response_time_;
       return;
     }
   }
 
   if (data.size() > 0) {
+    LOG(DEBUG) << "Send code cache to resource. url: " << url_.GetString().Utf8().c_str();
     resource_loader->SendCachedCodeToResource(std::move(data));
   }
 }
@@ -678,6 +682,9 @@ void ResourceLoader::DidFailLoadingBody() {
 }
 
 void ResourceLoader::DidCancelLoadingBody() {
+#ifdef OHOS_LOG_MESSAGE
+  LOG(WARNING) << "Resource loader DidCancelLoadingBody, url: ***";
+#endif
   Cancel();
 }
 
@@ -687,6 +694,9 @@ void ResourceLoader::StartWith(const ResourceRequestHead& request) {
 
   if (resource_->Options().synchronous_policy == kRequestSynchronously &&
       fetcher_->GetProperties().FreezeMode() != LoaderFreezeMode::kNone) {
+#ifdef OHOS_LOG_MESSAGE
+    LOG(WARNING) << "Resource loader StartWith, url: ***";
+#endif
     // TODO(yuzus): Evict bfcache if necessary.
     Cancel();
     return;
@@ -796,8 +806,15 @@ void ResourceLoader::ScheduleCancel() {
 }
 
 void ResourceLoader::CancelTimerFired(TimerBase*) {
+#ifdef OHOS_LOG_MESSAGE
+  if (loader_ && !resource_->HasClientsOrObservers()) {
+    LOG(WARNING) << "Resource loader CancelTimerFired, url *";
+    Cancel();
+  }
+#else
   if (loader_ && !resource_->HasClientsOrObservers())
     Cancel();
+#endif
 }
 
 void ResourceLoader::Cancel() {

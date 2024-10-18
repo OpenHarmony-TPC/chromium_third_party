@@ -170,7 +170,7 @@ void SystemClipboard::WritePlainText(const String& plain_text,
   clipboard_->WriteText(
     NonNullString(text)
 #if defined(OHOS_CLIPBOARD)
-    ,
+,
     copy_option
 #endif // defined(OHOS_CLIPBOARD)
   );
@@ -244,7 +244,7 @@ void SystemClipboard::WriteHTML(const String& markup,
   clipboard_->WriteHtml(
     NonNullString(markup), document_url
 #if defined(OHOS_CLIPBOARD)
-    ,
+,
     copy_option
 #endif // defined(OHOS_CLIPBOARD)
   );
@@ -352,7 +352,7 @@ void SystemClipboard::WriteImageWithTag(Image* image,
     clipboard_->WriteImage(
       n32_bitmap
 #if defined(OHOS_CLIPBOARD)
-      ,
+,
       copy_option
 #endif // defined(OHOS_CLIPBOARD)
     );
@@ -368,7 +368,7 @@ void SystemClipboard::WriteImageWithTag(Image* image,
       url.GetString(),
       NonNullString(title)
 #if defined(OHOS_CLIPBOARD)
-      ,
+,
       copy_option
 #endif // defined(OHOS_CLIPBOARD)
     );
@@ -382,7 +382,7 @@ void SystemClipboard::WriteImageWithTag(Image* image,
       URLToImageMarkup(url, title),
       KURL()
 #if defined(OHOS_CLIPBOARD)
-      ,
+,
       copy_option
 #endif // defined(OHOS_CLIPBOARD)
     );
@@ -406,7 +406,7 @@ void SystemClipboard::WriteImage(const SkBitmap& bitmap) {
   clipboard_->WriteImage(
     bitmap
 #if defined(OHOS_CLIPBOARD)
-    ,
+,
     copy_option
 #endif // defined(OHOS_CLIPBOARD)
   );
@@ -476,14 +476,14 @@ void SystemClipboard::WriteDataObject(DataObject* data_object) {
       if (string_item->type == kMimeTypeTextPlain) {
         clipboard_->WriteText(NonNullString(string_item->data)
 #if defined(OHOS_CLIPBOARD)
-                              ,
+,
                               copy_option
 #endif // defined(OHOS_CLIPBOARD)
         );
       } else if (string_item->type == kMimeTypeTextHTML) {
         clipboard_->WriteHtml(NonNullString(string_item->data), KURL()
 #if defined(OHOS_CLIPBOARD)
-                              ,
+,
                               copy_option
 #endif // defined(OHOS_CLIPBOARD)
         );

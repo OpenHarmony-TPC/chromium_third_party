@@ -273,7 +273,7 @@ void FullscreenController::FullscreenElementChanged(
 
   if (new_element) {
     DCHECK(Fullscreen::IsFullscreenElement(*new_element));
-#if defined(OHOS_MEDIA)
+#ifdef OHOS_MEDIA
     LOG(WARNING) << "OhMedia::FullscreenElementChanged new_element = "
                  << new_element->localName();
 #endif // OHOS_MEDIA
@@ -285,7 +285,7 @@ void FullscreenController::FullscreenElementChanged(
 
   if (old_element) {
     DCHECK(!Fullscreen::IsFullscreenElement(*old_element));
-#if defined(OHOS_MEDIA)
+#ifdef OHOS_MEDIA
     LOG(WARNING) << "OhMedia::FullscreenElementChanged old_element = "
                  << old_element->localName();
 #endif // OHOS_MEDIA

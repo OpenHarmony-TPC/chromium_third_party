@@ -2,24 +2,38 @@
    Use of this source code is governed by a BSD-style license that can be
    found in the LICENSE file. */
 
-#arrow-left1,
-#arrow-left2,
-#message,
-#arrow-right1,
+#arrow-left1 {
+  display: inline-block;
+  margin-left: 8px;
+  margin-right: -18px;
+}
+
+#arrow-left2 {
+  display: inline-block;
+}
+
+#arrow-right1 {
+  display: inline-block;
+  margin-right: -18px;
+}
 #arrow-right2 {
   display: inline-block;
+  margin-right: 8px;
 }
 
 #message {
   /* Make the message properly align with the arrow icons. */
-  max-width: 80%;
+  display: inline-block;
+  max-width: 90%;
   height: 36px;
+  line-height: 36px;
   vertical-align: middle;
   font-size: 15px;
 }
 
-#arrow-left1,
-#arrow-right1 {
-  /* Keep arrows right next to each other. */
-  margin-right: -18px;
+#arrow-left1 svg,
+#arrow-left2 svg,
+#arrow-right1 svg,
+#arrow-right2 svg {
+  transform: translateY(8px);
 }

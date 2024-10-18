@@ -136,9 +136,6 @@ class CORE_EXPORT WebSettingsImpl final : public WebSettings {
 #if defined(OHOS_EX_FREE_COPY)
   void SetContextMenuCustomization(bool) override;
 #endif
-#ifdef OHOS_EX_BLANK_TARGET_POPUP_INTERCEPT
-  void EnableBlankTargetPopupIntercept(bool) override;
-#endif
   void SetPasswordEchoDurationInSeconds(double) override;
   void SetPasswordEchoEnabled(bool) override;
   void SetPluginsEnabled(bool) override;
@@ -260,6 +257,11 @@ class CORE_EXPORT WebSettingsImpl final : public WebSettings {
   void SetCustomVideoPlayerEnabled(bool enable) override;
   void SetCustomVideoPlayerOverlay(bool overlay) override;
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
+
+#ifdef OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
+  void SetMediaNetworkTrafficPromptEnabled(bool enable) override;
+  void SetPlaybackWithMobileDataAllowed(bool allowed) override;
+#endif // OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
 
   bool RenderVSyncNotificationEnabled() const {
     return render_v_sync_notification_enabled_;

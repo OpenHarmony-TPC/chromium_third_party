@@ -667,8 +667,12 @@ void FrameSelection::PaintCaret(GraphicsContext& context,
                                 const PhysicalOffset& paint_offset) {
   frame_caret_->PaintCaret(context, paint_offset);
 }
-
+#ifdef OHOS_CLIPBOARD
+bool FrameSelection::Contains(const PhysicalOffset& point, bool contains_boundaries) {
+#else
 bool FrameSelection::Contains(const PhysicalOffset& point) {
+#endif
+
   if (!GetDocument().GetLayoutView())
     return false;
 
@@ -704,6 +708,12 @@ bool FrameSelection::Contains(const PhysicalOffset& point) {
   const PositionInFlatTree& start = visible_start.DeepEquivalent();
   const PositionInFlatTree& end = visible_end.DeepEquivalent();
   const PositionInFlatTree& pos = pos_with_affinity.GetPosition();
+
+#ifdef OHOS_CLIPBOARD
+    if (!contains_boundaries) {
+      return start.CompareTo(pos) < 0 && pos.CompareTo(end) < 0;
+  }
+#endif
   return start.CompareTo(pos) <= 0 && pos.CompareTo(end) <= 0;
 }
 
@@ -1145,8 +1155,8 @@ gfx::Rect FrameSelection::ClippedSelectionBoundsInRootFrame() const {
   int top = std::min(selection_start_rect.top_right().y(), selection_end_rect.top_right().y());
   selection_bounds = gfx::Rect(left, top, right - left, bottom - top);
   selection_bounds.Offset(
-        -(int)(frame_->GetPage()->GetVisualViewport().GetScrollOffset().x()),
-        -(int)(frame_->GetPage()->GetVisualViewport().GetScrollOffset().y()));
+      -(int)(frame_->GetPage()->GetVisualViewport().GetScrollOffset().x()),
+      -(int)(frame_->GetPage()->GetVisualViewport().GetScrollOffset().y()));
   return gfx::ScaleToEnclosingRect(selection_bounds, frame_->GetPage()->GetVisualViewport().Scale());
 }
 #endif

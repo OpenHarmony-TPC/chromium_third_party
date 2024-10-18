@@ -523,6 +523,7 @@ bool InputHandlerProxy::DidNativeEmbedEvent(const WebInputEvent& event) {
   return result;
 }
 
+
 void InputHandlerProxy::SetGestureEventResult(bool result) {
   LOG(DEBUG)<<"[NativeEmbed] SetGestureEventResult result is : " << result;
   if (native_event_queue_->empty()) {
@@ -1608,7 +1609,7 @@ InputHandlerProxy::EventDisposition InputHandlerProxy::HandleTouchMove(
     EventWithCallback* event_with_callback) {
   const auto& touch_event =
       static_cast<const WebTouchEvent&>(event_with_callback->event());
-
+  
   TRACE_EVENT2("input", "InputHandlerProxy::HandleTouchMove", "touch_result",
                touch_result_.has_value() ? touch_result_.value() : -1,
                "is_start_or_first",

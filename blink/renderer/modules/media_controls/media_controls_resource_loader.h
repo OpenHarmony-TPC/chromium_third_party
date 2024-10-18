@@ -39,6 +39,10 @@ class MediaControlsResourceLoader
   // Returns the specific stylesheet used for media related interstitials.
   static String GetMediaInterstitialsStyleSheet();
 
+#ifdef OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
+  static String GetMobileDataPromptStyleSheet();
+#endif // OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
+
   String GetUAStyleSheet() override;
 
   MediaControlsResourceLoader();

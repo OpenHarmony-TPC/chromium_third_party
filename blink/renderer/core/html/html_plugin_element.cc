@@ -296,9 +296,6 @@ void HTMLPlugInElement::RemovedFrom(ContainerNode& insertion_point) {
   // Plugins can persist only through reattachment during a lifecycle
   // update. This method shouldn't be called in that lifecycle phase.
   DCHECK(!persisted_plugin_);
-  LOG(INFO)<<"HTMLPlugInElement::RemovedFrom";
-  if (native_loader_)
-    native_loader_->OnDestroyNativeSurface();
   HTMLFrameOwnerElement::RemovedFrom(insertion_point);
 }
 
@@ -362,6 +359,13 @@ void HTMLPlugInElement::DetachLayoutTree(bool performing_reattach) {
   RemovePluginFromFrameView(plugin);
   ResetInstance();
 
+#if BUILDFLAG(IS_OHOS)
+  if (GetLayoutObject() && GetLayoutObject()->IsLayoutNative() &&
+      native_loader_ && !performing_reattach) {
+    native_loader_->Dispose();
+    native_loader_ = nullptr;
+  }
+#endif
   HTMLFrameOwnerElement::DetachLayoutTree(performing_reattach);
 }
 
@@ -591,7 +595,6 @@ HTMLPlugInElement::ObjectContentType HTMLPlugInElement::GetObjectContentType()
     return ObjectContentType::kPlugin;
   if (MIMETypeRegistry::IsSupportedNonImageMIMEType(mime_type))
     return ObjectContentType::kFrame;
-
   return ObjectContentType::kNone;
 }
 
@@ -867,18 +870,30 @@ HTMLPlugInElement::CustomStyleForLayoutObject(
 
 #if BUILDFLAG(IS_OHOS)
 bool HTMLPlugInElement::CheckNativeType(const char* key) const {
+  if (GetObjectContentType() != ObjectContentType::kNone) {
+    LOG(ERROR) << "[NativeEmbed] It's a standard object content type " << (int)GetObjectContentType();
+    return false;
+  }
+
   auto settings = GetDocument().GetSettings();
   if (!settings || !settings->GetNativeEmbedModeEnabled()) {
+    LOG(ERROR) << "[NativeEmbed] Native embed mode is not enabled.";
     return false;
   }
 
   auto rule = settings->NativeEmbedRule();
   auto valid_key = WebString::FromUTF8(key, strlen(key));
   if (rule.find(valid_key) == rule.end()) {
+    LOG(ERROR) << "[NativeEmbed] Invalid native embed tag " << valid_key.Utf8();
     return false;
   }
 
-  return service_type_.StartsWith(rule[valid_key]);
+  if (!service_type_.StartsWith(rule[valid_key])) {
+    LOG(ERROR) << "[NativeEmbed] Registered type " << rule[valid_key].Utf8() << " doens't match " << service_type_;
+    return false;
+  }
+
+  return true;
 }
 #endif
 

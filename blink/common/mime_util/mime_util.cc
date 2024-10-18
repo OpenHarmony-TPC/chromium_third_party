@@ -41,6 +41,11 @@ const char* const kSupportedImageTypes[] = {
 #if BUILDFLAG(ENABLE_AV1_DECODER)
     "image/avif",
 #endif
+#if BUILDFLAG(IS_OHOS)
+    "image/heif",
+    "image/heic",
+    "image/hevc",
+#endif
 };
 
 //  Support every script type mentioned in the spec, as it notes that "User
