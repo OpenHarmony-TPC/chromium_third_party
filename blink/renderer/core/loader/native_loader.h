@@ -140,8 +140,7 @@ class CORE_EXPORT NativeLoader
   void AttachToNewFrame();
 
   std::unique_ptr<WebNativeBridge> web_native_bridge_;
-  int native_embed_id_ = -1;
-  bool first_update_rect_ = true;
+  int native_embed_id_;
   bool visibility_ = false;
   bool first_update_visibility = false;
 
