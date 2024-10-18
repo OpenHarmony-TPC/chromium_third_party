@@ -163,9 +163,6 @@ void NativeLoader::OnCreateNativeSurface(int native_embed_id,
       const auto& replaced = To<LayoutReplaced>(layout_object);
       bounding_rect_ = ToPixelSnappedRect(replaced->ReplacedContentRect());
     }
-    if (bounding_rect_.IsEmpty()) {
-      first_update_rect_ = false;
-    }
   }
   LOG(INFO) << "NativeEmbed NativeLoader::OnCreateNativeSurface:"
             << bounding_rect_.ToString();
@@ -218,15 +215,15 @@ void NativeLoader::OnLayerRectVisibilityChange(bool visibility) {
 }
 
 void NativeLoader::OnLayerRectChange(const gfx::Rect& rect) {
-  if (first_update_rect_) {
-    first_update_rect_ = false;
+  if (bounding_rect_.ApproximatelyEqual(rect, 1) ||
+      !native_bridge_observer_remote_set_) {
     return;
   }
 
-  if (PluginBoundingRect().size() != rect.size()) {
+  if (bounding_rect_.size() != rect.size()) {
     bounding_rect_ = rect;
     if (!bounding_rect_changed_cb_.is_null()) {
-      bounding_rect_changed_cb_.Run(BoundsToViewport(bounding_rect_, plugin_element_->GetDocument()), true);
+      bounding_rect_changed_cb_.Run(BoundsToViewport(bounding_rect_, plugin_element_->GetDocument()));
     }
   } else {
     bounding_rect_.set_origin(rect.origin());
