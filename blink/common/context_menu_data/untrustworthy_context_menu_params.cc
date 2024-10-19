@@ -85,6 +85,9 @@ void UntrustworthyContextMenuParams::Assign(
 #ifdef OHOS_EX_FREE_COPY
   is_selectable = other.is_selectable;
 #endif
+#ifdef OHOS_DRAG_DROP
+  image_rect = other.image_rect;
+#endif
 }
 
 UntrustworthyContextMenuParams::~UntrustworthyContextMenuParams() = default;

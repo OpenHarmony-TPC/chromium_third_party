@@ -121,6 +121,11 @@ struct ContextMenuData {
   // Whether can be selectable.
   bool is_selectable;
 #endif
+
+#ifdef OHOS_DRAG_DROP
+  gfx::Rect image_rect;
+#endif
+
   // If this node is an input field, the type of that field.
   blink::mojom::ContextMenuDataInputFieldType input_field_type;
 

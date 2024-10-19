@@ -121,6 +121,12 @@ struct BLINK_COMMON_EXPORT
   }
 #endif
 
+#ifdef OHOS_DRAG_DROP
+  static const gfx::Rect& image_rect(const blink::UntrustworthyContextMenuParams& r) {
+    return r.image_rect;
+  }
+#endif
+
   static int writing_direction_default(
       const blink::UntrustworthyContextMenuParams& r) {
     return r.writing_direction_default;
