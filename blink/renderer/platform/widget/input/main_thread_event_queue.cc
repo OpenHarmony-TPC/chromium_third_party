@@ -332,7 +332,7 @@ void MainThreadEventQueue::HandleEvent(
     HandledEventCallback callback,
     bool allow_main_gesture_scroll) {
   TRACE_EVENT2("input", "MainThreadEventQueue::HandleEvent", "dispatch_type",
-               original_dispatch_type, "event_type", event->Event().GetType());
+               original_dispatch_type, "event_type", WebInputEvent::GetName(event->Event().GetType()));
   DCHECK(original_dispatch_type == DispatchType::kBlocking ||
          original_dispatch_type == DispatchType::kNonBlocking);
   DCHECK(ack_result == mojom::blink::InputEventResultState::kSetNonBlocking ||
