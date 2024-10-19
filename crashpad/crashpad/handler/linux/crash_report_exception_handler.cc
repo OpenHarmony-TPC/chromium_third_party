@@ -22,6 +22,9 @@
 #include "client/settings.h"
 #include "handler/linux/capture_snapshot.h"
 #include "minidump/minidump_file_writer.h"
+#if defined(OHOS_CRASHPAD)
+#include "minidump/minidump_user_extension_stream_data_source.h"
+#endif
 #include "snapshot/linux/process_snapshot_linux.h"
 #include "snapshot/sanitized/process_snapshot_sanitized.h"
 #include "util/file/file_helper.h"
@@ -162,6 +165,73 @@ bool CrashReportExceptionHandler::HandleExceptionWithBroker(
       &client, info, client_uid, 0, nullptr, local_report_id);
 }
 
+#if defined(OHOS_CRASHPAD)
+class OhosDfxDataSource final
+    : public MinidumpUserExtensionStreamDataSource {
+ public:
+  //! \brief Creates a data source with \a stream_type.
+  //!
+  //! param[in] stream_type The type of the stream
+  //! param[in] data The data of the stream.
+  //! param[in] data_size The length of \a data.
+  OhosDfxDataSource(uint32_t stream_type, const void* data, size_t data_size);
+  OhosDfxDataSource(const OhosDfxDataSource&) = delete;
+  OhosDfxDataSource& operator=(const OhosDfxDataSource&) = delete;
+
+  size_t StreamDataSize() override;
+  bool ReadStreamData(Delegate* delegate) override;
+
+ private:
+  std::vector<uint8_t> data_;
+};
+
+OhosDfxDataSource::OhosDfxDataSource(
+    uint32_t stream_type,
+    const void* data,
+    size_t data_size)
+    : MinidumpUserExtensionStreamDataSource(stream_type) {
+  data_.resize(data_size);
+
+  if (data_size)
+    memcpy(data_.data(), data, data_size);
+}
+
+size_t OhosDfxDataSource::StreamDataSize() {
+  return data_.size();
+}
+
+bool OhosDfxDataSource::ReadStreamData(Delegate* delegate) {
+  return delegate->ExtensionStreamDataSourceRead(
+    data_.size() ? data_.data() : nullptr, data_.size());
+}
+
+class OhosUserStreamDataSource : public UserStreamDataSource {
+ public:
+  OhosUserStreamDataSource(PtraceConnection* connection) : connection_(connection) {}
+
+  OhosUserStreamDataSource(const OhosUserStreamDataSource&) = delete;
+  OhosUserStreamDataSource& operator=(const OhosUserStreamDataSource&) = delete;
+
+  std::unique_ptr<MinidumpUserExtensionStreamDataSource>
+    ProduceStreamData(ProcessSnapshot* process_snapshot) override;
+ private:
+  PtraceConnection* connection_;
+};
+
+std::unique_ptr<MinidumpUserExtensionStreamDataSource>
+  OhosUserStreamDataSource::ProduceStreamData(
+    ProcessSnapshot* process_snapshot) {
+  std::string contents;
+  char path[32];
+  snprintf(path, sizeof(path), "/proc/%d/maps", connection_->GetProcessID());
+  if (!connection_->ReadFileContents(base::FilePath(path), &contents)) {
+    contents = "read maps failed!!";
+  }
+  return std::make_unique<OhosDfxDataSource>(
+    KMinidumpStreamTypeOhosDfxInfo, contents.c_str(), contents.size());
+}
+#endif
+
 bool CrashReportExceptionHandler::HandleExceptionWithConnection(
     PtraceConnection* connection,
     const ExceptionHandlerProtocol::ClientInformation& info,
@@ -188,6 +258,29 @@ bool CrashReportExceptionHandler::HandleExceptionWithConnection(
     process_snapshot->SetClientID(client_id);
   }
 
+#if defined(OHOS_CRASHPAD)
+  /*
+    add ohos maps info
+    for now, user_stream_data_sources_ is empty.
+    see third_party/crashpad/crashpad/handler/main.cc
+  */
+  const UserStreamDataSources* tmp = user_stream_data_sources_;
+  if (user_stream_data_sources_->size() != 0) {
+    LOG(ERROR) << "user_stream_data_sources_ will be overwritten !!!";
+  }
+  UserStreamDataSources tmp_overwrite;
+  tmp_overwrite.push_back(std::make_unique<OhosUserStreamDataSource>(connection));
+  user_stream_data_sources_ = &tmp_overwrite;
+  bool ret = write_minidump_to_database_
+             ? WriteMinidumpToDatabase(process_snapshot.get(),
+                                       sanitized_snapshot.get(),
+                                       write_minidump_to_log_,
+                                       local_report_id)
+             : WriteMinidumpToLog(process_snapshot.get(),
+                                  sanitized_snapshot.get());
+  user_stream_data_sources_ = tmp;
+  return ret;
+#else
   return write_minidump_to_database_
              ? WriteMinidumpToDatabase(process_snapshot.get(),
                                        sanitized_snapshot.get(),
@@ -195,6 +288,7 @@ bool CrashReportExceptionHandler::HandleExceptionWithConnection(
                                        local_report_id)
              : WriteMinidumpToLog(process_snapshot.get(),
                                   sanitized_snapshot.get());
+#endif
 }
 
 bool CrashReportExceptionHandler::WriteMinidumpToDatabase(
