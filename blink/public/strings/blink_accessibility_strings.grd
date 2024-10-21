@@ -109,6 +109,10 @@ need to be translated for each locale. Note that some accessibility strings rema
     <!-- Pseudolocales -->
     <output filename="blink_accessibility_strings_ar-XB.pak" type="data_package" lang="ar-XB" />
     <output filename="blink_accessibility_strings_en-XA.pak" type="data_package" lang="en-XA" />
+    <if expr="pp_ifdef('is_ohos')">
+      <output filename="blink_accessibility_strings_bo-CN.pak" type="data_package" lang="bo-CN" />
+      <output filename="blink_accessibility_strings_ug.pak" type="data_package" lang="ug" />
+    </if> 
   </outputs>
   <translations>
     <file path="translations/blink_accessibility_strings_af.xtb" lang="af" />
@@ -193,6 +197,10 @@ need to be translated for each locale. Note that some accessibility strings rema
     <file path="translations/blink_accessibility_strings_zh-HK.xtb" lang="zh-HK" />
     <file path="translations/blink_accessibility_strings_zh-TW.xtb" lang="zh-TW" />
     <file path="translations/blink_accessibility_strings_zu.xtb" lang="zu" />
+    <if expr="pp_ifdef('is_ohos')">
+        <file path="translations/blink_accessibility_strings_bo-CN.xtb" lang="bo-CN" />
+        <file path="translations/blink_accessibility_strings_ug.xtb" lang="ug" />
+    </if>
   </translations>
   <release seq="1">
     <messages fallback_to_english="true">

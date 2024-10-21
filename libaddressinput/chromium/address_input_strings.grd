@@ -122,6 +122,10 @@ third_party/libaddressinput/BUILD.gn.
     <!-- Pseudolocales -->
     <output filename="address_input_strings_ar-XB.pak" type="data_package" lang="ar-XB" />
     <output filename="address_input_strings_en-XA.pak" type="data_package" lang="en-XA" />
+    <if expr="pp_ifdef('is_ohos')">
+      <output filename="address_input_strings_bo-CN.pak" type="data_package" lang="bo-CN" />
+      <output filename="address_input_strings_ug.pak" type="data_package" lang="ug" />
+    </if>
   </outputs>
 
   <!-- Chromium translations. -->
@@ -208,6 +212,10 @@ third_party/libaddressinput/BUILD.gn.
     <file path="resources/address_input_strings_zh-HK.xtb" lang="zh-HK" />
     <file path="resources/address_input_strings_zh-TW.xtb" lang="zh-TW" />
     <file path="resources/address_input_strings_zu.xtb" lang="zu" />
+    <if expr="pp_ifdef('is_ohos')">
+       <file path="resources/address_input_strings_bo-CN.xtb" lang="bo-CN" />
+        <file path="resources/address_input_strings_ug.xtb" lang="ug" />
+    </if>
   </translations>
   <release seq="1">
     <messages fallback_to_english="true">
