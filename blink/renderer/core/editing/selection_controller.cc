@@ -753,7 +753,7 @@ bool SelectionController::SelectClosestWordFromHitTestResult(
             << static_cast<int>(select.at(1) - temp_offset + offset);
   SelectionInFlatTree temp_selection;
   TextControlElement* text_control =
-      EnclosingTextControl(GetSelectionInDOMTree().Base());
+      EnclosingTextControl(Selection().GetSelectionInDOMTree().Base());
   if (pos.IsNotNull()) {
     if (select.at(0) != -1 && select.at(1) != -1 &&
       text_control && text_control->type() != input_type_names::kPassword) {
