@@ -530,7 +530,7 @@ cc::LayerTreeSettings GenerateLayerTreeSettings(
   settings.create_low_res_tiling = true;
 #ifdef OHOS_NWEB_EX
   if (base::CommandLine::ForCurrentProcess()->HasSwitch(
-          ::switches::kForBrowser) &&
+          ::switches::kEnableNwebEx) &&
       !base::SysInfo::IsLowEndDevice()) {
     bool excludable_devices = base::CommandLine::ForCurrentProcess()
       ->HasSwitch(::switches::kEnableDeleteUnusedResourcesDelay);

@@ -506,7 +506,7 @@ bool ContextMenuController::ShowContextMenu(LocalFrame* frame,
 
 #if BUILDFLAG(IS_OHOS)
   bool is_browser = base::CommandLine::ForCurrentProcess()->HasSwitch(
-                      ::switches::kForBrowser);
+                      ::switches::kEnableNwebEx);
   String background_url;
   //  if InnerNode is not the image , find image from fallback.
   Node* inner_node = result.InnerNode();

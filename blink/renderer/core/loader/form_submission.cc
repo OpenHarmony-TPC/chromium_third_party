@@ -355,7 +355,7 @@ FormSubmission* FormSubmission::Create(HTMLFormElement* form,
 
 #ifdef OHOS_EX_BLANK_TARGET_POPUP_INTERCEPT
   if ((*base::CommandLine::ForCurrentProcess())
-          .HasSwitch(switches::kForBrowser)) {
+          .HasSwitch(switches::kEnableNwebExBlankTargetPopup_intercept)) {
     bool blank_target_popup_intercept_enabled = true;
     Settings* settings = form->GetDocument().GetFrame()->GetSettings();
     if (settings) {
