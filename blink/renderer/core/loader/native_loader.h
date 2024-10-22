@@ -122,7 +122,6 @@ class CORE_EXPORT NativeLoader
   String GetIdAttribute() const;
   String GetTagName() const;
   ParamMap GetParamList() const;
-  gfx::Rect PluginBoundingRect();
 
   // Adds a new NativeBridgeObserver remote that will be notified about native
   // bridge events and returns a receiver that an observer implementation can
@@ -146,8 +145,8 @@ class CORE_EXPORT NativeLoader
   void AttachToNewFrame();
 
   std::unique_ptr<WebNativeBridge> web_native_bridge_;
-  int native_embed_id_;
-  bool first_update_rect_ = false;
+  int native_embed_id_ = -1;
+  bool first_update_rect_ = true;
 
   Member<DisallowNewWrapper<
       HeapMojoAssociatedRemote<media::mojom::blink::NativeBridgeHost>>>
