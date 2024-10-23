@@ -48,6 +48,20 @@
 namespace blink {
 namespace {
 
+#if BUILDFLAG(IS_OHOS)
+
+#define FONT_SCALE 0.79
+
+struct ScaleParam {
+  SkScalar fontScale;
+};
+const std::unordered_map<std::string, ScaleParam> FONT_FAMILY_COMPRESSION_CONFIG = {
+  {"Noto Serif Tibetan", ScaleParam{.fontScale = FONT_SCALE}},
+  {"Noto Sans Tibetan", ScaleParam{.fontScale = FONT_SCALE}},
+};
+const ScaleParam DEFAULT_SCALE_PARAM = ScaleParam{.fontScale = 0};
+#endif
+
 #if BUILDFLAG(IS_LINUX) || BUILDFLAG(IS_CHROMEOS)
 // Getting the system font render style takes a significant amount of time on
 // Linux because looking up fonts using fontconfig can be very slow. We fetch
@@ -287,12 +301,27 @@ WebFontRenderStyle FontPlatformData::QuerySystemRenderStyle(
 
   return result;
 }
-
+#if BUILDFLAG(IS_OHOS)
+const ScaleParam& findCompressionConfigWithFont(const std::string& familyName) {
+  auto iter = FONT_FAMILY_COMPRESSION_CONFIG.find(familyName);
+  if (iter == FONT_FAMILY_COMPRESSION_CONFIG.end()) {
+    return DEFAULT_SCALE_PARAM;
+  }
+  return iter->second;
+}
+#endif
 SkFont FontPlatformData::CreateSkFont(const FontDescription*) const {
   SkFont font;
   style_.ApplyToSkFont(&font);
 
-  const float ts = text_size_ >= 0 ? text_size_ : 12;
+  float ts = text_size_ >= 0 ? text_size_ : 12;
+#if BUILDFLAG(IS_OHOS)
+  auto config = findCompressionConfigWithFont(family_);
+  if (!SkScalarNearlyZero(config.fontScale)) {
+    LOG(DEBUG) << "FontPlatformData::CreateSkFont fontScale is " << config.fontScale;
+    ts = ts * config.fontScale;
+  }
+#endif
   font.setSize(SkFloatToScalar(ts));
   font.setTypeface(typeface_);
   font.setEmbolden(synthetic_bold_);
