@@ -1243,6 +1243,9 @@ void WidgetInputHandlerManager::DidNativeEmbedEvent(blink::WebInputEvent::Type t
 }
 
 void WidgetInputHandlerManager::SetGestureEventResult(bool result) {
+  if (!input_handler_proxy_) {
+    return;
+  }
   input_handler_proxy_->SetGestureEventResult(result);
 }
 
@@ -1269,6 +1272,14 @@ void WidgetInputHandlerManager::TriggerVsyncImplTask() {
     input_handler_proxy_->TriggerVsyncImplTask();
   }
 }
+
+void WidgetInputHandlerManager::SetNativeEmbedMode(bool flag) {
+  if (!input_handler_proxy_) {
+    return;
+  }
+  input_handler_proxy_->SetNativeEmbedMode(flag);
+}
+
 #endif
 
 #if defined(OHOS_INPUT_EVENTS)

@@ -572,4 +572,7 @@ interface WidgetInputHandler {
                              bool animate);
   [EnableIf=is_ohos]
   SetGestureEventResult(bool result);
+
+  [EnableIf=is_ohos]
+  SetNativeEmbedMode(bool flag);
 };

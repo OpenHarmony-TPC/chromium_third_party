@@ -263,6 +263,12 @@ void WidgetInputHandlerImpl::SetGestureEventResult(bool result) {
 void WidgetInputHandlerImpl::TriggerVsyncImplTask() {
   input_handler_manager_->TriggerVsyncImplTask();
 }
+
+void WidgetInputHandlerImpl::SetNativeEmbedMode(bool flag) {
+  if (input_handler_manager_) {
+    input_handler_manager_->SetNativeEmbedMode(flag);
+  }
+}
 #endif
 
 }  // namespace blink
