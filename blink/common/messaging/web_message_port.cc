@@ -16,46 +16,6 @@
 
 namespace blink {
 
-#if defined(OHOS_MSGPORT)
-namespace {
-// An ArrayBufferPayload impl based on std::vector.
-class VectorArrayBuffer : public WebMessageArrayBufferPayload {
- public:
-  VectorArrayBuffer(std::vector<uint8_t> data, size_t position, size_t length)
-      : data_(std::move(data)), position_(position), length_(length) {
-    size_t size = base::CheckAdd(position_, length_).ValueOrDie();
-    CHECK_GE(data_.size(), size);
-  }
-
-  size_t GetLength() const override { return length_; }
-
-  bool GetIsResizableByUserJavaScript() const override {
-    // VectorArrayBuffers are not used for ArrayBuffer transfers and are
-    // currently always fixed-length. Structured cloning resizables ArrayBuffers
-    // is not yet supported in SMC.
-    return false;
-  }
-
-  size_t GetMaxByteLength() const override { return length_; }
-
-  absl::optional<base::span<const uint8_t>> GetAsSpanIfPossible()
-      const override {
-    return base::make_span(data_).subspan(position_, length_);
-  }
-
-  void CopyInto(base::span<uint8_t> dest) const override {
-    CHECK_GE(dest.size(), length_);
-    memcpy(dest.data(), data_.data() + position_, length_);
-  }
-
- private:
-  std::vector<uint8_t> data_;
-  size_t position_;
-  size_t length_;
-};
-}  // namespace
-#endif  // defined(OHOS_MSGPORT)
-
 WebMessagePort::Message::Message() = default;
 WebMessagePort::Message::Message(Message&&) = default;
 WebMessagePort::Message& WebMessagePort::Message::operator=(Message&&) =
