@@ -869,6 +869,17 @@ bool ContextMenuController::ShowContextMenu(LocalFrame* frame,
   }
 #endif
 
+#ifdef OHOS_DRAG_DROP
+  if (data.media_type == mojom::blink::ContextMenuDataMediaType::kImage &&
+      frame && frame->GetPage() && frame->View()) {
+    const gfx::Rect& image_rect = result.ImageRect();
+    gfx::Size image_size_in_pixels = gfx::ScaleToFlooredSize(
+        image_rect.size(), frame->GetPage()->GetVisualViewport().Scale());
+    gfx::Point adjust_image_location = frame->View()->FrameToViewport(image_rect.origin());
+    data.image_rect = gfx::Rect(adjust_image_location, image_size_in_pixels);
+  }
+#endif
+
   data.input_field_type = ComputeInputFieldType(result);
   data.selection_rect = ComputeSelectionRect(selected_frame);
   data.source_type = source_type;

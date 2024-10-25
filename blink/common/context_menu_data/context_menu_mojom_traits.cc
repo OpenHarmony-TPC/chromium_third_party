@@ -53,6 +53,12 @@ bool StructTraits<blink::mojom::UntrustworthyContextMenuParamsDataView,
       !data.ReadFieldRendererId(&out->field_renderer_id))
     return false;
 
+#ifdef OHOS_DRAG_DROP
+  if (!data.ReadImageRect(&out->image_rect)) {
+    return false;
+  }
+#endif
+
   out->x = data.x();
   out->y = data.y();
   out->has_image_contents = data.has_image_contents();

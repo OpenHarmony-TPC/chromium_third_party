@@ -78,6 +78,9 @@ UntrustworthyContextMenuParams ContextMenuParamsBuilder::Build(
 #ifdef OHOS_EX_FREE_COPY
   params.is_selectable = data.is_selectable;
 #endif
+#ifdef OHOS_DRAG_DROP
+  params.image_rect = data.image_rect;
+#endif
   for (const auto& suggestion : data.dictionary_suggestions)
     params.dictionary_suggestions.push_back(suggestion);
 
