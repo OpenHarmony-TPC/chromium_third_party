@@ -120,6 +120,8 @@ WebNativeBridgeImpl::~WebNativeBridgeImpl() {
     video_layer_->StopUsingProvider();
     video_layer_->ResetLayerRectUpdateCallback();
     LOG(DEBUG) << "[NativeEmbed] ResetLayerRectUpdateCallback.";
+    video_layer_->ResetLayerRectVisibilityChangeCallback();
+    LOG(DEBUG) << "[NativeEmbed] ResetLayerRectVisibilityChangeCallback.";
   }
 
   // Handle destruction of things that need to be destructed after the pipeline
