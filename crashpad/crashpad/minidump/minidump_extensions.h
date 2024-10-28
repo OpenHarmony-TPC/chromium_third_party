@@ -110,6 +110,10 @@ enum MinidumpStreamType : uint32_t {
 
   //! \brief The last reserved crashpad stream.
   kMinidumpStreamTypeCrashpadLastReservedStream = 0x4350ffff,
+#if defined(OHOS_CRASHPAD)
+  //! \brief  OHOS crashpad extend info
+  KMinidumpStreamTypeOhosDfxInfo = 0xCAFEBABE,
+#endif
 };
 
 //! \brief A variable-length UTF-8-encoded string carried within a minidump
