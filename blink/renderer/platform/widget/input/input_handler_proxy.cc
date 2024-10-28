@@ -574,6 +574,16 @@ void InputHandlerProxy::SetGestureEventResult(bool result) {
   }
 }
 
+void InputHandlerProxy::ScrollBy(float delta_x, float delta_y) {
+  TRACE_EVENT_INSTANT2(
+      "input", "ScrollBy", TRACE_EVENT_SCOPE_THREAD, "delta_x",
+      delta_x, "delta_y", delta_y);
+  gfx::PointF root_offset;
+  root_offset.set_x(delta_x);
+  root_offset.set_y(delta_y);
+  SynchronouslySetRootScrollOffset(root_offset);
+}
+
 void InputHandlerProxy::TriggerVsyncImplTask()
 {
   DCHECK(input_handler_);

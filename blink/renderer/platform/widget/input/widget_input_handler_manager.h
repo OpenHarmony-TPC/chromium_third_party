@@ -142,6 +142,7 @@ class PLATFORM_EXPORT WidgetInputHandlerManager final
   void TouchHitTest(const WebPointerEvent& event, size_t fingerId) override;
   void TriggerVsyncImplTask();
   void SetNativeEmbedMode(bool flag);
+  void ScrollBy(float delta_x, float delta_y);
 #endif
 
   void ObserveGestureEventOnMainThread(

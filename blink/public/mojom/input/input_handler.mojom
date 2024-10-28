@@ -575,4 +575,7 @@ interface WidgetInputHandler {
 
   [EnableIf=is_ohos]
   SetNativeEmbedMode(bool flag);
+
+  [EnableIf=is_ohos]
+  ScrollBy(float delta_x, float delta_y);
 };
