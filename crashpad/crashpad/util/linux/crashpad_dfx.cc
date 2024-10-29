@@ -21,7 +21,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
- 
+
 #include <elf.h>
 #include <fcntl.h>
 #include <sys/mman.h>
@@ -101,22 +101,22 @@ std::string CrashpadDfx::GetBuildId(const uint64_t noteAddr,const uint64_t noteS
             return "";
         }
         memcpy(&nhdr, reinterpret_cast<void*>(noteAddr + offset), sizeof(nhdr));
-        LOG(DEBUG) << "Note header read at offset " << offset << ": namesz=" << nhdr.n_namesz 
+        LOG(DEBUG) << "Note header read at offset " << offset << ": namesz=" << nhdr.n_namesz
         << ", descsz=" << nhdr.n_descsz << ", type=" << nhdr.n_type;
         offset += sizeof(nhdr);
- 
+
         if (noteSize - offset < nhdr.n_namesz) {
             LOG(ERROR) << "Insufficient space for reading note name at offset " << offset;
             return "";
         }
- 
+
         std::string name(nhdr.n_namesz, '\0');
         memcpy(&(name[0]), reinterpret_cast<void*>(noteAddr + offset), nhdr.n_namesz);
         if (name.back() == '\0') {
             name.resize(name.size() - 1); // Trim trailing '\0'
         }
         offset += (nhdr.n_namesz + 3) & ~3; // Align to 4 bytes
- 
+
         if (name == "GNU" && nhdr.n_type == NT_GNU_BUILD_ID) {
             if (noteSize - offset < nhdr.n_descsz || nhdr.n_descsz == 0) {
                 LOG(ERROR) << "Insufficient space for reading build ID at offset " << offset;
@@ -124,7 +124,7 @@ std::string CrashpadDfx::GetBuildId(const uint64_t noteAddr,const uint64_t noteS
             }
             std::string buildIdRaw(nhdr.n_descsz, '\0');
             memcpy(&buildIdRaw[0], reinterpret_cast<void*>(noteAddr + offset), nhdr.n_descsz);
- 
+
             std::string buildIdHex;
             for (unsigned char c : buildIdRaw) {
                 char hex[3];
@@ -165,7 +165,7 @@ std::string CrashpadDfx::GetBuildIdFromSO(const std::string& soFilePath) {
 
     Elf64_Ehdr* ehdr = reinterpret_cast<Elf64_Ehdr*>(mapped);
     Elf64_Shdr* shdrs = reinterpret_cast<Elf64_Shdr*>(reinterpret_cast<char*>(mapped) + ehdr->e_shoff);
- 
+
     std::string buildId;
     for (int i = 0; i < ehdr->e_shnum; ++i) {
         Elf64_Shdr& shdr = shdrs[i];
@@ -181,10 +181,10 @@ std::string CrashpadDfx::GetBuildIdFromSO(const std::string& soFilePath) {
     if (buildId.empty()) {
         LOG(WARNING) << "No Build ID found in the file.";
     }
- 
+
     munmap(mapped, stat_buf.st_size);
     close(fd);
- 
+
     return buildId;
 }
 
@@ -194,16 +194,22 @@ std::string CrashpadDfx::RetrieveBuildId() {
         return cachedBuildID;
     }
 #if defined(__arm__)
-    const std::string soFilePath = "/data/storage/el1/bundle/nweb/libs/arm/libweb_engine.so";
+    const std::string soFilePath = "/data/storage/el1/bundle/nweb/libs/arm/libarkweb_engine.so";
+    const std::string soFilePathNew = "/data/storage/el1/bundle/arkwebcore/libs/arm/libarkweb_engine.so";
 #elif defined(__aarch64__)
-    const std::string soFilePath = "/data/storage/el1/bundle/nweb/libs/arm64/libweb_engine.so";
+    const std::string soFilePath = "/data/storage/el1/bundle/nweb/libs/arm64/libarkweb_engine.so";
+    const std::string soFilePathNew = "/data/storage/el1/bundle/arkwebcore/libs/arm64/libarkweb_engine.so";
 #elif defined(__x86_64__)
-    const std::string soFilePath = "/data/storage/el1/bundle/nweb/libs/x86_64/libweb_engine.so";
+    const std::string soFilePath = "/data/storage/el1/bundle/nweb/libs/x86_64/libarkweb_engine.so";
+    const std::string soFilePathNew = "/data/storage/el1/bundle/arkwebcore/libs/x86_64/libarkweb_engine.so";
 #else
     cachedBuildID = "unsupported";
     return cachedBuildID;
 #endif
     cachedBuildID = CrashpadDfx::GetBuildIdFromSO(soFilePath);
+    if (cachedBuildID.empty()) {
+      cachedBuildID = CrashpadDfx::GetBuildIdFromSO(soFilePathNew);
+    }
     return cachedBuildID;
 }
 
@@ -221,7 +227,7 @@ std::string CrashpadDfx::GetProcessBundleName() {
         LOG(ERROR) << "CommandLine object is null. Cannot retrieve bundle name.";
         return "";
     }
- 
+
     if (command_line->HasSwitch("bundle-name")) {
         std::string bundle_name = command_line->GetSwitchValueASCII("bundle-name");
         if (bundle_name.empty()) {
@@ -244,7 +250,7 @@ void CrashpadDfx::ProcessCrashReport(const std::string process_type,
     uid_t user_id_t = getuid()/200000;
     const std::string user_id = std::to_string(user_id_t);;
     const std::string crash_count = std::to_string(GetAndUpdateRenderProcessCrashCount(process_type));
- 
+
     OHOS::NWeb::OhosAdapterHelper::GetInstance().GetHiSysEventAdapterInstance().Write(
       PROCESS_CRASH,
       OHOS::NWeb::HiSysEventAdapter::EventType::FAULT,
@@ -267,7 +273,7 @@ std::string CrashpadDfx::UpdateCrashDumpPathSuffix() {
   const std::string bundle_name = g_bundle_name;
   const std::string happen_time = g_happen_time;
   const std::string user_id = std::to_string(getuid()/200000);
-  const std::string dump_path_suffix = crashpad + delimiter + bundle_name  + delimiter 
+  const std::string dump_path_suffix = crashpad + delimiter + bundle_name  + delimiter
   + std::to_string(g_process_uid) + delimiter + buildID + delimiter + happen_time;
   return dump_path_suffix;
 }
