@@ -164,6 +164,7 @@ void NativeLoader::LoadResource(LocalFrame* frame) {
 
 void NativeLoader::OnCreateNativeSurface(int native_embed_id,
                                          RectChangeCB rect_changed_cb) {
+  LOG(INFO) << "[NativeEmbed] NativeLoader::OnCreateNativeSurface";
   if (!native_bridge_observer_remote_set_ || !cc_layer_) {
     return;
   }
@@ -192,7 +193,7 @@ void NativeLoader::OnCreateNativeSurface(int native_embed_id,
     bounding_rect_.set_origin(bounds_to_viewport.origin());
     embed_info->rect = bounds_to_viewport;
     if (!bounding_rect_changed_cb_.is_null()) {
-      bounding_rect_changed_cb_.Run(bounds_to_viewport, false);
+      bounding_rect_changed_cb_.Run(bounds_to_viewport);
     }
   }
 
@@ -212,22 +213,7 @@ void NativeLoader::OnCreateNativeSurface(int native_embed_id,
   }
 }
 
-void NativeLoader::UpdateSize(gfx::Size size) {
-  String native_type = GetTypeAttribute();
-  LOG(INFO) << "NativeEmbed size:" << size.ToString() << ",native_type:" << native_type;
-  if (native_type == "native/video") {
-    return;
-  }
-  if (bounding_rect_.size() != size) {
-    if (!bounding_rect_changed_cb_.is_null()) {
-      bounding_rect_changed_cb_.Run(gfx::ScaleToEnclosingRect(
-          bounding_rect_, PageConstraintInitalScale(plugin_element_->GetDocument())), true);
-    }
-  }
-}
-
 void NativeLoader::OnLayerRectChange(const gfx::Rect& rect) {
-
   if (first_update_rect_) {
     first_update_rect_ = false;
     return;
@@ -242,13 +228,13 @@ void NativeLoader::OnLayerRectChange(const gfx::Rect& rect) {
     bounding_rect_ = rect;
     if (!bounding_rect_changed_cb_.is_null()) {
       bounding_rect_changed_cb_.Run(gfx::ScaleToEnclosingRect(
-          bounding_rect_, PageConstraintInitalScale(plugin_element_->GetDocument())), true);
+          bounding_rect_, PageConstraintInitalScale(plugin_element_->GetDocument())));
     }
   } else {
     bounding_rect_.set_origin(rect.origin());
   }
 
-  LOG(DEBUG) << "NativeEmbed NativeLoader::OnLayerRectChange:"
+  LOG(INFO) << "NativeEmbed NativeLoader::OnLayerRectChange:"
             << bounding_rect_.ToString();
   for (auto& observer : native_bridge_observer_remote_set_->Value()) {
     observer->OnEmbedRectChange(gfx::Rect(
@@ -294,7 +280,6 @@ void NativeLoader::SetCcLayer(cc::Layer* cc_layer) {
                << GetTypeAttribute();
     cc_layer_->SetMayContainNative(true);
     cc_layer_->SetNeedsPushProperties();
-    cc_layer_->SetIsNativeVideo(GetTypeAttribute() == "native/video");
   }
 }
 
