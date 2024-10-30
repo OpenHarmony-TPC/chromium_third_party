@@ -19,6 +19,9 @@
 #include <sys/prctl.h>
 #include <sys/wait.h>
 #include <unistd.h>
+#if defined(OHOS_CRASHPAD_FORK)
+#include <sys/syscall.h>
+#endif
 
 #include "base/logging.h"
 #include "base/posix/eintr_wrapper.h"
@@ -176,7 +179,11 @@ int ExceptionHandlerClient::WaitForCrashDumpComplete() {
         ", received message.type = kTypeForkBroker, use broker process to dump, real pid = " << real_pid;
 #endif
         Signals::InstallDefaultHandler(SIGCHLD);
+#if defined(OHOS_CRASHPAD_FORK)
+        pid_t pid = syscall(SYS_clone, SIGCHILD, nullptr);
+#else
         pid_t pid = fork();
+#endif //defined(OHOS_CRASHPAD_FORK)
         if (pid <= 0) {
           ExceptionHandlerProtocol::Errno error = pid < 0 ? errno : 0;
           if (!WriteFile(server_sock_, &error, sizeof(error))) {
