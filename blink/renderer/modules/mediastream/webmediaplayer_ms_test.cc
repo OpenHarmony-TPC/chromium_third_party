@@ -1507,7 +1507,7 @@ TEST_P(WebMediaPlayerMSTest, DuplicateFrameTimestamp) {
   compositor_->EnqueueFrame(std::move(frame3), true);
 
   compositor_->StartRendering();
-  task_environment_.RunUntilIdle();
+  base::RunLoop().RunUntilIdle();
 
   base::TimeTicks deadline;
   deadline += kStep;  // Don't start deadline at zero.
@@ -1521,7 +1521,7 @@ TEST_P(WebMediaPlayerMSTest, DuplicateFrameTimestamp) {
   }
 
   compositor_->StopRendering();
-  task_environment_.RunUntilIdle();
+  base::RunLoop().RunUntilIdle();
 }
 
 TEST_P(WebMediaPlayerMSTest, HandlesArbitraryTimestampConversions) {
@@ -1551,7 +1551,7 @@ TEST_P(WebMediaPlayerMSTest, HandlesArbitraryTimestampConversions) {
   compositor_->EnqueueFrame(std::move(frame2), true);
 
   compositor_->StartRendering();
-  task_environment_.RunUntilIdle();
+  base::RunLoop().RunUntilIdle();
 
   base::TimeTicks deadline;
   deadline += kStep;  // Don't start deadline at zero.
@@ -1565,7 +1565,7 @@ TEST_P(WebMediaPlayerMSTest, HandlesArbitraryTimestampConversions) {
   }
 
   compositor_->StopRendering();
-  task_environment_.RunUntilIdle();
+  base::RunLoop().RunUntilIdle();
 }
 
 TEST_P(WebMediaPlayerMSTest, OutOfOrderEnqueue) {
@@ -1598,7 +1598,7 @@ TEST_P(WebMediaPlayerMSTest, OutOfOrderEnqueue) {
   compositor_->EnqueueFrame(std::move(frame2), true);
 
   compositor_->StartRendering();
-  task_environment_.RunUntilIdle();
+  base::RunLoop().RunUntilIdle();
 
   // Frames 1, 3 should be dropped.
   base::TimeTicks deadline;
@@ -1613,7 +1613,7 @@ TEST_P(WebMediaPlayerMSTest, OutOfOrderEnqueue) {
   compositor_->PutCurrentFrame();
 
   compositor_->StopRendering();
-  task_environment_.RunUntilIdle();
+  base::RunLoop().RunUntilIdle();
 }
 
 TEST_P(WebMediaPlayerMSTest, ValidPreferredInterval) {
