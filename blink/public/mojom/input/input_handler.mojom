@@ -571,7 +571,7 @@ interface WidgetInputHandler {
                              cc.mojom.BrowserControlsState current,
                              bool animate);
   [EnableIf=is_ohos]
-  SetGestureEventResult(bool result);
+  SetGestureEventResult(bool result, bool stopPropagation);
 
   [EnableIf=is_ohos]
   SetNativeEmbedMode(bool flag);
