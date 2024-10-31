@@ -1006,7 +1006,7 @@ void InspectorPageAgent::DidClearDocumentOfWindowObject(LocalFrame* frame) {
     return;
   }
   ScriptState* script_state = ToScriptStateForMainWorld(frame);
-  if (!script_state) {
+  if (!script_state || !v8_session_) {
     return;
   }
   ClassicScript::CreateUnspecifiedScript(script)->RunScript(
@@ -1859,6 +1859,11 @@ void InspectorPageAgent::Trace(Visitor* visitor) const {
   visitor->Trace(inspector_resource_content_loader_);
   visitor->Trace(isolated_worlds_);
   InspectorBaseAgent::Trace(visitor);
+}
+
+void InspectorPageAgent::Dispose() {
+  InspectorBaseAgent::Dispose();
+  v8_session_ = nullptr;
 }
 
 Response InspectorPageAgent::getOriginTrials(
