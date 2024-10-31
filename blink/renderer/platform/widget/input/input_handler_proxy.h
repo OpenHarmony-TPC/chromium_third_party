@@ -158,7 +158,7 @@ class PLATFORM_EXPORT InputHandlerProxy : public cc::InputHandlerClient,
       mojom::blink::ScrollResultDataPtr)>;
 
 #if BUILDFLAG(IS_OHOS)
-  using GestureEventCallback = base::OnceCallback<void(bool)>;
+  using GestureEventCallback = base::OnceCallback<void(bool, bool)>;
 #endif
   void HandleInputEventWithLatencyInfo(
       std::unique_ptr<blink::WebCoalescedInputEvent> event,
@@ -241,7 +241,7 @@ class PLATFORM_EXPORT InputHandlerProxy : public cc::InputHandlerClient,
     need_flush_scroll_update_gesture_ = true;
   }
   bool DidNativeEmbedEvent(const WebInputEvent& event);
-  void SetGestureEventResult(bool result);
+  void SetGestureEventResult(bool result, bool stopPropagation);
   void SendNativeEvent(const WebTouchEvent& touch_event,
     WebInputEvent::Type type, size_t i, bool result = true);
   void TriggerVsyncImplTask();

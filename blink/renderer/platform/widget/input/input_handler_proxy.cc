@@ -561,13 +561,14 @@ bool InputHandlerProxy::DidNativeEmbedEvent(const WebInputEvent& event) {
   return result;
 }
 
-void InputHandlerProxy::SetGestureEventResult(bool result) {
-  LOG(DEBUG)<<"[NativeEmbed] SetGestureEventResult result is : " << result;
+void InputHandlerProxy::SetGestureEventResult(bool result, bool stopPropagation) {
+  LOG(DEBUG) << "[NativeEmbed] SetGestureEventResult result is : " << result
+             << " stopPropagation is " << stopPropagation;
   if (native_event_queue_->empty()) {
-    LOG(DEBUG)<<"[NativeEmbed] native_event_queue_ is empty";
+    LOG(DEBUG) << "[NativeEmbed] native_event_queue_ is empty";
     return;
   }
-  if (result) {
+  if (result && stopPropagation) {
     DispatchSingleInputEvent(native_event_queue_->Pop(), true);
   } else {
     DispatchSingleInputEvent(native_event_queue_->Pop());
