@@ -23,15 +23,8 @@
 
 namespace blink {
 
-namespace {
-
-const float kInitEffectZoom = 1.0f;
-
-}  // namespace
-
 LayoutNative::LayoutNative(Element* native) : LayoutImage(native) {
   SetImageResource(MakeGarbageCollected<LayoutImageResource>());
-  SetIntrinsicSize(CalculateIntrinsicSize(kInitEffectZoom));
 }
 
 LayoutNative::~LayoutNative() = default;
@@ -40,118 +33,15 @@ void LayoutNative::Trace(Visitor* visitor) const {
   LayoutImage::Trace(visitor);
 }
 
-LayoutSize LayoutNative::DefaultSize() {
-  return LayoutSize(kDefaultWidth, kDefaultHeight);
-}
-
-void LayoutNative::UpdateIntrinsicSize(bool is_in_layout) {
-  NOT_DESTROYED();
-  LayoutSize size = CalculateIntrinsicSize(StyleRef().EffectiveZoom());
-  // Never set the element size to zero when in a media document.
-  if (size.IsEmpty() && GetNode()->ownerDocument() &&
-      GetNode()->ownerDocument()->IsMediaDocument()) {
-    return;
-  }
-
-  if (auto* layout_view = View()) {
-    size = LayoutSize(layout_view->GetLayoutSize());
-  }
-
-  if (size == IntrinsicSize()) {
-    return;
-  }
-
-  SetIntrinsicSize(size);
-  SetIntrinsicLogicalWidthsDirty();
-  if (!is_in_layout) {
-    SetNeedsLayoutAndFullPaintInvalidation(
-        layout_invalidation_reason::kSizeChanged);
-  }
-
-  if (!NativeElement() || !NativeElement()->NativeLoader()) {
-    return;
-  }
-  NativeElement()->NativeLoader()->UpdateSize(gfx::Size(size.Width().ToInt(),
-                                         size.Height().ToInt()));
-}
-
-LayoutSize LayoutNative::CalculateIntrinsicSize(float scale) {
-  NOT_DESTROYED();
-
-  LayoutSize size = DefaultSize();
-  size.Scale(scale);
-
-  if (!NativeElement() || !NativeElement()->NativeLoader()) {
-    return size;
-  }
-
-  if (const auto* content =
-          NativeElement()->NativeLoader()->GetWebNativeBridge()) {
-    gfx::Size nature_size = content->NaturalSize();
-    if (!nature_size.IsEmpty()) {
-      LayoutSize layout_size = LayoutSize(nature_size);
-      layout_size.Scale(scale);
-      return layout_size;
-    }
-  }
-
-  return size;
-}
-
-void LayoutNative::ImageChanged(WrappedImagePtr new_image,
-                                CanDeferInvalidation defer) {
-  NOT_DESTROYED();
-  LayoutImage::ImageChanged(new_image, defer);
-
-  // The intrinsic size is now that of the image, but in case we already had the
-  // intrinsic size of the video we call this here to restore the video size.
-  UpdateIntrinsicSize(/* is_in_layout */ false);
-}
-
 void LayoutNative::PaintReplaced(const PaintInfo& paint_info,
                                  const PhysicalOffset& paint_offset) const {
   NOT_DESTROYED();
   NativePainter(*this).PaintReplaced(paint_info, paint_offset);
 }
 
-void LayoutNative::UpdateLayout() {
-  NOT_DESTROYED();
-  UpdateNativeContent(/* is_in_layout */ true);
-
-  LayoutImage::UpdateLayout();
-}
-
-HTMLPlugInElement* LayoutNative::NativeElement() const {
+HTMLPlugInElement* LayoutNative::PluginElement() const {
   NOT_DESTROYED();
   return To<HTMLPlugInElement>(GetNode());
-}
-
-void LayoutNative::UpdateFromElement() {
-  NOT_DESTROYED();
-  LayoutImage::UpdateFromElement();
-  UpdateNativeContent(/* is_in_layout */ false);
-
-  SetShouldDoFullPaintInvalidation();
-}
-
-void LayoutNative::UpdateNativeContent(bool is_in_layout) {
-  NOT_DESTROYED();
-  UpdateIntrinsicSize(is_in_layout);
-
-  if (!NativeElement() || !NativeElement()->NativeLoader()) {
-    return;
-  }
-
-  auto* native_bridge = NativeElement()->NativeLoader()->GetWebNativeBridge();
-  if (!native_bridge) {
-    return;
-  }
-
-  if (!NativeElement()->InActiveDocument()) {
-    return;
-  }
-
-  NativeElement()->SetNeedsCompositingUpdate();
 }
 
 PhysicalRect LayoutNative::ReplacedContentRectFrom(
@@ -165,10 +55,10 @@ PhysicalRect LayoutNative::ReplacedContentRectFrom(
 
 bool LayoutNative::SupportsAcceleratedRendering() const {
   NOT_DESTROYED();
-  if (!NativeElement() || !NativeElement()->NativeLoader()) {
+  if (!PluginElement() || !PluginElement()->NativeLoader()) {
     return false;
   }
-  return !!NativeElement()->NativeLoader()->CcLayer();
+  return !!PluginElement()->NativeLoader()->CcLayer();
 }
 
 CompositingReasons LayoutNative::AdditionalCompositingReasons() const {
