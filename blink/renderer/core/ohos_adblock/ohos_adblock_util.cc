@@ -124,7 +124,9 @@ std::pair<std::string, bool> GetDomPathStep(Node& node,
 
   std::string id = element->getAttribute(html_names::kIdAttr).Utf8();
   std::string nodeNameInCorrectCase =
-      (!node.GetShadowRoot() || node.GetShadowRoot()->mode().Utf8().empty())
+      (!node.GetShadowRoot() ||
+        node.GetShadowRoot()->GetType() == ShadowRootType::kUserAgent ||
+        node.GetShadowRoot()->mode().Utf8().empty())
           ? node.nodeName().Utf8()
           : "#shadow-root (" + node.GetShadowRoot()->mode().Utf8() + ")";
 
@@ -179,7 +181,8 @@ std::pair<std::string, bool> GetDomPathStep(Node& node,
 
     std::string siblingNodeNameInCorrectCase =
         (!sibling->GetShadowRoot() ||
-         sibling->GetShadowRoot()->mode().Utf8().empty())
+          sibling->GetShadowRoot()->GetType() == ShadowRootType::kUserAgent ||
+          sibling->GetShadowRoot()->mode().Utf8().empty())
             ? sibling->nodeName().Utf8()
             : "#shadow-root (" + sibling->GetShadowRoot()->mode().Utf8() + ")";
 

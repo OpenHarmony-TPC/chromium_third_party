@@ -37,11 +37,11 @@ const char* ImageAcceptHeader() {
   return "image/avif,image/heif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8";
 #elif BUILDFLAG(ENABLE_AV1_DECODER)
   return "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8";
-#elif BUILDFLAG(ENABLE_HEIF_DECODER)
+#elif BUILDFLAG(ENABLE_HEIF_DECODER)  
   return "image/heif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8";
 #else
   return "image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8";
-#endif  
+#endif 
 }
 
 void SetAcceptHeader(net::HttpRequestHeaders& headers,
