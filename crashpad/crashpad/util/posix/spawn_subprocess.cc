@@ -135,7 +135,7 @@ bool SpawnSubprocess(const std::vector<std::string>& argv,
   // accidental early termination of the handler process will not result in a
   // zombie process.
 #if defined(OHOS_CRASHPAD_FORK)
-  pid_t pid = syscall(SYS_clone, SIGCHILD, nullptr);
+  pid_t pid = syscall(SYS_clone, SIGCHLD, nullptr);
 #else
   pid_t pid = fork();
 #endif //defined(OHOS_CRASHPAD_FORK)
@@ -200,7 +200,7 @@ bool SpawnSubprocess(const std::vector<std::string>& argv,
     PLOG(FATAL) << (use_path ? "execvpe" : "execve");
 #else
 #if defined(OHOS_CRASHPAD_FORK)
-    pid = syscall(SYS_clone, SIGCHILD,nullptr);
+    pid = syscall(SYS_clone, SIGCHLD,nullptr);
     if (pid < 0) {
       PLOG(FATAL) << "fork";
     }
@@ -211,8 +211,6 @@ bool SpawnSubprocess(const std::vector<std::string>& argv,
       //exit() instead of exit(),beacuse fork() was called
       _exit(EXIT_SUCCESS);
     }
-
-    CloseMultipleNowOrOnExec(STDERR_FILENO + 1, preserve_fd);
 
     auto execve_fp = use_path ? execvpe : execve;
     execve_fp(argv_for_spawn[0], argv_for_spawn, envp_for_spawn);
