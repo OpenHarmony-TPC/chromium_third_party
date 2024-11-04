@@ -491,6 +491,11 @@ class BLINK_EXPORT WebView {
   // Returns the number of live WebView instances in this process.
   static size_t GetWebViewCount();
 
+#ifdef OHOS_LOGGER_REPORT
+  BLINK_EXPORT static void SetStrictLogMode(bool);
+  BLINK_EXPORT static bool IsStrictLogMode();
+#endif
+
  protected:
   ~WebView() = default;
 };

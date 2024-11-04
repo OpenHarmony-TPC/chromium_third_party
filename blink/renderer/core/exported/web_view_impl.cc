@@ -268,6 +268,17 @@ bool WebViewImpl::UseExternalPopupMenus() const {
   return should_use_external_popup_menus_;
 }
 
+#ifdef OHOS_LOGGER_REPORT
+static bool g_is_strict_log_mode_ = true;
+void WebView::SetStrictLogMode(bool is_strict_log_mode) {
+  g_is_strict_log_mode_ = is_strict_log_mode;
+}
+
+bool WebView::IsStrictLogMode() {
+  return g_is_strict_log_mode_;
+}
+#endif
+
 namespace {
 
 class EmptyEventListener final : public NativeEventListener {
