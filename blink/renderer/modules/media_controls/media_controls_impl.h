@@ -62,6 +62,7 @@ class MediaControlPlaybackSpeedButtonElement;
 class MediaControlPlaybackSpeedListElement;
 class MediaControlPlayButtonElement;
 class MediaControlRemainingTimeDisplayElement;
+class MediaControlScrubbingPanelElement;
 class MediaControlScrubbingMessageElement;
 class MediaControlTextTrackListElement;
 class MediaControlsTextTrackManager;
@@ -372,6 +373,7 @@ class MODULES_EXPORT MediaControlsImpl final : public HTMLDivElement,
   Member<MediaControlPanelElement> panel_;
   Member<MediaControlPlayButtonElement> play_button_;
   Member<MediaControlTimelineElement> timeline_;
+  Member<MediaControlScrubbingPanelElement> scrubbing_panel_;
   Member<MediaControlScrubbingMessageElement> scrubbing_message_;
   Member<MediaControlCurrentTimeDisplayElement> current_time_display_;
   Member<MediaControlRemainingTimeDisplayElement> duration_display_;
