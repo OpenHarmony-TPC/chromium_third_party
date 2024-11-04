@@ -242,6 +242,7 @@ class PLATFORM_EXPORT InputHandlerProxy : public cc::InputHandlerClient,
   void TriggerVsyncImplTask();
   void NativeHitTestResult(bool native, size_t fingerId, int layerId);
   void SetNativeEmbedMode(bool flag);
+  void ScrollBy(float delta_x, float delta_y);
 #endif
 #if defined(OHOS_INPUT_EVENTS)
   void SetOverscrollMode(int mode);
