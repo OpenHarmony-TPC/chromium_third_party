@@ -107,7 +107,6 @@ video::-webkit-media-controls-panel {
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  align-items: center;
   user-select: none;
   z-index: 0;
   overflow: hidden;
@@ -684,7 +683,6 @@ audio::-webkit-media-controls-timeline,
 video::-webkit-media-controls-timeline {
   appearance: -internal-media-control;
 
-  width: 100%;
   height: 4px;
   padding-left: 16px;
   padding-right: 16px;
@@ -1422,9 +1420,17 @@ video::-internal-media-controls-overlay-cast-button.on {
  * Scrubbing
  */
 
-video::-internal-media-controls-scrubbing-message {
+video::-internal-media-controls-scrubbing-panel {
   position: absolute;
   top: 20%;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+  
+video::-internal-media-controls-scrubbing-message {
+  position: absolute;
   text-align: center;
   max-width: 100%;
   border-radius: 18px;
