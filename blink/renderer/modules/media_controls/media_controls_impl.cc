@@ -84,6 +84,7 @@
 #include "third_party/blink/renderer/modules/media_controls/elements/media_control_playback_speed_button_element.h"
 #include "third_party/blink/renderer/modules/media_controls/elements/media_control_playback_speed_list_element.h"
 #include "third_party/blink/renderer/modules/media_controls/elements/media_control_remaining_time_display_element.h"
+#include "third_party/blink/renderer/modules/media_controls/elements/media_control_scrubbing_panel_element.h"
 #include "third_party/blink/renderer/modules/media_controls/elements/media_control_scrubbing_message_element.h"
 #include "third_party/blink/renderer/modules/media_controls/elements/media_control_text_track_list_element.h"
 #include "third_party/blink/renderer/modules/media_controls/elements/media_control_timeline_element.h"
@@ -351,6 +352,7 @@ MediaControlsImpl::MediaControlsImpl(HTMLMediaElement& media_element)
       panel_(nullptr),
       play_button_(nullptr),
       timeline_(nullptr),
+      scrubbing_panel_(nullptr),
       scrubbing_message_(nullptr),
       current_time_display_(nullptr),
       duration_display_(nullptr),
@@ -554,6 +556,8 @@ void MediaControlsImpl::InitializeControls() {
   if (ShouldShowVideoControls()) {
     media_button_panel_ =
         MakeGarbageCollected<MediaControlButtonPanelElement>(*this);
+    scrubbing_panel_ =
+        MakeGarbageCollected<MediaControlScrubbingPanelElement>(*this);
     scrubbing_message_ =
         MakeGarbageCollected<MediaControlScrubbingMessageElement>(*this);
   }
@@ -665,7 +669,8 @@ void MediaControlsImpl::PopulatePanel() {
 
   Element* button_panel = panel_;
   if (ShouldShowVideoControls()) {
-    MaybeParserAppendChild(panel_, scrubbing_message_);
+    MaybeParserAppendChild(panel_, scrubbing_panel_);
+    MaybeParserAppendChild(scrubbing_panel_, scrubbing_message_);
     if (display_cutout_fullscreen_button_)
       panel_->ParserAppendChild(display_cutout_fullscreen_button_);
 

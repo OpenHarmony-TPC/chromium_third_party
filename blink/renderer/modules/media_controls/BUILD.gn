@@ -65,6 +65,8 @@ blink_modules_sources("media_controls") {
     "elements/media_control_popup_menu_element.h",
     "elements/media_control_remaining_time_display_element.cc",
     "elements/media_control_remaining_time_display_element.h",
+    "elements/media_control_scrubbing_panel_element.cc",
+    "elements/media_control_scrubbing_panel_element.h",
     "elements/media_control_scrubbing_message_element.cc",
     "elements/media_control_scrubbing_message_element.h",
     "elements/media_control_slider_element.cc",
