@@ -269,6 +269,12 @@ void WidgetInputHandlerImpl::SetNativeEmbedMode(bool flag) {
     input_handler_manager_->SetNativeEmbedMode(flag);
   }
 }
+
+void WidgetInputHandlerImpl::ScrollBy(float delta_x, float delta_y) {
+  if (input_handler_manager_) {
+    input_handler_manager_->ScrollBy(delta_x, delta_y);
+  }
+}
 #endif
 
 }  // namespace blink

@@ -1249,6 +1249,13 @@ void WidgetInputHandlerManager::SetGestureEventResult(bool result) {
   input_handler_proxy_->SetGestureEventResult(result);
 }
 
+void WidgetInputHandlerManager::ScrollBy(float delta_x, float delta_y) {
+  if (!input_handler_proxy_) {
+    return;
+  }
+  input_handler_proxy_->ScrollBy(delta_x, delta_y);
+}
+
 void WidgetInputHandlerManager::TouchHitTest(const WebPointerEvent& event, size_t fingerId) {
   main_thread_task_runner_->PostTask(
       FROM_HERE,
