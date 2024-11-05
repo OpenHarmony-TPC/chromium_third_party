@@ -1298,10 +1298,11 @@ void MouseEventManager::HandleCreateOverlay(T const& targeted_event) {
     PaintImage paint_image = image->PaintImageForCurrentFrame();
     SkBitmap bm;
     paint_image.GetSwSkImage()->asLegacyBitmap(&bm);
+    auto image_node = hit_test_result.InnerNodeOrImageMapImage();
     frame_->GetChromeClient().CreateOverlay(
         frame_,
         bm,
-        image_rect,
+        image_node,
         gfx::Point(touch_point.x() - image_rect.x(), touch_point.y() - image_rect.y()),
         base::BindRepeating(&MouseEventManager::SetOverlayInProgress, weak_ptr_factory_.GetWeakPtr()),
         base::BindRepeating(&MouseEventManager::OnDestroyImageAnalyzerOverlay, weak_ptr_factory_.GetWeakPtr()));

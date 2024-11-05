@@ -43,6 +43,7 @@
 #include "third_party/blink/public/mojom/input/input_handler.mojom-blink-forward.h"
 #include "third_party/blink/public/mojom/scroll/scroll_into_view_params.mojom-blink.h"
 #include "third_party/blink/renderer/core/core_export.h"
+#include "third_party/blink/renderer/core/dom/node.h"
 #include "third_party/blink/renderer/core/html/forms/external_date_time_chooser.h"
 #include "third_party/blink/renderer/core/html/forms/popup_menu.h"
 #include "third_party/blink/renderer/core/layout/geometry/physical_offset.h"
@@ -597,7 +598,7 @@ class CORE_EXPORT ChromeClient : public GarbageCollected<ChromeClient> {
   using OnDestroyImageAnalyzerOverlayCallback = base::RepeatingCallback<void()>;
   virtual void CreateOverlay(LocalFrame* frame,
                              const SkBitmap& image,
-                             const gfx::Rect& image_rect,
+                             const Node* image_node,
                              const gfx::Point& touch_point,
                              OnTextSelectedCallback callback,
                              OnDestroyImageAnalyzerOverlayCallback destroy_callback) = 0;

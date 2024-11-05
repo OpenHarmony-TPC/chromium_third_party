@@ -319,7 +319,7 @@ class CORE_EXPORT ChromeClientImpl final : public ChromeClient {
 #ifdef OHOS_AI
   void CreateOverlay(LocalFrame* frame,
                      const SkBitmap& image,
-                     const gfx::Rect& image_rect,
+                     const Node* image_node,
                      const gfx::Point& touch_point,
                      OnTextSelectedCallback callback,
                      OnDestroyImageAnalyzerOverlayCallback destroy_callback) override;
