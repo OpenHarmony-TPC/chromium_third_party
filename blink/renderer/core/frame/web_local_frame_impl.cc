@@ -3289,6 +3289,13 @@ void WebLocalFrameImpl::DidSubresourceFiltered() {
   Client()->DidSubresourceFiltered();
 }
 
+bool  WebLocalFrameImpl::GetGlobalAdblockEnabled() {
+  if (!Client())
+    return false;
+
+  return Client()->GetGlobalAdblockEnabled();
+}
+
 void WebLocalFrameImpl::SetHasElemHideTypeOption(
     bool has_elemhide_type_option) {
   frame_->SetHasElemHideTypeOption(has_elemhide_type_option);

@@ -118,7 +118,7 @@ class CORE_EXPORT LocalFrameClientImpl final : public LocalFrameClient {
 
 #ifdef OHOS_ARKWEB_ADBLOCK
   void DispatchDidSubresourceFiltered() override;
-
+  bool GetGlobalAdblockEnabled() override;
 #endif  // OHOS_ARKWEB_ADBLOCK
 
   void BeginNavigation(

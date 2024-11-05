@@ -62,6 +62,8 @@ class WebDocumentSubresourceFilter {
   virtual std::unique_ptr<std::vector<std::string>> GetUserDomPathSelectors(
       const blink::WebURL& document_url,
       bool need_generic_selectors) = 0;
+
+  virtual void set_activation_state(bool enabled) = 0;
 #endif
 
   virtual LoadPolicy GetLoadPolicyForWebSocketConnect(const WebURL&) = 0;

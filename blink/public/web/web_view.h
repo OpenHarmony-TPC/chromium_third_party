@@ -491,6 +491,11 @@ class BLINK_EXPORT WebView {
   // Returns the number of live WebView instances in this process.
   static size_t GetWebViewCount();
 
+#ifdef OHOS_ARKWEB_ADBLOCK
+  virtual void OnSetAdBlockEnable(bool site_adblock_enabled) = 0;
+  virtual bool GetAdBlockEnableForSite() = 0;
+#endif // OHOS_ARKWEB_ADBLOCK
+
  protected:
   ~WebView() = default;
 };

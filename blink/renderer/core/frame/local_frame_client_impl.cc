@@ -1197,5 +1197,8 @@ void LocalFrameClientImpl::DispatchDidSubresourceFiltered() {
   web_frame_->DidSubresourceFiltered();
 }
 
+bool  LocalFrameClientImpl::GetGlobalAdblockEnabled() {
+  return web_frame_->GetGlobalAdblockEnabled();
+}
 #endif  // OHOS_ARKWEB_ADBLOCK
 }  // namespace blink

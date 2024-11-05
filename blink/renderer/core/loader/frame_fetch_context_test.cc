@@ -200,6 +200,8 @@ class FixedPolicySubresourceFilter : public WebDocumentSubresourceFilter {
       bool need_generic_selectors) override {
         return {};
       }
+
+  void set_activation_state(bool enabled) override {}
   #endif
 
   void ReportDisallowedLoad() override { ++*filtered_load_counter_; }

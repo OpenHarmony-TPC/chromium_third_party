@@ -72,6 +72,7 @@ class CORE_EXPORT SubresourceFilter final
 #ifdef OHOS_ARKWEB_ADBLOCK
   void RequestSendStatistics(base::TimeDelta delay);
   void SendStatistics(TimerBase*);
+  bool GetAdBlockEnabledByPage() const;
 #endif  // OHOS_ARKWEB_ADBLOCK
 
   void ReportLoad(const KURL& resource_url,

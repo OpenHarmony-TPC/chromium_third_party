@@ -597,4 +597,8 @@ struct CommitNavigationParams {
   // Indicates whether the target document of this navigation should load with
   // the `has_storage_access` bit set.
   bool load_with_storage_access = false;
+
+  // #ifdef OHOS_ARKWEB_ADBLOCK
+  bool site_adblock_enabled = false;
+  // #endif
 };

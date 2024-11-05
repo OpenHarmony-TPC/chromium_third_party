@@ -76,6 +76,10 @@ struct BLINK_COMMON_EXPORT RendererPreferences {
   bool caret_browsing_enabled{false};
   std::vector<uint16_t> explicitly_allowed_network_ports;
 
+#ifdef OHOS_ARKWEB_ADBLOCK
+  bool is_global_adblock_enabled{false};
+#endif // OHOS_ARKWEB_ADBLOCK
+
   RendererPreferences();
   RendererPreferences(const RendererPreferences& other);
   RendererPreferences(RendererPreferences&& other);

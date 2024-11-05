@@ -161,4 +161,8 @@ struct RendererPreferences {
   bool selection_clipboard_buffer_available = false;
 
   array<uint16> explicitly_allowed_network_ports;
+
+  // #ifdef OHOS_ARKWEB_ADBLOCK
+  bool is_global_adblock_enabled = false;
+  // #endif // OHOS_ARKWEB_ADBLOCK
 };

@@ -3944,7 +3944,7 @@ WebHitTestResult WebViewImpl::HitTestResultForTap(
 #ifdef BUILDFLAG(OHOS_CLIPBOARD)
       main_frame->GetEventHandler()
           .HitTestResultForGestureEvent(
-              scaled_event, 
+              scaled_event,
               HitTestRequest::kReadOnly |
               HitTestRequest::kActive |
               HitTestRequest::kOnDoHitTest)
@@ -4202,5 +4202,31 @@ void WebViewImpl::CreateRemoteMainFrame(
 scheduler::WebAgentGroupScheduler& WebViewImpl::GetWebAgentGroupScheduler() {
   return web_agent_group_scheduler_;
 }
+
+#ifdef OHOS_ARKWEB_ADBLOCK
+void WebViewImpl::OnSetAdBlockEnable(bool site_adblock_enabled) {
+  Page* page = GetPage();
+  if (!page)
+    return;
+  LocalFrame* frame = DynamicTo<LocalFrame>(page->MainFrame());
+  if (!frame) {
+    return;
+  }
+  LocalFrame& root_frame = frame->LocalFrameRoot();
+  root_frame.SetAdBlockEnableForSite(site_adblock_enabled);
+}
+
+bool WebViewImpl::GetAdBlockEnableForSite() {
+  Page* page = GetPage();
+  if (!page)
+    return false;
+  LocalFrame* frame = DynamicTo<LocalFrame>(page->MainFrame());
+  if (!frame) {
+    return false;
+  }
+  LocalFrame& root_frame = frame->LocalFrameRoot();
+  return root_frame.GetAdBlockEnableForSite();
+}
+#endif // OHOS_ARKWEB_ADBLOCK
 
 }  // namespace blink

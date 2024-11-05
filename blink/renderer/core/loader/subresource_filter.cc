@@ -93,11 +93,22 @@ bool SubresourceFilter::AllowLoad(
     const KURL& resource_url,
     mojom::blink::RequestContextType request_context,
     ReportingDisposition reporting_disposition) {
+#ifdef OHOS_ARKWEB_ADBLOCK
+  WebDocumentSubresourceFilter::LoadPolicy load_policy =
+      WebDocumentSubresourceFilter::kAllow;
+
+  if (GetAdBlockEnabledByPage()) {
+    // TODO(csharrison): Implement a caching layer here which is a HashMap of
+    // Pair<url string, context> -> LoadPolicy.
+    load_policy =
+        subresource_filter_->GetLoadPolicy(resource_url, request_context);
+  }
+#else
   // TODO(csharrison): Implement a caching layer here which is a HashMap of
   // Pair<url string, context> -> LoadPolicy.
-
   WebDocumentSubresourceFilter::LoadPolicy load_policy =
       subresource_filter_->GetLoadPolicy(resource_url, request_context);
+#endif  // OHOS_ARKWEB_ADBLOCK
 
   if (reporting_disposition == ReportingDisposition::kReport)
     ReportLoad(resource_url, load_policy);
@@ -147,6 +158,24 @@ void SubresourceFilter::DidMatchCssRule(const KURL& document_url,
   RequestSendStatistics(base::Milliseconds(1000));
 }
 
+bool SubresourceFilter::GetAdBlockEnabledByPage() const {
+  auto* window = DynamicTo<LocalDOMWindow>(execution_context_.Get());
+  if (!window)
+    return false;
+
+  LocalFrame* local_frame = window->GetFrame();
+  if (!local_frame)
+    return false;
+  LocalFrame& local_frame_root = local_frame->LocalFrameRoot();
+
+  if (!local_frame_root.GetGlobalAdblockEnabled()) {
+    return false;
+  }
+  if (local_frame_root.GetAdBlockEnableForSite()) {
+    return true;
+  }
+  return false;
+}
 #endif
 
 bool SubresourceFilter::AllowWebSocketConnection(const KURL& url) {

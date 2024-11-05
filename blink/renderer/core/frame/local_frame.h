@@ -415,6 +415,12 @@ class CORE_EXPORT LocalFrame final
 #ifdef OHOS_ARKWEB_ADBLOCK
   void DidSubresourceFiltered();
 
+  bool GetGlobalAdblockEnabled();
+
+  void SetAdBlockEnableForSite(bool site_adblock_enabled);
+
+  bool GetAdBlockEnableForSite() const { return adblock_enabled_for_site_; }
+
   void SetHasElemHideTypeOption(bool has_elemhide_type_option);
 
   bool GetHasElemHideTypeOption() const { return has_elemhide_type_option_; }
@@ -1040,6 +1046,7 @@ class CORE_EXPORT LocalFrame final
   float text_zoom_factor_;
 
 #ifdef OHOS_ARKWEB_ADBLOCK
+  bool adblock_enabled_for_site_ = false;
   bool has_elemhide_type_option_ = false;
   bool has_document_type_option_ = false;
   bool has_generichide_type_option_ = false;
