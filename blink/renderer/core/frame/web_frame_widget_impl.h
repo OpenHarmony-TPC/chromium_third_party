@@ -57,6 +57,7 @@
 #include "third_party/blink/public/web/web_meaningful_layout.h"
 #include "third_party/blink/renderer/core/clipboard/data_object.h"
 #include "third_party/blink/renderer/core/core_export.h"
+#include "third_party/blink/renderer/core/dom/node.h"
 #include "third_party/blink/renderer/core/exported/web_page_popup_impl.h"
 #include "third_party/blink/renderer/core/frame/animation_frame_timing_monitor.h"
 #include "third_party/blink/renderer/core/frame/web_local_frame_impl.h"
@@ -679,12 +680,13 @@ class CORE_EXPORT WebFrameWidgetImpl
 #ifdef OHOS_AI
   using OnTextSelectedCallback = base::RepeatingCallback<void(bool)>;
   virtual void CreateOverlay(const SkBitmap& image,
-                             const gfx::Rect& image_rect,
-                             const gfx::Point & touch_point,
+                             const Node* image_node,
+                             const gfx::Point& touch_point,
                              OnTextSelectedCallback callback);
   void OnTextSelected(bool flag) override;
-  using GetScreenRectCallback = base::OnceCallback<void(const gfx::Rect&)>;
-  void GetScreenRect(GetScreenRectCallback callback) override;
+  using GetImageRectCallback = base::OnceCallback<void(const gfx::Rect&)>;
+  void GetImageRect(GetImageRectCallback callback) override;
+  gfx::Rect GetImageRectInner();
 #endif
 
  protected:
@@ -1178,6 +1180,7 @@ class CORE_EXPORT WebFrameWidgetImpl
 
 #ifdef OHOS_AI
   OnTextSelectedCallback on_text_selected_callback_;
+  const Node* hit_image_node_ = nullptr;
 #endif
 
   base::WeakPtrFactory<mojom::blink::FrameWidgetInputHandler>
