@@ -563,6 +563,12 @@ class CORE_EXPORT WebLocalFrameImpl final
 #ifdef OHOS_ARKWEB_ADBLOCK
   void DidSubresourceFiltered() override;
 
+  bool GetGlobalAdblockEnabled();
+
+  bool GetAdBlockEnabled() override {
+    return frame_->GetAdBlockEnableForSite();
+  }
+
   void SetHasElemHideTypeOption(bool has_elemhide_type_option) override;
 
   bool GetHasElemHideTypeOption() const override {

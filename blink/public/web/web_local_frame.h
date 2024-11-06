@@ -916,6 +916,8 @@ class BLINK_EXPORT WebLocalFrame : public WebFrame {
       bool has_generichide_type_option) = 0;
 
   virtual bool GetHasGenericHideTypeOption() const = 0;
+
+  virtual bool GetAdBlockEnabled() = 0;
 #endif  // OHOS_ARKWEB_ADBLOCK
 
   virtual void SetTargetToCurrentHistoryItem(const WebString& target) = 0;

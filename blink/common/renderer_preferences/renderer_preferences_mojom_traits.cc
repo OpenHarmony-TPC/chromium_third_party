@@ -106,6 +106,10 @@ bool StructTraits<blink::mojom::RendererPreferencesDataView,
   out->plugin_fullscreen_allowed = data.plugin_fullscreen_allowed();
   out->caret_browsing_enabled = data.caret_browsing_enabled();
 
+#ifdef OHOS_ARKWEB_ADBLOCK
+  out->is_global_adblock_enabled = data.is_global_adblock_enabled();
+#endif // OHOS_ARKWEB_ADBLOCK
+
   if (!data.ReadExplicitlyAllowedNetworkPorts(
           &out->explicitly_allowed_network_ports)) {
     return false;

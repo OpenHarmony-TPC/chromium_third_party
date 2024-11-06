@@ -247,6 +247,13 @@ struct BLINK_COMMON_EXPORT
 
   static bool Read(blink::mojom::RendererPreferencesDataView,
                    ::blink::RendererPreferences* out);
+
+#ifdef OHOS_ARKWEB_ADBLOCK
+  static const bool& is_global_adblock_enabled(
+      const ::blink::RendererPreferences& data) {
+    return data.is_global_adblock_enabled;
+  }
+#endif // OHOS_ARKWEB_ADBLOCK
 };
 
 }  // namespace mojo

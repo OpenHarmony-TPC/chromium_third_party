@@ -333,7 +333,7 @@ class CORE_EXPORT EmptyLocalFrameClient : public LocalFrameClient {
 
 #ifdef OHOS_ARKWEB_ADBLOCK
   void DispatchDidSubresourceFiltered() override {}
-
+  bool GetGlobalAdblockEnabled() override { return false; }
 #endif  // OHOS_ARKWEB_ADBLOCK
 
   void BeginNavigation(

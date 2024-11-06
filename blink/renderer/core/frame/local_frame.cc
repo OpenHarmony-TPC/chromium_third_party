@@ -1921,7 +1921,7 @@ bool LocalFrame::CanNavigate(const Frame& target_frame,
     if (!target_domain.empty() && !destination_domain.empty() &&
         target_domain == destination_domain &&
         (target_frame.GetSecurityContext()->GetSecurityOrigin()->Protocol() ==
-             destination_url.Protocol())) {
+         destination_url.Protocol())) {
       return true;
     }
 
@@ -3537,6 +3537,16 @@ void LocalFrame::SetResourceCacheRemote(
 #ifdef OHOS_ARKWEB_ADBLOCK
 void LocalFrame::DidSubresourceFiltered() {
   Client()->DispatchDidSubresourceFiltered();
+}
+
+bool LocalFrame::GetGlobalAdblockEnabled() {
+  return Client()->GetGlobalAdblockEnabled();
+}
+
+void LocalFrame::SetAdBlockEnableForSite(bool site_adblock_enabled) {
+  LOG(WARNING) << "[Adblock] Set adblock enable for site: "
+               << site_adblock_enabled;
+  adblock_enabled_for_site_ = site_adblock_enabled;
 }
 
 void LocalFrame::SetHasElemHideTypeOption(bool has_elemhide_type_option) {

@@ -175,7 +175,7 @@ class CORE_EXPORT LocalFrameClient : public FrameClient {
 
 #ifdef OHOS_ARKWEB_ADBLOCK
   virtual void DispatchDidSubresourceFiltered() = 0;
-
+  virtual bool GetGlobalAdblockEnabled() = 0;
 #endif
 
   virtual void BeginNavigation(

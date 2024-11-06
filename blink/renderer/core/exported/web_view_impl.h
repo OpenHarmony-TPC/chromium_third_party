@@ -634,6 +634,12 @@ class CORE_EXPORT WebViewImpl final : public WebView,
   void SetScrollOffset(const gfx::PointF point) override;
 #endif  // defined(OHOS_INPUT_EVENTS)
 
+#ifdef OHOS_ARKWEB_ADBLOCK
+  void OnSetAdBlockEnable(bool site_adblock_enabled) override;
+
+  bool GetAdBlockEnableForSite() override;
+#endif // OHOS_ARKWEB_ADBLOCK
+
  private:
   FRIEND_TEST_ALL_PREFIXES(WebFrameTest, DivScrollIntoEditableTest);
   FRIEND_TEST_ALL_PREFIXES(WebFrameTest,
