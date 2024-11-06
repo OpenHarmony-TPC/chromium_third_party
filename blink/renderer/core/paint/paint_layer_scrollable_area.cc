@@ -1421,7 +1421,7 @@ gfx::Rect PaintLayerScrollableArea::RectForHorizontalScrollbar() const {
               .ToInt() -
           scroll_corner.width(),
       HorizontalScrollbar()->ScrollbarThickness());
-#else  
+#else
   return gfx::Rect(
       HorizontalScrollbarStart(),
       border_box_size.height() - GetLayoutBox()->BorderBottom().ToInt() -
@@ -1460,7 +1460,7 @@ int PaintLayerScrollableArea::VerticalScrollbarStart() const {
          GetLayoutBox()->BorderRight().ToInt() -
          VerticalScrollbar()->ScrollbarThickness() -
          marginRight;
-#else  
+#else
   return PixelSnappedBorderBoxSize().width() -
          GetLayoutBox()->BorderRight().ToInt() -
          VerticalScrollbar()->ScrollbarThickness();
