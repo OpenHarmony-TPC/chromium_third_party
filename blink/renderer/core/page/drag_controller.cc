@@ -1910,7 +1910,8 @@ void DragController::RestoreDragImageEffects() {
   const ComputedStyle* style = node->GetComputedStyle();
   if (!style)
     return;
-  element->setAttribute(html_names::kStyleAttr, origin_style_.ToAtomicString());
+  if (!origin_style_.ToAtomicString().empty())
+    element->setAttribute(html_names::kStyleAttr, origin_style_.ToAtomicString());
 }
 
 bool DragController::IsDraging() {
