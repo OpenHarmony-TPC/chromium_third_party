@@ -4861,11 +4861,12 @@ void WebFrameWidgetImpl::RegisterClippedVisualViewportSelectionBounds(
 
 #ifdef OHOS_AI
 void WebFrameWidgetImpl::CreateOverlay(const SkBitmap& image,
-                                       const gfx::Rect& image_rect,
+                                       const Node* image_node,
                                        const gfx::Point & touch_point,
                                        OnTextSelectedCallback callback) {
   on_text_selected_callback_ = std::move(callback);
-  GetAssociatedFrameWidgetHost()->CreateOverlay(image, image_rect, touch_point);
+  hit_image_node_ = image_node;
+  GetAssociatedFrameWidgetHost()->CreateOverlay(image, GetImageRectInner(), touch_point);
 }
 
 void WebFrameWidgetImpl::OnTextSelected(bool flag) {
@@ -4874,24 +4875,26 @@ void WebFrameWidgetImpl::OnTextSelected(bool flag) {
   }
 }
 
-void WebFrameWidgetImpl::GetScreenRect(GetScreenRectCallback callback) {
-  LocalFrame* frame = LocalRootImpl()->GetFrame();
-  LocalFrameView* view = frame->View();
-  double ratio = frame->DevicePixelRatio();
-  float scale = PageScaleInMainFrame();
-  // view_rect is the most basic rect.
-  gfx::Rect view_rect = ToEnclosingRect(view->GetLayoutView()->ViewRect());
-  // abs_view_rect is absolute in the whole document.
-  gfx::Rect abs_view_rect = view->FrameToDocument(view_rect);
-  // rel_view_rect is relative to the screen.
-  gfx::Rect rel_view_rect = view->FrameToScreen(view_rect);
-  // screen_rect is calculate by the three rects above
-  gfx::Rect screen_rect = ToEnclosingRect(
-      gfx::RectF(abs_view_rect.x() - rel_view_rect.x() * ratio / scale,
-                 abs_view_rect.y() - rel_view_rect.y() * ratio / scale,
-                 abs_view_rect.width(),
-                 abs_view_rect.height()));
-  std::move(callback).Run(screen_rect);
+void WebFrameWidgetImpl::GetImageRect(GetImageRectCallback callback) {
+  std::move(callback).Run(GetImageRectInner());
+}
+
+gfx::Rect WebFrameWidgetImpl::GetImageRectInner() {
+  auto image_rect = gfx::Rect();
+  if (hit_image_node_) {
+    LocalFrame* frame = LocalRootImpl()->GetFrame();
+    LocalFrameView* view = frame->View();
+    auto abs_rect = 
+        hit_image_node_->GetLayoutBox()->AbsoluteContentQuad().BoundingBox();
+    auto rel_rect = view->FrameToScreen(ToEnclosingRect(abs_rect));
+    double ratio = frame->DevicePixelRatio();
+    float scale = PageScaleInMainFrame();
+    image_rect = gfx::Rect(base::ClampFloor(rel_rect.x() * ratio),
+                           base::ClampFloor(rel_rect.y() * ratio),
+                           base::ClampFloor(abs_rect.width() * scale),
+                           base::ClampFloor(abs_rect.height() * scale));
+  }
+  return image_rect;
 }
 #endif
 }  // namespace blink
