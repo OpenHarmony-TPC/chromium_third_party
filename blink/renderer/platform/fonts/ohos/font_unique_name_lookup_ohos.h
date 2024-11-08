@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// Based on font_unique_name_lookup_android.h originally written by
+// Copyright 2018 The Chromium Authors
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 #ifndef THIRD_PARTY_BLINK_RENDERER_PLATFORM_FONTS_LINUX_FONT_UNIQUE_NAME_LOOKUP_OHOS_H_
 #define THIRD_PARTY_BLINK_RENDERER_PLATFORM_FONTS_LINUX_FONT_UNIQUE_NAME_LOOKUP_OHOS_H_
 
