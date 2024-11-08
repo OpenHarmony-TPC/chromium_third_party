@@ -1451,12 +1451,12 @@ gfx::Rect ChromeClientImpl::AdjustWindowRectForDisplay(
 #ifdef OHOS_AI
 void ChromeClientImpl::CreateOverlay(LocalFrame* frame,
                                      const SkBitmap& image,
-                                     const gfx::Rect& image_rect,
+                                     const Node* image_node,
                                      const gfx::Point& touch_point,
                                      OnTextSelectedCallback callback,
                                      OnDestroyImageAnalyzerOverlayCallback destroy_callback) {
   WebLocalFrameImpl* web_frame = WebLocalFrameImpl::FromFrame(frame);
-  web_frame->LocalRootFrameWidget()->CreateOverlay(image, image_rect, touch_point, std::move(callback),
+  web_frame->LocalRootFrameWidget()->CreateOverlay(image, image_node, touch_point, std::move(callback),
     std::move(destroy_callback));
 }
 #endif
