@@ -948,6 +948,15 @@ void WebMediaPlayerImpl::DoLoad(LoadType load_type,
 
 #if defined(OHOS_CUSTOM_VIDEO_PLAYER)
 void WebMediaPlayerImpl::DoReloadForPrimitive() {
+  // If a demuxer override was specified or a Media Source pipeline will be
+  // used, the pipeline can start immediately.
+  if (demuxer_manager_->HasDemuxerOverride() ||
+      load_type_ == kLoadTypeMediaSource ||
+      loaded_url_.SchemeIs(media::remoting::kRemotingScheme)) {
+    StartPipeline();
+    return;
+  }
+
   // Short circuit the more complex loading path for data:// URLs. Sending
   // them through the network based loading path just wastes memory and causes
   // worse performance since reads become asynchronous.
