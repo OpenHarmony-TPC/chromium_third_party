@@ -2689,8 +2689,10 @@ void PaintLayerScrollableArea::UpdateNeedsCompositedScrolling(
 
 bool PaintLayerScrollableArea::VisualViewportSuppliesScrollbars() const {
 #ifdef OHOS_SCROLLBAR
-  return false;
-#else
+  if (auto* layout_view = DynamicTo<LayoutView>(GetLayoutBox())) {
+    return false;
+  }
+#endif  // OHOS_SCROLLBAR
   LocalFrame* frame = GetLayoutBox()->GetFrame();
   if (!frame || !frame->GetSettings())
     return false;
@@ -2702,7 +2704,6 @@ bool PaintLayerScrollableArea::VisualViewportSuppliesScrollbars() const {
   const TopDocumentRootScrollerController& controller =
       GetLayoutBox()->GetDocument().GetPage()->GlobalRootScrollerController();
   return controller.RootScrollerArea() == this;
-#endif  // OHOS_SCROLLBAR
 }
 
 bool PaintLayerScrollableArea::ScheduleAnimation() {
