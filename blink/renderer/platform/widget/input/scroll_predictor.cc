@@ -34,6 +34,13 @@ ScrollPredictor::ScrollPredictor()
     std::string filter_name = GetFieldTrialParamValueByFeature(
         blink::features::kFilteringScrollPrediction, "filter");
 
+    if (filter_name.empty())
+      filter_name = blink::features::kScrollPredictionFilter.Get();
+
+    TRACE_EVENT1("input", "ScrollPredictor::ScrollPredictor",
+                        "ScrollPredictionFilter",
+                        filter_name);
+
     input_prediction::FilterType filter_type =
         filter_factory_->GetFilterTypeFromName(filter_name);
 
@@ -80,12 +87,17 @@ std::unique_ptr<EventWithCallback> ScrollPredictor::ResampleScrollEvents(
       UpdatePrediction(coalesced_event.event_->Event(), frame_time);
 
     if (should_resample_scroll_events_) {
+      ResampleEvent(frame_time, frame_interval,
+                    event_with_callback->event_pointer());
+      // Sync the predicted `delta_y` to `metrics` for AverageLag metric.
       auto* metrics = event_with_callback->metrics()
                           ? event_with_callback->metrics()->AsScrollUpdate()
                           : nullptr;
-      ResampleEvent(frame_time, frame_interval,
-                    event_with_callback->event_pointer(),
-                    &event_with_callback->latency_info(), metrics);
+      if (metrics) {
+        WebGestureEvent* gesture_event =
+            static_cast<WebGestureEvent*>(event_with_callback->event_pointer());
+        metrics->set_predicted_delta(gesture_event->data.scroll_update.delta_y);
+      }
     }
 
     metrics_handler_.EvaluatePrediction();
@@ -96,6 +108,63 @@ std::unique_ptr<EventWithCallback> ScrollPredictor::ResampleScrollEvents(
   }
 
   return event_with_callback;
+}
+
+std::unique_ptr<EventWithCallback>
+ScrollPredictor::GenerateSyntheticScrollUpdate(
+    base::TimeTicks frame_time,
+    base::TimeDelta frame_interval,
+    mojom::blink::GestureDevice gesture_device,
+    int modifiers) {
+  if (!HasPrediction()) {
+    return nullptr;
+  }
+  WebGestureEvent gesture_event(WebInputEvent::Type::kGestureScrollUpdate,
+                                modifiers, frame_time, gesture_device);
+
+  ResampleEvent(frame_time, frame_interval, &gesture_event);
+
+  ui::LatencyInfo latency_info;
+  static int64_t trace_id = std::numeric_limits<uint32_t>::max();
+  latency_info.set_trace_id(--trace_id);
+  // TODO(b/329346768): We should also add a new `BEGIN` stage, instead of
+  // re-using the one that is explicitly about the `content::RenderWidgetHost`.
+  latency_info.AddLatencyNumberWithTraceName(
+      ui::INPUT_EVENT_LATENCY_BEGIN_RWH_COMPONENT,
+      "InputLatency::GestureScrollUpdate", frame_time);
+
+  std::unique_ptr<cc::ScrollUpdateEventMetrics> metrics =
+      cc::ScrollUpdateEventMetrics::Create(
+          ui::ET_GESTURE_SCROLL_UPDATE, gesture_event.GetScrollInputType(),
+          /*is_inertial=*/false,
+          cc::ScrollUpdateEventMetrics::ScrollUpdateType::kContinued,
+          /*delta=*/gesture_event.data.scroll_update.delta_y,
+          /*timestamp=*/frame_time,
+          /*arrived_in_browser_main_timestamp=*/frame_time,
+          /*blocking_touch_dispatched_to_renderer=*/frame_time,
+          /*trace_id=*/
+          base::IdType64<class ui::LatencyInfo>(latency_info.trace_id()));
+  metrics->set_predicted_delta(gesture_event.data.scroll_update.delta_y);
+  return std::make_unique<EventWithCallback>(
+      std::make_unique<WebCoalescedInputEvent>(std::move(gesture_event),
+                                               latency_info),
+      base::BindOnce([](InputHandlerProxy::EventDisposition event_disposition,
+                        std::unique_ptr<WebCoalescedInputEvent> event,
+                        std::unique_ptr<InputHandlerProxy::DidOverscrollParams>
+                            overscroll_params,
+                        const WebInputEventAttribution& attribution,
+                        std::unique_ptr<cc::EventMetrics> metrics,
+                        mojom::blink::ScrollResultDataPtr scroll_result_data) {
+        ui::LatencyInfo::TraceIntermediateFlowEvents(
+            {event->latency_info()},
+            ::perfetto::protos::pbzero::ChromeLatencyInfo::
+                STEP_DID_HANDLE_INPUT_AND_OVERSCROLL);
+      }),
+      std::move(metrics));
+}
+
+bool ScrollPredictor::HasPrediction() const {
+  return predictor_->HasPrediction();
 }
 
 void ScrollPredictor::Reset() {
@@ -134,17 +203,19 @@ void ScrollPredictor::UpdatePrediction(const WebInputEvent& event,
 
 void ScrollPredictor::ResampleEvent(base::TimeTicks frame_time,
                                     base::TimeDelta frame_interval,
-                                    WebInputEvent* event,
-                                    ui::LatencyInfo* latency_info,
-                                    cc::ScrollUpdateEventMetrics* metrics) {
+                                    WebInputEvent* event) {
   DCHECK(event->GetType() == WebInputEvent::Type::kGestureScrollUpdate);
   WebGestureEvent* gesture_event = static_cast<WebGestureEvent*>(event);
 
-  TRACE_EVENT_BEGIN1("input", "ScrollPredictor::ResampleScrollEvents",
-                     "OriginalDelta",
-                     gfx::PointF(gesture_event->data.scroll_update.delta_x,
-                                 gesture_event->data.scroll_update.delta_y)
-                         .ToString());
+  {
+      TRACE_EVENT2("input", "ScrollPredictor::ResampleScrollEvents",
+                        "OriginalDelta",
+                        gfx::PointF(gesture_event->data.scroll_update.delta_x,
+                                    gesture_event->data.scroll_update.delta_y)
+                            .ToString(),
+                        "frametime", frame_time);
+  }
+
   gfx::PointF predicted_accumulated_delta = current_event_accumulated_delta_;
 
   base::TimeDelta prediction_delta = frame_time - gesture_event->TimeStamp();
@@ -169,8 +240,9 @@ void ScrollPredictor::ResampleEvent(base::TimeTicks frame_time,
   // filtering on predicted events
   gfx::PointF filtered_pos = predicted_accumulated_delta;
   if (filtering_enabled_ && filter_->Filter(prediction_time, &filtered_pos) &&
-      predicted)
+      predicted) {
     predicted_accumulated_delta = filtered_pos;
+  }
 
   // If the last resampled GSU over predict the delta, new GSU might try to
   // scroll back to make up the difference, which cause the scroll to jump
@@ -187,15 +259,15 @@ void ScrollPredictor::ResampleEvent(base::TimeTicks frame_time,
           ? 0
           : new_delta.y();
 
-  // Sync the predicted `delta_y` to `metrics` for AverageLag metric.
-  if (metrics)
-    metrics->set_predicted_delta(new_delta.y());
+  {
+      TRACE_EVENT2("input", "ScrollPredictor::ResampleScrollEvents",
+                      "PredictedDelta",
+                      gfx::PointF(gesture_event->data.scroll_update.delta_x,
+                                  gesture_event->data.scroll_update.delta_y)
+                          .ToString(),
+                      "frametime", frame_time);
+  }
 
-  TRACE_EVENT_END1("input", "ScrollPredictor::ResampleScrollEvents",
-                   "PredictedDelta",
-                   gfx::PointF(gesture_event->data.scroll_update.delta_x,
-                               gesture_event->data.scroll_update.delta_y)
-                       .ToString());
   last_predicted_accumulated_delta_.Offset(
       gesture_event->data.scroll_update.delta_x,
       gesture_event->data.scroll_update.delta_y);
