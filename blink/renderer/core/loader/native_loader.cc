@@ -177,6 +177,8 @@ void NativeLoader::OnCreateNativeSurface(int native_embed_id,
   auto* frame = CurrentFrame();
   if (frame && frame->View()) {
     auto bounds_to_viewport = BoundsToViewport(bounding_rect_, plugin_element_->GetDocument());
+    float bounds_origin_scale = PageConstraintInitalScale(plugin_element_->GetDocument());
+    bounds_to_viewport.set_origin(gfx::gfx::ScaleToCeiledPoint(bounding_rect_.origin()),bounds_origin_scale);
     // We will use the position relative to visual viewport.
     bounding_rect_.set_origin(bounds_to_viewport.origin());
     embed_info->rect = bounds_to_viewport;
