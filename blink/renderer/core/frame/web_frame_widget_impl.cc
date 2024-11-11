@@ -4859,7 +4859,7 @@ void WebFrameWidgetImpl::GetImageRect(GetImageRectCallback callback) {
 
 gfx::Rect WebFrameWidgetImpl::GetImageRectInner() {
   auto image_rect = gfx::Rect();
-  if (hit_image_node_) {
+  if (hit_image_node_ && hit_image_node_->isConnected()) {
     LocalFrame* frame = LocalRootImpl()->GetFrame();
     LocalFrameView* view = frame->View();
     auto abs_rect = 
@@ -4871,6 +4871,9 @@ gfx::Rect WebFrameWidgetImpl::GetImageRectInner() {
                            base::ClampFloor(rel_rect.y() * ratio),
                            base::ClampFloor(abs_rect.width() * scale),
                            base::ClampFloor(abs_rect.height() * scale));
+  } else {
+    LOG(INFO) << "hit_image_node_ is nullptr or disconnected.";
+    hit_image_node_ = nullptr;
   }
   return image_rect;
 }
