@@ -238,6 +238,10 @@ bool ClipboardCommands::ExecuteCopy(LocalFrame& frame,
                                     Event*,
                                     EditorCommandSource source,
                                     const String&) {
+#if defined(OHOS_CLIPBOARD)
+  TRACE_EVENT0("blink", "NWebCopy");
+  LOG(INFO) << "start to execute copy, source=" << static_cast<int32_t>(source);
+#endif
   if (!DispatchCopyOrCutEvent(frame, source, event_type_names::kCopy))
     return true;
   if (!frame.GetEditor().CanCopy())
@@ -663,8 +667,9 @@ bool ClipboardCommands::ExecutePaste(LocalFrame& frame,
                                      Event*,
                                      EditorCommandSource source,
                                      const String&) {
-#if BUILDFLAG(IS_OHOS)
+#if defined(OHOS_CLIPBOARD)
   TRACE_EVENT0("blink", "NWebPaste");
+  LOG(INFO) << "start to execute paste, source=" << static_cast<int32_t>(source);
 #endif
   Paste(frame, source);
   return true;

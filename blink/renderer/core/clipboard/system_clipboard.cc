@@ -565,6 +565,9 @@ void SystemClipboard::TakeSnapshot() {
   if (snapshot_count_ == 1) {
     DCHECK(!snapshot_);
     snapshot_ = std::make_unique<Snapshot>();
+#if defined(OHOS_CLIPBOARD)
+    clipboard_->OnClipboardDataGuard(true);
+#endif
   }
 }
 
@@ -573,6 +576,9 @@ void SystemClipboard::DropSnapshot() {
   --snapshot_count_;
   if (snapshot_count_ == 0) {
     snapshot_.reset();
+#if defined(OHOS_CLIPBOARD)
+    clipboard_->OnClipboardDataGuard(false);
+#endif
   }
 }
 

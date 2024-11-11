@@ -143,6 +143,9 @@ interface ClipboardHost {
   ReadUnsanitizedCustomFormat(mojo_base.mojom.String16 format) =>
       (mojo_base.mojom.BigBuffer data);
 
+  [EnableIf=is_ohos_clipboard, Sync]
+  OnClipboardDataGuard(bool status) => ();
+
   // Writing to the clipboard via mojo is a two-phase operation. First, the
   // sender sends the different types of data it'd like to write to the
   // receiver. Then, it sends a commit message to commit the data to the system
