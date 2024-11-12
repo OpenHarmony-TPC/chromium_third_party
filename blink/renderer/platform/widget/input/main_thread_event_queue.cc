@@ -667,9 +667,8 @@ void MainThreadEventQueue::QueueEvent(
       std::string debug_info = "is_raf_aligned:" + std::to_string(is_raf_aligned)
                           + ", needs_main_frame:" + std::to_string(needs_main_frame)
                           + ", needs_post_task:" + std::to_string(needs_post_task);
-      TRACE_EVENT2("input", "MainThreadEventQueue::QueueEvent kEnqueued",
-        "event_type", WebInputEvent::GetName(input_event_type), 
-        "debug_info", debug_info);
+      TRACE_EVENT2("input", "MainThreadEventQueue::QueueEvent kEnqueued", "event_type",
+          WebInputEvent::GetName(input_event_type), "debug_info", debug_info);
     }
   }
 
