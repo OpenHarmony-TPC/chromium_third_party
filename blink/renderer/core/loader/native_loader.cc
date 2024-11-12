@@ -58,6 +58,7 @@ float PageConstraintInitalScale(const Document& document) {
 }
 
 gfx::Rect BoundsToViewport(const gfx::Rect& bounding_rect_, const Document& document) {
+  // Only size() is changed here.
   return gfx::Rect(bounding_rect_.origin(), gfx::ScaleToCeiledSize(
       bounding_rect_.size(), PageConstraintInitalScale(document)));
 }
@@ -175,6 +176,7 @@ void NativeLoader::OnCreateNativeSurface(int native_embed_id,
   auto* frame = CurrentFrame();
   if (frame && frame->View()) {
     auto bounds_to_viewport = BoundsToViewport(bounding_rect_, plugin_element_->GetDocument());
+    // origin() needs updated when first created.
     float bounds_origin_scale = PageConstraintInitalScale(plugin_element_->GetDocument());
     bounds_to_viewport.set_origin(gfx::ScaleToCeiledPoint(bounding_rect_.origin(), bounds_origin_scale));
     // We will use the position relative to visual viewport.
