@@ -173,6 +173,7 @@ class CORE_EXPORT DragController final
 
   WTF::StringBuilder origin_style_;
   bool is_draging_;
+  bool did_start_drag_image_effects_;
 #endif
 };
 
