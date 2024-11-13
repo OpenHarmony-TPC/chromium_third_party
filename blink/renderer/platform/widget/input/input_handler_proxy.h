@@ -149,6 +149,11 @@ class PLATFORM_EXPORT InputHandlerProxy : public cc::InputHandlerClient,
     // ElementId provided by a hit test in Blink.
     REQUIRES_MAIN_THREAD_HIT_TEST,
   };
+  enum NativeEventDisposition {
+    NORMAL,
+    SEND_NATIVE,
+    END_QUEUE,
+  };
   using EventDispositionCallback = base::OnceCallback<void(
       EventDisposition,
       std::unique_ptr<blink::WebCoalescedInputEvent> event,
@@ -240,7 +245,7 @@ class PLATFORM_EXPORT InputHandlerProxy : public cc::InputHandlerClient,
     current_internal_begin_frame_args_ = args;
     need_flush_scroll_update_gesture_ = true;
   }
-  bool DidNativeEmbedEvent(const WebInputEvent& event);
+  InputHandlerProxy::NativeEventDisposition DidNativeEmbedEvent(const WebInputEvent& event);
   void SetGestureEventResult(bool result, bool stopPropagation);
   void SendNativeEvent(const WebTouchEvent& touch_event,
     WebInputEvent::Type type, size_t i, bool result = true);
@@ -502,6 +507,7 @@ class PLATFORM_EXPORT InputHandlerProxy : public cc::InputHandlerClient,
   bool need_flush_scroll_update_gesture_ = false;
   viz::BeginFrameArgs current_internal_begin_frame_args_;
   std::unique_ptr<NativeEmbedEventQueue> native_event_queue_;
+  std::unique_ptr<NativeEmbedEventQueue> native_touch_end_queue_;
   std::string embed_id_ = "-1";
   bool isNativeType_ = true;
   std::unordered_map<size_t, bool> native_map_;
@@ -509,6 +515,8 @@ class PLATFORM_EXPORT InputHandlerProxy : public cc::InputHandlerClient,
   std::unordered_map<size_t, int> native_id_map_;
   bool native_enabled_ = false;
   gfx::RectF nativeRect_;
+  int32_t hit_testing_number_ = 0;
+  base::circular_deque<size_t> end_index_queue_;
 #endif
 };
 

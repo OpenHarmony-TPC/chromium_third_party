@@ -272,6 +272,7 @@ InputHandlerProxy::InputHandlerProxy(cc::InputHandler& input_handler,
   UpdateElasticOverscroll();
   compositor_event_queue_ = std::make_unique<CompositorThreadEventQueue>();
   native_event_queue_ = std::make_unique<NativeEmbedEventQueue>();
+  native_touch_end_queue_ = std::make_unique<NativeEmbedEventQueue>();
   scroll_predictor_ =
       (base::FeatureList::IsEnabled(blink::features::kResamplingScrollEvents) &&
        client->AllowsScrollResampling())
@@ -343,11 +344,15 @@ void InputHandlerProxy::HandleInputEventWithLatencyInfo(
                                         NO_SCROLL_PINCH,
                                         base::SampleMetadataScope::kProcess);
   #if BUILDFLAG(IS_OHOS)
-    bool result = DidNativeEmbedEvent(event_with_callback->event());
+    NativeEventDisposition result = DidNativeEmbedEvent(event_with_callback->event());
     LOG(DEBUG)<<"[NativeEmbed] DidNativeEmbedEvent return result is : "<<result;
-    if (result) {
+    if (result == SEND_NATIVE) {
       TRACE_EVENT0("input", "InputHandlerProxy::HandleInputEventWithLatencyInfo::DidNativeEmbedEvent");
       native_event_queue_->Queue(std::move(event_with_callback));
+      TriggerVsyncImplTask();
+    } else if (result == END_QUEUE) {
+      TRACE_EVENT0("input", "InputHandlerProxy::HandleInputEventWithLatencyInfo::DidNativeEmbedEvent");
+      native_touch_end_queue_->Queue(std::move(event_with_callback));
       TriggerVsyncImplTask();
     } else {
   #endif
@@ -469,6 +474,7 @@ void InputHandlerProxy::HandleInputEventWithLatencyInfo(
 void InputHandlerProxy::NativeHitTestResult(bool native, size_t fingerId, int layerId) {
   LOG(DEBUG)<<"[NativeEmbed] NativeHitTestResult fingerId is : "<< fingerId << " and native is : "<< native;
   native_map_[fingerId] = native;
+  hit_testing_number_--;
   if (native) {
     native_id_map_[fingerId] = layerId;
     SendNativeEvent(start_touch_event_, WebInputEvent::Type::kTouchStart, fingerId);
@@ -476,6 +482,18 @@ void InputHandlerProxy::NativeHitTestResult(bool native, size_t fingerId, int la
     SendNativeEvent(start_touch_event_, WebInputEvent::Type::kTouchStart, fingerId, false);
     auto event_with_callback = native_event_queue_->Pop();
     DispatchSingleInputEvent(std::move(event_with_callback));
+  }
+  while (hit_testing_number_ == 0 && !native_touch_end_queue_->empty()) {
+    auto callback = native_touch_end_queue_->Pop();
+    size_t i = end_index_queue_.front();
+    end_index_queue_.pop_front();
+    if (native) {
+      const WebTouchEvent& touch_event = static_cast<const WebTouchEvent&>(callback->event());
+      native_event_queue_->Queue(std::move(callback));
+      SendNativeEvent(touch_event, WebInputEvent::Type::kTouchEnd, i);
+    } else {
+      DispatchSingleInputEvent(std::move(callback));
+    }
   }
 }
 
@@ -509,12 +527,13 @@ void InputHandlerProxy::SendNativeEvent(const WebTouchEvent& touch_event,
   }
 }
 
-bool InputHandlerProxy::DidNativeEmbedEvent(const WebInputEvent& event) {
+InputHandlerProxy::NativeEventDisposition
+InputHandlerProxy::DidNativeEmbedEvent(const WebInputEvent& event) {
   if (!IsTouchEventType(event.GetType())) {
-    return false;
+    return NORMAL;
   }
   const WebTouchEvent& touch_event = static_cast<const WebTouchEvent&>(event);
-  bool result = false;
+  InputHandlerProxy::NativeEventDisposition result = NORMAL;
   for (size_t i = 0; i < touch_event.touches_length; ++i) {
     WebTouchPoint::State state = touch_event.touches[i].state;
     float x = touch_event.touches[i].PositionInWidget().x();
@@ -530,7 +549,7 @@ bool InputHandlerProxy::DidNativeEmbedEvent(const WebInputEvent& event) {
         native_id_map_[id] = video_layer_impl->id();
         SendNativeEvent(touch_event, event.GetType(), i);
         native_map_[id] = true;
-        result = true;
+        result = SEND_NATIVE;
         continue;
       }
       if (!native_enabled_) {
@@ -542,20 +561,29 @@ bool InputHandlerProxy::DidNativeEmbedEvent(const WebInputEvent& event) {
         const WebTouchPoint& touch_point = touch_event.touches[i];
         WebPointerEvent pointer_event = WebPointerEvent(touch_event, touch_point);
         client_->TouchHitTest(pointer_event, id);
-        result = true;
+        hit_testing_number_++;
+        result = SEND_NATIVE;
       } else {
         SendNativeEvent(touch_event, event.GetType(), i, false);
         native_map_[id] = false;
-        result = false;
+        result = NORMAL;
       }
       continue;
     }
 
-    if (native_map_[id]) {
+    if (native_map_[id] && event.GetType() != WebInputEvent::Type::kTouchEnd) {
       SendNativeEvent(touch_event, event.GetType(), i);
-      result = true;
+      result = SEND_NATIVE;
     }
     if (event.GetType() == WebInputEvent::Type::kTouchEnd) {
+      if (hit_testing_number_ != 0) {
+        result = END_QUEUE;
+        end_index_queue_.emplace_back(i);
+        LOG(INFO) << "[NativeEmbed] DidNativeEmbedEvent touchStart in hitTesting.";
+      } else if (native_map_[id]) {
+        SendNativeEvent(touch_event, event.GetType(), i);
+        result = SEND_NATIVE;
+      }
       native_map_[id] = false;
     }
   }
