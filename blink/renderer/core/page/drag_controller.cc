@@ -176,7 +176,8 @@ DragController::DragController(Page* page)
       drag_destination_action_(kDragDestinationActionNone),
 #ifdef OHOS_DRAG_DROP
       did_initiate_drag_(false),
-      is_draging_(false) {} 
+      is_draging_(false),
+      did_start_drag_image_effects_(false) {}
 #else
       did_initiate_drag_(false) {} 
 #endif
@@ -1882,6 +1883,7 @@ void DragController::StartDragImageEffects() {
   origin_style_.Clear();
   origin_style_.Append(String(
     AtomicString(element->getAttribute(html_names::kStyleAttr))));
+  did_start_drag_image_effects_ = true;
 
   StringBuilder image_drag_style;
   image_drag_style.Append(origin_style_);
@@ -1910,9 +1912,10 @@ void DragController::RestoreDragImageEffects() {
   const ComputedStyle* style = node->GetComputedStyle();
   if (!style)
     return;
-  if (!origin_style_.ToAtomicString().empty()) {
+  if (did_start_drag_image_effects_) {
     element->setAttribute(html_names::kStyleAttr, origin_style_.ToAtomicString());
   }
+  did_start_drag_image_effects_ = false;
 }
 
 bool DragController::IsDraging() {
