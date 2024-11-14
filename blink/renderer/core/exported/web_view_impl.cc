@@ -1748,6 +1748,10 @@ void WebView::ApplyWebPreferences(const web_pref::WebPreferences& prefs,
   settings->SetWebAppScope(WebString::FromASCII(prefs.web_app_scope.spec()));
 
 #if BUILDFLAG(IS_ANDROID) || BUILDFLAG(IS_OHOS)
+  settings->SetForceZeroLayoutHeight(prefs.force_zero_layout_height);
+  LOG(DEBUG) << "WebViewImpl:UpdateMainFrameLayoutSize,forceZeroLayoutHeight:"
+             << prefs.force_zero_layout_height;
+
   settings->SetAllowCustomScrollbarInMainFrame(false);
   settings->SetAccessibilityFontScaleFactor(prefs.font_scale_factor);
   settings->SetDeviceScaleAdjustment(prefs.device_scale_adjustment);
@@ -1760,7 +1764,6 @@ void WebView::ApplyWebPreferences(const web_pref::WebPreferences& prefs,
       prefs.use_legacy_background_size_shorthand_behavior);
   settings->SetWideViewportQuirkEnabled(prefs.wide_viewport_quirk);
   settings->SetUseWideViewport(prefs.use_wide_viewport);
-  settings->SetForceZeroLayoutHeight(prefs.force_zero_layout_height);
   settings->SetViewportMetaMergeContentQuirk(
       prefs.viewport_meta_merge_content_quirk);
   settings->SetViewportMetaNonUserScalableQuirk(
