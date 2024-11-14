@@ -161,7 +161,7 @@ void NativeLoader::OnCreateNativeSurface(int native_embed_id,
   if (bounding_rect_.IsEmpty()) {
     plugin_element_->GetDocument().UpdateStyleAndLayoutForNode(
         plugin_element_, DocumentUpdateReason::kPlugin);
-    bounding_rect_ = plugin_element_->PixelSnappedBoundingBox();    
+    bounding_rect_ = plugin_element_->PixelSnappedBoundingBox();
     if (auto* layout_object = plugin_element_->GetLayoutObject()) {
       if (const auto& replaced = To<LayoutReplaced>(layout_object)) {
         bounding_rect_.set_size(ToPixelSnappedRect(replaced->ReplacedContentRect()).size());
@@ -170,7 +170,7 @@ void NativeLoader::OnCreateNativeSurface(int native_embed_id,
   }
   LOG(INFO) << "NativeEmbed NativeLoader::OnCreateNativeSurface:"
             << bounding_rect_.ToString();
-            
+
   native_embed_id_ = native_embed_id;
   bounding_rect_changed_cb_ = rect_changed_cb;
   cc_layer_->SetNativeEmbedId(native_embed_id_);
@@ -181,8 +181,8 @@ void NativeLoader::OnCreateNativeSurface(int native_embed_id,
     auto bounds_to_viewport = BoundsToViewport(bounding_rect_, plugin_element_->GetDocument());
     // Create phase requires change the origin of the bounding_rect with page
     // initial_scale.
-    float bounds_origin_scale = PageConstraintInitalScale(plugin_element_->GetDocument());
-    bounds_to_viewport.set_origin(gfx::ScaleToCeiledPoint(bounding_rect_.origin(), bounds_origin_scale));
+    // float bounds_origin_scale = PageConstraintInitalScale(plugin_element_->GetDocument());
+    // bounds_to_viewport.set_origin(gfx::ScaleToCeiledPoint(bounding_rect_.origin(), bounds_origin_scale));
     // We will use the position relative to visual viewport.
     bounding_rect_.set_origin(bounds_to_viewport.origin());
     embed_info->rect = bounds_to_viewport;
@@ -226,7 +226,7 @@ void NativeLoader::OnLayerRectChange(const gfx::Rect& rect) {
       !native_bridge_observer_remote_set_) {
     return;
   }
- 
+
   if (bounding_rect_.size() != rect.size()) {
     bounding_rect_ = rect;
     if (!bounding_rect_changed_cb_.is_null()) {
