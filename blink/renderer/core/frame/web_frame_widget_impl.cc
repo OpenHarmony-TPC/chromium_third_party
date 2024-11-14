@@ -165,6 +165,10 @@
 #include "third_party/blink/renderer/core/layout/layout_view.h"
 #endif
 
+#ifdef OHOS_CLIPBOARD
+#include "third_party/blink/public/common/context_menu_data/edit_flags.h"
+#endif
+
 namespace {
 #if BUILDFLAG(IS_OHOS)
   constexpr int disableDelayTime = 300;
@@ -3973,6 +3977,37 @@ void WebFrameWidgetImpl::CollapseSelection() {
                              blink::WebLocalFrame::kHideSelectionHandle,
                              mojom::blink::SelectionMenuBehavior::kHide);
 }
+
+#ifdef OHOS_CLIPBOARD
+void WebFrameWidgetImpl::GetEditFlags(GetEditFlagsCallback callback) {
+  int32_t edit_flags = blink::ContextMenuDataEditFlags::kCanDoNone;
+  WebLocalFrame* focused_frame = FocusedWebLocalFrameInWidget();
+  if (!focused_frame) {
+    std::move(callback).Run(edit_flags);
+    return;
+  }
+
+  if (focused_frame->IsCommandEnabled(WebString::FromLatin1("Undo"))) {
+    edit_flags |= blink::ContextMenuDataEditFlags::kCanUndo;
+  }
+  if (focused_frame->IsCommandEnabled(WebString::FromLatin1("Redo"))) {
+    edit_flags |= blink::ContextMenuDataEditFlags::kCanRedo;
+  }
+  if (focused_frame->IsCommandEnabled(WebString::FromLatin1("Cut"))) {
+    edit_flags |= blink::ContextMenuDataEditFlags::kCanCut;
+  }
+  if (focused_frame->IsCommandEnabled(WebString::FromLatin1("Copy"))) {
+    edit_flags |= blink::ContextMenuDataEditFlags::kCanCopy;
+  }
+  if (focused_frame->IsCommandEnabled(WebString::FromLatin1("Paste"))) {
+    edit_flags |= blink::ContextMenuDataEditFlags::kCanPaste;
+  }
+  if (focused_frame->IsCommandEnabled(WebString::FromLatin1("SelectAll"))) {
+    edit_flags |= blink::ContextMenuDataEditFlags::kCanSelectAll;
+  }
+  std::move(callback).Run(edit_flags);
+}
+#endif
 
 void WebFrameWidgetImpl::Replace(const String& word) {
   auto* focused_frame = FocusedWebLocalFrameInWidget();

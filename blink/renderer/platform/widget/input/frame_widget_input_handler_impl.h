@@ -83,6 +83,9 @@ class PLATFORM_EXPORT FrameWidgetInputHandlerImpl
   void Delete() override;
   void SelectAll() override;
   void CollapseSelection() override;
+#ifdef OHOS_CLIPBOARD
+  void GetEditFlags(GetEditFlagsCallback callback) override;
+#endif
   void SelectRange(const gfx::Point& base, const gfx::Point& extent) override;
   void SelectAroundCaret(mojom::blink::SelectionGranularity granularity,
                          bool should_show_handle,
