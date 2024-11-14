@@ -177,7 +177,7 @@ DragController::DragController(Page* page)
 #ifdef OHOS_DRAG_DROP
       did_initiate_drag_(false),
       is_draging_(false),
-      did_start_drag_image_effects_(false) {} 
+      did_start_drag_image_effects_(false) {}
 #else
       did_initiate_drag_(false) {} 
 #endif
