@@ -604,6 +604,7 @@ void FetchManager::Loader::Start() {
 
     if (!execution_context_->GetContentSecurityPolicyForWorld(world_.get())) {
         LOG(ERROR) << "FetchManager::Loader::Start error ContentSecurityPolicyForWorld is null";
+        return;
     }
 #endif //HW_WEBVIEW_BUGFIX_BASE
 
