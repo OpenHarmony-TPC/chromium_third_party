@@ -1770,7 +1770,8 @@ void WidgetBase::DidNativeEmbedEvent(blink::WebInputEvent::Type type,
     default:
           nativeType = mojom::blink::NativeTouchType::CANCEL;
   }
-  LOG(DEBUG)<<"[NativeEmbed] DidNativeEmbedEvent type is : "<< nativeType <<" x: "<<x <<" y: "<<y;
+  LOG(INFO) << "[NativeEmbed] DidNativeEmbedEvent type is : " << nativeType
+            << " x: "<< x <<" y: "<< y << " embedId: " << embedId << " id: " << id;
   widget_host_->DidNativeEmbedEvent(
     mojom::blink::NativeEmbedTouchEvent::New(static_cast<String>(embedId), id, x, y, x, y, nativeType, x, y));
 }
