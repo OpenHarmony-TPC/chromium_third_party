@@ -575,17 +575,19 @@ InputHandlerProxy::DidNativeEmbedEvent(const WebInputEvent& event) {
       SendNativeEvent(touch_event, event.GetType(), i);
       result = SEND_NATIVE;
     }
-    if (event.GetType() == WebInputEvent::Type::kTouchEnd) {
-      if (hit_testing_number_ != 0) {
-        result = END_QUEUE;
-        end_index_queue_.emplace_back(i);
-        LOG(INFO) << "[NativeEmbed] DidNativeEmbedEvent touchStart in hitTesting.";
-      } else if (native_map_[id]) {
-        SendNativeEvent(touch_event, event.GetType(), i);
-        result = SEND_NATIVE;
-      }
-      native_map_[id] = false;
+    if (event.GetType() != WebInputEvent::Type::kTouchEnd) {
+      continue;
     }
+    if (hit_testing_number_ != 0) {
+      result = END_QUEUE;
+      end_index_queue_.emplace_back(i);
+      LOG(INFO) << "[NativeEmbed] DidNativeEmbedEvent touchStart in hitTesting.";
+    } 
+    if (hit_testing_number_ == 0 && native_map_[id]) {
+      SendNativeEvent(touch_event, event.GetType(), i);
+      result = SEND_NATIVE;
+    }
+    native_map_[id] = false;
   }
   return result;
 }
