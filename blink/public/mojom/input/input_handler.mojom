@@ -383,6 +383,9 @@ interface FrameWidgetInputHandler {
   SelectAll();
   CollapseSelection();
 
+  [EnableIf=is_ohos_clipboard, Sync]
+  GetEditFlags() => (int32 result);
+
   // Replaces the selected region or a word around the cursor with the
   // specified string.
   Replace(mojo_base.mojom.String16 word);
