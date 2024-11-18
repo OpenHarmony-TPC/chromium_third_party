@@ -756,7 +756,7 @@ bool SelectionController::SelectClosestWordFromHitTestResult(
       EnclosingTextControl(Selection().GetSelectionInDOMTree().Base());
   if (pos.IsNotNull()) {
     if (select.at(0) != -1 && select.at(1) != -1 &&
-      text_control && text_control->type() != input_type_names::kPassword) {
+      (!text_control || text_control->type() != input_type_names::kPassword)) {
       temp_selection =
           SelectionInFlatTree::Builder()
               .Collapse(
