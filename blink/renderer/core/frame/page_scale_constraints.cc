@@ -82,7 +82,7 @@ void PageScaleConstraints::FitToContentsWidth(
 
   // Clamp the minimum scale so that the viewport can't exceed the document
   // width.
-  LOG(INFO) << "FitToContentsWidth: compare the minimum_scale(" << minimum_scale << ") and (" 
+  LOG(INFO) << "FitToContentsWidth: compare the minimum_scale(" << minimum_scale << ") and ("
       << view_width_not_including_scrollbars << "/" << contents_width << ")";
   minimum_scale = std::max(
       minimum_scale, view_width_not_including_scrollbars / contents_width);
