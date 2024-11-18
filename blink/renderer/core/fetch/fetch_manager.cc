@@ -596,6 +596,18 @@ void FetchManager::Loader::Start() {
 
   // "- should fetching |request| be blocked as content security returns
   //    blocked"
+#if defined(HW_WEBVIEW_BUGFIX_BASE)
+    if (!execution_context_) {
+        LOG(ERROR) << "FetchManager::Loader::Start error execution_context_ is null";
+        return;
+    }
+
+    if (!execution_context_->GetContentSecurityPolicyForWorld(world_.get())) {
+        LOG(ERROR) << "FetchManager::Loader::Start error ContentSecurityPolicyForWorld is null";
+        return;
+    }
+#endif //HW_WEBVIEW_BUGFIX_BASE
+
   if (!execution_context_->GetContentSecurityPolicyForWorld(world_.get())
            ->AllowConnectToSource(fetch_request_data_->Url(),
                                   fetch_request_data_->Url(),
