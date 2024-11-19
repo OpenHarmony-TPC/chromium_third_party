@@ -17,6 +17,10 @@
 #include "third_party/blink/renderer/core/page/viewport_description.h"
 #include "ui/base/ime/mojom/virtual_keyboard_types.mojom-blink.h"
 
+#if BUILDFLAG(IS_OHOS)
+#include "base/ohos/sys_info_utils.h"
+#endif
+
 namespace blink {
 
 ViewportData::ViewportData(Document& document)
@@ -91,6 +95,14 @@ void ViewportData::UpdateViewportDescription() {
   // defined from the layout meta tag.
   mojom::ViewportFit current_viewport_fit =
       GetViewportDescription().GetViewportFit();
+
+#if BUILDFLAG(IS_OHOS)
+  if (legacy_viewport_description_.type !=
+        ViewportDescription::kUserAgentStyleSheet &&
+      base::ohos::IsTabletDevice()) {
+      current_viewport_fit = legacy_viewport_description_.GetViewportFit();
+  }
+#endif
 
   // If we are forcing to expand into the display cutout then we should override
   // the viewport fit value.
