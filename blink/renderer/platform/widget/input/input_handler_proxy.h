@@ -152,6 +152,7 @@ class PLATFORM_EXPORT InputHandlerProxy : public cc::InputHandlerClient,
   enum NativeEventDisposition {
     NORMAL,
     SEND_NATIVE,
+    SEND_VIDEO,
     END_QUEUE,
   };
   using EventDispositionCallback = base::OnceCallback<void(
