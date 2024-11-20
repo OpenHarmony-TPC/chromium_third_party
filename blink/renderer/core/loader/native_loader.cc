@@ -58,10 +58,12 @@ float PageConstraintInitalScale(const Document& document) {
 }
 
 gfx::Rect BoundsToViewport(const gfx::Rect& bounding_rect_, const Document& document) {
-  // We only change the size of the bounding_rect with the page
-  // initial_scale here.
   return gfx::Rect(bounding_rect_.origin(), gfx::ScaleToCeiledSize(
       bounding_rect_.size(), PageConstraintInitalScale(document)));
+}
+
+gfx::Point PositionToViewport(const gfx::Point& bounding_rect_position, const Document& document) {
+  return gfx::ScaleToCeiledPoint(bounding_rect_position, PageConstraintInitalScale(document));
 }
 
 }  // anonymous namespace
@@ -158,7 +160,7 @@ void NativeLoader::OnCreateNativeSurface(int native_embed_id,
     return;
   }
 
-  if (bounding_rect_.IsEmpty()) {
+  if (!cc_layer_update_) {
     plugin_element_->GetDocument().UpdateStyleAndLayoutForNode(
         plugin_element_, DocumentUpdateReason::kPlugin);
     bounding_rect_ = plugin_element_->PixelSnappedBoundingBox();
@@ -179,8 +181,11 @@ void NativeLoader::OnCreateNativeSurface(int native_embed_id,
   auto* frame = CurrentFrame();
   if (frame && frame->View()) {
     auto bounds_to_viewport = BoundsToViewport(bounding_rect_, plugin_element_->GetDocument());
-    // Create phase requires change the origin of the bounding_rect with page
-    // initial_scale.
+    if (!cc_layer_update_) {
+      // Create phase requires change the origin of the bounding_rect with page
+      // initial_scale.
+      bounds_to_viewport.set_origin(PositionToViewport(bounding_rect_.origin(), plugin_element_->GetDocument()));
+    }
     // We will use the position relative to visual viewport.
     bounding_rect_.set_origin(bounds_to_viewport.origin());
     embed_info->rect = bounds_to_viewport;
@@ -233,6 +238,8 @@ void NativeLoader::OnLayerRectChange(const gfx::Rect& rect) {
   } else {
     bounding_rect_.set_origin(rect.origin());
   }
+
+  cc_layer_update_ = true;
   LOG(INFO) << "NativeEmbed NativeLoader::OnLayerRectChange:"
             << bounding_rect_.ToString();
   for (auto& observer : native_bridge_observer_remote_set_->Value()) {
