@@ -143,6 +143,7 @@ class CORE_EXPORT NativeLoader
   int native_embed_id_;
   bool visibility_ = false;
   bool first_update_visibility = false;
+  boll cc_layer_update_ = false;
 
   Member<DisallowNewWrapper<
       HeapMojoAssociatedRemote<media::mojom::blink::NativeBridgeHost>>>
