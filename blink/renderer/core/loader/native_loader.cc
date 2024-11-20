@@ -178,7 +178,6 @@ void NativeLoader::OnCreateNativeSurface(int native_embed_id,
   cc_layer_->SetNativeEmbedId(native_embed_id_);
 
   auto embed_info = media::mojom::blink::NativeEmbedInfo::New();
-  auto* frame = CurrentFrame();
   auto bounds_to_viewport = BoundsToViewport(bounding_rect_, plugin_element_->GetDocument());
   if (!cc_layer_update_) {
     // Create phase requires change the origin of the bounding_rect with page
