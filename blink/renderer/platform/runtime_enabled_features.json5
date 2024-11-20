@@ -1965,8 +1965,8 @@
       public: true,
       settable_from_internals: true,
       // #if defined(OHOS_SCROLL_PERFORMANCE)
-      // status: {"Android": "stable"},
-      status: {"Android": "stable", "default": "stable"},
+      status: {"Android": "stable"},
+      // status: {"Android": "stable", "default": "stable"},
       // #endif  // defined(OHOS_SCROLL_PERFORMANCE)
       base_feature: "none",
     },
