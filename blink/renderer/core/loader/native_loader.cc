@@ -238,6 +238,7 @@ void NativeLoader::OnLayerRectChange(const gfx::Rect& rect) {
     bounding_rect_.set_origin(rect.origin());
   }
 
+  cc_layer_update_ = true;
   LOG(INFO) << "NativeEmbed NativeLoader::OnLayerRectChange:"
             << bounding_rect_.ToString();
   for (auto& observer : native_bridge_observer_remote_set_->Value()) {
@@ -245,7 +246,7 @@ void NativeLoader::OnLayerRectChange(const gfx::Rect& rect) {
   }
 }
 
-cc_layer_update_ = true;
+
 void NativeLoader::OnDestroyNativeSurface() {
   LOG(INFO) << "[NativeEmbed] NativeLoader::OnDestroyNativeSurface";
   bounding_rect_changed_cb_.Reset();
