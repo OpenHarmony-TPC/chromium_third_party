@@ -97,8 +97,12 @@ void ViewportData::UpdateViewportDescription() {
       GetViewportDescription().GetViewportFit();
 
 #if BUILDFLAG(IS_OHOS)
+  bool viewport_meta_enabled =
+      document_->GetSettings() &&
+      document_->GetSettings()->GetViewportMetaEnabled();
   if (legacy_viewport_description_.type !=
         ViewportDescription::kUserAgentStyleSheet &&
+      !viewport_meta_enabled &&
       base::ohos::IsTabletDevice()) {
       current_viewport_fit = legacy_viewport_description_.GetViewportFit();
   }
