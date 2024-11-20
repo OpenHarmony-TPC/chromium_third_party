@@ -160,7 +160,7 @@ void NativeLoader::OnCreateNativeSurface(int native_embed_id,
     return;
   }
 
-  if (!cc_layer_update_) {
+  if (!cc_layer_update_ || bounding_rect_.IsEmpty()) {
     plugin_element_->GetDocument().UpdateStyleAndLayoutForNode(
         plugin_element_, DocumentUpdateReason::kPlugin);
     bounding_rect_ = plugin_element_->PixelSnappedBoundingBox();
@@ -179,19 +179,17 @@ void NativeLoader::OnCreateNativeSurface(int native_embed_id,
 
   auto embed_info = media::mojom::blink::NativeEmbedInfo::New();
   auto* frame = CurrentFrame();
-  if (frame && frame->View()) {
-    auto bounds_to_viewport = BoundsToViewport(bounding_rect_, plugin_element_->GetDocument());
-    if (!cc_layer_update_) {
-      // Create phase requires change the origin of the bounding_rect with page
-      // initial_scale.
-      bounds_to_viewport.set_origin(PositionToViewport(bounding_rect_.origin(), plugin_element_->GetDocument()));
-    }
-    // We will use the position relative to visual viewport.
-    bounding_rect_.set_origin(bounds_to_viewport.origin());
-    embed_info->rect = bounds_to_viewport;
-    if (!bounding_rect_changed_cb_.is_null()) {
-      bounding_rect_changed_cb_.Run(bounds_to_viewport);
-    }
+  auto bounds_to_viewport = BoundsToViewport(bounding_rect_, plugin_element_->GetDocument());
+  if (!cc_layer_update_) {
+    // Create phase requires change the origin of the bounding_rect with page
+    // initial_scale.
+    bounds_to_viewport.set_origin(PositionToViewport(bounding_rect_.origin(), plugin_element_->GetDocument()));
+  }
+  // We will use the position relative to visual viewport.
+  bounding_rect_.set_origin(bounds_to_viewport.origin());
+  embed_info->rect = bounds_to_viewport;
+  if (!bounding_rect_changed_cb_.is_null()) {
+    bounding_rect_changed_cb_.Run(bounds_to_viewport);
   }
 
   embed_info->embed_id = native_embed_id_;
