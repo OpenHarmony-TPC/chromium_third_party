@@ -74,6 +74,10 @@ class MockClipboardHost : public mojom::blink::ClipboardHost {
 #if BUILDFLAG(IS_MAC)
   void WriteStringToFindPboard(const String& text) override;
 #endif
+#if defined(OHOS_CLIPBOARD)
+  void OnClipboardDataGuard(bool status,
+                            OnClipboardDataGuardCallback callback) override;
+#endif
   Vector<String> ReadStandardFormatNames();
 
   mojo::ReceiverSet<mojom::blink::ClipboardHost> receivers_;
