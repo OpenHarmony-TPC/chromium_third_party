@@ -151,6 +151,10 @@ class TestMediaPlayerObserver final
     received_media_paused_stream_ended_ = stream_ended;
     run_loop_->Quit();
   }
+  
+#if BUILDFLAG(IS_OHOS)
+  void OnMediaPlayerGone() override {}
+#endif
 
   void OnMutedStatusChanged(bool muted) override {
     received_muted_status_type_ = muted;

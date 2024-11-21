@@ -4896,6 +4896,13 @@ void HTMLMediaElement::DidPlayerPaused(bool stream_ended) {
     observer->OnMediaPaused(stream_ended);
 }
 
+#if BUILDFLAG(IS_OHOS)
+void HTMLMediaElement::DidPlayerGone() {
+  for (auto& observer : media_player_observer_remote_set_->Value())
+    observer->OnMediaPlayerGone();
+}
+#endif
+
 void HTMLMediaElement::DidPlayerMutedStatusChange(bool muted) {
   for (auto& observer : media_player_observer_remote_set_->Value())
     observer->OnMutedStatusChanged(muted);
