@@ -346,12 +346,14 @@ void InputHandlerProxy::HandleInputEventWithLatencyInfo(
   #if BUILDFLAG(IS_OHOS)
     NativeEventDisposition result = DidNativeEmbedEvent(event_with_callback->event());
     LOG(DEBUG)<<"[NativeEmbed] DidNativeEmbedEvent return result is : "<<result;
-    if (result == SEND_NATIVE) {
-      TRACE_EVENT0("input", "InputHandlerProxy::HandleInputEventWithLatencyInfo::DidNativeEmbedEvent");
+    if (result == SEND_NATIVE || result == SEND_VIDEO) {
+      TRACE_EVENT1("input", "InputHandlerProxy::HandleInputEventWithLatencyInfo::DidNativeEmbedEvent",
+                   "NativeEventDisposition", result);
       native_event_queue_->Queue(std::move(event_with_callback));
       TriggerVsyncImplTask();
     } else if (result == END_QUEUE) {
-      TRACE_EVENT0("input", "InputHandlerProxy::HandleInputEventWithLatencyInfo::DidNativeEmbedEvent");
+      TRACE_EVENT1("input", "InputHandlerProxy::HandleInputEventWithLatencyInfo::DidNativeEmbedEvent",
+                   "NativeEventDisposition", result);
       native_touch_end_queue_->Queue(std::move(event_with_callback));
       TriggerVsyncImplTask();
     } else {
@@ -473,6 +475,7 @@ void InputHandlerProxy::HandleInputEventWithLatencyInfo(
 #if BUILDFLAG(IS_OHOS)
 void InputHandlerProxy::NativeHitTestResult(bool native, size_t fingerId, int layerId) {
   LOG(DEBUG)<<"[NativeEmbed] NativeHitTestResult fingerId is : "<< fingerId << " and native is : "<< native;
+  TRACE_EVENT1("input", "InputHandlerProxy::NativeHitTestResult", "native", native);
   native_map_[fingerId] = native;
   hit_testing_number_--;
   if (native) {
@@ -499,6 +502,8 @@ void InputHandlerProxy::NativeHitTestResult(bool native, size_t fingerId, int la
 
 void InputHandlerProxy::SendNativeEvent(const WebTouchEvent& touch_event,
                                         WebInputEvent::Type type, size_t i, bool result) {
+  TRACE_EVENT2("input", "InputHandlerProxy::SendNativeEvent",
+               "type", WebInputEvent::GetName(type), "result", result);
   if (result) {
     float x = touch_event.touches[i].PositionInWidget().x();
     float y = touch_event.touches[i].PositionInWidget().y();
@@ -549,7 +554,7 @@ InputHandlerProxy::DidNativeEmbedEvent(const WebInputEvent& event) {
         native_id_map_[id] = video_layer_impl->id();
         SendNativeEvent(touch_event, event.GetType(), i);
         native_map_[id] = true;
-        result = SEND_NATIVE;
+        result = SEND_VIDEO;
         continue;
       }
       if (!native_enabled_) {
@@ -571,7 +576,11 @@ InputHandlerProxy::DidNativeEmbedEvent(const WebInputEvent& event) {
       continue;
     }
 
-    if (native_map_[id] && event.GetType() != WebInputEvent::Type::kTouchEnd) {
+    bool isNativeArea = false;
+    if (native_map_.find(id) != native_map_.end()) {
+      isNativeArea = native_map_.find(id)->second;
+    }
+    if (isNativeArea && event.GetType() != WebInputEvent::Type::kTouchEnd) {
       SendNativeEvent(touch_event, event.GetType(), i);
       result = SEND_NATIVE;
     }
@@ -583,7 +592,7 @@ InputHandlerProxy::DidNativeEmbedEvent(const WebInputEvent& event) {
       end_index_queue_.emplace_back(i);
       LOG(INFO) << "[NativeEmbed] DidNativeEmbedEvent touchStart in hitTesting.";
     } 
-    if (hit_testing_number_ == 0 && native_map_[id]) {
+    if (hit_testing_number_ == 0 && isNativeArea) {
       SendNativeEvent(touch_event, event.GetType(), i);
       result = SEND_NATIVE;
     }
@@ -595,6 +604,7 @@ InputHandlerProxy::DidNativeEmbedEvent(const WebInputEvent& event) {
 void InputHandlerProxy::SetGestureEventResult(bool result, bool stopPropagation) {
   LOG(DEBUG) << "[NativeEmbed] SetGestureEventResult result is : " << result
              << " stopPropagation is " << stopPropagation;
+  TRACE_EVENT1("input", "InputHandlerProxy::SetGestureEventResult", "result", result);
   if (native_event_queue_->empty()) {
     LOG(DEBUG) << "[NativeEmbed] native_event_queue_ is empty";
     return;
