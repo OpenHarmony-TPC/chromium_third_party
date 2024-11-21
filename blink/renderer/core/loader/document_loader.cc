@@ -3415,7 +3415,10 @@ scoped_refptr<const SharedBuffer> DocumentLoader::OnGetImageFromCache(
   if (kurl.IsValid() && frame_ &&
       GetFrameLoader().GetDocumentLoader() == this) {
     resource = MemoryCache::Get()->ResourceForURL(
-        kurl, frame_->GetDocument()->Fetcher()->GetCacheIdentifier(kurl));
+        kurl,
+        frame_->GetDocument()->Fetcher()->GetCacheIdentifier(
+                                          kurl,
+                                          /*skip_service_worker=*/false));
 
     if (!resource) {
       HeapVector<Member<Resource>> resources =
