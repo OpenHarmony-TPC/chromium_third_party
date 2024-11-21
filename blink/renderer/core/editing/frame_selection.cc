@@ -1126,7 +1126,7 @@ PhysicalRect FrameSelection::AbsoluteUnclippedBounds() const {
 
 #if defined(OHOS_CLIPBOARD)
 gfx::Rect FrameSelection::ClippedSelectionBoundsInRootFrame() const {
-  if (!frame_ || !frame_->GetPage()) {
+  if (!frame_ || !frame_->GetPage() || !frame_->View()) {
     return gfx::Rect();
   }
   const VisibleSelection& selection = ComputeVisibleSelectionInDOMTree();
@@ -1134,25 +1134,13 @@ gfx::Rect FrameSelection::ClippedSelectionBoundsInRootFrame() const {
     return gfx::Rect();
   }
 
-  auto start_position = selection.Start();
-  auto end_position = selection.End();
-  gfx::Rect selection_bounds;
-  if ((start_position.AnchorNode() && !start_position.AnchorNode()->IsTextNode()) ||
-      (end_position.AnchorNode() && !end_position.AnchorNode()->IsTextNode())) {
-    selection_bounds = blink::ToPixelSnappedRect(AbsoluteUnclippedBounds());
-    selection_bounds.Offset(
-        -(int)(frame_->GetPage()->GetVisualViewport().GetScrollOffset().x()),
-        -(int)(frame_->GetPage()->GetVisualViewport().GetScrollOffset().y()));
-    return gfx::ScaleToEnclosingRect(selection_bounds, frame_->GetPage()->GetVisualViewport().Scale());
-  }
-  gfx::Rect selection_start_rect = AbsoluteSelectionBoundsOf(CreateVisiblePosition(start_position));
-  gfx::Rect selection_end_rect = AbsoluteSelectionBoundsOf(CreateVisiblePosition(end_position));
+  gfx::Rect viewport_in_root_frame = gfx::ToEnclosingRect(
+      frame_->GetPage()->GetVisualViewport().VisibleRect());
+  gfx::Rect unclipped_bounds_in_root_frame = frame_->View()->ConvertToRootFrame(
+      blink::ToPixelSnappedRect(frame_->Selection().AbsoluteUnclippedBounds()));
+  gfx::Rect selection_bounds = gfx::IntersectRects(
+      viewport_in_root_frame, unclipped_bounds_in_root_frame);
 
-  int left = std::min(selection_start_rect.bottom_left().x(), selection_end_rect.bottom_left().x());
-  int right = std::max(selection_start_rect.top_right().x(), selection_end_rect.top_right().x());
-  int bottom = std::max(selection_start_rect.bottom_left().y(), selection_end_rect.bottom_left().y());
-  int top = std::min(selection_start_rect.top_right().y(), selection_end_rect.top_right().y());
-  selection_bounds = gfx::Rect(left, top, right - left, bottom - top);
   selection_bounds.Offset(
         -(int)(frame_->GetPage()->GetVisualViewport().GetScrollOffset().x()),
         -(int)(frame_->GetPage()->GetVisualViewport().GetScrollOffset().y()));
