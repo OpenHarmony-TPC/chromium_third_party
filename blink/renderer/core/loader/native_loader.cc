@@ -182,7 +182,8 @@ void NativeLoader::OnCreateNativeSurface(int native_embed_id,
   if (!cc_layer_update_) {
     // Create phase requires change the origin of the bounding_rect with page
     // initial_scale.
-    bounds_to_viewport.set_origin(PositionToViewport(bounding_rect_.origin(), plugin_element_->GetDocument()));
+    bounds_to_viewport.set_origin(PositionToViewport(
+        bounding_rect_.origin(), plugin_element_->GetDocument()));
   }
   // We will use the position relative to visual viewport.
   bounding_rect_.set_origin(bounds_to_viewport.origin());
