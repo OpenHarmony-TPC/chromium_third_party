@@ -717,7 +717,8 @@ bool ImageLoader::ShouldLoadImmediately(const KURL& url) const {
   // content when style recalc is over and DOM mutation is allowed again.
   if (!url.IsNull()) {
     Resource* resource = GetMemoryCache()->ResourceForURL(
-        url, element_->GetDocument().Fetcher()->GetCacheIdentifier(url));
+        url, element_->GetDocument().Fetcher()->GetCacheIdentifier(
+                 url, /*skip_service_worker=*/false));
 
     if (resource && !resource->ErrorOccurred() &&
         CanReuseFromListOfAvailableImages(
