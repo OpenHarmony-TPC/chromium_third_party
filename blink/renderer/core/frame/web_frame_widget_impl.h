@@ -849,9 +849,6 @@ class CORE_EXPORT WebFrameWidgetImpl
   void Delete() override;
   void SelectAll() override;
   void CollapseSelection() override;
-#ifdef OHOS_CLIPBOARD
-  void GetEditFlags(GetEditFlagsCallback callback) override;
-#endif
   void Replace(const String& word) override;
   void ReplaceMisspelling(const String& word) override;
   void SelectRange(const gfx::Point& base_in_dips,

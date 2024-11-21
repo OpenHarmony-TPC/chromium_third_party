@@ -293,30 +293,6 @@ void FrameWidgetInputHandlerImpl::CollapseSelection() {
       widget_, main_thread_frame_widget_input_handler_));
 }
 
-#ifdef OHOS_CLIPBOARD
-void FrameWidgetInputHandlerImpl::GetEditFlags(GetEditFlagsCallback callback) {
-  if (ThreadedCompositingEnabled()) {
-    callback = base::BindOnce(
-        [](scoped_refptr<base::SingleThreadTaskRunner> callback_task_runner,
-           GetEditFlagsCallback callback, int32_t result) {
-          callback_task_runner->PostTask(FROM_HERE,
-                                         base::BindOnce(std::move(callback), result));
-        },
-        base::SingleThreadTaskRunner::GetCurrentDefault(), std::move(callback));
-  }
-
-  RunOnMainThread(base::BindOnce(
-      [](base::WeakPtr<mojom::blink::FrameWidgetInputHandler> handler,
-         GetEditFlagsCallback callback) {
-        if (handler)
-          handler->GetEditFlags(std::move(callback));
-        else
-          std::move(callback).Run(0);
-      },
-      main_thread_frame_widget_input_handler_, std::move(callback)));
-}
-#endif
-
 void FrameWidgetInputHandlerImpl::SelectRange(const gfx::Point& base,
                                               const gfx::Point& extent) {
   // TODO(dtapuska): This event should be coalesced. Chrome IPC uses
