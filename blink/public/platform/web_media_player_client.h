@@ -189,6 +189,10 @@ class BLINK_PLATFORM_EXPORT WebMediaPlayerClient {
   // in |stream_ended| if playback has reached the end of the stream.
   virtual void DidPlayerPaused(bool stream_ended) = 0;
 
+#if BUILDFLAG(IS_OHOS)
+  virtual void DidPlayerGone() = 0;
+#endif
+
   // Notify the client that the muted status of the media player has changed.
   virtual void DidPlayerMutedStatusChange(bool muted) = 0;
 

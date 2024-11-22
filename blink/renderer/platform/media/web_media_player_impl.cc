@@ -3280,7 +3280,7 @@ void WebMediaPlayerImpl::SetDelegateState(DelegateState new_state,
     case DelegateState::GONE:
       delegate_->PlayerGone(delegate_id_);
 #if BUILDFLAG(IS_OHOS)
-      client_->DidPlayerPaused(ended_);
+      client_->DidPlayerGone();
 #endif
       break;
     case DelegateState::PLAYING: {

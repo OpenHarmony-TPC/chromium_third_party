@@ -577,6 +577,9 @@ class CORE_EXPORT HTMLMediaElement
   void PausePlayback(PauseReason) final;
   void DidPlayerStartPlaying() override;
   void DidPlayerPaused(bool stream_ended) override;
+#if BUILDFLAG(IS_OHOS)
+  void DidPlayerGone() override;
+#endif
   void DidPlayerMutedStatusChange(bool muted) override;
   void DidMediaMetadataChange(bool has_audio,
                               bool has_video,
