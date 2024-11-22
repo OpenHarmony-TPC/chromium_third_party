@@ -596,7 +596,7 @@ void FetchManager::Loader::Start() {
 
   // "- should fetching |request| be blocked as content security returns
   //    blocked"
-#if defined(HW_WEBVIEW_BUGFIX_BASE)
+#if defined(OHOS_BUGFIX_CRASH)
     if (!execution_context_) {
         LOG(ERROR) << "FetchManager::Loader::Start error execution_context_ is null";
         return;
@@ -606,7 +606,7 @@ void FetchManager::Loader::Start() {
         LOG(ERROR) << "FetchManager::Loader::Start error ContentSecurityPolicyForWorld is null";
         return;
     }
-#endif //HW_WEBVIEW_BUGFIX_BASE
+#endif //OHOS_BUGFIX_CRASH
 
   if (!execution_context_->GetContentSecurityPolicyForWorld(world_.get())
            ->AllowConnectToSource(fetch_request_data_->Url(),
