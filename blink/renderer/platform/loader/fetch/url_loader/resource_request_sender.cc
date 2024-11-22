@@ -262,7 +262,9 @@ int ResourceRequestSender::SendAsync(
   request_info_ = std::make_unique<PendingRequestInfo>(
       std::move(client), request->destination, KURL(request->url),
       std::move(resource_load_info_notifier_wrapper));
-
+#if BUILDFLAG(IS_OHOS)
+  request_info_->request_id_ = request_id;
+#endif
   request_info_->resource_load_info_notifier_wrapper
       ->NotifyResourceLoadInitiated(
           request_id, request->url, request->method, request->referrer,
@@ -547,8 +549,9 @@ void ResourceRequestSender::OnStartLoadingResponseBody(
 
 void ResourceRequestSender::OnRequestComplete(
     const network::URLLoaderCompletionStatus& status) {
-  TRACE_EVENT0("loading", "ResourceRequestSender::OnRequestComplete");
-
+#if BUILDFLAG(IS_OHOS)
+  TRACE_EVENT1("loading", "ResourceRequestSender::OnRequestComplete", "id", request_info_->request_id_);
+#endif
   if (!request_info_) {
     return;
   }

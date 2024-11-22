@@ -177,6 +177,9 @@ class BLINK_PLATFORM_EXPORT ResourceRequestSender {
 
     ~PendingRequestInfo();
 
+#if BUILDFLAG(IS_OHOS)
+    int request_id_;
+#endif
     scoped_refptr<ResourceRequestClient> client;
     network::mojom::RequestDestination request_destination;
     LoaderFreezeMode freeze_mode = LoaderFreezeMode::kNone;

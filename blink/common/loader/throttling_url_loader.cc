@@ -688,8 +688,10 @@ void ThrottlingURLLoader::OnReceiveResponse(
   DCHECK_EQ(DEFERRED_NONE, deferred_stage_);
   DCHECK(!loader_completed_);
   DCHECK(deferring_throttles_.empty());
-  TRACE_EVENT1("loading", "ThrottlingURLLoader::OnReceiveResponse", "url",
-               response_url_.possibly_invalid_spec());
+#if BUILDFLAG(IS_OHOS)
+  TRACE_EVENT2("loading", "ThrottlingURLLoader::OnReceiveResponse", "url",
+               response_url_.possibly_invalid_spec(), "id", start_info_->request_id);
+#endif
   did_receive_response_ = true;
   body_ = std::move(body);
   cached_metadata_ = std::move(cached_metadata);
