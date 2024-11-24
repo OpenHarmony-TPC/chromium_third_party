@@ -34,6 +34,10 @@ group("jpeg") {
   }
 }
 
+group("libffmpeg") {
+  public_deps = [ "//third_party/ffmpeg:ffmpeg" ]
+}
+
 # This is a meta target that forwards include paths only to the system's
 # libjpeg, third_party/libjpeg, or third_party/libjpeg_turbo depending on the
 # build args declared in this file. This is needed, rarely, for targets that
