@@ -219,12 +219,18 @@ void HEIFImageDecoder::OnSetData(SegmentReader* data) {
   base::span<const uint8_t> encoded_data =
       base::make_span(sk_data->bytes(), sk_data->size());
 
-  if (GetDecoderAdapter()->ParseImageInfo(encoded_data.data(),
-                                          (uint32_t)encoded_data.size())) {
-    LOG(INFO) << "[HeifSupport] HEIF image size " << GetDecoderAdapter()->GetImageWidth()
-              << " * " << GetDecoderAdapter()->GetImageHeight();
-    SetSize(GetDecoderAdapter()->GetImageWidth(),
-            GetDecoderAdapter()->GetImageHeight());
+  OHOS::NWeb::OhosImageDecoderAdapter* decoder_adapter = GetDecoderAdapter();
+  if (decoder_adapter == nullptr) {
+    LOG(ERROR) << "[HeifSupport] Fail to get decoder adapter.";
+    SetFailed();
+    return;
+  }
+
+  if (decoder_adapter->ParseImageInfo(encoded_data.data(), (uint32_t)encoded_data.size())) {
+    LOG(INFO) << "[HeifSupport] HEIF image size " << decoder_adapter->GetImageWidth()
+              << " * " << decoder_adapter->GetImageHeight();
+    SetSize(decoder_adapter->GetImageWidth(),
+            decoder_adapter->GetImageHeight());
     return;
   }
   LOG(ERROR) << "[HeifSupport] Fail to parsing image information. ";
@@ -311,10 +317,15 @@ bool HEIFImageDecoder::MatchesHeifSignature(const sk_sp<SkData>& data) {
     return true;
   }
 
+  OHOS::NWeb::OhosImageDecoderAdapter* decoder_adapter = GetDecoderAdapter();
+  if (decoder_adapter == nullptr) {
+    LOG(ERROR) << "[HeifSupport] Fail to get decoder adapter.";
+    return false;
+  }
+
   // Do double check.
-  if (GetDecoderAdapter()->ParseImageInfo(encoded_data.data(),
-                                          (uint32_t)encoded_data.size())) {
-    return GetDecoderAdapter()->GetEncodedFormat() == "image/heif";
+  if (decoder_adapter->ParseImageInfo(encoded_data.data(), (uint32_t)encoded_data.size())) {
+    return decoder_adapter->GetEncodedFormat() == "image/heif";
   }
   LOG(INFO) << "[HeifSupport] Fail to parsing image information. ";
   return false;
@@ -324,6 +335,9 @@ OHOS::NWeb::OhosImageDecoderAdapter* HEIFImageDecoder::GetDecoderAdapter() {
   if (!decoder_adapter_) {
     decoder_adapter_ = OHOS::NWeb::OhosAdapterHelper::GetInstance()
                            .CreateOhosImageDecoderAdapter();
+    if (!decoder_adapter_) {
+      return nullptr;
+    }
   }
 
   return decoder_adapter_.get();
