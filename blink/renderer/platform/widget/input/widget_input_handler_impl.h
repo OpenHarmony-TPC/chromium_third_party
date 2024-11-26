@@ -94,7 +94,7 @@ class WidgetInputHandlerImpl : public mojom::blink::WidgetInputHandler {
   void InputWasProcessed();
 
 #if BUILDFLAG(IS_OHOS)
-  void SetGestureEventResult(bool result) override;
+  void SetGestureEventResult(bool result, bool stopPropagation) override;
   void SetNativeEmbedMode(bool flag) override;
 #endif
 

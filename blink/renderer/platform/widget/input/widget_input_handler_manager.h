@@ -136,7 +136,7 @@ class PLATFORM_EXPORT WidgetInputHandlerManager final
 #if BUILDFLAG(IS_OHOS)
   void DidNativeEmbedEvent(blink::WebInputEvent::Type type,
                            std::string embedId, int32_t id, float x, float y) override;
-  void SetGestureEventResult(bool result);
+  void SetGestureEventResult(bool result, bool stopPropagation);
   void NativeHitTestResult(bool isNative, size_t fingerId, int layerId);
   void AsyncNativeHitTestResult(bool isNative, size_t fingerId, int layerId);
   void TouchHitTest(const WebPointerEvent& event, size_t fingerId) override;

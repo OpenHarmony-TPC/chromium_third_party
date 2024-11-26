@@ -253,8 +253,8 @@ void WidgetInputHandlerImpl::Release() {
 }
 
 #if BUILDFLAG(IS_OHOS)
-void WidgetInputHandlerImpl::SetGestureEventResult(bool result) {
-  input_handler_manager_->SetGestureEventResult(result);
+void WidgetInputHandlerImpl::SetGestureEventResult(bool result, bool stopPropagation) {
+  input_handler_manager_->SetGestureEventResult(result, stopPropagation);
 }
 
 void WidgetInputHandlerImpl::TriggerVsyncImplTask() {
