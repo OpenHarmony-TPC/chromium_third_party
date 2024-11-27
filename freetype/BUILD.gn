@@ -24,10 +24,14 @@ config("freetype_component_config") {
     "FT_CONFIG_OPTIONS_H=\"freetype-custom/freetype/config/ftoption.h\"",
   ]
 
-  if (!is_android && !is_ohos) {
+  if (!is_android) {
     # Selects type1cid.c and type1.c modules in
     # freetype-custom-include/freetype/config/ftmodule.h.
     defines += [ "PDFIUM_REQUIRED_MODULES" ]
+    if (is_ohos) {
+      # Same with Android to avoid performance impact.
+      defines += [ "WITHOUT_HARFBUZZ" ]
+    }
   } else {
     # Using HarfBuzz assisted autohinting has a performance impact that we do
     # not want to take on Android, see crbug.com/724095.
@@ -123,7 +127,7 @@ source_set("freetype_source") {
     sources += [ "src/src/base/ftsystem.c" ]
   }
 
-  if (!is_android && !is_ohos) {
+  if (!is_android) {
     sources += [
       "src/src/base/ftcid.c",
       "src/src/cid/type1cid.c",
