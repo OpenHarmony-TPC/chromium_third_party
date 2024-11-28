@@ -74,6 +74,7 @@ class MockOhosImageDecoderAdapter : public OHOS::NWeb::OhosImageDecoderAdapter {
                OHOS::NWeb::AllocatorType type,
                bool useYuv),
               (override));
+  MOCK_METHOD(void*, GetDecodeData, (), ());
 };
 
 class HeifImageDecoderTest : public testing::Test {
