@@ -2724,7 +2724,8 @@ WebInputEventResult WebFrameWidgetImpl::HandleInputEvent(
       SetTouchUpTime(::base::subtle::TimeTicksNowIgnoringOverride().since_origin().InNanoseconds());
   }
 
-  if (input_event.GetType() == WebInputEvent::Type::kRawKeyDown) {
+  if (input_event.GetType() == WebInputEvent::Type::kRawKeyDown ||
+      input_event.GetType() == WebInputEvent::Type::kMouseUp) {
     OHOS::NWeb::OhosAdapterHelper::GetInstance().CreateSocPerfClientAdapter()
       ->ApplySocPerfConfigByIdEx(OHOS::NWeb::SocPerfClientAdapter::SOC_PERF_WEB_GESTURE_ID, true);
     rawKeyDownTime_++;
