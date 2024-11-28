@@ -3277,6 +3277,9 @@ void WebMediaPlayerImpl::SetDelegateState(DelegateState new_state,
   switch (new_state) {
     case DelegateState::GONE:
       delegate_->PlayerGone(delegate_id_);
+#if BUILDFLAG(IS_OHOS)
+      client_->DidPlayerPaused(ended_);
+#endif
       break;
     case DelegateState::PLAYING: {
       // When delegate get PlayerGone it removes all state, need to make sure
