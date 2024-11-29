@@ -38,7 +38,7 @@ ABSL_CONST_INIT static base_internal::SpinLock freelist_lock(
     absl::kConstInit, base_internal::SCHEDULE_KERNEL_ONLY);
 ABSL_CONST_INIT static base_internal::ThreadIdentity* thread_identity_freelist;
 #if BUILDFLAG(IS_OHOS)
-    static constexpr uintptr_t kInvalidPointer = 0x1000;
+  static constexpr uintptr_t kInvalidPointer = 0x1000;
 #endif
 
 // A per-thread destructor for reclaiming associated ThreadIdentity objects.
@@ -48,7 +48,7 @@ static void ReclaimThreadIdentity(void* v) {
       static_cast<base_internal::ThreadIdentity*>(v);
 #if BUILDFLAG(IS_OHOS)
     if (reinterpret_cast<uintptr_t>(identity) < kInvalidPointer) {
-        return;
+      return;
     }
 #endif
 
