@@ -1570,7 +1570,7 @@ bool SelectionController::HandleGestureTapIfSelectionExist(
       gfx::ToFlooredPoint(event.Event().PositionInRootFrame())));
   WebLocalFrameImpl* web_local_frame = WebLocalFrameImpl::FromFrame(frame_);
   bool ret = false;
-  if (!Selection().Contains(v_point, false)) {
+  if (!Selection().Contains(v_point)) {
     LOG(INFO) << "Tap outside the selected range to clear selection";
     if (web_local_frame) {
       const blink::WebRange& range =
