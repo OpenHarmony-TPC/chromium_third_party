@@ -42,6 +42,7 @@ class RectF;
 }
 
 #ifdef OHOS_DRAG_DROP
+#include "third_party/blink/renderer/core/dom/element.h"
 #include "third_party/blink/renderer/platform/wtf/text/string_builder.h"
 #endif
 
@@ -113,6 +114,7 @@ class CORE_EXPORT DragController final
   bool DragLinkCheckSrcAndType();
   void UpdateLinkStyle(Node* node);
   void RestoreLinkStyle(Node* node);
+  void FindAndRemoveGrayStyle(Element *tempEle);
   bool IsHyperLinkDragging();
   void StartDragLinkEffects();
   void RestoreDragLinkEffects();
