@@ -360,8 +360,7 @@ void HTMLPlugInElement::DetachLayoutTree(bool performing_reattach) {
   ResetInstance();
 
 #if BUILDFLAG(IS_OHOS)
-  if (GetLayoutObject() && GetLayoutObject()->IsLayoutNative() &&
-      native_loader_ && !performing_reattach) {
+  if (native_loader_ && !performing_reattach) {
     native_loader_->Dispose();
   }
 #endif
