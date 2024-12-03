@@ -1729,6 +1729,7 @@ video::-internal-mobile-data-prompt {
   justify-content: center;
   align-items: center;
   transform: translate3d(0,0,0);
+  line-height: normal;
   background-color: var(--ohos_id_color_mask_light);
   font-size: var(--ohos_id_text_size_body2);
   font-weight: var(--ohos_id_text_font_family_regular);
