@@ -125,6 +125,8 @@ static const float kDragTextAlpha = 0.7f;
 static const float kDragImageAlpha = 1.0f;
 static const float kUxDragImageScale = 1.0f;
 static const char* kDragLinkGrayStyle = "; color: gray;";
+static const char* kDragLinkGrayStyleRemoveType1 = "color: gray;";
+static const char* kDragLinkGrayStyleRemoveType2 = "color: gray";
 #else
 static const float kDragImageAlpha = 0.75f;
 #endif // #ifdef OHOS_DRAG_DROP
@@ -1742,22 +1744,49 @@ void DragController::RestoreLinkStyle(Node* node) {
   NodeList *list = node->childNodes();
   if (list) {
     unsigned len = list->length();
-    const WTF::String grayStyle(kDragLinkGrayStyle);
     for (unsigned i = 0; i < len; i++) {
       Node* tempNode = list->item(i);
       if (tempNode) {
         auto* tempEle = DynamicTo<Element>(tempNode);
         if (tempEle) {
-          String styleAttr = String(AtomicString(tempEle->getAttribute(html_names::kStyleAttr)));
-          size_t pos = styleAttr.Find(grayStyle);
-          if (pos != WTF::kNotFound) {
-            String oriStyle = styleAttr.replace((unsigned)pos, grayStyle.length(), "");
-            tempEle->setAttribute(html_names::kStyleAttr, AtomicString(oriStyle));
-          }
+          FindAndRemoveGrayStyle(tempEle);
           RestoreLinkStyle(tempNode);
         }
       }
     }
+  }
+}
+
+void DragController::FindAndRemoveGrayStyle(Element *tempEle)
+{
+  const WTF::String grayStyle(kDragLinkGrayStyle);
+  const WTF::String grayStyle1(kDragLinkGrayStyleRemoveType1);
+  const WTF::String grayStyle2(kDragLinkGrayStyleRemoveType2);
+  String styleAttr = String(AtomicString(tempEle->getAttribute(html_names::kStyleAttr)));
+  size_t pos = styleAttr.Find(grayStyle);
+  if (pos != WTF::kNotFound) {
+    if (pos + grayStyle.length() == styleAttr.length()) {
+      String oriStyle = styleAttr.replace((unsigned)pos, grayStyle.length(), "");
+      tempEle->setAttribute(html_names::kStyleAttr, AtomicString(oriStyle));
+    } else {
+      String oriStyle = styleAttr.replace((unsigned)pos, grayStyle.length(), ";");
+      tempEle->setAttribute(html_names::kStyleAttr, AtomicString(oriStyle));
+    }
+    return;
+  }
+
+  pos = styleAttr.Find(grayStyle1);
+  if (pos != WTF::kNotFound) {
+    String oriStyle = styleAttr.replace((unsigned)pos, grayStyle1.length(), "");
+    tempEle->setAttribute(html_names::kStyleAttr, AtomicString(oriStyle));
+    return;
+  }
+
+  pos = styleAttr.Find(grayStyle2);
+  if (pos != WTF::kNotFound) {
+    String oriStyle = styleAttr.replace((unsigned)pos, grayStyle2.length(), "");
+    tempEle->setAttribute(html_names::kStyleAttr, AtomicString(oriStyle));
+    return;
   }
 }
 
@@ -1777,13 +1806,7 @@ void DragController::RestoreDragLinkEffects() {
     element->GetDocument().UpdateStyleAndLayoutTree();
   }
 
-  const WTF::String grayStyle(kDragLinkGrayStyle);
-  String styleAttr = String(AtomicString(element->getAttribute(html_names::kStyleAttr)));
-  size_t pos = styleAttr.Find(grayStyle);
-  if (pos != WTF::kNotFound) {
-    String oriStyle = styleAttr.replace((unsigned)pos, grayStyle.length(), "");
-    element->setAttribute(html_names::kStyleAttr, AtomicString(oriStyle));
-  }
+  FindAndRemoveGrayStyle(element);
   RestoreLinkStyle(node);
 
   LayoutObject* layout_object = node->GetLayoutObject();
