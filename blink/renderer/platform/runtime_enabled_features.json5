@@ -2291,7 +2291,7 @@
     // "experimental" is the support on other platforms.
     {
       name: "MiddleClickAutoscroll",
-      status: "test",
+      status: "stable",
       base_feature: "none",
     },
     {
