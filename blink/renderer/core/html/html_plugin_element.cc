@@ -296,6 +296,12 @@ void HTMLPlugInElement::RemovedFrom(ContainerNode& insertion_point) {
   // Plugins can persist only through reattachment during a lifecycle
   // update. This method shouldn't be called in that lifecycle phase.
   DCHECK(!persisted_plugin_);
+#if BUILDFLAG(IS_OHOS)
+  if (native_loader_) {
+    native_loader_->Dispose();
+    native_loader_ = nullptr;
+  }
+#endif
   HTMLFrameOwnerElement::RemovedFrom(insertion_point);
 }
 
@@ -360,8 +366,7 @@ void HTMLPlugInElement::DetachLayoutTree(bool performing_reattach) {
   ResetInstance();
 
 #if BUILDFLAG(IS_OHOS)
-  if (GetLayoutObject() && GetLayoutObject()->IsLayoutNative() &&
-      native_loader_ && !performing_reattach) {
+  if (native_loader_ && !performing_reattach) {
     native_loader_->Dispose();
   }
 #endif
