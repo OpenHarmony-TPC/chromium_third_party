@@ -4859,7 +4859,12 @@ void WebFrameWidgetImpl::GetImageRect(GetImageRectCallback callback) {
 
 gfx::Rect WebFrameWidgetImpl::GetImageRectInner() {
   auto image_rect = gfx::Rect();
-  if (hit_image_node_ && hit_image_node_->isConnected()) {
+  if (!HitTestResult::GetImage(hit_image_node_)) {
+    LOG(INFO) << "cannot get image from hit_image_node_";
+    hit_image_node_ = nullptr;
+    return image_rect;
+  }
+  if (hit_image_node_ && hit_image_node_->IsInDocumentTree()) {
     LocalFrame* frame = LocalRootImpl()->GetFrame();
     LocalFrameView* view = frame->View();
     auto abs_rect = 
