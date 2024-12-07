@@ -1805,6 +1805,7 @@ void DragController::RestoreDragLinkEffects() {
   auto* element = DynamicTo<Element>(node);
   if (element) {
     element->GetDocument().UpdateStyleAndLayoutTree();
+    element->GetDocument().UpdateHoverActiveState(false, false, nullptr);
   }
 
   FindAndRemoveGrayStyle(element);
