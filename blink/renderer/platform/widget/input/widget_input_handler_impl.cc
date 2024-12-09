@@ -149,6 +149,9 @@ void WidgetInputHandlerImpl::RequestCompositionUpdates(bool immediate_request,
 void WidgetInputHandlerImpl::DispatchEvent(
     std::unique_ptr<WebCoalescedInputEvent> event,
     DispatchEventCallback callback) {
+#if defined(IS_OHOS)
+  LOG(INFO) << "DispatchEvent type:" << WebInputEvent::GetName(event->Event().GetType());
+#endif
   TRACE_EVENT1("input", "WidgetInputHandlerImpl::DispatchEvent", "type", WebInputEvent::GetName(event->Event().GetType()));
   input_handler_manager_->DispatchEvent(std::move(event), std::move(callback));
 }
@@ -165,6 +168,9 @@ void WidgetInputHandlerImpl::TryFinishFling() {
 
 void WidgetInputHandlerImpl::DispatchNonBlockingEvent(
     std::unique_ptr<WebCoalescedInputEvent> event) {
+#if defined(IS_OHOS)
+  LOG(INFO) << "DispatchNonBlockingEvent type:" << WebInputEvent::GetName(event->Event().GetType());
+#endif
   TRACE_EVENT1("input", "WidgetInputHandlerImpl::DispatchNonBlockingEvent", "type", WebInputEvent::GetName(event->Event().GetType()));
   input_handler_manager_->DispatchEvent(std::move(event),
                                         DispatchEventCallback());
