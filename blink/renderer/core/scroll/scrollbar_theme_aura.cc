@@ -57,7 +57,7 @@ namespace {
 // this.
 constexpr int kScrollbarThicknessForWebTests = 15;
 #ifdef OHOS_SCROLLBAR
-constexpr int kScrollbarForceThicknessForWeb = 16;
+constexpr int kScrollbarForceThicknessForWeb = 24; // 1 vp = 1.5 px, 16 * 1.5
 #endif
 // While the theme does not have specific values for scrollbar-width: thin
 // we just use a fixed 2/3 ratio of the default value.
