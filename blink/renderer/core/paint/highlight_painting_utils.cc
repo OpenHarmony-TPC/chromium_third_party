@@ -438,9 +438,19 @@ TextPaintStyle HighlightPaintingUtils::HighlightPaintingStyle(
     highlight_style.current_color =
         ResolveColor(document, style, pseudo_style.get(), pseudo,
                      GetCSSPropertyColor(), previous_layer_current_color);
+#ifdef OHOS_DRAG_DROP
+    if (InSelectionDragging(document)) {
+      highlight_style.fill_color = Color::kLightGray;
+    } else {
+      highlight_style.fill_color = ResolveColor(
+          document, style, pseudo_style.get(), pseudo,
+          GetCSSPropertyWebkitTextFillColor(), previous_layer_current_color);
+    }
+#else
     highlight_style.fill_color = ResolveColor(
         document, style, pseudo_style.get(), pseudo,
         GetCSSPropertyWebkitTextFillColor(), previous_layer_current_color);
+#endif
     // TODO(crbug.com/1147859) ignore highlight ‘text-emphasis-color’
     // https://github.com/w3c/csswg-drafts/issues/7101
     highlight_style.emphasis_mark_color = ResolveColor(
