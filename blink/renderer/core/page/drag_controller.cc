@@ -1473,6 +1473,9 @@ std::unique_ptr<DragImage> DetermineDragImageAndRect(
 
 }  // namespace
 
+#if defined(OHOS_DRAG_DROP)
+NO_SANITIZE("cfi")
+#endif
 bool DragController::StartDrag(LocalFrame* frame,
                                const DragState& state,
                                const WebMouseEvent& drag_event,
@@ -1705,7 +1708,7 @@ void DragController::UpdateLinkStyle(Node* node) {
   }
 }
 
-void DragController::StartDragLinkEffects() {
+NO_SANITIZE("cfi") void DragController::StartDragLinkEffects() {
   if (!DragLinkCheckSrcAndType()) {
     LOG(DEBUG) << "DragDrop check not pass, no need to change style";
     return;
@@ -1791,7 +1794,7 @@ void DragController::FindAndRemoveGrayStyle(Element *tempEle)
   }
 }
 
-void DragController::RestoreDragLinkEffects() {
+NO_SANITIZE("cfi") void DragController::RestoreDragLinkEffects() {
   if (!DragLinkCheckSrcAndType()) {
     LOG(DEBUG) << "DragDrop check not pass, no need to change style";
     return;
@@ -1818,7 +1821,7 @@ void DragController::RestoreDragLinkEffects() {
   InvalidateSelectionForDrag(node->ownerDocument());
 }
 
-void DragController::StartDragTextEffects() {
+NO_SANITIZE("cfi") void DragController::StartDragTextEffects() {
   if (!drag_state_)
     return;
 
@@ -1838,7 +1841,7 @@ void DragController::StartDragTextEffects() {
   InvalidateSelectionForDrag(node->ownerDocument());
 }
 
-void DragController::RestoreDragTextEffects() {
+NO_SANITIZE("cfi") void DragController::RestoreDragTextEffects() {
     if (!drag_state_)
     return;
 
@@ -1883,7 +1886,7 @@ bool DragController::IsInImageDraging() {
          did_initiate_drag_;
 }
 
-void DragController::StartDragImageEffects() {
+NO_SANITIZE("cfi") void DragController::StartDragImageEffects() {
   if (!drag_state_)
     return;
 
@@ -1918,7 +1921,7 @@ void DragController::StartDragImageEffects() {
   InvalidateSelectionForDrag(node->ownerDocument());
 }
 
-void DragController::RestoreDragImageEffects() {
+NO_SANITIZE("cfi") void DragController::RestoreDragImageEffects() {
   if (!drag_state_)
     return;
 
