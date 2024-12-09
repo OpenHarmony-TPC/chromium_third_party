@@ -839,12 +839,9 @@ AXObject* AXObject::ComputeParentOrNull() const {
 // static
 Node* AXObject::GetParentNodeForComputeParent(AXObjectCacheImpl& cache,
                                               Node* node) {
-  if (!node) {
+  if (!node || !node->isConnected()) {
     return nullptr;
   }
-
-  DCHECK(node->isConnected())
-      << "Should not call with disconnected node: " << node;
 
   // A document's parent should be the page popup owner, if any, otherwise null.
   if (auto* document = DynamicTo<Document>(node)) {
