@@ -105,6 +105,7 @@ struct BLINK_COMMON_EXPORT WebPreferences {
   std::string embed_tag;
   std::string embed_tag_type;
   int draw_mode;
+  float font_weight_scale;
 #endif  // BUILDFLAG(IS_OHOS)
 #ifdef OHOS_SCROLLBAR
   uint32_t scrollbar_color;

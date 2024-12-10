@@ -540,6 +540,10 @@ void WebSettingsImpl::SetDrawMode(int mode) {
 void WebSettingsImpl::SetTextZoomFactor(float factor) {
   settings_->SetTextZoomFactor(factor);
 }
+
+void WebSettingsImpl::SetFontWeightScale(float value) {
+  settings_->SetFontWeightScale(value);
+}
 #endif
 
 void WebSettingsImpl::SetMockGestureTapHighlightsEnabled(bool enabled) {

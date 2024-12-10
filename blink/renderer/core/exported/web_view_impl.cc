@@ -1582,6 +1582,7 @@ void WebView::ApplyWebPreferences(const web_pref::WebPreferences& prefs,
       WebString::FromASCII(base::ToLowerASCII(prefs.embed_tag)),
       WebString::FromASCII(base::ToLowerASCII(prefs.embed_tag_type)));
   settings->SetDrawMode(prefs.draw_mode);
+  settings->SetFontWeightScale(prefs.font_weight_scale);
 #endif  // BUILDFLAG(IS_OHOS)
 
 #ifdef OHOS_SCROLLBAR

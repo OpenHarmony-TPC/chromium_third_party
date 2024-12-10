@@ -160,6 +160,9 @@ class CORE_EXPORT FontBuilder {
                            const FontDescription& parent_description);
   void UpdateComputedSize(FontDescription&, const ComputedStyleBuilder&);
   void UpdateAdjustedSize(FontDescription&, FontSelector*);
+#if BUILDFLAG(IS_OHOS)
+  void UpdateWeightScale(FontDescription&);
+#endif
 
   float GetComputedSizeFromSpecifiedSize(FontDescription&,
                                          float effective_zoom,

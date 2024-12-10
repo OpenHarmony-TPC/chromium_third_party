@@ -525,5 +525,8 @@ struct WebPreferences {
   [EnableIf=ohos_custom_video_player]
   bool custom_video_player_overlay = false;
   // #endif OHOS_CUSTOM_VIDEO_PLAYER
+  
+  [EnableIf=is_ohos]
+  float font_weight_scale;
 };
 
