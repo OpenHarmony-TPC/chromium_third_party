@@ -1022,7 +1022,9 @@ void WidgetBase::UpdateTextInputStateInternal(bool show_virtual_keyboard,
     // Check whether the keyboard should always be hidden for the currently
     // focused element.
     always_hide_ime = frame_widget->ShouldSuppressKeyboardForFocusedElement();
-    LOG(INFO) << "UpdateTextInputStateInternal update always_hide_ime value:" << always_hide_ime;
+    if (always_hide_ime) {
+        LOG(INFO) << "UpdateTextInputStateInternal update always_hide_ime value:" << always_hide_ime;
+    }
     frame_widget->GetEditContextBoundsInWindow(&control_bounds,
                                                &selection_bounds);
     frame_widget->GetInputElementAttributes(input_atrributes);
