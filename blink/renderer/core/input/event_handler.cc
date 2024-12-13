@@ -751,6 +751,8 @@ WebInputEventResult EventHandler::HandlePointerEvent(
   WebInputEventResult event_result = pointer_event_manager_->HandlePointerEvent(
       web_pointer_event, coalesced_events, predicted_events);
   gesture_manager_->NotifyPointerEventHandled(web_pointer_event);
+  OHOS_TRACE_EVENT1("blink", "EventHandler::HandlePointerEvent", "event_result",
+      event_result);
   return event_result;
 }
 
