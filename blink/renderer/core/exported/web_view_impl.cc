@@ -1464,16 +1464,6 @@ void WebViewImpl::ResizeWithBrowserControls(
       size_.width() && ContentsSize().width() &&
       main_frame_widget_size.width() != size_.width() &&
       !fullscreen_controller_->IsFullscreenOrTransitioning();
-#ifdef OHOS_PAGE_UP_DOWN
-  if (!base::ohos::IsPcDevice()) {
-    bool is_width_height_change_diff =
-        (main_frame_widget_size.width() - size_.width()) *
-            (main_frame_widget_size.height() - size_.height()) < 0;
-    is_rotation = is_rotation && is_width_height_change_diff;
-    LOG(DEBUG)<<"when resize, is_rotation is "<<is_rotation;
-    LOG(DEBUG)<<"when resize, is_width_height_change_diff is "<<is_width_height_change_diff;
-  }
-#endif  // OHOS_PAGE_UP_DOWN
   size_ = main_frame_widget_size;
 
   if (!main_frame->IsOutermostMainFrame()) {
