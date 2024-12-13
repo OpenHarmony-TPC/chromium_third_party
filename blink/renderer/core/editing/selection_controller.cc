@@ -1539,8 +1539,9 @@ template void SelectionController::UpdateSelectionForContextMenuEvent<
 #ifdef OHOS_CLIPBOARD
 bool SelectionController::HandleGestureTapIfSelectionExist(
     const MouseEventWithHitTestResults& event) {
-  TRACE_EVENT0("blink",
-               "SelectionController::HandleGestureTapIfSelectionExist");
+  TRACE_EVENT1("blink",
+               "SelectionController::HandleGestureTapIfSelectionExist",
+               "Selection().IsAvailable()", Selection().IsAvailable());
   if (!Selection().IsAvailable()) {
     return false;
   }
@@ -1555,10 +1556,12 @@ bool SelectionController::HandleGestureTapIfSelectionExist(
   bool single_click = event.Event().click_count <= 1;
   bool extend_selection = IsExtendingSelection(event);
   if (!single_click || extend_selection || !event.Event().FromTouch()) {
+    LOG(INFO) << "Non-click events are not handled, extend_selection = " << extend_selection;
     return false;
   }
 
   if (Selection().IsSelectAll()) {
+    LOG(INFO) << "Select All does not process click events";
     return false;
   }
 
