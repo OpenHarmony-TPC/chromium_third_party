@@ -387,6 +387,11 @@ bool WidgetInputHandlerManager::HandleInputEvent(
       std::move(handled_callback));
   widget_->input_handler().HandleInputEvent(event, std::move(metrics),
                                             std::move(blink_callback));
+  // cherry-pick from google begin
+  // TODO(szager): Should this be limited to discrete input events by
+  // conditioning on (!scheduler::PendingUserInput::IsContinuousEventType())?
+  widget_->LayerTreeHost()->proxy()->SetInputResponsePending();
+  // cherry-pick from google end
   return true;
 }
 
