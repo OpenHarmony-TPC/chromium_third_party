@@ -380,10 +380,26 @@ void WidgetBaseInputHandler::HandleInputEvent(
     if (mouse_event.GetType() == WebInputEvent::Type::kMouseLeave)
       current_cursor_.reset();
 
+// Only if web receives a kLeft down and a kLeft up event the keyboard
+// should be triggered
+#if defined(OHOS_INPUT_EVENTS)
+    if (mouse_event.button == WebPointerProperties::Button::kLeft &&
+        mouse_event.GetType() == WebInputEvent::Type::kMouseDown) {
+      is_leftdown_last_mouse_ = true;
+    }
+
+    if (mouse_event.button == WebPointerProperties::Button::kLeft &&
+        mouse_event.GetType() == WebInputEvent::Type::kMouseUp && is_leftdown_last_mouse_) {
+      show_virtual_keyboard_for_mouse = true;
+      is_leftdown_last_mouse_ = false;
+    }
+#else
     if (mouse_event.button == WebPointerProperties::Button::kLeft &&
         mouse_event.GetType() == WebInputEvent::Type::kMouseUp) {
       show_virtual_keyboard_for_mouse = true;
     }
+#endif
+
   }
 
 #if BUILDFLAG(IS_ANDROID)
