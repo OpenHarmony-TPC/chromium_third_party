@@ -399,7 +399,6 @@ void WidgetBaseInputHandler::HandleInputEvent(
       show_virtual_keyboard_for_mouse = true;
     }
 #endif
-
   }
 
 #if BUILDFLAG(IS_ANDROID)
