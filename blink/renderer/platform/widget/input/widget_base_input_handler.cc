@@ -380,9 +380,9 @@ void WidgetBaseInputHandler::HandleInputEvent(
     if (mouse_event.GetType() == WebInputEvent::Type::kMouseLeave)
       current_cursor_.reset();
 
+#if defined(OHOS_INPUT_EVENTS)
 // Only if web receives a kLeft down and a kLeft up event the keyboard
 // should be triggered
-#if defined(OHOS_INPUT_EVENTS)
     if (mouse_event.button == WebPointerProperties::Button::kLeft &&
         mouse_event.GetType() == WebInputEvent::Type::kMouseDown) {
       is_leftdown_last_mouse_ = true;
