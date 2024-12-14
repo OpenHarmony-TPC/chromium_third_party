@@ -1242,11 +1242,11 @@ void WidgetInputHandlerManager::DidNativeEmbedEvent(blink::WebInputEvent::Type t
       base::BindOnce(&WidgetBase::DidNativeEmbedEvent, widget_, type, embedId, id, x, y));
 }
 
-void WidgetInputHandlerManager::SetGestureEventResult(bool result) {
+void WidgetInputHandlerManager::SetGestureEventResult(bool result, bool stopPropagation) {
   if (!input_handler_proxy_) {
     return;
   }
-  input_handler_proxy_->SetGestureEventResult(result);
+  input_handler_proxy_->SetGestureEventResult(result, stopPropagation);
 }
 
 void WidgetInputHandlerManager::ScrollBy(float delta_x, float delta_y) {
