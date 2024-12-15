@@ -60,6 +60,12 @@ namespace blink {
 
 namespace {
 
+#ifdef OHOS_AI
+const int kMinAnalyzedImageWidth = 100;
+const int kMinAnalyzedImageHeight = 100;
+const double KMinAnalyzedImageToPageRatio = 0.8;
+#endif
+
 void UpdateMouseMovementXY(const WebMouseEvent& mouse_event,
                            const gfx::PointF* last_position,
                            LocalDOMWindow* dom_window,
@@ -1271,12 +1277,16 @@ void MouseEventManager::HandleCreateOverlay(T const& targeted_event) {
       frame_->GetEventHandler().HitTestResultAtLocation(location);
 
   Image* image = hit_test_result.GetImage();
-  if (hit_test_result.AbsoluteImageURL().IsEmpty() ||
-      !image ||
-      image == last_analyzed_image_) {
+  if (hit_test_result.AbsoluteImageURL().IsEmpty() || !image || image->IsNull()) {
     LOG(INFO) << "MouseEventManager::HandleCreateOverlay, invalid or has no image";
     return;
   }
+
+  if (image == last_analyzed_image_) {
+    LOG(INFO) << "MouseEventManager::HandleCreateOverlay, hit last analyzed image";
+    return;
+  }
+
   if (hit_test_result.InnerNode() && hit_test_result.InnerNode()->GetLayoutObject()) {
     if (!hit_test_result.InnerNode()->GetLayoutObject()->StyleRef().IsSelectable()) {
       LOG(INFO) << "MouseEventManager::HandleCreateOverlay image is not selectable";
@@ -1292,8 +1302,9 @@ void MouseEventManager::HandleCreateOverlay(T const& targeted_event) {
       frame_->View()->FrameToDocument(gfx::ToRoundedPoint(targeted_event.PositionInRootFrame()));
   gfx::Rect view_rect =
       frame_->View()->FrameToDocument(ToEnclosingRect(frame_->View()->GetLayoutView()->ViewRect()));
-  if (base::ohos::IsPcDevice() ||
-      (1.0 * image_rect.width() / view_rect.width() > 0.8 && image_rect.height() > 60)) {
+  auto image_to_page_width_ratio = 1.0 * image_rect.width() / view_rect.width();
+  if (image->width() >= kMinAnalyzedImageWidth && image->height() >= kMinAnalyzedImageHeight &&
+      (base::ohos::IsPcDevice() || image_to_page_width_ratio > KMinAnalyzedImageToPageRatio)) {
     LOG(INFO) << "MouseEventManager::HandleCreateOverlay, start";
     PaintImage paint_image = image->PaintImageForCurrentFrame();
     SkBitmap bm;
