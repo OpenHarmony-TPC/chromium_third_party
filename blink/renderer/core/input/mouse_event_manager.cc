@@ -1267,7 +1267,7 @@ void MouseEventManager::HandleCreateOverlay(T const& targeted_event) {
 
   Image* image = hit_test_result.GetImage();
   if (hit_test_result.AbsoluteImageURL().IsEmpty() ||
-      !image ||
+      !image || image->IsNull() ||
       image == last_analyzed_image_) {
     LOG(INFO) << "MouseEventManager::HandleCreateOverlay, invalid or has no image";
     return;
@@ -1281,7 +1281,7 @@ void MouseEventManager::HandleCreateOverlay(T const& targeted_event) {
       frame_->View()->FrameToDocument(gfx::ToRoundedPoint(targeted_event.PositionInRootFrame()));
   gfx::Rect view_rect =
       frame_->View()->FrameToDocument(ToEnclosingRect(frame_->View()->GetLayoutView()->ViewRect()));
-  if (base::ohos::IsPcDevice() ||
+  if ((base::ohos::IsPcDevice() && image_rect.width() > 0 && image_rect.height() > 0)  ||
       (1.0 * image_rect.width() / view_rect.width() > 0.8 && image_rect.height() > 60)) {
     LOG(INFO) << "MouseEventManager::HandleCreateOverlay, start";
     PaintImage paint_image = image->PaintImageForCurrentFrame();
