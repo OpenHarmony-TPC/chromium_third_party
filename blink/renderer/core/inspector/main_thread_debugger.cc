@@ -34,6 +34,7 @@
 
 #include "base/synchronization/lock.h"
 #include "build/build_config.h"
+#include "content/public/common/content_switches.h"
 #include "build/chromeos_buildflags.h"
 #include "third_party/blink/renderer/bindings/core/v8/binding_security.h"
 #include "third_party/blink/renderer/bindings/core/v8/script_controller.h"
@@ -209,7 +210,8 @@ void MainThreadDebugger::ExceptionThrown(ExecutionContext* context,
     String message = event->MessageForConsole();
     String url = location->Url();
 #ifdef OHOS_NWEB_EX
-    if (message.length() > MAX_MESSAGE_LENGTH) {
+    if (base::CommandLine::ForCurrentProcess()->HasSwitch(
+          switches::kForBrowser && message.length() > MAX_MESSAGE_LENGTH) {
       message.Truncate(MAX_MESSAGE_LENGTH);
     }
 #endif
