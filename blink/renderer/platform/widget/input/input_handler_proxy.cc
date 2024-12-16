@@ -450,7 +450,9 @@ void InputHandlerProxy::HandleInputEventWithLatencyInfo(
     bool is_first_wheel_scroll_update =
         gesture_event.SourceDevice() == WebGestureDevice::kTouchpad &&
         is_first_gesture_scroll_update;
-
+#if BUILDFLAG(IS_OHOS)
+    WebGestureEvent::Type gesture_event_type = gesture_event.GetType();
+#endif
     bool queue_was_empty = compositor_event_queue_->empty();
     compositor_event_queue_->Queue(std::move(event_with_callback));
     // |synchronous_input_handler_| is WebView only. WebView has different
@@ -463,7 +465,7 @@ void InputHandlerProxy::HandleInputEventWithLatencyInfo(
       input_handler_->SetNeedsAnimateInput();
     }
 #if BUILDFLAG(IS_OHOS)
-    if (need_flush_scroll_update_gesture_ && gesture_event.GetType() == WebGestureEvent::Type::kGestureScrollUpdate) {
+    if (need_flush_scroll_update_gesture_ && gesture_event_type == WebGestureEvent::Type::kGestureScrollUpdate) {
       DeliverInputForBeginFrame(current_internal_begin_frame_args_);
     }
 #endif
