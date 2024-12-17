@@ -33,6 +33,8 @@
 #include <memory>
 
 #include "base/synchronization/lock.h"
+#include "build/build_config.h"
+#include "content/public/common/content_switches.h"
 #include "build/chromeos_buildflags.h"
 #include "third_party/blink/renderer/bindings/core/v8/binding_security.h"
 #include "third_party/blink/renderer/bindings/core/v8/script_controller.h"
@@ -89,6 +91,9 @@ LocalFrame* ToFrame(ExecutionContext* context) {
 }
 
 MainThreadDebugger* MainThreadDebugger::instance_ = nullptr;
+#ifdef OHOS_NWEB_EX
+const int MAX_MESSAGE_LENGTH = 5000;
+#endif
 
 MainThreadDebugger::MainThreadDebugger(v8::Isolate* isolate)
     : ThreadDebuggerCommonImpl(isolate), paused_(false) {
@@ -204,6 +209,12 @@ void MainThreadDebugger::ExceptionThrown(ExecutionContext* context,
     SourceLocation* location = event->Location();
     String message = event->MessageForConsole();
     String url = location->Url();
+#ifdef OHOS_NWEB_EX
+    if (base::CommandLine::ForCurrentProcess()->HasSwitch(
+          switches::kForBrowser && message.length() > MAX_MESSAGE_LENGTH) {
+      message.Truncate(MAX_MESSAGE_LENGTH);
+    }
+#endif
     GetV8Inspector()->exceptionThrown(
         script_state->GetContext(), ToV8InspectorStringView(default_message),
         exception, ToV8InspectorStringView(message),
