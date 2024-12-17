@@ -646,6 +646,11 @@ class CORE_EXPORT HTMLMediaElement
   void RequestExitFullscreen() override {}
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
 
+#if defined(OHOS_VIDEO_ASSISTANT)
+  void SetPlaybackRate(double playback_rate) override {}
+  void RequestDownloadUrl() override {}
+#endif  // defined(OHOS_VIDEO_ASSISTANT)
+
   void LoadTimerFired(TimerBase*);
   void ProgressEventTimerFired();
   void PlaybackProgressTimerFired();

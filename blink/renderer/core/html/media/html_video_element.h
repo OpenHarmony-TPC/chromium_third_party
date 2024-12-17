@@ -207,6 +207,11 @@ class CORE_EXPORT HTMLVideoElement final
   void RequestExitFullscreen() final;
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
 
+#if defined(OHOS_VIDEO_ASSISTANT)
+  void SetPlaybackRate(double playback_rate) final;
+  void RequestDownloadUrl() final;
+#endif  // defined(OHOS_VIDEO_ASSISTANT)
+
   void DidMoveToNewDocument(Document& old_document) override;
 
   void UpdatePictureInPictureAvailability();
