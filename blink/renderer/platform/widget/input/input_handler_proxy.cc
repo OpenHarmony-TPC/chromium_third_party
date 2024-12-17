@@ -324,6 +324,9 @@ void InputHandlerProxy::HandleInputEventWithLatencyInfo(
                 tracing::FillFlowEvent(ctx, TrackEvent::LegacyEvent::FLOW_INOUT,
                                        trace_id);
               });
+  OHOS_TRACE_EVENT2("input", "InputHandlerProxy::HandleInputEventWithLatencyInfo",
+      "type", WebInputEvent::GetName(event->Event().GetType()),
+      "trace_id", trace_id);
 
   auto event_with_callback = std::make_unique<EventWithCallback>(
       std::move(event), std::move(callback), std::move(metrics));
