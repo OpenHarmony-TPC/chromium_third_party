@@ -116,33 +116,16 @@ used to filter file path.
                 <policyitem type="compatibility" name="GPL-2.0-with-classpath-exception" path="jdk11/current/lib/psfont.properties.ja" desc="经法务确认,涉及文件在render下进行了隔离" />
                 <policyitem type="compatibility" name="GPL-3.0+" path="libwebp/src/m4/ax_pthread.m4" desc="经法务确认,涉及文件在render下进行了隔离" />
                 <policyitem type="compatibility" name="SPDX:GPL-2.0 WITH Classpath-exception-2.0" path="jdk11/current/NOTICE" desc="经法务确认,涉及文件在render下进行了隔离" />
-                <policyitem type="compatibility" name="LGPL-2.1+" path="alsa/LICENSE" desc="经法务确认,涉及文件在render下进行了隔离" />
                 <policyitem type="compatibility" name="Linux-OpenIB" path="libei/include/rdma/i40iw-abi.h" desc="经法务确认,涉及文件在render下进行了隔离" />
                 <policyitem type="compatibility" name="Linux-OpenIB" path="libei/include/rdma/rdma_user_ioctl_cmds.h" desc="经法务确认,涉及文件在render下进行了隔离" />
                 <policyitem type="compatibility" name="Linux-OpenIB" path="libei/include/rdma/ib_user_ioctl_cmds.h" desc="经法务确认,涉及文件在render下进行了隔离" />
                 <policyitem type="compatibility" name="GPLStyleLicense" path="libei/include/rdma/i40iw-abi.h" desc="经法务确认,涉及文件在render下进行了隔离" />
                 <policyitem type="compatibility" name="GPLStyleLicense" path="libei/include/rdma/rdma_user_ioctl_cmds.h" desc="经法务确认,涉及文件在render下进行了隔离" />
                 <policyitem type="compatibility" name="GPLStyleLicense" path="libei/include/rdma/ib_user_ioctl_cmds.h" desc="经法务确认,涉及文件在render下进行了隔离" />
-                <policyitem type="compatibility" name="GPL-2.0-with-classpath-exception" path="android_system_sdk/LICENSE" desc="经法务确认,涉及文件在render下进行了隔离" />
-                <policyitem type="compatibility" name="GPL-2.0-or-later-with-Classpath-exception-2.0" path="jdk11/current/legal/java.base/LICENSE" desc="经法务确认,涉及文件在render下进行了隔离" />
-                <policyitem type="compatibility" name="GPLStyleLicense" path="kotlinc/current/license/third_party/rhino_LICENSE.txt" desc="经法务确认,涉及文件在render下进行了隔离" />
-                <policyitem type="compatibility" name="MIT" path="selenium-atoms/LICENSE.sizzle" desc="经法务确认,涉及文件在render下进行了隔离" />
-                <policyitem type="compatibility" name="LGPLStyleLicense" path="selenium-atoms/LICENSE.sizzle" desc="经法务确认,涉及文件在render下进行了隔离" />
-                <policyitem type="compatibility" name="GPL-2.0+-with-LLVM-exception" path="crubit/LICENSE" desc="经法务确认,涉及文件在render下进行了隔离" />
-                <policyitem type="compatibility" name="GPL-3.0+" path="wlcs/LICENSE" desc="经法务确认,涉及文件在render下进行了隔离" />
-                <policyitem type="compatibility" name="OpenSSL" path="apache-linux/LICENSE" desc="经法务确认,涉及文件在render下进行了隔离" />
-                <policyitem type="compatibility" name="GPLStyleLicense" path="eigen3/LICENSE" desc="经法务确认,涉及文件在render下进行了隔离" />
-                <policyitem type="compatibility" name="LicenseRef-scancode-sunpro" path="kotlinc/current/license/third_party/sun_license.txt" desc="经法务确认,涉及文件在render下进行了隔离" />
                 <policyitem type="compatibility" name="Linux-OpenIB" path="libei/include/rdma/mlx5_user_ioctl_cmds.h" desc="经法务确认,涉及文件在render下进行了隔离" />
                 <policyitem type="compatibility" name="Linux-OpenIB" path="libei/include/rdma/mlx5_user_ioctl_verbs.h" desc="经法务确认,涉及文件在render下进行了隔离" />
                 <policyitem type="compatibility" name="GPLStyleLicense" path="libei/include/rdma/mlx5_user_ioctl_cmds.h" desc="经法务确认,涉及文件在render下进行了隔离" />
                 <policyitem type="compatibility" name="GPLStyleLicense" path="libei/include/rdma/mlx5_user_ioctl_verbs.h" desc="经法务确认,涉及文件在render下进行了隔离" />
-                <policyitem type="compatibility" name="GPLStyleLicense" path="kotlinc/current/license/third_party/trove_license.txt" desc="经法务确认,涉及文件在render下进行了隔离" />
-                <policyitem type="compatibility" name="GPL-2.0-or-later" path="xdg_shared_mime_info/LICENSE" desc="经法务确认,涉及文件在render下进行了隔离" />
-                <policyitem type="compatibility" name="GPLStyleLicense" path="kotlinc/current/license/third_party/trove_readme_license.txt" desc="经法务确认,涉及文件在render下进行了隔离" />
-                <policyitem type="compatibility" name="EPL-1.0" path="kotlinc/current/license/third_party/aether_license.txt" desc="经法务确认,涉及文件在render下进行了隔离" />
-                <policyitem type="compatibility" name="GPLStyleLicense" path="dbus/LICENSE" desc="经法务确认,涉及文件在render下进行了隔离" />
-                <policyitem type="compatibility" name="GPLStyleLicense" path="kotlinc/current/license/third_party/testdata/findbugs_license.txt" desc="经法务确认,涉及文件在render下进行了隔离" />
             </policy>
         </policylist>
         <filefilterlist>
@@ -198,7 +181,6 @@ used to filter file path.
                 <filteritem type="filepath" name="cpuinfo/src/BUILD.bazel" desc="chromium原生文件无license" />
                 <filteritem type="filepath" name="nearby/src/internal/platform/implementation/windows/generated/winrt/impl/Windows.Phone.Management.Deployment.2.h" desc="chromium原生文件无license" />
                 <filteritem type="filepath" name="kotlinc/current/bin/kapt" desc="chromium原生文件无license" />
-                <filteritem type="filepath" name="kotlinc/current/license/third_party/prototype_license.txt" desc="chromium原生文件无license" />
                 <filteritem type="filepath" name="nearby/src/fastpair/dataparser/BUILD" desc="chromium原生文件无license" />
                 <filteritem type="filepath" name="nearby/src/fastpair/internal/impl/windows/BUILD" desc="chromium原生文件无license" />
                 <filteritem type="filepath" name="kotlinc/current/bin/kapt.bat" desc="chromium原生文件无license" />
@@ -207,7 +189,6 @@ used to filter file path.
                 <filteritem type="filepath" name="kotlinc/current/bin/kotlin" desc="chromium原生文件无license" />
                 <filteritem type="filepath" name="cpuinfo/src/confu.yaml" desc="chromium原生文件无license" />
                 <filteritem type="filepath" name="kotlinc/current/bin/kotlin-dce-js" desc="chromium原生文件无license" />
-                <filteritem type="filepath" name="kotlinc/current/license/third_party/scala_license.txt" desc="chromium原生文件无license" />
                 <filteritem type="filepath" name="libwebp/src/swig/setup.py" desc="chromium原生文件无license" />
                 <filteritem type="filepath" name="nearby/src/fastpair/internal/test/BUILD" desc="chromium原生文件无license" />
                 <filteritem type="filepath" name="nearby/src/internal/base/BUILD" desc="chromium原生文件无license" />
@@ -220,14 +201,10 @@ used to filter file path.
                 <filteritem type="filepath" name="nearby/src/internal/test/BUILD" desc="chromium原生文件无license" />
                 <filteritem type="filepath" name="xnnpack/src/test/gemm-microkernel-tester.cc" desc="chromium原生文件无license" />
                 <filteritem type="filepath" name="kotlinc/current/bin/kotlinc" desc="chromium原生文件无license" />
-                <filteritem type="filepath" name="kotlinc/current/license/COPYRIGHT_HEADER.txt" desc="chromium原生文件无license" />
-                <filteritem type="filepath" name="lzma_sdk/LICENSE" desc="chromium原生文件无license" />
                 <filteritem type="filepath" name="nearby/src/fastpair/common/BUILD" desc="chromium原生文件无license" />
                 <filteritem type="filepath" name="nearby/src/internal/platform/implementation/windows/generated/winrt/impl/Windows.ApplicationModel.Store.2.h" desc="chromium原生文件无license" />
                 <filteritem type="filepath" name="nearby/src/internal/platform/implementation/windows/generated/winrt/impl/Windows.Services.Store.0.h" desc="chromium原生文件无license" />
                 <filteritem type="filepath" name="polymer/v3_0/components-chromium/polymer/lib/utils/flush.d.ts" desc="chromium原生文件无license" />
-                <filteritem type="filepath" name="xnnpack/src/LICENSE" desc="chromium原生文件无license" />
-                <filteritem type="filepath" name="cardboard/src/third_party/unity_plugin_api/LICENSE" desc="chromium原生文件无license" />
                 <filteritem type="filepath" name="google_benchmark/src/BUILD.bazel" desc="chromium原生文件无license" />
                 <filteritem type="filepath" name="kotlinc/current/bin/kotlinc-js" desc="chromium原生文件无license" />
                 <filteritem type="filepath" name="libei/include/linux/aio_abi.h" desc="chromium原生文件无license" />
@@ -254,7 +231,6 @@ used to filter file path.
                 <filteritem type="filepath" name="cpuinfo/src/deps/clog/confu.yaml" desc="chromium原生文件无license" />
                 <filteritem type="filepath" name="fxdiv/src/BUILD.bazel" desc="chromium原生文件无license" />
                 <filteritem type="filepath" name="kotlinc/current/bin/kotlinc.bat" desc="chromium原生文件无license" />
-                <filteritem type="filepath" name="kotlinc/current/license/third_party/testdata/eclipse_license.txt" desc="chromium原生文件无license" />
                 <filteritem type="filepath" name="libei/include/linux/parport.h" desc="chromium原生文件无license" />
                 <filteritem type="filepath" name="nearby/src/fastpair/repository/BUILD" desc="chromium原生文件无license" />
                 <filteritem type="filepath" name="zlib/zlib.3" desc="chromium原生文件无license" />
@@ -270,6 +246,29 @@ used to filter file path.
                 <filteritem type="filepath" name="node/node_modules/svgo/LICENSE" desc="该文件的许可证为MIT" />
                 <filteritem type="filepath" name="jsoncpp/LICENSE" desc="该文件的许可证为MIT" />
                 <filteritem type="filepath" name="LICENSE" desc="该文件的许可证为BSD-3-Clause"/>
+                <filteritem type="filepath" name="alsa/LICENSE" desc="该文件的许可证为LGPL-2.1-only"/>
+                <filteritem type="filepath" name="android_system_sdk/LICENSE" desc="该文件的许可证为GPL-2.0-with-classpath-exception"/>
+                <filteritem type="filepath" name="jdk11/current/legal/java.base/LICENSE" desc="该文件的许可证为GPL-2.0-or-later-with-Classpath-exception-2.0"/>
+                <filteritem type="filepath" name="kotlinc/current/license/third_party/rhino_LICENSE.txt" desc="该文件的许可证为GPLStyleLicense"/>
+                <filteritem type="filepath" name="selenium-atoms/LICENSE.sizzle" desc="该文件的许可证为MIT"/>
+                <filteritem type="filepath" name="crubit/LICENSE" desc="该文件的许可证为GPL-2.0+-with-LLVM-exception"/>
+                <filteritem type="filepath" name="wlcs/LICENSE" desc="该文件的许可证为GPL-3.0+"/>
+                <filteritem type="filepath" name="apache-linux/LICENSE" desc="该文件的许可证为OpenSSL"/>
+                <filteritem type="filepath" name="eigen3/LICENSE" desc="该文件的许可证为GPLStyleLicense"/>
+                <filteritem type="filepath" name="kotlinc/current/license/third_party/trove_license.txt" desc="该文件的许可证为GPLStyleLicense"/>
+                <filteritem type="filepath" name="xdg_shared_mime_info/LICENSE" desc="该文件的许可证为GPL-2.0-or-later"/>
+                <filteritem type="filepath" name="kotlinc/current/license/third_party/trove_readme_license.txt" desc="该文件的许可证为GPLStyleLicense"/>
+                <filteritem type="filepath" name="kotlinc/current/license/third_party/aether_license.txt" desc="该文件的许可证为EPL-1.0"/>
+                <filteritem type="filepath" name="dbus/LICENSE" desc="该文件的许可证为GPLStyleLicense"/>
+                <filteritem type="filepath" name="kotlinc/current/license/third_party/testdata/findbugs_license.txt" desc="该文件的许可证为GPLStyleLicense"/>
+                <filteritem type="filepath" name="kotlinc/current/license/third_party/sun_license.txt" desc="该文件的许可证为LicenseRef-scancode-sunpro"/>
+                <filteritem type="filepath" name="kotlinc/current/license/third_party/prototype_license.txt" desc="该文件的许可证为	MIT No Attribution" />
+                <filteritem type="filepath" name="kotlinc/current/license/third_party/scala_license.txt" desc="该文件的许可证为BSD-3-Clause" />
+                <filteritem type="filepath" name="kotlinc/current/license/COPYRIGHT_HEADER.txt" desc="该文件的许可证为Apache 2.0" />
+                <filteritem type="filepath" name="lzma_sdk/LICENSE" desc="该文件的许可证为Public Domain" />
+                <filteritem type="filepath" name="xnnpack/src/LICENSE" desc="该文件的许可证为BSD-3-Clause" />
+                <filteritem type="filepath" name="cardboard/src/third_party/unity_plugin_api/LICENSE" desc="该文件的许可证为LicenseRef-scancode-warranty-disclaimer" />
+                <filteritem type="filepath" name="kotlinc/current/license/third_party/testdata/eclipse_license.txt" desc="该文件的许可证为EPL-1.0" />
                 <filteritem type="filepath" name="crashpad/crashpad/third_party/xnu/README.crashpad" desc="该文件的许可证为APSL-2.0" />
                 <filteritem type="filepath" name="crashpad/crashpad/third_party/zlib/README.crashpad" desc="该文件的许可证为Zlib" />
                 <filteritem type="filepath" name="fdlibm/LICENSE" desc="该文件的许可证为LicenseRef-scancode-sunpro" />
@@ -402,7 +401,6 @@ used to filter file path.
                 <filteritem type="filepath" name="node/linux/node-linux-x64/lib/node_modules/npm/node_modules/clean-stack/index.d.ts" desc="经确认，该文件不会使用" />
                 <filteritem type="filepath" name="abseil-cpp/absl/time/internal/cctz/testdata/.*" desc="经确认，该文件不会使用" />
                 <filteritem type="filepath" name="android_crazy_linker/src/README.TXT" desc="经确认，该文件不会使用" />
-
                 <filteritem type="filepath" name="LGPL-2.1+" path="alsa/LICENSE" desc="该文件的许可证为LGPL-2.1+" />
                 <filteritem type="filepath" name="GPL-2.0-with-classpath-exception" path="android_system_sdk/LICENSE" desc="该文件的许可证为GPL-2.0-with-classpath-exception" />
                 <filteritem type="filepath" name="GPL-2.0+-with-LLVM-exception" path="crubit/LICENSE" desc="该文件的许可证为GPL-2.0+-with-LLVM-exception" />
@@ -417,7 +415,6 @@ used to filter file path.
                 <filteritem type="filepath" name="GPLStyleLicense" path="kotlinc/current/license/third_party/trove_license.txt" desc="该文件的许可证为GPLStyleLicense" />
                 <filteritem type="filepath" name="GPLStyleLicense" path="kotlinc/current/license/third_party/trove_readme_license.txt" desc="该文件的许可证为GPLStyleLicense" />
                 <filteritem type="filepath" name="EPL-1.0" path="kotlinc/current/license/third_party/aether_license.txt" desc="该文件的许可证为EPL-1.0" />
-
             </filefilter>
             <filefilter name="binaryFileTypePolicyFilter">
                 <filteritem type="filepath" name="ohos_sdk/ohos-sdk-4.0.7.5-Beta1.tar.gz" desc="ohos自研文件" />
