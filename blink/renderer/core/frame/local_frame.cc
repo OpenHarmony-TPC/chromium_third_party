@@ -228,6 +228,10 @@
 #include "third_party/blink/renderer/core/frame/window_controls_overlay_changed_delegate.h"
 #endif
 
+#if BUILDFLAG(IS_OHOS)
+#include "base/ohos/sys_info_utils.h"
+#endif
+
 namespace blink {
 
 namespace {
@@ -1410,6 +1414,28 @@ void LocalFrame::SetPageAndTextZoomFactors(float page_zoom_factor,
   }
 
   bool page_zoom_changed = (page_zoom_factor != page_zoom_factor_);
+
+#if BUILDFLAG(IS_OHOS)
+  if (base::ohos::IsTabletDevice()) {
+    float zoom_factor_for_device_scale =
+        page->GetChromeClient().ZoomFactorForViewportLayout();
+    zoom_factor_for_device_scale =
+        zoom_factor_for_device_scale ? zoom_factor_for_device_scale : 1;
+    float current_zoom_factor = page_zoom_factor / zoom_factor_for_device_scale;
+    if (page_zoom_changed && current_zoom_factor > 1.0f &&
+        !scale_limits_min_changed_) {
+      scale_limits_min_changed_ = true;
+      page->ResetPageScaleConstraints(false);
+      scale_limits_max_changed_ = false;
+    }
+    if (page_zoom_changed && current_zoom_factor <= 1.0f &&
+        !scale_limits_max_changed_) {
+      scale_limits_max_changed_ = true;
+      page->ResetPageScaleConstraints(true);
+      scale_limits_min_changed_ = false;
+    }
+  }
+#endif
 
   page_zoom_factor_ = page_zoom_factor;
   text_zoom_factor_ = text_zoom_factor;

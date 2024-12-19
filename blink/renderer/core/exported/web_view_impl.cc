@@ -453,6 +453,55 @@ SkFontHinting RendererPreferencesToSkiaHinting(
 }
 #endif  // !BUILDFLAG(IS_MAC) && !BUILDFLAG(IS_WIN)
 
+void ApplyOhosWebPreferences(const web_pref::WebPreferences& prefs,
+                             WebView* web_view,
+                             WebSettings* settings,
+                             WebViewImpl* web_view_impl) {
+#if defined(OHOS_INPUT_EVENTS)
+  settings->SetVerticalHideScrollbars(prefs.hide_vertical_scrollbars);
+  settings->SetHorizontalHideScrollbars(prefs.hide_horizontal_scrollbars);
+  settings->SetScrollable(prefs.scroll_enabled);
+#endif  // defined(OHOS_INPUT_EVENTS)
+
+#if BUILDFLAG(IS_OHOS)
+  settings->SetNativeEmbedModeEnabled(prefs.native_embed_mode_enabled);
+  settings->RegisterNativeEmbedRule(
+      WebString::FromASCII(base::ToLowerASCII(prefs.embed_tag)),
+      WebString::FromASCII(base::ToLowerASCII(prefs.embed_tag_type)));
+  settings->SetDrawMode(prefs.draw_mode);
+#endif  // BUILDFLAG(IS_OHOS)
+
+#ifdef OHOS_SCROLLBAR
+  settings->SetScrollBarColor(prefs.scrollbar_color);
+#endif  // OHOS_SCROLLBAR
+
+#if defined(OHOS_EX_FREE_COPY)
+  settings->SetContextMenuCustomization(
+      prefs.contextmenu_customization_enabled);
+#endif
+
+#if defined(OHOS_CLIPBOARD)
+  settings->SetCopyOption(prefs.copy_option);
+#endif  // defined(OHOS_CLIPBOARD)
+
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+  settings->SetCustomVideoPlayerEnabled(prefs.custom_video_player_enable);
+  settings->SetCustomVideoPlayerOverlay(prefs.custom_video_player_overlay);
+#endif // OHOS_CUSTOM_VIDEO_PLAYER
+
+#ifdef OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
+  settings->SetMediaNetworkTrafficPromptEnabled(
+      prefs.enable_media_network_traffic_prompt);
+  settings->SetPlaybackWithMobileDataAllowed(
+      prefs.playback_with_mobile_data_allowed);
+#endif // OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
+
+
+#if defined(OHOS_MEDIA)
+  settings->SetPreferHiddenVolumeControls(!base::ohos::IsPcDevice());
+#endif
+}
+
 }  // namespace
 
 // WebView ----------------------------------------------------------------
@@ -1570,28 +1619,6 @@ void WebView::ApplyWebPreferences(const web_pref::WebPreferences& prefs,
   RuntimeEnabledFeatures::SetWebKitScrollbarStylingEnabled(
       prefs.enable_webkit_scrollbar_styling);
 
-#if defined(OHOS_INPUT_EVENTS)
-  settings->SetVerticalHideScrollbars(prefs.hide_vertical_scrollbars);
-  settings->SetHorizontalHideScrollbars(prefs.hide_horizontal_scrollbars);
-  settings->SetScrollable(prefs.scroll_enabled);
-#endif  // defined(OHOS_INPUT_EVENTS)
-
-#if BUILDFLAG(IS_OHOS)
-  settings->SetNativeEmbedModeEnabled(prefs.native_embed_mode_enabled);
-  settings->RegisterNativeEmbedRule(
-      WebString::FromASCII(base::ToLowerASCII(prefs.embed_tag)),
-      WebString::FromASCII(base::ToLowerASCII(prefs.embed_tag_type)));
-  settings->SetDrawMode(prefs.draw_mode);
-#endif  // BUILDFLAG(IS_OHOS)
-
-#ifdef OHOS_SCROLLBAR
-  settings->SetScrollBarColor(prefs.scrollbar_color);
-#endif  // OHOS_SCROLLBAR
-
-#if defined(OHOS_EX_FREE_COPY)
-  settings->SetContextMenuCustomization(
-      prefs.contextmenu_customization_enabled);
-#endif
   // Enable gpu-accelerated 2d canvas if requested on the command line.
   RuntimeEnabledFeatures::SetAccelerated2dCanvasEnabled(
       prefs.accelerated_2d_canvas_enabled);
@@ -1704,37 +1731,13 @@ void WebView::ApplyWebPreferences(const web_pref::WebPreferences& prefs,
   settings->SetTextTrackWindowRadius(
       WebString::FromASCII(prefs.text_track_window_radius));
 
-#if defined(OHOS_CLIPBOARD)
-  settings->SetCopyOption(prefs.copy_option);
-#endif  // defined(OHOS_CLIPBOARD)
-
-#if defined(OHOS_VIEWPORT) || defined(OHOS_MEDIA)
-  bool is_2in1_device = base::CommandLine::ForCurrentProcess()
-      ->HasSwitch(::switches::kWebViewImplForLargeScreen);
-#endif  // defined(OHOS_VIEWPORT) || defined(OHOS_MEDIA)
-
   // Needs to happen before SetDefaultPageScaleLimits below since that'll
   // recalculate the final page scale limits and that depends on this setting.
-#if defined(OHOS_VIEWPORT)
-  if (is_2in1_device) {
-    settings->SetShrinksViewportContentToFit(false);
-    // Needs to happen before SetIgnoreViewportTagScaleLimits below.
-    web_view->SetDefaultPageScaleLimits(1.f, 4.f);
-  } else {
-    settings->SetShrinksViewportContentToFit(
-        prefs.shrinks_viewport_contents_to_fit);
-    // Needs to happen before SetIgnoreViewportTagScaleLimits below.
-    web_view->SetDefaultPageScaleLimits(
-        prefs.default_minimum_page_scale_factor,
-        prefs.default_maximum_page_scale_factor);
-  }
-#else
   settings->SetShrinksViewportContentToFit(
       prefs.shrinks_viewport_contents_to_fit);
   // Needs to happen before SetIgnoreViewportTagScaleLimits below.
   web_view->SetDefaultPageScaleLimits(prefs.default_minimum_page_scale_factor,
                                       prefs.default_maximum_page_scale_factor);
-#endif  // #ifdef OHOS_VIEWPORT
 
   settings->SetFullscreenSupported(prefs.fullscreen_supported);
   settings->SetTextAutosizingEnabled(prefs.text_autosizing_enabled);
@@ -1751,59 +1754,53 @@ void WebView::ApplyWebPreferences(const web_pref::WebPreferences& prefs,
   settings->SetForceZeroLayoutHeight(prefs.force_zero_layout_height);
   LOG(DEBUG) << "WebViewImpl:UpdateMainFrameLayoutSize,forceZeroLayoutHeight:"
              << prefs.force_zero_layout_height;
-
-  settings->SetAllowCustomScrollbarInMainFrame(false);
-  settings->SetAccessibilityFontScaleFactor(prefs.font_scale_factor);
-  settings->SetDeviceScaleAdjustment(prefs.device_scale_adjustment);
-  web_view_impl->SetIgnoreViewportTagScaleLimits(prefs.force_enable_zoom);
-  settings->SetDefaultVideoPosterURL(
-      WebString::FromASCII(prefs.default_video_poster_url.spec()));
-  settings->SetSupportDeprecatedTargetDensityDPI(
-      prefs.support_deprecated_target_density_dpi);
-  settings->SetUseLegacyBackgroundSizeShorthandBehavior(
-      prefs.use_legacy_background_size_shorthand_behavior);
-  settings->SetWideViewportQuirkEnabled(prefs.wide_viewport_quirk);
-  settings->SetUseWideViewport(prefs.use_wide_viewport);
-  settings->SetViewportMetaMergeContentQuirk(
-      prefs.viewport_meta_merge_content_quirk);
-  settings->SetViewportMetaNonUserScalableQuirk(
-      prefs.viewport_meta_non_user_scalable_quirk);
-  settings->SetViewportMetaZeroValuesQuirk(
-      prefs.viewport_meta_zero_values_quirk);
-  settings->SetClobberUserAgentInitialScaleQuirk(
-      prefs.clobber_user_agent_initial_scale_quirk);
-  settings->SetIgnoreMainFrameOverflowHiddenQuirk(
-      prefs.ignore_main_frame_overflow_hidden_quirk);
-  settings->SetReportScreenSizeInPhysicalPixelsQuirk(
-      prefs.report_screen_size_in_physical_pixels_quirk);
-  settings->SetShouldReuseGlobalForUnownedMainFrame(
-      prefs.reuse_global_for_unowned_main_frame);
-#if defined(OHOS_MEDIA)
-  if (is_2in1_device) {
-    settings->SetPreferHiddenVolumeControls(false);
-  } else {
+  if (!base::ohos::IsPcDevice()) {
+    settings->SetAllowCustomScrollbarInMainFrame(false);
+    settings->SetAccessibilityFontScaleFactor(prefs.font_scale_factor);
+    settings->SetDeviceScaleAdjustment(prefs.device_scale_adjustment);
+    web_view_impl->SetIgnoreViewportTagScaleLimits(prefs.force_enable_zoom);
+    settings->SetDefaultVideoPosterURL(
+        WebString::FromASCII(prefs.default_video_poster_url.spec()));
+    settings->SetSupportDeprecatedTargetDensityDPI(
+        prefs.support_deprecated_target_density_dpi);
+    settings->SetUseLegacyBackgroundSizeShorthandBehavior(
+        prefs.use_legacy_background_size_shorthand_behavior);
+    settings->SetWideViewportQuirkEnabled(prefs.wide_viewport_quirk);
+    settings->SetUseWideViewport(prefs.use_wide_viewport);
+    settings->SetForceZeroLayoutHeight(prefs.force_zero_layout_height);
+    settings->SetViewportMetaMergeContentQuirk(
+        prefs.viewport_meta_merge_content_quirk);
+    settings->SetViewportMetaNonUserScalableQuirk(
+        prefs.viewport_meta_non_user_scalable_quirk);
+    settings->SetViewportMetaZeroValuesQuirk(
+        prefs.viewport_meta_zero_values_quirk);
+    settings->SetClobberUserAgentInitialScaleQuirk(
+        prefs.clobber_user_agent_initial_scale_quirk);
+    settings->SetIgnoreMainFrameOverflowHiddenQuirk(
+        prefs.ignore_main_frame_overflow_hidden_quirk);
+    settings->SetReportScreenSizeInPhysicalPixelsQuirk(
+        prefs.report_screen_size_in_physical_pixels_quirk);
+    settings->SetShouldReuseGlobalForUnownedMainFrame(
+        prefs.reuse_global_for_unowned_main_frame);
     settings->SetPreferHiddenVolumeControls(true);
-  }
-#else
-  settings->SetPreferHiddenVolumeControls(true);
-#endif  // defined(OHOS_MEDIA)
-  settings->SetSpellCheckEnabledByDefault(prefs.spellcheck_enabled_by_default);
+    settings->SetSpellCheckEnabledByDefault(
+        prefs.spellcheck_enabled_by_default);
 
-  RuntimeEnabledFeatures::SetVideoFullscreenOrientationLockEnabled(
-      prefs.video_fullscreen_orientation_lock_enabled);
-  RuntimeEnabledFeatures::SetVideoRotateToFullscreenEnabled(
-      prefs.video_rotate_to_fullscreen_enabled);
-  settings->SetEmbeddedMediaExperienceEnabled(
-      prefs.embedded_media_experience_enabled);
-  settings->SetImmersiveModeEnabled(prefs.immersive_mode_enabled);
-  settings->SetDoNotUpdateSelectionOnMutatingSelectionRange(
-      prefs.do_not_update_selection_on_mutating_selection_range);
-  RuntimeEnabledFeatures::SetCSSHexAlphaColorEnabled(
-      prefs.css_hex_alpha_color_enabled);
-  RuntimeEnabledFeatures::SetScrollTopLeftInteropEnabled(
-      prefs.scroll_top_left_interop_enabled);
-  RuntimeEnabledFeatures::SetAcceleratedSmallCanvasesEnabled(
-      !prefs.disable_accelerated_small_canvases);
+    RuntimeEnabledFeatures::SetVideoFullscreenOrientationLockEnabled(
+        prefs.video_fullscreen_orientation_lock_enabled);
+    RuntimeEnabledFeatures::SetVideoRotateToFullscreenEnabled(
+        prefs.video_rotate_to_fullscreen_enabled);
+    settings->SetEmbeddedMediaExperienceEnabled(
+        prefs.embedded_media_experience_enabled);
+    settings->SetImmersiveModeEnabled(prefs.immersive_mode_enabled);
+    settings->SetDoNotUpdateSelectionOnMutatingSelectionRange(
+        prefs.do_not_update_selection_on_mutating_selection_range);
+    RuntimeEnabledFeatures::SetCSSHexAlphaColorEnabled(
+        prefs.css_hex_alpha_color_enabled);
+    RuntimeEnabledFeatures::SetScrollTopLeftInteropEnabled(
+        prefs.scroll_top_left_interop_enabled);
+    RuntimeEnabledFeatures::SetAcceleratedSmallCanvasesEnabled(
+        !prefs.disable_accelerated_small_canvases);
   RuntimeEnabledFeatures::SetInputMultipleFieldsUIEnabled(base::ohos::IsPcDevice());
 #endif  // BUILDFLAG(IS_ANDROID)
 
@@ -1824,19 +1821,8 @@ void WebView::ApplyWebPreferences(const web_pref::WebPreferences& prefs,
   settings->SetRequireTransientActivationForShowFileOrDirectoryPicker(
       prefs.require_transient_activation_for_show_file_or_directory_picker);
   settings->SetViewportEnabled(prefs.viewport_enabled);
-
-#ifdef OHOS_VIEWPORT
-  if (is_2in1_device) {
-    settings->SetViewportMetaEnabled(false);
-    settings->SetViewportStyle(mojom::ViewportStyle::kDefault);
-  } else {
-    settings->SetViewportMetaEnabled(prefs.viewport_meta_enabled);
-    settings->SetViewportStyle(prefs.viewport_style);
-  }
-#else
   settings->SetViewportMetaEnabled(prefs.viewport_meta_enabled);
   settings->SetViewportStyle(prefs.viewport_style);
-#endif  // #ifdef OHOS_VIEWPORT
   settings->SetAutoZoomFocusedEditableToLegibleScale(
       prefs.auto_zoom_focused_editable_to_legible_scale);
 
@@ -1980,11 +1966,8 @@ void WebView::ApplyWebPreferences(const web_pref::WebPreferences& prefs,
 
 #if BUILDFLAG(IS_OHOS)
   web_view_impl->SetPinchSmoothMode(prefs.pinch_smooth_mode);
+  ApplyOhosWebPreferences(prefs, web_view, settings, web_view_impl);
 #endif  // BUILDFLAG(IS_OHOS)
-#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
-  settings->SetCustomVideoPlayerEnabled(prefs.custom_video_player_enable);
-  settings->SetCustomVideoPlayerOverlay(prefs.custom_video_player_overlay);
-#endif // OHOS_CUSTOM_VIDEO_PLAYER
 
 #if BUILDFLAG(IS_OHOS)
   settings->SetTextZoomFactor(prefs.text_zoom_factor);
