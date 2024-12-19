@@ -313,6 +313,10 @@ class CORE_EXPORT Page final : public GarbageCollected<Page>,
   void SetDefaultPageScaleLimits(float min_scale, float max_scale);
   void SetUserAgentPageScaleConstraints(
       const PageScaleConstraints& new_constraints);
+#if BUILDFLAG(IS_OHOS)
+  // Ignore shrinks_viewport_contents_to_fit if browser zoom works.
+  void ResetPageScaleConstraints(bool constraint_for_mobile);
+#endif
 
 #if DCHECK_IS_ON()
   void SetIsPainting(bool painting) { is_painting_ = painting; }
@@ -566,6 +570,10 @@ class CORE_EXPORT Page final : public GarbageCollected<Page>,
   // only set for the MPArch implementation and is true when the corresponding
   // browser side FrameTree has the FrameTree::Type of kFencedFrame.
   bool is_fenced_frame_tree_ = false;
+
+#if BUILDFLAG(IS_OHOS)
+  bool enable_default_page_scale_limits_update_ = true;
+#endif
 
   // This tracks the mode that the fenced frame is set to.
   blink::FencedFrame::DeprecatedFencedFrameMode fenced_frame_mode_ =
