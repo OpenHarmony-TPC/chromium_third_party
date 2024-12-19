@@ -146,11 +146,26 @@ void WidgetInputHandlerImpl::RequestCompositionUpdates(bool immediate_request,
                                  widget_, immediate_request, monitor_request));
 }
 
+#if BUILDFLAG(IS_OHOS)
+static bool FilterLogEvent(WebInputEvent::Type type) {
+  switch (type) {
+    case WebInputEvent::Type::kMouseUp:
+    case WebInputEvent::Type::kMouseDown:
+    case WebInputEvent::Type::kTouchStart:
+    case WebInputEvent::Type::kTouchEnd:
+      return true;
+    default:
+      return false;
+  }
+}
+#endif
+
 void WidgetInputHandlerImpl::DispatchEvent(
     std::unique_ptr<WebCoalescedInputEvent> event,
     DispatchEventCallback callback) {
-#if defined(IS_OHOS)
-  LOG(INFO) << "DispatchEvent type:" << WebInputEvent::GetName(event->Event().GetType());
+#if BUILDFLAG(IS_OHOS)
+  if (FilterLogEvent(event->Event().GetType()))
+    LOG(INFO) << "DispatchEvent type:" << WebInputEvent::GetName(event->Event().GetType());
 #endif
   TRACE_EVENT1("input", "WidgetInputHandlerImpl::DispatchEvent", "type", WebInputEvent::GetName(event->Event().GetType()));
   input_handler_manager_->DispatchEvent(std::move(event), std::move(callback));
@@ -168,8 +183,9 @@ void WidgetInputHandlerImpl::TryFinishFling() {
 
 void WidgetInputHandlerImpl::DispatchNonBlockingEvent(
     std::unique_ptr<WebCoalescedInputEvent> event) {
-#if defined(IS_OHOS)
-  LOG(INFO) << "DispatchNonBlockingEvent type:" << WebInputEvent::GetName(event->Event().GetType());
+#if BUILDFLAG(IS_OHOS)
+  if (FilterLogEvent(event->Event().GetType()))
+    LOG(INFO) << "DispatchNonBlockingEvent type:" << WebInputEvent::GetName(event->Event().GetType());
 #endif
   TRACE_EVENT1("input", "WidgetInputHandlerImpl::DispatchNonBlockingEvent", "type", WebInputEvent::GetName(event->Event().GetType()));
   input_handler_manager_->DispatchEvent(std::move(event),
