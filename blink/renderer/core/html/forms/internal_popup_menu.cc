@@ -4,6 +4,7 @@
 
 #include "third_party/blink/renderer/core/html/forms/internal_popup_menu.h"
 
+#include "base/ohos/sys_info_utils.h"
 #include "build/build_config.h"
 #include "third_party/blink/public/common/input/web_mouse_event.h"
 #include "third_party/blink/public/platform/platform.h"
@@ -631,7 +632,11 @@ void InternalPopupMenu::Dispose() {
 
 void InternalPopupMenu::Show(PopupMenu::ShowEventType type) {
   DCHECK(!popup_);
+#if BUILDFLAG(IS_OHOS)
+  taller_options_ = (!base::ohos::IsPcDevice() && type == PopupMenu::kTouch) ||
+#else
   taller_options_ = type == PopupMenu::kTouch ||
+#endif
                     RuntimeEnabledFeatures::ForceTallerSelectPopupEnabled();
   popup_ = chrome_client_->OpenPagePopup(this);
 }
