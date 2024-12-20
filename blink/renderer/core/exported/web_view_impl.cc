@@ -1965,7 +1965,6 @@ void WebView::ApplyWebPreferences(const web_pref::WebPreferences& prefs,
   }
 
 #if BUILDFLAG(IS_OHOS)
-  web_view_impl->SetPinchSmoothMode(prefs.pinch_smooth_mode);
   ApplyOhosWebPreferences(prefs, web_view, settings, web_view_impl);
 #endif  // BUILDFLAG(IS_OHOS)
 
