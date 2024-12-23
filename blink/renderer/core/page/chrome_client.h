@@ -216,6 +216,12 @@ class CORE_EXPORT ChromeClient : public GarbageCollected<ChromeClient> {
   virtual absl::optional<int> GetMaxRenderBufferBounds(
       LocalFrame& frame) const = 0;
 
+#ifdef OHOS_DRAG_DROP
+  virtual gfx::Rect GetVisibleRectToWeb(LocalFrame*) {
+    return gfx::Rect();
+  }
+#endif
+
   // Start a system drag and drop operation.
   //
   // The `cursor_offset` is the offset of the drag-point from the top-left of
