@@ -1223,6 +1223,16 @@ void WebFrameWidgetImpl::CancelDrag() {
   current_drag_data_ = nullptr;
 }
 
+#ifdef OHOS_DRAG_DROP
+gfx::Rect WebFrameWidgetImpl::GetVisibleRectToWeb() {
+  gfx::Rect rect;
+  if (auto host = GetAssociatedFrameWidgetHost(); host) {
+    host->GetVisibleRectToWeb(&rect);
+  }
+  return rect;
+}
+#endif
+
 void WebFrameWidgetImpl::StartDragging(const WebDragData& drag_data,
                                        DragOperationsMask operations_allowed,
                                        const SkBitmap& drag_image,

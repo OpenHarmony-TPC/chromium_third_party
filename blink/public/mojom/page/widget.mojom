@@ -200,6 +200,10 @@ interface FrameWidgetHost {
                 gfx.mojom.Vector2d cursor_offset_in_dip,
                 gfx.mojom.Rect drag_obj_rect_in_dip,
                 DragEventSourceInfo event_info);
+
+  [EnableIf=ohos_drag_drop, Sync]
+  GetVisibleRectToWeb() => (gfx.mojom.Rect rect);
+
   [EnableIf=ohos_ex_free_copy, Sync]
   GetWordSelection(string text, int8 offset) => (array<int8> select);
 
