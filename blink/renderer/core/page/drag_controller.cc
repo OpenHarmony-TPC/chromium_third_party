@@ -1075,10 +1075,19 @@ gfx::Point DragLocationForDHTMLDrag(const gfx::Point& mouse_dragged_point,
                     drag_initiation_location.y() - drag_image_offset.y());
 }
 
+#ifdef OHOS_DRAG_DROP
+gfx::Rect DragRectForSelectionDrag(const LocalFrame& frame, const gfx::RectF& visibleRect) {
+#else
 gfx::Rect DragRectForSelectionDrag(const LocalFrame& frame) {
+#endif
   frame.View()->UpdateLifecycleToLayoutClean(DocumentUpdateReason::kSelection);
+#ifdef OHOS_DRAG_DROP
+  gfx::Rect dragging_rect =
+      gfx::ToEnclosingRect(IntersectRects(visibleRect, DragController::ClippedSelection(frame)));
+#else
   gfx::Rect dragging_rect =
       gfx::ToEnclosingRect(DragController::ClippedSelection(frame));
+#endif
   int x1 = dragging_rect.x();
   int y1 = dragging_rect.y();
   int x2 = dragging_rect.right();
@@ -1163,7 +1172,9 @@ static std::unique_ptr<DragImage> ClippedDragImageForImage(
 static std::unique_ptr<DragImage> CreateClippedDragImageForImage(
     LocalFrame* src,
     const Element& element,
-    const gfx::Rect& image_rect) {
+    const gfx::Rect& image_rect,
+    const gfx::RectF& visibleRect,
+    gfx::Rect& clipped_image_rect) {
   if (!src || !src->View() || !src->GetPage()) {
     return nullptr;
   }
@@ -1174,7 +1185,9 @@ static std::unique_ptr<DragImage> CreateClippedDragImageForImage(
       src->GetPage()->GetVisualViewport().VisibleRect();
   gfx::RectF clipped_image_rect_in_root_frame =
       IntersectRects(viewport_in_root_frame, image_rect_in_root_frame);
-  gfx::Rect clipped_image_rect = src->View()->ConvertFromRootFrame(
+  clipped_image_rect_in_root_frame = IntersectRects(clipped_image_rect_in_root_frame, visibleRect);
+
+  clipped_image_rect = src->View()->ConvertFromRootFrame(
       ToEnclosedRect(clipped_image_rect_in_root_frame));
 
   gfx::Size image_size_in_pixels = image_rect.size();
@@ -1323,9 +1336,16 @@ gfx::RectF DragController::ClippedSelection(const LocalFrame& frame) {
 }
 
 // static
+#ifdef OHOS_DRAG_DROP
+std::unique_ptr<DragImage> DragController::DragImageForSelection(
+    LocalFrame& frame,
+    float opacity, 
+    const gfx::RectF& visibleRect) {
+#else
 std::unique_ptr<DragImage> DragController::DragImageForSelection(
     LocalFrame& frame,
     float opacity) {
+#endif
   if (!frame.Selection().ComputeVisibleSelectionInDOMTreeDeprecated().IsRange())
     return nullptr;
 
@@ -1338,8 +1358,10 @@ std::unique_ptr<DragImage> DragController::DragImageForSelection(
       PaintFlag::kSelectionDragImageOnly | PaintFlag::kOmitCompositingInfo;
 
 #ifdef OHOS_DRAG_DROP
-    paint_flags |= PaintFlag::kGlobalPaintDragSelection;
+  paint_flags |= PaintFlag::kGlobalPaintDragSelection;
+  painting_rect = IntersectRects(painting_rect, visibleRect);
 #endif
+
   auto* builder = MakeGarbageCollected<PaintRecordBuilder>();
   frame.View()->PaintOutsideOfLifecycle(
       builder->Context(), paint_flags,
@@ -1384,7 +1406,11 @@ std::unique_ptr<DragImage> DetermineDragImageAndRect(
     const DragState& state,
     const HitTestResult& hit_test_result,
     const gfx::Point& drag_initiation_location,
-    const gfx::Point& mouse_dragged_point) {
+    const gfx::Point& mouse_dragged_point
+#ifdef OHOS_DRAG_DROP
+    , const gfx::RectF& visibleRect
+#endif
+  ) {
   DataTransfer* data_transfer = state.drag_data_transfer_.Get();
   const KURL& link_url = hit_test_result.AbsoluteLinkURL();
   float device_scale_factor =
@@ -1412,11 +1438,12 @@ std::unique_ptr<DragImage> DetermineDragImageAndRect(
   if (state.drag_type_ == kDragSourceActionSelection) {
     if (!drag_image) {
 #ifdef OHOS_DRAG_DROP
-  drag_image = DragController::DragImageForSelection(*frame, kDragTextAlpha);
+      drag_image = DragController::DragImageForSelection(*frame, kDragTextAlpha, visibleRect);
+      drag_obj_rect = DragRectForSelectionDrag(*frame, visibleRect);
 #else
-  drag_image = DragController::DragImageForSelection(*frame, kDragImageAlpha);
-#endif
+      drag_image = DragController::DragImageForSelection(*frame, kDragImageAlpha);
       drag_obj_rect = DragRectForSelectionDrag(*frame);
+#endif
     }
   } else if (state.drag_type_ == kDragSourceActionImage) {
     if (!drag_image) {
@@ -1430,7 +1457,11 @@ std::unique_ptr<DragImage> DetermineDragImageAndRect(
       if (frame->GetSettings()) {
         // create clipped drag image
         LOG(INFO) << "DragDrop image drag create clipped drag image";
-        drag_image = CreateClippedDragImageForImage(frame, *element, image_rect);
+        gfx::Rect clipped_image_rect = image_rect;
+        drag_image = CreateClippedDragImageForImage(frame, *element, image_rect, visibleRect, clipped_image_rect);
+        drag_obj_rect =
+          DragRectForImage(drag_image.get(), effective_drag_initiation_location,
+                           clipped_image_rect.origin(), image_size_in_pixels);
       } else {
         // Pass the selected image size in DIP becasue dragImageForImage clips
         // the image in DIP.  The coordinates of the locations are in Viewport
@@ -1440,6 +1471,9 @@ std::unique_ptr<DragImage> DetermineDragImageAndRect(
         // coordinates to use high resolution image on high DPI screens.
         drag_image = DragImageForImage(*element, device_scale_factor,
                                        image_size_in_pixels);
+        drag_obj_rect =
+          DragRectForImage(drag_image.get(), effective_drag_initiation_location,
+                           image_rect.origin(), image_size_in_pixels);
       }
 #else
       // Pass the selected image size in DIP becasue dragImageForImage clips the
@@ -1450,10 +1484,10 @@ std::unique_ptr<DragImage> DetermineDragImageAndRect(
       // coordinates to use high resolution image on high DPI screens.
       drag_image = DragImageForImage(*element, device_scale_factor,
                                      image_size_in_pixels);
-#endif
       drag_obj_rect =
           DragRectForImage(drag_image.get(), effective_drag_initiation_location,
                            image_rect.origin(), image_size_in_pixels);
+#endif
     }
   } else if (state.drag_type_ == kDragSourceActionLink) {
     if (!drag_image) {
@@ -1525,8 +1559,11 @@ bool DragController::StartDrag(LocalFrame* frame,
 
   std::unique_ptr<DragImage> drag_image = DetermineDragImageAndRect(
       drag_obj_rect, effective_drag_initiation_location, frame, state,
-      hit_test_result, drag_initiation_location, mouse_dragged_point);
-
+      hit_test_result, drag_initiation_location, mouse_dragged_point
+#ifdef OHOS_DRAG_DROP
+      , GetVisibleRectToUIInRootFrame(frame)
+#endif
+    );
   DoSystemDrag(drag_image.get(), drag_obj_rect,
                effective_drag_initiation_location,
                state.drag_data_transfer_.Get(), frame);
@@ -1535,6 +1572,25 @@ bool DragController::StartDrag(LocalFrame* frame,
 #endif
   return true;
 }
+
+#ifdef OHOS_DRAG_DROP
+gfx::RectF DragController::GetVisibleRectToUIInRootFrame(LocalFrame* frame) {
+  if (!frame || !frame->View() || !frame->GetPage() || !page_) {
+    return gfx::RectF();
+  }
+
+  gfx::Rect visibleRect = page_->GetChromeClient().GetVisibleRectToWeb(frame);
+  gfx::RectF visible_rect_in_root_frame(frame->View()->ConvertToRootFrame(visibleRect));
+  auto scroll_offset = frame->GetPage()->GetVisualViewport().GetScrollOffset();
+  float page_scale_factor = frame->GetPage()->PageScaleFactor();
+  
+  visible_rect_in_root_frame.Scale(1.f / page_scale_factor);
+  visible_rect_in_root_frame.Offset(scroll_offset);
+  LOG(INFO) << "Dragdrop, visible_rect_in_root_frame : " << visible_rect_in_root_frame.ToString()
+            << ", page_scale_factor : " << page_scale_factor << ", scroll_offset : " << scroll_offset.ToString();
+  return visible_rect_in_root_frame;
+}
+#endif
 
 void DragController::DoSystemDrag(DragImage* image,
                                   const gfx::Rect& drag_obj_rect,
@@ -1565,9 +1621,9 @@ void DragController::DoSystemDrag(DragImage* image,
 
   SkBitmap drag_image = image ? image->Bitmap() : SkBitmap();
 #ifdef OHOS_DRAG_DROP
-    StartDragTextEffects();
-    StartDragImageEffects();
-    StartDragLinkEffects();
+  StartDragTextEffects();
+  StartDragImageEffects();
+  StartDragLinkEffects();
 #endif
   page_->GetChromeClient().StartDragging(frame, drag_data, drag_operation_mask,
                                          std::move(drag_image), cursor_offset,

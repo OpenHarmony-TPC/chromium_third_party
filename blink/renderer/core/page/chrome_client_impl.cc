@@ -261,6 +261,16 @@ void ChromeClientImpl::SetKeyboardFocusURL(Element* new_focus_element) {
   web_view_->SetKeyboardFocusURL(focus_url);
 }
 
+#ifdef OHOS_DRAG_DROP
+gfx::Rect ChromeClientImpl::GetVisibleRectToWeb(LocalFrame* frame) {
+  WebLocalFrameImpl* web_frame = WebLocalFrameImpl::FromFrame(frame);
+  if (!web_frame || !web_frame->LocalRootFrameWidget()) {
+    return gfx::Rect();
+  }
+  return web_frame->LocalRootFrameWidget()->GetVisibleRectToWeb();
+}
+#endif
+
 void ChromeClientImpl::StartDragging(LocalFrame* frame,
                                      const WebDragData& drag_data,
                                      DragOperationsMask mask,
