@@ -802,8 +802,13 @@ bool PageSchedulerImpl::IsBackgrounded() const {
 }
 
 bool PageSchedulerImpl::ShouldFreezePage() const {
-  if (!base::FeatureList::IsEnabled(blink::features::kStopInBackground))
+  if (!base::FeatureList::IsEnabled(blink::features::kStopInBackground)
+#ifdef OHOS_ACTIVE_POLICY
+    && !is_tab_freezing_enable_force
+#endif
+    ) {
     return false;
+  }
   return IsOrdinary() && IsBackgrounded();
 }
 
@@ -860,6 +865,18 @@ PageSchedulerImpl::AllWakeUpBudgetPools() {
           same_origin_intensive_wake_up_budget_pool_.get(),
           cross_origin_intensive_wake_up_budget_pool_.get()};
 }
+
+#ifdef OHOS_ACTIVE_POLICY
+void PageSchedulerImpl::SetDelayDurationForBackgroundTabFreezing(int64_t millisecond) {
+  LOG(INFO) << "SetDelayDurationForBackgroundTabFreezing " << millisecond;
+  if (millisecond != -1) {
+    is_tab_freezing_enable_force = true;
+  } else {
+    is_tab_freezing_enable_force = false;
+  }
+  delay_for_background_tab_freezing_ = base::Milliseconds(millisecond);
+}
+#endif // OHOS_ACTIVE_POLICY
 
 }  // namespace scheduler
 }  // namespace blink

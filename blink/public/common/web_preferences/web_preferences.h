@@ -419,6 +419,10 @@ struct BLINK_COMMON_EXPORT WebPreferences {
   bool custom_video_player_overlay = false;
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
 
+#ifdef OHOS_ACTIVE_POLICY
+  int64_t delay_for_background_tab_freezing = -1;
+#endif
+
   // We try to keep the default values the same as the default values in
   // chrome, except for the cases where it would require lots of extra work for
   // the embedder to use the same default value.

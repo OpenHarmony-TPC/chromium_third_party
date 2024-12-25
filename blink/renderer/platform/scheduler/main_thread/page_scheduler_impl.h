@@ -142,6 +142,10 @@ class PLATFORM_EXPORT PageSchedulerImpl : public PageScheduler {
     return weak_factory_.GetWeakPtr();
   }
 
+#ifdef OHOS_ACTIVE_POLICY
+  void SetDelayDurationForBackgroundTabFreezing(int64_t millisecond) override;
+#endif
+
  private:
   friend class FrameSchedulerImpl;
   friend class page_scheduler_impl_unittest::PageSchedulerImplTest;
@@ -326,7 +330,12 @@ class PLATFORM_EXPORT PageSchedulerImpl : public PageScheduler {
   CancelableClosureHolder reset_had_recent_title_or_favicon_update_;
   CancelableClosureHolder on_audio_silent_closure_;
   CancelableClosureHolder do_freeze_page_callback_;
+#ifdef OHOS_ACTIVE_POLICY
+  base::TimeDelta delay_for_background_tab_freezing_;
+  bool is_tab_freezing_enable_force = false;
+#else
   const base::TimeDelta delay_for_background_tab_freezing_;
+#endif
 
   // Whether foreground timers should be always throttled.
   const bool throttle_foreground_timers_;

@@ -500,6 +500,11 @@ void ApplyOhosWebPreferences(const web_pref::WebPreferences& prefs,
 #if defined(OHOS_MEDIA)
   settings->SetPreferHiddenVolumeControls(!base::ohos::IsPcDevice());
 #endif
+
+#ifdef OHOS_ACTIVE_POLICY
+  web_view_impl->SetDelayDurationForBackgroundTabFreezing(
+      prefs.delay_for_background_tab_freezing);
+#endif
 }
 
 }  // namespace
@@ -4214,5 +4219,17 @@ bool WebViewImpl::GetAdBlockEnableForSite() {
   return root_frame.GetAdBlockEnableForSite();
 }
 #endif // OHOS_ARKWEB_ADBLOCK
+
+#ifdef OHOS_ACTIVE_POLICY
+void WebViewImpl::SetDelayDurationForBackgroundTabFreezing(int64_t millisecond) {
+  if (millisecond < 0) {
+    return;
+  }
+
+  if (GetPage() && Scheduler()) {
+    Scheduler()->SetDelayDurationForBackgroundTabFreezing(millisecond);
+  }
+}
+#endif
 
 }  // namespace blink

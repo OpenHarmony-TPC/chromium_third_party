@@ -868,6 +868,13 @@ struct BLINK_COMMON_EXPORT StructTraits<blink::mojom::WebPreferencesDataView,
   }
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
 
+#ifdef OHOS_ACTIVE_POLICY
+  static int64_t delay_for_background_tab_freezing(
+      const blink::web_pref::WebPreferences& r) {
+    return r.delay_for_background_tab_freezing;
+  }
+#endif // OHOS_ACTIVE_POLICY
+
 };
 
 }  // namespace mojo

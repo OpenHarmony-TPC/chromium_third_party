@@ -85,6 +85,10 @@ class PLATFORM_EXPORT PageScheduler {
 
   // Creates a WebWidgetScheduler implementation.
   virtual scoped_refptr<scheduler::WidgetScheduler> CreateWidgetScheduler() = 0;
+
+#ifdef OHOS_ACTIVE_POLICY
+  virtual void SetDelayDurationForBackgroundTabFreezing(int64_t millisecond) = 0;
+#endif
 };
 
 }  // namespace blink

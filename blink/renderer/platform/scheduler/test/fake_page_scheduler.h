@@ -84,6 +84,10 @@ class FakePageScheduler : public PageScheduler {
     return nullptr;
   }
 
+#ifdef OHOS_ACTIVE_POLICY
+  void SetDelayDurationForBackgroundTabFreezing(int64_t) override {}
+#endif
+
  private:
   bool is_audio_playing_;
   bool is_throttling_exempt_;
