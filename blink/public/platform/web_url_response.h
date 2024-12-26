@@ -288,6 +288,9 @@ class BLINK_PLATFORM_EXPORT WebURLResponse {
   void SetWasFetchedViaCache(bool);
   void SetArrivalTimeAtRenderer(base::TimeTicks arrival);
 
+#if BUILDFLAG(IS_OHOS)
+  void SetCodeCacheValid(bool code_cache_valid);
+#endif
 #if INSIDE_BLINK
  protected:
   // Permit subclasses to set arbitrary ResourceResponse pointer as
