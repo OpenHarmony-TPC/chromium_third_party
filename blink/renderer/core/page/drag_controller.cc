@@ -1082,8 +1082,12 @@ gfx::Rect DragRectForSelectionDrag(const LocalFrame& frame) {
 #endif
   frame.View()->UpdateLifecycleToLayoutClean(DocumentUpdateReason::kSelection);
 #ifdef OHOS_DRAG_DROP
-  gfx::Rect dragging_rect =
-      gfx::ToEnclosingRect(IntersectRects(visibleRect, DragController::ClippedSelection(frame)));
+  gfx::Rect dragging_rect;
+  if (visibleRect.IsEmpty()) {
+    dragging_rect = gfx::ToEnclosingRect(DragController::ClippedSelection(frame));
+  } else {
+    dragging_rect = gfx::ToEnclosingRect(IntersectRects(visibleRect, DragController::ClippedSelection(frame)));
+  }
 #else
   gfx::Rect dragging_rect =
       gfx::ToEnclosingRect(DragController::ClippedSelection(frame));
@@ -1185,7 +1189,9 @@ static std::unique_ptr<DragImage> CreateClippedDragImageForImage(
       src->GetPage()->GetVisualViewport().VisibleRect();
   gfx::RectF clipped_image_rect_in_root_frame =
       IntersectRects(viewport_in_root_frame, image_rect_in_root_frame);
-  clipped_image_rect_in_root_frame = IntersectRects(clipped_image_rect_in_root_frame, visibleRect);
+  if (!visibleRect.IsEmpty()) {
+    clipped_image_rect_in_root_frame = IntersectRects(clipped_image_rect_in_root_frame, visibleRect);
+  }
 
   clipped_image_rect = src->View()->ConvertFromRootFrame(
       ToEnclosedRect(clipped_image_rect_in_root_frame));
@@ -1359,7 +1365,9 @@ std::unique_ptr<DragImage> DragController::DragImageForSelection(
 
 #ifdef OHOS_DRAG_DROP
   paint_flags |= PaintFlag::kGlobalPaintDragSelection;
-  painting_rect = IntersectRects(painting_rect, visibleRect);
+  if (!visibleRect.IsEmpty()) {
+    painting_rect = IntersectRects(painting_rect, visibleRect);
+  }
 #endif
 
   auto* builder = MakeGarbageCollected<PaintRecordBuilder>();
