@@ -845,8 +845,10 @@ void DocumentLoader::UpdateForSameDocumentNavigation(
         soft_navigation_heuristics_task_id) {
   DCHECK_EQ(IsBackForwardLoadType(type), !!history_item);
 
-#if BUILDFLAG(IS_OHOS)
-  frame_->GetDocument()->Fetcher()->UpdateAllowPreloadRecord(true);
+#if BUILDFLAG(IS_OHOS_PRPP)
+  if (frame_ && frame_->GetDocument() && frame_->GetDocument()->Fetcher()) {
+    frame_->GetDocument()->Fetcher()->UpdateAllowPreloadRecord(true);
+  }
 #endif
   SinglePageAppNavigationType single_page_app_navigation_type =
       CategorizeSinglePageAppNavigation(same_document_navigation_type, type);
@@ -2755,8 +2757,10 @@ void DocumentLoader::CommitNavigation() {
   // is available by tracking the execution context's lifetime.
   ProfilerGroup::InitializeIfEnabled(frame_->DomWindow());
 
-#if BUILDFLAG(IS_OHOS)
-  frame_->GetDocument()->Fetcher()->UpdateAllowPreloadRecord(true);
+#if BUILDFLAG(IS_OHOS_PRPP)
+  if (frame_ && frame_->GetDocument() && frame_->GetDocument()->Fetcher()) {
+    frame_->GetDocument()->Fetcher()->UpdateAllowPreloadRecord(true);
+  }
 #endif
   // Load the document if needed.
   StartLoadingResponse();

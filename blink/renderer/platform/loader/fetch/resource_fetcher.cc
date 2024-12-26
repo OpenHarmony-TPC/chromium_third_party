@@ -1146,9 +1146,9 @@ absl::optional<ResourceRequestBlockedReason> ResourceFetcher::PrepareRequest(
     resource_request.SetAllowStoredCredentials(false);
   }
 
-#if BUILDFLAG(IS_OHOS)
+#if BUILDFLAG(IS_OHOS_PRPP)
   resource_request.SetAllowPreloadRecord(allow_preload_record_);
-  resource_request.SetMainPage(main_page_);
+  resource_request.SetMainUrl(main_url_);
 #endif
   return absl::nullopt;
 }
@@ -1231,8 +1231,9 @@ Resource* ResourceFetcher::RequestResource(FetchParameters& params,
 #if BUILDFLAG(IS_OHOS)
   int request_id_perf_stat = GenerateRequestId();
   TRACE_EVENT2("blink,blink.resource", "ResourceFetcher::requestResource",
-               "url", params.Url().ElidedString().Utf8() + " | method=" + params.GetResourceRequest().HttpMethod().Utf8(),
-               "id", request_id_perf_stat);
+               "id", request_id_perf_stat,
+               "method", params.GetResourceRequest().HttpMethod().Utf8() +
+               " | url =" + params.Url().ElidedString().Utf8());
 #endif
   // |resource_request|'s origin can be null here, corresponding to the "client"
   // value in the spec. In that case client's origin is used.
@@ -1402,6 +1403,12 @@ Resource* ResourceFetcher::RequestResource(FetchParameters& params,
   ImageLoadBlockingPolicy load_blocking_policy =
       ImageLoadBlockingPolicy::kDefault;
   if (resource->GetType() == ResourceType::kImage) {
+#if BUILDFLAG(IS_OHOS_PRPP)
+    if (resource->PriorityFromObservers().first.visibility ==
+        ResourcePriority::kVisible) {
+      resource_request.SetAllowPreloadRecord(true);
+    }
+#endif
     image_resources_.insert(resource);
     not_loaded_image_resources_.insert(resource);
     if (params.GetImageRequestBehavior() ==

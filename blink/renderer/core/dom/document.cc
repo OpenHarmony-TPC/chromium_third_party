@@ -2863,8 +2863,10 @@ void Document::Initialize() {
   if (View())
     View()->DidAttachDocument();
 
-#if BUILDFLAG(IS_OHOS)
-  fetcher_->SetMainPage(base_url_);
+#if BUILDFLAG(IS_OHOS_PRPP)
+  if (fetcher_) {
+    fetcher_->SetMainUrl(base_url_);
+  }
 #endif
 }
 

@@ -407,9 +407,9 @@ void PopulateResourceRequest(const ResourceRequestHead& src,
 
   dest->attribution_reporting_eligibility =
       src.GetAttributionReportingEligibility();
-#if BUILDFLAG(IS_OHOS)
+#if BUILDFLAG(IS_OHOS_PRPP)
   dest->allow_preload_record = src.GetAllowPreloadRecord();
-  dest->main_page = GURL(src.GetMainPage());
+  dest->main_url = GURL(src.GetMainUrl());
 #endif
 }
 

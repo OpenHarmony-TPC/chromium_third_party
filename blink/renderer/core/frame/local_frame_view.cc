@@ -839,7 +839,7 @@ void LocalFrameView::PerformLayout() {
   }
 
   document->Fetcher()->UpdateAllImageResourcePriorities();
-#if BUILDFLAG(IS_OHOS)
+#if BUILDFLAG(IS_OHOS_PRPP)
   if (!document->Url().GetString().Utf8().empty()) {
     LayoutBox* body_box = nullptr;
     const LayoutBox* html_box = nullptr;
