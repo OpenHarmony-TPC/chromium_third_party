@@ -623,6 +623,10 @@ class CORE_EXPORT WebViewImpl final : public WebView,
   // words, after the frame has painted something.
   void DidFirstVisuallyNonEmptyPaint();
 
+#ifdef OHOS_ACTIVE_POLICY
+  void SetDelayDurationForBackgroundTabFreezing(int64_t millisecond);
+#endif
+
   scheduler::WebAgentGroupScheduler& GetWebAgentGroupScheduler();
 
 #ifdef OHOS_PAGE_UP_DOWN

@@ -525,5 +525,10 @@ struct WebPreferences {
   [EnableIf=ohos_custom_video_player]
   bool custom_video_player_overlay = false;
   // #endif OHOS_CUSTOM_VIDEO_PLAYER
+
+  // #if defined(OHOS_ACTIVE_POLICY)
+  [EnableIf=ohos_active_policy]
+  int64 delay_for_background_tab_freezing = -1;
+  // #endif OHOS_ACTIVE_POLICY
 };
 
