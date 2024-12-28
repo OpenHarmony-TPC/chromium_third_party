@@ -308,6 +308,7 @@ cc::Layer* NativeLoader::CcLayer() const {
 }
 
 void NativeLoader::Trace(Visitor* visitor) const {
+  visitor->Trace(plugin_element_);
   visitor->Trace(native_bridge_host_remote_);
   visitor->Trace(native_bridge_observer_remote_set_);
   ExecutionContextLifecycleStateObserver::Trace(visitor);
