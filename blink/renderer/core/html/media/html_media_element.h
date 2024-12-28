@@ -1058,7 +1058,7 @@ class CORE_EXPORT HTMLMediaElement
 #if defined(OHOS_CUSTOM_VIDEO_PLAYER)
   gfx::Rect layer_rect_;
   std::string media_format_;
-  Node* next_retry_child_node_ = nullptr;
+  Member<Node> next_retry_child_node_ = nullptr;
   bool should_create_custom_renderer_ = true;
   bool played_by_custom_mp_ = false;
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
