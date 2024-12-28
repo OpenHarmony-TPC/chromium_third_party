@@ -965,7 +965,7 @@ void WidgetBase::WillBeginMainFrame() {
   if (!base::FeatureList::IsEnabled(features::kRunTextInputUpdatePostLifecycle))
     UpdateTextInputState();
 #if BUILDFLAG(IS_OHOS)
-  if () {
+  if (base::ohos::IsPcDevice()) {
     ReportForegroundThreadPool();
   }  
 #endif
