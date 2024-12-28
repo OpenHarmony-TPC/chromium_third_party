@@ -1389,6 +1389,9 @@ void WebFrameWidgetImpl::Trace(Visitor* visitor) const {
   visitor->Trace(mouse_capture_element_);
   visitor->Trace(device_emulator_);
   visitor->Trace(animation_frame_timing_monitor_);
+#ifdef OHOS_AI
+  visitor->Trace(hit_image_node_);
+#endif
 }
 
 void WebFrameWidgetImpl::SetNeedsRecalculateRasterScales() {
