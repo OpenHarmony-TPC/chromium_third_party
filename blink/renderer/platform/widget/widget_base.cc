@@ -59,6 +59,18 @@
 #include "ui/gfx/geometry/dip_util.h"
 #include "ui/gfx/presentation_feedback.h"
 
+#if BUILDFLAG(IS_OHOS)
+#include "base/process/process_handle.h"
+#include "base/task/post_job.h"
+#include "base/task/thread_pool/job_task_source.h"
+#include "base/task/thread_pool/thread_pool_impl.h"
+#include "base/task/thread_pool/thread_group_impl.h"
+#include "base/task/thread_pool/worker_thread.h"
+#include "content/child/child_thread_impl.h"
+#include "third_party/ohos_ndk/includes/ohos_adapter/res_sched_client_adapter.h"
+#include "base/ohos/sys_info_utils.h"
+#endif
+
 #if BUILDFLAG(IS_ANDROID)
 #include "third_party/blink/renderer/platform/widget/compositing/android_webview/synchronous_layer_tree_frame_sink.h"
 #endif
@@ -206,6 +218,10 @@ void WidgetBase::InitializeCompositing(
           : nullptr,
       cc::CategorizedWorkerPool::GetOrCreate(
           &BlinkCategorizedWorkerPoolDelegate::Get()));
+
+#if BUILDFLAG(IS_OHOS)
+  is_worker_pool_initial_ = true;
+#endif
 
   FrameWidget* frame_widget = client_->FrameWidget();
 
@@ -869,6 +885,77 @@ void WidgetBase::EndUpdateLayers() {
   client_->EndUpdateLayers();
 }
 
+#if BUILDFLAG(IS_OHOS)
+static void GetThreadIdsAndReport(
+    std::vector<base::internal::WorkerThread*>& workers, bool is_created) {
+  std::vector<int32_t> thread_ids;
+  std::vector<base::internal::WorkerThread*> remain_workers;
+  for (auto& worker : workers) {
+    if (worker) {
+      auto tid = worker->GetRealTid();
+      if (tid) {
+        thread_ids.push_back(tid);
+      } else {
+        remain_workers.push_back(worker);
+      }
+    }
+  }
+  workers.clear();
+  if (remain_workers.size()) {
+    workers = std::move(remain_workers);
+  }
+
+  auto* thread = content::ChildThreadImpl::current();
+  if (thread) {
+    auto host = thread->child_process_host();
+    auto status = is_created ? OHOS::NWeb::ResSchedStatusAdapter::THREAD_CREATED :
+                               OHOS::NWeb::ResSchedStatusAdapter::THREAD_DESTROYED;
+    host->ReportKeyThreadIds(static_cast<int32_t>(status),
+      base::GetCurrentRealPid(), thread_ids,
+      static_cast<int32_t>(OHOS::NWeb::ResSchedRoleAdapter::IMAGE_DECODE));
+  }
+}
+
+void WidgetBase::ReportForegroundThreadPool() {
+  if (!is_worker_pool_initial_) {
+    return;
+  }
+  cc::CategorizedWorkerPool* worker_pool = cc::CategorizedWorkerPool::GetOrCreate(
+    &BlinkCategorizedWorkerPoolDelegate::Get());
+  cc::CategorizedWorkerPoolJob* worker_pool_job =
+    static_cast<cc::CategorizedWorkerPoolJob*>(worker_pool);
+  base::JobHandle* foreground_job_handle = worker_pool_job->GetForegroundJobHandle();
+  if (!foreground_job_handle) {
+    return;
+  }
+  base::internal::JobTaskSource* task_source =
+    foreground_job_handle->GetTaskSource();
+  if (!task_source) {
+    return;
+  }
+  base::internal::PooledTaskRunnerDelegate* pool_delegate = task_source->delegate();
+  base::internal::ThreadPoolImpl* thread_pool =
+    static_cast<base::internal::ThreadPoolImpl*>(pool_delegate);
+  if(!thread_pool) {
+    return;
+  }
+  base::internal::ThreadGroupImpl* foreground_thread_group =
+    static_cast<base::internal::ThreadGroupImpl*>(thread_pool->GetForegroundThreadGroup());
+  if (foreground_thread_group) {
+    std::vector<base::internal::WorkerThread*>& create_workers =
+      foreground_thread_group->ReportCreateWorkers();
+    if (create_workers.size()) {
+      GetThreadIdsAndReport(create_workers, true);
+    }
+    std::vector<base::internal::WorkerThread*>& destroy_workers =
+      foreground_thread_group->ReportDestroyWorkers();
+    if (destroy_workers.size()) {
+      GetThreadIdsAndReport(destroy_workers, false);
+    }
+  }
+}
+#endif
+
 void WidgetBase::WillBeginMainFrame() {
   TRACE_EVENT0("gpu", "WidgetBase::WillBeginMainFrame");
   client_->SetSuppressFrameRequestsWorkaroundFor704763Only(true);
@@ -878,6 +965,11 @@ void WidgetBase::WillBeginMainFrame() {
   // we would like to eliminate.
   if (!base::FeatureList::IsEnabled(features::kRunTextInputUpdatePostLifecycle))
     UpdateTextInputState();
+#if BUILDFLAG(IS_OHOS)
+  if (base::ohos::IsPcDevice()) {
+    ReportForegroundThreadPool();
+  }  
+#endif
 }
 
 void WidgetBase::RunPaintBenchmark(int repeat_count,
