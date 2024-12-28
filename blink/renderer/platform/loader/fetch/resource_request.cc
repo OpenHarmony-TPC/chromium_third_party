@@ -116,10 +116,10 @@ ResourceRequestHead::ResourceRequestHead(const KURL& url)
       referrer_policy_(network::mojom::ReferrerPolicy::kDefault),
       cors_preflight_policy_(
           network::mojom::CorsPreflightPolicy::kConsiderPreflight)
-#if BUILDFLAG(IS_OHOS)
+#if BUILDFLAG(IS_OHOS_PRPP)
       ,
       allow_preload_record_(false),
-      main_page_(KURL())
+      main_url_(KURL())
 #endif
       {}
 

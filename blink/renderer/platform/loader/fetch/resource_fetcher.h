@@ -34,6 +34,7 @@
 #include "base/task/single_thread_task_runner.h"
 #include "base/unguessable_token.h"
 #include "mojo/public/cpp/bindings/pending_remote.h"
+#include "net/base/prp_preload_buildflags.h"
 #include "services/metrics/public/cpp/mojo_ukm_recorder.h"
 #include "third_party/abseil-cpp/absl/types/optional.h"
 #include "third_party/blink/public/common/subresource_load_metrics.h"
@@ -229,9 +230,9 @@ class PLATFORM_EXPORT ResourceFetcher
   void ClearPreloads(ClearPreloadsPolicy = kClearAllPreloads);
   void ScheduleWarnUnusedPreloads();
 
-#if BUILDFLAG(IS_OHOS)
+#if BUILDFLAG(IS_OHOS_PRPP)
   void UpdateAllowPreloadRecord(bool allow) { allow_preload_record_ = allow; }
-  void SetMainPage(const KURL& url) { main_page_ = url; }
+  void SetMainUrl(const KURL& url) { main_url_ = url; }
 #endif
 
   MHTMLArchive* Archive() const { return archive_.Get(); }
@@ -649,9 +650,9 @@ class PLATFORM_EXPORT ResourceFetcher
   // Area (in pixels) below which an image is considered "small"
   uint32_t small_image_max_size_ = 0;
 
-#if BUILDFLAG(IS_OHOS)
+#if BUILDFLAG(IS_OHOS_PRPP)
   bool allow_preload_record_ = true;
-  KURL main_page_;
+  KURL main_url_;
 #endif
 };
 

@@ -33,6 +33,7 @@
 #include "base/containers/flat_set.h"
 #include "base/time/time.h"
 #include "base/unguessable_token.h"
+#include "net/base/prp_preload_buildflags.h"
 #include "net/cookies/site_for_cookies.h"
 #include "net/filter/source_stream.h"
 #include "services/metrics/public/cpp/ukm_source_id.h"
@@ -571,12 +572,12 @@ class PLATFORM_EXPORT ResourceRequestHead {
     attribution_reporting_eligibility_ = eligibility;
   }
 
-#if BUILDFLAG(IS_OHOS)
+#if BUILDFLAG(IS_OHOS_PRPP)
   bool GetAllowPreloadRecord() const { return allow_preload_record_; }
   void SetAllowPreloadRecord(bool allow) { allow_preload_record_ = allow; }
 
-  const KURL& GetMainPage() const { return main_page_; }
-  void SetMainPage(const KURL& url) { main_page_ = url; }
+  const KURL& GetMainUrl() const { return main_url_; }
+  void SetMainUrl(const KURL& url) { main_url_ = url; }
 #endif
 
  private:
@@ -705,9 +706,9 @@ class PLATFORM_EXPORT ResourceRequestHead {
   network::mojom::AttributionReportingEligibility
       attribution_reporting_eligibility_ =
           network::mojom::AttributionReportingEligibility::kUnset;
-#if BUILDFLAG(IS_OHOS)
+#if BUILDFLAG(IS_OHOS_PRPP)
   bool allow_preload_record_ = false;
-  KURL main_page_;
+  KURL main_url_;
 #endif
 };
 
