@@ -68,6 +68,7 @@
 #include "base/task/thread_pool/worker_thread.h"
 #include "content/child/child_thread_impl.h"
 #include "third_party/ohos_ndk/includes/ohos_adapter/res_sched_client_adapter.h"
+#include "base/ohos/sys_info_utils.h"
 #endif
 
 #if BUILDFLAG(IS_ANDROID)
