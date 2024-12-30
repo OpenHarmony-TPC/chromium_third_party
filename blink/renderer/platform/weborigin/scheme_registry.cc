@@ -77,6 +77,12 @@ class URLSchemesRegistry final {
     }
     for (auto& scheme : url::GetEmptyDocumentSchemes())
       empty_document_schemes.insert(scheme.c_str());
+
+#if BUILDFLAG(IS_OHOS)
+    for (auto& scheme : url::GetCodeCacheEnabledSchemes()) {
+       code_cache_with_response_time_schemes.insert(scheme.c_str());
+    }
+#endif
   }
   ~URLSchemesRegistry() = default;
 
