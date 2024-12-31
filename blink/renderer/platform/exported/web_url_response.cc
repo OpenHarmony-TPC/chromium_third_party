@@ -203,6 +203,10 @@ WebURLResponse WebURLResponse::Create(
   response.SetWebBundleURL(KURL(head.web_bundle_url));
   response.SetTriggerAttestation(head.trigger_attestation);
 
+#if BUILDFLAG(IS_OHOS)
+  response.SetCodeCacheValid(head.code_cache_valid);
+#endif
+
   SetSecurityStyleAndDetails(GURL(KURL(url)), head, &response,
                              report_security_info);
 
@@ -492,6 +496,12 @@ void WebURLResponse::SetWasFetchedViaServiceWorker(bool value) {
 void WebURLResponse::SetArrivalTimeAtRenderer(base::TimeTicks value) {
   resource_response_->SetArrivalTimeAtRenderer(value);
 }
+
+#if BUILDFLAG(IS_OHOS)
+void WebURLResponse::SetCodeCacheValid(bool code_cache_valid) {
+  resource_response_->SetCodeCacheValid(code_cache_valid);
+}
+#endif
 
 network::mojom::FetchResponseSource
 WebURLResponse::GetServiceWorkerResponseSource() const {

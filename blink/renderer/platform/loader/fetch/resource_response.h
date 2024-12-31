@@ -455,6 +455,16 @@ class PLATFORM_EXPORT ResourceResponse final {
     request_include_credentials_ = request_include_credentials;
   }
 
+#if BUILDFLAG(IS_OHOS)
+  bool CodeCacheValid() const {
+    return code_cache_valid_;
+  }
+
+  void SetCodeCacheValid(bool code_cache_valid) {
+    code_cache_valid_ = code_cache_valid;
+  }
+#endif
+
  private:
   void UpdateHeaderParsedState(const AtomicString& name);
 
@@ -658,6 +668,9 @@ class PLATFORM_EXPORT ResourceResponse final {
   bool emitted_extra_info_ = false;
 
   absl::optional<network::TriggerAttestation> trigger_attestation_;
+#if BUILDFLAG(IS_OHOS)
+  bool code_cache_valid_ = false;
+#endif
 };
 
 }  // namespace blink

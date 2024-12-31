@@ -99,6 +99,7 @@
 
 #if BUILDFLAG(IS_OHOS)
 #include "base/logging.h"
+#include "ohos_adapter_helper.h"
 #endif
 
 namespace blink {
@@ -274,7 +275,12 @@ class ResourceLoader::CodeCacheRequest {
   // code cache. Might send cached code if available.
   void DidReceiveResponse(const base::Time& resource_response_time,
                           bool use_isolated_code_cache,
-                          ResourceLoader* resource_loader);
+                          ResourceLoader* resource_loader
+#if BUILDFLAG(IS_OHOS)
+                          ,
+                          bool code_cache_valid = false
+#endif
+                          );
 
   // Stores the value of defers that is needed to restore the state
   // once fetching from code cache is finished. Returns true if the
@@ -303,7 +309,12 @@ class ResourceLoader::CodeCacheRequest {
   // Send |cache_code| if we got a response from code_cache_loader and the
   // url_loader.
   void MaybeSendCachedCode(mojo_base::BigBuffer data,
-                           ResourceLoader* resource_loader);
+                           ResourceLoader *resource_loader
+#if BUILDFLAG(IS_OHOS)
+                           ,
+                           bool code_cache_valid = false
+#endif
+  );
 
   CodeCacheRequestStatus status_;
   std::unique_ptr<WebCodeCacheLoader> code_cache_loader_;
@@ -352,11 +363,20 @@ bool ResourceLoader::CodeCacheRequest::FetchFromCodeCache(
 void ResourceLoader::CodeCacheRequest::DidReceiveResponse(
     const base::Time& resource_response_time,
     bool use_isolated_code_cache,
-    ResourceLoader* resource_loader) {
+    ResourceLoader* resource_loader
+#if BUILDFLAG(IS_OHOS)
+    ,
+    bool code_cache_valid
+#endif
+    ) {
   resource_response_arrived_ = true;
   resource_response_time_ = resource_response_time;
   use_isolated_code_cache_ = use_isolated_code_cache;
-  MaybeSendCachedCode(std::move(cached_code_), resource_loader);
+  MaybeSendCachedCode(std::move(cached_code_), resource_loader
+#if BUILDFLAG(IS_OHOS)
+    , code_cache_valid
+#endif
+  );
 }
 
 // Returns true if |this| handles |defers| and therefore the callsite, i.e. the
@@ -409,7 +429,12 @@ void ResourceLoader::CodeCacheRequest::ProcessCodeCacheResponse(
 
 void ResourceLoader::CodeCacheRequest::MaybeSendCachedCode(
     mojo_base::BigBuffer data,
-    ResourceLoader* resource_loader) {
+    ResourceLoader* resource_loader
+#if BUILDFLAG(IS_OHOS)
+    ,
+    bool code_cache_valid
+#endif
+    ) {
   // Wait until both responses have arrived; they can happen in either order.
   if (status_ != kReceivedResponse || !resource_response_arrived_) {
     return;
@@ -450,9 +475,19 @@ void ResourceLoader::CodeCacheRequest::MaybeSendCachedCode(
   } else {
     // If the timestamps don't match or are null, the code cache data may be for
     // a different response. See https://crbug.com/1099587.
+#if BUILDFLAG(IS_OHOS)
+    if (code_cache_valid) {
+      LOG(DEBUG) << "web.304CodeCache enabled, using code cache.";
+    }
+    if (!code_cache_valid &&
+        (cached_code_response_time_.is_null() ||
+         resource_response_time_.is_null() ||
+         resource_response_time_ != cached_code_response_time_)) {
+#else
     if (cached_code_response_time_.is_null() ||
         resource_response_time_.is_null() ||
         resource_response_time_ != cached_code_response_time_) {
+#endif
       ClearCachedCodeIfPresent();
       return;
     }
@@ -1199,8 +1234,17 @@ void ResourceLoader::DidReceiveResponseInternal(
   // Resource expects that we receive the response first before the
   // corresponding cached code.
   if (code_cache_request_) {
+#if BUILDFLAG(IS_OHOS)
+    bool code_cache_valid =
+        response.CodeCacheValid() || (response.HttpStatusCode() == 304);
+#endif
     code_cache_request_->DidReceiveResponse(
-        response.ResponseTime(), should_use_isolated_code_cache_, this);
+        response.ResponseTime(), should_use_isolated_code_cache_, this
+#if BUILDFLAG(IS_OHOS)
+        ,
+        code_cache_valid
+#endif
+    );
   }
 
   if (auto* frame_or_worker_scheduler = fetcher_->GetFrameOrWorkerScheduler()) {
