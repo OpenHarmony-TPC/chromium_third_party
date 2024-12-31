@@ -1181,7 +1181,7 @@ class CORE_EXPORT WebFrameWidgetImpl
 
 #ifdef OHOS_AI
   OnTextSelectedCallback on_text_selected_callback_;
-  Member<Node> hit_image_node_ = nullptr;
+  const Node* hit_image_node_ = nullptr;
 #endif
 
   base::WeakPtrFactory<mojom::blink::FrameWidgetInputHandler>
