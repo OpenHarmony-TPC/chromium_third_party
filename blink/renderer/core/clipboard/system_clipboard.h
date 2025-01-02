@@ -215,7 +215,7 @@ class CORE_EXPORT SystemClipboard final
 #if defined(OHOS_CLIPBOARD)
   bool IsCopyAllowed();
  
-  LocalFrame* frame_;
+  Member<LocalFrame> frame_;
 #endif // defined(OHOS_CLIPBOARD)
 };
 
