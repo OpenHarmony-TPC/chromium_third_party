@@ -88,6 +88,11 @@ constexpr int kDefaultMaxTokenizationBudget = 250;
 constexpr int kInfiniteTokenizationBudget = 1e7;
 constexpr int kNumYieldsWithDefaultBudget = 2;
 
+#if BUILDFLAG(IS_OHOS)
+constexpr int kOptimizedMaxTokenizationBudget = 100;
+static bool kUseOptimizedBudget = false;
+#endif
+
 class EndIfDelayedForbiddenScope;
 class ShouldCompleteScope;
 class AttemptToEndForbiddenScope;
@@ -185,6 +190,16 @@ bool IsPreloadScanningEnabled(Document* document) {
   return document->GetSettings() &&
          document->GetSettings()->GetDoHtmlPreloadScanning();
 }
+
+#if BUILDFLAG(IS_OHOS)
+void SetOptimizeParserBudgetEnabled(bool enable) {
+  if (kUseOptimizedBudget != enable) {
+    LOG(DEBUG) << "OptimizeParserBudget set enable: " << enable;
+    TRACE_EVENT1("blink", "SetOptimizeParserBudgetEnabled", "enable", enable);
+    kUseOptimizedBudget = enable; 
+  }
+}
+#endif
 
 base::TimeDelta GetDefaultTimedBudget() {
   static const base::FeatureParam<base::TimeDelta> kDefaultParserBudgetParam{
@@ -642,6 +657,9 @@ bool HTMLDocumentParser::PumpTokenizer() {
       (task_runner_state_->TimesYielded() <= kNumYieldsWithDefaultBudget)
           ? task_runner_state_->GetDefaultBudget()
           : kInfiniteTokenizationBudget;
+#if BUILDFLAG(IS_OHOS)
+  budget = kUseOptimizedBudget ? kOptimizedMaxTokenizationBudget : budget;
+#endif
 
   base::TimeDelta timed_budget;
   if (TimedParserBudgetEnabled())
@@ -712,6 +730,9 @@ bool HTMLDocumentParser::PumpTokenizer() {
           elapsed_time = chunk_parsing_timer.Elapsed();
         }
         should_yield = elapsed_time >= timed_budget;
+        if (kUseOptimizedBudget) {
+          should_yield = budget <= 0;
+        }
       } else {
         should_yield = budget <= 0;
       }
