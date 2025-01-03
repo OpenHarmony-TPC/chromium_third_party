@@ -65,6 +65,10 @@ class PLATFORM_EXPORT SurfaceLayerBridge
   void SetVideoRectChangeCallback(
       cc::SurfaceLayer::RectChangeCallback callback) override;
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
+#ifdef OHOS_VIDEO_ASSISTANT
+  void SetLayerBoundsChangeCallback(
+      cc::SurfaceLayer::LayerBoundsChangeCallback callback) override;
+#endif // OHOS_VIDEO_ASSISTANT
 
  private:
   scoped_refptr<cc::SurfaceLayer> surface_layer_;

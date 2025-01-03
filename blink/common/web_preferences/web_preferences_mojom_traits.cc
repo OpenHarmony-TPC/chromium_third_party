@@ -268,6 +268,9 @@ bool StructTraits<blink::mojom::WebPreferencesDataView,
   out->delay_for_background_tab_freezing =
       data.delay_for_background_tab_freezing();
 #endif
+#ifdef OHOS_VIDEO_ASSISTANT
+  out->video_assistant_enabled = data.video_assistant_enabled();
+#endif // OHOS_VIDEO_ASSISTANT
   return true;
 }
 

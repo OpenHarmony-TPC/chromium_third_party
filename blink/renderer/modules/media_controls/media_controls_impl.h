@@ -76,6 +76,9 @@ class TextTrack;
 class MediaControlEnteredFullscreenPanelElement;
 class MediaControlEnteredFullscreenTitleDisplayElement;
 #endif // defined(OHOS_MEDIA)
+#ifdef OHOS_VIDEO_ASSISTANT
+class HTMLStyleElement;
+#endif // OHOS_VIDEO_ASSISTANT
 
 // Default implementation of the core/ MediaControls interface used by
 // HTMLMediaElement.
@@ -403,6 +406,10 @@ class MODULES_EXPORT MediaControlsImpl final : public HTMLDivElement,
   Member<MediaControlEnteredFullscreenTitleDisplayElement>
       entered_fullscreen_title_display_;
 #endif // defined(OHOS_MEDIA)
+
+#ifdef OHOS_VIDEO_ASSISTANT
+  Member<HTMLStyleElement> style_element_;
+#endif // OHOS_VIDEO_ASSISTANT
 
   Member<MediaControlsMediaEventListener> media_event_listener_;
   Member<MediaControlsOrientationLockDelegate> orientation_lock_delegate_;

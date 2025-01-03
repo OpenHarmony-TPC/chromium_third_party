@@ -312,6 +312,10 @@ class WebSettings {
   virtual void SetCustomVideoPlayerOverlay(bool overlay) = 0;
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
 
+#ifdef OHOS_VIDEO_ASSISTANT
+  virtual void SetVideoAssistantEnabled(bool enabled) {}
+#endif // OHOS_VIDEO_ASSISTANT
+
  protected:
   ~WebSettings() = default;
 };

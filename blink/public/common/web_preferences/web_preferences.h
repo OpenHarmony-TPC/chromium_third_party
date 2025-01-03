@@ -423,6 +423,10 @@ struct BLINK_COMMON_EXPORT WebPreferences {
   int64_t delay_for_background_tab_freezing = -1;
 #endif
 
+#ifdef OHOS_VIDEO_ASSISTANT
+  bool video_assistant_enabled = false;
+#endif // OHOS_VIDEO_ASSISTANT
+
   // We try to keep the default values the same as the default values in
   // chrome, except for the cases where it would require lots of extra work for
   // the embedder to use the same default value.

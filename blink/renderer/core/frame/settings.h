@@ -162,6 +162,15 @@ bool IsCustomVideoPlayerOverlay() const {
 }
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
 
+#ifdef OHOS_VIDEO_ASSISTANT
+  void SetVideoAssistantEnabled(bool enabled) {
+    video_assistant_enabled_ = enabled;
+  }
+  bool GetVideoAssistantEnabled() {
+    return video_assistant_enabled_;
+  }
+#endif // OHOS_VIDEO_ASSISTANT
+
  private:
   void Invalidate(SettingsDelegate::ChangeType);
 
@@ -202,6 +211,10 @@ bool IsCustomVideoPlayerOverlay() const {
   bool custom_video_player_enabled_ = false;
   bool custom_video_player_overlay_ = false;
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
+
+#ifdef OHOS_VIDEO_ASSISTANT
+  bool video_assistant_enabled_ = false;
+#endif // OHOS_VIDEO_ASSISTANT
 };
 
 }  // namespace blink

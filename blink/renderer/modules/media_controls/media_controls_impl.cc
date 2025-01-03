@@ -106,6 +106,10 @@
 #include "third_party/blink/renderer/platform/web_test_support.h"
 #include "ui/gfx/geometry/size.h"
 
+#ifdef OHOS_VIDEO_ASSISTANT
+#include "third_party/blink/renderer/core/html/html_style_element.h"
+#endif // OHOS_VIDEO_ASSISTANT
+
 namespace blink {
 
 namespace {
@@ -1963,6 +1967,14 @@ void MediaControlsImpl::OnEnteredFullscreen() {
 
   StopHideMediaControlsTimer();
   StartHideMediaControlsTimer();
+
+#ifdef OHOS_VIDEO_ASSISTANT
+  if (MediaElement().IsVideoAssistantEnabled()) {
+    style_element_ = MakeGarbageCollected<HTMLStyleElement>(
+        GetDocument(), CreateElementFlags());
+    ParserAppendChild(style_element_);
+  }
+#endif // OHOS_VIDEO_ASSISTANT
 }
 
 void MediaControlsImpl::OnExitedFullscreen() {
@@ -1980,6 +1992,11 @@ void MediaControlsImpl::OnExitedFullscreen() {
   HidePopupMenu();
   StopHideMediaControlsTimer();
   StartHideMediaControlsTimer();
+#ifdef OHOS_VIDEO_ASSISTANT
+  if (style_element_) {
+    ParserRemoveChild(*style_element_);
+  }
+#endif // OHOS_VIDEO_ASSISTANT
 }
 
 void MediaControlsImpl::OnPictureInPictureChanged() {
@@ -2284,6 +2301,9 @@ void MediaControlsImpl::Trace(Visitor* visitor) const {
   visitor->Trace(entered_fullscreen_panel_);
   visitor->Trace(entered_fullscreen_title_display_);
 #endif // defined(OHOS_MEDIA)
+#ifdef OHOS_VIDEO_ASSISTANT
+  visitor->Trace(style_element_);
+#endif // OHOS_VIDEO_ASSISTANT
   MediaControls::Trace(visitor);
   HTMLDivElement::Trace(visitor);
 }

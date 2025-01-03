@@ -747,6 +747,11 @@ class PLATFORM_EXPORT WebMediaPlayerImpl
   void OnLayerRectChange(const gfx::Rect& rect);
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
 
+#ifdef OHOS_VIDEO_ASSISTANT
+  void OnLayerBoundsChange(const gfx::Rect& bounds);
+  void OnLayerOpacityChange(float opacity);
+#endif // OHOS_VIDEO_ASSISTANT
+
   WebLocalFrame* const frame_;
 
   WebMediaPlayer::NetworkState network_state_ =

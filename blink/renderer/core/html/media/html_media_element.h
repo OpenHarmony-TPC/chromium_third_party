@@ -420,6 +420,15 @@ class CORE_EXPORT HTMLMediaElement
   WebString GetTitle() const;
 #endif // defined(OHOS_MEDIA)
 
+#ifdef OHOS_VIDEO_ASSISTANT
+  bool IsVideoAssistantEnabled() override;
+  void OnLayerBoundsChange(const gfx::Rect& bounds) override;
+  void OnWebMediaPlayerShowing(bool showing) override;
+
+  void TryNotifyVideoPlaying();
+  void NotifyVideoVisible(bool visible);
+#endif // OHOS_VIDEO_ASSISTANT
+
  protected:
   // Assert the correct order of the children in shadow dom when DCHECK is on.
   static void AssertShadowRootChildren(ShadowRoot&);
@@ -780,10 +789,27 @@ class CORE_EXPORT HTMLMediaElement
   mojo::PendingAssociatedReceiver<media::mojom::blink::MediaPlayerObserver>
   AddMediaPlayerObserverAndPassReceiver();
 
+#ifdef OHOS_VIDEO_ASSISTANT
+  media::mojom::blink::VideoAttributesForVASTPtr
+  CollectVideoAttributesForVAST();
+
+  void NotifyVideoPlayingInternal();
+  void UpdateVideoAssistantAttributes();
+  void NotifyVideoDestroyed();
+
+  void OnVideoAssistantConfigReceived(
+      base::OnceCallback<void()> callback,
+      media::mojom::blink::VideoAssistantConfigPtr config);
+  void OnNotifyVideoPlayingTimerFired(TimerBase*);
+#endif // OHOS_VIDEO_ASSISTANT
+
   // Timers used to schedule one-shot tasks with no delay.
   HeapTaskRunnerTimer<HTMLMediaElement> load_timer_;
   HeapTaskRunnerTimer<HTMLMediaElement> audio_tracks_timer_;
   HeapTaskRunnerTimer<HTMLMediaElement> removed_from_document_timer_;
+#ifdef OHOS_VIDEO_ASSISTANT
+  HeapTaskRunnerTimer<HTMLMediaElement> notify_video_playing_timer_;
+#endif // OHOS_VIDEO_ASSISTANT
   // Use a low precision timer for repeating tasks to avoid excessive Idle Wake
   // Up frequency, especially when WebRTC is used and the page contains many
   // HTMLMediaElements.
@@ -1062,6 +1088,16 @@ class CORE_EXPORT HTMLMediaElement
   bool should_create_custom_renderer_ = true;
   bool played_by_custom_mp_ = false;
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
+
+#ifdef OHOS_VIDEO_ASSISTANT
+  bool video_assistant_enabled_ = false;
+  bool video_visible_ = false;
+  bool web_player_showing_ = true;
+  bool has_been_seen_playing_once_ = false;
+  bool has_notified_playing_ = false;
+  gfx::RectF video_rect_;
+  absl::optional<bool> video_assistant_;
+#endif // OHOS_VIDEO_ASSISTANT
 };
 
 template <>
