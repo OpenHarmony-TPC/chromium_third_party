@@ -133,6 +133,11 @@
 #include "third_party/blink/renderer/core/frame/page_scale_constraints_set.h"
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
 
+#ifdef OHOS_VIDEO_ASSISTANT
+#include "base/base_switches.h"
+#include "third_party/blink/renderer/core/frame/visual_viewport.h"
+#endif // OHOS_VIDEO_ASSISTANT
+
 #ifndef LOG_MEDIA_EVENTS
 // Default to not logging events because so many are generated they can
 // overwhelm the rest of the logging.
@@ -486,6 +491,12 @@ HTMLMediaElement::HTMLMediaElement(const QualifiedName& tag_name,
           document.GetTaskRunner(TaskType::kInternalMedia),
           this,
           &HTMLMediaElement::OnRemovedFromDocumentTimerFired),
+#ifdef OHOS_VIDEO_ASSISTANT
+      notify_video_playing_timer_(
+          document.GetTaskRunner(TaskType::kInternalMedia),
+          this,
+          &HTMLMediaElement::OnNotifyVideoPlayingTimerFired),
+#endif // OHOS_VIDEO_ASSISTANT
       progress_event_timer_(
           document.GetTaskRunner(TaskType::kInternalMedia),
           WTF::BindRepeating(&HTMLMediaElement::ProgressEventTimerFired,
@@ -557,6 +568,14 @@ HTMLMediaElement::HTMLMediaElement(const QualifiedName& tag_name,
   AddElementToDocumentMap(this, &document);
 
   UseCounter::Count(document, WebFeature::kHTMLMediaElement);
+
+#ifdef OHOS_VIDEO_ASSISTANT
+  if (base::CommandLine::ForCurrentProcess()->HasSwitch(
+      switches::kEnableVideoAssistant)) {
+    video_assistant_enabled_ = true;
+  }
+  LOG(INFO) << "video_assistant_enabled_[" << video_assistant_enabled_ << "]";
+#endif // OHOS_VIDEO_ASSISTANT
 }
 
 HTMLMediaElement::~HTMLMediaElement() {
@@ -729,6 +748,10 @@ void HTMLMediaElement::AttachToNewFrame() {
 }
 
 void HTMLMediaElement::ResetMojoState() {
+#ifdef OHOS_VIDEO_ASSISTANT
+  LOG(INFO) << "ResetMojoState";
+  NotifyVideoDestroyed();
+#endif // OHOS_VIDEO_ASSISTANT
   if (media_player_host_remote_)
     media_player_host_remote_->Value().reset();
   media_player_host_remote_ = MakeGarbageCollected<DisallowNewWrapper<
@@ -794,6 +817,10 @@ void HTMLMediaElement::ParseAttribute(
                                               params.new_value);
       if (GetMediaControls())
         GetMediaControls()->OnControlsListUpdated();
+
+#ifdef OHOS_VIDEO_ASSISTANT
+      UpdateVideoAssistantAttributes();
+#endif // OHOS_VIDEO_ASSISTANT
     }
   } else if (name == html_names::kPreloadAttr) {
     SetPlayerPreload();
@@ -2214,6 +2241,9 @@ void HTMLMediaElement::SetReadyState(ReadyState state) {
 
     duration_ = web_media_player_->Duration();
     ScheduleEvent(event_type_names::kDurationchange);
+#ifdef OHOS_VIDEO_ASSISTANT
+    UpdateVideoAssistantAttributes();
+#endif // OHOS_VIDEO_ASSISTANT
 
     if (IsHTMLVideoElement())
       ScheduleEvent(event_type_names::kResize);
@@ -2725,6 +2755,9 @@ void HTMLMediaElement::setPlaybackRate(double rate,
   if (playback_rate_ != rate) {
     playback_rate_ = rate;
     ScheduleEvent(event_type_names::kRatechange);
+#ifdef OHOS_VIDEO_ASSISTANT
+    UpdateVideoAssistantAttributes();
+#endif // OHOS_VIDEO_ASSISTANT
   }
 
   // FIXME: remove web_media_player_ check once we figure out how
@@ -3841,10 +3874,23 @@ void HTMLMediaElement::DurationChanged(double duration, bool request_seek) {
   if (duration_ == duration)
     return;
 
+#ifdef OHOS_VIDEO_ASSISTANT
+  bool old_duration_is_valid = duration_ > 0 &&
+      duration_ < std::numeric_limits<double>::max();
+  bool new_duration_is_valid = duration > 0 &&
+      duration < std::numeric_limits<double>::max();
+#endif // OHOS_VIDEO_ASSISTANT
+
   DVLOG(3) << "durationChanged(" << *this << ") : " << duration_ << " -> "
            << duration;
   duration_ = duration;
   ScheduleEvent(event_type_names::kDurationchange);
+
+#ifdef OHOS_VIDEO_ASSISTANT
+  if (old_duration_is_valid != new_duration_is_valid) {
+    UpdateVideoAssistantAttributes();
+  }
+#endif // OHOS_VIDEO_ASSISTANT
 
   if (web_media_player_)
     web_media_player_->OnTimeUpdate();
@@ -4087,6 +4133,11 @@ void HTMLMediaElement::StopPeriodicTimers() {
 
 void HTMLMediaElement::
     ClearMediaPlayerAndAudioSourceProviderClientWithoutLocking() {
+#ifdef OHOS_VIDEO_ASSISTANT
+  LOG(INFO) << "ClearMediaPlayerAndAudioSourceProviderClientWithoutLocking";
+  NotifyVideoDestroyed();
+#endif // OHOS_VIDEO_ASSISTANT
+
   GetAudioSourceProvider().SetClient(nullptr);
   if (web_media_player_) {
     audio_source_provider_.Wrap(nullptr);
@@ -4892,11 +4943,23 @@ void HTMLMediaElement::PausePlayback(PauseReason pause_reason) {
 void HTMLMediaElement::DidPlayerStartPlaying() {
   for (auto& observer : media_player_observer_remote_set_->Value())
     observer->OnMediaPlaying();
+
+#ifdef OHOS_VIDEO_ASSISTANT
+  LOG(INFO) << "DidPlayerStartPlaying";
+  TryNotifyVideoPlaying();
+#endif // OHOS_VIDEO_ASSISTANT
 }
 
 void HTMLMediaElement::DidPlayerPaused(bool stream_ended) {
   for (auto& observer : media_player_observer_remote_set_->Value())
     observer->OnMediaPaused(stream_ended);
+
+#ifdef OHOS_VIDEO_ASSISTANT
+  LOG(INFO) << "DidPlayerPaused";
+  if (notify_video_playing_timer_.IsActive()) {
+    notify_video_playing_timer_.Stop();
+  }
+#endif // OHOS_VIDEO_ASSISTANT
 }
 
 #if BUILDFLAG(IS_OHOS)
@@ -5260,6 +5323,134 @@ void HTMLMediaElement::FullscreenChanged(bool is_fullscreen) {
   }
 }
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
+
+#ifdef OHOS_VIDEO_ASSISTANT
+bool HTMLMediaElement::IsVideoAssistantEnabled() {
+  if (!video_assistant_enabled_) {
+    return false;
+  }
+  return video_assistant_.value_or(true);
+}
+void HTMLMediaElement::OnLayerBoundsChange(const gfx::Rect& bounds) {
+  if (has_been_seen_playing_once_) {
+    return;
+  }
+  video_rect_ = gfx::RectF(bounds);
+  if (GetDocument().GetPage()) {
+    const auto& visual_viewport = GetDocument().GetPage()->GetVisualViewport();
+    gfx::Rect visible_rect = visual_viewport.VisibleContentRect();
+    visible_rect = gfx::Rect(visible_rect.size());
+    if (!bounds.Intersects(visible_rect)) {
+      video_rect_ = gfx::RectF();
+    }
+  }
+  if (has_notified_playing_) {
+    has_been_seen_playing_once_ = !video_rect_.IsEmpty();
+  }
+  UpdateVideoAssistantAttributes();
+}
+void HTMLMediaElement::OnWebMediaPlayerShowing(bool showing) {
+  if (web_player_showing_ == showing) {
+    return;
+  }
+  web_player_showing_ = showing;
+  UpdateVideoAssistantAttributes();
+}
+void HTMLMediaElement::TryNotifyVideoPlaying() {
+  if (!video_assistant_enabled_) {
+    return;
+  }
+  if (!video_assistant_) {
+    auto callback = WTF::BindOnce(&HTMLMediaElement::NotifyVideoPlayingInternal,
+        WrapWeakPersistent(this));
+    GetMediaPlayerHostRemote().RequestVideoAssistantConfig(
+        WTF::BindOnce(&HTMLMediaElement::OnVideoAssistantConfigReceived,
+            WrapWeakPersistent(this), std::move(callback)));
+    return;
+  }
+  NotifyVideoPlayingInternal();
+}
+void HTMLMediaElement::NotifyVideoPlayingInternal() {
+  if (!IsVideoAssistantEnabled()) {
+    return;
+  }
+  const int delay_in_ms = 100;
+  if (!notify_video_playing_timer_.IsActive()) {
+    notify_video_playing_timer_.StartOneShot(
+        base::Milliseconds(delay_in_ms), FROM_HERE);
+  }
+}
+void HTMLMediaElement::UpdateVideoAssistantAttributes() {
+  if (!IsVideoAssistantEnabled()) {
+    return;
+  }
+  if (IsHTMLVideoElement()) {
+    auto attributes = CollectVideoAttributesForVAST();
+    for (auto& observer : media_player_observer_remote_set_->Value()) {
+      observer->OnUpdateVideoAttributes(attributes.Clone());
+    }
+  }
+}
+void HTMLMediaElement::NotifyVideoVisible(bool visible) {
+  if (!IsVideoAssistantEnabled()) {
+    return;
+  }
+  bool changed = video_visible_ != visible;
+  LOG(INFO) << "NotifyVideoVisible(" << visible << "), changed[" << changed << "]";
+  video_visible_ = visible;
+  if (changed) {
+    UpdateVideoAssistantAttributes();
+  }
+}
+void HTMLMediaElement::NotifyVideoDestroyed() {
+  if (!IsVideoAssistantEnabled()) {
+    return;
+  }
+  LOG(INFO) << "NotifyVideoDestroyed";
+  if (IsHTMLVideoElement()) {
+    for (auto& observer : media_player_observer_remote_set_->Value()) {
+      observer->OnVideoDestroyed();
+    }
+  }
+}
+media::mojom::blink::VideoAttributesForVASTPtr
+HTMLMediaElement::CollectVideoAttributesForVAST() {
+  auto attributes = media::mojom::blink::VideoAttributesForVAST::New();
+  attributes->show_fullscreen_button = true;
+  attributes->show_download_button = !controls_list_->ShouldHideDownload();
+  attributes->show_playback_rate_menu = true;
+  attributes->current_playback_rate = playbackRate();
+  attributes->rect = video_rect_;
+  attributes->supports_save = SupportsSave();
+  attributes->duration = duration();
+  attributes->visible = video_visible_ && web_player_showing_ &&
+      !video_rect_.IsEmpty();
+  return attributes;
+}
+void HTMLMediaElement::OnVideoAssistantConfigReceived(
+    base::OnceCallback<void()> callback,
+    media::mojom::blink::VideoAssistantConfigPtr config) {
+  LOG(INFO) << "OnVideoAssistantConfigReceived(" << config->video_assistant << ")";
+  video_assistant_ = config->video_assistant;
+  if (!video_assistant_.value()) {
+    return;
+  }
+  std::move(callback).Run();
+}
+void HTMLMediaElement::OnNotifyVideoPlayingTimerFired(TimerBase*) {
+  LOG(INFO) << "OnNotifyVideoPlayingTimerFired";
+  has_notified_playing_ = true;
+  if (IsHTMLVideoElement()) {
+    auto attributes = CollectVideoAttributesForVAST();
+    if (!has_been_seen_playing_once_) {
+      has_been_seen_playing_once_ = !video_rect_.IsEmpty();
+    }
+    for (auto& observer : media_player_observer_remote_set_->Value()) {
+      observer->OnVideoPlaying(attributes.Clone());
+    }
+  }
+}
+#endif // OHOS_VIDEO_ASSISTANT
 
 STATIC_ASSERT_ENUM(WebMediaPlayer::kReadyStateHaveNothing,
                    HTMLMediaElement::kHaveNothing);

@@ -530,5 +530,10 @@ struct WebPreferences {
   [EnableIf=ohos_active_policy]
   int64 delay_for_background_tab_freezing = -1;
   // #endif OHOS_ACTIVE_POLICY
+
+  // #ifdef OHOS_VIDEO_ASSISTANT
+  [EnableIf=ohos_video_assistant]
+  bool video_assistant_enabled = false;
+  // #endif OHOS_VIDEO_ASSISTANT
 };
 

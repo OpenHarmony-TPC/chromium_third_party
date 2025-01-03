@@ -875,6 +875,12 @@ struct BLINK_COMMON_EXPORT StructTraits<blink::mojom::WebPreferencesDataView,
   }
 #endif // OHOS_ACTIVE_POLICY
 
+#ifdef OHOS_VIDEO_ASSISTANT
+  static bool video_assistant_enabled(
+      const blink::web_pref::WebPreferences& r) {
+    return r.video_assistant_enabled;
+  }
+#endif // OHOS_VIDEO_ASSISTANT
 };
 
 }  // namespace mojo

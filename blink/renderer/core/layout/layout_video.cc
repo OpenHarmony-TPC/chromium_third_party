@@ -40,6 +40,9 @@ const float kInitEffectZoom = 1.0f;
 
 LayoutVideo::LayoutVideo(HTMLVideoElement* video) : LayoutMedia(video) {
   SetIntrinsicSize(CalculateIntrinsicSize(kInitEffectZoom));
+#ifdef OHOS_VIDEO_ASSISTANT
+  MediaElement()->NotifyVideoVisible(true);
+#endif // OHOS_VIDEO_ASSISTANT
 }
 
 LayoutVideo::~LayoutVideo() {
@@ -249,5 +252,13 @@ CompositingReasons LayoutVideo::AdditionalCompositingReasons() const {
 
   return CompositingReason::kNone;
 }
+
+#ifdef OHOS_VIDEO_ASSISTANT
+void LayoutVideo::WillBeDestroyed() {
+  NOT_DESTROYED();
+  LayoutMedia::WillBeDestroyed();
+  MediaElement()->NotifyVideoVisible(false);
+}
+#endif // OHOS_VIDEO_ASSISTANT
 
 }  // namespace blink

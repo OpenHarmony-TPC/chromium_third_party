@@ -866,4 +866,11 @@ void WebSettingsImpl::SetCustomVideoPlayerOverlay(bool overlay) {
   settings_->SetCustomVideoPlayerOverlay(overlay);
 }
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
+
+#ifdef OHOS_VIDEO_ASSISTANT
+void WebSettingsImpl::SetVideoAssistantEnabled(bool enabled) {
+  settings_->SetVideoAssistantEnabled(enabled);
+}
+#endif // OHOS_VIDEO_ASSISTANT
+
 }  // namespace blink
