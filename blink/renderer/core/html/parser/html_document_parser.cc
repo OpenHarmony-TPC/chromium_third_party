@@ -193,11 +193,9 @@ bool IsPreloadScanningEnabled(Document* document) {
 
 #if BUILDFLAG(IS_OHOS)
 void SetOptimizeParserBudgetEnabled(bool enable) {
-  if (kUseOptimizedBudget != enable) {
-    LOG(DEBUG) << "OptimizeParserBudget set enable: " << enable;
-    TRACE_EVENT1("blink", "SetOptimizeParserBudgetEnabled", "enable", enable);
-    kUseOptimizedBudget = enable; 
-  }
+  LOG(DEBUG) << "OptimizeParserBudget set enable: " << enable;
+  TRACE_EVENT1("blink", "SetOptimizeParserBudgetEnabled", "enable", enable);
+  kUseOptimizedBudget = enable; 
 }
 #endif
 
@@ -730,9 +728,16 @@ bool HTMLDocumentParser::PumpTokenizer() {
           elapsed_time = chunk_parsing_timer.Elapsed();
         }
         should_yield = elapsed_time >= timed_budget;
+#if BUILDFLAG(IS_OHOS)
         if (kUseOptimizedBudget) {
-          should_yield = budget <= 0;
+          should_yield = should_yield || budget <= 0;
+          if (should_yield) {
+            LOG(DEBUG) << "OptimizeParserBudget in PumpTokenlizer. current parse tokens: " << tokens_parsed <<
+                ". left token budget: " << budget <<
+                ". elapsed time: " << elapsed_time;
+          }
         }
+#endif
       } else {
         should_yield = budget <= 0;
       }
