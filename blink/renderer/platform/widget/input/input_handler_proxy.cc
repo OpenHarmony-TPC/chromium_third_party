@@ -324,6 +324,10 @@ void InputHandlerProxy::HandleInputEventWithLatencyInfo(
                 tracing::FillFlowEvent(ctx, TrackEvent::LegacyEvent::FLOW_INOUT,
                                        trace_id);
               });
+  std::string trace_content_ = "event_type: " + std::to_string(static_cast<int>(event->latency_info().source_event_type())) +
+      " ,step: " + "STEP_HANDLE_INPUT_EVENT_IMPL";
+  OHOS_TRACE_EVENT2("input,benchmark,latencyInfo", "LatencyInfo.Flow", "trace_id",
+                    std::to_string(trace_id), "trace_content", trace_content_);
   OHOS_TRACE_EVENT2("input", "InputHandlerProxy::HandleInputEventWithLatencyInfo",
       "type", WebInputEvent::GetName(event->Event().GetType()),
       "trace_id", trace_id);

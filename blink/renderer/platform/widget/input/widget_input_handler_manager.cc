@@ -1039,6 +1039,11 @@ void WidgetInputHandlerManager::DidHandleInputEventSentToCompositor(
       {event->latency_info()},
       ChromeLatencyInfo::STEP_DID_HANDLE_INPUT_AND_OVERSCROLL);
 
+  std::string trace_content_ = "event_type: " + std::to_string(static_cast<int>(event->latency_info().source_event_type())) +
+      " ,step: " + "STEP_DID_HANDLE_INPUT_AND_OVERSCROLL";
+  OHOS_TRACE_EVENT2("input,benchmark,latencyInfo", "LatencyInfo.Flow", "trace_id",
+                    std::to_string(event->latency_info().trace_id()), "trace_content", trace_content_);
+
   if (event_disposition == InputHandlerProxy::REQUIRES_MAIN_THREAD_HIT_TEST) {
     TRACE_EVENT_INSTANT0("input", "PostingHitTestToMainThread",
                          TRACE_EVENT_SCOPE_THREAD);
@@ -1146,6 +1151,11 @@ void WidgetInputHandlerManager::DidHandleInputEventSentToMain(
                "ack_state", ack_state);
   ui::LatencyInfo::TraceIntermediateFlowEvents(
       {latency_info}, ChromeLatencyInfo::STEP_HANDLED_INPUT_EVENT_MAIN_OR_IMPL);
+
+  std::string trace_content_ = "event_type: " + std::to_string(static_cast<int>(latency_info.source_event_type())) +
+      " ,step: " + "STEP_HANDLED_INPUT_EVENT_MAIN_OR_IMPL";
+  OHOS_TRACE_EVENT2("input,benchmark,latencyInfo", "LatencyInfo.Flow", "trace_id",
+                    std::to_string(latency_info.trace_id()), "trace_content", trace_content_);
 
   absl::optional<cc::TouchAction> touch_action_for_ack = touch_action_from_main;
   if (!touch_action_for_ack.has_value()) {
