@@ -617,6 +617,7 @@ class CORE_EXPORT PaintLayerScrollableArea final
   CompositorElementId GetScrollCornerElementId() const;
 
 #ifdef OHOS_SCROLLBAR
+  float ComputeVisibleAreaScale() const;
   void UpdateScrollbarLengthOrCreateWidthScale();
 #endif // OHOS_SCROLLBAR
 
