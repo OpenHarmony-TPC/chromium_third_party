@@ -331,7 +331,7 @@ void WidgetBaseInputHandler::HandleInputEvent(
                                        trace_id);
               });
 
-  std::string trace_content_ = "event_type: " + std::to_string(static_cast<int>(coalesced_event.latency_info.source_event_type())) +
+  std::string trace_content_ = "event_type: " + std::to_string(static_cast<int>(coalesced_event.latency_info().source_event_type())) +
       " ,step: " + "STEP_HANDLE_INPUT_EVENT_MAIN";
   OHOS_TRACE_EVENT2("input,benchmark,latencyInfo", "LatencyInfo.Flow", "trace_id",
                     std::to_string(trace_id), "trace_content", trace_content_);
