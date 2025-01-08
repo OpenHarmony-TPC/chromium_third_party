@@ -89,7 +89,7 @@ constexpr int kInfiniteTokenizationBudget = 1e7;
 constexpr int kNumYieldsWithDefaultBudget = 2;
 
 #if BUILDFLAG(IS_OHOS)
-constexpr int kOptimizedMaxTokenizationBudget = 100;
+constexpr int kOptimizedMaxTokenizationBudget = 150;
 static bool kUseOptimizedBudget = false;
 #endif
 
