@@ -44,7 +44,7 @@ class CookieJarHelper {
   class ShmRegisterRecord;
   using ShmRegisterRecordList = std::list<ShmRegisterRecord*>;
   String cookie_value_;
-  Member<Document> document_;
+  Persistent<Document> document_;
   mojo::ScopedSharedBufferHandle buffer_;
   mojo::ScopedSharedBufferMapping mapping_;
   ShmRegisterRecordList shm_record_list_;
