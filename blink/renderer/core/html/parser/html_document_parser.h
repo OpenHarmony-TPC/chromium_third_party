@@ -84,6 +84,10 @@ enum ParserPrefetchPolicy {
 void CORE_EXPORT ResetDiscardedTokenCountForTesting();
 size_t CORE_EXPORT GetDiscardedTokenCountForTesting();
 
+#if BUILDFLAG(IS_OHOS)
+void CORE_EXPORT SetOptimizeParserBudgetEnabled(bool enable);
+#endif
+
 class CORE_EXPORT HTMLDocumentParser : public ScriptableDocumentParser,
                                        private HTMLParserScriptRunnerHost {
  public:
