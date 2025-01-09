@@ -831,6 +831,10 @@ class BLINK_EXPORT WebLocalFrameClient {
   virtual void DidSubresourceFiltered() {}
   virtual bool GetGlobalAdblockEnabled() { return false; }
 #endif  // OHOS_ARKWEB_ADBLOCK
+
+#if defined(OHOS_JSPROXY)
+  virtual void RunScriptsAtHeadReady() {}
+#endif
 };
 
 }  // namespace blink
