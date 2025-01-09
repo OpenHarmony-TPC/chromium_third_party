@@ -493,7 +493,12 @@ void SystemClipboard::WriteDataObject(DataObject* data_object) {
     }
   }
   if (!custom_data.empty()) {
-    clipboard_->WriteCustomData(std::move(custom_data));
+    clipboard_->WriteCustomData(std::move(custom_data)
+#if defined(OHOS_CLIPBOARD)
+,
+                              copy_option
+#endif // defined(OHOS_CLIPBOARD)
+        );
   }
 }
 
@@ -541,9 +546,21 @@ void SystemClipboard::WriteUnsanitizedCustomFormat(const String& type,
       data.size() >= mojom::blink::ClipboardHost::kMaxDataSize) {
     return;
   }
+#if defined(OHOS_CLIPBOARD)
+  if (!IsCopyAllowed()) {
+    LOG(ERROR) << "WritePlainText failed, copy option mode is 'NONE'";
+    return;
+  }
+  blink::mojom::CopyOptionMode copy_option = frame_->GetSettings()->GetCopyOption();
+#endif // defined(OHOS_CLIPBOARD)
   // The format size restriction is added in `ClipboardWriter::IsValidType`.
   DCHECK_LT(type.length(), mojom::blink::ClipboardHost::kMaxFormatSize);
-  clipboard_->WriteUnsanitizedCustomFormat(type, std::move(data));
+  clipboard_->WriteUnsanitizedCustomFormat(type, std::move(data)
+#if defined(OHOS_CLIPBOARD)
+,
+                              copy_option
+#endif // defined(OHOS_CLIPBOARD)
+        );
 }
 
 void SystemClipboard::Trace(Visitor* visitor) const {
