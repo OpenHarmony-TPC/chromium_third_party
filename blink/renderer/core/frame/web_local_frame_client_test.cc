@@ -62,6 +62,11 @@ class CallTrackingTestWebLocalFrameClient
     TestWebFrameClient::RunScriptsAtDocumentReady();
   }
 
+  void RunScriptsAtHeadReady() override {
+    calls_.push_back("RunScriptsAtHeadReady");
+    TestWebFrameClient::RunScriptsAtHeadReady();
+  }
+
   void RunScriptsAtDocumentIdle() override {
     calls_.push_back("RunScriptsAtDocumentIdle");
     TestWebFrameClient::RunScriptsAtDocumentIdle();

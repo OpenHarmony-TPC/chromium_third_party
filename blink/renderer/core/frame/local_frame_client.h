@@ -335,6 +335,10 @@ class CORE_EXPORT LocalFrameClient : public FrameClient {
   virtual void RunScriptsAtDocumentReady(bool document_is_empty) = 0;
   virtual void RunScriptsAtDocumentIdle() = 0;
 
+#if defined(OHOS_JSPROXY)
+  virtual void RunScriptsAtHeadElementAvailable() = 0;
+#endif
+
   virtual void DidCreateScriptContext(v8::Local<v8::Context>,
                                       int32_t world_id) = 0;
   virtual void WillReleaseScriptContext(v8::Local<v8::Context>,

@@ -227,6 +227,15 @@ void LocalFrameClientImpl::RunScriptsAtDocumentElementAvailable() {
   // The callback might have deleted the frame, do not use |this|!
 }
 
+#if defined(OHOS_JSPROXY)
+void LocalFrameClientImpl::RunScriptsAtHeadElementAvailable() {
+  if (web_frame_ && web_frame_->Client()) {
+    web_frame_->Client()->RunScriptsAtHeadReady();
+  }
+  // The callback might have deleted the frame, do not use |this|!
+}
+#endif
+
 void LocalFrameClientImpl::RunScriptsAtDocumentReady(bool document_is_empty) {
   if (!document_is_empty && IsLoadedAsMHTMLArchive(web_frame_->GetFrame())) {
     // For MHTML pages, recreate the shadow DOM contents from the templates that
