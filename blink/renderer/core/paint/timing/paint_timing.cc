@@ -15,7 +15,9 @@
 #include "third_party/blink/renderer/core/frame/local_dom_window.h"
 #include "third_party/blink/renderer/core/frame/local_frame.h"
 #include "third_party/blink/renderer/core/frame/local_frame_view.h"
+#if BUILDFLAG(IS_OHOS)
 #include "third_party/blink/renderer/core/html/parser/html_document_parser.h"
+#endif
 #include "third_party/blink/renderer/core/inspector/console_message.h"
 #include "third_party/blink/renderer/core/loader/document_loader.h"
 #include "third_party/blink/renderer/core/loader/interactive_detector.h"
@@ -354,7 +356,7 @@ void PaintTiming::SetFirstContentfulPaintPresentation(base::TimeTicks stamp) {
 #if BUILDFLAG(IS_OHOS)
   LOG(DEBUG) << "OptimizeParserBudget FCP reset budget.";
   TRACE_EVENT0("blink", "PaintTiming::SetFirstContentfulPaintPresentation");
-  blink:SetOptimizeParserBudgetEnabled(false);
+  SetOptimizeParserBudgetEnabled(false);
 #endif
   first_contentful_paint_presentation_ = stamp;
   bool is_soft_navigation_fcp = false;
