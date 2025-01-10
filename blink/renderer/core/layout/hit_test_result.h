@@ -224,6 +224,10 @@ class CORE_EXPORT HitTestResult {
   }
 #endif
 
+#ifdef OHOS_DRAG_DROP
+  gfx::Rect GetReplacedContentRect() const;
+#endif
+
  private:
 #ifndef OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
   NodeSet& MutableListBasedTestResult();  // See above.
