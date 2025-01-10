@@ -1446,8 +1446,10 @@ std::unique_ptr<DragImage> DetermineDragImageAndRect(
   if (state.drag_type_ == kDragSourceActionSelection) {
     if (!drag_image) {
 #ifdef OHOS_DRAG_DROP
-      drag_image = DragController::DragImageForSelection(*frame, kDragTextAlpha, visibleRect);
-      drag_obj_rect = DragRectForSelectionDrag(*frame, visibleRect);
+      gfx::RectF visible_rect_from_root_frame =
+          gfx::RectF(frame->View()->ConvertFromRootFrame(gfx::ToEnclosingRect(visibleRect)));
+      drag_image = DragController::DragImageForSelection(*frame, kDragTextAlpha, visible_rect_from_root_frame);
+      drag_obj_rect = DragRectForSelectionDrag(*frame, visible_rect_from_root_frame);
 #else
       drag_image = DragController::DragImageForSelection(*frame, kDragImageAlpha);
       drag_obj_rect = DragRectForSelectionDrag(*frame);
@@ -1588,7 +1590,7 @@ gfx::RectF DragController::GetVisibleRectToUIInRootFrame(LocalFrame* frame) {
   }
 
   gfx::Rect visibleRect = page_->GetChromeClient().GetVisibleRectToWeb(frame);
-  gfx::RectF visible_rect_in_root_frame(frame->View()->ConvertToRootFrame(visibleRect));
+  gfx::RectF visible_rect_in_root_frame(visibleRect);
   auto scroll_offset = frame->GetPage()->GetVisualViewport().GetScrollOffset();
   float page_scale_factor = frame->GetPage()->PageScaleFactor();
   
