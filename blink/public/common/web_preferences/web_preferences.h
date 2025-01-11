@@ -419,6 +419,11 @@ struct BLINK_COMMON_EXPORT WebPreferences {
   bool custom_video_player_overlay = false;
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
 
+#ifdef OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
+  bool enable_media_network_traffic_prompt = false;
+  bool playback_with_mobile_data_allowed = false;
+#endif // OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
+
 #ifdef OHOS_ACTIVE_POLICY
   int64_t delay_for_background_tab_freezing = -1;
 #endif
