@@ -1962,8 +1962,11 @@ void MediaControlsImpl::OnEnteredFullscreen() {
   }
 #endif // defined(OHOS_MEDIA)
   fullscreen_button_->SetIsFullscreen(true);
+
+#if !BUILDFLAG(IS_OHOS)
   if (display_cutout_fullscreen_button_)
     display_cutout_fullscreen_button_->SetIsWanted(true);
+#endif
 
   StopHideMediaControlsTimer();
   StartHideMediaControlsTimer();
@@ -1986,8 +1989,11 @@ void MediaControlsImpl::OnExitedFullscreen() {
   SetClass("fullscreen", false);
 #endif // defined(OHOS_MEDIA)
   fullscreen_button_->SetIsFullscreen(false);
+
+#if !BUILDFLAG(IS_OHOS)
   if (display_cutout_fullscreen_button_)
     display_cutout_fullscreen_button_->SetIsWanted(false);
+#endif
 
   HidePopupMenu();
   StopHideMediaControlsTimer();

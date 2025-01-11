@@ -752,7 +752,11 @@ ScriptPromise Fullscreen::RequestFullscreen(Element& pending,
 
 #if defined(OHOS_CUSTOM_VIDEO_PLAYER)
   if (request_type & FullscreenRequestType::kForCustomMediaPlayer) {
-    error = nullptr;
+    if (!pending.isConnected()) {
+      error = "Element is not connected";
+    } else {
+      error = nullptr;
+    }
   }
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
 

@@ -858,6 +858,12 @@ void WebSettingsImpl::SetModalContextMenu(bool is_available) {
   settings_->SetModalContextMenu(is_available);
 }
 
+#ifdef OHOS_VIDEO_ASSISTANT
+void WebSettingsImpl::SetVideoAssistantEnabled(bool enabled) {
+  settings_->SetVideoAssistantEnabled(enabled);
+}
+#endif // OHOS_VIDEO_ASSISTANT
+
 #if defined(OHOS_CUSTOM_VIDEO_PLAYER)
 void WebSettingsImpl::SetCustomVideoPlayerEnabled(bool enable) {
   settings_->SetCustomVideoPlayerEnabled(enable);
