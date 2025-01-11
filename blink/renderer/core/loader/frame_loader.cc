@@ -1674,6 +1674,15 @@ void FrameLoader::RunScriptsAtDocumentElementAvailable() {
   // The frame might be detached at this point.
 }
 
+#if defined(OHOS_JSPROXY)
+void FrameLoader::RunScriptsAtHeadElementAvailable() {
+  if (Client()) {
+    Client()->RunScriptsAtHeadElementAvailable();
+  }
+}
+#endif
+
+
 void FrameLoader::DispatchDidClearDocumentOfWindowObject() {
   if (state_ == State::kUninitialized)
     return;

@@ -48,6 +48,9 @@
 #include "third_party/blink/renderer/core/html/custom/custom_element_registry.h"
 #include "third_party/blink/renderer/core/html/forms/form_associated.h"
 #include "third_party/blink/renderer/core/html/forms/html_form_element.h"
+#if defined(OHOS_JSPROXY)
+#include "third_party/blink/renderer/core/html/html_head_element.h"
+#endif
 #include "third_party/blink/renderer/core/html/html_html_element.h"
 #include "third_party/blink/renderer/core/html/html_plugin_element.h"
 #include "third_party/blink/renderer/core/html/html_script_element.h"
@@ -782,6 +785,19 @@ void HTMLConstructionSite::InsertHTMLHeadElement(AtomicHTMLToken* token) {
   AttachLater(CurrentNode(), head_->GetElement());
   open_elements_.PushHTMLHeadElement(head_);
 }
+
+#if defined(OHOS_JSPROXY)
+void HTMLConstructionSite::RunScriptsAtHeadElementAvailable() {
+  if (!head_) {
+    return;
+  }
+
+  HTMLHeadElement* element = To<HTMLHeadElement>(head_->GetElement());
+  if (element) {
+    element->RunScriptsAtHeadElementAvailable();
+  }
+}
+#endif
 
 void HTMLConstructionSite::InsertHTMLBodyElement(AtomicHTMLToken* token) {
   DCHECK(!ShouldFosterParent());
