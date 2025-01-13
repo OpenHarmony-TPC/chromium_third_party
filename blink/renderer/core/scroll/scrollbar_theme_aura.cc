@@ -45,6 +45,9 @@
 #include "third_party/blink/renderer/platform/theme/web_theme_engine_helper.h"
 #include "third_party/blink/renderer/platform/web_test_support.h"
 #include "ui/gfx/geometry/point_conversions.h"
+#if BUILDFLAG(IS_OHOS)
+#include "base/ohos/sys_info_utils.h"
+#endif
 
 namespace blink {
 
@@ -57,7 +60,7 @@ namespace {
 // this.
 constexpr int kScrollbarThicknessForWebTests = 15;
 #ifdef OHOS_SCROLLBAR
-constexpr int kScrollbarForceThicknessForWeb = 24; // 1 vp = 1.5 px, 16 * 1.5
+constexpr int kScrollbarForceThicknessForWeb = 16;
 #endif
 // While the theme does not have specific values for scrollbar-width: thin
 // we just use a fixed 2/3 ratio of the default value.
@@ -180,8 +183,9 @@ int ScrollbarThemeAura::ScrollbarThickness(float scale_from_dip,
           WebThemeEngine::kPartScrollbarVerticalTrack);
 
 #ifdef OHOS_SCROLLBAR
+  float ratio = base::ohos::GetPixelRatio();
   if (!OverlayScrollbarsEnabled()) {
-    return kScrollbarForceThicknessForWeb;
+    return kScrollbarForceThicknessForWeb * ratio;
   }
 #endif
   return scrollbar_size.width() * Proportion(scrollbar_width) * scale_from_dip;
