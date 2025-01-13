@@ -92,6 +92,7 @@ void HEIFImageDecoder::OnSetData(SegmentReader* data) {
               << " * " << decoder_adapter->GetImageHeight();
     SetSize(decoder_adapter->GetImageWidth(),
             decoder_adapter->GetImageHeight());
+    data_ = data;
     return;
   }
   LOG(ERROR) << "[HeifSupport] Fail to parsing image information. ";
@@ -163,7 +164,82 @@ wtf_size_t HEIFImageDecoder::DecodeFrameCount() {
 
 void HEIFImageDecoder::InitializeNewFrame(wtf_size_t index) {}
 
-void HEIFImageDecoder::Decode(wtf_size_t index) {}
+void HEIFImageDecoder::Decode(wtf_size_t index) {
+  if (frame_buffer_cache_.empty()) {
+    LOG(ERROR) << "[HeifSupport] HEIFImageDecoder::Decode frame_buffer_cache is empty.";
+    SetFailed();
+    return;
+  }
+
+  const char* segment = nullptr;
+  const size_t bytes = data_->GetSomeData(segment, 0);
+  if (segment == nullptr || bytes == 0) {
+    LOG(ERROR) << "[HeifSupport] HEIFImageDecoder::Decode GetSomeData failed.";
+    SetFailed();
+    return;
+  }
+
+  bool decode_rst = GetDecoderAdapter()->Decode((const uint8_t*)segment, (uint32_t)data_->size(),
+                                                OHOS::NWeb::AllocatorType::kShareMemAlloc, false);
+  if (!decode_rst) {
+    LOG(ERROR) << "[HeifSupport] HEIFImageDecoder::Decode Decode failed.";
+    SetFailed();
+    return;
+  }
+  LOG(DEBUG) << "[HeifSupport] HEIFImageDecoder::Decode GetDecoderAdapter()->Decode succeed.";
+
+  void *ptr = GetDecoderAdapter()->GetDecodeData();
+  if (ptr == nullptr) {
+    LOG(ERROR) << "[HeifSupport] HEIFImageDecoder::Decode GetDecodeData failed.";
+    SetFailed();
+    return;
+  }
+
+  if (!InitFrameBuffer(index)) {
+    LOG(ERROR) << "[HeifSupport] HEIFImageDecoder::Decode InitFrameBuffer failed.";
+    SetFailed();
+    return;
+  }
+
+  ImageFrame& buffer = frame_buffer_cache_[index];
+  ImageFrame::PixelData* pixel = buffer.GetAddr(0, 0);
+  if (pixel == nullptr) {
+    LOG(ERROR) << "[HeifSupport] HEIFImageDecoder::Decode GetAddr failed.";
+    SetFailed();
+    return;
+  }
+
+  int stride = GetDecoderAdapter()->GetStride();
+  if (stride <= 0) {
+    LOG(ERROR) << "[HeifSupport] HEIFImageDecoder::Decode stride error. stride = " << stride;
+    SetFailed();
+    return;
+  }
+
+  int width = buffer.Bitmap().width();
+  int height = buffer.Bitmap().height();
+  size_t rowBytes = buffer.Bitmap().rowBytes();
+  int bytesPerPixel = buffer.Bitmap().bytesPerPixel();
+  for (int i = 0; i < height; i++) {
+    if (memcpy_s((uint8_t*)pixel + i * width * bytesPerPixel, rowBytes,
+                 (uint8_t*)ptr + i * stride, width * bytesPerPixel) != EOK) {
+      LOG(ERROR) << "[HeifSupport] HEIFImageDecoder::Decode memcpy failed."
+                 << "width = " << width
+                 << ", height = " << height
+                 << ", rowBytes = " << rowBytes
+                 << ", bytesPerPixel = " << bytesPerPixel
+                 << ", stride = " << stride;
+      SetFailed();
+      return;
+    }
+  }
+
+  GetDecoderAdapter()->ReleasePixelMap();
+
+  buffer.SetPixelsChanged(true);
+  buffer.SetStatus(ImageFrame::kFrameComplete);
+  LOG(DEBUG) << "[HeifSupport] HEIFImageDecoder::Decode decode complete.";
+}
 
 bool HEIFImageDecoder::CanReusePreviousFrameBuffer(wtf_size_t index) const {
   return true;

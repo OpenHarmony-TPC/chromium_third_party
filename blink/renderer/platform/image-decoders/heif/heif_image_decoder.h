@@ -67,6 +67,7 @@ class PLATFORM_EXPORT HEIFImageDecoder final : public ImageDecoder {
   static OHOS::NWeb::OhosImageDecoderAdapter* GetDecoderAdapter();
 
  private:
+  scoped_refptr<SegmentReader> data_;
   // ImageDecoder:
   void DecodeSize() override;
   wtf_size_t DecodeFrameCount() override;
