@@ -858,7 +858,7 @@ void LocalFrameView::PerformLayout() {
     }
     if (body_height >
         (GetFrame().ContentLayoutObject()->ViewRect().Height().ToInt() *
-        1.5)) {
+        1.5)) { // only record preload info in 1.5 viewport height
       document->Fetcher()->UpdateAllowPreloadRecord(false);
     } else {
       document->Fetcher()->UpdateAllowPreloadRecord(true);
