@@ -893,7 +893,7 @@ bool HTMLPlugInElement::CheckNativeType(const char* key) const {
     LOG(ERROR) << "[NativeEmbed] Registered type " << rule[valid_key].Utf8() << " doens't match " << service_type_;
     return false;
   }
- 
+
   return true;
 }
 #endif
