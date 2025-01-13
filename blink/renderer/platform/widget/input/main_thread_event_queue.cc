@@ -764,7 +764,9 @@ void MainThreadEventQueue::SetNeedsMainFrame() {
           FROM_HERE, kMaxRafDelay,
           base::BindOnce(&MainThreadEventQueue::RafFallbackTimerFired, this));
     }
-    if (client_)
+    if (client_) {
+      TRACE_EVENT0("input", "MainThreadEventQueue::SetNeedsMainFrame");
+    }
       client_->SetNeedsMainFrame();
     return;
   }
