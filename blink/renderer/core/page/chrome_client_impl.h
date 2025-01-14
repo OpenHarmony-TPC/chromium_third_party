@@ -85,6 +85,9 @@ class CORE_EXPORT ChromeClientImpl final : public ChromeClient {
   std::unique_ptr<cc::ScopedPauseRendering> PauseRendering(
       LocalFrame&) override;
   absl::optional<int> GetMaxRenderBufferBounds(LocalFrame&) const override;
+#ifdef OHOS_DRAG_DROP
+  gfx::Rect GetVisibleRectToWeb(LocalFrame*) override;
+#endif
   void StartDragging(LocalFrame*,
                      const WebDragData&,
                      DragOperationsMask,

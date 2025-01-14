@@ -100,7 +100,11 @@ class CORE_EXPORT DragController final
 
   DragState& GetDragState();
 
+#ifdef OHOS_DRAG_DROP
+  static std::unique_ptr<DragImage> DragImageForSelection(LocalFrame&, float, const gfx::RectF&);
+#else
   static std::unique_ptr<DragImage> DragImageForSelection(LocalFrame&, float);
+#endif
 
   // Return the selection bounds in absolute coordinates for the frame, clipped
   // to the visual viewport.
@@ -128,6 +132,7 @@ class CORE_EXPORT DragController final
   void SetDragInitState(bool did_initiate_drag);
   bool IsDraging();
 
+  gfx::RectF GetVisibleRectToUIInRootFrame(LocalFrame* frame);
 #endif
 
  private:

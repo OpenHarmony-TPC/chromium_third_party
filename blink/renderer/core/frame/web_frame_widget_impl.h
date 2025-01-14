@@ -376,6 +376,10 @@ class CORE_EXPORT WebFrameWidgetImpl
   FrameWidgetTestHelper* GetFrameWidgetTestHelperForTesting() override;
   void PrepareForFinalLifecyclUpdateForTesting() override;
 
+#ifdef OHOS_DRAG_DROP
+  gfx::Rect GetVisibleRectToWeb();
+#endif
+
   // Called when a drag-n-drop operation should begin.
   virtual void StartDragging(const WebDragData&,
                              DragOperationsMask,
