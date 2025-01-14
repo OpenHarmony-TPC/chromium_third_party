@@ -475,6 +475,12 @@ class CORE_EXPORT HTMLMediaElement
   void FullscreenChanged(bool is_fullscreen);
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
 
+#if defined(OHOS_MEDIA_AVSESSION)
+  virtual void SetMediaTitle();
+  virtual String GetMediaTitle() const;
+  virtual String GetVideoPoster() const;
+#endif // OHOS_MEDIA_AVSESSION
+
  private:
   // Friend class for testing.
   friend class ContextMenuControllerTest;
@@ -902,6 +908,11 @@ class CORE_EXPORT HTMLMediaElement
 
   typedef unsigned PendingActionFlags;
   PendingActionFlags pending_action_flags_;
+
+#if defined(OHOS_MEDIA_AVSESSION)
+  String meida_title_;
+  String video_poster_;
+#endif // OHOS_MEDIA_AVSESSION
 
   // FIXME: HTMLMediaElement has way too many state bits.
   bool playing_ : 1;
