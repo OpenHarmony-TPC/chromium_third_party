@@ -13,6 +13,7 @@
 #include "third_party/blink/public/platform/web_url_loader_factory.h"
 #include "third_party/blink/public/platform/web_url_request_extra_data.h"
 #include "third_party/blink/public/platform/websocket_handshake_throttle_provider.h"
+#include "third_party/blink/renderer/platform/accept_languages_watcher.h"
 
 namespace blink {
 
@@ -207,9 +208,12 @@ void WebServiceWorkerFetchContextImpl::UpdateSubresourceLoaderFactories(
 
 void WebServiceWorkerFetchContextImpl::NotifyUpdate(
     const RendererPreferences& new_prefs) {
-  DCHECK(accept_languages_watcher_);
-  if (renderer_preferences_.accept_languages != new_prefs.accept_languages)
-    accept_languages_watcher_->NotifyUpdate();
+  // Reserving `watcher` on the stack ensures it is not GC'd within this scope.
+  auto* watcher = accept_languages_watcher_.Get();
+  if (watcher &&
+      renderer_preferences_.accept_languages != new_prefs.accept_languages) {
+    watcher->NotifyUpdate();
+  }
   renderer_preferences_ = new_prefs;
 }
 

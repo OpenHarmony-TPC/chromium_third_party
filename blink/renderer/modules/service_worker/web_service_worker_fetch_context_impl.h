@@ -5,6 +5,7 @@
 #ifndef THIRD_PARTY_BLINK_RENDERER_MODULES_SERVICE_WORKER_WEB_SERVICE_WORKER_FETCH_CONTEXT_IMPL_H_
 #define THIRD_PARTY_BLINK_RENDERER_MODULES_SERVICE_WORKER_WEB_SERVICE_WORKER_FETCH_CONTEXT_IMPL_H_
 
+#include "base/task/single_thread_task_runner.h"
 #include "mojo/public/cpp/bindings/pending_receiver.h"
 #include "mojo/public/cpp/bindings/receiver.h"
 #include "third_party/blink/public/common/renderer_preferences/renderer_preferences.h"
@@ -15,6 +16,7 @@
 #include "third_party/blink/public/platform/modules/service_worker/web_service_worker_fetch_context.h"
 #include "third_party/blink/public/platform/web_string.h"
 #include "third_party/blink/public/platform/web_vector.h"
+#include "third_party/blink/renderer/platform/heap/persistent.h"
 #include "third_party/blink/renderer/platform/weborigin/kurl.h"
 
 namespace blink {
@@ -127,7 +129,7 @@ class BLINK_EXPORT WebServiceWorkerFetchContextImpl final
   // This is owned by ThreadedMessagingProxyBase on the main thread.
   base::WaitableEvent* terminate_sync_load_event_ = nullptr;
 
-  AcceptLanguagesWatcher* accept_languages_watcher_ = nullptr;
+  WeakPersistent<AcceptLanguagesWatcher> accept_languages_watcher_;
 
   WebVector<WebString> cors_exempt_header_list_;
   bool is_offline_mode_ = false;
