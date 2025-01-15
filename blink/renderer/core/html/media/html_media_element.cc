@@ -839,6 +839,10 @@ void HTMLMediaElement::ParseAttribute(
              RuntimeEnabledFeatures::MediaLatencyHintEnabled()) {
     if (web_media_player_)
       web_media_player_->SetLatencyHint(latencyHint());
+#if defined(OHOS_MEDIA_AVSESSION)
+  } else if (name == html_names::kTitleAttr) {
+    SetMediaTitle();
+#endif // OHOS_MEDIA_AVSESSION
   } else {
     HTMLElement::ParseAttribute(params);
   }
@@ -4970,8 +4974,22 @@ void HTMLMediaElement::DidPlayerGone() {
 #endif
 
 void HTMLMediaElement::DidPlayerMutedStatusChange(bool muted) {
+#if defined(OHOS_MEDIA_AVSESSION)
+  for (auto& observer : media_player_observer_remote_set_->Value()) {
+    observer->OnMutedStatusChanged(muted);
+    auto mediaTitle = GetMediaTitle();
+    auto videoPoster = GetVideoPoster();
+    if (!mediaTitle.empty()) {
+      observer->OnGetMediaTitle(mediaTitle);
+    }
+    if (!videoPoster.empty()) {
+      observer->OnGetVideoPoster(videoPoster);
+    }
+  }
+#else
   for (auto& observer : media_player_observer_remote_set_->Value())
     observer->OnMutedStatusChanged(muted);
+#endif // OHOS_MEDIA_AVSESSION
 }
 
 void HTMLMediaElement::DidMediaMetadataChange(
@@ -5451,6 +5469,26 @@ void HTMLMediaElement::OnNotifyVideoPlayingTimerFired(TimerBase*) {
   }
 }
 #endif // OHOS_VIDEO_ASSISTANT
+
+#if defined(OHOS_MEDIA_AVSESSION)
+void HTMLMediaElement::SetMediaTitle() {
+  meida_title_ = FastGetAttribute(html_names::kTitleAttr).GetString();
+}
+
+String HTMLMediaElement::GetMediaTitle() const {
+  if (meida_title_.empty()) {
+    return String();
+  }
+  return meida_title_;
+}
+
+String HTMLMediaElement::GetVideoPoster() const {
+  if (video_poster_.empty()) {
+    return String();
+  }
+  return video_poster_;
+}
+#endif // OHOS_MEDIA_AVSESSION
 
 STATIC_ASSERT_ENUM(WebMediaPlayer::kReadyStateHaveNothing,
                    HTMLMediaElement::kHaveNothing);

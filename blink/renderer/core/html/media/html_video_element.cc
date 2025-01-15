@@ -207,6 +207,9 @@ void HTMLVideoElement::ParseAttribute(
     const AttributeModificationParams& params) {
   if (params.name == html_names::kPosterAttr) {
     UpdatePosterImage();
+#if defined(OHOS_MEDIA_AVSESSION)
+    video_poster_ = FastGetAttribute(html_names::kPosterAttr).GetString();
+#endif // OHOS_MEDIA_AVSESSION
 
     // Notify the player when the poster image URL changes.
     if (GetWebMediaPlayer())
