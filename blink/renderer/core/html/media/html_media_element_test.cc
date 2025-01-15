@@ -235,7 +235,7 @@ class TestMediaPlayerObserver final
           remote_playback_metadata) const {
     return received_remote_playback_metadata_ == remote_playback_metadata;
   }
-#ifdefined (OHOS_MEDIA_AVSESSION)
+#if defined (OHOS_MEDIA_AVSESSION)
   void OnGetMediaTitle(const WTF::String & data) override {}
 
   void OnGetVideoPoster(const WTF::String & data) override {}
