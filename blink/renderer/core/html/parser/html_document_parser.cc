@@ -387,6 +387,9 @@ HTMLDocumentParser::HTMLDocumentParser(Document& document,
           // cause UI flickering. To mitigate, use_infinite_budget will
           // parse all the way up to the mojo limit.
           (document.Url().ProtocolIs("chrome-extension") ||
+#if defined(OHOS_ARKWEB_EXTENSIONS)
+           document.Url().ProtocolIs("arkweb-extension") ||
+#endif
            document.Url().IsLocalFile())
               ? kInfiniteTokenizationBudget
               : kDefaultMaxTokenizationBudget)),
