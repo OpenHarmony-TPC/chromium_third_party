@@ -264,6 +264,9 @@ bool StructTraits<blink::mojom::WebPreferencesDataView,
   out->custom_video_player_enable = data.custom_video_player_enable();
   out->custom_video_player_overlay = data.custom_video_player_overlay();
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
+#ifdef OHOS_VIDEO_ASSISTANT
+  out->video_assistant_enabled = data.video_assistant_enabled();
+#endif // OHOS_VIDEO_ASSISTANT
 #ifdef OHOS_ACTIVE_POLICY
   out->delay_for_background_tab_freezing =
       data.delay_for_background_tab_freezing();
