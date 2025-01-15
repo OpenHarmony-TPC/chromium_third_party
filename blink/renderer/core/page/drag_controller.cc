@@ -1406,6 +1406,16 @@ void SelectEnclosingAnchorIfContentEditable(LocalFrame* frame) {
   }
 }
 
+#ifdef OHOS_DRAG_DROP
+gfx::Rect GetImageRectFromImageNode(LocalFrame* frame, const HitTestResult& hit_test_result) {
+  gfx::Rect image_rect = hit_test_result.ImageRect();
+  if (!frame || !frame->GetSettings()) {
+    return image_rect;
+  }
+  return hit_test_result.GetReplacedContentRect();
+}
+#endif
+
 std::unique_ptr<DragImage> DetermineDragImageAndRect(
     gfx::Rect& drag_obj_rect,
     gfx::Point& effective_drag_initiation_location,
@@ -1457,7 +1467,11 @@ std::unique_ptr<DragImage> DetermineDragImageAndRect(
   } else if (state.drag_type_ == kDragSourceActionImage) {
     if (!drag_image) {
       auto* element = DynamicTo<Element>(state.drag_src_.Get());
+#ifdef OHOS_DRAG_DROP
+      const gfx::Rect& image_rect = GetImageRectFromImageNode(frame, hit_test_result);
+#else
       const gfx::Rect& image_rect = hit_test_result.ImageRect();
+#endif
       // TODO(oshima): Remove this scaling and simply pass imageRect to
       // dragImageForImage once all platforms are migrated to use zoom for dsf.
       gfx::Size image_size_in_pixels = gfx::ScaleToFlooredSize(
