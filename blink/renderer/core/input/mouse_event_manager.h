@@ -30,6 +30,10 @@ class ScrollManager;
 
 enum class DragInitiator;
 
+#ifdef OHOS_AI
+enum class HitOverlayStatus{ kNone, kCreating, kCreated };
+#endif
+
 // This class takes care of dispatching all mouse events and keeps track of
 // positions and states of mouse.
 class CORE_EXPORT MouseEventManager final
@@ -156,12 +160,27 @@ class CORE_EXPORT MouseEventManager final
   void MarkHoverStateDirty();
 
 #ifdef OHOS_AI
+  enum class FoldStatus : uint32_t {
+    UNKNOWN = 0,
+    FULL = 1,
+    MAIN = 2,
+    SUB = 3,
+    COORDINATION = 4
+  };
   void HandleGestureCreateOverlay(const WebGestureEvent& gesture_event);
   void CreateOverlayCallback();
   bool GetOverlayInProgress();
+  bool IsValidOverlayNode(Node* node);
+  HitOverlayStatus GetHitOverlayStatus(
+      const HitTestResult& hit_test_result, bool ignore_overlay_status = false);
+  HitOverlayStatus GetHitOverlayStatusFromMouseEvent(
+      const MouseEventWithHitTestResults& event);
+  void CloseImageOverlay();
+  void GetAbsImageRect(gfx::RectF& abs_rect);
   void SetOverlayInProgress(bool flag);
-  void SetOverlayInProgressOnly(bool flag);
+  void SetOverlayCreatingStatus(bool flag);
   void OnDestroyImageAnalyzerOverlay();
+  void OnFoldStatusChanged(uint32_t foldstatus);
   template <typename T>
   void HandleCreateOverlay(T const& targeted_event);
 #endif
@@ -260,10 +279,13 @@ class CORE_EXPORT MouseEventManager final
   
 #ifdef OHOS_AI
   bool overlay_in_progress_ = false;
+  bool overlay_creating_ = false;
   WebMouseEvent last_mouse_drag_;
   Image* last_analyzed_image_ = nullptr;
   base::RetainingOneShotTimer create_overlay_timer_;
   base::WeakPtrFactory<MouseEventManager> weak_ptr_factory_{this};
+  double fold_screen_status_ = 1.0;
+  Member<Node> hit_image_node_;
 #endif
 };
 
