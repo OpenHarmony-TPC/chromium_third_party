@@ -496,6 +496,11 @@ class BLINK_EXPORT WebView {
   virtual bool GetAdBlockEnableForSite() = 0;
 #endif // OHOS_ARKWEB_ADBLOCK
 
+#ifdef OHOS_LOGGER_REPORT
+  BLINK_EXPORT static void SetStrictLogMode(bool);
+  BLINK_EXPORT static bool IsStrictLogMode();
+#endif
+
  protected:
   ~WebView() = default;
 };

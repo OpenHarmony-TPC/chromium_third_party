@@ -102,6 +102,10 @@
 #include "ohos_adapter_helper.h"
 #endif
 
+#ifdef OHOS_LOGGER_REPORT
+#include "url/ohos/log_utils.h"
+#endif
+
 namespace blink {
 
 namespace {
@@ -580,6 +584,11 @@ bool ResourceLoader::ShouldFetchCodeCache() {
   LOG(DEBUG) << "Resource loader if scheme:"
              << request.Url().Protocol().Utf8().c_str()
              << " supports code cache:" << is_protocal_support_code_cache;
+#ifdef OHOS_LOGGER_REPORT
+  LOG_FEEDBACK(DEBUG) << "Resource loader if scheme: "
+             << url::LogUtils::ConvertUrlWithMask(request.Url().Protocol().Utf8().c_str())
+             << " supports code cache:" << is_protocal_support_code_cache;
+#endif
 #endif
   if (!request.Url().ProtocolIsInHTTPFamily() && !should_use_source_hash
 #if BUILDFLAG(IS_OHOS)
@@ -713,6 +722,11 @@ void ResourceLoader::DidFailLoadingBody() {
 }
 
 void ResourceLoader::DidCancelLoadingBody() {
+#ifdef OHOS_LOGGER_REPORT
+  LOG_FEEDBACK(WARNING) << "Resource loader DidCancelLoadingBody, url: "
+                        << url::LogUtils::ConvertUrlWithMask(
+                           resource_->LastResourceRequest().Url().GetString().Utf8());
+#endif
   Cancel();
 }
 
@@ -722,6 +736,11 @@ void ResourceLoader::StartWith(const ResourceRequestHead& request) {
 
   if (resource_->Options().synchronous_policy == kRequestSynchronously &&
       fetcher_->GetProperties().FreezeMode() != LoaderFreezeMode::kNone) {
+#ifdef OHOS_LOGGER_REPORT
+    LOG_FEEDBACK(WARNING) << "Resource loader StartWith, url: "
+                          << url::LogUtils::ConvertUrlWithMask(
+                              resource_->LastResourceRequest().Url().GetString().Utf8());
+#endif
     // TODO(yuzus): Evict bfcache if necessary.
     Cancel();
     return;

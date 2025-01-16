@@ -134,6 +134,10 @@ void PaintTiming::MarkFirstContentfulPaint() {
 #ifdef OHOS_LOG_MESSAGE
   LOG(INFO) << "event_message: MarkFirstContentfulPaint";
 #endif
+
+#ifdef OHOS_LOGGER_REPORT
+  LOG_FEEDBACK(INFO) << "event_message: MarkFirstContentfulPaint";
+#endif
 }
 
 void PaintTiming::MarkFirstImagePaint() {

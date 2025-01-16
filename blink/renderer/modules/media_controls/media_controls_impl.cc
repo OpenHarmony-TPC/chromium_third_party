@@ -922,6 +922,9 @@ void MediaControlsImpl::Reset() {
 #if defined(OHOS_MEDIA)
     LOG(INFO) << "OhMedia::pause";
 #endif // OHOS_MEDIA
+#ifdef OHOS_LOGGER_REPORT
+    LOG_FEEDBACK(INFO) << "OhMedia::pause";
+#endif
     MediaElement().pause();
   }
 
@@ -1068,6 +1071,9 @@ void MediaControlsImpl::MakeOpaque() {
 #if defined(OHOS_MEDIA)
   LOG(WARNING) << "OhMedia::MakeOpaque";
 #endif // OHOS_MEDIA
+#ifdef OHOS_LOGGER_REPORT
+  LOG_FEEDBACK(WARNING) << "OhMedia::MakeOpaque";
+#endif
   ShowCursor();
 #if defined(OHOS_MEDIA)
   if (MediaElement().IsFullscreen()) {

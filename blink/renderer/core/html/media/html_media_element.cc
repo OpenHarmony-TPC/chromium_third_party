@@ -412,6 +412,9 @@ float PageConstraintInitalScale(const Document& document) {
     scale = page->GetPageScaleConstraintsSet().FinalConstraints().initial_scale;
   } else {
     LOG(INFO) << "using default scale 1.0";
+#ifdef OHOS_LOGGER_REPORT
+    LOG_FEEDBACK(INFO) << "using default scale 1.0";
+#endif
   }
   return scale;
 }
@@ -949,6 +952,9 @@ void HTMLMediaElement::ScheduleEvent(const AtomicString& event_name) {
       event_name == event_type_names::kSeeking ||
       event_name == event_type_names::kStalled) {
     LOG(INFO) << "OhMedia::ScheduleEvent(" << *this << ") " << event_name;
+#ifdef OHOS_LOGGER_REPORT
+    LOG_FEEDBACK(INFO) << "OhMedia::ScheduleEvent(" << *this << ") " << event_name;
+#endif
   }
 #endif // OHOS_MEDIA
 }
@@ -1415,6 +1421,9 @@ void HTMLMediaElement::LoadResource(const WebMediaPlayerSource& source,
 #if defined(OHOS_MEDIA)
   } else {
     LOG(WARNING) << "OhMedia::LoadResource source is not url";
+#ifdef OHOS_LOGGER_REPORT
+    LOG_FEEDBACK(WARNING) << "OhMedia::LoadResource source is not url";
+#endif
 #endif // OHOS_MEDIA
   }
 
@@ -2000,6 +2009,10 @@ void HTMLMediaElement::MediaLoadingFailed(WebMediaPlayer::NetworkState error,
 #if defined(OHOS_MEDIA)
   LOG(INFO) << "OhMedia::MediaLoadingFailed error = " << int{error}
             << ", message='" << input_message << "')";
+#ifdef OHOS_LOGGER_REPORT
+  LOG_FEEDBACK(INFO) << "OhMedia::MediaLoadingFailed error = " << (int)error
+                     << ", message = " << input_message << ")";
+#endif
 #endif // OHOS_MEDIA
 
   bool should_be_opaque = MediaShouldBeOpaque();
@@ -2872,6 +2885,9 @@ ScriptPromise HTMLMediaElement::playForBindings(ScriptState* script_state) {
 
 #ifdef OHOS_MEDIA
   LOG(INFO) << "OhMedia::playForBindings(" << *this << ")";
+#ifdef OHOS_LOGGER_REPORT
+  LOG_FEEDBACK(INFO) << "OhMedia::playForBindings(" << *this << ")";
+#endif
 #endif // OHOS_MEDIA
 
   absl::optional<DOMExceptionCode> code = Play();
@@ -2981,6 +2997,9 @@ void HTMLMediaElement::pause() {
 
 #if defined(OHOS_MEDIA)
   LOG(WARNING) << "OhMedia::pause";
+#ifdef OHOS_LOGGER_REPORT
+  LOG_FEEDBACK(WARNING) << "OhMedia::pause";
+#endif
 #endif // OHOS_MEDIA
 
   // When updating pause, be sure to update PauseToLetDescriptionFinish().
@@ -4053,10 +4072,18 @@ void HTMLMediaElement::UpdatePlayState(bool pause_speech /* = true */) {
       pause();
       LOG(INFO) << "UpdatePlayState document is hidden, video do not "
                    "be allow to play";
+#ifdef OHOS_LOGGER_REPORT
+      LOG_FEEDBACK(INFO) << "UpdatePlayState document is hidden, video do not "
+                            "be allow to play";
+#endif
     }
   }
   LOG(WARNING) << "OhMedia::UpdatePlayState should_be_playing = "
                << should_be_playing << ", is_playing" << is_playing;
+#ifdef OHOS_LOGGER_REPORT
+  LOG_FEEDBACK(WARNING) << "OhMedia::UpdatePlayState should_be_playing = "
+                        << should_be_playing << ",is_playing = " << is_playing;
+#endif
 #endif  // OHOS_MEDIA_POLICY
 
   if (should_be_playing) {
@@ -5283,6 +5310,11 @@ std::string HTMLMediaElement::GetOutgoingReferrerString() {
 
 void HTMLMediaElement::UpdatePlaybackStatus(uint32_t status) {
   LOG(INFO) << "UpdatePlaybackStatus(" << status << "), paused_[" << paused_ << "]";
+
+#ifdef OHOS_LOGGER_REPORT
+  LOG_FEEDBACK(INFO) << "UpdatePlaybackStatus(" << status << "), paused_[" << paused_ << "]";
+#endif
+
   base::AutoReset<bool> resetter(&played_by_custom_mp_, true);
   if (paused_ == !status) {
     return;
@@ -5320,6 +5352,11 @@ gfx::Rect HTMLMediaElement::GetVideoRect() {
         ToFlooredSize(layout_box->Size()));
   }
   LOG(INFO) << "using default vidoe size";
+
+#ifdef OHOS_LOGGER_REPORT
+  LOG_FEEDBACK(INFO) << "using default vidoe size";
+#endif
+
   return gfx::Rect(LayoutReplaced::kDefaultWidth,
         LayoutReplaced::kDefaultHeight);
 }

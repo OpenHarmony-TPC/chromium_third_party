@@ -879,4 +879,11 @@ void WebSettingsImpl::SetVideoAssistantEnabled(bool enabled) {
 }
 #endif // OHOS_VIDEO_ASSISTANT
 
+#ifdef OHOS_LOGGER_REPORT
+int32_t WebSettingsImpl::GetUsageScenario() 
+{
+    return settings_->GetUsageScenario();
+}
+#endif
+
 }  // namespace blink

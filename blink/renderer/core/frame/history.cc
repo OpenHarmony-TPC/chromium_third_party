@@ -196,6 +196,11 @@ void History::go(ScriptState* script_state,
         "fully active");
     return;
   }
+
+#ifdef OHOS_LOGGER_REPORT
+  LOG_FEEDBACK(INFO) << "WebViewBackForward history::go[offset]" << delta;
+#endif
+
   LocalFrame* frame = window->GetFrame();
   DCHECK(frame);
 

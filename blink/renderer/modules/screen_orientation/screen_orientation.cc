@@ -144,6 +144,9 @@ ScriptPromise ScreenOrientation::lock(ScriptState* state,
 #if defined(OHOS_MEDIA)
   LOG(INFO) << "OhMedia::ScreenOrientation lock = " << lock_string;
 #endif // OHOS_MEDIA
+#ifdef OHOS_LOGGER_REPORT
+  LOG_FEEDBACK(INFO) << "OhMedia::ScreenOrientation lock = " << lock_string;
+#endif
   if (!state->ContextIsValid() || !Controller()) {
     exception_state.ThrowDOMException(
         DOMExceptionCode::kInvalidStateError,
