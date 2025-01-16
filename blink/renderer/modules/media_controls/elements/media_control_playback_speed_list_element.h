@@ -35,6 +35,11 @@ class MediaControlPlaybackSpeedListElement final
   Element* CreatePlaybackSpeedListItem(const int display_name,
                                        const double playback_rate);
 
+#ifdef OHOS_VIDEO_ASSISTANT
+  String CreatePlaybackSpeedLabelContentHM(const double playback_rate);
+#endif
+  void RecordPlaybackSpeed(const double playback_rate);
+
   // Creates the header element of the playback speed list.
   Element* CreatePlaybackSpeedHeaderItem();
 

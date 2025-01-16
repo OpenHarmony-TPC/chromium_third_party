@@ -435,6 +435,9 @@ class CORE_EXPORT ChromeClient : public GarbageCollected<ChromeClient> {
 
   virtual void EnterFullscreen(LocalFrame&,
                                const FullscreenOptions*,
+#ifdef OHOS_VIDEO_ASSISTANT
+                               bool overlay_fullscreen,
+#endif // OHOS_VIDEO_ASSISTANT
                                FullscreenRequestType
 #if defined(OHOS_MEDIA)
                                ,
