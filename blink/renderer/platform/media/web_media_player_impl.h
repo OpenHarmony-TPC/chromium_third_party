@@ -328,6 +328,10 @@ class PLATFORM_EXPORT WebMediaPlayerImpl
     return is_background_suspend_enabled_;
   }
 
+#ifdef OHOS_VIDEO_ASSISTANT
+  void SetVideoSurface(int32_t widget_id) override;
+#endif // OHOS_VIDEO_ASSISTANT
+
   // Distinct states that |delegate_| can be in. (Public for testing.)
   enum class DelegateState {
     GONE,
@@ -752,6 +756,10 @@ class PLATFORM_EXPORT WebMediaPlayerImpl
   void OnLayerOpacityChange(float opacity);
 #endif // OHOS_VIDEO_ASSISTANT
 
+#ifdef OHOS_VIDEO_ASSISTANT
+  void OnSurfaceRequested(media::SurfaceCreatedCB surface_created_cb);
+#endif // OHOS_VIDEO_ASSISTANT
+
   WebLocalFrame* const frame_;
 
   WebMediaPlayer::NetworkState network_state_ =
@@ -1162,6 +1170,11 @@ class PLATFORM_EXPORT WebMediaPlayerImpl
 
   base::WeakPtr<WebMediaPlayerImpl> weak_this_;
   base::WeakPtrFactory<WebMediaPlayerImpl> weak_factory_{this};
+
+#ifdef OHOS_VIDEO_ASSISTANT
+  media::SurfaceCreatedCB surface_created_cb_;
+  int32_t video_surface_id_ = -1;
+#endif // OHOS_VIDEO_ASSISTANT
 };
 
 }  // namespace blink

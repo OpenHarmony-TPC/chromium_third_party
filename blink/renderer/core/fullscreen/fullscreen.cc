@@ -777,8 +777,15 @@ ScriptPromise Fullscreen::RequestFullscreen(Element& pending,
     HTMLVideoElement* video_element = nullptr;
     absl::optional<gfx::Size> video_natural_size = absl::nullopt;
 
+#ifdef OHOS_VIDEO_ASSISTANT
+    bool overlay_fullscreen = false;
+#endif // OHOS_VIDEO_ASSISTANT
+
     if (auto* element = DynamicTo<HTMLVideoElement>(pending)) {
       video_element = element;
+#ifdef OHOS_VIDEO_ASSISTANT
+      overlay_fullscreen  = true;
+#endif // OHOS_VIDEO_ASSISTANT
     } else {
       HTMLCollection* children = pending.getElementsByTagName("video");
       for (unsigned int i = 0; children && i < children->length(); i++) {
@@ -795,7 +802,11 @@ ScriptPromise Fullscreen::RequestFullscreen(Element& pending,
           gfx::Size(video_element->videoWidth(), video_element->videoHeight());
     }
 
-    frame.GetChromeClient().EnterFullscreen(frame, options, request_type,
+    frame.GetChromeClient().EnterFullscreen(frame, options,
+#ifdef OHOS_VIDEO_ASSISTANT
+                                            overlay_fullscreen,
+#endif // OHOS_VIDEO_ASSISTANT
+                                            request_type,
                                             video_natural_size);
 #else
     frame.GetChromeClient().EnterFullscreen(frame, options, request_type);

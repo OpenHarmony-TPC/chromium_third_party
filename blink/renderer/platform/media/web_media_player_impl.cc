@@ -714,6 +714,13 @@ void WebMediaPlayerImpl::DisableOverlay() {
     ScheduleRestart();
   else
     MaybeSendOverlayInfoToDecoder();
+
+#ifdef OHOS_VIDEO_ASSISTANT
+  video_surface_id_ = -1;
+  if (surface_created_cb_) {
+    surface_created_cb_.Run(video_surface_id_);
+  }
+#endif // OHOS_VIDEO_ASSISTANT
 }
 
 void WebMediaPlayerImpl::EnteredFullscreen() {
@@ -3130,7 +3137,16 @@ media::PipelineStatus WebMediaPlayerImpl::OnDemuxerCreated(
     attempting_suspended_start_ = true;
   }
 
+#ifdef OHOS_VIDEO_ASSISTANT
+  media::RequestSurfaceCB request_surface_cb =
+      base::BindPostTaskToCurrentDefault(
+          base::BindOnce(&WebMediaPlayerImpl::OnSurfaceRequested, weak_this_));
+#endif // OHOS_VIDEO_ASSISTANT
+
   pipeline_controller_->Start(start_type, demuxer, this, is_streaming,
+#ifdef OHOS_VIDEO_ASSISTANT
+                              std::move(request_surface_cb),
+#endif // OHOS_VIDEO_ASSISTANT
                               is_static);
   return media::OkStatus();
 }
@@ -3359,7 +3375,15 @@ void WebMediaPlayerImpl::SetSuspendState(bool is_suspended) {
       preroll_attempt_pending_ = false;
       preroll_attempt_start_time_ = tick_clock_->NowTicks();
     }
+#ifdef OHOS_VIDEO_ASSISTANT
+    media::RequestSurfaceCB request_surface_cb =
+        base::BindPostTaskToCurrentDefault(
+            base::BindOnce(&WebMediaPlayerImpl::OnSurfaceRequested,
+                weak_this_));
+    pipeline_controller_->Resume(std::move(request_surface_cb));
+#else
     pipeline_controller_->Resume();
+#endif // OHOS_VIDEO_ASSISTANT
   }
 }
 
@@ -3813,7 +3837,7 @@ bool WebMediaPlayerImpl::ShouldPausePlaybackWhenHidden() const {
   // Expect that video will pause after switching to the background while loading.
   if (HasVideo() && pipeline_metadata_.natural_size.IsEmpty()) {
     return true;
-  }       
+  }
 
   // Audio only stream is allowed to play when in background.
   if (!HasVideo() && preserve_audio)
@@ -4335,6 +4359,24 @@ void WebMediaPlayerImpl::OnLayerRectChange(const gfx::Rect& rect) {
 void WebMediaPlayerImpl::OnLayerBoundsChange(const gfx::Rect& bounds) {
   DCHECK(main_task_runner_->BelongsToCurrentThread());
   client_->OnLayerBoundsChange(bounds);
+}
+
+void WebMediaPlayerImpl::SetVideoSurface(int32_t widget_id) {
+  LOG(INFO) << "SetVideoSurface(" << widget_id << ")";
+  video_surface_id_ = widget_id;
+  if (surface_created_cb_) {
+    surface_created_cb_.Run(widget_id);
+  }
+}
+
+void WebMediaPlayerImpl::OnSurfaceRequested(
+    media::SurfaceCreatedCB surface_created_cb) {
+  LOG(INFO) << "OnSurfaceRequested, video_surface_id_[" << video_surface_id_ << "]";
+  surface_created_cb_ = std::move(surface_created_cb);
+
+  if (video_surface_id_ > 0) {
+    surface_created_cb_.Run(video_surface_id_);
+  }
 }
 #endif // OHOS_VIDEO_ASSISTANT
 

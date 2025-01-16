@@ -498,6 +498,7 @@ void ApplyOhosWebPreferences(const web_pref::WebPreferences& prefs,
 
 #ifdef OHOS_VIDEO_ASSISTANT
   settings->SetVideoAssistantEnabled(prefs.video_assistant_enabled);
+  settings->SetCustomMediaPlayerEnabled(prefs.custom_media_player_enabled);
 #endif // OHOS_VIDEO_ASSISTANT
 
 #if defined(OHOS_MEDIA)
@@ -2003,13 +2004,20 @@ void WebViewImpl::ThemeChanged() {
 void WebViewImpl::EnterFullscreen(
     LocalFrame& frame,
     const FullscreenOptions* options,
+#ifdef OHOS_VIDEO_ASSISTANT
+    bool overlay_fullscreen,
+#endif // OHOS_VIDEO_ASSISTANT
     FullscreenRequestType request_type
 #if defined(OHOS_MEDIA)
     ,
     const absl::optional<gfx::Size>& video_natural_size
 #endif  // defined(OHOS_MEDIA)
 ) {
-  fullscreen_controller_->EnterFullscreen(frame, options, request_type
+  fullscreen_controller_->EnterFullscreen(frame, options,
+#ifdef OHOS_VIDEO_ASSISTANT
+                                          overlay_fullscreen,
+#endif // OHOS_VIDEO_ASSISTANT
+                                          request_type
 #if defined(OHOS_MEDIA)
                                           ,
                                           video_natural_size

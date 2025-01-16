@@ -36,6 +36,10 @@
 #include "third_party/blink/renderer/core/inspector/dev_tools_emulator.h"
 #include "third_party/blink/renderer/platform/graphics/deferred_image_decoder.h"
 
+#ifdef OHOS_VIDEO_ASSISTANT
+#include "third_party/blink/renderer/modules/media_controls/media_controls_resource_loader.h"
+#endif
+
 namespace blink {
 
 WebSettingsImpl::WebSettingsImpl(Settings* settings,
@@ -870,6 +874,10 @@ void WebSettingsImpl::SetCustomVideoPlayerOverlay(bool overlay) {
 #ifdef OHOS_VIDEO_ASSISTANT
 void WebSettingsImpl::SetVideoAssistantEnabled(bool enabled) {
   settings_->SetVideoAssistantEnabled(enabled);
+}
+void WebSettingsImpl::SetCustomMediaPlayerEnabled(bool enabled) {
+  settings_->SetCustomMediaPlayerEnabled(enabled);
+  MediaControlsResourceLoader::SetCustomMediaPlayerEnabled(enabled);
 }
 #endif // OHOS_VIDEO_ASSISTANT
 

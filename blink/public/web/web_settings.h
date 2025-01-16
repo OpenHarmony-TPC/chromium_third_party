@@ -314,6 +314,7 @@ class WebSettings {
 
 #ifdef OHOS_VIDEO_ASSISTANT
   virtual void SetVideoAssistantEnabled(bool enabled) {}
+  virtual void SetCustomMediaPlayerEnabled(bool enabled) {}
 #endif // OHOS_VIDEO_ASSISTANT
 
  protected:

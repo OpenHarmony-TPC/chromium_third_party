@@ -39,6 +39,11 @@ class MediaControlsResourceLoader
   // Returns the specific stylesheet used for media related interstitials.
   static String GetMediaInterstitialsStyleSheet();
 
+#ifdef OHOS_VIDEO_ASSISTANT
+  static bool custom_media_player_enabled_;
+  static void SetCustomMediaPlayerEnabled(bool enable);
+#endif
+
   String GetUAStyleSheet() override;
 
   MediaControlsResourceLoader();
