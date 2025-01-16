@@ -469,12 +469,6 @@ void MultipleFieldsTemporalInputTypeView::HandleFocusInEvent(
 }
 
 void MultipleFieldsTemporalInputTypeView::ForwardEvent(Event& event) {
-#if defined(OHOS_INPUT_EVENTS)
-  if (event.type() == event_type_names::kDOMFocusOut) {
-    Blur();
-    return;
-  }
-#endif
   if (SpinButtonElement* element = GetSpinButtonElement()) {
     element->ForwardEvent(event);
     if (event.DefaultHandled())
