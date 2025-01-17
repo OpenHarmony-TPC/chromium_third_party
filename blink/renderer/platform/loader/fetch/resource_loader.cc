@@ -584,11 +584,6 @@ bool ResourceLoader::ShouldFetchCodeCache() {
   LOG(DEBUG) << "Resource loader if scheme:"
              << request.Url().Protocol().Utf8().c_str()
              << " supports code cache:" << is_protocal_support_code_cache;
-#ifdef OHOS_LOGGER_REPORT
-  LOG_FEEDBACK(DEBUG) << "Resource loader if scheme: "
-             << url::LogUtils::ConvertUrlWithMask(request.Url().Protocol().Utf8().c_str())
-             << " supports code cache:" << is_protocal_support_code_cache;
-#endif
 #endif
   if (!request.Url().ProtocolIsInHTTPFamily() && !should_use_source_hash
 #if BUILDFLAG(IS_OHOS)
