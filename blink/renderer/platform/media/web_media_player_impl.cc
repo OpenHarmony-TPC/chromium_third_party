@@ -890,6 +890,9 @@ void WebMediaPlayerImpl::DoLoad(LoadType load_type,
 #if defined(OHOS_CUSTOM_VIDEO_PLAYER)
   if (loaded_url_.SchemeIs(media::remoting::kRemotingScheme)) {
     LOG(INFO) << "disable custom renderer for remote scheme";
+#ifdef OHOS_LOGGER_REPORT
+    LOG_FEEDBACK(INFO) << "disable custom renderer for remote scheme";
+#endif
     should_create_custom_renderer_ = false;
     should_overlay_ = false;
   }
@@ -1129,6 +1132,9 @@ void WebMediaPlayerImpl::DoSeek(base::TimeDelta time, bool time_updated) {
 #if defined(OHOS_MEDIA)
   LOG(WARNING) << "OhMedia::DoSeek seconds = " << time.InSecondsF();
 #endif // OHOS_MEDIA
+#ifdef OHOS_LOGGER_REPORT
+  LOG_FEEDBACK(WARNING) << "OhMedia::DoSeek seconds = " << time.InSecondsF();
+#endif
   ReadyState old_state = ready_state_;
   if (ready_state_ > WebMediaPlayer::kReadyStateHaveMetadata)
     SetReadyState(WebMediaPlayer::kReadyStateHaveMetadata);
@@ -1213,6 +1219,10 @@ void WebMediaPlayerImpl::SetVolume(double volume) {
 #if defined(OHOS_MEDIA)
   LOG(INFO) << "OhMedia::SetVolume volume is :" << volume;
 #endif // OHOS_MEDIA
+
+#ifdef OHOS_LOGGER_REPORT
+  LOG_FEEDBACK(INFO) << "OhMedia::SetVolume volume is :" << volume;
+#endif
 
   if (delegate_has_audio_ != HasUnmutedAudio()) {
     delegate_has_audio_ = HasUnmutedAudio();
@@ -1968,6 +1978,10 @@ void WebMediaPlayerImpl::RestartForHls() {
 void WebMediaPlayerImpl::RestartForPrimitive() {
   LOG(INFO) << "RestartForPrimitive, primitive_renderer_type_["
             << GetRendererName(primitive_renderer_type_) << "]";
+#ifdef OHOS_LOGGER_REPORT
+  LOG_FEEDBACK(INFO) << "RestartForPrimitive, primitive_renderer_type_["
+            << GetRendererName(primitive_renderer_type_) << "]";
+#endif
   DCHECK(main_task_runner_->BelongsToCurrentThread());
   should_create_custom_renderer_= false;
   should_overlay_ = false;
@@ -1988,6 +2002,9 @@ void WebMediaPlayerImpl::OnError(media::PipelineStatus status) {
 #if defined(OHOS_MEDIA)
   LOG(INFO) << "OhMedia::OnError PipelineStatus = " << status;
 #endif // OHOS_MEDIA
+#ifdef OHOS_LOGGER_REPORT
+  LOG_FEEDBACK(INFO) << "OhMedia::OnError PipelineStatus = " << status;
+#endif
 
   if (suppress_destruction_errors_)
     return;
@@ -2316,6 +2333,11 @@ void WebMediaPlayerImpl::OnBufferingStateChangeInternal(
   LOG(INFO) << "OhMedia::OnBufferingStateChangeInternal(" << (void*)this << ")"
             << " state:" << BufferingStateToString(state, reason);
 #endif // OHOS_MEDIA
+
+#ifdef OHOS_LOGGER_REPORT
+  LOG_FEEDBACK(INFO) << "OhMedia::OnBufferingStateChangeInternal(" << (void*)this << ")"
+            << " state:" << BufferingStateToString(state, reason);
+#endif
 
   DCHECK(main_task_runner_->BelongsToCurrentThread());
 
@@ -2710,6 +2732,10 @@ void WebMediaPlayerImpl::OnFrameShown() {
   LOG(INFO) << "OhMedia::WebMediaPlayerImpl::OnFrameShown()"
             << " delegate_id:" << delegate_id_;
 #endif // OHOD_MEDIA
+#ifdef OHOS_LOGGER_REPORT
+  LOG_FEEDBACK(INFO) << "OhMedia::WebMediaPlayerImpl::OnFrameHidden()"
+            << " delegate_id_:" << delegate_id_;
+#endif
 #ifdef OHOS_VIDEO_ASSISTANT
   client_->OnWebMediaPlayerShowing(true);
 #endif // OHOS_VIDEO_ASSISTANT
@@ -2738,6 +2764,9 @@ void WebMediaPlayerImpl::OnFrameShown() {
 #if defined(OHOS_MEDIA)
     LOG(WARNING) << "OhMedia::OnFrameShown ResumePlayBack()";
 #endif // OHOS_MEDIA
+#ifdef OHOS_LOGGER_REPORT
+    LOG_FEEDBACK(WARNING) << "OhMedia::OnFrameShown ResumePlayback()";
+#endif
     client_->ResumePlayback();  // Calls UpdatePlayState() so return afterwards.
     return;
   }
@@ -4107,6 +4136,10 @@ void WebMediaPlayerImpl::OnFirstFrame(base::TimeTicks frame_time) {
   LOG(INFO) << __func__ << " OhMedia::delegate_id_:" << delegate_id_
             << " elapsed:" << elapsed.InSecondsF();
 #endif // OHOS_MEDIA
+#ifdef OHOS_LOGGER_REPORT
+  LOG_FEEDBACK(INFO) << __func__ << " OhMedia::delegate_id_:" << delegate_id_
+            << " elapsed:" << elapsed.InSecondsF();
+#endif
 
   media::PipelineStatistics ps = GetPipelineStatistics();
   if (client_) {

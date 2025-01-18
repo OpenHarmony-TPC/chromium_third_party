@@ -766,6 +766,13 @@ void StyleCascade::LookupAndApplyDeclaration(const CSSProperty& property,
       LOG(INFO) << "[AdBlock] Element("<< state_.GetElement().ToString()
                 << " ) dom path:"
                 << GetDomPath(state_.GetElement(), false, true);
+
+#ifdef OHOS_LOGGER_REPORT
+      LOG_FEEDBACK(INFO) << "[AdBlock] Element("<< state_.GetElement().ToString()
+                << " ) dom path:"
+                << GetDomPath(state_.GetElement(), false, true);
+#endif
+
     }
   }
 
@@ -785,6 +792,11 @@ void StyleCascade::LookupAndApplyDeclaration(const CSSProperty& property,
       LOG(INFO) << "[User AdBlock] Element(" << state_.GetElement().ToString()
                 << ") dom path:"
                 << GetDomPath(state_.GetElement(), false, true);
+#ifdef OHOS_LOGGER_REPORT
+      LOG_FEEDBACK(INFO) << "[User AdBlock] Element(" << state_.GetElement().ToString()
+                << ") dom path:"
+                << GetDomPath(state_.GetElement(), false, true);
+#endif
     }
   }
 #endif

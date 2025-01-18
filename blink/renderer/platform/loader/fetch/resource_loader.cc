@@ -102,6 +102,10 @@
 #include "ohos_adapter_helper.h"
 #endif
 
+#ifdef OHOS_LOGGER_REPORT
+#include "url/ohos/log_utils.h"
+#endif
+
 namespace blink {
 
 namespace {
@@ -713,6 +717,11 @@ void ResourceLoader::DidFailLoadingBody() {
 }
 
 void ResourceLoader::DidCancelLoadingBody() {
+#ifdef OHOS_LOGGER_REPORT
+  LOG_FEEDBACK(WARNING) << "Resource loader DidCancelLoadingBody, url: "
+                        << url::LogUtils::ConvertUrlWithMask(
+                           resource_->LastResourceRequest().Url().GetString().Utf8());
+#endif
   Cancel();
 }
 
@@ -722,6 +731,11 @@ void ResourceLoader::StartWith(const ResourceRequestHead& request) {
 
   if (resource_->Options().synchronous_policy == kRequestSynchronously &&
       fetcher_->GetProperties().FreezeMode() != LoaderFreezeMode::kNone) {
+#ifdef OHOS_LOGGER_REPORT
+    LOG_FEEDBACK(WARNING) << "Resource loader StartWith, url: "
+                          << url::LogUtils::ConvertUrlWithMask(
+                              resource_->LastResourceRequest().Url().GetString().Utf8());
+#endif
     // TODO(yuzus): Evict bfcache if necessary.
     Cancel();
     return;

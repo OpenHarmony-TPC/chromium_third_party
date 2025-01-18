@@ -278,6 +278,11 @@ void FullscreenController::FullscreenElementChanged(
                  << new_element->localName();
 #endif // OHOS_MEDIA
 
+#ifdef OHOS_LOGGER_REPORT
+    LOG_FEEDBACK(WARNING) << "OhMedia::FullscreenElementChanged new_element = "
+                 << new_element->localName();
+#endif
+
     if (auto* video_element = DynamicTo<HTMLVideoElement>(*new_element)) {
       video_element->DidEnterFullscreen();
     }
@@ -289,6 +294,11 @@ void FullscreenController::FullscreenElementChanged(
     LOG(WARNING) << "OhMedia::FullscreenElementChanged old_element = "
                  << old_element->localName();
 #endif // OHOS_MEDIA
+
+#ifdef OHOS_LOGGER_REPORT
+    LOG_FEEDBACK(WARNING) << "OhMedia::FullscreenElementChanged old_element = "
+                 << old_element->localName();
+#endif
 
     if (old_video_element)
       old_video_element->DidExitFullscreen();

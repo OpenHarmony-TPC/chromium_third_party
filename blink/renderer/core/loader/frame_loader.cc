@@ -132,6 +132,10 @@
 #include "third_party/blink/renderer/platform/wtf/text/string_utf8_adaptor.h"
 #include "third_party/blink/renderer/platform/wtf/text/wtf_string.h"
 
+#ifdef OHOS_LOGGER_REPORT
+#include "url/ohos/log_utils.h"
+#endif
+
 namespace blink {
 
 namespace {
@@ -1117,6 +1121,11 @@ void FrameLoader::CommitNavigation(
     // document.
     if (commit_reason == CommitReason::kXSLT && document_loader_)
       document_loader_->SetSentDidFinishLoad();
+#ifdef OHOS_LOGGER_REPORT
+    LOG_FEEDBACK(INFO) << "Frame loader CommitNavigation, url: "
+                       << url::LogUtils::ConvertUrlWithMask(
+                          navigation_params->url.GetString().Utf8());
+#endif
     if (!DetachDocument()) {
       DCHECK(!is_provisional);
       return;

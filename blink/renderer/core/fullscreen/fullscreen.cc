@@ -697,6 +697,13 @@ ScriptPromise Fullscreen::RequestFullscreen(Element& pending,
                << pending.localName() << ", CountFullscreenInTopLayer = "
                << CountFullscreenInTopLayer(pending.GetDocument());
 #endif // OHOS_MEDIA
+  
+#ifdef OHOS_LOGGER_REPORT
+  LOG_FEEDBACK(WARNING) << "OhMedia::RequestFullscreen localName = "
+               << pending.localName() << ", CountFullscreenInTopLayer = "
+               << CountFullscreenInTopLayer(pending.GetDocument());
+#endif
+
   RequestFullscreenScope scope;
 
   // 1. Let |pending| be the context object.
@@ -989,6 +996,9 @@ ScriptPromise Fullscreen::ExitFullscreen(Document& doc,
 #if defined(OHOS_MEDIA)
   LOG(WARNING) << "OhMedia::ExitFullscreen";
 #endif // OHOS_MEDIA  
+#ifdef OHOS_LOGGER_REPORT
+  LOG_FEEDBACK(WARNING) << "OhMedia::ExitFullscreen";
+#endif
   // 1. Let |promise| be a new promise.
   // ScriptPromiseResolver is allocated after step 2.
   ScriptPromiseResolver* resolver = nullptr;
@@ -1074,6 +1084,9 @@ void Fullscreen::DidExitFullscreen(Document& document) {
 #if defined(OHOS_MEDIA)
   LOG(WARNING) << "OhMedia::DidExitFullscreen";
 #endif // OHOS_MEDIA
+#ifdef OHOS_LOGGER_REPORT
+  LOG_FEEDBACK(WARNING) << "OhMedia::DidExitFullscreen";
+#endif
   // If this is a response to an ExitFullscreen call then
   // continue exiting. Otherwise call FullyExitFullscreen.
   Fullscreen& fullscreen = From(*document.domWindow());

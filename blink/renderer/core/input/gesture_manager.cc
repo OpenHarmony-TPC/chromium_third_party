@@ -522,6 +522,9 @@ WebInputEventResult GestureManager::HandleGestureLongPress(
 WebInputEventResult GestureManager::HandleGestureDragLongPress(
     const GestureEventWithHitTestResults& targeted_event) {
   LOG(INFO) << "DragDrop HandleGestureDragLongPress";
+#ifdef OHOS_LOGGER_REPORT
+  LOG_FEEDBACK(INFO) << "DragDrop HandleGestureDragLongPress";
+#endif
   const WebGestureEvent& gesture_event = targeted_event.Event();
 
   // FIXME: Ideally we should try to remove the extra mouse-specific hit-tests

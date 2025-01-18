@@ -172,6 +172,9 @@ void TextIteratorTextNodeHandler::HandleTextNodeInRange(const Text* node,
   const NGOffsetMapping* const mapping =
       NGOffsetMapping::ForceGetFor(Position(node, offset_));
   if (UNLIKELY(!mapping)) {
+#ifdef OHOS_LOGGER_REPORT
+    LOG_FEEDBACK(ERROR) << "We have LayoutText outside LayoutBlockFlow " << text_node_;
+#endif
     NOTREACHED() << "We have LayoutText outside LayoutBlockFlow " << text_node_;
     return;
   }

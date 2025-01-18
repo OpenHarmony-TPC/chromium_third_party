@@ -143,12 +143,22 @@ std::unique_ptr<DragImage> DragImage::CreateClippedByVisualViewport(
     gfx::Vector2dF image_scale) {
   if (!image) {
     LOG(WARNING) << "DragDrop Invalid image input";
+
+#ifdef OHOS_LOGGER_REPORT
+    LOG_FEEDBACK(WARNING) << "DragDrop Invalid image input";
+#endif
+
     return nullptr;
   }
 
   PaintImage paint_image = image->PaintImageForCurrentFrame();
   if (!paint_image) {
     LOG(WARNING) << "DragDrop Invalid paint image";
+
+#ifdef OHOS_LOGGER_REPORT
+    LOG_FEEDBACK(WARNING) << "DragDrop Invalid paint image";
+#endif
+
     return nullptr;
   }
 
@@ -164,6 +174,11 @@ std::unique_ptr<DragImage> DragImage::CreateClippedByVisualViewport(
                                                 interpolation_quality);
   if (!paint_image || !paint_image.GetSwSkImage()->asLegacyBitmap(&bm)) {
     LOG(WARNING) << "DragDrop Invalid paint image or bitmap after clip";
+
+#ifdef OHOS_LOGGER_REPORT
+    LOG_FEEDBACK(WARNING) << "DragDrop Invalid paint image or bitmap after clip";
+#endif
+
     return nullptr;
   }
   (void)device_scale_factor;

@@ -1146,6 +1146,9 @@ static std::unique_ptr<DragImage> ClippedDragImageForImage(
   gfx::Size image_size = image->Size(respect_orientation);
   if (image_size.IsEmpty()) {
     LOG(INFO) << "DragDrop Try to get clipped drag image failed, the size is empty";
+#ifdef OHOS_LOGGER_REPORT
+    LOG_FEEDBACK(INFO) << "DragDrop Try to get clipped drag image failed, the size is empty";
+#endif
     return nullptr;
   }
 
@@ -1269,6 +1272,12 @@ std::unique_ptr<DragImage> DragImageForImage(
       LOG(WARNING) << "The image ("
           << image_size.width() << "," << image_size.height()
           << ") is too big to support drag";
+
+#ifdef OHOS_LOGGER_REPORT
+      LOG_FEEDBACK(WARNING) << "The image ("
+          << image_size.width() << "," << image_size.height()
+          << ") is too big to support drag";
+#endif
     }
 #endif
   return DragImage::Create(image.get(), respect_orientation,
