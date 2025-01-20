@@ -727,7 +727,9 @@ void MediaControlsImpl::PopulatePanel() {
     AttachHoverBackground(play_button_);
     AttachHoverBackground(fullscreen_button_);
     AttachHoverBackground(overflow_menu_);
+#if defined(OHOS_VIDEO_ASSISTANT)
   }
+#endif
 }
 
 #if defined(OHOS_VIDEO_ASSISTANT)
