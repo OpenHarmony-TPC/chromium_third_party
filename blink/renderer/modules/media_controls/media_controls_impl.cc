@@ -579,7 +579,7 @@ void MediaControlsImpl::InitializeControls() {
   if (ShouldShowVideoControls()) {
     media_button_panel_ =
         MakeGarbageCollected<MediaControlButtonPanelElement>(*this);
-    scrubbing_panel_ = 
+    scrubbing_panel_ =
         MakeGarbageCollected<MediaControlScrubbingPanelElement>(*this);
     scrubbing_message_ =
         MakeGarbageCollected<MediaControlScrubbingMessageElement>(*this);
@@ -727,7 +727,9 @@ void MediaControlsImpl::PopulatePanel() {
     AttachHoverBackground(play_button_);
     AttachHoverBackground(fullscreen_button_);
     AttachHoverBackground(overflow_menu_);
+#if defined(OHOS_VIDEO_ASSISTANT)
   }
+#endif
 }
 
 #if defined(OHOS_VIDEO_ASSISTANT)
