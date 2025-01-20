@@ -1447,7 +1447,14 @@ InputHandlerProxy::HandleGestureScrollUpdate(
 
   cc::InputHandlerScrollResult scroll_result =
       input_handler_->ScrollUpdate(&scroll_state, delay);
-
+  std::string scroll_result_str = "trace_id:" + std::to_string(trace_id)
+    + " pro_dy:" + std::to_string(provided_delta_x)
+    + " pro_dy:" + std::to_string(provided_delta_y)
+    + " vi_dx:" + std::to_string(scroll_result.current_visual_offset.x())
+    + " vi_dy" + std::to_string(scroll_result.current_visual_offset.y());
+  OHOS_TRACE_EVENT1(
+    "input", "InputHandlerProxy::HandleGestureScrollUpdate_Result", 
+    "result", scroll_result_str);
   TRACE_EVENT(
       "input", "InputHandlerProxy::HandleGestureScrollUpdate_Result",
       [trace_id, provided_delta_x, provided_delta_y,
