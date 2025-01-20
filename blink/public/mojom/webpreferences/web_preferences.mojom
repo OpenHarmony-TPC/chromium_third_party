@@ -534,6 +534,7 @@ struct WebPreferences {
   // #ifdef OHOS_VIDEO_ASSISTANT
   [EnableIf=ohos_video_assistant]
   bool video_assistant_enabled = false;
+  [EnableIf=ohos_video_assistant]
   bool custom_media_player_enabled = false;
   // #endif OHOS_VIDEO_ASSISTANT
 };
