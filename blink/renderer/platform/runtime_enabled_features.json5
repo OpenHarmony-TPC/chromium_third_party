@@ -2005,7 +2005,7 @@
       // No plan to support complex UI for date/time INPUT types on Android.
       // status: {"Android": "test", "default": "stable"},
       // IS_OHOS && OHOS_CSS_INPUT_TIME
-      // status: {"test"}
+      status: "stable",
     },
     {
       name: "InstalledApp",
