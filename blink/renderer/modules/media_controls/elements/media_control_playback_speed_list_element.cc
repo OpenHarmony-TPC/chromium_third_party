@@ -142,6 +142,15 @@ void MediaControlPlaybackSpeedListElement::SetIsWanted(bool wanted) {
 }
 
 void MediaControlPlaybackSpeedListElement::DefaultEventHandler(Event& event) {
+#ifdef OHOS_VIDEO_ASSISTANT
+  if (GetMediaControls().ShouldShowVideoControlsHM()) {
+    if (event.type() == event_type_names::kGestureshowpress) {
+      SetHrHidden(event);
+    } else if (event.type() == event_type_names::kLostpointercapture) {
+      RemoveHrHidden(event);
+    }
+  }
+#endif
   if (event.type() == event_type_names::kClick) {
     // This handles the back button click. Clicking on a menu item triggers the
     // change event instead.
@@ -177,6 +186,40 @@ void MediaControlPlaybackSpeedListElement::DefaultEventHandler(Event& event) {
   }
   MediaControlPopupMenuElement::DefaultEventHandler(event);
 }
+
+#ifdef OHOS_VIDEO_ASSISTANT
+void MediaControlPlaybackSpeedListElement::SetHrHidden(Event& event) {
+  Node* target = event.target()->ToNode();
+  if (!target || !target->IsElementNode()) {
+    return;
+  }
+  if (target->HasPreviousSibling()) {
+    To<Element>(target->previousSibling())->SetShadowPseudoId(
+      AtomicString("-internal-media-controls-playback-speed-list-hr-hidden"));
+  }
+  if (target->HasNextSibling()) {
+    To<Element>(target->nextSibling())->SetShadowPseudoId(
+      AtomicString("-internal-media-controls-playback-speed-list-hr-hidden"));
+  }
+}
+
+void MediaControlPlaybackSpeedListElement::RemoveHrHidden(Event& event) {
+  Node* target = event.target()->ToNode();
+  if (!target || !target->IsElementNode()) {
+    return;
+  }
+  if (target->HasPreviousSibling() &&
+      To<Element>(target->previousSibling())->ShadowPseudoId().GetString() ==
+        "-internal-media-controls-playback-speed-list-hr-hidden") {
+    To<Element>(target->previousSibling())->removeAttribute(html_names::kPseudoAttr);
+  }
+  if (target->HasNextSibling() &&
+      To<Element>(target->nextSibling())->ShadowPseudoId().GetString() ==
+        "-internal-media-controls-playback-speed-list-hr-hidden") {
+    To<Element>(target->nextSibling())->removeAttribute(html_names::kPseudoAttr);
+  }
+}
+#endif
 
 void MediaControlPlaybackSpeedListElement::RecordPlaybackSpeed(const double playback_rate) {
   if (playback_rate == 0.25) {

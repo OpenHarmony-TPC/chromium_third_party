@@ -449,6 +449,8 @@ class CORE_EXPORT HTMLMediaElement
   void SeekingFinishedOverlay();
   void ErrorOverlay(int32_t error_code, const String& error_msg);
   void VideoSizeChangedOverlay(int32_t width, int32_t height);
+
+  bool IsRTL() const; 
 #endif // OHOS_VIDEO_ASSISTANT
 
  protected:
