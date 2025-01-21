@@ -60,7 +60,9 @@ String MediaControlTimeDisplayElement::FormatTime() const {
   } else {
 #endif
     return MediaControlsSharedHelpers::FormatTime(current_value_);
+#ifdef OHOS_VIDEO_ASSISTANT
   }
+#endif
 }
 
 }  // namespace blink
