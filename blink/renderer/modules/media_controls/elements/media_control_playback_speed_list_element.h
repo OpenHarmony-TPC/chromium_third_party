@@ -28,6 +28,10 @@ class MediaControlPlaybackSpeedListElement final
   class RequestAnimationFrameCallback;
 
   void DefaultEventHandler(Event&) override;
+#ifdef OHOS_VIDEO_ASSISTANT
+  void SetHrHidden(Event& event);
+  void RemoveHrHidden(Event& event);
+#endif
 
   void RefreshPlaybackSpeedListMenu();
 

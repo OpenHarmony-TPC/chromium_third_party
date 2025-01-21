@@ -66,6 +66,12 @@ void MediaControlsMediaEventListener::Attach() {
                                      /*use_capture=*/false);
   GetMediaElement().addEventListener(event_type_names::kPointerenter, this,
                                      /*use_capture=*/false);
+#ifdef OHOS_VIDEO_ASSISTANT
+  if (media_controls_->ShouldShowVideoControlsHM()) {
+    GetMediaElement().addEventListener(event_type_names::kRatechange, this,
+                                      /*use_capture=*/false);
+  }
+#endif
 
   // Listen to two different fullscreen events in order to make sure the new and
   // old APIs are handled.
@@ -222,6 +228,14 @@ void MediaControlsMediaEventListener::Invoke(
     media_controls_->OnLoadedData();
     return;
   }
+#ifdef OHOS_VIDEO_ASSISTANT
+  if (media_controls_->ShouldShowVideoControlsHM()) {
+    if (event->type() == event_type_names::kRatechange) {
+      media_controls_->OnPlaybackSpeedRateChanged();
+      return;
+    }
+  }
+#endif
 
   // Fullscreen handling.
   if (event->type() == event_type_names::kFullscreenchange ||

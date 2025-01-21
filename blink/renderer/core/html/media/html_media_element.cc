@@ -135,6 +135,8 @@
 
 #ifdef OHOS_VIDEO_ASSISTANT
 #include "base/base_switches.h"
+#include "base/strings/string_split.h"
+#include "base/strings/string_util.h"
 #include "third_party/blink/renderer/core/frame/visual_viewport.h"
 #endif // OHOS_VIDEO_ASSISTANT
 
@@ -5697,6 +5699,18 @@ void HTMLMediaElement::VideoSizeChangedOverlay(int32_t width, int32_t height) {
       observer->VideoSizeChangedOverlay(width, height);
     }
   }
+}
+
+bool HTMLMediaElement::IsRTL() const {
+  bool isRTL = base::i18n::IsRTL();
+  const std::string locale = base::i18n::GetConfiguredLocale();
+  std::vector<base::StringPiece> locale_split = base::SplitStringPiece(
+      locale, "-_", base::KEEP_WHITESPACE, base::SPLIT_WANT_ALL);
+  const base::StringPiece& language_code = locale_split[0];
+  if (language_code.compare("ug") == 0) {
+    isRTL = true;
+  }
+  return isRTL && locale.find("ur") == std::string::npos;
 }
 
 void HTMLMediaElement::SetVideoSurface(int32_t widget_id) {

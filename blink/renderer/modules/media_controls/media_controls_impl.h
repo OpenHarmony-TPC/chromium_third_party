@@ -75,10 +75,11 @@ class TextTrack;
 #if defined(OHOS_MEDIA)
 class MediaControlEnteredFullscreenPanelElement;
 class MediaControlEnteredFullscreenTitleDisplayElement;
-class MediaControlTopRowPanelElement;
 #endif // defined(OHOS_MEDIA)
 #ifdef OHOS_VIDEO_ASSISTANT
 class HTMLStyleElement;
+class MediaControlTopRowPanelElement;
+class MediaControlTimelineRowPanelElement;
 #endif // OHOS_VIDEO_ASSISTANT
 
 // Default implementation of the core/ MediaControls interface used by
@@ -147,7 +148,6 @@ class MODULES_EXPORT MediaControlsImpl final : public HTMLDivElement,
   bool PlaybackSpeedListIsWanted();
 #ifdef OHOS_VIDEO_ASSISTANT
   bool ShouldShowVideoControlsHM() const;
-  void RefreshPlaybackSpeedButton();
 #endif
 
   // Methods related to the overflow menu.
@@ -383,6 +383,9 @@ class MODULES_EXPORT MediaControlsImpl final : public HTMLDivElement,
   void OnWaiting();
   void OnLoadingProgress();
   void OnLoadedData();
+#ifdef OHOS_VIDEO_ASSISTANT
+  void OnPlaybackSpeedRateChanged();
+#endif
 
   // Media control elements.
   Member<MediaControlOverlayEnclosureElement> overlay_enclosure_;
@@ -426,6 +429,7 @@ class MODULES_EXPORT MediaControlsImpl final : public HTMLDivElement,
 #ifdef OHOS_VIDEO_ASSISTANT
   Member<HTMLStyleElement> style_element_;
   Member<MediaControlTopRowPanelElement> top_row_panel_;
+  Member<MediaControlTimelineRowPanelElement> timeline_row_panel_;
 #endif // OHOS_VIDEO_ASSISTANT
 
   Member<MediaControlsMediaEventListener> media_event_listener_;

@@ -68,7 +68,6 @@
 #if defined(OHOS_MEDIA)
 #include "third_party/blink/renderer/modules/media_controls/elements/media_control_entered_fullscreen_panel_element.h"
 #include "third_party/blink/renderer/modules/media_controls/elements/media_control_entered_fullscreen_title_display_element.h"
-#include "third_party/blink/renderer/modules/media_controls/elements/media_control_top_row_panel_element.h"
 #endif // defined(OHOS_MEDIA)
 #include "third_party/blink/renderer/modules/media_controls/elements/media_control_fullscreen_button_element.h"
 #include "third_party/blink/renderer/modules/media_controls/elements/media_control_loading_panel_element.h"
@@ -108,6 +107,8 @@
 
 #ifdef OHOS_VIDEO_ASSISTANT
 #include "third_party/blink/renderer/core/html/html_style_element.h"
+#include "third_party/blink/renderer/modules/media_controls/elements/media_control_top_row_panel_element.h"
+#include "third_party/blink/renderer/modules/media_controls/elements/media_control_timeline_row_panel_element.h"
 #endif // OHOS_VIDEO_ASSISTANT
 
 namespace blink {
@@ -425,6 +426,7 @@ MediaControlsImpl::MediaControlsImpl(HTMLMediaElement& media_element)
 #if defined(OHOS_VIDEO_ASSISTANT)
   if (ShouldShowVideoControlsHM()) {
     top_row_panel_ = nullptr;
+    timeline_row_panel_ = nullptr;
   }
 #endif
 }
@@ -436,6 +438,10 @@ MediaControlsImpl* MediaControlsImpl::Create(HTMLMediaElement& media_element,
   controls->SetShadowPseudoId(AtomicString("-webkit-media-controls"));
   controls->InitializeControls();
   controls->Reset();
+
+#ifdef OHOS_VIDEO_ASSISTANT
+  controls->SetClass("rtl", media_element.IsRTL());
+#endif
 
   if (RuntimeEnabledFeatures::VideoFullscreenOrientationLockEnabled() &&
       IsA<HTMLVideoElement>(media_element)) {
@@ -545,6 +551,8 @@ void MediaControlsImpl::InitializeControls() {
   if (ShouldShowVideoControlsHM()) {
     top_row_panel_ = MakeGarbageCollected<MediaControlTopRowPanelElement>(*this);
     top_row_panel_->setInnerHTML("");
+    timeline_row_panel_ = MakeGarbageCollected<MediaControlTimelineRowPanelElement>(*this);
+    timeline_row_panel_->setInnerHTML("");
   }
 #endif // defined(OHOS_VIDEO_ASSISTANT)
 
@@ -746,6 +754,7 @@ void MediaControlsImpl::PopulatePanelHM() {
     MaybeParserAppendChild(volume_control_container_, volume_slider_);
     volume_control_container_->ParserAppendChild(mute_button_);
     top_row_panel_->ParserAppendChild(volume_control_container_);
+    AttachHoverBackground(mute_button_);
 
     download_button_->SetIsWanted(download_button_->ShouldDisplayDownloadButton());
     top_row_panel_->ParserAppendChild(download_button_);
@@ -772,15 +781,14 @@ void MediaControlsImpl::PopulatePanelHM() {
   }
 
   button_panel->ParserAppendChild(play_button_);
-  button_panel->ParserAppendChild(current_time_display_);
-  button_panel->ParserAppendChild(timeline_);
-  button_panel->ParserAppendChild(duration_display_);
 
-  if (ShouldShowAudioControls()) {
-    MaybeParserAppendChild(volume_control_container_, volume_slider_);
-    volume_control_container_->ParserAppendChild(mute_button_);
-    button_panel->ParserAppendChild(volume_control_container_);
+  if (timeline_row_panel_) {
+    timeline_row_panel_->setInnerHTML("");
   }
+  timeline_row_panel_->ParserAppendChild(current_time_display_);
+  timeline_row_panel_->ParserAppendChild(timeline_);
+  timeline_row_panel_->ParserAppendChild(duration_display_);
+  button_panel->ParserAppendChild(timeline_row_panel_);
 
   button_panel->ParserAppendChild(playback_speed_button_);
   playback_speed_button_->SetIsWanted(ShouldShowPlaybackSpeedButton(MediaElement()));
@@ -1244,7 +1252,11 @@ bool MediaControlsImpl::ShouldHideMediaControls(unsigned behavior_flags) const {
 
 bool MediaControlsImpl::AreVideoControlsHovered() const {
   DCHECK(IsA<HTMLVideoElement>(MediaElement()));
-
+#ifdef OHOS_VIDEO_ASSISTANT
+  if (ShouldShowVideoControlsHM()) {
+    return media_button_panel_->IsHovered() || timeline_->IsHovered() || top_row_panel_->IsHovered();
+  }
+#endif
   return media_button_panel_->IsHovered() || timeline_->IsHovered();
 }
 
@@ -1342,10 +1354,6 @@ bool MediaControlsImpl::PlaybackSpeedListIsWanted() {
 
 bool MediaControlsImpl::ShouldShowVideoControlsHM() const {
   return MediaElement().IsCustomMediaPlayerEnabled() && ShouldShowVideoControls();
-}
-
-void MediaControlsImpl::RefreshPlaybackSpeedButton() {
-  playback_speed_button_->RefreshPlaybackSpeedButton();
 }
 #endif
 
@@ -2431,6 +2439,12 @@ void MediaControlsImpl::OnLoadedData() {
   UpdateCSSClassFromState();
 }
 
+#ifdef OHOS_VIDEO_ASSISTANT
+void MediaControlsImpl::OnPlaybackSpeedRateChanged() {
+  playback_speed_button_->RefreshPlaybackSpeedButton();
+}
+#endif
+
 HTMLVideoElement& MediaControlsImpl::VideoElement() {
   return *To<HTMLVideoElement>(&MediaElement());
 }
@@ -2491,6 +2505,7 @@ void MediaControlsImpl::VideoAssistantTrace(Visitor* visitor) const {
   visitor->Trace(style_element_);
   if (ShouldShowVideoControlsHM()) {
       visitor->Trace(top_row_panel_);
+      visitor->Trace(timeline_row_panel_);
   }
 }
 #endif // OHOS_VIDEO_ASSISTANT

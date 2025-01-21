@@ -42,9 +42,6 @@ MediaControlPlaybackSpeedButtonElement::MediaControlPlaybackSpeedButtonElement(
 static constexpr int playback_speed_rate_integerize = 100;
 static constexpr int keep_one_decimal = 10;
 void MediaControlPlaybackSpeedButtonElement::RefreshPlaybackSpeedButton() {
-  EventDispatchForbiddenScope::AllowUserAgentEvents allow_events;
-  RemoveChildren(kOmitSubtreeModifiedEvent);
-
   double playback_rate = MediaElement().playbackRate();
   if (1.0 == playback_rate) {
     setAttribute(html_names::kValueAttr, AtomicString(GetLocale().QueryString(
