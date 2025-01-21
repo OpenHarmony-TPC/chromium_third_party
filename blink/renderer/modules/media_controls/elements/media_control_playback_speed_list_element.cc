@@ -179,7 +179,6 @@ void MediaControlPlaybackSpeedListElement::DefaultEventHandler(Event& event) {
 }
 
 void MediaControlPlaybackSpeedListElement::RecordPlaybackSpeed(const double playback_rate) {
-  static constexpr double playback_speed_rate = 3.0;
   if (playback_rate == 0.25) {
     RecordPlaybackSpeedUMA(MediaControlsPlaybackSpeed::k0_25X);
   } else if (playback_rate == 0.5) {
@@ -197,7 +196,7 @@ void MediaControlPlaybackSpeedListElement::RecordPlaybackSpeed(const double play
   } else if (playback_rate == 2.0) {
     RecordPlaybackSpeedUMA(MediaControlsPlaybackSpeed::k2X);
 #ifdef OHOS_VIDEO_ASSISTANT
-  } else if (playback_rate == playback_speed_rate) {
+  } else if (playback_rate == 3.0) {
     RecordPlaybackSpeedUMA(MediaControlsPlaybackSpeed::k3X);
 #endif
   } else {
