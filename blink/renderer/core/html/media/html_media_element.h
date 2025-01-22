@@ -627,6 +627,7 @@ class CORE_EXPORT HTMLMediaElement
 
 #if defined(OHOS_CUSTOM_VIDEO_PLAYER)
   bool IsMuted() override;
+  uint32_t IsMediaMuted();
   bool IsCustomVideoPlayerEnabled() override;
   bool ShouldCustomVideoPlayerOverlay() override;
   bool ShouldShowMediaControls() override;
@@ -678,6 +679,7 @@ class CORE_EXPORT HTMLMediaElement
 #if defined(OHOS_VIDEO_ASSISTANT)
   void SetPlaybackRate(double playback_rate) override {}
   void RequestDownloadUrl() override {}
+  void HidePlaybackSpeedList() override;
   void SetVideoSurface(int32_t widget_id) override;
 #endif  // defined(OHOS_VIDEO_ASSISTANT)
 

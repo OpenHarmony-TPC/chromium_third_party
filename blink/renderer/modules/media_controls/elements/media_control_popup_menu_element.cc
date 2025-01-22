@@ -109,10 +109,17 @@ class MediaControlPopupMenuElement::EventListener final
         event->stopPropagation();
         event->SetDefaultHandled();
       }
-    } else if (event->type() == event_type_names::kResize ||
-               event->type() == event_type_names::kScroll ||
-               event->type() == event_type_names::kBeforetoggle) {
+    } else if (event->type() == event_type_names::kScroll ||
+               event->type() == event_type_names::kResize) {
       popup_menu_->SetIsWanted(false);
+    } else if (event->type() == event_type_names::kBeforetoggle) {
+#ifdef OHOS_VIDEO_ASSISTANT
+      if (!popup_menu_->GetMediaControls().ShouldShowVideoControlsHM()) {
+#endif
+      popup_menu_->SetIsWanted(false);
+#ifdef OHOS_VIDEO_ASSISTANT
+      }
+#endif
     }
   }
 

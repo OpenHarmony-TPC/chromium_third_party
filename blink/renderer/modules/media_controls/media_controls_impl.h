@@ -319,6 +319,9 @@ class MODULES_EXPORT MediaControlsImpl final : public HTMLDivElement,
   void ComputeWhichControlsFit();
 
   void HidePopupMenu();
+#ifdef OHOS_VIDEO_ASSISTANT
+  void HidePlaybackSpeedList() override;
+#endif // OHOS_VIDEO_ASSISTANT
   void UpdateOverflowMenuWanted() const;
   void UpdateOverflowMenuItemCSSClass() const;
   void UpdateScrubbingMessageFits() const;
