@@ -717,9 +717,13 @@ void WebMediaPlayerImpl::DisableOverlay() {
     MaybeSendOverlayInfoToDecoder();
 
 #ifdef OHOS_VIDEO_ASSISTANT
+  bool surface_changed = video_surface_id_ != -1;
   video_surface_id_ = -1;
-  if (surface_created_cb_) {
+  if (surface_changed && surface_created_cb_) {
     surface_created_cb_.Run(video_surface_id_);
+    if (paused_ && !seeking_) {
+      pipeline_controller_->Seek(base::Seconds(CurrentTime()), true);
+    }
   }
 #endif // OHOS_VIDEO_ASSISTANT
 }
@@ -3447,6 +3451,13 @@ WebMediaPlayerImpl::UpdatePlayState_ComputePlayState(
   // kReadyStateHaveMetadata.
   bool can_stay_suspended = (is_stale || have_future_data) && is_suspended &&
                             paused_ && !seeking_ && !needs_first_frame_;
+
+#ifdef OHOS_VIDEO_ASSISTANT
+  if (video_surface_id_ > 0) {
+    idle_suspended = false;
+    can_stay_suspended = false;
+  }
+#endif // OHOS_VIDEO_ASSISTANT
 
   // Combined suspend state.
   result.is_suspended = must_suspend || idle_suspended ||

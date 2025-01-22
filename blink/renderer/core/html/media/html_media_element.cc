@@ -1680,6 +1680,12 @@ void HTMLMediaElement::StartPlayerLoad() {
   if (IsFullscreen())
     web_media_player_->EnteredFullscreen();
 
+#ifdef OHOS_VIDEO_ASSISTANT
+  if (IsFullscreen()) {
+    EnterFullScreenOverlay();
+  }
+#endif // OHOS_VIDEO_ASSISTANT
+
   web_media_player_->SetLatencyHint(latencyHint());
 
   web_media_player_->SetPreservesPitch(preservesPitch());
@@ -2806,6 +2812,14 @@ void HTMLMediaElement::setPlaybackRate(double rate,
   if (cue_timeline_ && PotentiallyPlaying())
     cue_timeline_->OnPlaybackRateUpdated();
 }
+
+#ifdef OHOS_VIDEO_ASSISTANT
+void HTMLMediaElement::HidePlaybackSpeedList() {
+  if (GetMediaControls()) {
+    GetMediaControls()->HidePlaybackSpeedList();
+  }
+}
+#endif // OHOS_VIDEO_ASSISTANT
 
 HTMLMediaElement::DirectionOfPlayback HTMLMediaElement::GetDirectionOfPlayback()
     const {
@@ -5070,6 +5084,10 @@ void HTMLMediaElement::DidUseAudioServiceChange(bool uses_audio_service) {
 void HTMLMediaElement::DidPlayerSizeChange(const gfx::Size& size) {
   for (auto& observer : media_player_observer_remote_set_->Value())
     observer->OnMediaSizeChanged(size);
+
+#ifdef OHOS_VIDEO_ASSISTANT
+  VideoSizeChangedOverlay(size.width(), size.height());
+#endif // OHOS_VIDEO_ASSISTANT
 }
 
 void HTMLMediaElement::OnRemotePlaybackDisabled(bool disabled) {
@@ -5224,6 +5242,18 @@ void HTMLMediaElement::OpenerContextObserver::ContextDestroyed() {
 #if defined(OHOS_CUSTOM_VIDEO_PLAYER)
 bool HTMLMediaElement::IsMuted() {
   return muted_;
+}
+uint32_t HTMLMediaElement::IsMediaMuted() {
+  static constexpr uint32_t noAudioTracks = 2;
+  static constexpr uint32_t muted = 0;
+  static constexpr uint32_t notMuted = 1;
+  if (!HasAudio()) {
+    return noAudioTracks;
+  }
+  if (muted_) {
+    return muted;
+  }
+  return notMuted;
 }
 bool HTMLMediaElement::IsUsedCustomVideoPlayer() {
   return IsCustomVideoPlayerEnabled();
@@ -5385,6 +5415,7 @@ bool HTMLMediaElement::IsVideoAssistantEnabled() {
   }
   return video_assistant_.value_or(true);
 }
+
 void HTMLMediaElement::OnLayerBoundsChange(const gfx::Rect& bounds) {
   if (has_been_seen_playing_once_) {
     return;
@@ -5402,8 +5433,8 @@ void HTMLMediaElement::OnLayerBoundsChange(const gfx::Rect& bounds) {
     has_been_seen_playing_once_ = !video_rect_.IsEmpty();
   }
   UpdateVideoAssistantAttributes();
-  VideoSizeChangedOverlay(video_rect_.width(), video_rect_.height());
 }
+
 void HTMLMediaElement::OnWebMediaPlayerShowing(bool showing) {
   if (web_player_showing_ == showing) {
     return;
@@ -5411,6 +5442,7 @@ void HTMLMediaElement::OnWebMediaPlayerShowing(bool showing) {
   web_player_showing_ = showing;
   UpdateVideoAssistantAttributes();
 }
+
 void HTMLMediaElement::TryNotifyVideoPlaying() {
   if (!video_assistant_enabled_) {
     return;
@@ -5425,6 +5457,7 @@ void HTMLMediaElement::TryNotifyVideoPlaying() {
   }
   NotifyVideoPlayingInternal();
 }
+
 void HTMLMediaElement::NotifyVideoPlayingInternal() {
   if (!IsVideoAssistantEnabled()) {
     return;
@@ -5435,6 +5468,7 @@ void HTMLMediaElement::NotifyVideoPlayingInternal() {
         base::Milliseconds(delay_in_ms), FROM_HERE);
   }
 }
+
 void HTMLMediaElement::UpdateVideoAssistantAttributes() {
   if (!IsVideoAssistantEnabled()) {
     return;
@@ -5446,6 +5480,7 @@ void HTMLMediaElement::UpdateVideoAssistantAttributes() {
     }
   }
 }
+
 void HTMLMediaElement::NotifyVideoVisible(bool visible) {
   if (!IsVideoAssistantEnabled()) {
     return;
@@ -5457,6 +5492,7 @@ void HTMLMediaElement::NotifyVideoVisible(bool visible) {
     UpdateVideoAssistantAttributes();
   }
 }
+
 void HTMLMediaElement::NotifyVideoDestroyed() {
   if (!IsVideoAssistantEnabled()) {
     return;
@@ -5468,6 +5504,7 @@ void HTMLMediaElement::NotifyVideoDestroyed() {
     }
   }
 }
+
 media::mojom::blink::VideoAttributesForVASTPtr
 HTMLMediaElement::CollectVideoAttributesForVAST() {
   auto attributes = media::mojom::blink::VideoAttributesForVAST::New();
@@ -5497,7 +5534,7 @@ HTMLMediaElement::CollectMediaInfoAttributesForVAST() {
   mediaInfoAttr->playback_rate = playbackRate();
   mediaInfoAttr->video_width = media_player->NaturalSize().width();
   mediaInfoAttr->video_height = media_player->NaturalSize().height();
-  mediaInfoAttr->isMuted = IsMuted();
+  mediaInfoAttr->isMuted = IsMediaMuted();
   mediaInfoAttr->isPlaying = !media_player->Paused();
   mediaInfoAttr->isShowPlaybackSpeed = true;
   mediaInfoAttr->show_download_button = !controls_list_->ShouldHideDownload();

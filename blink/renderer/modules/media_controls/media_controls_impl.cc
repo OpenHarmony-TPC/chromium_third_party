@@ -2372,6 +2372,12 @@ void MediaControlsImpl::HidePopupMenu() {
     TogglePlaybackSpeedList();
 }
 
+#ifdef OHOS_VIDEO_ASSISTANT
+void MediaControlsImpl::HidePlaybackSpeedList() {
+  playback_speed_list_->SetIsWanted(false);
+}
+#endif
+
 void MediaControlsImpl::VolumeSliderWantedTimerFired(TimerBase*) {
   volume_slider_->OpenSlider();
   volume_control_container_->OpenContainer();
