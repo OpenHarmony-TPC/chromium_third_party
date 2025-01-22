@@ -172,11 +172,6 @@ void MediaControlPlaybackSpeedListElement::DefaultEventHandler(Event& event) {
         To<Element>(target)->GetFloatingPointAttribute(PlaybackRateAttrName());
     MediaElement().setDefaultPlaybackRate(playback_rate);
     MediaElement().setPlaybackRate(playback_rate);
-#ifdef OHOS_VIDEO_ASSISTANT
-    if (GetMediaControls().ShouldShowVideoControlsHM()) {
-      GetMediaControls().RefreshPlaybackSpeedButton();
-    }
-#endif
 
     RecordPlaybackSpeed(playback_rate);
 
