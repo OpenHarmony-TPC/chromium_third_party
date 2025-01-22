@@ -350,7 +350,7 @@ void MediaControlPlaybackSpeedListElement::RefreshPlaybackSpeedListMenu() {
 
   checked_item_ = nullptr;
 
-  const PlaybackSpeed* playbackSpeedsRef = nullptr;
+  const PlaybackSpeed* playbackSpeedsRef;
   unsigned playbackSpeedsSize;
 #ifdef OHOS_VIDEO_ASSISTANT
   if (GetMediaControls().ShouldShowVideoControlsHM()) {
