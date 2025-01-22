@@ -5234,13 +5234,13 @@ bool HTMLMediaElement::IsMuted() {
   return muted_;
 }
 uint32_t HTMLMediaElement::IsMediaMuted() {
-  static constexpr uint32_t noAudioTracks = 2;
-  static constexpr uint32_t muted = 0;
   static constexpr uint32_t notMuted = 1;
   if (!HasAudio()) {
+    static constexpr uint32_t noAudioTracks = 2;
     return noAudioTracks;
   }
   if (muted_) {
+    static constexpr uint32_t muted = 0;
     return muted;
   }
   return notMuted;
