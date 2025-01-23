@@ -18,6 +18,9 @@ class MODULES_EXPORT MediaControlPlaybackSpeedButtonElement final
  public:
   explicit MediaControlPlaybackSpeedButtonElement(MediaControlsImpl&);
 
+#ifdef OHOS_VIDEO_ASSISTANT
+  void RefreshPlaybackSpeedButton();
+#endif
   // MediaControlInputElement overrides.
   bool WillRespondToMouseClickEvents() override;
   int GetOverflowStringId() const override;

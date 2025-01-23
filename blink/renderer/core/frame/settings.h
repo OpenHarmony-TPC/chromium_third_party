@@ -169,6 +169,12 @@ bool IsCustomVideoPlayerOverlay() const {
   bool GetVideoAssistantEnabled() {
     return video_assistant_enabled_;
   }
+  void SetCustomMediaPlayerEnabled(bool enabled) {
+    custom_media_player_enabled_ = enabled;
+  }
+  bool GetCustomMediaPlayerEnabled() {
+    return custom_media_player_enabled_;
+  }
 #endif // OHOS_VIDEO_ASSISTANT
 
  private:
@@ -214,6 +220,7 @@ bool IsCustomVideoPlayerOverlay() const {
 
 #ifdef OHOS_VIDEO_ASSISTANT
   bool video_assistant_enabled_ = false;
+  bool custom_media_player_enabled_ = false;
 #endif // OHOS_VIDEO_ASSISTANT
 };
 

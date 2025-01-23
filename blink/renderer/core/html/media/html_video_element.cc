@@ -467,6 +467,9 @@ void HTMLVideoElement::DidEnterFullscreen() {
 #if defined(OHOS_CUSTOM_VIDEO_PLAYER)
   FullscreenChanged(true);
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
+#if defined(OHOS_VIDEO_ASSISTANT)
+  EnterFullScreenOverlay();
+#endif
 }
 
 void HTMLVideoElement::DidExitFullscreen() {
@@ -485,6 +488,9 @@ void HTMLVideoElement::DidExitFullscreen() {
 #if defined(OHOS_CUSTOM_VIDEO_PLAYER)
   FullscreenChanged(false);
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
+#if defined(OHOS_VIDEO_ASSISTANT)
+  FullscreenChangedOverlay(false);
+#endif
 }
 
 void HTMLVideoElement::DidMoveToNewDocument(Document& old_document) {

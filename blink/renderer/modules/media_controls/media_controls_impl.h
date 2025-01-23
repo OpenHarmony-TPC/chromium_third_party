@@ -78,6 +78,8 @@ class MediaControlEnteredFullscreenTitleDisplayElement;
 #endif // defined(OHOS_MEDIA)
 #ifdef OHOS_VIDEO_ASSISTANT
 class HTMLStyleElement;
+class MediaControlTopRowPanelElement;
+class MediaControlTimelineRowPanelElement;
 #endif // OHOS_VIDEO_ASSISTANT
 
 // Default implementation of the core/ MediaControls interface used by
@@ -144,6 +146,9 @@ class MODULES_EXPORT MediaControlsImpl final : public HTMLDivElement,
   // Methods related to the playback speed menu.
   void TogglePlaybackSpeedList();
   bool PlaybackSpeedListIsWanted();
+#ifdef OHOS_VIDEO_ASSISTANT
+  bool ShouldShowVideoControlsHM() const;
+#endif
 
   // Methods related to the overflow menu.
   void OpenOverflowMenu();
@@ -167,6 +172,10 @@ class MODULES_EXPORT MediaControlsImpl final : public HTMLDivElement,
   // Methods used for Download In-product help.
   const MediaControlOverflowMenuButtonElement& OverflowButton() const;
   MediaControlOverflowMenuButtonElement& OverflowButton();
+#ifdef OHOS_VIDEO_ASSISTANT
+  const MediaControlPlaybackSpeedButtonElement& Playback_Speed_Button() const;
+  MediaControlPlaybackSpeedButtonElement& Playback_Speed_Button();
+#endif
 
   // Accessors for UI elements.
   const MediaControlCurrentTimeDisplayElement& CurrentTimeDisplay() const;
@@ -259,6 +268,12 @@ class MODULES_EXPORT MediaControlsImpl final : public HTMLDivElement,
   void InitializeControls();
   void PopulatePanel();
 
+#ifdef OHOS_VIDEO_ASSISTANT
+  void PopulatePanelHM();
+  void VideoAssistantTrace(Visitor* visitor) const;
+  MediaControlsSizingClass GetSizingClassHM();
+#endif // OHOS_VIDEO_ASSISTANT
+
   // Attach hover background div to buttons
   void AttachHoverBackground(Element*);
 
@@ -304,6 +319,9 @@ class MODULES_EXPORT MediaControlsImpl final : public HTMLDivElement,
   void ComputeWhichControlsFit();
 
   void HidePopupMenu();
+#ifdef OHOS_VIDEO_ASSISTANT
+  void HidePlaybackSpeedList() override;
+#endif // OHOS_VIDEO_ASSISTANT
   void UpdateOverflowMenuWanted() const;
   void UpdateOverflowMenuItemCSSClass() const;
   void UpdateScrubbingMessageFits() const;
@@ -334,6 +352,7 @@ class MODULES_EXPORT MediaControlsImpl final : public HTMLDivElement,
   void HandlePointerEvent(Event*);
   void HandleClickEvent(Event*);
   void HandleTouchEvent(Event*);
+  void HandleDoubleTap(Event*);
 
   void EnsureAnimatedArrowContainer();
   void MaybeJump(int);
@@ -367,6 +386,9 @@ class MODULES_EXPORT MediaControlsImpl final : public HTMLDivElement,
   void OnWaiting();
   void OnLoadingProgress();
   void OnLoadedData();
+#ifdef OHOS_VIDEO_ASSISTANT
+  void OnPlaybackSpeedRateChanged();
+#endif
 
   // Media control elements.
   Member<MediaControlOverlayEnclosureElement> overlay_enclosure_;
@@ -409,6 +431,8 @@ class MODULES_EXPORT MediaControlsImpl final : public HTMLDivElement,
 
 #ifdef OHOS_VIDEO_ASSISTANT
   Member<HTMLStyleElement> style_element_;
+  Member<MediaControlTopRowPanelElement> top_row_panel_;
+  Member<MediaControlTimelineRowPanelElement> timeline_row_panel_;
 #endif // OHOS_VIDEO_ASSISTANT
 
   Member<MediaControlsMediaEventListener> media_event_listener_;
@@ -461,6 +485,9 @@ class MODULES_EXPORT MediaControlsImpl final : public HTMLDivElement,
   Member<MediaControlsTextTrackManager> text_track_manager_;
 
   bool is_test_mode_ = false;
+#ifdef OHOS_VIDEO_ASSISTANT
+  bool is_begin_scrubbing = false;
+#endif
 };
 }  // namespace blink
 

@@ -28,12 +28,21 @@ class MediaControlPlaybackSpeedListElement final
   class RequestAnimationFrameCallback;
 
   void DefaultEventHandler(Event&) override;
+#ifdef OHOS_VIDEO_ASSISTANT
+  void SetHrHidden(Event& event);
+  void RemoveHrHidden(Event& event);
+#endif
 
   void RefreshPlaybackSpeedListMenu();
 
   // Creates the playback speed element in the list.
   Element* CreatePlaybackSpeedListItem(const int display_name,
                                        const double playback_rate);
+
+#ifdef OHOS_VIDEO_ASSISTANT
+  String CreatePlaybackSpeedLabelContentHM(const double playback_rate);
+#endif
+  void RecordPlaybackSpeed(const double playback_rate);
 
   // Creates the header element of the playback speed list.
   Element* CreatePlaybackSpeedHeaderItem();

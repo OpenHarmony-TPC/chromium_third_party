@@ -59,6 +59,9 @@ mojom::blink::FullscreenOptionsPtr ToMojoOptions(
     FullscreenRequestType request_type
 #if defined(OHOS_MEDIA)
     ,
+#ifdef OHOS_VIDEO_ASSISTANT
+    bool overlay_fullscreen = false,
+#endif // OHOS_VIDEO_ASSISTANT
     const absl::optional<gfx::Size>& video_natural_size = absl::nullopt
 #endif  // defined(OHOS_MEDIA)
 ) {
@@ -90,6 +93,10 @@ mojom::blink::FullscreenOptionsPtr ToMojoOptions(
     fullscreen_options->video_natural_size = video_natural_size.value();
   }
 #endif  // defined(OHOS_MEDIA)
+
+#ifdef OHOS_VIDEO_ASSISTANT
+   fullscreen_options->overlay_fullscreen = overlay_fullscreen;
+#endif // OHOS_VIDEO_ASSISTANT
 
   return fullscreen_options;
 }
@@ -162,6 +169,9 @@ void FullscreenController::DidExitFullscreen() {
 void FullscreenController::EnterFullscreen(
     LocalFrame& frame,
     const FullscreenOptions* options,
+#ifdef OHOS_VIDEO_ASSISTANT
+    bool overlay_fullscreen,
+#endif // OHOS_VIDEO_ASSISTANT
     FullscreenRequestType request_type
 #if defined(OHOS_MEDIA)
     ,
@@ -207,9 +217,13 @@ void FullscreenController::EnterFullscreen(
   }
 
   DCHECK(state_ == State::kInitial || requesting_fullscreen_screen_change);
-  auto fullscreen_options = ToMojoOptions(&frame, options, request_type
+  auto fullscreen_options = ToMojoOptions(&frame, options,
+                                          request_type
 #if defined(OHOS_MEDIA)
                                           ,
+#ifdef OHOS_VIDEO_ASSISTANT
+                                          overlay_fullscreen,
+#endif // OHOS_VIDEO_ASSISTANT
                                           video_natural_size
 #endif  // defined(OHOS_MEDIA)
   );

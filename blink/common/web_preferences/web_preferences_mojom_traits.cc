@@ -273,6 +273,7 @@ bool StructTraits<blink::mojom::WebPreferencesDataView,
 #endif
 #ifdef OHOS_VIDEO_ASSISTANT
   out->video_assistant_enabled = data.video_assistant_enabled();
+  out->custom_media_player_enabled = data.custom_media_player_enabled();
 #endif // OHOS_VIDEO_ASSISTANT
   return true;
 }

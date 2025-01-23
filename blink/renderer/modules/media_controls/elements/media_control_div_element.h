@@ -6,6 +6,10 @@
 #define THIRD_PARTY_BLINK_RENDERER_MODULES_MEDIA_CONTROLS_ELEMENTS_MEDIA_CONTROL_DIV_ELEMENT_H_
 
 #include "third_party/blink/renderer/core/html/html_div_element.h"
+#ifdef OHOS_VIDEO_ASSISTANT
+#include "third_party/blink/renderer/core/html/html_span_element.h"
+#include "third_party/blink/renderer/core/html/html_progress_element.h"
+#endif
 #include "third_party/blink/renderer/modules/media_controls/elements/media_control_element_base.h"
 
 namespace blink {
