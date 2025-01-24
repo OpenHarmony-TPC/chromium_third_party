@@ -36,6 +36,12 @@
 #include <android/keycodes.h>
 #endif
 
+#ifdef OHOS_LOGGER_REPORT
+#include "base/base_switches.h"
+#include "base/command_line.h"
+#include "content/public/common/content_switches.h"
+#endif
+
 using perfetto::protos::pbzero::ChromeLatencyInfo;
 using perfetto::protos::pbzero::TrackEvent;
 
@@ -331,7 +337,7 @@ void WidgetBaseInputHandler::HandleInputEvent(
                                        trace_id);
               });
 
-  std::string trace_content_ = "event_type: " + std::to_string(static_cast<int>(coalesced_event.latency_info.source_event_type())) +
+  std::string trace_content_ = "event_type: " + std::to_string(static_cast<int>(coalesced_event.latency_info().source_event_type())) +
       " ,step: " + "STEP_HANDLE_INPUT_EVENT_MAIN";
   OHOS_TRACE_EVENT2("input,benchmark,latencyInfo", "LatencyInfo.Flow", "trace_id",
                     std::to_string(trace_id), "trace_content", trace_content_);
@@ -555,6 +561,14 @@ if (processed != WebInputEventResult::kNotHandled) {
   LOG(INFO) << "input event handled by webkit: "
             << WebInputEvent::GetName(input_event.GetType())
             << ", processed:" << static_cast<int32_t>(processed);
+#ifdef OHOS_LOGGER_REPORT
+  if (base::CommandLine::ForCurrentProcess()->HasSwitch(
+      ::switches::kEnableLoggerReport)) {
+    LOG_FEEDBACK(INFO) << "input event not handled by webkit: "
+            << WebInputEvent::GetName(input_event.GetType())
+            << ", processed:" << static_cast<int32_t>(processed);
+  }
+#endif
 }
 
   // Ensure all injected scrolls were handled or queue up - any remaining

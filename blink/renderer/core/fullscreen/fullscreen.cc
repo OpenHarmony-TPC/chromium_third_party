@@ -697,6 +697,13 @@ ScriptPromise Fullscreen::RequestFullscreen(Element& pending,
                << pending.localName() << ", CountFullscreenInTopLayer = "
                << CountFullscreenInTopLayer(pending.GetDocument());
 #endif // OHOS_MEDIA
+  
+#ifdef OHOS_LOGGER_REPORT
+  LOG_FEEDBACK(WARNING) << "OhMedia::RequestFullscreen localName = "
+               << pending.localName() << ", CountFullscreenInTopLayer = "
+               << CountFullscreenInTopLayer(pending.GetDocument());
+#endif
+
   RequestFullscreenScope scope;
 
   // 1. Let |pending| be the context object.
@@ -752,7 +759,11 @@ ScriptPromise Fullscreen::RequestFullscreen(Element& pending,
 
 #if defined(OHOS_CUSTOM_VIDEO_PLAYER)
   if (request_type & FullscreenRequestType::kForCustomMediaPlayer) {
-    error = nullptr;
+    if (!pending.isConnected()) {
+      error = "Element is not connected";
+    } else {
+      error = nullptr;
+    }
   }
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
 
@@ -777,8 +788,15 @@ ScriptPromise Fullscreen::RequestFullscreen(Element& pending,
     HTMLVideoElement* video_element = nullptr;
     absl::optional<gfx::Size> video_natural_size = absl::nullopt;
 
+#ifdef OHOS_VIDEO_ASSISTANT
+    bool overlay_fullscreen = false;
+#endif // OHOS_VIDEO_ASSISTANT
+
     if (auto* element = DynamicTo<HTMLVideoElement>(pending)) {
       video_element = element;
+#ifdef OHOS_VIDEO_ASSISTANT
+      overlay_fullscreen  = true;
+#endif // OHOS_VIDEO_ASSISTANT
     } else {
       HTMLCollection* children = pending.getElementsByTagName("video");
       for (unsigned int i = 0; children && i < children->length(); i++) {
@@ -795,7 +813,11 @@ ScriptPromise Fullscreen::RequestFullscreen(Element& pending,
           gfx::Size(video_element->videoWidth(), video_element->videoHeight());
     }
 
-    frame.GetChromeClient().EnterFullscreen(frame, options, request_type,
+    frame.GetChromeClient().EnterFullscreen(frame, options,
+#ifdef OHOS_VIDEO_ASSISTANT
+                                            overlay_fullscreen,
+#endif // OHOS_VIDEO_ASSISTANT
+                                            request_type,
                                             video_natural_size);
 #else
     frame.GetChromeClient().EnterFullscreen(frame, options, request_type);
@@ -985,6 +1007,9 @@ ScriptPromise Fullscreen::ExitFullscreen(Document& doc,
 #if defined(OHOS_MEDIA)
   LOG(WARNING) << "OhMedia::ExitFullscreen";
 #endif // OHOS_MEDIA  
+#ifdef OHOS_LOGGER_REPORT
+  LOG_FEEDBACK(WARNING) << "OhMedia::ExitFullscreen";
+#endif
   // 1. Let |promise| be a new promise.
   // ScriptPromiseResolver is allocated after step 2.
   ScriptPromiseResolver* resolver = nullptr;
@@ -1070,6 +1095,9 @@ void Fullscreen::DidExitFullscreen(Document& document) {
 #if defined(OHOS_MEDIA)
   LOG(WARNING) << "OhMedia::DidExitFullscreen";
 #endif // OHOS_MEDIA
+#ifdef OHOS_LOGGER_REPORT
+  LOG_FEEDBACK(WARNING) << "OhMedia::DidExitFullscreen";
+#endif
   // If this is a response to an ExitFullscreen call then
   // continue exiting. Otherwise call FullyExitFullscreen.
   Fullscreen& fullscreen = From(*document.domWindow());

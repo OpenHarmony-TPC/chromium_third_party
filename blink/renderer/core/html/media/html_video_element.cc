@@ -207,6 +207,9 @@ void HTMLVideoElement::ParseAttribute(
     const AttributeModificationParams& params) {
   if (params.name == html_names::kPosterAttr) {
     UpdatePosterImage();
+#if defined(OHOS_MEDIA_AVSESSION)
+    video_poster_ = FastGetAttribute(html_names::kPosterAttr).GetString();
+#endif // OHOS_MEDIA_AVSESSION
 
     // Notify the player when the poster image URL changes.
     if (GetWebMediaPlayer())
@@ -464,6 +467,9 @@ void HTMLVideoElement::DidEnterFullscreen() {
 #if defined(OHOS_CUSTOM_VIDEO_PLAYER)
   FullscreenChanged(true);
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
+#if defined(OHOS_VIDEO_ASSISTANT)
+  EnterFullScreenOverlay();
+#endif
 }
 
 void HTMLVideoElement::DidExitFullscreen() {
@@ -482,6 +488,9 @@ void HTMLVideoElement::DidExitFullscreen() {
 #if defined(OHOS_CUSTOM_VIDEO_PLAYER)
   FullscreenChanged(false);
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
+#if defined(OHOS_VIDEO_ASSISTANT)
+  FullscreenChangedOverlay(false);
+#endif
 }
 
 void HTMLVideoElement::DidMoveToNewDocument(Document& old_document) {

@@ -35,6 +35,11 @@ MediaControlsResourceLoader::MediaControlsResourceLoader()
 MediaControlsResourceLoader::~MediaControlsResourceLoader() = default;
 
 String MediaControlsResourceLoader::GetMediaControlsCSS() const {
+#if defined(OHOS_VIDEO_ASSISTANT)
+  if (custom_media_player_enabled_) {
+    return UncompressResourceAsString(IDR_UASTYLE_MEDIA_CONTROLS_HM_CSS);
+  }
+#endif
   return UncompressResourceAsString(IDR_UASTYLE_MEDIA_CONTROLS_CSS);
 }
 
@@ -70,6 +75,11 @@ String MediaControlsResourceLoader::GetArrowLeftSVGImage() {
 
 // static
 String MediaControlsResourceLoader::GetScrubbingMessageStyleSheet() {
+#if defined(OHOS_VIDEO_ASSISTANT)
+  if (custom_media_player_enabled_) {
+    return UncompressResourceAsString(IDR_SHADOWSTYLE_MEDIA_CONTROLS_SCRUBBING_MESSAGE_HM_CSS);
+  }
+#endif
   return UncompressResourceAsString(
       IDR_SHADOWSTYLE_MEDIA_CONTROLS_SCRUBBING_MESSAGE_CSS);
 }
@@ -110,5 +120,14 @@ void MediaControlsResourceLoader::InjectMediaControlsUAStyleSheet() {
   if (!default_style_sheets.HasMediaControlsStyleSheetLoader())
     default_style_sheets.SetMediaControlsStyleSheetLoader(std::move(loader));
 }
+
+#ifdef OHOS_VIDEO_ASSISTANT
+
+bool MediaControlsResourceLoader::custom_media_player_enabled_ = false;
+
+void MediaControlsResourceLoader::SetCustomMediaPlayerEnabled(bool enable) {
+  custom_media_player_enabled_ = enable;
+}
+#endif
 
 }  // namespace blink

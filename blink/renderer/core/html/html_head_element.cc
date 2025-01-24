@@ -25,9 +25,26 @@
 
 #include "third_party/blink/renderer/core/html_names.h"
 
+#if defined(OHOS_JSPROXY)
+#include "third_party/blink/renderer/core/frame/local_frame.h"
+#include "third_party/blink/renderer/core/loader/frame_loader.h"
+#endif
+
 namespace blink {
 
 HTMLHeadElement::HTMLHeadElement(Document& document)
     : HTMLElement(html_names::kHeadTag, document) {}
+
+#if defined(OHOS_JSPROXY)
+void HTMLHeadElement::RunScriptsAtHeadElementAvailable() {
+  // When parsing a fragment, its dummy document has a null parser.
+  if (!GetDocument().Parser())
+    return;
+
+  if (GetDocument().GetFrame()) {
+    GetDocument().GetFrame()->Loader().RunScriptsAtHeadElementAvailable();
+  }
+}
+#endif
 
 }  // namespace blink

@@ -307,6 +307,11 @@ class WebSettings {
   virtual void SetDrawMode(int) = 0;
   virtual void SetTextZoomFactor(float factor) = 0;
 #endif
+
+#if defined(OHOS_LOGGER_REPORT)
+  virtual int32_t GetUsageScenario() = 0;
+#endif
+
 #if defined(OHOS_CUSTOM_VIDEO_PLAYER)
   virtual void SetCustomVideoPlayerEnabled(bool enable) = 0;
   virtual void SetCustomVideoPlayerOverlay(bool overlay) = 0;
@@ -314,6 +319,7 @@ class WebSettings {
 
 #ifdef OHOS_VIDEO_ASSISTANT
   virtual void SetVideoAssistantEnabled(bool enabled) {}
+  virtual void SetCustomMediaPlayerEnabled(bool enabled) {}
 #endif // OHOS_VIDEO_ASSISTANT
 
  protected:

@@ -1386,6 +1386,9 @@ void LocalFrameMojoHandler::GetImageFromCache(
   blink::Document* document = frame_->GetDocument();
   if (document == nullptr) {
     LOG(ERROR) << "getImageFromCache: document nullptr";
+#ifdef OHOS_LOGGER_REPORT
+    LOG_FEEDBACK(ERROR) << "getImageFromCache: document nullptr";
+#endif
     // Client()->OnGetImageDataForUrl(url, 0, nullptr);
     std::move(callback).Run(0, base::ReadOnlySharedMemoryRegion());
     return;
@@ -1394,6 +1397,9 @@ void LocalFrameMojoHandler::GetImageFromCache(
   DocumentLoader* loader = document->Loader();
   if (loader == nullptr) {
     LOG(ERROR) << "getImageFromCache: loader nullptr";
+#ifdef OHOS_LOGGER_REPORT
+    LOG_FEEDBACK(ERROR) << "getImageFromCache: loader nullptr";
+#endif
     // Client()->OnGetImageDataForUrl(url, 0, nullptr);
     std::move(callback).Run(0, base::ReadOnlySharedMemoryRegion());
     return;
@@ -1403,6 +1409,9 @@ void LocalFrameMojoHandler::GetImageFromCache(
       loader->OnGetImageFromCache(url);
   if (resource_buffer == nullptr) {
     LOG(ERROR) << "getImageFromCache: Get resource buffer null";
+#ifdef OHOS_LOGGER_REPORT
+    LOG_FEEDBACK(ERROR) << "getImageFromCache: Get resource buffer null";
+#endif
     // Client()->OnGetImageDataForUrl(url, 0, nullptr);
     std::move(callback).Run(0, base::ReadOnlySharedMemoryRegion());
     return;
@@ -1412,6 +1421,9 @@ void LocalFrameMojoHandler::GetImageFromCache(
       base::WritableSharedMemoryRegion::Create(resource_buffer->size());
   if (!region.IsValid()) {
     LOG(ERROR) << "getImageFromCache: WritableSharedMemoryRegion create failed";
+#ifdef OHOS_LOGGER_REPORT
+    LOG_FEEDBACK(ERROR) << "getImageFromCache: WritableSharedMemoryRegion create failed";
+#endif
     // Client()->OnGetImageDataForUrl(url, 0, nullptr);
     std::move(callback).Run(0, base::ReadOnlySharedMemoryRegion());
     return;
@@ -1420,6 +1432,9 @@ void LocalFrameMojoHandler::GetImageFromCache(
   base::WritableSharedMemoryMapping mapping = region.Map();
   if (!mapping.IsValid()) {
     LOG(ERROR) << "getImageFromCache: WritableSharedMemoryRegion map failed";
+#ifdef OHOS_LOGGER_REPORT
+    LOG_FEEDBACK(ERROR) << "getImageFromCache: WritableSharedMemoryRegion map failed";
+#endif
     // Client()->OnGetImageDataForUrl(url, 0, nullptr);
     std::move(callback).Run(0, base::ReadOnlySharedMemoryRegion());
     return;
@@ -1431,6 +1446,10 @@ void LocalFrameMojoHandler::GetImageFromCache(
     LOG(ERROR)
         << "getImageFromCache: Get resource bytes unfinished, buffer size "
         << resource_buffer->size();
+#ifdef OHOS_LOGGER_REPORT
+    LOG_FEEDBACK(ERROR) << "getImageFromCache: Get resource bytes unfinished, buffer size "
+        << resource_buffer->size();
+#endif
     // Client()->OnGetImageDataForUrl(url, 0, nullptr);
     std::move(callback).Run(0, base::ReadOnlySharedMemoryRegion());
     return;

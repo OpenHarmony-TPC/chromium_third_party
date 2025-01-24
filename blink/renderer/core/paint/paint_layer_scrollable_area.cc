@@ -108,6 +108,7 @@
 #include "third_party/blink/renderer/core/scroll/smooth_scroll_sequencer.h"
 #include "third_party/blink/renderer/core/view_transition/view_transition.h"
 #include "third_party/blink/renderer/core/view_transition/view_transition_utils.h"
+#include "third_party/blink/renderer/platform/geometry/layout_unit.h"
 #include "third_party/blink/renderer/platform/graphics/paint/drawing_recorder.h"
 #include "third_party/blink/renderer/platform/heap/garbage_collected.h"
 #include "ui/base/ui_base_features.h"
@@ -660,6 +661,11 @@ gfx::Vector2d PaintLayerScrollableArea::MaximumScrollOffsetInt() const {
   gfx::Size visible_size;
   if (this == controller.RootScrollerArea()) {
     visible_size = controller.RootScrollerVisibleArea();
+#ifdef OHOS_SCROLLBAR
+    auto scale_factor = ComputeVisibleAreaScale();
+    visible_size.set_width(visible_size.width() / scale_factor);
+    visible_size.set_height(visible_size.height() / scale_factor);
+#endif  // OHOS_SCROLLBAR
   } else {
     visible_size = ToPixelSnappedRect(GetLayoutBox()->OverflowClipRect(
                                           GetLayoutBox()->Location(),
@@ -690,20 +696,6 @@ PhysicalRect PaintLayerScrollableArea::LayoutContentRect(
   NGPhysicalBoxStrut scrollbars;
   if (scrollbar_inclusion == kExcludeScrollbars)
     scrollbars = GetLayoutBox()->ComputeScrollbars();
-#ifdef OHOS_SCROLLBAR
-  if (is_pinch_gesture_active_) {
-    Page* page = GetLayoutBox()->GetFrame()->LocalFrameRoot().GetPage();
-    if (page) {
-      float scale_factor = page->PageScaleFactor();
-      if (scale_factor > 1.f && layer_->IsRootLayer()) {
-        layer_size.SetWidth(
-            blink::LayoutUnit(layer_size.Width() / scale_factor));
-        layer_size.SetHeight(
-            blink::LayoutUnit(layer_size.Height() / scale_factor));
-      }
-    }
-  }
-#endif  // OHOS_SCROLLBAR
   PhysicalSize size(
       layer_size.Width() - border_width - scrollbars.HorizontalSum(),
       layer_size.Height() - border_height - scrollbars.VerticalSum());
@@ -812,6 +804,16 @@ void PaintLayerScrollableArea::ScrollbarVisibilityChanged() {
 }
 
 #ifdef OHOS_SCROLLBAR
+float PaintLayerScrollableArea::ComputeVisibleAreaScale() const {
+  Page* page = GetLayoutBox()->GetDocument().GetPage();
+  DCHECK(page);
+  float scale_factor = page->PageScaleFactor();
+  if (is_pinch_gesture_active_ && !base::ohos::IsPcDevice() && scale_factor > 1.f && layer_->IsRootLayer()) {
+    return scale_factor;
+  }
+  return 1.f;
+}
+
 void PaintLayerScrollableArea::UpdateScrollbarLengthOrCreateWidthScale() {
   is_pinch_gesture_active_ = true;
   if (HorizontalScrollbar() && VerticalScrollbar()) {
@@ -1039,10 +1041,18 @@ void PaintLayerScrollableArea::UpdateScrollbarEnabledState(
 }
 
 void PaintLayerScrollableArea::UpdateScrollbarProportions() {
+#ifdef OHOS_SCROLLBAR
+  auto scale_factor = ComputeVisibleAreaScale();
+  if (Scrollbar* horizontal_scrollbar = HorizontalScrollbar())
+    horizontal_scrollbar->SetProportion(VisibleWidth() / scale_factor, ContentsSize().width());
+  if (Scrollbar* vertical_scrollbar = VerticalScrollbar())
+    vertical_scrollbar->SetProportion(VisibleHeight() / scale_factor, ContentsSize().height());
+#else
   if (Scrollbar* horizontal_scrollbar = HorizontalScrollbar())
     horizontal_scrollbar->SetProportion(VisibleWidth(), ContentsSize().width());
   if (Scrollbar* vertical_scrollbar = VerticalScrollbar())
     vertical_scrollbar->SetProportion(VisibleHeight(), ContentsSize().height());
+#endif
 }
 
 void PaintLayerScrollableArea::SetScrollOffsetUnconditionally(
@@ -1302,8 +1312,14 @@ bool PaintLayerScrollableArea::HasHorizontalOverflow() const {
   // converse problem seems to happen much less frequently in practice, so we
   // bias the logic towards preventing unwanted horizontal scrollbars, which
   // are more common and annoying.
+#ifdef OHOS_SCROLLBAR
+  auto scale_factor = ComputeVisibleAreaScale();
+  LayoutUnit client_width = LayoutUnit::FromFloatRound(LayoutContentRect(kIncludeScrollbars).Width().ToFloat() /
+    scale_factor - VerticalScrollbarWidth(kIgnoreOverlayScrollbarSize));
+#else
   LayoutUnit client_width = LayoutContentRect(kIncludeScrollbars).Width() -
                             VerticalScrollbarWidth(kIgnoreOverlayScrollbarSize);
+#endif
   if (NeedsRelayout() && !HadVerticalScrollbarBeforeRelayout())
     client_width += VerticalScrollbarWidth();
   LayoutUnit scroll_width(ScrollWidth());
@@ -1313,9 +1329,15 @@ bool PaintLayerScrollableArea::HasHorizontalOverflow() const {
 }
 
 bool PaintLayerScrollableArea::HasVerticalOverflow() const {
+#ifdef OHOS_SCROLLBAR
+  auto scale_factor = ComputeVisibleAreaScale();
+  LayoutUnit client_height = LayoutUnit::FromFloatRound(LayoutContentRect(kIncludeScrollbars).Height().ToFloat() /
+    scale_factor - HorizontalScrollbarHeight(kIgnoreOverlayScrollbarSize));
+#else
   LayoutUnit client_height =
       LayoutContentRect(kIncludeScrollbars).Height() -
       HorizontalScrollbarHeight(kIgnoreOverlayScrollbarSize);
+#endif
   LayoutUnit scroll_height(ScrollHeight());
   LayoutUnit box_y = GetLayoutBox()->Location().Y();
   return SnapSizeToPixel(scroll_height, box_y) >

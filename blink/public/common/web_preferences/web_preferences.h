@@ -425,6 +425,7 @@ struct BLINK_COMMON_EXPORT WebPreferences {
 
 #ifdef OHOS_VIDEO_ASSISTANT
   bool video_assistant_enabled = false;
+  bool custom_media_player_enabled = false;
 #endif // OHOS_VIDEO_ASSISTANT
 
   // We try to keep the default values the same as the default values in

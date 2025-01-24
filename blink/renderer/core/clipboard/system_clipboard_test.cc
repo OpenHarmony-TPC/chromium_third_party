@@ -271,7 +271,13 @@ TEST_F(SystemClipboardTest, CustomData) {
   EXPECT_EQ(system_clipboard().ReadCustomData("a"), "");
 
   // Setting text in the host is visible in system.
-  clipboard_host()->WriteCustomData({{"a", "first"}});
+  clipboard_host()->WriteCustomData({{"a", "first"}}
+#if defined(OHOS_CLIPBOARD)
+                                    ,
+                                    ::blink::mojom::CopyOptionMode::NONE
+#endif  // defined(OHOS_CLIPBOARD)
+  );
+
   EXPECT_EQ(system_clipboard().ReadCustomData("a"), "first");
 
   // Inside a snapshot scope, the first read from the system clipboard
@@ -279,10 +285,20 @@ TEST_F(SystemClipboardTest, CustomData) {
   {
     ScopedSystemClipboardSnapshot snapshot(system_clipboard());
 
-    clipboard_host()->WriteCustomData({{"a", "second"}});
+    clipboard_host()->WriteCustomData({{"a", "second"}}
+#if defined(OHOS_CLIPBOARD)
+                                      ,
+                                      ::blink::mojom::CopyOptionMode::NONE
+#endif  // defined(OHOS_CLIPBOARD)
+    );
     EXPECT_EQ(system_clipboard().ReadCustomData("a"), "second");
 
-    clipboard_host()->WriteCustomData({{"a", "third"}, {"b", "fourth"}});
+    clipboard_host()->WriteCustomData({{"a", "third"}, {"b", "fourth"}}
+#if defined(OHOS_CLIPBOARD)
+                                      ,
+                                      ::blink::mojom::CopyOptionMode::NONE
+#endif  // defined(OHOS_CLIPBOARD)
+    );
     EXPECT_EQ(system_clipboard().ReadCustomData("a"), "second");
     EXPECT_EQ(system_clipboard().ReadCustomData("b"), "fourth");
   }

@@ -168,6 +168,10 @@
 #include "third_party/blink/renderer/core/html/image_document.h"
 #endif
 
+#ifdef OHOS_LOGGER_REPORT
+#include "url/ohos/log_utils.h"
+#endif
+
 namespace blink {
 namespace {
 
@@ -1655,6 +1659,10 @@ void DocumentLoader::SetDefersLoading(LoaderFreezeMode mode) {
 
 void DocumentLoader::DetachFromFrame(bool flush_microtask_queue) {
   DCHECK(frame_);
+#ifdef OHOS_LOGGER_REPORT
+  LOG_FEEDBACK(INFO) << "Document loader DetachFromFrame, url: "
+                     << url::LogUtils::ConvertUrlWithMask(url_.GetString().Utf8());
+#endif
   StopLoading();
   // `frame_` may become null because this method can get re-entered. If it
   // is null we've already run the code below so just return early.
@@ -1856,6 +1864,10 @@ void DocumentLoader::StartLoadingResponse() {
   // always be a frame here.
   if (frame_ && frame_->GetDocument()->IsMediaDocument()) {
     parser_->Finish();
+#ifdef OHOS_LOGGER_REPORT
+    LOG_FEEDBACK(INFO) << "Document loader StartLoadingResponse, url: "
+                       << url::LogUtils::ConvertUrlWithMask(url_.GetString().Utf8());
+#endif
     StopLoading();
     return;
   }
@@ -3394,18 +3406,33 @@ scoped_refptr<const SharedBuffer> GetShareBufferForImageDocument(
   HTMLImageElement* element = To<ImageDocument>(document)->ImageElement();
   if (!element) {
     LOG(ERROR) << "GetShareBufferForImageDocument, element is null";
+
+#ifdef OHOS_LOGGER_REPORT
+    LOG_FEEDBACK(ERROR) << "GetShareBufferForImageDocument, element is null";
+#endif
+
     return nullptr;
   }
 
   ImageResourceContent* content = element->CachedImage();
   if (!content) {
     LOG(ERROR) << "GetShareBufferForImageDocument, content is null";
+
+#ifdef OHOS_LOGGER_REPORT
+    LOG_FEEDBACK(ERROR) << "GetShareBufferForImageDocument, content is null";
+#endif
+
     return nullptr;
   }
 
   blink::Image* image = content->GetImage();
   if (!image || image->IsNull()) {
     LOG(ERROR) << "GetShareBufferForImageDocument, image is null";
+
+#ifdef OHOS_LOGGER_REPORT
+    LOG_FEEDBACK(ERROR) << "GetShareBufferForImageDocument, image is null";
+#endif
+
     return nullptr;
   }
 

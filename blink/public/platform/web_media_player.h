@@ -397,6 +397,10 @@ class WebMediaPlayer {
   virtual bool IsUsingCustomRenderer() const { return false; }
   virtual void SetInitialPreload(uint32_t preload) {}
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
+
+#ifdef OHOS_VIDEO_ASSISTANT
+  virtual void SetVideoSurface(int32_t widget_id) {}
+#endif // OHOS_VIDEO_ASSISTANT
 };
 
 }  // namespace blink

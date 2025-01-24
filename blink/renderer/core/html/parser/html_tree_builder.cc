@@ -2210,6 +2210,9 @@ void HTMLTreeBuilder::ProcessEndTag(AtomicHTMLToken* token) {
           ProcessTemplateEndTag(token);
           return;
         case HTMLTag::kHead:
+#if defined(OHOS_JSPROXY)
+          tree_.RunScriptsAtHeadElementAvailable();
+#endif
           tree_.OpenElements()->PopHTMLHeadElement();
           SetInsertionMode(kAfterHeadMode);
           return;

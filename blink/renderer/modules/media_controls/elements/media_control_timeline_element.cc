@@ -379,6 +379,14 @@ bool MediaControlTimelineElement::EndScrubbingEvent(Event& event) {
       is_touching_ = false;
       return true;
     }
+#ifdef OHOS_VIDEO_ASSISTANT
+    if (GetMediaControls().ShouldShowVideoControlsHM()) {
+      if (event.type() == event_type_names::kPointerout) {
+        is_touching_ = false;
+        return true;
+      }
+    }
+#endif
   } else if (event.type() == event_type_names::kPointerup ||
              event.type() == event_type_names::kPointercancel) {
     return IsValidPointerEvent(event);

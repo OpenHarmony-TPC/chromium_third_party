@@ -1146,6 +1146,9 @@ static std::unique_ptr<DragImage> ClippedDragImageForImage(
   gfx::Size image_size = image->Size(respect_orientation);
   if (image_size.IsEmpty()) {
     LOG(INFO) << "DragDrop Try to get clipped drag image failed, the size is empty";
+#ifdef OHOS_LOGGER_REPORT
+    LOG_FEEDBACK(INFO) << "DragDrop Try to get clipped drag image failed, the size is empty";
+#endif
     return nullptr;
   }
 
@@ -1269,6 +1272,12 @@ std::unique_ptr<DragImage> DragImageForImage(
       LOG(WARNING) << "The image ("
           << image_size.width() << "," << image_size.height()
           << ") is too big to support drag";
+
+#ifdef OHOS_LOGGER_REPORT
+      LOG_FEEDBACK(WARNING) << "The image ("
+          << image_size.width() << "," << image_size.height()
+          << ") is too big to support drag";
+#endif
     }
 #endif
   return DragImage::Create(image.get(), respect_orientation,
@@ -1407,6 +1416,16 @@ void SelectEnclosingAnchorIfContentEditable(LocalFrame* frame) {
   }
 }
 
+#ifdef OHOS_DRAG_DROP
+gfx::Rect GetImageRectFromImageNode(LocalFrame* frame, const HitTestResult& hit_test_result) {
+  gfx::Rect image_rect = hit_test_result.ImageRect();
+  if (!frame || !frame->GetSettings()) {
+    return image_rect;
+  }
+  return hit_test_result.GetReplacedContentRect();
+}
+#endif
+
 std::unique_ptr<DragImage> DetermineDragImageAndRect(
     gfx::Rect& drag_obj_rect,
     gfx::Point& effective_drag_initiation_location,
@@ -1446,8 +1465,10 @@ std::unique_ptr<DragImage> DetermineDragImageAndRect(
   if (state.drag_type_ == kDragSourceActionSelection) {
     if (!drag_image) {
 #ifdef OHOS_DRAG_DROP
-      drag_image = DragController::DragImageForSelection(*frame, kDragTextAlpha, visibleRect);
-      drag_obj_rect = DragRectForSelectionDrag(*frame, visibleRect);
+      gfx::RectF visible_rect_from_root_frame =
+          gfx::RectF(frame->View()->ConvertFromRootFrame(gfx::ToEnclosingRect(visibleRect)));
+      drag_image = DragController::DragImageForSelection(*frame, kDragTextAlpha, visible_rect_from_root_frame);
+      drag_obj_rect = DragRectForSelectionDrag(*frame, visible_rect_from_root_frame);
 #else
       drag_image = DragController::DragImageForSelection(*frame, kDragImageAlpha);
       drag_obj_rect = DragRectForSelectionDrag(*frame);
@@ -1456,7 +1477,11 @@ std::unique_ptr<DragImage> DetermineDragImageAndRect(
   } else if (state.drag_type_ == kDragSourceActionImage) {
     if (!drag_image) {
       auto* element = DynamicTo<Element>(state.drag_src_.Get());
+#ifdef OHOS_DRAG_DROP
+      const gfx::Rect& image_rect = GetImageRectFromImageNode(frame, hit_test_result);
+#else
       const gfx::Rect& image_rect = hit_test_result.ImageRect();
+#endif
       // TODO(oshima): Remove this scaling and simply pass imageRect to
       // dragImageForImage once all platforms are migrated to use zoom for dsf.
       gfx::Size image_size_in_pixels = gfx::ScaleToFlooredSize(
@@ -1588,7 +1613,7 @@ gfx::RectF DragController::GetVisibleRectToUIInRootFrame(LocalFrame* frame) {
   }
 
   gfx::Rect visibleRect = page_->GetChromeClient().GetVisibleRectToWeb(frame);
-  gfx::RectF visible_rect_in_root_frame(frame->View()->ConvertToRootFrame(visibleRect));
+  gfx::RectF visible_rect_in_root_frame(visibleRect);
   auto scroll_offset = frame->GetPage()->GetVisualViewport().GetScrollOffset();
   float page_scale_factor = frame->GetPage()->PageScaleFactor();
   

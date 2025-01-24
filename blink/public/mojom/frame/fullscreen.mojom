@@ -34,5 +34,8 @@ struct FullscreenOptions {
 
   [EnableIf=ohos_custom_video_player]
   bool is_custom_media_player = false;
+
+  [EnableIf=ohos_video_assistant]
+  bool overlay_fullscreen = false;
 };
 

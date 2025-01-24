@@ -262,8 +262,13 @@ class CORE_EXPORT WebSettingsImpl final : public WebSettings {
   void SetCustomVideoPlayerOverlay(bool overlay) override;
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
 
+#ifdef OHOS_LOGGER_REPORT
+  int32_t GetUsageScenario() override;
+#endif
+
 #ifdef OHOS_VIDEO_ASSISTANT
   void SetVideoAssistantEnabled(bool enabled) override;
+  void SetCustomMediaPlayerEnabled(bool enabled) override;
 #endif // OHOS_VIDEO_ASSISTANT
 
   bool RenderVSyncNotificationEnabled() const {

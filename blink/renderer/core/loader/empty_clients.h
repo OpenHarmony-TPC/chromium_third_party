@@ -262,9 +262,11 @@ class CORE_EXPORT EmptyChromeClient : public ChromeClient {
 #ifdef OHOS_AI
   void CreateOverlay(LocalFrame* frame,
                      const SkBitmap& image,
-                     const Node* image_node,
                      const gfx::Point& touch_point,
-                     OnTextSelectedCallback callback) override {}
+                     GetAbsImageRectCallback get_rect_callback,
+                     OnTextSelectedCallback callback,
+                     OnDestroyImageAnalyzerOverlayCallback destroy_callback) override {}
+  uint32_t GetFoldStatus(LocalFrame* frame) override { return 0; }
 #endif
  private:
   const display::ScreenInfos empty_screen_infos_{display::ScreenInfo()};
@@ -422,6 +424,10 @@ class CORE_EXPORT EmptyLocalFrameClient : public LocalFrameClient {
   void RunScriptsAtDocumentElementAvailable() override {}
   void RunScriptsAtDocumentReady(bool) override {}
   void RunScriptsAtDocumentIdle() override {}
+
+#if defined(OHOS_JSPROXY)
+  void RunScriptsAtHeadElementAvailable() override {}
+#endif
 
   void DidCreateScriptContext(v8::Local<v8::Context>,
                               int32_t world_id) override {}

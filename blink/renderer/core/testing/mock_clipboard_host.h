@@ -59,7 +59,12 @@ class MockClipboardHost : public mojom::blink::ClipboardHost {
   void WriteHtml(const ::WTF::String& markup, const ::blink::KURL& url, ::blink::mojom::blink::CopyOptionMode copy_option) override;
   void WriteSvg(const String& markup) override;
   void WriteSmartPasteMarker(::blink::mojom::blink::CopyOptionMode copy_option) override;
-  void WriteCustomData(const HashMap<String, String>& data) override;
+  void WriteCustomData(const HashMap<String, String>& data
+#if defined(OHOS_CLIPBOARD)
+,
+                     const blink::mojom::CopyOptionMode copy_option
+#endif // defined(OHOS_CLIPBOARD)
+                     ) override;
   void WriteBookmark(const WTF::String& url, const ::WTF::String& title, ::blink::mojom::blink::CopyOptionMode copy_option) override;
   void WriteImage(const ::SkBitmap& image,
                   ::blink::mojom::blink::CopyOptionMode copy_option) override;
@@ -70,7 +75,12 @@ class MockClipboardHost : public mojom::blink::ClipboardHost {
       const String& format,
       ReadUnsanitizedCustomFormatCallback callback) override;
   void WriteUnsanitizedCustomFormat(const String& format,
-                                    mojo_base::BigBuffer data) override;
+                                    mojo_base::BigBuffer data
+#if defined(OHOS_CLIPBOARD)
+,
+                     const blink::mojom::CopyOptionMode copy_option
+#endif // defined(OHOS_CLIPBOARD)
+                     ) override;
 #if BUILDFLAG(IS_MAC)
   void WriteStringToFindPboard(const String& text) override;
 #endif

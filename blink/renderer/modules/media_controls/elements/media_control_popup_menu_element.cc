@@ -19,6 +19,9 @@
 #include "third_party/blink/renderer/core/html_names.h"
 #include "third_party/blink/renderer/modules/media_controls/elements/media_control_elements_helper.h"
 #include "third_party/blink/renderer/modules/media_controls/elements/media_control_overflow_menu_button_element.h"
+#ifdef OHOS_VIDEO_ASSISTANT
+#include "third_party/blink/renderer/modules/media_controls/elements/media_control_playback_speed_button_element.h"
+#endif
 #include "third_party/blink/renderer/modules/media_controls/media_controls_impl.h"
 #include "third_party/blink/renderer/platform/keyboard_codes.h"
 #include "third_party/blink/renderer/platform/wtf/functional.h"
@@ -106,10 +109,17 @@ class MediaControlPopupMenuElement::EventListener final
         event->stopPropagation();
         event->SetDefaultHandled();
       }
-    } else if (event->type() == event_type_names::kResize ||
-               event->type() == event_type_names::kScroll ||
-               event->type() == event_type_names::kBeforetoggle) {
+    } else if (event->type() == event_type_names::kScroll ||
+               event->type() == event_type_names::kResize) {
       popup_menu_->SetIsWanted(false);
+    } else if (event->type() == event_type_names::kBeforetoggle) {
+#ifdef OHOS_VIDEO_ASSISTANT
+      if (!popup_menu_->GetMediaControls().ShouldShowVideoControlsHM()) {
+#endif
+      popup_menu_->SetIsWanted(false);
+#ifdef OHOS_VIDEO_ASSISTANT
+      }
+#endif
     }
   }
 
@@ -213,7 +223,6 @@ void MediaControlPopupMenuElement::SetPosition() {
   DCHECK(!RuntimeEnabledFeatures::CSSAnchorPositioningEnabled());
   // The popup is positioned slightly on the inside of the bottom right
   // corner.
-  static constexpr int kPopupMenuMarginPx = 4;
   static const char kImportant[] = "important";
   static const char kPx[] = "px";
 
@@ -223,6 +232,12 @@ void MediaControlPopupMenuElement::SetPosition() {
   DCHECK(bounding_client_rect);
   DCHECK(dom_window);
 
+#ifdef OHOS_VIDEO_ASSISTANT
+  if (GetMediaControls().ShouldShowVideoControlsHM()) {
+    SetPopupAnchorHM(bounding_client_rect, dom_window);
+  } else {
+#endif
+  static constexpr int kPopupMenuMarginPx = 4;
   WTF::String bottom_str_value =
       WTF::String::Number(dom_window->innerHeight() -
                           bounding_client_rect->bottom() + kPopupMenuMarginPx) +
@@ -236,9 +251,61 @@ void MediaControlPopupMenuElement::SetPosition() {
                        ASSERT_NO_EXCEPTION);
   style()->setProperty(dom_window, "right", right_str_value, kImportant,
                        ASSERT_NO_EXCEPTION);
+#ifdef OHOS_VIDEO_ASSISTANT
+  }
+#endif
 }
 
+#ifdef OHOS_VIDEO_ASSISTANT
+static constexpr int kPopupMenuMarginPxOhos = 8;
+static constexpr int kPopupMenuPaddingPx = 4;
+// 48*7+6+4+4+8+8=366
+static constexpr int kPopupMenuBottomSpaceLeft = 366;
+// 224+16+16+8=264
+static constexpr int kPopupMenuLeftSpaceLeft = 264;
+static const char kImportant[] = "important";
+static const char kPx[] = "px";
+
+void MediaControlPopupMenuElement::SetPopupAnchorHM(DOMRect* bounding_client_rect, LocalDOMWindow* dom_window) {
+  style()->removeProperty("max-height", ASSERT_NO_EXCEPTION);
+  if (kPopupMenuBottomSpaceLeft <= dom_window->innerHeight() -
+      bounding_client_rect->bottom() + kPopupMenuMarginPxOhos) {
+    WTF::String top_str_value = WTF::String::Number(bounding_client_rect->bottom()) + kPx;
+    style()->setProperty(dom_window, "top", top_str_value, kImportant,
+                        ASSERT_NO_EXCEPTION);
+    style()->removeProperty("bottom", ASSERT_NO_EXCEPTION);
+  } else {
+    WTF::String bottom_str_value = WTF::String::Number(dom_window->innerHeight() -
+                        bounding_client_rect->top()) + kPx;
+    style()->setProperty(dom_window, "bottom", bottom_str_value, kImportant,
+                        ASSERT_NO_EXCEPTION);
+    style()->removeProperty("top", ASSERT_NO_EXCEPTION);
+    if (kPopupMenuBottomSpaceLeft > bounding_client_rect->top() + kPopupMenuMarginPxOhos) {
+      WTF::String height_str_value = WTF::String::Number(bounding_client_rect->top() -
+                            kPopupMenuMarginPxOhos - 2 * kPopupMenuPaddingPx) + kPx;
+      style()->setProperty(dom_window, "max-height", height_str_value, kImportant,
+                        ASSERT_NO_EXCEPTION);
+    }
+  }
+
+  if (kPopupMenuLeftSpaceLeft <= bounding_client_rect->right()) {
+    WTF::String right_str_value = WTF::String::Number(dom_window->innerWidth() -
+                            bounding_client_rect->right()) + kPx;
+    style()->setProperty(dom_window, "right", right_str_value, kImportant, ASSERT_NO_EXCEPTION);
+  } else {
+    WTF::String right_str_value = WTF::String::Number(dom_window->innerWidth() -
+                            kPopupMenuLeftSpaceLeft) + kPx;
+    style()->setProperty(dom_window, "right", right_str_value, kImportant, ASSERT_NO_EXCEPTION);
+  }
+}
+#endif
+
 Element* MediaControlPopupMenuElement::PopupAnchor() const {
+#ifdef OHOS_VIDEO_ASSISTANT
+  if (GetMediaControls().ShouldShowVideoControlsHM()) {
+    return &GetMediaControls().Playback_Speed_Button();
+  }
+#endif
   return &GetMediaControls().OverflowButton();
 }
 

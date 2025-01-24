@@ -206,6 +206,21 @@ class TestMediaPlayerObserver final
   void OnUpdateVideoAttributes(
       media::mojom::blink::VideoAttributesForVASTPtr video_attributes) override {}
   void OnVideoDestroyed() override {}
+  void OnFullScreenOverlayEnter(media::mojom::blink::MediaInfoForVASTPtr media_info) override {}
+  void UpdatePlayStateOverlay(bool playState) override {}
+  void MutedChangedOverlay(bool muted) override {}
+  void PlaybackRateChangedOverlay(double playback_rate) override {}
+
+  void DurationChangedOverlay(double duration) override {}
+  void TimeUpdateOverlay(double current_time) override {}
+  void BufferedEndTimeChangedOverlay(double buffered_end_time) override {}
+  void EndedOverlay() override {}
+
+  void FullscreenChangedOverlay(bool fullscreen) override {}
+  void SeekingOverlay() override {}
+  void SeekingFinishedOverlay() override {}
+  void ErrorOverlay(int32_t error_code, const WTF::String& error_msg) override {}
+  void VideoSizeChangedOverlay(int32_t width, int32_t height) override {}
 #endif // OHOS_VIDEO_ASSISTANT
 
   // Getters used from HTMLMediaElementTest.
@@ -235,7 +250,11 @@ class TestMediaPlayerObserver final
           remote_playback_metadata) const {
     return received_remote_playback_metadata_ == remote_playback_metadata;
   }
+#if defined (OHOS_MEDIA_AVSESSION)
+  void OnGetMediaTitle(const WTF::String& data) override {}
 
+  void OnGetVideoPoster(const WTF::String& data) override {}
+#endif // OHOS_MEDIA_AVSESSION
  private:
   std::unique_ptr<base::RunLoop> run_loop_;
   bool received_media_playing_{false};

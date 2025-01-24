@@ -34,6 +34,10 @@
 #include "third_party/blink/renderer/platform/weborigin/scheme_registry.h"
 #include "third_party/blink/renderer/platform/weborigin/security_policy.h"
 
+#ifdef OHOS_LOGGER_REPORT
+#include "url/ohos/log_utils.h"
+#endif
+
 namespace {
 
 // Creates a serialized AtomicString header value out of the input string, using
@@ -121,6 +125,10 @@ BaseFetchContext::CanRequestBasedOnSubresourceFilterOnly(
     }
     LOG(INFO) << "[User AdBlock] Subresource request blocked : "
               << url.GetString().Utf8();
+#ifdef OHOS_LOGGER_REPORT
+    LOG_FEEDBACK(INFO) << "[User AdBlock] Subresource request blocked : "
+                       << url::LogUtils::ConvertUrlWithMask(url.GetString().Utf8());
+#endif
     return ResourceRequestBlockedReason::kSubresourceFilter;
   }
 #endif
@@ -728,6 +736,10 @@ BaseFetchContext::CanRequestInternal(
                                           reporting_disposition))) {
     LOG(WARNING) << "[AdBlock] Subresource request blocked : "
                  << url.GetString().Utf8();
+#ifdef OHOS_LOGGER_REPORT
+    LOG_FEEDBACK(WARNING) << "[AdBlock] Subresource request blocked : "
+                          << url::LogUtils::ConvertUrlWithMask(url.GetString().Utf8());
+#endif
     return ResourceRequestBlockedReason::kSubresourceFilter;
   }
   if ((GetUserSubresourceFilter() &&
@@ -735,6 +747,10 @@ BaseFetchContext::CanRequestInternal(
                                               reporting_disposition))) {
     LOG(WARNING) << "[User AdBlock] Subresource request blocked : "
                  << url.GetString().Utf8();
+#ifdef OHOS_LOGGER_REPORT
+    LOG_FEEDBACK(WARNING) << "[User AdBlock] Subresource request blocked : "
+                          << url::LogUtils::ConvertUrlWithMask(url.GetString().Utf8());
+#endif
     return ResourceRequestBlockedReason::kSubresourceFilter;
   }
 #else
@@ -743,6 +759,10 @@ BaseFetchContext::CanRequestInternal(
                                            reporting_disposition)) {
       LOG(WARNING) << "[AdBlock] Subresource request blocked : "
                    << url.GetString().Utf8();
+#ifdef OHOS_LOGGER_REPORT
+      LOG_FEEDBACK(WARNING) << "[AdBlock] Subresource request blocked : "
+                            << url::LogUtils::ConvertUrlWithMask(url.GetString().Utf8());
+#endif
       return ResourceRequestBlockedReason::kSubresourceFilter;
     }
   }

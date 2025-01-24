@@ -60,6 +60,12 @@ namespace blink {
 
 namespace {
 
+#ifdef OHOS_AI
+const int KMinAnalyzedImageWidth = 100;
+const int KMinAnalyzedImageHeight = 100;
+const double KMinAnalyzedImageToPageRatio = 0.8;
+#endif
+
 void UpdateMouseMovementXY(const WebMouseEvent& mouse_event,
                            const gfx::PointF* last_position,
                            LocalDOMWindow* dom_window,
@@ -175,6 +181,9 @@ void MouseEventManager::Trace(Visitor* visitor) const {
   visitor->Trace(element_under_mouse_);
   visitor->Trace(mouse_press_node_);
   visitor->Trace(click_element_);
+#ifdef OHOS_AI
+  visitor->Trace(hit_image_node_);
+#endif
   SynchronousMutationObserver::Trace(visitor);
 }
 
@@ -706,6 +715,12 @@ WebInputEventResult MouseEventManager::HandleMousePressEvent(
   drag_start_pos_in_root_frame_ =
       PhysicalOffset(gfx::ToFlooredPoint(event.Event().PositionInRootFrame()));
 
+#ifdef OHOS_AI
+  if (GetHitOverlayStatusFromMouseEvent(event) == HitOverlayStatus::kNone) {
+    LOG(INFO) << "HandleMousePressEvent CloseImageOverlay";
+    CloseImageOverlay();
+  }
+#endif
   mouse_pressed_ = true;
 
   bool swallow_event =
@@ -1241,17 +1256,101 @@ bool MouseEventManager::GetOverlayInProgress() {
   return overlay_in_progress_;
 }
 
+bool MouseEventManager::IsValidOverlayNode(Node* node) {
+  auto image = HitTestResult::GetImage(node);
+  if (!image || image->IsNull()) {
+    LOG(INFO) << "MouseEventManager::IsValidOverlayNode, node is null";
+    return false;
+  }
+  return true;
+}
+
+HitOverlayStatus MouseEventManager::GetHitOverlayStatus(
+    const HitTestResult& hit_test_result, bool ignore_overlay_status) {
+  auto status = HitOverlayStatus::kNone;
+  auto node = hit_test_result.InnerNodeOrImageMapImage();
+  if ((ignore_overlay_status || overlay_in_progress_) &&
+      IsValidOverlayNode(node) && IsValidOverlayNode(hit_image_node_) &&
+      node == hit_image_node_.Get()) {
+    status = overlay_creating_ ? HitOverlayStatus::kCreating
+                               : HitOverlayStatus::kCreated;
+  }
+  LOG(INFO) << "MouseEventManager::GetHitOverlayStatus, status: "
+            << static_cast<uint32_t>(status);
+  return status;
+}
+
+HitOverlayStatus MouseEventManager::GetHitOverlayStatusFromMouseEvent(
+    const MouseEventWithHitTestResults& event) {
+  HitTestLocation location(frame_->View()->ConvertFromRootFrame(
+      gfx::ToFlooredPoint(event.Event().PositionInRootFrame())));
+  HitTestResult hit_test_result =
+      frame_->GetEventHandler().HitTestResultAtLocation(location);
+  return GetHitOverlayStatus(hit_test_result);
+}
+
+void MouseEventManager::CloseImageOverlay() {
+  if (!overlay_in_progress_) {
+    LOG(INFO) << "MouseEventManager::CloseImageOverlay: No image overlay to closed.";
+    return;
+  }
+  WebLocalFrameImpl* web_local_frame = WebLocalFrameImpl::FromFrame(frame_);
+  if (web_local_frame && web_local_frame->Client()) {
+    LOG(INFO) << "MouseEventManager::CloseImageOverlay: start.";
+    if (web_local_frame->Client()->CloseImageOverlaySelection()) {
+      overlay_in_progress_ = false;
+    } else {
+      LOG(INFO) << "MouseEventManager::CloseImageOverlay: failed.";
+    }
+  }
+}
+
+void MouseEventManager::GetAbsImageRect(gfx::RectF& abs_rect) {
+  abs_rect = gfx::RectF();
+  if (!IsValidOverlayNode(hit_image_node_)) {
+    LOG(INFO) << "cannot get image from hit_image_node_";
+    hit_image_node_ = nullptr;
+    return;
+  }
+  if (hit_image_node_ && hit_image_node_->isConnected()) {
+    abs_rect = hit_image_node_->GetLayoutBox()->AbsoluteContentQuad().BoundingBox();
+  } else {
+    LOG(INFO) << "hit_image_node_ is nullptr or disconnected.";
+    hit_image_node_ = nullptr;
+  }
+}
+
 void MouseEventManager::SetOverlayInProgress(bool flag) {
   LOG(INFO) << "MouseEventManager::SetOverlayInProgress, flag == " << flag;
   overlay_in_progress_ = flag;
   if (!flag) {
     last_analyzed_image_ = nullptr;
+    hit_image_node_ = nullptr;
   }
 }
 
-void MouseEventManager::SetOverlayInProgressOnly(bool flag) {
-  LOG(INFO) << "MouseEventManager::SetOverlayInProgressOnly, flag == " << flag;
-  overlay_in_progress_ = flag;
+void MouseEventManager::SetOverlayCreatingStatus(bool flag) {
+  LOG(INFO) << "MouseEventManager::SetOverlayCreatingStatus, flag == " << flag;
+  overlay_creating_ = flag;
+}
+
+void MouseEventManager::OnDestroyImageAnalyzerOverlay() {
+  LOG(INFO) << "MouseEventManager::OnDestroyImageAnalyzerOverlay";
+  overlay_in_progress_ = false;
+  overlay_creating_ = false;
+  last_analyzed_image_ = nullptr;
+  hit_image_node_ = nullptr;
+}
+
+void MouseEventManager::OnFoldStatusChanged(uint32_t foldstatus) {
+  LOG(INFO) << "MouseEventManager::OnFoldStatusChanged foldstatus = "
+            << foldstatus;
+  FoldStatus foldStatusType = static_cast<FoldStatus>(foldstatus);
+  if (foldStatusType == FoldStatus::FULL || foldStatusType == FoldStatus::MAIN) {
+    fold_screen_status_ = 2.0;
+  } else {
+    fold_screen_status_ = 1.0;
+  }
 }
 
 template <typename T>
@@ -1266,38 +1365,55 @@ void MouseEventManager::HandleCreateOverlay(T const& targeted_event) {
       frame_->GetEventHandler().HitTestResultAtLocation(location);
 
   Image* image = hit_test_result.GetImage();
-  if (hit_test_result.AbsoluteImageURL().IsEmpty() ||
-      !image || image->IsNull() ||
-      image == last_analyzed_image_) {
+  Node* inner_node = hit_test_result.InnerNodeOrImageMapImage();
+  if (hit_test_result.AbsoluteImageURL().IsEmpty() || !IsValidOverlayNode(inner_node)) {
     LOG(INFO) << "MouseEventManager::HandleCreateOverlay, invalid or has no image";
     return;
   }
+
+  if (GetHitOverlayStatus(hit_test_result, true) != HitOverlayStatus::kNone) {
+    LOG(INFO) << "MouseEventManager::HandleCreateOverlay, hit last analyzer image";
+    return;
+  }
+
+  if (hit_test_result.InnerNode() && hit_test_result.InnerNode()->GetLayoutObject()) {
+    if (!hit_test_result.InnerNode()->GetLayoutObject()->StyleRef().IsSelectable()) {
+      LOG(INFO) << "MouseEventManager::HandleCreateOverlay image is not selectable";
+      return;
+    }
+  }
   overlay_in_progress_ = false;
   last_analyzed_image_ = image;
-
+  frame_->GetEventHandler().GetSelectionController().SetImageOverlayHitTest(hit_test_result);
+  OnFoldStatusChanged(frame_->GetChromeClient().GetFoldStatus(frame_));
+  LOG(INFO) << "MouseEventManager::HandleCreateOverlay fold_screen_status_ is " << fold_screen_status_;
   gfx::Rect image_rect =
       frame_->View()->FrameToDocument(hit_test_result.ImageRect());
   gfx::Point touch_point =
       frame_->View()->FrameToDocument(gfx::ToRoundedPoint(targeted_event.PositionInRootFrame()));
   gfx::Rect view_rect =
       frame_->View()->FrameToDocument(ToEnclosingRect(frame_->View()->GetLayoutView()->ViewRect()));
-  if ((base::ohos::IsPcDevice() && image_rect.width() > 0 && image_rect.height() > 0)  ||
-      (1.0 * image_rect.width() / view_rect.width() > 0.8 && image_rect.height() > 60)) {
+  auto image_to_page_width_ratio = fold_screen_status_ * image_rect.width() / view_rect.width();
+  LOG(INFO) << "MouseEventManager::HandleCreateOverlay width ratio is " << image_to_page_width_ratio;
+  if (image->width() >= KMinAnalyzedImageWidth && image->height() >= KMinAnalyzedImageHeight &&
+      (base::ohos::IsPcDevice() || image_to_page_width_ratio > KMinAnalyzedImageToPageRatio)) {
     LOG(INFO) << "MouseEventManager::HandleCreateOverlay, start";
     PaintImage paint_image = image->PaintImageForCurrentFrame();
     if (!paint_image.GetSwSkImage()) {
       LOG(ERROR) << "MouseEventManager::HandleCreateOverlay, paint_image.GetSwSkImage() is null";
       return;
     }
+    SetOverlayCreatingStatus(true);
     SkBitmap bm;
     paint_image.GetSwSkImage()->asLegacyBitmap(&bm);
-    auto image_node = hit_test_result.InnerNodeOrImageMapImage();
+    hit_image_node_ = inner_node;
     frame_->GetChromeClient().CreateOverlay(
         frame_,
         bm,
-        image_node,
         gfx::Point(touch_point.x() - image_rect.x(), touch_point.y() - image_rect.y()),
-        base::BindRepeating(&MouseEventManager::SetOverlayInProgress, weak_ptr_factory_.GetWeakPtr()));
+        base::BindRepeating(&MouseEventManager::GetAbsImageRect, weak_ptr_factory_.GetWeakPtr()),
+        base::BindRepeating(&MouseEventManager::SetOverlayInProgress, weak_ptr_factory_.GetWeakPtr()),
+        base::BindRepeating(&MouseEventManager::OnDestroyImageAnalyzerOverlay, weak_ptr_factory_.GetWeakPtr()));
   }
 }
 #endif

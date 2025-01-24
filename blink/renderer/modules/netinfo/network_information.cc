@@ -20,6 +20,13 @@
 #include "third_party/blink/renderer/platform/weborigin/kurl.h"
 #include "third_party/blink/renderer/platform/wtf/text/wtf_string.h"
 
+#ifdef OHOS_LOGGER_REPORT
+#include "base/base_switches.h"
+#include "base/command_line.h"
+#include "content/public/common/content_switches.h"
+#include "url/ohos/log_utils.h"
+#endif
+
 namespace blink {
 
 namespace {
@@ -182,7 +189,24 @@ void NetworkInformation::ConnectionChange(
   bool type_changed =
       RuntimeEnabledFeatures::NetInfoDownlinkMaxEnabled() &&
       (type_ != type || downlink_max_mbps_ != downlink_max_mbps);
-
+#ifdef OHOS_LOGGER_REPORT
+  if (type_changed && base::CommandLine::ForCurrentProcess()->HasSwitch(
+      switches::kEnableLoggerReport)) {
+    LOG_FEEDBACK(INFO) << "NetworkInformation::ConnectionChange, type_ "
+              << static_cast<int>(type_) << ", type " << static_cast<int>(type)
+              << ", downlink_max_mbps_ " << downlink_max_mbps_
+              << ", downlink_max_mbps " << downlink_max_mbps
+              << ", network_quality_estimate_changed "
+              << network_quality_estimate_changed << ", save_data_ "
+              << save_data_ << ", save_data " << save_data
+              << ", effective_type_ " << static_cast<int>(effective_type_)
+              << ", effective_type " << static_cast<int>(effective_type)
+              << ", http_rtt_msec_ " << http_rtt_msec_ << ", new_http_rtt_msec "
+              << new_http_rtt_msec << ", downlink_mbps_ " << downlink_mbps_
+              << ", new_downlink_mbps " << new_downlink_mbps << ", host: "
+              << url::LogUtils::ConvertUrlWithMask(host.Utf8());
+  }
+#endif
   type_ = type;
   downlink_max_mbps_ = downlink_max_mbps;
   if (network_quality_estimate_changed) {

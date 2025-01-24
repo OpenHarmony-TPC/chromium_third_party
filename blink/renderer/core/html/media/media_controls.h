@@ -79,6 +79,10 @@ class CORE_EXPORT MediaControls : public GarbageCollectedMixin {
 
   void Trace(Visitor*) const override;
 
+#ifdef OHOS_VIDEO_ASSISTANT
+  virtual void HidePlaybackSpeedList() = 0;
+#endif
+
  private:
   Member<HTMLMediaElement> media_element_;
 };

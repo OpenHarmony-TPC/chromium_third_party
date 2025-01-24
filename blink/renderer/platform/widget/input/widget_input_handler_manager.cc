@@ -677,6 +677,8 @@ void WidgetInputHandlerManager::DispatchEvent(
   }
 
   if (suppress_input && !allow_pre_commit_input_ && !event_is_move) {
+    LOG(INFO) << "DispatchEvent Dropping event to defer rendering pipeline"
+              << event->Event().GetType();
     if (callback) {
       std::move(callback).Run(mojom::blink::InputEventResultSource::kMainThread,
                               ui::LatencyInfo(),
@@ -752,6 +754,7 @@ void WidgetInputHandlerManager::DispatchEvent(
   if (uses_input_handler_) {
     // If the input_handler_proxy has disappeared ensure we just ack event.
     if (!input_handler_proxy_) {
+      LOG(INFO) << "DispatchEvent input_handler_proxy_ has disappeared";
       if (callback) {
         std::move(callback).Run(
             mojom::blink::InputEventResultSource::kMainThread,

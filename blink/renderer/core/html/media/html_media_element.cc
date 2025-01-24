@@ -135,6 +135,8 @@
 
 #ifdef OHOS_VIDEO_ASSISTANT
 #include "base/base_switches.h"
+#include "base/strings/string_split.h"
+#include "base/strings/string_util.h"
 #include "third_party/blink/renderer/core/frame/visual_viewport.h"
 #endif // OHOS_VIDEO_ASSISTANT
 
@@ -412,6 +414,9 @@ float PageConstraintInitalScale(const Document& document) {
     scale = page->GetPageScaleConstraintsSet().FinalConstraints().initial_scale;
   } else {
     LOG(INFO) << "using default scale 1.0";
+#ifdef OHOS_LOGGER_REPORT
+    LOG_FEEDBACK(INFO) << "using default scale 1.0";
+#endif
   }
   return scale;
 }
@@ -839,6 +844,10 @@ void HTMLMediaElement::ParseAttribute(
              RuntimeEnabledFeatures::MediaLatencyHintEnabled()) {
     if (web_media_player_)
       web_media_player_->SetLatencyHint(latencyHint());
+#if defined(OHOS_MEDIA_AVSESSION)
+  } else if (name == html_names::kTitleAttr) {
+    SetMediaTitle();
+#endif // OHOS_MEDIA_AVSESSION
   } else {
     HTMLElement::ParseAttribute(params);
   }
@@ -945,8 +954,33 @@ void HTMLMediaElement::ScheduleEvent(const AtomicString& event_name) {
       event_name == event_type_names::kSeeking ||
       event_name == event_type_names::kStalled) {
     LOG(INFO) << "OhMedia::ScheduleEvent(" << *this << ") " << event_name;
+#ifdef OHOS_LOGGER_REPORT
+    LOG_FEEDBACK(INFO) << "OhMedia::ScheduleEvent(" << *this << ") " << event_name;
+#endif
   }
 #endif // OHOS_MEDIA
+
+#if defined(OHOS_VIDEO_ASSISTANT)
+  if (IsCustomMediaPlayerEnabled()) {
+    if (event_name == event_type_names::kTimeupdate) {
+      TimeUpdateOverlay(currentTime());
+      BufferedEndTimeChangedOverlay(CalculateBufferedEndTime());
+    } else if (event_name == event_type_names::kDurationchange) {
+      DurationChangedOverlay(duration());
+    } else if (event_name == event_type_names::kEnded) {
+      EndedOverlay();
+    } else if (event_name == event_type_names::kSeeking) {
+      SeekingOverlay();
+    } else if (event_name == event_type_names::kSeeked) {
+      SeekingFinishedOverlay();
+    } else if (event_name == event_type_names::kError) {
+      auto error_info = error();
+      if (error_info) {
+        ErrorOverlay(error_info->code(), error_info->message());
+      }
+    }
+  }
+#endif // OHOS_VIDEO_ASSISTANT
 }
 
 void HTMLMediaElement::ScheduleEvent(Event* event) {
@@ -1411,6 +1445,9 @@ void HTMLMediaElement::LoadResource(const WebMediaPlayerSource& source,
 #if defined(OHOS_MEDIA)
   } else {
     LOG(WARNING) << "OhMedia::LoadResource source is not url";
+#ifdef OHOS_LOGGER_REPORT
+    LOG_FEEDBACK(WARNING) << "OhMedia::LoadResource source is not url";
+#endif
 #endif // OHOS_MEDIA
   }
 
@@ -1539,7 +1576,7 @@ LocalFrame* HTMLMediaElement::LocalFrameForPlayer() {
                           : GetDocument().GetFrame();
 }
 
-#if defined(OHOS_MEDIA)
+#if defined(OHOS_MEDIA) || defined(OHOS_VIDEO_ASSISTANT)
 WebString HTMLMediaElement::GetTitle() const {
   if (GetDocument().GetPage() && GetDocument().GetPage()->MainFrame()) {
     Frame* main_frame = GetDocument().GetPage()->MainFrame();
@@ -1549,7 +1586,7 @@ WebString HTMLMediaElement::GetTitle() const {
   }
   return WebString();
 }
-#endif // defined(OHOS_MEDIA)
+#endif // defined(OHOS_MEDIA) || defined(OHOS_VIDEO_ASSISTANT)
 
 void HTMLMediaElement::StartPlayerLoad() {
   DCHECK(!web_media_player_);
@@ -1655,6 +1692,12 @@ void HTMLMediaElement::StartPlayerLoad() {
 
   if (IsFullscreen())
     web_media_player_->EnteredFullscreen();
+
+#ifdef OHOS_VIDEO_ASSISTANT
+  if (IsFullscreen()) {
+    EnterFullScreenOverlay();
+  }
+#endif // OHOS_VIDEO_ASSISTANT
 
   web_media_player_->SetLatencyHint(latencyHint());
 
@@ -1996,6 +2039,10 @@ void HTMLMediaElement::MediaLoadingFailed(WebMediaPlayer::NetworkState error,
 #if defined(OHOS_MEDIA)
   LOG(INFO) << "OhMedia::MediaLoadingFailed error = " << int{error}
             << ", message='" << input_message << "')";
+#ifdef OHOS_LOGGER_REPORT
+  LOG_FEEDBACK(INFO) << "OhMedia::MediaLoadingFailed error = " << (int)error
+                     << ", message = " << input_message << ")";
+#endif
 #endif // OHOS_MEDIA
 
   bool should_be_opaque = MediaShouldBeOpaque();
@@ -2757,6 +2804,7 @@ void HTMLMediaElement::setPlaybackRate(double rate,
     ScheduleEvent(event_type_names::kRatechange);
 #ifdef OHOS_VIDEO_ASSISTANT
     UpdateVideoAssistantAttributes();
+    PlaybackRateChangedOverlay(playback_rate_);
 #endif // OHOS_VIDEO_ASSISTANT
   }
 
@@ -2773,6 +2821,14 @@ void HTMLMediaElement::setPlaybackRate(double rate,
   if (cue_timeline_ && PotentiallyPlaying())
     cue_timeline_->OnPlaybackRateUpdated();
 }
+
+#ifdef OHOS_VIDEO_ASSISTANT
+void HTMLMediaElement::HidePlaybackSpeedList() {
+  if (GetMediaControls()) {
+    GetMediaControls()->HidePlaybackSpeedList();
+  }
+}
+#endif // OHOS_VIDEO_ASSISTANT
 
 HTMLMediaElement::DirectionOfPlayback HTMLMediaElement::GetDirectionOfPlayback()
     const {
@@ -2868,6 +2924,9 @@ ScriptPromise HTMLMediaElement::playForBindings(ScriptState* script_state) {
 
 #ifdef OHOS_MEDIA
   LOG(INFO) << "OhMedia::playForBindings(" << *this << ")";
+#ifdef OHOS_LOGGER_REPORT
+  LOG_FEEDBACK(INFO) << "OhMedia::playForBindings(" << *this << ")";
+#endif
 #endif // OHOS_MEDIA
 
   absl::optional<DOMExceptionCode> code = Play();
@@ -2977,6 +3036,9 @@ void HTMLMediaElement::pause() {
 
 #if defined(OHOS_MEDIA)
   LOG(WARNING) << "OhMedia::pause";
+#ifdef OHOS_LOGGER_REPORT
+  LOG_FEEDBACK(WARNING) << "OhMedia::pause";
+#endif
 #endif // OHOS_MEDIA
 
   // When updating pause, be sure to update PauseToLetDescriptionFinish().
@@ -3191,6 +3253,10 @@ void HTMLMediaElement::setMuted(bool muted) {
     return;
 
   muted_ = muted;
+
+#if defined(OHOS_VIDEO_ASSISTANT)
+  MutedChangedOverlay(muted_);
+#endif
 
   ScheduleEvent(event_type_names::kVolumechange);
 
@@ -4049,10 +4115,18 @@ void HTMLMediaElement::UpdatePlayState(bool pause_speech /* = true */) {
       pause();
       LOG(INFO) << "UpdatePlayState document is hidden, video do not "
                    "be allow to play";
+#ifdef OHOS_LOGGER_REPORT
+      LOG_FEEDBACK(INFO) << "UpdatePlayState document is hidden, video do not "
+                            "be allow to play";
+#endif
     }
   }
   LOG(WARNING) << "OhMedia::UpdatePlayState should_be_playing = "
                << should_be_playing << ", is_playing" << is_playing;
+#ifdef OHOS_LOGGER_REPORT
+  LOG_FEEDBACK(WARNING) << "OhMedia::UpdatePlayState should_be_playing = "
+                        << should_be_playing << ",is_playing = " << is_playing;
+#endif
 #endif  // OHOS_MEDIA_POLICY
 
   if (should_be_playing) {
@@ -4072,6 +4146,11 @@ void HTMLMediaElement::UpdatePlayState(bool pause_speech /* = true */) {
 #else
       web_media_player_->Play();
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
+
+#if defined(OHOS_VIDEO_ASSISTANT)
+      UpdatePlayStateOverlay(true);
+#endif
+
       if (::features::IsTextBasedAudioDescriptionEnabled())
         SpeechSynthesis()->Resume();
 
@@ -4098,6 +4177,10 @@ void HTMLMediaElement::UpdatePlayState(bool pause_speech /* = true */) {
 #else
       web_media_player_->Pause();
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
+
+#if defined(OHOS_VIDEO_ASSISTANT)
+      UpdatePlayStateOverlay(false);
+#endif
 
       if (pause_speech && ::features::IsTextBasedAudioDescriptionEnabled())
         SpeechSynthesis()->Pause();
@@ -4970,8 +5053,22 @@ void HTMLMediaElement::DidPlayerGone() {
 #endif
 
 void HTMLMediaElement::DidPlayerMutedStatusChange(bool muted) {
+#if defined(OHOS_MEDIA_AVSESSION)
+  for (auto& observer : media_player_observer_remote_set_->Value()) {
+    observer->OnMutedStatusChanged(muted);
+    auto mediaTitle = GetMediaTitle();
+    auto videoPoster = GetVideoPoster();
+    if (!mediaTitle.empty()) {
+      observer->OnGetMediaTitle(mediaTitle);
+    }
+    if (!videoPoster.empty()) {
+      observer->OnGetVideoPoster(videoPoster);
+    }
+  }
+#else
   for (auto& observer : media_player_observer_remote_set_->Value())
     observer->OnMutedStatusChanged(muted);
+#endif // OHOS_MEDIA_AVSESSION
 }
 
 void HTMLMediaElement::DidMediaMetadataChange(
@@ -5022,6 +5119,10 @@ void HTMLMediaElement::DidUseAudioServiceChange(bool uses_audio_service) {
 void HTMLMediaElement::DidPlayerSizeChange(const gfx::Size& size) {
   for (auto& observer : media_player_observer_remote_set_->Value())
     observer->OnMediaSizeChanged(size);
+
+#ifdef OHOS_VIDEO_ASSISTANT
+  VideoSizeChangedOverlay(size.width(), size.height());
+#endif // OHOS_VIDEO_ASSISTANT
 }
 
 void HTMLMediaElement::OnRemotePlaybackDisabled(bool disabled) {
@@ -5177,6 +5278,18 @@ void HTMLMediaElement::OpenerContextObserver::ContextDestroyed() {
 bool HTMLMediaElement::IsMuted() {
   return muted_;
 }
+uint32_t HTMLMediaElement::IsMediaMuted() {
+  static constexpr uint32_t notMuted = 1;
+  if (!HasAudio()) {
+    static constexpr uint32_t noAudioTracks = 2;
+    return noAudioTracks;
+  }
+  if (muted_) {
+    static constexpr uint32_t muted = 0;
+    return muted;
+  }
+  return notMuted;
+}
 bool HTMLMediaElement::IsUsedCustomVideoPlayer() {
   return IsCustomVideoPlayerEnabled();
 }
@@ -5265,6 +5378,11 @@ std::string HTMLMediaElement::GetOutgoingReferrerString() {
 
 void HTMLMediaElement::UpdatePlaybackStatus(uint32_t status) {
   LOG(INFO) << "UpdatePlaybackStatus(" << status << "), paused_[" << paused_ << "]";
+
+#ifdef OHOS_LOGGER_REPORT
+  LOG_FEEDBACK(INFO) << "UpdatePlaybackStatus(" << status << "), paused_[" << paused_ << "]";
+#endif
+
   base::AutoReset<bool> resetter(&played_by_custom_mp_, true);
   if (paused_ == !status) {
     return;
@@ -5302,6 +5420,11 @@ gfx::Rect HTMLMediaElement::GetVideoRect() {
         ToFlooredSize(layout_box->Size()));
   }
   LOG(INFO) << "using default vidoe size";
+
+#ifdef OHOS_LOGGER_REPORT
+  LOG_FEEDBACK(INFO) << "using default vidoe size";
+#endif
+
   return gfx::Rect(LayoutReplaced::kDefaultWidth,
         LayoutReplaced::kDefaultHeight);
 }
@@ -5331,6 +5454,7 @@ bool HTMLMediaElement::IsVideoAssistantEnabled() {
   }
   return video_assistant_.value_or(true);
 }
+
 void HTMLMediaElement::OnLayerBoundsChange(const gfx::Rect& bounds) {
   if (has_been_seen_playing_once_) {
     return;
@@ -5349,6 +5473,7 @@ void HTMLMediaElement::OnLayerBoundsChange(const gfx::Rect& bounds) {
   }
   UpdateVideoAssistantAttributes();
 }
+
 void HTMLMediaElement::OnWebMediaPlayerShowing(bool showing) {
   if (web_player_showing_ == showing) {
     return;
@@ -5356,6 +5481,7 @@ void HTMLMediaElement::OnWebMediaPlayerShowing(bool showing) {
   web_player_showing_ = showing;
   UpdateVideoAssistantAttributes();
 }
+
 void HTMLMediaElement::TryNotifyVideoPlaying() {
   if (!video_assistant_enabled_) {
     return;
@@ -5370,6 +5496,7 @@ void HTMLMediaElement::TryNotifyVideoPlaying() {
   }
   NotifyVideoPlayingInternal();
 }
+
 void HTMLMediaElement::NotifyVideoPlayingInternal() {
   if (!IsVideoAssistantEnabled()) {
     return;
@@ -5380,6 +5507,7 @@ void HTMLMediaElement::NotifyVideoPlayingInternal() {
         base::Milliseconds(delay_in_ms), FROM_HERE);
   }
 }
+
 void HTMLMediaElement::UpdateVideoAssistantAttributes() {
   if (!IsVideoAssistantEnabled()) {
     return;
@@ -5391,6 +5519,7 @@ void HTMLMediaElement::UpdateVideoAssistantAttributes() {
     }
   }
 }
+
 void HTMLMediaElement::NotifyVideoVisible(bool visible) {
   if (!IsVideoAssistantEnabled()) {
     return;
@@ -5402,6 +5531,7 @@ void HTMLMediaElement::NotifyVideoVisible(bool visible) {
     UpdateVideoAssistantAttributes();
   }
 }
+
 void HTMLMediaElement::NotifyVideoDestroyed() {
   if (!IsVideoAssistantEnabled()) {
     return;
@@ -5413,6 +5543,7 @@ void HTMLMediaElement::NotifyVideoDestroyed() {
     }
   }
 }
+
 media::mojom::blink::VideoAttributesForVASTPtr
 HTMLMediaElement::CollectVideoAttributesForVAST() {
   auto attributes = media::mojom::blink::VideoAttributesForVAST::New();
@@ -5427,6 +5558,29 @@ HTMLMediaElement::CollectVideoAttributesForVAST() {
       !video_rect_.IsEmpty();
   return attributes;
 }
+
+media::mojom::blink::MediaInfoForVASTPtr
+HTMLMediaElement::CollectMediaInfoAttributesForVAST() {
+  auto media_player = GetWebMediaPlayer();
+  if (!media_player) {
+    return nullptr;
+  }
+  auto mediaInfoAttr = media::mojom::blink::MediaInfoForVAST::New();
+  mediaInfoAttr->id = WTF::String::FromUTF8(GetIdAttribute().Utf8());
+  mediaInfoAttr->title = WTF::String::FromUTF8(GetTitle().Utf8());
+  mediaInfoAttr->duration = duration();
+  mediaInfoAttr->current_time = media_player->CurrentTime();
+  mediaInfoAttr->playback_rate = playbackRate();
+  mediaInfoAttr->video_width = media_player->NaturalSize().width();
+  mediaInfoAttr->video_height = media_player->NaturalSize().height();
+  mediaInfoAttr->isMuted = IsMediaMuted();
+  mediaInfoAttr->isPlaying = !media_player->Paused();
+  mediaInfoAttr->isShowPlaybackSpeed = true;
+  mediaInfoAttr->show_download_button = !controls_list_->ShouldHideDownload();
+  mediaInfoAttr->supports_save = SupportsSave();
+  return mediaInfoAttr;
+}
+
 void HTMLMediaElement::OnVideoAssistantConfigReceived(
     base::OnceCallback<void()> callback,
     media::mojom::blink::VideoAssistantConfigPtr config) {
@@ -5450,7 +5604,234 @@ void HTMLMediaElement::OnNotifyVideoPlayingTimerFired(TimerBase*) {
     }
   }
 }
+
+bool HTMLMediaElement::IsCustomMediaPlayerEnabled() {
+  return GetDocument().GetSettings() &&
+        GetDocument().GetSettings()->GetCustomMediaPlayerEnabled() &&
+        IsHTMLVideoElement();
+}
+
+void HTMLMediaElement::EnterFullScreenOverlay() {
+  if (!IsCustomMediaPlayerEnabled()) {
+    return;
+  }
+  LOG(INFO) << "EnterFullScreenOverlay";
+  if (IsHTMLVideoElement()) {
+    auto attributes = CollectMediaInfoAttributesForVAST();
+    if (!attributes) {
+      LOG(INFO) << "EnterFullScreenOverlay, failed, no player";
+      return;
+    }
+    for (auto& observer : media_player_observer_remote_set_->Value()) {
+      observer->OnFullScreenOverlayEnter(attributes.Clone());
+    }
+  }
+}
+
+void HTMLMediaElement::UpdatePlayStateOverlay(bool playState) {
+  if (!IsCustomMediaPlayerEnabled()) {
+    return;
+  }
+  LOG(INFO) << "UpdatePlayStateOverlay";
+  if (IsHTMLVideoElement()) {
+    for (auto& observer : media_player_observer_remote_set_->Value()) {
+      observer->UpdatePlayStateOverlay(playState);
+    }
+  }
+}
+
+void HTMLMediaElement::MutedChangedOverlay(bool muted) {
+  if (!IsCustomMediaPlayerEnabled()) {
+    return;
+  }
+  LOG(INFO) << "MutedChangedOverlay";
+  if (IsHTMLVideoElement()) {
+    for (auto& observer : media_player_observer_remote_set_->Value()) {
+      observer->MutedChangedOverlay(muted);
+    }
+  }
+}
+
+void HTMLMediaElement::PlaybackRateChangedOverlay(double playback_rate) {
+  if (!IsCustomMediaPlayerEnabled()) {
+    return;
+  }
+  LOG(INFO) << "PlaybackRateChangedOverlay";
+  if (IsHTMLVideoElement()) {
+    for (auto& observer : media_player_observer_remote_set_->Value()) {
+      observer->PlaybackRateChangedOverlay(playback_rate);
+    }
+  }
+}
+
+void HTMLMediaElement::DurationChangedOverlay(double duration) {
+  if (!IsCustomMediaPlayerEnabled()) {
+    return;
+  }
+  LOG(INFO) << "DurationChangedOverlay";
+  if (IsHTMLVideoElement()) {
+    for (auto& observer : media_player_observer_remote_set_->Value()) {
+      observer->DurationChangedOverlay(duration);
+    }
+  }
+}
+
+void HTMLMediaElement::TimeUpdateOverlay(double current_time) {
+  if (!IsCustomMediaPlayerEnabled()) {
+    return;
+  }
+  if (IsHTMLVideoElement()) {
+    for (auto& observer : media_player_observer_remote_set_->Value()) {
+      observer->TimeUpdateOverlay(current_time);
+    }
+  }
+}
+
+void HTMLMediaElement::BufferedEndTimeChangedOverlay(double buffered_end_time) {
+  if (!IsCustomMediaPlayerEnabled()) {
+    return;
+  }
+  if (IsHTMLVideoElement()) {
+    for (auto& observer : media_player_observer_remote_set_->Value()) {
+      observer->BufferedEndTimeChangedOverlay(buffered_end_time);
+    }
+  }
+}
+
+double HTMLMediaElement::CalculateBufferedEndTime()
+{
+  const double kCurrentTimeBufferedDelta = 1.0;
+  TimeRanges* buffered_time_ranges = buffered();
+  DCHECK(buffered_time_ranges);
+  if (std::isnan(duration()) || std::isinf(duration()) || !duration() ||
+      std::isnan(currentTime())) {
+    return 0;
+  }
+
+  for (unsigned i = 0; i < buffered_time_ranges->length(); ++i) {
+    float start = buffered_time_ranges->start(i, ASSERT_NO_EXCEPTION);
+    float end = buffered_time_ranges->end(i, ASSERT_NO_EXCEPTION);
+    if (std::isnan(start) || std::isnan(end) ||
+        start > currentTime() + kCurrentTimeBufferedDelta ||
+        end < currentTime()) {
+      continue;
+    }
+    return end;
+  }
+  return 0;
+}
+
+void HTMLMediaElement::EndedOverlay() {
+  if (!IsCustomMediaPlayerEnabled()) {
+    return;
+  }
+  LOG(INFO) << "EndedOverlay";
+  if (IsHTMLVideoElement()) {
+    for (auto& observer : media_player_observer_remote_set_->Value()) {
+      observer->EndedOverlay();
+    }
+  }
+}
+
+void HTMLMediaElement::FullscreenChangedOverlay(bool fullscreen) {
+  if (!IsCustomMediaPlayerEnabled()) {
+    return;
+  }
+  LOG(INFO) << "FullscreenChangedOverlay";
+  if (IsHTMLVideoElement()) {
+    for (auto& observer : media_player_observer_remote_set_->Value()) {
+      observer->FullscreenChangedOverlay(fullscreen);
+    }
+  }
+}
+
+void HTMLMediaElement::SeekingOverlay() {
+  if (!IsCustomMediaPlayerEnabled()) {
+    return;
+  }
+  LOG(INFO) << "SeekingOverlay";
+  if (IsHTMLVideoElement()) {
+    for (auto& observer : media_player_observer_remote_set_->Value()) {
+      observer->SeekingOverlay();
+    }
+  }
+}
+
+void HTMLMediaElement::SeekingFinishedOverlay() {
+  if (!IsCustomMediaPlayerEnabled()) {
+    return;
+  }
+  LOG(INFO) << "SeekingFinishedOverlay";
+  if (IsHTMLVideoElement()) {
+    for (auto& observer : media_player_observer_remote_set_->Value()) {
+      observer->SeekingFinishedOverlay();
+    }
+  }
+}
+
+void HTMLMediaElement::ErrorOverlay(int32_t error_code, const String& error_msg) {
+  if (!IsCustomMediaPlayerEnabled()) {
+    return;
+  }
+  LOG(INFO) << "ErrorOverlay";
+  if (IsHTMLVideoElement()) {
+    for (auto& observer : media_player_observer_remote_set_->Value()) {
+      observer->ErrorOverlay(error_code, error_msg);
+    }
+  }
+}
+
+void HTMLMediaElement::VideoSizeChangedOverlay(int32_t width, int32_t height) {
+  if (!IsCustomMediaPlayerEnabled()) {
+    return;
+  }
+  LOG(DEBUG) << "VideoSizeChangedOverlay";
+  if (IsHTMLVideoElement()) {
+    for (auto& observer : media_player_observer_remote_set_->Value()) {
+      observer->VideoSizeChangedOverlay(width, height);
+    }
+  }
+}
+
+bool HTMLMediaElement::IsRTL() const {
+  bool isRTL = base::i18n::IsRTL();
+  const std::string locale = base::i18n::GetConfiguredLocale();
+  std::vector<base::StringPiece> locale_split = base::SplitStringPiece(
+      locale, "-_", base::KEEP_WHITESPACE, base::SPLIT_WANT_ALL);
+  const base::StringPiece& language_code = locale_split[0];
+  if (language_code.compare("ug") == 0) {
+    isRTL = true;
+  }
+  return isRTL && locale.find("ur") == std::string::npos;
+}
+
+void HTMLMediaElement::SetVideoSurface(int32_t widget_id) {
+  LOG(INFO) << "SetVideoSurface(" << widget_id << ")";
+  if (GetWebMediaPlayer()) {
+    GetWebMediaPlayer()->SetVideoSurface(widget_id);
+  }
+}
 #endif // OHOS_VIDEO_ASSISTANT
+
+#if defined(OHOS_MEDIA_AVSESSION)
+void HTMLMediaElement::SetMediaTitle() {
+  meida_title_ = FastGetAttribute(html_names::kTitleAttr).GetString();
+}
+
+String HTMLMediaElement::GetMediaTitle() const {
+  if (meida_title_.empty()) {
+    return String();
+  }
+  return meida_title_;
+}
+
+String HTMLMediaElement::GetVideoPoster() const {
+  if (video_poster_.empty()) {
+    return String();
+  }
+  return video_poster_;
+}
+#endif // OHOS_MEDIA_AVSESSION
 
 STATIC_ASSERT_ENUM(WebMediaPlayer::kReadyStateHaveNothing,
                    HTMLMediaElement::kHaveNothing);

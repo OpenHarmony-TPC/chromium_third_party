@@ -206,6 +206,11 @@ PaintImage Image::ClipResizeAndOrientImage(
 
   if (size.IsEmpty()) {
     LOG(INFO) << "DragDrop Clip resize and orient image but the size is empty.";
+
+#ifdef OHOS_LOGGER_REPORT
+    LOG_FEEDBACK(INFO) << "DragDrop Clip resize and orient image but the size is empty.";
+#endif
+
     return PaintImage();
   }
 
@@ -213,6 +218,11 @@ PaintImage Image::ClipResizeAndOrientImage(
       clip_rect.width() == image.width() &&
       clip_rect.height() == image.height()) {
     LOG(INFO) << "DragDrop Nothing to adjust drag image, just use the original";
+
+#ifdef OHOS_LOGGER_REPORT
+    LOG_FEEDBACK(INFO) << "DragDrop Nothing to adjust drag image, just use the original";
+#endif
+
     DCHECK_EQ(image.width(), size.width());
     DCHECK_EQ(image.height(), size.height());
     return image;
@@ -225,6 +235,12 @@ PaintImage Image::ClipResizeAndOrientImage(
   if (!surface) {
     LOG(WARNING) << "DragDrop Make a SkImageInfo with w=" << clip_size.width()
                  << ", h=" << clip_size.height() << " failed.";
+
+#ifdef OHOS_LOGGER_REPORT
+    LOG_FEEDBACK(WARNING) << "DragDrop Make a SkImageInfo with w=" << clip_size.width()
+                 << ", h=" << clip_size.height() << " failed.";
+#endif
+
     return PaintImage();
   }
 
@@ -248,6 +264,14 @@ PaintImage Image::ClipResizeAndOrientImage(
             << ") from intrinsic(" << image.width() << "*" << image.height()
             << ") to visual size(" << clip_size.width() << "*"
             << clip_size.height() << "), opacity=" << opacity;
+
+#ifdef OHOS_LOGGER_REPORT
+  LOG_FEEDBACK(INFO) << "DragDrop Create a clipped drag image(" << clip_rect.ToString()
+            << ") from intrinsic(" << image.width() << "*" << image.height()
+            << ") to visual size(" << clip_size.width() << "*"
+            << clip_size.height() << "), opacity=" << opacity;
+#endif
+
   return PaintImageBuilder::WithProperties(std::move(image))
       .set_image(surface->makeImageSnapshot(), PaintImage::GetNextContentId())
       .TakePaintImage();

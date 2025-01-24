@@ -519,6 +519,10 @@ class BLINK_EXPORT WebLocalFrameClient {
   virtual void ChangeVisibilityOfQuickMenu() {}
 #endif
 
+#ifdef OHOS_AI
+  virtual bool CloseImageOverlaySelection() { return false; }
+#endif
+
 #ifdef OHOS_DRAG_DROP
   // Tell the UI to dismiss the contextmenu popup window
   virtual void ClearContextMenu() {}
@@ -831,6 +835,10 @@ class BLINK_EXPORT WebLocalFrameClient {
   virtual void DidSubresourceFiltered() {}
   virtual bool GetGlobalAdblockEnabled() { return false; }
 #endif  // OHOS_ARKWEB_ADBLOCK
+
+#if defined(OHOS_JSPROXY)
+  virtual void RunScriptsAtHeadReady() {}
+#endif
 };
 
 }  // namespace blink

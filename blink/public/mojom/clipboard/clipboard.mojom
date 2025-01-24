@@ -170,7 +170,11 @@ interface ClipboardHost {
   WriteSmartPasteMarker(CopyOptionMode copy_option);
 
   // Chrome-specific pickled data.
+  [EnableIfNot=is_ohos_clipboard]
   WriteCustomData(map<mojo_base.mojom.String16, mojo_base.mojom.BigString16> data);
+  [EnableIf=is_ohos_clipboard]
+  WriteCustomData(map<mojo_base.mojom.String16, mojo_base.mojom.BigString16> data,
+                  CopyOptionMode copy_option);
 
   // TODO(dcheng): The |url| parameter should really be a GURL, but <canvas>'s
   // copy as image tries to set very long data: URLs on the clipboard. Using
@@ -194,8 +198,13 @@ interface ClipboardHost {
   // unsanitized payload provided by the web authors.
   // There can only be 100 custom formats per write operation and it will be
   // registered when the web authors request for a custom format.
+  [EnableIfNot=is_ohos_clipboard]
   WriteUnsanitizedCustomFormat(mojo_base.mojom.String16 format,
                                mojo_base.mojom.BigBuffer data);
+  [EnableIf=is_ohos_clipboard]
+  WriteUnsanitizedCustomFormat(mojo_base.mojom.String16 format,
+                               mojo_base.mojom.BigBuffer data,
+                               CopyOptionMode copy_option);
 
   CommitWrite();
 

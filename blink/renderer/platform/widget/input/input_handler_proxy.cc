@@ -719,6 +719,21 @@ void InputHandlerProxy::DispatchSingleInputEvent(
 
   WebInputEventAttribution attribution =
       PerformEventAttribution(event_with_callback->event());
+
+#if BUILDFLAG(IS_OHOS)
+  if (elastic_overscroll_controller_) {
+    auto helper = elastic_overscroll_controller_->GetScrollElasticityHelper();
+    if (event_with_callback->event().IsGestureScroll() && !input_handler_->IsCurrentlyScrolling() &&
+        helper && !helper->StretchAmount().IsZero()) {
+      event_with_callback->RunCallbacks(DID_HANDLE, monitored_latency_info,
+                                        std::move(current_overscroll_params_),
+                                        attribution,
+                                        std::move(current_scroll_result_data_));
+      return;
+    }
+  }
+#endif
+
   InputHandlerProxy::EventDisposition disposition =
       RouteToTypeSpecificHandler(event_with_callback.get(), attribution);
 
@@ -1447,7 +1462,14 @@ InputHandlerProxy::HandleGestureScrollUpdate(
 
   cc::InputHandlerScrollResult scroll_result =
       input_handler_->ScrollUpdate(&scroll_state, delay);
-
+  std::string scroll_result_str = "trace_id:" + std::to_string(trace_id)
+    + " pro_dy:" + std::to_string(provided_delta_x)
+    + " pro_dy:" + std::to_string(provided_delta_y)
+    + " vi_dx:" + std::to_string(scroll_result.current_visual_offset.x())
+    + " vi_dy" + std::to_string(scroll_result.current_visual_offset.y());
+  OHOS_TRACE_EVENT1(
+    "input", "InputHandlerProxy::HandleGestureScrollUpdate_Result", 
+    "result", scroll_result_str);
   TRACE_EVENT(
       "input", "InputHandlerProxy::HandleGestureScrollUpdate_Result",
       [trace_id, provided_delta_x, provided_delta_y,

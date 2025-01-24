@@ -42,6 +42,9 @@ class MediaControlPopupMenuElement : public MediaControlDivElement {
  private:
   class EventListener;
 
+#ifdef OHOS_VIDEO_ASSISTANT
+  void SetPopupAnchorHM(DOMRect* bounding_client_rect, LocalDOMWindow* dom_window);
+#endif
   Element* PopupAnchor() const;
 
   void HideIfNotFocused();
