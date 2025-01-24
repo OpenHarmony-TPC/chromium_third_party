@@ -803,11 +803,19 @@ WebInputEventResult WebFrameWidgetImpl::HandleKeyEvent(
   // not the page.
   scoped_refptr<WebPagePopupImpl> page_popup = View()->GetPagePopup();
   if (page_popup) {
+#if defined(OHOS_INPUT_EVENTS)
+    WebInputEventResult event_result = page_popup->HandleKeyEvent(event);
+#else
     page_popup->HandleKeyEvent(event);
+#endif
     if (event.GetType() == WebInputEvent::Type::kRawKeyDown) {
       suppress_next_keypress_event_ = true;
     }
+#if defined(OHOS_INPUT_EVENTS)
+    return event_result;
+#else
     return WebInputEventResult::kHandledSystem;
+#endif
   }
 
   auto* frame = DynamicTo<LocalFrame>(FocusedCoreFrame());
