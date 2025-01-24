@@ -262,9 +262,11 @@ class CORE_EXPORT EmptyChromeClient : public ChromeClient {
 #ifdef OHOS_AI
   void CreateOverlay(LocalFrame* frame,
                      const SkBitmap& image,
-                     const Node* image_node,
                      const gfx::Point& touch_point,
-                     OnTextSelectedCallback callback) override {}
+                     GetAbsImageRectCallback get_rect_callback,
+                     OnTextSelectedCallback callback,
+                     OnDestroyImageAnalyzerOverlayCallback destroy_callback) override {}
+  uint32_t GetFoldStatus(LocalFrame* frame) override { return 0; }
 #endif
  private:
   const display::ScreenInfos empty_screen_infos_{display::ScreenInfo()};

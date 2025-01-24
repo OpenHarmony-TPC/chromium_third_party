@@ -325,9 +325,11 @@ class CORE_EXPORT ChromeClientImpl final : public ChromeClient {
 #ifdef OHOS_AI
   void CreateOverlay(LocalFrame* frame,
                      const SkBitmap& image,
-                     const Node* image_node,
                      const gfx::Point& touch_point,
-                     OnTextSelectedCallback callback) override;
+                     GetAbsImageRectCallback get_rect_callback,
+                     OnTextSelectedCallback callback,
+                     OnDestroyImageAnalyzerOverlayCallback destroy_callback) override;
+  uint32_t GetFoldStatus(LocalFrame* frame) override;
 #endif
  private:
   bool IsChromeClientImpl() const override { return true; }
