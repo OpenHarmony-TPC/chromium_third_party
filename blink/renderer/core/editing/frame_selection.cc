@@ -944,6 +944,10 @@ void FrameSelection::NotifyDisplayLockForSelectionChange(
 
 void FrameSelection::FocusedOrActiveStateChanged() {
   bool active_and_focused = FrameIsFocusedAndActive();
+#ifdef OHOS_FOCUS
+  LOG(INFO) << "Focused Or Active State Changed, focused=" << focused_
+            << ", active_and_focused=" << active_and_focused;
+#endif
 
   // Trigger style invalidation from the focused element. Even though
   // the focused element hasn't changed, the evaluation of focus pseudo
@@ -1532,6 +1536,8 @@ EphemeralRange FrameSelection::GetSelectionRangeAroundCaret(
 
 #ifdef OHOS_DRAG_DROP
 void FrameSelection::InvalidateSelectionForDrag() {
+  LOG(INFO) << "DragDrop: Invalidate Selection For Drag, focused=" << focused_
+            << ", active_and_focused=" << FrameIsFocusedAndActive();
   auto* view = GetDocument().GetLayoutView();
   if (view) {
     layout_selection_->InvalidatePaintForSelection();
