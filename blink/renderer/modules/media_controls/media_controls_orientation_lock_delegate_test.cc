@@ -144,6 +144,9 @@ class MockChromeClientForOrientationLockDelegate final
   // async due to IPC, emulate that by posting tasks:
   void EnterFullscreen(LocalFrame& frame,
                        const FullscreenOptions*,
+#ifdef OHOS_VIDEO_ASSISTANT
+                       bool overlay_fullscreen,
+#endif // OHOS_VIDEO_ASSISTANT
                        FullscreenRequestType
 #if defined(OHOS_MEDIA) && defined(OHOS_UNITTESTS)
                        ,

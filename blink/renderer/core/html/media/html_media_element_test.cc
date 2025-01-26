@@ -207,7 +207,7 @@ class TestMediaPlayerObserver final
       media::mojom::blink::VideoAttributesForVASTPtr video_attributes) override {}
   void OnVideoDestroyed() override {}
   void OnFullScreenOverlayEnter(media::mojom::blink::MediaInfoForVASTPtr media_info) override {}
-  void UpdatePlayStateOverlay(bool playState) override {}
+  void UpdatePlayStateOverlay(uint32_t playState) override {}
   void MutedChangedOverlay(bool muted) override {}
   void PlaybackRateChangedOverlay(double playback_rate) override {}
 
