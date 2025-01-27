@@ -1833,6 +1833,7 @@ void WebView::ApplyWebPreferences(const web_pref::WebPreferences& prefs,
         prefs.scroll_top_left_interop_enabled);
     RuntimeEnabledFeatures::SetAcceleratedSmallCanvasesEnabled(
         !prefs.disable_accelerated_small_canvases);
+    RuntimeEnabledFeatures::SetInputMultipleFieldsUIEnabled(false);
   }
 #endif  // BUILDFLAG(IS_ANDROID)
 
