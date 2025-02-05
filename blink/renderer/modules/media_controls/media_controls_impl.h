@@ -487,6 +487,8 @@ class MODULES_EXPORT MediaControlsImpl final : public HTMLDivElement,
   bool is_test_mode_ = false;
 #ifdef OHOS_VIDEO_ASSISTANT
   bool is_begin_scrubbing = false;
+  HeapTaskRunnerTimer<MediaControlsImpl> scrubbing_timer_;
+  void ScrubbingTimerFired(TimerBase*);
 #endif
 };
 }  // namespace blink
