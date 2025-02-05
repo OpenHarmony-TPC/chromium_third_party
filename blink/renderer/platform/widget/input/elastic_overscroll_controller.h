@@ -82,6 +82,9 @@ class PLATFORM_EXPORT ElasticOverscrollController {
   gfx::Vector2dF GetOverScrollOffset();
 #endif
 #endif
+#if BUILDFLAG(IS_OHOS)
+  cc::ScrollElasticityHelper* GetScrollElasticityHelper() const { return helper_; }
+#endif
 
  protected:
   virtual void DidEnterMomentumAnimatedState() = 0;
