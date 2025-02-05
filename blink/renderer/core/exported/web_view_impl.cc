@@ -501,7 +501,6 @@ void ApplyOhosWebPreferences(const web_pref::WebPreferences& prefs,
 
 #if defined(OHOS_CUSTOM_VIDEO_PLAYER)
   settings->SetCustomVideoPlayerEnabled(prefs.custom_video_player_enable);
-  settings->SetCustomVideoPlayerOverlay(prefs.custom_video_player_overlay);
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
 
 #ifdef OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
@@ -533,6 +532,24 @@ void ApplyOhosWebPreferences(const web_pref::WebPreferences& prefs,
       auto* web_local_frame = DynamicTo<WebLocalFrameImpl>(frame);
       if (web_local_frame && web_local_frame->FrameWidget()) {
         web_local_frame->FrameWidget()->SetTextZoomFactor(prefs.text_zoom_factor);
+      }
+    }
+  }
+#endif
+
+#ifdef OHOS_VIDEO_ASSISTANT
+  bool exist_enabled = settings->GetCustomMediaPlayerEnabled();
+  if (exist_enabled != prefs.custom_media_player_enabled) {
+    LOG(INFO) << "Update custom media player enable, exist_enabled: " << exist_enabled
+              << ", prefs.custom_media_player_enabled:" << prefs.custom_media_player_enabled;
+    settings->SetCustomVideoPlayerOverlay(prefs.custom_video_player_overlay);
+    if (main_frame) {
+      auto* local_main_frame = DynamicTo<WebLocalFrameImpl>(main_frame);
+      if (local_main_frame) {
+        Document* document = local_main_frame->GetDocument();
+        if (document) {
+          document->GetStyleEngine().EnsureDefaultStyleSheetsForMediaElement();
+        }
       }
     }
   }

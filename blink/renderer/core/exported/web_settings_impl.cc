@@ -877,6 +877,9 @@ void WebSettingsImpl::SetCustomMediaPlayerEnabled(bool enabled) {
   settings_->SetCustomMediaPlayerEnabled(enabled);
   MediaControlsResourceLoader::SetCustomMediaPlayerEnabled(enabled);
 }
+bool WebSettingsImpl::GetCustomMediaPlayerEnabled() {
+  return settings_->GetCustomMediaPlayerEnabled();
+}
 #endif // OHOS_VIDEO_ASSISTANT
 
 }  // namespace blink
