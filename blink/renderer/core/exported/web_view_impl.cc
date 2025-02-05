@@ -518,8 +518,9 @@ void ApplyOhosWebPreferences(const web_pref::WebPreferences& prefs,
     LOG(INFO) << "Update custom media player enable, exist_enabled: " << exist_enabled
               << ", prefs.custom_media_player_enabled:" << prefs.custom_media_player_enabled;
     settings->SetCustomVideoPlayerOverlay(prefs.custom_video_player_overlay);
-    if (main_frame) {
-      auto* local_main_frame = DynamicTo<WebLocalFrameImpl>(main_frame);
+    const auto* main_frame_ptr = web_view->MainFrame();
+    if (main_frame_ptr) {
+      auto* local_main_frame = DynamicTo<WebLocalFrameImpl>(main_frame_ptr);
       if (local_main_frame) {
         Document* document = local_main_frame->GetDocument();
         if (document) {
