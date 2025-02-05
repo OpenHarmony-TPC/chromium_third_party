@@ -161,29 +161,6 @@ video::-webkit-media-controls {
     hsl(0, 0%, 0%) 100%;
 }
 
-video::-webkit-media-controls.sizing-small div[pseudo="-webkit-media-controls-panel" i] {
-  background-size: auto 112px;
-}
-
-video::-webkit-media-controls.sizing-large div[pseudo="-webkit-media-controls-panel" i] {
-  background-size: auto 222px;
-}
-
-/* Need dark gradient at the top of the video when the scrubbing message is
-* shown */
-video::-webkit-media-controls:not(.audio-only) div[pseudo="-webkit-media-controls-panel" i].scrubbing-message {
-  background:
-    linear-gradient(to bottom, var(--gradient-steps)) repeat-x bottom left;
-}
-
-video::-webkit-media-controls.sizing-small div[pseudo="-webkit-media-controls-panel" i].scrubbing-message {
-  background-size: auto 120px, auto 112px;
-}
-
-video::-webkit-media-controls.sizing-large div[pseudo="-webkit-media-controls-panel" i].scrubbing-message {
-  background-size: auto 120px, auto 220px;
-}
-
 audio::-internal-media-controls-top-row-panel,
 video::-internal-media-controls-top-row-panel,
 audio::-internal-media-controls-button-panel,
@@ -325,8 +302,17 @@ video::-internal-media-controls-playback-speed-button {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
+  font-weight: 500;
   color: rgba(255, 255, 255, 0.9) ;
+}
+
+video::-webkit-media-controls.sizing-small input[pseudo="-internal-media-controls-playback-speed-button" i] {
+  font-size: 12px;
+}
+
+video::-webkit-media-controls.sizing-medium input[pseudo="-internal-media-controls-playback-speed-button" i],
+video::-webkit-media-controls.sizing-large input[pseudo="-internal-media-controls-playback-speed-button" i] {
+  font-size: 14px;
 }
 
 video::-webkit-media-controls-mute-button {
@@ -483,17 +469,26 @@ video::-webkit-media-controls-fullscreen-button {
   margin-inline-start: 2px;
 }
 
-video::-webkit-media-controls.sizing-small div[pseudo="-internal-media-controls-top-row-panel" i],
+video::-webkit-media-controls.sizing-small div[pseudo="-internal-media-controls-top-row-panel" i] {
+  padding: 0 16px;
+}
+
 video::-webkit-media-controls.sizing-small div[pseudo="-internal-media-controls-button-panel" i] {
   padding: 0 8px;
 }
 
-video::-webkit-media-controls.sizing-medium div[pseudo="-internal-media-controls-top-row-panel" i],
+video::-webkit-media-controls.sizing-medium div[pseudo="-internal-media-controls-top-row-panel" i] {
+  padding: 0 24px;
+}
+
 video::-webkit-media-controls.sizing-medium div[pseudo="-internal-media-controls-button-panel" i] {
   padding: 0 16px;
 }
 
-video::-webkit-media-controls.sizing-large div[pseudo="-internal-media-controls-top-row-panel" i],
+video::-webkit-media-controls.sizing-large div[pseudo="-internal-media-controls-top-row-panel" i]{
+  padding: 0 32px;
+}
+
 video::-webkit-media-controls.sizing-large div[pseudo="-internal-media-controls-button-panel" i] {
   padding: 0 24px;
 }
@@ -505,12 +500,14 @@ video::-webkit-media-controls-play-button {
 
 video::-webkit-media-controls:not(.audio-only) [pseudo="-webkit-media-controls-panel"] [pseudo="-webkit-media-controls-play-button"] {
   background-image: url(ic_play_fill_white.svg);
+  background-size: 24px 24px;
 }
 
 audio::-webkit-media-controls-mute-button,
 video::-webkit-media-controls-mute-button {
   background-image: -internal-light-dark(url(ic_volume_up.svg), url(ic_volume_up_white.svg));
 }
+
 video::-webkit-media-controls:not(.audio-only) [pseudo="-webkit-media-controls-panel"] [pseudo="-webkit-media-controls-mute-button"] {
   background-image: url(ic_speaker_wave_3_white.svg);
 }
@@ -523,12 +520,20 @@ audio::-webkit-media-controls-mute-button.muted,
 video::-webkit-media-controls-mute-button.muted {
   background-image: -internal-light-dark(url(ic_volume_off.svg), url(ic_volume_off_white.svg));
 }
+
 video::-webkit-media-controls:not(.audio-only) [pseudo="-webkit-media-controls-panel"] [pseudo="-webkit-media-controls-mute-button"].muted {
   background-image: url(ic_speaker_slash_white.svg);
 }
 
 video::-webkit-media-controls.rtl:not(.audio-only) [pseudo="-webkit-media-controls-panel"] [pseudo="-webkit-media-controls-mute-button"].muted {
   background-image: url(ic_speaker_slash_mirror.svg);
+}
+
+video::-webkit-media-controls:not(.audio-only) [pseudo="-webkit-media-controls-panel"] [pseudo="-webkit-media-controls-mute-button"],
+video::-webkit-media-controls.rtl:not(.audio-only) [pseudo="-webkit-media-controls-panel"] [pseudo="-webkit-media-controls-mute-button"],
+video::-webkit-media-controls:not(.audio-only) [pseudo="-webkit-media-controls-panel"] [pseudo="-webkit-media-controls-mute-button"].muted,
+video::-webkit-media-controls.rtl:not(.audio-only) [pseudo="-webkit-media-controls-panel"] [pseudo="-webkit-media-controls-mute-button"].muted {
+  background-size: 24px 24px;
 }
 
 video::-internal-media-controls-display-cutout-fullscreen-button {
@@ -545,6 +550,7 @@ video::-webkit-media-controls-fullscreen-button {
 }
 video::-webkit-media-controls:not(.audio-only) [pseudo="-webkit-media-controls-panel"] [pseudo="-webkit-media-controls-fullscreen-button"] {
   background-image: url(ic_arrow_up_left_and_arrow_down_right_white.svg);
+  background-size: 24px 24px;
 }
 
 audio::-webkit-media-controls-fullscreen-button.fullscreen,
@@ -595,6 +601,7 @@ audio::-internal-media-controls-download-button {
 
 video::-webkit-media-controls:not(.audio-only) [pseudo="-webkit-media-controls-panel"] [pseudo="-internal-media-controls-download-button"] {
   background-image: url(ic_arrow_down_circle_white.svg);
+  background-size: 24px 24px;
 }
 
 audio::-internal-media-controls-playback-speed-button {
@@ -867,16 +874,6 @@ video::-webkit-media-controls input[pseudo="-webkit-media-controls-timeline" i]:
   border-radius: 50%;
 }
 
-video::-webkit-media-controls #thumb:active::after {
-  position: absolute;
-  width: 18px;
-  height: 18px;
-  top: -4px;
-  left: -4px;
-  background-color: rgba(255, 255, 255, 0.15);
-  content: '';
-}
-
 video::-webkit-media-controls input[pseudo="-webkit-media-controls-timeline" i]:hover::-webkit-slider-thumb,
 video::-webkit-media-controls input[pseudo="-webkit-media-controls-timeline" i]:focus::-webkit-slider-thumb,
 audio::-webkit-media-controls input[pseudo="-webkit-media-controls-timeline" i]:hover::-webkit-slider-thumb,
@@ -907,22 +904,9 @@ video::-webkit-media-controls div[pseudo="-internal-media-controls-loading-panel
   margin-top: -48px /* (72px overlay play button height + 24px timeline height + padding-bottom) / -2) */;
 }
 
-div[pseudo="-internal-media-controls-loading-panel" i]::-internal-media-controls-loading-panel-spinner-mask-1-background {
-  left: 0;
-    background-image: -internal-light-dark(url(default_100_percent/loading_mask_1.svg), url(default_100_percent/loading_mask_1_white.svg));
-  background-position: center left;
-}
-
-div[pseudo="-internal-media-controls-loading-panel" i]::-internal-media-controls-loading-panel-spinner-mask-2-background {
-  left: -100%;
-    background-image: -internal-light-dark(url(default_100_percent/loading_mask_2.svg), url(default_100_percent/loading_mask_2_white.svg));
-  background-position: center right;
-}
-
 input[pseudo="-webkit-media-controls-timeline" i]::-internal-media-controls-segmented-track,
 input[pseudo="-webkit-media-controls-volume-slider" i]::-internal-media-controls-segmented-track {
   appearance: -internal-media-control;
-
   flex: 1;
   background: -internal-light-dark(rgba(0, 0, 0, .2), rgba(255, 255, 255, 0.2));
   border-radius: 2px;
@@ -930,7 +914,7 @@ input[pseudo="-webkit-media-controls-volume-slider" i]::-internal-media-controls
 }
 video::-webkit-media-controls:not(.audio-only) input[pseudo="-webkit-media-controls-timeline" i]::-internal-media-controls-segmented-track,
 video::-webkit-media-controls:not(.audio-only) input[pseudo="-webkit-media-controls-volume-slider" i]::-internal-media-controls-segmented-track {
-  background: rgba(255, 255, 255, .3);
+  background: rgba(255, 255, 255, .2);
   box-shadow: 0 2px 10px 0 rgba(0,0,0,0.5);
 }
 
@@ -954,7 +938,7 @@ video::-webkit-media-controls:not(.audio-only) input[pseudo="-webkit-media-contr
 }
 
 video::-webkit-media-controls:not(.audio-only) input[pseudo="-webkit-media-controls-timeline" i]::-webkit-slider-thumb {
-  background: #E5E5E5;
+  background: #E5E5E5;  
   box-shadow: unset;
 }
 
@@ -1000,7 +984,7 @@ input[pseudo="-webkit-media-controls-volume-slider" i]::-internal-track-segment-
 }
 video::-webkit-media-controls:not(.audio-only) input[pseudo="-webkit-media-controls-timeline" i]::-internal-track-segment-highlight-after,
 video::-webkit-media-controls:not(.audio-only) input[pseudo="-webkit-media-controls-volume-slider" i]::-internal-track-segment-highlight-after {
-  background: rgba(255, 255, 255, .54);
+  background: rgba(255, 255, 255, .4);
 }
 
 audio::-webkit-media-controls-volume-slider,
@@ -1363,7 +1347,7 @@ label[pseudo="-internal-media-controls-playback-speed-list-item"] input {
 
 label[pseudo="-internal-media-controls-text-track-list-item"] input:checked,
 label[pseudo="-internal-media-controls-playback-speed-list-item"] input:checked {
-  background: url(ic_check_blue_hm.svg) no-repeat center center;
+  background: -internal-light-dark(url(ic_check_mark.svg), url(ic_check_mark_white.svg)) no-repeat center;
 }
 
 video::-webkit-media-controls-overlay-enclosure {
@@ -1452,11 +1436,15 @@ video::-webkit-media-controls.audio-only [pseudo="-internal-media-controls-overf
 */
 
 video::-internal-media-controls-loading-panel {
+  background: url(loading_40dp_dark.png) no-repeat center;
+  background-size: 40px 40px;
+  height: 40px;
+  left: 50%;
+  right: unset;
   position: absolute;
-  left: 0;
-  top: 0;
-  right: 0;
-  bottom: 0;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 40px;
   overflow: hidden;
   z-index: 1;
   pointer-events: none;
@@ -1470,7 +1458,6 @@ video::-webkit-media-controls.audio-only [pseudo="-internal-media-controls-loadi
 /**
 * Animated Arrow Container
 */
-
 video::-internal-media-controls-animated-arrow-container {
   position: absolute;
   display: flex;
@@ -1482,6 +1469,12 @@ video::-internal-media-controls-animated-arrow-container {
   overflow: hidden;
   z-index: 1;
   pointer-events: none;
+}
+
+video::-webkit-media-controls.rtl div[pseudo="-internal-media-controls-loading-panel" i] {
+  left: unset;
+  right: 50%;
+  transform: translate(50%, -50%);
 }
 
 audio::-internal-media-controls-animated-arrow-container,
@@ -1643,11 +1636,13 @@ video::-internal-media-controls-scrubbing-message {
 progress::-webkit-progress-bar {
   height: 2px;
   background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 1px;
 }
 
 progress::-webkit-progress-value {
   height: 2px;
   background-color: #FFFFFF;
+  border-radius: 1px;
 }
 
 .state-scrubbing input[pseudo="-webkit-media-controls-overlay-play-button" i] {
@@ -1741,7 +1736,9 @@ audio::-internal-media-controls-text-track-list {
   /* In high contrast mode, the icons are inverted, i.e. non-white svgs become white svgs, white become non-white.  */
   video::-webkit-media-controls:not(.audio-only) [pseudo="-webkit-media-controls-panel"] [pseudo="-webkit-media-controls-play-button"] {
     background-image: url(ic_play_fill.svg);
+    background-size: 24px 24px;
   }
+
   video::-webkit-media-controls:not(.audio-only) [pseudo="-webkit-media-controls-panel"] [pseudo="-webkit-media-controls-mute-button"] {
     background-image: url(ic_speaker_wave_3.svg);
   }
@@ -1770,6 +1767,7 @@ audio::-internal-media-controls-text-track-list {
 
   video::-webkit-media-controls:not(.audio-only) [pseudo="-webkit-media-controls-panel"] [pseudo="-webkit-media-controls-fullscreen-button"] {
     background-image: url(ic_arrow_up_left_and_arrow_down_right.svg);
+    background-size: 24px 24px;
   }
   video::-webkit-media-controls:not(.audio-only) [pseudo="-webkit-media-controls-panel"] [pseudo="-internal-media-controls-overflow-button"] {
     background-image: url(ic_menu.svg);
