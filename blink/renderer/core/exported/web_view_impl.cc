@@ -524,7 +524,7 @@ void ApplyOhosWebPreferences(const web_pref::WebPreferences& prefs,
       if (local_main_frame) {
         Document* document = local_main_frame->GetDocument();
         if (document) {
-          document->GetStyleEngine().EnsureDefaultStyleSheetsForMediaElement();
+          document->GetStyleEngine().EnsureUAStyleForMediaElement();
         }
       }
     }
