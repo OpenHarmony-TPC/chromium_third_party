@@ -37,9 +37,11 @@ MediaControlsResourceLoader::~MediaControlsResourceLoader() = default;
 String MediaControlsResourceLoader::GetMediaControlsCSS() const {
 #if defined(OHOS_VIDEO_ASSISTANT)
   if (custom_media_player_enabled_) {
+    LOG(INFO) << "GetMediaControls load HM CSS";
     return UncompressResourceAsString(IDR_UASTYLE_MEDIA_CONTROLS_HM_CSS);
   }
 #endif
+  LOG(INFO) << "GetMediaControls load default CSS";
   return UncompressResourceAsString(IDR_UASTYLE_MEDIA_CONTROLS_CSS);
 }
 
