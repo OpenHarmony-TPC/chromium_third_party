@@ -464,6 +464,31 @@ SkFontHinting RendererPreferencesToSkiaHinting(
 }
 #endif  // !BUILDFLAG(IS_MAC) && !BUILDFLAG(IS_WIN)
 
+void ApplyOhosMediaPlayerEnabled(const web_pref::WebPreferences& prefs,
+                                 WebView* web_view,
+                                 WebSettings* settings) {
+  bool exist_enabled = settings->GetCustomMediaPlayerEnabled();
+  if (exist_enabled == prefs.custom_media_player_enabled) {
+    return;
+  }
+  LOG(INFO) << "Update custom media player enable, exist_enabled: " << exist_enabled
+            << ", prefs.custom_media_player_enabled:" << prefs.custom_media_player_enabled;
+  settings->SetCustomMediaPlayerEnabled(prefs.custom_media_player_enabled);
+  const auto* main_frame = web_view->MainFrame();
+  if (!main_frame) {
+    return;
+  }
+  auto* local_main_frame = DynamicTo<WebLocalFrameImpl>(main_frame);
+  if (!local_main_frame) {
+    return;
+  }
+  Document* document = local_main_frame->GetDocument();
+  if (!document) {
+    return;
+  }
+  document->GetStyleEngine().EnsureUAStyleForMediaElement();
+}
+
 void ApplyOhosWebPreferences(const web_pref::WebPreferences& prefs,
                              WebView* web_view,
                              WebSettings* settings,
@@ -509,22 +534,7 @@ void ApplyOhosWebPreferences(const web_pref::WebPreferences& prefs,
 
 #ifdef OHOS_VIDEO_ASSISTANT
   settings->SetVideoAssistantEnabled(prefs.video_assistant_enabled);
-  bool exist_enabled = settings->GetCustomMediaPlayerEnabled();
-  if (exist_enabled != prefs.custom_media_player_enabled) {
-    LOG(INFO) << "Update custom media player enable, exist_enabled: " << exist_enabled
-              << ", prefs.custom_media_player_enabled:" << prefs.custom_media_player_enabled;
-    settings->SetCustomVideoPlayerOverlay(prefs.custom_video_player_overlay);
-    const auto* main_frame_ptr = web_view->MainFrame();
-    if (main_frame_ptr) {
-      auto* local_main_frame = DynamicTo<WebLocalFrameImpl>(main_frame_ptr);
-      if (local_main_frame) {
-        Document* document = local_main_frame->GetDocument();
-        if (document) {
-          document->GetStyleEngine().EnsureUAStyleForMediaElement();
-        }
-      }
-    }
-  }
+
 #endif // OHOS_VIDEO_ASSISTANT
 
 #if defined(OHOS_MEDIA)
