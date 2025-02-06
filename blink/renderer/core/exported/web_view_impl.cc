@@ -464,6 +464,7 @@ SkFontHinting RendererPreferencesToSkiaHinting(
 }
 #endif  // !BUILDFLAG(IS_MAC) && !BUILDFLAG(IS_WIN)
 
+#ifdef OHOS_VIDEO_ASSISTANT
 void ApplyOhosMediaPlayerEnabled(const web_pref::WebPreferences& prefs,
                                  WebView* web_view,
                                  WebSettings* settings) {
@@ -488,6 +489,7 @@ void ApplyOhosMediaPlayerEnabled(const web_pref::WebPreferences& prefs,
   }
   document->GetStyleEngine().EnsureUAStyleForMediaElement();
 }
+#endif
 
 void ApplyOhosWebPreferences(const web_pref::WebPreferences& prefs,
                              WebView* web_view,
