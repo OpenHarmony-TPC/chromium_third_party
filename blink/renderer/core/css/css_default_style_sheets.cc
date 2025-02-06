@@ -425,6 +425,20 @@ bool CSSDefaultStyleSheets::EnsureDefaultStyleSheetForForcedColors() {
   return true;
 }
 
+#ifdef OHOS_VIDEO_ASSISTANT
+bool CSSDefaultStyleSheets::EnsureDefaultStyleSheetsForMediaElement() {
+  if (media_controls_style_sheet_ && HasMediaControlsStyleSheetLoader()) {
+    LOG(INFO) << "CSSDefaultStyleSheets, Update media controls style sheets";
+    media_controls_style_sheet_ =
+        ParseUASheet(media_controls_style_sheet_loader_->GetUAStyleSheet());
+    default_media_controls_style_ = MakeGarbageCollected<RuleSet>();
+    AddRulesToDefaultStyleSheets(media_controls_style_sheet_, NamespaceType::kMediaControls);
+    return true;
+  }
+  return false;
+}
+#endif
+
 void CSSDefaultStyleSheets::CollectFeaturesTo(const Document& document,
                                               RuleFeatureSet& features) {
   if (DefaultHtmlStyle()) {

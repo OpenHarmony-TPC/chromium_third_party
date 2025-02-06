@@ -2186,6 +2186,18 @@ void StyleEngine::EnsureUAStyleForForcedColors() {
   }
 }
 
+#ifdef OHOS_VIDEO_ASSISTANT
+void StyleEngine::EnsureUAStyleForMediaElement() {
+  LOG(INFO) << "StyleEngine, EnsureUAStyleForMediaElement start";
+  if (CSSDefaultStyleSheets::Instance().EnsureDefaultStyleSheetsForMediaElement()) {
+    global_rule_set_->MarkDirty();
+    if (GetDocument().IsActive()) {
+      UpdateActiveStyle();
+    }
+  }
+}
+#endif
+
 RuleSet* StyleEngine::DefaultViewTransitionStyle() const {
   DCHECK(ua_view_transition_style_);
   return ua_view_transition_style_.Get();
