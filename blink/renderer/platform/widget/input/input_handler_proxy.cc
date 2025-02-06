@@ -48,6 +48,10 @@
 #include "ui/latency/latency_info.h"
 #include "cc/layers/layer_impl.h"
 
+#if BUILDFLAG(IS_OHOS)
+#include "base/ohos/sys_info_utils.h"
+#endif
+
 using perfetto::protos::pbzero::ChromeLatencyInfo;
 using perfetto::protos::pbzero::TrackEvent;
 
@@ -273,11 +277,20 @@ InputHandlerProxy::InputHandlerProxy(cc::InputHandler& input_handler,
   compositor_event_queue_ = std::make_unique<CompositorThreadEventQueue>();
   native_event_queue_ = std::make_unique<NativeEmbedEventQueue>();
   native_touch_end_queue_ = std::make_unique<NativeEmbedEventQueue>();
+#if defined(OHOS_INPUT_EVENTS)
+  scroll_predictor_ =
+      (base::FeatureList::IsEnabled(blink::features::kResamplingScrollEvents) &&
+       client->AllowsScrollResampling() &&
+       (base::ohos::IsTabletDevice() || base::ohos::IsPcDevice()))
+          ? std::make_unique<ScrollPredictor>()
+          : nullptr;
+#else
   scroll_predictor_ =
       (base::FeatureList::IsEnabled(blink::features::kResamplingScrollEvents) &&
        client->AllowsScrollResampling())
           ? std::make_unique<ScrollPredictor>()
           : nullptr;
+#endif  // defined(OHOS_INPUT_EVENTS)
 
   if (base::FeatureList::IsEnabled(blink::features::kSkipTouchEventFilter) &&
       GetFieldTrialParamValueByFeature(
