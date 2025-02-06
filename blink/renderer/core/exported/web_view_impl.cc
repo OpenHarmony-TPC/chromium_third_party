@@ -534,7 +534,7 @@ void ApplyOhosWebPreferences(const web_pref::WebPreferences& prefs,
 
 #ifdef OHOS_VIDEO_ASSISTANT
   settings->SetVideoAssistantEnabled(prefs.video_assistant_enabled);
-
+  ApplyOhosMediaPlayerEnabled(prefs, web_view, settings);
 #endif // OHOS_VIDEO_ASSISTANT
 
 #if defined(OHOS_MEDIA)
