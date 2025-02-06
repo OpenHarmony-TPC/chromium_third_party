@@ -715,17 +715,6 @@ void WebMediaPlayerImpl::DisableOverlay() {
     ScheduleRestart();
   else
     MaybeSendOverlayInfoToDecoder();
-
-#ifdef OHOS_VIDEO_ASSISTANT
-  bool surface_changed = video_surface_id_ != -1;
-  video_surface_id_ = -1;
-  if (surface_changed && surface_created_cb_) {
-    surface_created_cb_.Run(video_surface_id_);
-    if (paused_ && !seeking_) {
-      pipeline_controller_->Seek(base::Seconds(CurrentTime()), true);
-    }
-  }
-#endif // OHOS_VIDEO_ASSISTANT
 }
 
 void WebMediaPlayerImpl::EnteredFullscreen() {
@@ -761,6 +750,14 @@ void WebMediaPlayerImpl::ExitedFullscreen() {
   // See EnteredFullscreen for why we do this.
   if (!decoder_requires_restart_for_overlay_)
     MaybeSendOverlayInfoToDecoder();
+
+#ifdef OHOS_VIDEO_ASSISTANT
+  bool surface_changed = video_surface_id_ != -1;
+  video_surface_id_ = -1;
+  if (surface_changed && surface_created_cb_) {
+    surface_created_cb_.Run(video_surface_id_);
+  }
+#endif // OHOS_VIDEO_ASSISTANT
 }
 
 void WebMediaPlayerImpl::BecameDominantVisibleContent(bool is_dominant) {
@@ -4419,6 +4416,10 @@ void WebMediaPlayerImpl::SetVideoSurface(int32_t widget_id) {
   video_surface_id_ = widget_id;
   if (surface_created_cb_) {
     surface_created_cb_.Run(widget_id);
+  }
+
+  if (paused_ && !seeking_) {
+    pipeline_controller_->Seek(base::Seconds(CurrentTime()), true);
   }
 }
 
