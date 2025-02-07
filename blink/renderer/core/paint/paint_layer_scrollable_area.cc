@@ -3232,6 +3232,17 @@ gfx::Size PaintLayerScrollableArea::PixelSnappedBorderBoxSize() const {
   // This can be fixed only after we support subpixels in overflow control
   // geometry. For now we ensure correct pixel snapping of overflow controls by
   // calling PositionOverflowControls() again when paint offset is updated.
+#ifdef OHOS_SCROLLBAR
+  const TopDocumentRootScrollerController& controller =
+      GetLayoutBox()->GetDocument().GetPage()->GlobalRootScrollerController();
+  if (!base::ohos::IsPcDevice() && DynamicTo<LayoutView>(GetLayoutBox()) && controller.RootScrollerArea() == this) {
+      const auto& visualViewportSize=
+          GetLayoutBox()->GetFrameView()->GetPage()->GetVisualViewport().Size();
+      if (visualViewportSize.width() > GetLayoutBox()->Size().Width()) {
+          GetLayoutBox()->SetSize(LayoutSize(visualViewportSize.width(), visualViewportSize.height()));
+      }
+  }
+#endif // OHOS_SCROLLBAR
   return GetLayoutBox()->PixelSnappedBorderBoxSize(
       GetLayoutBox()->FirstFragment().PaintOffset());
 }
