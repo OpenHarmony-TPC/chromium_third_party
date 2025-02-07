@@ -583,6 +583,9 @@ class CORE_EXPORT Page final : public GarbageCollected<Page>,
 #ifdef OHOS_DISPLAY_CUTOUT
   gfx::Insets safe_area_;
 #endif
+#if BUILDFLAG(IS_OHOS)
+  bool enable_default_page_scale_limits_update_ = true;
+#endif
 
   // This tracks the mode that the fenced frame is set to.
   blink::FencedFrame::DeprecatedFencedFrameMode fenced_frame_mode_ =

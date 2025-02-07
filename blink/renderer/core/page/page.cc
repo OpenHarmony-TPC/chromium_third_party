@@ -463,7 +463,12 @@ void Page::SetDefaultPageScaleLimits(float min_scale, float max_scale) {
   new_defaults.minimum_scale = min_scale;
   new_defaults.maximum_scale = max_scale;
 
+#if BUILDFLAG(IS_OHOS)
+  if (!enable_default_page_scale_limits_update_ || 
+      new_defaults == GetPageScaleConstraintsSet().DefaultConstraints())
+#else
   if (new_defaults == GetPageScaleConstraintsSet().DefaultConstraints())
+#endif
     return;
 
   GetPageScaleConstraintsSet().SetDefaultConstraints(new_defaults);
@@ -501,10 +506,12 @@ void Page::SetUserAgentPageScaleConstraints(
 
 #if BUILDFLAG(IS_OHOS)
 void Page::ResetPageScaleConstraints(bool constraint_for_mobile) {
+  enable_default_page_scale_limits_update_ = true;
   if (constraint_for_mobile) {
     SetDefaultPageScaleLimits(0.25f, 5.0f);
   } else {
     SetDefaultPageScaleLimits(1.0f, 4.0f);
+    enable_default_page_scale_limits_update_ = false;
   }
 
   PageScaleConstraints constraints =
