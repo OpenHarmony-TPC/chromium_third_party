@@ -400,6 +400,7 @@ class WebMediaPlayer {
 
 #ifdef OHOS_VIDEO_ASSISTANT
   virtual void SetVideoSurface(int32_t widget_id) {}
+  virtual bool SupportVideoSurface() { return false; }
 #endif // OHOS_VIDEO_ASSISTANT
 };
 

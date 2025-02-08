@@ -1105,6 +1105,12 @@ void MediaControlsImpl::MaybeShow() {
   volume_slider_->OnControlsShown();
   UpdateCSSClassFromState();
   UpdateActingAsAudioControls();
+
+#if defined(OHOS_MEDIA) && defined(OHOS_VIDEO_ASSISTANT)
+  if (MediaElement().IsFullscreen()) {
+    entered_fullscreen_panel_->SetIsWanted(true);
+  }
+#endif // defined(OHOS_MEDIA) && defined(OHOS_VIDEO_ASSISTANT)
 }
 
 void MediaControlsImpl::Hide() {
@@ -1134,6 +1140,9 @@ void MediaControlsImpl::Hide() {
 #if defined(OHOS_MEDIA)
   if (MediaElement().IsFullscreen()) {
     entered_fullscreen_title_display_->SetIsWanted(false);
+#if defined(OHOS_VIDEO_ASSISTANT)
+    entered_fullscreen_panel_->SetIsWanted(false);
+#endif // defined(OHOS_VIDEO_ASSISTANT)
   }
 #endif // defined(OHOS_MEDIA)
   timeline_->OnControlsHidden();
@@ -2130,6 +2139,11 @@ void MediaControlsImpl::OnEnteredFullscreen() {
   entered_fullscreen_panel_->ParserAppendChild(
       entered_fullscreen_title_display_);
   entered_fullscreen_panel_->SetIsWanted(true);
+#if defined(OHOS_VIDEO_ASSISTANT)
+  if (!MediaElement().ShouldShowControls()) {
+    entered_fullscreen_panel_->SetIsWanted(false);
+  }
+#endif // defined(OHOS_VIDEO_ASSISTANT)
 
   SetClass("fullscreen", true);
 
