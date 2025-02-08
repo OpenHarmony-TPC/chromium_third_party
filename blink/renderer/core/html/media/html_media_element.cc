@@ -5578,6 +5578,11 @@ HTMLMediaElement::CollectMediaInfoAttributesForVAST() {
   mediaInfoAttr->isShowPlaybackSpeed = true;
   mediaInfoAttr->show_download_button = !controls_list_->ShouldHideDownload();
   mediaInfoAttr->supports_save = SupportsSave();
+  mediaInfoAttr->fullscreen_overlay = true;
+
+  if (GetWebMediaPlayer() && !GetWebMediaPlayer()->SupportVideoSurface()) {
+    mediaInfoAttr->fullscreen_overlay = false;
+  }
   return mediaInfoAttr;
 }
 
@@ -5611,9 +5616,28 @@ bool HTMLMediaElement::IsCustomMediaPlayerEnabled() {
         IsHTMLVideoElement();
 }
 
+void HTMLMediaElement::OnSupportVideoSurfaceChanged(
+    bool support, std::string decoder_name) {
+  LOG(INFO) << "OnSupportVideoSurfaceChanged("
+            << support << ", " << decoder_name << ")";
+  if (!support) {
+    SetUserWantsControlsVisible(false);
+  } else {
+    user_wants_controls_visible_.reset();
+    UpdateControlsVisibility();
+  }
+  for (auto& observer : media_player_observer_remote_set_->Value()) {
+    observer->FullscreenOverlayChanged(support, WTF::String(decoder_name));
+  }
+}
+
 void HTMLMediaElement::EnterFullScreenOverlay() {
   if (!IsCustomMediaPlayerEnabled()) {
     return;
+  }
+  if (GetWebMediaPlayer() && !GetWebMediaPlayer()->SupportVideoSurface()) {
+    LOG(INFO) << "Decoder doesn't support video surface.";
+    SetUserWantsControlsVisible(false);
   }
   LOG(INFO) << "EnterFullScreenOverlay";
   if (IsHTMLVideoElement()) {
@@ -5738,6 +5762,10 @@ void HTMLMediaElement::FullscreenChangedOverlay(bool fullscreen) {
     return;
   }
   LOG(INFO) << "FullscreenChangedOverlay";
+  if (!fullscreen) {
+    user_wants_controls_visible_.reset();
+    UpdateControlsVisibility();
+  }
   if (IsHTMLVideoElement()) {
     for (auto& observer : media_player_observer_remote_set_->Value()) {
       observer->FullscreenChangedOverlay(fullscreen);

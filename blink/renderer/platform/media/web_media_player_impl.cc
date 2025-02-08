@@ -4423,14 +4423,23 @@ void WebMediaPlayerImpl::SetVideoSurface(int32_t widget_id) {
   }
 }
 
+bool WebMediaPlayerImpl::SupportVideoSurface() {
+  return support_video_surface_;
+}
+
 void WebMediaPlayerImpl::OnSurfaceRequested(
-    media::SurfaceCreatedCB surface_created_cb) {
-  LOG(INFO) << "OnSurfaceRequested, video_surface_id_[" << video_surface_id_ << "]";
+    media::SurfaceCreatedCB surface_created_cb,
+    bool support_video_surface,
+    std::string decoder_name) {
+  LOG(INFO) << "OnSurfaceRequested(" << support_video_surface <<
+            "), video_surface_id_[" << video_surface_id_ << "]";
   surface_created_cb_ = std::move(surface_created_cb);
+  support_video_surface_ = support_video_surface;
 
   if (video_surface_id_ > 0) {
     surface_created_cb_.Run(video_surface_id_);
   }
+  client_->OnSupportVideoSurfaceChanged(support_video_surface_, decoder_name);
 }
 #endif // OHOS_VIDEO_ASSISTANT
 

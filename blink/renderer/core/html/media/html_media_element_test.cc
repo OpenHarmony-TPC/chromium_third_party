@@ -221,6 +221,8 @@ class TestMediaPlayerObserver final
   void SeekingFinishedOverlay() override {}
   void ErrorOverlay(int32_t error_code, const WTF::String& error_msg) override {}
   void VideoSizeChangedOverlay(int32_t width, int32_t height) override {}
+  void FullscreenOverlayChanged(
+      bool fullscreen_overlay, const WTF::String& decoder_name) override {}
 #endif // OHOS_VIDEO_ASSISTANT
 
   // Getters used from HTMLMediaElementTest.
