@@ -362,6 +362,7 @@ class CORE_EXPORT HTMLMediaElement
   double EffectiveMediaVolume() const;
 
 #if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+  bool IsMediaPlayerShown() const;
   bool IsUsedCustomVideoPlayer();
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
 
@@ -427,7 +428,7 @@ class CORE_EXPORT HTMLMediaElement
 #ifdef OHOS_VIDEO_ASSISTANT
   bool IsVideoAssistantEnabled() override;
   void OnLayerBoundsChange(const gfx::Rect& bounds) override;
-  void OnWebMediaPlayerShowing(bool showing) override;
+  void OnPageVisibilityChanged() override;
 
   void TryNotifyVideoPlaying();
   void NotifyVideoVisible(bool visible);
@@ -1124,7 +1125,6 @@ class CORE_EXPORT HTMLMediaElement
 #ifdef OHOS_VIDEO_ASSISTANT
   bool video_assistant_enabled_ = false;
   bool video_visible_ = false;
-  bool web_player_showing_ = true;
   bool has_been_seen_playing_once_ = false;
   bool has_notified_playing_ = false;
   gfx::RectF video_rect_;

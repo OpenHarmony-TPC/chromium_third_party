@@ -2672,7 +2672,7 @@ void WebMediaPlayerImpl::OnFrameHidden() {
             << " delegate_id_:" << delegate_id_;
 #endif // OHOS_MEDIA
 #ifdef OHOS_VIDEO_ASSISTANT
-  client_->OnWebMediaPlayerShowing(false);
+  client_->OnPageVisibilityChanged();
 #endif // OHOS_VIDEO_ASSISTANT
 
   // Backgrounding a video requires a user gesture to resume playback.
@@ -2725,7 +2725,7 @@ void WebMediaPlayerImpl::OnFrameShown() {
             << " delegate_id_:" << delegate_id_;
 #endif // OHOS_MEDIA
 #ifdef OHOS_VIDEO_ASSISTANT
-  client_->OnWebMediaPlayerShowing(true);
+  client_->OnPageVisibilityChanged();
 #endif // OHOS_VIDEO_ASSISTANT
 
   // Foreground videos don't require user gesture to continue playback.
@@ -4353,6 +4353,9 @@ void WebMediaPlayerImpl::PlayWithReason(media::ActionReason reason) {
 void WebMediaPlayerImpl::PauseWithReason(media::ActionReason reason) {
   base::AutoReset<media::ActionReason> resetter(&action_reason_, reason);
   Pause();
+}
+bool WebMediaPlayerImpl::IsMediaPlayerShown() const {
+  return !IsHidden();
 }
 bool WebMediaPlayerImpl::IsUsingCustomRenderer() const {
   return should_create_custom_renderer_;
