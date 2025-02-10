@@ -43,6 +43,7 @@ static constexpr int playback_speed_rate_integerize = 100;
 static constexpr int keep_one_decimal = 10;
 void MediaControlPlaybackSpeedButtonElement::RefreshPlaybackSpeedButton() {
   double playback_rate = MediaElement().playbackRate();
+  MediaElement().setDefaultPlaybackRate(playback_rate);
   if (1.0 == playback_rate) {
     setAttribute(html_names::kValueAttr, AtomicString(GetLocale().QueryString(
                  IDS_OHOS_MEDIA_VIDEO_PLAYBACK_SPEED_BUTTON)));
@@ -84,9 +85,8 @@ const char* MediaControlPlaybackSpeedButtonElement::GetNameForHistograms()
 void MediaControlPlaybackSpeedButtonElement::DefaultEventHandler(Event& event) {
 #ifdef OHOS_VIDEO_ASSISTANT
   if (GetMediaControls().ShouldShowVideoControlsHM()) {
-    if ((event.type() == event_type_names::kClick ||
-        event.type() == event_type_names::kGesturetap)
-        && !GetMediaControls().PlaybackSpeedListIsWanted()) {
+    if (event.type() == event_type_names::kGesturetap &&
+        !GetMediaControls().PlaybackSpeedListIsWanted()) {
       GetMediaControls().TogglePlaybackSpeedList();
     }
   } else {
