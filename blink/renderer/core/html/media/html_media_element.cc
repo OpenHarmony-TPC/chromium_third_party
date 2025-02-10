@@ -5082,6 +5082,12 @@ void HTMLMediaElement::DidMediaMetadataChange(
     observer->OnMediaMetadataChanged(has_audio, has_video, media_content_type);
   }
 
+#ifdef OHOS_VIDEO_ASSISTANT
+  if (HasAudio()) {
+    MutedChangedOverlay(muted_);
+  }
+#endif // OHOS_MEDIA_ASSISTANT
+
   if (video_codec == media::VideoCodec::kUnknown &&
       audio_codec == media::AudioCodec::kUnknown) {
     return;
