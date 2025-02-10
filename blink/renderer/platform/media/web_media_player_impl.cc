@@ -2557,6 +2557,12 @@ void WebMediaPlayerImpl::OnVideoNaturalSizeChange(const gfx::Size& size) {
     // now know that there is a video track. This condition is paired with code
     // in CreateWatchTimeReporter() that guesses the existence of a video track.
     CreateWatchTimeReporter();
+#ifdef OHOS_MEDIA
+    if (!paused_ && IsHidden() && ShouldPausePlaybackWhenHidden()) {
+      LOG(INFO) << "OhMedia::WebMediaPlayerImpl::OnVideoNaturalSizeChange pause when hidden";
+      PauseVideoIfNeeded();
+    }
+#endif // OHOS_MEDIA
   } else {
     UpdateSecondaryProperties();
   }
@@ -3887,11 +3893,6 @@ bool WebMediaPlayerImpl::ShouldPausePlaybackWhenHidden() const {
           ? HasUnmutedAudio() || audio_source_provider_->IsAudioBeingCaptured()
           : HasAudio();
 
-  // Expect that video will pause after switching to the background while loading.
-  if (HasVideo() && pipeline_metadata_.natural_size.IsEmpty()) {
-    return true;
-  }
-
   // Audio only stream is allowed to play when in background.
   if (!HasVideo() && preserve_audio)
     return false;
@@ -4424,16 +4425,29 @@ void WebMediaPlayerImpl::SetVideoSurface(int32_t widget_id) {
   if (surface_created_cb_) {
     surface_created_cb_.Run(widget_id);
   }
+
+  if (paused_ && !seeking_) {
+    pipeline_controller_->Seek(base::Seconds(CurrentTime()), true);
+  }
+}
+
+bool WebMediaPlayerImpl::SupportVideoSurface() {
+  return support_video_surface_;
 }
 
 void WebMediaPlayerImpl::OnSurfaceRequested(
-    media::SurfaceCreatedCB surface_created_cb) {
-  LOG(INFO) << "OnSurfaceRequested, video_surface_id_[" << video_surface_id_ << "]";
+    media::SurfaceCreatedCB surface_created_cb,
+    bool support_video_surface,
+    std::string decoder_name) {
+  LOG(INFO) << "OnSurfaceRequested(" << support_video_surface <<
+            "), video_surface_id_[" << video_surface_id_ << "]";
   surface_created_cb_ = std::move(surface_created_cb);
+  support_video_surface_ = support_video_surface;
 
   if (video_surface_id_ > 0) {
     surface_created_cb_.Run(video_surface_id_);
   }
+  client_->OnSupportVideoSurfaceChanged(support_video_surface_, decoder_name);
 }
 #endif // OHOS_VIDEO_ASSISTANT
 

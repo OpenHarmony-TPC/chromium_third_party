@@ -114,7 +114,11 @@ class PLATFORM_EXPORT RTCVideoDecoderStreamAdapter
  private:
   class InternalDemuxerStream;
 
+#ifdef OHOS_VIDEO_ASSISTANT
+  using InitCB = CrossThreadOnceFunction<void(bool, bool, std::string)>;
+#else
   using InitCB = CrossThreadOnceFunction<void(bool)>;
+#endif // OHOS_VIDEO_ASSISTANT
   using FlushDoneCB = CrossThreadOnceFunction<void()>;
 
   struct PendingBuffer {
@@ -137,7 +141,11 @@ class PLATFORM_EXPORT RTCVideoDecoderStreamAdapter
 
   void InitializeOnMediaThread(const media::VideoDecoderConfig& config,
                                InitCB init_cb);
+#ifdef OHOS_VIDEO_ASSISTANT
+  void OnInitializeDone(base::TimeTicks start_time, bool success, bool, std::string);
+#else
   void OnInitializeDone(base::TimeTicks start_time, bool success);
+#endif // OHOS_VIDEO_ASSISTANT
   void DecodeOnMediaThread(std::unique_ptr<PendingBuffer>);
   void OnFrameReady(media::VideoDecoderStream::ReadResult result);
 

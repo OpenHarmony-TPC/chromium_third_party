@@ -429,6 +429,8 @@ class CORE_EXPORT HTMLMediaElement
   void NotifyVideoVisible(bool visible);
 
   bool IsCustomMediaPlayerEnabled() override;
+  void OnSupportVideoSurfaceChanged(
+      bool support, std::string decoder_name) override;
   void EnterFullScreenOverlay();
   void UpdatePlayStateOverlay(bool playState);
   void MutedChangedOverlay(bool muted);

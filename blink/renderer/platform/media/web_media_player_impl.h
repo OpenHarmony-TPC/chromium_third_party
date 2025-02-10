@@ -330,6 +330,7 @@ class PLATFORM_EXPORT WebMediaPlayerImpl
 
 #ifdef OHOS_VIDEO_ASSISTANT
   void SetVideoSurface(int32_t widget_id) override;
+  bool SupportVideoSurface() override;
 #endif // OHOS_VIDEO_ASSISTANT
 
   // Distinct states that |delegate_| can be in. (Public for testing.)
@@ -757,7 +758,9 @@ class PLATFORM_EXPORT WebMediaPlayerImpl
 #endif // OHOS_VIDEO_ASSISTANT
 
 #ifdef OHOS_VIDEO_ASSISTANT
-  void OnSurfaceRequested(media::SurfaceCreatedCB surface_created_cb);
+  void OnSurfaceRequested(media::SurfaceCreatedCB surface_created_cb,
+                          bool support_video_surface,
+                          std::string decoder_name);
 #endif // OHOS_VIDEO_ASSISTANT
 
   WebLocalFrame* const frame_;
@@ -1174,6 +1177,7 @@ class PLATFORM_EXPORT WebMediaPlayerImpl
 #ifdef OHOS_VIDEO_ASSISTANT
   media::SurfaceCreatedCB surface_created_cb_;
   int32_t video_surface_id_ = -1;
+  bool support_video_surface_ = true;
 #endif // OHOS_VIDEO_ASSISTANT
 };
 

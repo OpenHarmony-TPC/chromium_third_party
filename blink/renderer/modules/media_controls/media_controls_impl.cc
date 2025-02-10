@@ -155,6 +155,7 @@ constexpr int kDownloadIndexToRowColumns = 7;
 constexpr int kPlaybackSpeedIndexToRowColumns = 9;
 constexpr int kMediaControlsSizingMediumThresholdVideoAssitant = 600;
 constexpr int kMediaControlsSizingLargeThresholdVideoAssitant = 840;
+constexpr base::TimeDelta kScrubbingDelay = base::Seconds(1.0);
 #endif
 // The number of seconds to jump when double tapping.
 constexpr int kNumberOfSecondsToJump = 10;
@@ -416,7 +417,14 @@ MediaControlsImpl::MediaControlsImpl(HTMLMediaElement& media_element)
           this,
           &MediaControlsImpl::VolumeSliderWantedTimerFired),
       text_track_manager_(
-          MakeGarbageCollected<MediaControlsTextTrackManager>(media_element)) {
+          MakeGarbageCollected<MediaControlsTextTrackManager>(media_element))
+#if defined(OHOS_VIDEO_ASSISTANT)
+      ,
+      scrubbing_timer_(media_element.GetDocument().GetTaskRunner(TaskType::kInternalMedia),
+          this,
+          &MediaControlsImpl::ScrubbingTimerFired)
+#endif
+{
   // On touch devices, start with the assumption that the user will interact via
   // touch events.
   Settings* settings = media_element.GetDocument().GetSettings();
@@ -1108,6 +1116,12 @@ void MediaControlsImpl::MaybeShow() {
   volume_slider_->OnControlsShown();
   UpdateCSSClassFromState();
   UpdateActingAsAudioControls();
+
+#if defined(OHOS_MEDIA) && defined(OHOS_VIDEO_ASSISTANT)
+  if (MediaElement().IsFullscreen()) {
+    entered_fullscreen_panel_->SetIsWanted(true);
+  }
+#endif // defined(OHOS_MEDIA) && defined(OHOS_VIDEO_ASSISTANT)
 }
 
 void MediaControlsImpl::Hide() {
@@ -1137,6 +1151,9 @@ void MediaControlsImpl::Hide() {
 #if defined(OHOS_MEDIA)
   if (MediaElement().IsFullscreen()) {
     entered_fullscreen_title_display_->SetIsWanted(false);
+#if defined(OHOS_VIDEO_ASSISTANT)
+    entered_fullscreen_panel_->SetIsWanted(false);
+#endif // defined(OHOS_VIDEO_ASSISTANT)
   }
 #endif // defined(OHOS_MEDIA)
   timeline_->OnControlsHidden();
@@ -1292,6 +1309,9 @@ void MediaControlsImpl::BeginScrubbing(bool is_touch_event) {
 #ifdef OHOS_VIDEO_ASSISTANT
   if (scrubbing_message_ && is_touch_event) {
     is_begin_scrubbing = true;
+    if (scrubbing_timer_.IsActive()) {
+      scrubbing_timer_.Stop();
+    }
   }
 #else
   if (scrubbing_message_ && is_touch_event) {
@@ -1315,8 +1335,10 @@ void MediaControlsImpl::EndScrubbing() {
   if (scrubbing_message_) {
 #ifdef OHOS_VIDEO_ASSISTANT
     if (ShouldShowVideoControlsHM()) {
-      scrubbing_message_->updateScrubbingMsg(false);
-      is_begin_scrubbing = false;
+      if (scrubbing_timer_.IsActive()) {
+        scrubbing_timer_.Stop();
+      }
+      scrubbing_timer_.StartOneShot(kScrubbingDelay, FROM_HERE);
     } else {
 #endif
     scrubbing_message_->SetIsWanted(false);
@@ -1610,6 +1632,17 @@ MediaControlsSizingClass MediaControlsImpl::GetSizingClassHM() {
     return MediaControlsSizingClass::kMedium;
   }
   return MediaControlsSizingClass::kLarge;
+}
+
+void MediaControlsImpl::ScrubbingTimerFired(TimerBase*) {
+  if (!MediaElement().isConnected()) {
+    return;
+  }
+ 
+  if (is_begin_scrubbing) {
+    scrubbing_message_->updateScrubbingMsg(false);
+    is_begin_scrubbing = false;
+  }
 }
 #endif
 
@@ -2135,6 +2168,11 @@ void MediaControlsImpl::OnEnteredFullscreen() {
   entered_fullscreen_panel_->ParserAppendChild(
       entered_fullscreen_title_display_);
   entered_fullscreen_panel_->SetIsWanted(true);
+#if defined(OHOS_VIDEO_ASSISTANT)
+  if (!MediaElement().ShouldShowControls()) {
+    entered_fullscreen_panel_->SetIsWanted(false);
+  }
+#endif // defined(OHOS_VIDEO_ASSISTANT)
 
   SetClass("fullscreen", true);
 
@@ -2513,6 +2551,7 @@ void MediaControlsImpl::Trace(Visitor* visitor) const {
 #endif // defined(OHOS_MEDIA)
 #ifdef OHOS_VIDEO_ASSISTANT
   VideoAssistantTrace(visitor);
+  visitor->Trace(scrubbing_timer_);
 #endif // OHOS_VIDEO_ASSISTANT
   MediaControls::Trace(visitor);
   HTMLDivElement::Trace(visitor);

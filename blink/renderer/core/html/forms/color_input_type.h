@@ -71,6 +71,7 @@ class ColorInputType final : public InputType,
   void DidSetValue(const String&, bool value_changed) override;
   void HandleDOMActivateEvent(Event&) override;
   ControlPart AutoAppearance() const override;
+  void ForwardEvent(Event&) override;
   void OpenPopupView() override;
   void ClosePopupView() override;
   bool HasOpenedPopup() const override;

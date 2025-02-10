@@ -177,6 +177,15 @@ ControlPart ColorInputType::AutoAppearance() const {
              : kSquareButtonPart;
 }
 
+void ColorInputType::ForwardEvent(Event& event) {
+#if defined(OHOS_INPUT_EVENTS)
+  if (event.type() == event_type_names::kDOMFocusOut) {
+    Blur();
+    return;
+  }
+#endif
+}
+
 void ColorInputType::OpenPopupView() {
   ChromeClient* chrome_client = GetChromeClient();
   Document& document = GetElement().GetDocument();

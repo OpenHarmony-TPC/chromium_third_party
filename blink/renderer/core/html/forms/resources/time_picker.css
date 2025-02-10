@@ -6,6 +6,7 @@
 .time-picker {
   background: #FFFFFF;
   border: 1px solid #bfbfbf;
+  border-right: 2px solid #bfbfbf;
   display: flex;
   flex-direction: column;
   height: 258px;
