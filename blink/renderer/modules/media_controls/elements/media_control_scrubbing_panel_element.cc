@@ -24,6 +24,12 @@ MediaControlScrubbingPanelElement::MediaControlScrubbingPanelElement(
 MediaControlsImpl& media_controls)
 : MediaControlDivElement(media_controls) {
 SetShadowPseudoId(AtomicString("-internal-media-controls-scrubbing-panel"));
+CreateUserAgentShadowRoot();
+SetIsWanted(false);
+}
+
+void MediaControlScrubbingPanelElement::SetIsWanted(bool wanted) {
+  MediaControlDivElement::SetIsWanted(wanted);
 }
 
 } // namespace blink
