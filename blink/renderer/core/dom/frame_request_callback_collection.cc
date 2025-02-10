@@ -11,6 +11,10 @@
 
 namespace blink {
 
+#if BUILDFLAG(IS_OHOS)
+  static constexpr int TRACE_CONTROL_MAX = 10;
+#endif
+
 FrameRequestCallbackCollection::FrameRequestCallbackCollection(
     ExecutionContext* context)
     : context_(context) {}
@@ -59,8 +63,18 @@ void FrameRequestCallbackCollection::CancelFrameCallback(CallbackId id) {
 void FrameRequestCallbackCollection::ExecuteFrameCallbacks(
     double high_res_now_ms,
     double high_res_now_ms_legacy) {
+#if BUILDFLAG(IS_OHOS)
+  if (trace_control_count < TRACE_CONTROL_MAX) {
+    trace_control_count++;
+  } else {
+    TRACE_EVENT0("blink",
+               "FrameRequestCallbackCollection::ExecuteFrameCallbacks");
+    trace_control_count = 0;           
+  }
+#else
   TRACE_EVENT0("blink",
                "FrameRequestCallbackCollection::ExecuteFrameCallbacks");
+#endif
   ExecutionContext::ScopedRequestAnimationFrameStatus scoped_raf_status(
       context_);
 
