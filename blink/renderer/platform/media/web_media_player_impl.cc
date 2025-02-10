@@ -715,17 +715,6 @@ void WebMediaPlayerImpl::DisableOverlay() {
     ScheduleRestart();
   else
     MaybeSendOverlayInfoToDecoder();
-
-#ifdef OHOS_VIDEO_ASSISTANT
-  bool surface_changed = video_surface_id_ != -1;
-  video_surface_id_ = -1;
-  if (surface_changed && surface_created_cb_) {
-    surface_created_cb_.Run(video_surface_id_);
-    if (paused_ && !seeking_) {
-      pipeline_controller_->Seek(base::Seconds(CurrentTime()), true);
-    }
-  }
-#endif // OHOS_VIDEO_ASSISTANT
 }
 
 void WebMediaPlayerImpl::EnteredFullscreen() {
@@ -761,6 +750,17 @@ void WebMediaPlayerImpl::ExitedFullscreen() {
   // See EnteredFullscreen for why we do this.
   if (!decoder_requires_restart_for_overlay_)
     MaybeSendOverlayInfoToDecoder();
+
+#ifdef OHOS_VIDEO_ASSISTANT
+  bool surface_changed = video_surface_id_ != -1;
+  video_surface_id_ = -1;
+  if (surface_changed && surface_created_cb_) {
+    surface_created_cb_.Run(video_surface_id_);
+    if (Paused() && !ended_) {
+      DoSeek(base::Seconds(CurrentTime()), true);
+    }
+  }
+#endif // OHOS_VIDEO_ASSISTANT
 }
 
 void WebMediaPlayerImpl::BecameDominantVisibleContent(bool is_dominant) {
@@ -1164,7 +1164,12 @@ void WebMediaPlayerImpl::DoSeek(base::TimeDelta time, bool time_updated) {
   //      Because the buffers may have changed between seeks, MSE seeks are
   //      never elided.
   if (paused_ && pipeline_controller_->IsStable() &&
-      (paused_time_ == time || (ended_ && time == base::Seconds(Duration()))) &&
+#ifdef OHOS_VIDEO_ASSISTANT
+      (((paused_time_ == time) && !client_->IsVideoAssistantEnabled()) ||
+#else
+      (paused_time_ == time ||
+#endif
+      (ended_ && time == base::Seconds(Duration())))) &&
       GetDemuxerType() != media::DemuxerType::kChunkDemuxer) {
     if (old_state == kReadyStateHaveEnoughData) {
       // This will in turn SetReadyState() to signal the demuxer seek, followed
