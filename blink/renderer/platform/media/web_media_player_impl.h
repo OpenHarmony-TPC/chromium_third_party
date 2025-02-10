@@ -745,6 +745,7 @@ class PLATFORM_EXPORT WebMediaPlayerImpl
 
   void PlayWithReason(media::ActionReason reason) override;
   void PauseWithReason(media::ActionReason reason) override;
+  bool IsMediaPlayerShown() const override;
   bool IsUsingCustomRenderer() const override;
   void SetInitialPreload(uint32_t preload) override;
 
