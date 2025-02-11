@@ -102,9 +102,8 @@ void ViewportData::UpdateViewportDescription() {
       document_->GetSettings()->GetViewportMetaEnabled();
   // when the viewport_meta is disabled, but needs to parse viewport-fit to
   // expand the safe area
-  if (legacy_viewport_description_.type !=
-        ViewportDescription::kUserAgentStyleSheet &&
-      !viewport_meta_enabled) {
+  if (legacy_viewport_description_.type != ViewportDescription::kUserAgentStyleSheet &&
+      !viewport_meta_enabled && (base::ohos::IsTabletDevice() || base::ohos::IsPcDevice())) {
       current_viewport_fit = legacy_viewport_description_.GetViewportFit();
   }
 #endif
