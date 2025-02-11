@@ -1274,9 +1274,6 @@ void WebFrameWidgetImpl::DragTargetDragEnterOrOver(
   DragData drag_data(current_drag_data_.Get(), point_in_root_frame,
                      screen_point, operations_allowed_);
 
-  #ifdef OHOS_DRAG_DROP
-  GetPage()->GetDragController().SetDragInitState(true);
-  #endif
   drag_operation_ = GetPage()->GetDragController().DragEnteredOrUpdated(
       &drag_data, *local_root_->GetFrame());
 
