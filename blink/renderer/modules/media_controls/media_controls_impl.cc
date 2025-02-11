@@ -2117,7 +2117,7 @@ void MediaControlsImpl::OnSeeking() {
     }
 
     if (scrubbing_panel_ && is_begin_scrubbing) {
-      scrubbing_panel_->SetIsWanted(false);
+      scrubbing_panel_->SetIsWanted(true);
     }
   }
 #endif
