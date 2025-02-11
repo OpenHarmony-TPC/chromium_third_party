@@ -5296,6 +5296,12 @@ uint32_t HTMLMediaElement::IsMediaMuted() {
   }
   return notMuted;
 }
+bool HTMLMediaElement::IsMediaPlayerShown() const {
+  if (!web_media_player_) {
+    return false;
+  }
+  return web_media_player_->IsMediaPlayerShown();
+}
 bool HTMLMediaElement::IsUsedCustomVideoPlayer() {
   return IsCustomVideoPlayerEnabled();
 }
@@ -5480,11 +5486,7 @@ void HTMLMediaElement::OnLayerBoundsChange(const gfx::Rect& bounds) {
   UpdateVideoAssistantAttributes();
 }
 
-void HTMLMediaElement::OnWebMediaPlayerShowing(bool showing) {
-  if (web_player_showing_ == showing) {
-    return;
-  }
-  web_player_showing_ = showing;
+void HTMLMediaElement::OnPageVisibilityChanged() {
   UpdateVideoAssistantAttributes();
 }
 
@@ -5560,7 +5562,7 @@ HTMLMediaElement::CollectVideoAttributesForVAST() {
   attributes->rect = video_rect_;
   attributes->supports_save = SupportsSave();
   attributes->duration = duration();
-  attributes->visible = video_visible_ && web_player_showing_ &&
+  attributes->visible = video_visible_ && IsMediaPlayerShown() &&
       !video_rect_.IsEmpty();
   return attributes;
 }
