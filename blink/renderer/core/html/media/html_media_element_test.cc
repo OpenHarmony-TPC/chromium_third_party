@@ -254,8 +254,9 @@ class TestMediaPlayerObserver final
   }
 #if defined (OHOS_MEDIA_AVSESSION)
   void OnGetMediaTitle(const WTF::String& data) override {}
-
   void OnGetVideoPoster(const WTF::String& data) override {}
+  void OnInitMediaTitle() override {}
+  void OnInitVideoPoster() override {}
 #endif // OHOS_MEDIA_AVSESSION
  private:
   std::unique_ptr<base::RunLoop> run_loop_;

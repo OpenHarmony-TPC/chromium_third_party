@@ -5056,6 +5056,8 @@ void HTMLMediaElement::DidPlayerMutedStatusChange(bool muted) {
 #if defined(OHOS_MEDIA_AVSESSION)
   for (auto& observer : media_player_observer_remote_set_->Value()) {
     observer->OnMutedStatusChanged(muted);
+    observer->OnInitMediaTitle();
+    observer->OnInitVideoPoster();
     auto mediaTitle = GetMediaTitle();
     auto videoPoster = GetVideoPoster();
     if (!mediaTitle.empty()) {
