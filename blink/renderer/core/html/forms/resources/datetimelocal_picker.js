@@ -11,7 +11,7 @@ function initializeDateTimeLocalPicker(config) {
   const dateTimeLocalPicker = new DateTimeLocalPicker(config);
   global.picker = dateTimeLocalPicker;
   main.append(dateTimeLocalPicker);
-  main.style.border = '1px solid transparent';
+  main.style.border = '1px solid #bfbfbf';
   main.style.height = dateTimeLocalPicker.height + 'px';
   main.style.width = dateTimeLocalPicker.width + 'px';
   resizeWindow(dateTimeLocalPicker.width + 2, dateTimeLocalPicker.height + 2);
