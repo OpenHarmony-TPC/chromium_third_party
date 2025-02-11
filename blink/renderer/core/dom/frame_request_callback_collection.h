@@ -95,6 +95,10 @@ class CORE_EXPORT FrameRequestCallbackCollection final : public NameClient {
   CallbackId next_callback_id_ = 0;
 
   Member<ExecutionContext> context_;
+
+#if BUILDFLAG(IS_OHOS)
+  int trace_control_count = 0;
+#endif
 };
 
 }  // namespace blink

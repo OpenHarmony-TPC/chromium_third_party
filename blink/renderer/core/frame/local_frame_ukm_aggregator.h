@@ -166,6 +166,11 @@ class CORE_EXPORT LocalFrameUkmAggregator
   friend class LocalFrameUkmAggregatorTest;
   friend class LocalFrameUkmAggregatorSimTest;
 
+#if BUILDFLAG(IS_OHOS)
+  int trace_control_count = 0;
+  int trace_control_count_begin = 0;
+#endif
+
   // Primary metric name
   static const char* primary_metric_name() { return "MainFrame"; }
 

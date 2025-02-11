@@ -23,6 +23,10 @@
 
 namespace {
 
+#if BUILDFLAG(IS_OHOS)
+  static constexpr int TRACE_CONTROL_MAX = 10;
+#endif
+
 inline base::HistogramBase::Sample ToSample(int64_t value) {
   return base::saturated_cast<base::HistogramBase::Sample>(value);
 }
@@ -324,15 +328,34 @@ void LocalFrameUkmAggregator::RecordCountSample(size_t metric_index,
 }
 
 void LocalFrameUkmAggregator::BeginForcedLayout() {
+#if BUILDFLAG(IS_OHOS)
+  if (trace_control_count_begin < TRACE_CONTROL_MAX) {
+    trace_control_count_begin++;
+  } else {
+    TRACE_EVENT_BEGIN0("blink", metrics_data()[kForcedStyleAndLayout].name);
+    trace_control_count_begin = 0;           
+  }
+#else
   TRACE_EVENT_BEGIN0("blink", metrics_data()[kForcedStyleAndLayout].name);
+#endif
 }
 
 void LocalFrameUkmAggregator::RecordForcedLayoutSample(
     DocumentUpdateReason reason,
     base::TimeTicks start,
     base::TimeTicks end) {
+#if BUILDFLAG(IS_OHOS)
+  if (trace_control_count < TRACE_CONTROL_MAX) {
+    trace_control_count++;
+  } else {
+    TRACE_EVENT_END1("blink", metrics_data()[kForcedStyleAndLayout].name,
+                   "preFCP", fcp_state_ == kBeforeFCPSignal);
+    trace_control_count = 0;           
+  }
+#else
   TRACE_EVENT_END1("blink", metrics_data()[kForcedStyleAndLayout].name,
                    "preFCP", fcp_state_ == kBeforeFCPSignal);
+#endif
   int64_t count = (end - start).InMicroseconds();
   bool is_pre_fcp = (fcp_state_ != kHavePassedFCP);
 
