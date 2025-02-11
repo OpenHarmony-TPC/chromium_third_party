@@ -85,7 +85,7 @@ const char* MediaControlPlaybackSpeedButtonElement::GetNameForHistograms()
 void MediaControlPlaybackSpeedButtonElement::DefaultEventHandler(Event& event) {
 #ifdef OHOS_VIDEO_ASSISTANT
   if (GetMediaControls().ShouldShowVideoControlsHM()) {
-    if (event.type() == event_type_names::kGesturetap &&
+    if (!IsDisabled() && event.type() == event_type_names::kGesturetap &&
         !GetMediaControls().PlaybackSpeedListIsWanted()) {
       GetMediaControls().TogglePlaybackSpeedList();
     }

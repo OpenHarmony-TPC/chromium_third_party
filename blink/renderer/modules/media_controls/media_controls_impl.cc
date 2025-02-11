@@ -913,6 +913,14 @@ void MediaControlsImpl::UpdateCSSClassFromState() {
         overflow_menu_->setAttribute(html_names::kDisabledAttr, "");
         updated = true;
       }
+
+#ifdef OHOS_VIDEO_ASSISTANT
+      if (ShouldShowVideoControlsHM() &&
+          !playback_speed_button_->FastHasAttribute(html_names::kDisabledAttr)) {
+        playback_speed_button_->setAttribute(html_names::kDisabledAttr, "");
+        updated = true;
+      }
+#endif
     } else {
       if (play_button_->FastHasAttribute(html_names::kDisabledAttr)) {
         play_button_->removeAttribute(html_names::kDisabledAttr);
@@ -923,6 +931,14 @@ void MediaControlsImpl::UpdateCSSClassFromState() {
         overflow_menu_->removeAttribute(html_names::kDisabledAttr);
         updated = true;
       }
+
+#ifdef OHOS_VIDEO_ASSISTANT
+      if (ShouldShowVideoControlsHM() &&
+          !playback_speed_button_->FastHasAttribute(html_names::kDisabledAttr)) {
+        playback_speed_button_->setAttribute(html_names::kDisabledAttr, "");
+        updated = true;
+      }
+#endif
     }
 
     if (state == kNoSource || state == kNotLoaded) {
@@ -930,11 +946,21 @@ void MediaControlsImpl::UpdateCSSClassFromState() {
         timeline_->setAttribute(html_names::kDisabledAttr, "");
         updated = true;
       }
+#ifdef OHOS_VIDEO_ASSISTANT
+      if (ShouldShowVideoControlsHM()) {
+        current_time_display_->classList().Add(kDisabledCSSClass);
+      }
+#endif
     } else {
       if (timeline_->FastHasAttribute(html_names::kDisabledAttr)) {
         timeline_->removeAttribute(html_names::kDisabledAttr);
         updated = true;
       }
+#ifdef OHOS_VIDEO_ASSISTANT
+      if (ShouldShowVideoControlsHM()) {
+        current_time_display_->classList().Remove(kDisabledCSSClass);
+      }
+#endif
     }
 
     if (updated)

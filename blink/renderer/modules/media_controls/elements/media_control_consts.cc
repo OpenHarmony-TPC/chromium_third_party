@@ -7,5 +7,6 @@
 namespace blink {
 
 const char kClosedCSSClass[] = "closed";
+const char kDisabledCSSClass[] = "disabled";
 
 }  // namespace blink
