@@ -1164,7 +1164,7 @@ void WebMediaPlayerImpl::DoSeek(base::TimeDelta time, bool time_updated) {
 #else
       (paused_time_ == time ||
 #endif
-      (ended_ && time == base::Seconds(Duration())))) &&
+      (ended_ && time == base::Seconds(Duration()))) &&
       GetDemuxerType() != media::DemuxerType::kChunkDemuxer) {
     if (old_state == kReadyStateHaveEnoughData) {
       // This will in turn SetReadyState() to signal the demuxer seek, followed
