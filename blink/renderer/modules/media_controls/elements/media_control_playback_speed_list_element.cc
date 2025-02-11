@@ -154,13 +154,7 @@ void MediaControlPlaybackSpeedListElement::DefaultEventHandler(Event& event) {
   if (event.type() == event_type_names::kClick) {
     // This handles the back button click. Clicking on a menu item triggers the
     // change event instead.
-#ifdef OHOS_VIDEO_ASSISTANT
-    if (!GetMediaControls().ShouldShowVideoControlsHM()) {
-#endif
     GetMediaControls().ToggleOverflowMenu();
-#ifdef OHOS_VIDEO_ASSISTANT
-    }
-#endif
     event.SetDefaultHandled();
   } else if (event.type() == event_type_names::kChange) {
     // Identify which input element was selected and update playback speed
@@ -185,7 +179,8 @@ void MediaControlPlaybackSpeedListElement::DefaultEventHandler(Event& event) {
 #ifdef OHOS_VIDEO_ASSISTANT
 void MediaControlPlaybackSpeedListElement::SetHrHidden(Event& event) {
   Node* target = event.target()->ToNode();
-  if (!target || !target->IsElementNode()) {
+  if (!target || !target->IsElementNode() ||
+      !To<Element>(target)->FastHasAttribute(html_names::kAriaLabelAttr)) {
     return;
   }
   if (target->HasPreviousSibling()) {
@@ -200,7 +195,8 @@ void MediaControlPlaybackSpeedListElement::SetHrHidden(Event& event) {
 
 void MediaControlPlaybackSpeedListElement::RemoveHrHidden(Event& event) {
   Node* target = event.target()->ToNode();
-  if (!target || !target->IsElementNode()) {
+  if (!target || !target->IsElementNode() ||
+      !To<Element>(target)->FastHasAttribute(html_names::kAriaLabelAttr)) {
     return;
   }
   if (target->HasPreviousSibling() &&

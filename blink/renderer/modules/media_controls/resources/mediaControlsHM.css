@@ -1635,14 +1635,13 @@ video::-internal-media-controls-scrubbing-message {
 
 progress::-webkit-progress-bar {
   height: 2px;
-  background-color: rgba(255, 255, 255, 0.2);
-  border-radius: 1px;
+  border-radius: 1.5px;
 }
 
 progress::-webkit-progress-value {
   height: 2px;
   background-color: #FFFFFF;
-  border-radius: 1px;
+  border-radius: 1.5px;
 }
 
 .state-scrubbing input[pseudo="-webkit-media-controls-overlay-play-button" i] {
