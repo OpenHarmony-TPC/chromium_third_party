@@ -8,6 +8,7 @@
 namespace blink {
 
 extern const char kClosedCSSClass[];
+extern const char kDisabledCSSClass[];
 
 }  // namespace blink
 

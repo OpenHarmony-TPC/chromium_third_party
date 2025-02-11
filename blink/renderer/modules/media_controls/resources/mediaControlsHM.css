@@ -295,6 +295,16 @@ video::-internal-media-controls-playback-speed-button {
   position: relative;
 }
 
+video::-webkit-media-controls input[pseudo="-internal-media-controls-download-button" i]:disabled {
+  background-color: initial;
+  opacity: 0.4;
+}
+
+video::-webkit-media-controls input[pseudo="-internal-media-controls-playback-speed-button" i]:disabled {
+  background-color: initial;
+  color: rgba(255, 255, 255, 0.4);
+}
+
 video::-internal-media-controls-playback-speed-button {
   width: 40px;
   height: 40px;
@@ -569,8 +579,13 @@ video::-webkit-media-controls-play-button:disabled,
 video::-webkit-media-controls-fullscreen-button:disabled {
   background-color: initial;
   opacity: 0.3;
-
   cursor: default;
+}
+
+video::-webkit-media-controls-mute-button:disabled,
+video::-webkit-media-controls-play-button:disabled,
+video::-webkit-media-controls-fullscreen-button:disabled {
+  opacity: 0.4;
 }
 
 audio::-internal-media-controls-cast-button,
@@ -1043,6 +1058,7 @@ video::-webkit-media-controls-time-remaining-display {
   letter-spacing: 0;
   text-shadow: 0 0 10px -internal-light-dark(#ffffff, #3b3b3b);
 }
+
 video::-webkit-media-controls:not(.audio-only) [pseudo="-webkit-media-controls-current-time-display"],
 video::-webkit-media-controls:not(.audio-only) [pseudo="-webkit-media-controls-time-remaining-display"] {
   color: #FFFFFF;
@@ -1050,6 +1066,10 @@ video::-webkit-media-controls:not(.audio-only) [pseudo="-webkit-media-controls-t
   line-height: 12px;
   text-shadow: unset;
   opacity: unset;
+}
+
+video::-webkit-media-controls:not(.audio-only) [pseudo="-webkit-media-controls-current-time-display"].disabled {
+  color: rgba(255, 255, 255, 0.4);
 }
 
 /**
