@@ -5628,7 +5628,10 @@ void HTMLMediaElement::OnSupportVideoSurfaceChanged(
     bool support, std::string decoder_name) {
   LOG(INFO) << "OnSupportVideoSurfaceChanged("
             << support << ", " << decoder_name << ")";
-  if (!support) {
+  if (!IsCustomMediaPlayerEnabled()) {
+    return;
+  }
+  if (!support && IsFullscreen()) {
     SetUserWantsControlsVisible(false);
   } else {
     user_wants_controls_visible_.reset();
