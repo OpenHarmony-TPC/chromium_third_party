@@ -757,7 +757,7 @@ void WebMediaPlayerImpl::ExitedFullscreen() {
   if (surface_changed && surface_created_cb_) {
     surface_created_cb_.Run(video_surface_id_);
     if (Paused() && !ended_) {
-      DoSeek(base::Seconds(CurrentTime()), true);
+      Seek(CurrentTime());
     }
   }
 #endif // OHOS_VIDEO_ASSISTANT
@@ -4394,7 +4394,7 @@ void WebMediaPlayerImpl::SetVideoSurface(int32_t widget_id) {
   }
 
   if (paused_ && !seeking_) {
-    pipeline_controller_->Seek(base::Seconds(CurrentTime()), true);
+    Seek(CurrentTime());
   }
 }
 
