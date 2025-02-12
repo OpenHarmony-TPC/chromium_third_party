@@ -2509,6 +2509,12 @@ void WebMediaPlayerImpl::OnVideoNaturalSizeChange(const gfx::Size& size) {
     // now know that there is a video track. This condition is paired with code
     // in CreateWatchTimeReporter() that guesses the existence of a video track.
     CreateWatchTimeReporter();
+#ifdef OHOS_MEDIA
+    if (!paused_ && IsHidden() && ShouldPausePlaybackWhenHidden()) {
+      LOG(INFO) << "OhMedia::WebMediaPlayerImpl::OnVideoNaturalSizeChange pause when hidden";
+      PauseVideoIfNeeded();
+    }
+#endif // OHOS_MEDIA
   } else {
     UpdateSecondaryProperties();
   }
@@ -3790,11 +3796,6 @@ bool WebMediaPlayerImpl::ShouldPausePlaybackWhenHidden() const {
       should_pause_background_muted_audio_
           ? HasUnmutedAudio() || audio_source_provider_->IsAudioBeingCaptured()
           : HasAudio();
-
-  // Expect that video will pause after switching to the background while loading.
-  if (HasVideo() && pipeline_metadata_.natural_size.IsEmpty()) {
-    return true;
-  }       
 
   // Audio only stream is allowed to play when in background.
   if (!HasVideo() && preserve_audio)
