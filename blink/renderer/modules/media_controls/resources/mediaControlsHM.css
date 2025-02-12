@@ -1654,6 +1654,7 @@ video::-internal-media-controls-scrubbing-message {
 }
 
 progress::-webkit-progress-bar {
+  background-color: rgba(255, 255, 255, 0.2);
   height: 2px;
   border-radius: 1.5px;
 }
