@@ -386,6 +386,9 @@ class PLATFORM_EXPORT WidgetBase : public mojom::blink::Widget,
 #if defined(OHOS_INPUT_EVENTS)
   void SetZoomLevel(float magnify_delta, const gfx::Point& anchor);
   void SetOverscrollMode(int mode);
+  // set and get requestKeyboardReason
+  void SetRequestKeyboardReason(int32_t requestKeyboardReason);
+  int32_t GetRequestKeyboardReason() const { return requestKeyboardReason_; };
 #if defined(OHOS_GET_SCROLL_OFFSET)
   gfx::Vector2dF GetOverScrollOffset();
 #endif
@@ -579,6 +582,9 @@ class PLATFORM_EXPORT WidgetBase : public mojom::blink::Widget,
   absl::optional<int> max_render_buffer_bounds_sw_;
 
   base::WeakPtrFactory<WidgetBase> weak_ptr_factory_{this};
+#if defined(OHOS_INPUT_EVENTS)
+  int32_t requestKeyboardReason_ = 0;
+#endif
 #if BUILDFLAG(IS_OHOS)
   bool is_worker_pool_initial_ = false;
 #endif
