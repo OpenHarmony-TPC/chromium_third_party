@@ -266,6 +266,9 @@ bool StructTraits<blink::mojom::WebPreferencesDataView,
   out->playback_with_mobile_data_allowed =
       data.playback_with_mobile_data_allowed();
 #endif // OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
+#ifdef OHOS_VIDEO_ASSISTANT
+  out->video_assistant_enabled = data.video_assistant_enabled();
+#endif // OHOS_VIDEO_ASSISTANT
   return true;
 }
 

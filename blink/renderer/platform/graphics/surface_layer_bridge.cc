@@ -164,5 +164,15 @@ void SurfaceLayerBridge::SetVideoRectChangeCallback(
   }
 }
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
+#ifdef OHOS_VIDEO_ASSISTANT
+void SurfaceLayerBridge::SetLayerBoundsChangeCallback(
+    cc::SurfaceLayer::LayerBoundsChangeCallback callback) {
+  if (surface_layer_) {
+    surface_layer_->SetLayerBoundsChangeCallback(std::move(callback));
+  } else {
+    LOG(WARNING) << "SetLayerBoundsChangeCallback, surface_layer_ is null";
+  }
+}
+#endif // OHOS_VIDEO_ASSISTANT
 
 }  // namespace blink

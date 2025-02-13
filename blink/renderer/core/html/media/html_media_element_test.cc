@@ -196,6 +196,14 @@ class TestMediaPlayerObserver final
     run_loop_->Quit();
   }
 
+#ifdef OHOS_VIDEO_ASSISTANT
+  void OnVideoPlaying(
+      media::mojom::blink::VideoAttributesForVASTPtr video_attributes) override {}
+  void OnUpdateVideoAttributes(
+      media::mojom::blink::VideoAttributesForVASTPtr video_attributes) override {}
+  void OnVideoDestroyed() override {}
+#endif // OHOS_VIDEO_ASSISTANT
+
   // Getters used from HTMLMediaElementTest.
   bool received_media_playing() const { return received_media_playing_; }
 
@@ -250,6 +258,10 @@ class TestMediaPlayerHost final : public media::mojom::blink::MediaPlayerHost {
     receiver_.Bind(std::move(media_player_observer));
     run_loop_.Quit();
   }
+#ifdef OHOS_VIDEO_ASSISTANT
+  void RequestVideoAssistantConfig(
+      RequestVideoAssistantConfigCallback callback) {}
+#endif // OHOS_VIDEO_ASSISTANT
 
   TestMediaPlayerObserver& observer() { return observer_; }
 

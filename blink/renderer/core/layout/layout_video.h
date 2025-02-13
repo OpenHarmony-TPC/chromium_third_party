@@ -91,6 +91,10 @@ class CORE_EXPORT LayoutVideo final : public LayoutMedia {
   }
   CompositingReasons AdditionalCompositingReasons() const override;
 
+#ifdef OHOS_VIDEO_ASSISTANT
+  void WillBeDestroyed() override;
+#endif // OHOS_VIDEO_ASSISTANT
+
   LayoutSize cached_image_size_;
 };
 

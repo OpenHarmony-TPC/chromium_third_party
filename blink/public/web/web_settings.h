@@ -314,6 +314,10 @@ class WebSettings {
   virtual void SetPlaybackWithMobileDataAllowed(bool allowed) = 0;
 #endif // OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
 
+#ifdef OHOS_VIDEO_ASSISTANT
+  virtual void SetVideoAssistantEnabled(bool enabled) {}
+#endif // OHOS_VIDEO_ASSISTANT
+
  protected:
   ~WebSettings() = default;
 };

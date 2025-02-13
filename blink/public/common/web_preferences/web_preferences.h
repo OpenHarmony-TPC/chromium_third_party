@@ -421,6 +421,10 @@ struct BLINK_COMMON_EXPORT WebPreferences {
   bool playback_with_mobile_data_allowed = false;
 #endif // OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
 
+#ifdef OHOS_VIDEO_ASSISTANT
+  bool video_assistant_enabled = false;
+#endif // OHOS_VIDEO_ASSISTANT
+
   // We try to keep the default values the same as the default values in
   // chrome, except for the cases where it would require lots of extra work for
   // the embedder to use the same default value.

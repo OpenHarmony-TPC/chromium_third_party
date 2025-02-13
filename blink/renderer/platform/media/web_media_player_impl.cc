@@ -2088,6 +2088,7 @@ void WebMediaPlayerImpl::OnMetadata(const media::PipelineMetadata& metadata) {
     }
 
     if (use_surface_layer_) {
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER) || defined(OHOS_VIDEO_ASSISTANT)
 #if defined(OHOS_CUSTOM_VIDEO_PLAYER)
       if (!surface_layer_for_video_enabled_) {
         ActivateSurfaceLayerForVideo();
@@ -2105,9 +2106,18 @@ void WebMediaPlayerImpl::OnMetadata(const media::PipelineMetadata& metadata) {
                 weak_this_));
       }
       bridge_->SetVideoRectChangeCallback(video_rect_callback);
+#endif // OHOS_CUSTOM_VIDEO_PLAYER
+#ifdef OHOS_VIDEO_ASSISTANT
+      if (client_->IsVideoAssistantEnabled()) {
+        bridge_->SetLayerBoundsChangeCallback(
+            base::BindPostTaskToCurrentDefault(
+                base::BindRepeating(&WebMediaPlayerImpl::OnLayerBoundsChange,
+                  weak_this_)));
+      }
+#endif // OHOS_VIDEO_ASSISTANT
 #else
       ActivateSurfaceLayerForVideo();
-#endif // OHOS_CUSTOM_VIDEO_PLAYER
+#endif // OHOS_CUSTOM_VIDEO_PLAYER || OHOS_VIDEO_ASSISTANT
     } else {
       DCHECK(!video_layer_);
       video_layer_ = cc::VideoLayer::Create(
@@ -2645,6 +2655,9 @@ void WebMediaPlayerImpl::OnFrameHidden() {
   LOG(INFO) << "OhMedia::WebMediaPlayerImpl::OnFrameHidden()"
             << " delegate_id_:" << delegate_id_;
 #endif // OHOS_MEDIA
+#ifdef OHOS_VIDEO_ASSISTANT
+  client_->OnWebMediaPlayerShowing(false);
+#endif // OHOS_VIDEO_ASSISTANT
 
   // Backgrounding a video requires a user gesture to resume playback.
   if (IsHidden())
@@ -2695,6 +2708,9 @@ void WebMediaPlayerImpl::OnFrameShown() {
   LOG(INFO) << "OhMedia::WebMediaPlayerImpl::OnFrameShown()"
             << " delegate_id_:" << delegate_id_;
 #endif // OHOS_MEDIA
+#ifdef OHOS_VIDEO_ASSISTANT
+  client_->OnWebMediaPlayerShowing(true);
+#endif // OHOS_VIDEO_ASSISTANT
 
   // Foreground videos don't require user gesture to continue playback.
   video_locked_when_paused_when_hidden_ = false;
@@ -4310,5 +4326,12 @@ void WebMediaPlayerImpl::OnLayerRectChange(const gfx::Rect& rect) {
   client_->OnLayerRectChange(rect);
 }
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
+
+#ifdef OHOS_VIDEO_ASSISTANT
+void WebMediaPlayerImpl::OnLayerBoundsChange(const gfx::Rect& bounds) {
+  DCHECK(main_task_runner_->BelongsToCurrentThread());
+  client_->OnLayerBoundsChange(bounds);
+}
+#endif // OHOS_VIDEO_ASSISTANT
 
 }  // namespace blink
