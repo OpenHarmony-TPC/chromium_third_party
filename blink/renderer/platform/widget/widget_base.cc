@@ -1049,6 +1049,9 @@ void WidgetBase::UpdateTextInputStateInternal(bool show_virtual_keyboard,
       (selection_bounds && frame_selection_bounds_ != selection_bounds)) {
     ui::mojom::blink::TextInputStatePtr params =
         ui::mojom::blink::TextInputState::New();
+#if defined(OHOS_INPUT_EVENTS)
+    input_atrributes.insert("requestKeyboardReason", WTF::String::Number(GetRequestKeyboardReason()));
+#endif
     params->node_id = new_info.node_id;
     params->type = new_type;
     params->mode = new_mode;
@@ -1064,6 +1067,11 @@ void WidgetBase::UpdateTextInputStateInternal(bool show_virtual_keyboard,
       params->ime_text_spans_info =
           frame_widget->GetImeTextSpansInfo(new_info.ime_text_spans);
     }
+#if defined(OHOS_INPUT_EVENTS)
+    // reset to none
+    int32_t requestKeyboardReasonNone = 0;
+    SetRequestKeyboardReason(requestKeyboardReasonNone);
+#endif
 #if BUILDFLAG(IS_ANDROID) || BUILDFLAG(IS_OHOS)
     if (next_previous_flags_ == kInvalidNextPreviousFlagsValue) {
       // Due to a focus change, values will be reset by the frame.
@@ -1792,6 +1800,10 @@ void WidgetBase::SetOverscrollMode(int mode) {
     return;
   }
   widget_input_handler_manager_->SetOverscrollMode(mode);
+}
+
+void WidgetBase::SetRequestKeyboardReason(int32_t requestKeyboardReason) {
+  requestKeyboardReason_ = requestKeyboardReason;
 }
 
 #if defined(OHOS_GET_SCROLL_OFFSET)
