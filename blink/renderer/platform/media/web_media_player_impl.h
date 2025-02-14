@@ -762,6 +762,8 @@ class PLATFORM_EXPORT WebMediaPlayerImpl
   void OnSurfaceRequested(media::SurfaceCreatedCB surface_created_cb,
                           bool support_video_surface,
                           std::string decoder_name);
+  void OnVideoDecoderChanaged(bool support_video_surface,
+                              std::string decoder_name);
 #endif // OHOS_VIDEO_ASSISTANT
 
   WebLocalFrame* const frame_;
