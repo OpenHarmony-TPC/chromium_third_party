@@ -3262,7 +3262,11 @@ void HTMLMediaElement::setMuted(bool muted) {
 
   // If it is unmute and AutoplayPolicy doesn't want the playback to continue,
   // pause the playback.
-  if (EffectiveMediaVolume() && !autoplay_policy_->RequestAutoplayUnmute())
+  if (EffectiveMediaVolume() && !autoplay_policy_->RequestAutoplayUnmute()
+#if defined(OHOS_VIDEO_ASSISTANT)
+     && !IsCustomMediaPlayerEnabled()
+#endif
+  )
     pause();
 
   // If playback was not paused by the autoplay policy and got unmuted, the
