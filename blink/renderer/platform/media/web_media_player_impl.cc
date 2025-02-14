@@ -3156,11 +3156,16 @@ media::PipelineStatus WebMediaPlayerImpl::OnDemuxerCreated(
   media::RequestSurfaceCB request_surface_cb =
       base::BindPostTaskToCurrentDefault(
           base::BindOnce(&WebMediaPlayerImpl::OnSurfaceRequested, weak_this_));
+  media::VideoDecoderChangedCB video_decoder_changed_cb =
+      base::BindPostTaskToCurrentDefault(
+          base::BindRepeating(&WebMediaPlayerImpl::OnVideoDecoderChanaged,
+              weak_this_));
 #endif // OHOS_VIDEO_ASSISTANT
 
   pipeline_controller_->Start(start_type, demuxer, this, is_streaming,
 #ifdef OHOS_VIDEO_ASSISTANT
                               std::move(request_surface_cb),
+                              std::move(video_decoder_changed_cb),
 #endif // OHOS_VIDEO_ASSISTANT
                               is_static);
   return media::OkStatus();
@@ -3401,7 +3406,13 @@ void WebMediaPlayerImpl::SetSuspendState(bool is_suspended) {
         base::BindPostTaskToCurrentDefault(
             base::BindOnce(&WebMediaPlayerImpl::OnSurfaceRequested,
                 weak_this_));
-    pipeline_controller_->Resume(std::move(request_surface_cb));
+    media::VideoDecoderChangedCB video_decoder_changed_cb =
+        base::BindPostTaskToCurrentDefault(
+            base::BindRepeating(&WebMediaPlayerImpl::OnVideoDecoderChanaged,
+                weak_this_));
+    pipeline_controller_->Resume(
+        std::move(request_surface_cb),
+        std::move(video_decoder_changed_cb));
 #else
     pipeline_controller_->Resume();
 #endif // OHOS_VIDEO_ASSISTANT
@@ -4414,6 +4425,15 @@ void WebMediaPlayerImpl::OnSurfaceRequested(
   if (video_surface_id_ > 0) {
     surface_created_cb_.Run(video_surface_id_);
   }
+  client_->OnSupportVideoSurfaceChanged(support_video_surface_, decoder_name);
+}
+
+void WebMediaPlayerImpl::OnVideoDecoderChanaged(
+    bool support_video_surface,
+    std::string decoder_name) {
+  LOG(INFO) << "OnVideoDecoderChanaged(" << support_video_surface
+            << ", " << decoder_name << ")";
+  support_video_surface_ = support_video_surface;
   client_->OnSupportVideoSurfaceChanged(support_video_surface_, decoder_name);
 }
 #endif // OHOS_VIDEO_ASSISTANT

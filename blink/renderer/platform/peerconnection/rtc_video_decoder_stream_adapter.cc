@@ -766,6 +766,9 @@ void RTCVideoDecoderStreamAdapter::InitializeOnMediaThread(
       &RTCVideoDecoderStreamAdapter::OnDecoderChanged, weak_this_));
   decoder_stream_->Initialize(
       demuxer_stream_.get(), ConvertToBaseOnceCallback(std::move(init_cb)),
+#ifdef OHOS_VIDEO_ASSISTANT
+      media::VideoDecoderChangedCB(),
+#endif // OHOS_VIDEO_ASSISTANT
       cdm_context, base::DoNothing() /* statistics_cb */,
       base::DoNothing() /* waiting_cb */);
 }
