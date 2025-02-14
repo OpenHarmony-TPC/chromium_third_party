@@ -871,6 +871,13 @@ struct BLINK_COMMON_EXPORT StructTraits<blink::mojom::WebPreferencesDataView,
     return r.playback_with_mobile_data_allowed;
   }
 #endif // OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
+
+#ifdef OHOS_VIDEO_ASSISTANT
+  static bool video_assistant_enabled(
+      const blink::web_pref::WebPreferences& r) {
+    return r.video_assistant_enabled;
+  }
+#endif // OHOS_VIDEO_ASSISTANT
 };
 
 }  // namespace mojo

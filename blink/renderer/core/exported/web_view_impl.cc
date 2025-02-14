@@ -511,6 +511,10 @@ void ApplyOhosWebPreferences(const web_pref::WebPreferences& prefs,
       prefs.playback_with_mobile_data_allowed);
 #endif // OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
 
+#ifdef OHOS_VIDEO_ASSISTANT
+  settings->SetVideoAssistantEnabled(prefs.video_assistant_enabled);
+#endif // OHOS_VIDEO_ASSISTANT
+
 #if defined(OHOS_MEDIA)
   settings->SetPreferHiddenVolumeControls(!base::ohos::IsPcDevice());
 #endif

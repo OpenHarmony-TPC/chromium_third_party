@@ -51,8 +51,13 @@ class BLINK_PLATFORM_EXPORT WebSurfaceLayerBridge {
   virtual void UnregisterFrameSinkHierarchy() = 0;
 
 #if defined(OHOS_CUSTOM_VIDEO_PLAYER)
-  virtual void SetVideoRectChangeCallback(cc::SurfaceLayer::RectChangeCallback callback) {}
+  virtual void SetVideoRectChangeCallback(
+      cc::SurfaceLayer::RectChangeCallback callback) {}
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
+#ifdef OHOS_VIDEO_ASSISTANT
+  virtual void SetLayerBoundsChangeCallback(
+      cc::SurfaceLayer::LayerBoundsChangeCallback callback) {}
+#endif // OHOS_VIDEO_ASSISTANT
 };
 
 }  // namespace blink

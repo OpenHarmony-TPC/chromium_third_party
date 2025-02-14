@@ -864,4 +864,11 @@ void WebSettingsImpl::SetPlaybackWithMobileDataAllowed(bool allowed) {
   settings_->SetPlaybackWithMobileDataAllowed(allowed);
 }
 #endif // OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
+
+#ifdef OHOS_VIDEO_ASSISTANT
+void WebSettingsImpl::SetVideoAssistantEnabled(bool enabled) {
+  settings_->SetVideoAssistantEnabled(enabled);
+}
+#endif // OHOS_VIDEO_ASSISTANT
+
 }  // namespace blink

@@ -527,5 +527,10 @@ struct WebPreferences {
   [EnableIf=ohos_media_network_traffic_prompt]
   bool playback_with_mobile_data_allowed = false;
   // #endif OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
+
+  // #ifdef OHOS_VIDEO_ASSISTANT
+  [EnableIf=ohos_video_assistant]
+  bool video_assistant_enabled = false;
+  // #endif OHOS_VIDEO_ASSISTANT
 };
 
