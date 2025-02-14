@@ -799,7 +799,8 @@ WebInputEventResult MouseEventManager::HandleMouseDraggedEvent(
 
 #ifdef OHOS_AI
   last_mouse_drag_ = event.Event();
-  if (!mouse_pressed_ && !is_mouse_position_unknown_) {
+  if (!mouse_pressed_ && !is_mouse_position_unknown_ &&
+      !scroll_manager_->MiddleClickAutoscrollInProgress()) {
     create_overlay_timer_.Reset();
   } else {
     create_overlay_timer_.Stop();
