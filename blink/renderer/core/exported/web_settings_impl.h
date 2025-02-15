@@ -255,6 +255,7 @@ class CORE_EXPORT WebSettingsImpl final : public WebSettings {
                                const WebString& type) override;
   void SetDrawMode(int) override;
   void SetTextZoomFactor(float factor) override;
+  void SetFontWeightScale(float) override;
 #endif
 
 #if defined(OHOS_CUSTOM_VIDEO_PLAYER)

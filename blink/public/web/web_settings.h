@@ -306,6 +306,7 @@ class WebSettings {
   virtual void RegisterNativeEmbedRule(const WebString&, const WebString&) = 0;
   virtual void SetDrawMode(int) = 0;
   virtual void SetTextZoomFactor(float factor) = 0;
+  virtual void SetFontWeightScale(float) = 0;
 #endif
 
 #if defined(OHOS_LOGGER_REPORT)

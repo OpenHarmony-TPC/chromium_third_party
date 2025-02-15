@@ -105,6 +105,7 @@ WebPreferences::WebPreferences()
       embed_tag(kEmbedTag),
       embed_tag_type(kNativeType),
       draw_mode(0),
+      font_weight_scale(1.0f),
 #endif  // BUILDFLAG(IS_OHOS)
 #ifdef OHOS_SCROLLBAR
       scrollbar_color(0),

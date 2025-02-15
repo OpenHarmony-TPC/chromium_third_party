@@ -24,6 +24,7 @@
 
 #include "third_party/blink/renderer/core/css/resolver/font_builder.h"
 
+#include "base/logging.h"
 #include "third_party/blink/renderer/core/css/css_font_selector.h"
 #include "third_party/blink/renderer/core/css/style_engine.h"
 #include "third_party/blink/renderer/core/css_value_keywords.h"
@@ -34,6 +35,8 @@
 #include "third_party/blink/renderer/core/style/computed_style.h"
 #include "third_party/blink/renderer/platform/font_family_names.h"
 #include "third_party/blink/renderer/platform/fonts/font_description.h"
+
+constexpr float epsilon = 0.001f;
 
 namespace blink {
 
@@ -351,6 +354,27 @@ void FontBuilder::UpdateSpecifiedSize(
   CheckForGenericFamilyChange(parent_description, font_description);
 }
 
+#if BUILDFLAG(IS_OHOS)
+void FontBuilder::UpdateWeightScale(FontDescription& font_description) {
+  float weightScale = 1.0f;
+  if (document_) {
+    Settings* settings = document_->GetSettings();
+    if (settings) {
+      weightScale = settings->GetFontWeightScale();
+    }
+  }
+  if (weightScale < epsilon) {
+    return;
+  }
+  float newWeight = std::clamp(
+    (float) font_description.Weight() * weightScale,
+    (float) MinWeightValue(),
+    (float) MaxWeightValue());
+  LOG(INFO) << "FollowSystemFontWeight, fontWeight =" << (float) font_description.Weight() << " * " << weightScale;
+  font_description.SetWeight(FontSelectionValue(newWeight));
+}
+#endif
+
 void FontBuilder::UpdateAdjustedSize(FontDescription& font_description,
                                      FontSelector* font_selector) {
   // Note: the computed_size has scale/zooming applied as well as text auto-
@@ -410,6 +434,9 @@ void FontBuilder::UpdateFontDescription(FontDescription& description,
   }
   if (IsSet(PropertySetFlag::kWeight)) {
     description.SetWeight(font_description_.Weight());
+#if BUILDFLAG(IS_OHOS)
+    UpdateWeightScale(description);
+#endif
   }
   if (IsSet(PropertySetFlag::kStretch)) {
     description.SetStretch(font_description_.Stretch());
@@ -548,6 +575,9 @@ void FontBuilder::CreateInitialFont(ComputedStyleBuilder& builder) {
                                 false));
   UpdateSpecifiedSize(font_description, builder.GetFontDescription());
   UpdateComputedSize(font_description, builder);
+#if BUILDFLAG(IS_OHOS)
+  UpdateWeightScale(font_description);
+#endif
 
   font_description.SetOrientation(builder.ComputeFontOrientation());
 

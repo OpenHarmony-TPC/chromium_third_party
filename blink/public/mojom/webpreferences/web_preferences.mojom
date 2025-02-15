@@ -531,6 +531,9 @@ struct WebPreferences {
   int64 delay_for_background_tab_freezing = -1;
   // #endif OHOS_ACTIVE_POLICY
 
+  [EnableIf=is_ohos]
+  float font_weight_scale;
+
   // #ifdef OHOS_VIDEO_ASSISTANT
   [EnableIf=ohos_video_assistant]
   bool video_assistant_enabled = false;
