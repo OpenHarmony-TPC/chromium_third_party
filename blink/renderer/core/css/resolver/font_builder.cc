@@ -370,7 +370,7 @@ void FontBuilder::UpdateWeightScale(FontDescription& font_description) {
     (float) font_description.Weight() * weightScale,
     (float) MinWeightValue(),
     (float) MaxWeightValue());
-  LOG(INFO) << "FollowSystemFontWeight, fontWeight =" << (float) font_description.Weight() << " * " << weightScale;
+  LOG(DEBUG) << "FollowSystemFontWeight, fontWeight =" << (float) font_description.Weight() << " * " << weightScale;
   font_description.SetWeight(FontSelectionValue(newWeight));
 }
 #endif
