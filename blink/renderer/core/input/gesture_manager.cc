@@ -491,7 +491,9 @@ WebInputEventResult GestureManager::HandleGestureLongPress(
     selection_controller_->SetLastLongPressHitTestResult(hit_test_result);
     // notify webContentImpl reset showing_context_menu_ status, to make sure
     // update contextMenu
-    selection_controller_->NotifyContextMenuWillShow();
+    if (!hit_test_result.IsSelected(location)) {
+      selection_controller_->NotifyContextMenuWillShow();
+    }
   } else {
     if (inner_node && inner_node->GetLayoutObject() &&
         selection_controller_->HandleGestureLongPress(hit_test_result)) {
