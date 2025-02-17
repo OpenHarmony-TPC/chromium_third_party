@@ -164,10 +164,5 @@ enum RequestKeyboardReason {
   NONE,          // no event reason
   MOUSE,         // user triggered mouse event
   TOUCH,         // user triggered touch event
-  TOUCH_PAD,     // user triggered pad event
-  KEYBOARD,      // user triggered keyboard event
-  JOYSTICK,      // user triggered joystick event
-  CROWN,         // user triggered crown event
-  TOUCH_PEN,     // user triggered pen event
-  OTHER          // other reason
+  OTHER = 20     // other reason
 };
