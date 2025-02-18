@@ -1142,7 +1142,7 @@ void WebMediaPlayerImpl::DoSeek(base::TimeDelta time, bool time_updated) {
                time.InSecondsF(), "id", media_player_id_);
 
 #if defined(OHOS_MEDIA)
-  LOG(WARNING) << "OhMedia::DoSeek seconds = " << time.InSecondsF();
+LOG(WARNING) << "OhMedia::DoSeek(" << (void*)this << "), seconds = " << time.InSecondsF() << "s)";
 #endif // OHOS_MEDIA
 #ifdef OHOS_LOGGER_REPORT
   LOG_FEEDBACK(WARNING) << "OhMedia::DoSeek seconds = " << time.InSecondsF();
@@ -1227,15 +1227,16 @@ void WebMediaPlayerImpl::SetRate(double rate) {
 void WebMediaPlayerImpl::SetVolume(double volume) {
   DVLOG(1) << __func__ << "(" << volume << ")";
   DCHECK(main_task_runner_->BelongsToCurrentThread());
+
+#ifdef OHOS_MEDIA
+  LOG(INFO) << "OhMedia:: " << __func__ << "(" << (void*)this  << "), volume =" << volume;
+#endif // OHOS_MEDIA
+
   volume_ = volume;
   pipeline_controller_->SetVolume(volume_ * volume_multiplier_);
   if (watch_time_reporter_)
     watch_time_reporter_->OnVolumeChange(volume);
   client_->DidPlayerMutedStatusChange(volume == 0.0);
-
-#if defined(OHOS_MEDIA)
-  LOG(INFO) << "OhMedia::SetVolume volume is :" << volume;
-#endif // OHOS_MEDIA
 
 #ifdef OHOS_LOGGER_REPORT
   LOG_FEEDBACK(INFO) << "OhMedia::SetVolume volume is :" << volume;

@@ -2522,6 +2522,10 @@ void HTMLMediaElement::Seek(double time) {
   if (!web_media_player_ || ready_state_ == kHaveNothing)
     return;
 
+#ifdef OHOS_MEDIA
+  LOG(INFO) << "OhMedia::" << __func__ << "(" << *this << "),  time=" << time;
+#endif // OHOS_MEDIA
+
   // Ignore preload none and start load if necessary.
   SetIgnorePreloadNone();
 
@@ -2608,6 +2612,10 @@ void HTMLMediaElement::FinishSeek() {
 
   // 17 - Queue a task to fire a simple event named seeked at the element.
   ScheduleEvent(event_type_names::kSeeked);
+
+#ifdef OHOS_MEDIA
+  LOG(INFO) << "OhMedia::" << __func__ << "(" << *this << ")";
+#endif // OHOS_MEDIA
 }
 
 HTMLMediaElement::ReadyState HTMLMediaElement::getReadyState() const {
@@ -3035,7 +3043,7 @@ void HTMLMediaElement::pause() {
   DVLOG(2) << "pause(" << *this << ")";
 
 #if defined(OHOS_MEDIA)
-  LOG(WARNING) << "OhMedia::pause";
+  LOG(WARNING) << "OhMedia::pause(" << *this << ")";
 #ifdef OHOS_LOGGER_REPORT
   LOG_FEEDBACK(WARNING) << "OhMedia::pause";
 #endif
@@ -3202,6 +3210,10 @@ double HTMLMediaElement::volume() const {
 
 void HTMLMediaElement::setVolume(double vol, ExceptionState& exception_state) {
   DVLOG(2) << "setVolume(" << *this << ", " << vol << ")";
+
+#ifdef OHOS_MEDIA
+  LOG(INFO) << "OhMedia::" << __func__ << "(" << *this << "), vol=" << vol << ", volume_=" << volume_;
+#endif // OHOS_MEDIA
 
   if (volume_ == vol)
     return;
@@ -4045,6 +4057,10 @@ WebTimeRanges HTMLMediaElement::SeekableInternal() const {
   if (!web_media_player_)
     return {};
 
+#ifdef OHOS_MEDIA
+  LOG(INFO) << "OhMedia::" << __func__ << "(" << *this << ")";
+#endif // OHOS_MEDIA
+
   if (media_source_attachment_)
     return media_source_attachment_->SeekableInternal(media_source_tracer_);
 
@@ -4125,7 +4141,7 @@ void HTMLMediaElement::UpdatePlayState(bool pause_speech /* = true */) {
 #endif
     }
   }
-  LOG(WARNING) << "OhMedia::UpdatePlayState should_be_playing = "
+  LOG(WARNING) << "OhMedia::UpdatePlayState(" << *this << "), should_be_playing = "
                << should_be_playing << ", is_playing" << is_playing;
 #ifdef OHOS_LOGGER_REPORT
   LOG_FEEDBACK(WARNING) << "OhMedia::UpdatePlayState should_be_playing = "
@@ -5057,6 +5073,10 @@ void HTMLMediaElement::DidPlayerGone() {
 #endif
 
 void HTMLMediaElement::DidPlayerMutedStatusChange(bool muted) {
+#ifdef OHOS_MEDIA
+  LOG(INFO) << "OhMedia::" << __func__ << "(" << *this << "), muted=" <<muted;
+#endif // OHOS_MEDIA
+
 #if defined(OHOS_MEDIA_AVSESSION)
   for (auto& observer : media_player_observer_remote_set_->Value()) {
     observer->OnMutedStatusChanged(muted);
