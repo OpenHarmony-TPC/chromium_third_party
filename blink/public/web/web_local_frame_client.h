@@ -830,6 +830,10 @@ class BLINK_EXPORT WebLocalFrameClient {
 #ifdef OHOS_ARKWEB_ADBLOCK
   virtual void DidSubresourceFiltered() {}
 #endif  // OHOS_ARKWEB_ADBLOCK
+
+#if defined(OHOS_JSPROXY)
+  virtual void RunScriptsAtHeadReady() {}
+#endif
 };
 
 }  // namespace blink
