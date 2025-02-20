@@ -51,7 +51,6 @@ static String extractDeviceType(const String& input) {
     return String();
   }
 
-
   wtf_size_t length = endPos - startPos - 1;
   if (length <= 0) {
     return String();
