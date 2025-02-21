@@ -31,8 +31,10 @@ String GetReducedNavigatorPlatform() {
   return "Win32";
 #elif BUILDFLAG(IS_FUCHSIA)
   return "";
-#elif BUILDFLAG(IS_LINUX) || BUILDFLAG(IS_CHROMEOS) || BUILDFLAG(IS_OHOS)
+#elif BUILDFLAG(IS_LINUX) || BUILDFLAG(IS_CHROMEOS)
   return "Linux x86_64";
+#elif BUILDFLAG(IS_OHOS)
+  return "OpenHarmony";
 #elif BUILDFLAG(IS_IOS)
   return "iPhone";
 #else
@@ -40,6 +42,7 @@ String GetReducedNavigatorPlatform() {
 #endif
 }
 
+#if BUILDFLAG(IS_OHOS)
 static String extractDeviceType(const String& input) {
   wtf_size_t startPos = input.find('(');
   if (startPos == WTF::kNotFound) {
@@ -58,6 +61,11 @@ static String extractDeviceType(const String& input) {
 
   return input.Substring(startPos + 1, length);
 }
+
+static bool IsValidDeviceType(const String& deviceType) {
+  return deviceType == "PC" || deviceType == "Phone" || deviceType == "Tablet";
+}
+#endif
 }  // namespace
 
 NavigatorBase::NavigatorBase(ExecutionContext* context)
@@ -81,7 +89,7 @@ String NavigatorBase::platform() const {
 #if BUILDFLAG(IS_OHOS)
   String userAgentStr = execution_context ? execution_context->UserAgent() : String();
   String deviceType = extractDeviceType(userAgentStr);
-  if (deviceType.length() > 0) {
+  if (IsValidDeviceType(deviceType)) {
     return String("OpenHarmony ") + deviceType;
   }
 #endif
