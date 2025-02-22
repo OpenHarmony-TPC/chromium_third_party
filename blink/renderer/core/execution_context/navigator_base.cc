@@ -42,30 +42,6 @@ String GetReducedNavigatorPlatform() {
 #endif
 }
 
-#if BUILDFLAG(IS_OHOS)
-static String extractDeviceType(const String& input) {
-  wtf_size_t startPos = input.find('(');
-  if (startPos == WTF::kNotFound) {
-    return String();
-  }
-
-  wtf_size_t endPos = input.find(';', startPos);
-  if (endPos == WTF::kNotFound) {
-    return String();
-  }
-
-  wtf_size_t length = endPos - startPos - 1;
-  if (length <= 0) {
-    return String();
-  }
-
-  return input.Substring(startPos + 1, length);
-}
-
-static bool IsValidDeviceType(const String& deviceType) {
-  return deviceType == "PC" || deviceType == "Phone" || deviceType == "Tablet";
-}
-#endif
 }  // namespace
 
 NavigatorBase::NavigatorBase(ExecutionContext* context)
@@ -85,14 +61,6 @@ String NavigatorBase::platform() const {
   // Report as user agent access
   if (execution_context)
     execution_context->ReportNavigatorUserAgentAccess();
-
-#if BUILDFLAG(IS_OHOS)
-  String userAgentStr = execution_context ? execution_context->UserAgent() : String();
-  String deviceType = extractDeviceType(userAgentStr);
-  if (IsValidDeviceType(deviceType)) {
-    return String("OpenHarmony ") + deviceType;
-  }
-#endif
 
   // If the User-Agent string is opted into the SendFullUserAgentAfterReduction,
   // platform should be a full value.
