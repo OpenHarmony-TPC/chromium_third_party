@@ -1111,5 +1111,12 @@
       initial: 1,
       type: "float",
     },
+    {
+      // Set the scale of the font weight in OHOS.
+      name: "fontWeightScale",
+      initial: 1,
+      invalidate: ["Style"],
+      type: "float",
+    },
   ],
 }

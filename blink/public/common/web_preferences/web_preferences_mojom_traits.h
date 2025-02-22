@@ -823,6 +823,10 @@ struct BLINK_COMMON_EXPORT StructTraits<blink::mojom::WebPreferencesDataView,
   static uint32_t draw_mode(const blink::web_pref::WebPreferences& r) {
     return r.draw_mode;
   }
+
+  static float font_weight_scale(const blink::web_pref::WebPreferences& r) {
+    return r.font_weight_scale;
+  }
 #endif  // BUILDFLAG(IS_OHOS)
 
 #if defined(OHOS_INPUT_EVENTS)
