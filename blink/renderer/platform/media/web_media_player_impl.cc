@@ -1128,7 +1128,7 @@ void WebMediaPlayerImpl::DoSeek(base::TimeDelta time, bool time_updated) {
                time.InSecondsF(), "id", media_player_id_);
 
 #ifdef OHOS_MEDIA
-  LOG(WARNING) << "OhMedia::DoSeek seconds = " << time.InSecondsF();
+  LOG(WARNING) << "OhMedia::DoSeek(" << (void*)this << "), seconds = " << time.InSecondsF() << "s)";
 #endif // OHOS_MEDIA
 
   ReadyState old_state = ready_state_;
@@ -1213,7 +1213,7 @@ void WebMediaPlayerImpl::SetVolume(double volume) {
   client_->DidPlayerMutedStatusChange(volume == 0.0);
 
 #ifdef OHOS_MEDIA
-  LOG(INFO) << "OhMedia::SetVolume volume is :" << volume;
+  LOG(INFO) << "OhMedia:: " << __func__ << "(" << (void*)this  << "), volume =" << volume;
 #endif // OHOS_MEDIA
 
   if (delegate_has_audio_ != HasUnmutedAudio()) {
