@@ -3144,13 +3144,14 @@ HTMLMediaElementControlsList* HTMLMediaElement::ControlsListInternal() const {
 
 double HTMLMediaElement::volume() const {
   return volume_;
-#ifdef OHOS_MEDIA
-  LOG(INFO) << "OhMedia::" << __func__ << "(" << *this << "), vol=" << vol << ", volume_=" << volume_;
-#endif // OHOS_MEDIA
 }
 
 void HTMLMediaElement::setVolume(double vol, ExceptionState& exception_state) {
   DVLOG(2) << "setVolume(" << *this << ", " << vol << ")";
+
+#ifdef OHOS_MEDIA
+  LOG(INFO) << "OhMedia::" << __func__ << "(" << *this << "), vol=" << vol << ", volume_=" << volume_;
+#endif // OHOS_MEDIA
 
   if (volume_ == vol)
     return;
