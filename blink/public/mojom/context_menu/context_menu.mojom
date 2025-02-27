@@ -170,7 +170,10 @@ struct UntrustworthyContextMenuParams {
   // Whether inner node can selectable.
   [EnableIf=ohos_ex_free_copy]
   bool is_selectable;
-  
+
+  [EnableIf=ohos_drag_drop]
+  gfx.mojom.Rect image_rect;
+
   // Writing direction menu items.
   int32 writing_direction_default;
   int32 writing_direction_left_to_right;

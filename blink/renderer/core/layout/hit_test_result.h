@@ -220,6 +220,10 @@ class CORE_EXPORT HitTestResult {
   }
 #endif
 
+#ifdef OHOS_DRAG_DROP
+  gfx::Rect GetReplacedContentRect() const;
+#endif
+
  private:
   NodeSet& MutableListBasedTestResult();  // See above.
   HTMLMediaElement* MediaElement() const;

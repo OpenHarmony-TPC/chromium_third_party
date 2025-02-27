@@ -107,6 +107,9 @@ struct BLINK_COMMON_EXPORT UntrustworthyContextMenuParams {
 #ifdef OHOS_EX_FREE_COPY
   bool is_selectable;
 #endif
+#ifdef OHOS_DRAG_DROP
+  gfx::Rect image_rect;
+#endif
   // Writing direction menu items.
   int writing_direction_default;
   int writing_direction_left_to_right;
