@@ -146,6 +146,7 @@ class CORE_EXPORT NativeLoader
   std::unique_ptr<WebNativeBridge> web_native_bridge_;
   int native_embed_id_ = -1;
   bool first_update_rect_ = true;
+  bool cc_layer_update_ = false;
 
   Member<DisallowNewWrapper<
       HeapMojoAssociatedRemote<media::mojom::blink::NativeBridgeHost>>>
