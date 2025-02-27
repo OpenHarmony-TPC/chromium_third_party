@@ -62,6 +62,15 @@ float PageConstraintInitalScale(const Document& document) {
   return scale;
 }
 
+gfx::Rect BoundsToViewport(const gfx::Rect& bounding_rect, const Document& document) {
+  return gfx::Rect(bounding_rect.origin(), gfx::ScaleToCeiledSize(
+      bounding_rect.size(), PageConstraintInitalScale(document)));
+}
+
+gfx::Point PositionToViewport(const gfx::Point& bounding_rect_position, const Document& document) {
+  return gfx::ScaleToCeiledPoint(bounding_rect_position, PageConstraintInitalScale(document));
+}
+
 }  // anonymous namespace
 
 NativeLoader::NativeLoader(HTMLPlugInElement* plugin_element)
@@ -169,7 +178,7 @@ void NativeLoader::OnCreateNativeSurface(int native_embed_id,
     return;
   }
 
-  if (bounding_rect_.IsEmpty()) {
+  if (!cc_layer_update_ || bounding_rect_.IsEmpty()) {
     plugin_element_->GetDocument().UpdateStyleAndLayoutForNode(
         plugin_element_, DocumentUpdateReason::kPlugin);
     bounding_rect_ = plugin_element_->PixelSnappedBoundingBox();
@@ -185,16 +194,18 @@ void NativeLoader::OnCreateNativeSurface(int native_embed_id,
   cc_layer_->SetNativeEmbedId(native_embed_id_);
 
   auto embed_info = media::mojom::blink::NativeEmbedInfo::New();
-  auto* frame = CurrentFrame();
-  if (frame && frame->View()) {
-    auto bounds_to_viewport =
-        frame->View()->FrameToViewport(bounding_rect_);
-    // We will use the position relative to visual viewport.
-    bounding_rect_.set_origin(bounds_to_viewport.origin());
-    embed_info->rect = bounds_to_viewport;
-    if (!bounding_rect_changed_cb_.is_null()) {
-      bounding_rect_changed_cb_.Run(bounds_to_viewport);
-    }
+ auto bounds_to_viewport = BoundsToViewport(bounding_rect_, plugin_element_->GetDocument());
+  if (!cc_layer_update_) {
+    // Create phase requires change the origin of the bounding_rect with page
+ 
+    // initial_scale.
+    bounds_to_viewport.set_origin(PositionToViewport(bounding_rect_.origin(), plugin_element_->GetDocument()));
+  }
+  // We will use the position relative to visual viewport.
+  bounding_rect_.set_origin(bounds_to_viewport.origin());
+  embed_info->rect = bounds_to_viewport;
+  if (!bounding_rect_changed_cb_.is_null()) {
+    bounding_rect_changed_cb_.Run(bounds_to_viewport);
   }
 
   embed_info->embed_id = native_embed_id_;
@@ -227,21 +238,17 @@ void NativeLoader::OnLayerRectChange(const gfx::Rect& rect) {
   if (bounding_rect_.size() != rect.size()) {
     bounding_rect_ = rect;
     if (!bounding_rect_changed_cb_.is_null()) {
-      bounding_rect_changed_cb_.Run(gfx::ScaleToEnclosingRect(
-          bounding_rect_, PageConstraintInitalScale(plugin_element_->GetDocument())));
+      bounding_rect_changed_cb_.Run(BoundsToViewport(bounding_rect_, plugin_element_->GetDocument()));
     }
   } else {
     bounding_rect_.set_origin(rect.origin());
   }
 
+  cc_layer_update_ = true;
   LOG(INFO) << "NativeEmbed NativeLoader::OnLayerRectChange:"
             << bounding_rect_.ToString();
   for (auto& observer : native_bridge_observer_remote_set_->Value()) {
-    observer->OnEmbedRectChange(gfx::Rect(
-        bounding_rect_.origin(),
-        gfx::ScaleToCeiledSize(
-            bounding_rect_.size(),
-            PageConstraintInitalScale(plugin_element_->GetDocument()))));
+   observer->OnEmbedRectChange(BoundsToViewport(bounding_rect_, plugin_element_->GetDocument()));
   }
 }
 
