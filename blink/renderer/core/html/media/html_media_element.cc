@@ -616,6 +616,10 @@ void HTMLMediaElement::DidMoveToNewDocument(Document& old_document) {
       GetDocument().GetTaskRunner(TaskType::kInternalMedia));
   removed_from_document_timer_.MoveToNewTaskRunner(
       GetDocument().GetTaskRunner(TaskType::kInternalMedia));
+#ifdef OHOS_VIDEO_ASSISTANT
+  notify_video_playing_timer_.MoveToNewTaskRunner(
+      GetDocument().GetTaskRunner(TaskType::kInternalMedia));
+#endif // OHOS_VIDEO_ASSISTANT
 
   autoplay_policy_->DidMoveToNewDocument(old_document);
 
@@ -4729,6 +4733,9 @@ void HTMLMediaElement::Trace(Visitor* visitor) const {
   visitor->Trace(load_timer_);
   visitor->Trace(audio_tracks_timer_);
   visitor->Trace(removed_from_document_timer_);
+#ifdef OHOS_VIDEO_ASSISTANT
+  visitor->Trace(notify_video_playing_timer_);
+#endif // OHOS_VIDEO_ASSISTANT
   visitor->Trace(played_time_ranges_);
   visitor->Trace(async_event_queue_);
   visitor->Trace(error_);
