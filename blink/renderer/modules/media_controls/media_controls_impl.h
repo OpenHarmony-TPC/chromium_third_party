@@ -272,6 +272,7 @@ class MODULES_EXPORT MediaControlsImpl final : public HTMLDivElement,
   void PopulatePanelHM();
   void VideoAssistantTrace(Visitor* visitor) const;
   MediaControlsSizingClass GetSizingClassHM();
+  void MakeTransparentImmediately();
 #endif // OHOS_VIDEO_ASSISTANT
 
   // Attach hover background div to buttons
