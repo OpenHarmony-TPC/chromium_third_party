@@ -208,6 +208,9 @@ class CORE_EXPORT ChromeClientImpl final : public ChromeClient {
 
   void EnterFullscreen(LocalFrame&,
                        const FullscreenOptions*,
+#ifdef OHOS_VIDEO_ASSISTANT
+                       bool overlay_fullscreen,
+#endif // OHOS_VIDEO_ASSISTANT
                        FullscreenRequestType
 #if defined(OHOS_MEDIA)
                        ,

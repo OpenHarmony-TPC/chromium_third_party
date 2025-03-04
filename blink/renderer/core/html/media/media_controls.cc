@@ -18,11 +18,12 @@ constexpr int kMediaControlsSizingLargeThreshold = 1441;
 
 // static
 MediaControlsSizingClass MediaControls::GetSizingClass(int width) {
-  if (width < kMediaControlsSizingMediumThreshold)
+  if (width < kMediaControlsSizingMediumThreshold) {
     return MediaControlsSizingClass::kSmall;
-  if (width < kMediaControlsSizingLargeThreshold)
+  }
+  if (width < kMediaControlsSizingLargeThreshold) {
     return MediaControlsSizingClass::kMedium;
-
+  }
   return MediaControlsSizingClass::kLarge;
 }
 

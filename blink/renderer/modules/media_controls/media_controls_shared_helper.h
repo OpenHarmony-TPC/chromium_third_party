@@ -42,6 +42,9 @@ class MediaControlsSharedHelpers final {
       HTMLMediaElement& media_element);
 
   static String FormatTime(double time);
+#ifdef OHOS_VIDEO_ASSISTANT
+  static String FormatTimeHM(double time);
+#endif
   static bool ShouldShowFullscreenButton(const HTMLMediaElement& media_element);
 };
 

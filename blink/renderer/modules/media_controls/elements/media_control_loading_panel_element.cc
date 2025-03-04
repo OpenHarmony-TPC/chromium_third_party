@@ -161,7 +161,13 @@ void MediaControlLoadingPanelElement::UpdateDisplayState() {
       // If the media controls are loading metadata then we should show the
       // loading panel and insert it into the DOM.
       if (IsInLoadingState(GetMediaControls()) && !controls_hidden_) {
+#ifdef OHOS_VIDEO_ASSISTANT
+    if (!GetMediaControls().ShouldShowVideoControlsHM()) {
+#endif
         PopulateShadowDOM();
+#ifdef OHOS_VIDEO_ASSISTANT
+    }
+#endif
         SetIsWanted(true);
         SetAnimationIterationCount(kInfinite);
         state_ = State::kPlaying;
@@ -171,6 +177,11 @@ void MediaControlLoadingPanelElement::UpdateDisplayState() {
       // If the media controls are stopped then we should hide the loading
       // panel, but not until the current cycle of animations is complete.
       if (!IsInLoadingState(GetMediaControls())) {
+#ifdef OHOS_VIDEO_ASSISTANT
+    if (GetMediaControls().ShouldShowVideoControlsHM()) {
+        HideAnimation();
+    }
+#endif
         SetAnimationIterationCount(WTF::String::Number(animation_count_ + 1));
         state_ = State::kCoolingDown;
       }

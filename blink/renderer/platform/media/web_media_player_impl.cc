@@ -750,6 +750,17 @@ void WebMediaPlayerImpl::ExitedFullscreen() {
   // See EnteredFullscreen for why we do this.
   if (!decoder_requires_restart_for_overlay_)
     MaybeSendOverlayInfoToDecoder();
+
+#ifdef OHOS_VIDEO_ASSISTANT
+  bool surface_changed = video_surface_id_ != -1;
+  video_surface_id_ = -1;
+  if (surface_changed && surface_created_cb_) {
+    surface_created_cb_.Run(video_surface_id_);
+    if (Paused() && !ended_) {
+      Seek(CurrentTime());
+    }
+  }
+#endif // OHOS_VIDEO_ASSISTANT
 }
 
 void WebMediaPlayerImpl::BecameDominantVisibleContent(bool is_dominant) {
@@ -1148,7 +1159,12 @@ void WebMediaPlayerImpl::DoSeek(base::TimeDelta time, bool time_updated) {
   //      Because the buffers may have changed between seeks, MSE seeks are
   //      never elided.
   if (paused_ && pipeline_controller_->IsStable() &&
-      (paused_time_ == time || (ended_ && time == base::Seconds(Duration()))) &&
+#ifdef OHOS_VIDEO_ASSISTANT
+      (((paused_time_ == time) && !client_->IsVideoAssistantEnabled()) ||
+#else
+      (paused_time_ == time ||
+#endif
+      (ended_ && time == base::Seconds(Duration()))) &&
       GetDemuxerType() != media::DemuxerType::kChunkDemuxer) {
     if (old_state == kReadyStateHaveEnoughData) {
       // This will in turn SetReadyState() to signal the demuxer seek, followed
@@ -2664,7 +2680,7 @@ void WebMediaPlayerImpl::OnFrameHidden() {
             << " delegate_id_:" << delegate_id_;
 #endif // OHOS_MEDIA
 #ifdef OHOS_VIDEO_ASSISTANT
-  client_->OnWebMediaPlayerShowing(false);
+  client_->OnPageVisibilityChanged();
 #endif // OHOS_VIDEO_ASSISTANT
 
   // Backgrounding a video requires a user gesture to resume playback.
@@ -2717,7 +2733,7 @@ void WebMediaPlayerImpl::OnFrameShown() {
             << " delegate_id_:" << delegate_id_;
 #endif // OHOS_MEDIA
 #ifdef OHOS_VIDEO_ASSISTANT
-  client_->OnWebMediaPlayerShowing(true);
+  client_->OnPageVisibilityChanged();
 #endif // OHOS_VIDEO_ASSISTANT
 
   // Foreground videos don't require user gesture to continue playback.
@@ -3136,7 +3152,21 @@ media::PipelineStatus WebMediaPlayerImpl::OnDemuxerCreated(
     attempting_suspended_start_ = true;
   }
 
+#ifdef OHOS_VIDEO_ASSISTANT
+  media::RequestSurfaceCB request_surface_cb =
+      base::BindPostTaskToCurrentDefault(
+          base::BindOnce(&WebMediaPlayerImpl::OnSurfaceRequested, weak_this_));
+  media::VideoDecoderChangedCB video_decoder_changed_cb =
+      base::BindPostTaskToCurrentDefault(
+          base::BindRepeating(&WebMediaPlayerImpl::OnVideoDecoderChanaged,
+              weak_this_));
+#endif // OHOS_VIDEO_ASSISTANT
+
   pipeline_controller_->Start(start_type, demuxer, this, is_streaming,
+#ifdef OHOS_VIDEO_ASSISTANT
+                              std::move(request_surface_cb),
+                              std::move(video_decoder_changed_cb),
+#endif // OHOS_VIDEO_ASSISTANT
                               is_static);
   return media::OkStatus();
 }
@@ -3371,7 +3401,21 @@ void WebMediaPlayerImpl::SetSuspendState(bool is_suspended) {
       preroll_attempt_pending_ = false;
       preroll_attempt_start_time_ = tick_clock_->NowTicks();
     }
+#ifdef OHOS_VIDEO_ASSISTANT
+    media::RequestSurfaceCB request_surface_cb =
+        base::BindPostTaskToCurrentDefault(
+            base::BindOnce(&WebMediaPlayerImpl::OnSurfaceRequested,
+                weak_this_));
+    media::VideoDecoderChangedCB video_decoder_changed_cb =
+        base::BindPostTaskToCurrentDefault(
+            base::BindRepeating(&WebMediaPlayerImpl::OnVideoDecoderChanaged,
+                weak_this_));
+    pipeline_controller_->Resume(
+        std::move(request_surface_cb),
+        std::move(video_decoder_changed_cb));
+#else
     pipeline_controller_->Resume();
+#endif // OHOS_VIDEO_ASSISTANT
   }
 }
 
@@ -3423,6 +3467,13 @@ WebMediaPlayerImpl::UpdatePlayState_ComputePlayState(
   // kReadyStateHaveMetadata.
   bool can_stay_suspended = (is_stale || have_future_data) && is_suspended &&
                             paused_ && !seeking_ && !needs_first_frame_;
+
+#ifdef OHOS_VIDEO_ASSISTANT
+  if (video_surface_id_ > 0) {
+    idle_suspended = false;
+    can_stay_suspended = false;
+  }
+#endif // OHOS_VIDEO_ASSISTANT
 
   // Combined suspend state.
   result.is_suspended = must_suspend || idle_suspended ||
@@ -4322,6 +4373,9 @@ void WebMediaPlayerImpl::PauseWithReason(media::ActionReason reason) {
   base::AutoReset<media::ActionReason> resetter(&action_reason_, reason);
   Pause();
 }
+bool WebMediaPlayerImpl::IsMediaPlayerShown() const {
+  return !IsHidden();
+}
 bool WebMediaPlayerImpl::IsUsingCustomRenderer() const {
   return should_create_custom_renderer_;
 }
@@ -4341,6 +4395,46 @@ void WebMediaPlayerImpl::OnLayerRectChange(const gfx::Rect& rect) {
 void WebMediaPlayerImpl::OnLayerBoundsChange(const gfx::Rect& bounds) {
   DCHECK(main_task_runner_->BelongsToCurrentThread());
   client_->OnLayerBoundsChange(bounds);
+}
+
+void WebMediaPlayerImpl::SetVideoSurface(int32_t widget_id) {
+  LOG(INFO) << "SetVideoSurface(" << widget_id << ")";
+  video_surface_id_ = widget_id;
+  if (surface_created_cb_) {
+    surface_created_cb_.Run(widget_id);
+  }
+
+  if (paused_ && !seeking_) {
+    Seek(CurrentTime());
+  }
+}
+
+bool WebMediaPlayerImpl::SupportVideoSurface() {
+  return support_video_surface_;
+}
+
+void WebMediaPlayerImpl::OnSurfaceRequested(
+    media::SurfaceCreatedCB surface_created_cb,
+    bool support_video_surface,
+    std::string decoder_name) {
+  LOG(INFO) << "OnSurfaceRequested(" << support_video_surface <<
+            "), video_surface_id_[" << video_surface_id_ << "]";
+  surface_created_cb_ = std::move(surface_created_cb);
+  support_video_surface_ = support_video_surface;
+
+  if (video_surface_id_ > 0) {
+    surface_created_cb_.Run(video_surface_id_);
+  }
+  client_->OnSupportVideoSurfaceChanged(support_video_surface_, decoder_name);
+}
+
+void WebMediaPlayerImpl::OnVideoDecoderChanaged(
+    bool support_video_surface,
+    std::string decoder_name) {
+  LOG(INFO) << "OnVideoDecoderChanaged(" << support_video_surface
+            << ", " << decoder_name << ")";
+  support_video_surface_ = support_video_surface;
+  client_->OnSupportVideoSurfaceChanged(support_video_surface_, decoder_name);
 }
 #endif // OHOS_VIDEO_ASSISTANT
 

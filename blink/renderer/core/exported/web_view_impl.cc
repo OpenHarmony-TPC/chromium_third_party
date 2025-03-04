@@ -468,6 +468,33 @@ SkFontHinting RendererPreferencesToSkiaHinting(
 }
 #endif  // !BUILDFLAG(IS_MAC) && !BUILDFLAG(IS_WIN)
 
+#ifdef OHOS_VIDEO_ASSISTANT
+void ApplyOhosMediaPlayerEnabled(const web_pref::WebPreferences& prefs,
+                                 WebView* web_view,
+                                 WebSettings* settings) {
+  bool exist_enabled = settings->GetCustomMediaPlayerEnabled();
+  if (exist_enabled == prefs.custom_media_player_enabled) {
+    return;
+  }
+  LOG(INFO) << "Update custom media player enable, exist_enabled: " << exist_enabled
+            << ", prefs.custom_media_player_enabled:" << prefs.custom_media_player_enabled;
+  settings->SetCustomMediaPlayerEnabled(prefs.custom_media_player_enabled);
+  const auto* main_frame = web_view->MainFrame();
+  if (!main_frame) {
+    return;
+  }
+  auto* local_main_frame = DynamicTo<WebLocalFrameImpl>(main_frame);
+  if (!local_main_frame) {
+    return;
+  }
+  Document* document = local_main_frame->GetDocument();
+  if (!document) {
+    return;
+  }
+  document->GetStyleEngine().EnsureUAStyleForMediaElement();
+}
+#endif
+
 void ApplyOhosWebPreferences(const web_pref::WebPreferences& prefs,
                              WebView* web_view,
                              WebSettings* settings,
@@ -513,6 +540,7 @@ void ApplyOhosWebPreferences(const web_pref::WebPreferences& prefs,
 
 #ifdef OHOS_VIDEO_ASSISTANT
   settings->SetVideoAssistantEnabled(prefs.video_assistant_enabled);
+  ApplyOhosMediaPlayerEnabled(prefs, web_view, settings);
 #endif // OHOS_VIDEO_ASSISTANT
 
 #if defined(OHOS_MEDIA)
@@ -535,6 +563,15 @@ void ApplyOhosWebPreferences(const web_pref::WebPreferences& prefs,
       }
     }
   }
+#endif
+
+#if defined(OHOS_MEDIA)
+  settings->SetPreferHiddenVolumeControls(!base::ohos::IsPcDevice());
+#endif
+
+#ifdef OHOS_ACTIVE_POLICY
+  web_view_impl->SetDelayDurationForBackgroundTabFreezing(
+      prefs.delay_for_background_tab_freezing);
 #endif
 }
 
@@ -2010,13 +2047,20 @@ void WebViewImpl::ThemeChanged() {
 void WebViewImpl::EnterFullscreen(
     LocalFrame& frame,
     const FullscreenOptions* options,
+#ifdef OHOS_VIDEO_ASSISTANT
+    bool overlay_fullscreen,
+#endif // OHOS_VIDEO_ASSISTANT
     FullscreenRequestType request_type
 #if defined(OHOS_MEDIA)
     ,
     const absl::optional<gfx::Size>& video_natural_size
 #endif  // defined(OHOS_MEDIA)
 ) {
-  fullscreen_controller_->EnterFullscreen(frame, options, request_type
+  fullscreen_controller_->EnterFullscreen(frame, options,
+#ifdef OHOS_VIDEO_ASSISTANT
+                                          overlay_fullscreen,
+#endif // OHOS_VIDEO_ASSISTANT
+                                          request_type
 #if defined(OHOS_MEDIA)
                                           ,
                                           video_natural_size

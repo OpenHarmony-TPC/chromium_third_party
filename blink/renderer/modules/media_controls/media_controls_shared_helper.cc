@@ -125,12 +125,43 @@ String MediaControlsSharedHelpers::FormatTime(double time) {
   // etc.
 
   if (hours > 0) {
-    return String::Format("%s%d:%02d:%02d", negative_sign, hours, minutes,
-                          seconds);
+    return String::Format("%s%d:%02d:%02d", negative_sign, hours, minutes, seconds);
   }
 
   return String::Format("%s%d:%02d", negative_sign, minutes, seconds);
 }
+
+#ifdef OHOS_VIDEO_ASSISTANT
+
+constexpr int TIME_BASE_RATIO = 60;
+
+String MediaControlsSharedHelpers::FormatTimeHM(double time) {
+  if (!std::isfinite(time))
+    time = 0;
+
+  int seconds = static_cast<int>(fabs(time));
+  int minutes = seconds / TIME_BASE_RATIO;
+  int hours = minutes / TIME_BASE_RATIO;
+
+  seconds %= TIME_BASE_RATIO;
+  minutes %= TIME_BASE_RATIO;
+
+  const char* negative_sign = (time < 0 ? "-" : "");
+
+  // [0-10) minutes duration is m:ss
+  // [10-60) minutes duration is mm:ss
+  // [1-10) hours duration is h:mm:ss
+  // [10-100) hours duration is hh:mm:ss
+  // [100-1000) hours duration is hhh:mm:ss
+  // etc.
+
+  if (hours > 0) {
+    return String::Format("%s%02d:%02d:%02d", negative_sign, hours, minutes, seconds);
+  }
+
+  return String::Format("%s%02d:%02d", negative_sign, minutes, seconds);
+}
+#endif // OHOS_VIDEO_ASSISTANT
 
 bool MediaControlsSharedHelpers::ShouldShowFullscreenButton(
     const HTMLMediaElement& media_element) {

@@ -27,7 +27,6 @@
 #include "third_party/blink/renderer/modules/media_controls/media_controls_impl.h"
 
 #include "base/auto_reset.h"
-#include "media/base/media_switches.h"
 #include "third_party/blink/public/platform/platform.h"
 #include "third_party/blink/public/platform/task_type.h"
 #include "third_party/blink/public/platform/user_metrics_action.h"
@@ -108,6 +107,8 @@
 
 #ifdef OHOS_VIDEO_ASSISTANT
 #include "third_party/blink/renderer/core/html/html_style_element.h"
+#include "third_party/blink/renderer/modules/media_controls/elements/media_control_top_row_panel_element.h"
+#include "third_party/blink/renderer/modules/media_controls/elements/media_control_timeline_row_panel_element.h"
 #endif // OHOS_VIDEO_ASSISTANT
 
 namespace blink {
@@ -149,6 +150,13 @@ constexpr base::TimeDelta kDoubleTapDelay = base::Milliseconds(300);
 constexpr base::TimeDelta kTimeToShowVolumeSlider = base::Milliseconds(200);
 constexpr base::TimeDelta kTimeToShowVolumeSliderTest = base::Milliseconds(0);
 
+#ifdef OHOS_VIDEO_ASSISTANT
+constexpr int kDownloadIndexToRowColumns = 7;
+constexpr int kPlaybackSpeedIndexToRowColumns = 9;
+constexpr int kMediaControlsSizingMediumThresholdVideoAssitant = 600;
+constexpr int kMediaControlsSizingLargeThresholdVideoAssitant = 840;
+constexpr base::TimeDelta kScrubbingDelay = base::Seconds(1.0);
+#endif
 // The number of seconds to jump when double tapping.
 constexpr int kNumberOfSecondsToJump = 10;
 
@@ -409,13 +417,26 @@ MediaControlsImpl::MediaControlsImpl(HTMLMediaElement& media_element)
           this,
           &MediaControlsImpl::VolumeSliderWantedTimerFired),
       text_track_manager_(
-          MakeGarbageCollected<MediaControlsTextTrackManager>(media_element)) {
+          MakeGarbageCollected<MediaControlsTextTrackManager>(media_element))
+#if defined(OHOS_VIDEO_ASSISTANT)
+      ,
+      scrubbing_timer_(media_element.GetDocument().GetTaskRunner(TaskType::kInternalMedia),
+          this,
+          &MediaControlsImpl::ScrubbingTimerFired)
+#endif
+{
   // On touch devices, start with the assumption that the user will interact via
   // touch events.
   Settings* settings = media_element.GetDocument().GetSettings();
   is_touch_interaction_ = settings ? settings->GetMaxTouchPoints() > 0 : false;
 
   resize_observer_->observe(&media_element);
+#if defined(OHOS_VIDEO_ASSISTANT)
+  if (ShouldShowVideoControlsHM()) {
+    top_row_panel_ = nullptr;
+    timeline_row_panel_ = nullptr;
+  }
+#endif
 }
 
 MediaControlsImpl* MediaControlsImpl::Create(HTMLMediaElement& media_element,
@@ -425,6 +446,10 @@ MediaControlsImpl* MediaControlsImpl::Create(HTMLMediaElement& media_element,
   controls->SetShadowPseudoId(AtomicString("-webkit-media-controls"));
   controls->InitializeControls();
   controls->Reset();
+
+#ifdef OHOS_VIDEO_ASSISTANT
+  controls->SetClass("rtl", media_element.IsRTL());
+#endif
 
   if (RuntimeEnabledFeatures::VideoFullscreenOrientationLockEnabled() &&
       IsA<HTMLVideoElement>(media_element)) {
@@ -529,6 +554,16 @@ void MediaControlsImpl::InitializeControls() {
       MakeGarbageCollected<MediaControlEnteredFullscreenTitleDisplayElement>(
           *this);
 #endif // defined(OHOS_MEDIA)
+
+#if defined(OHOS_VIDEO_ASSISTANT)
+  if (ShouldShowVideoControlsHM()) {
+    top_row_panel_ = MakeGarbageCollected<MediaControlTopRowPanelElement>(*this);
+    top_row_panel_->setInnerHTML("");
+    timeline_row_panel_ = MakeGarbageCollected<MediaControlTimelineRowPanelElement>(*this);
+    timeline_row_panel_->setInnerHTML("");
+  }
+#endif // defined(OHOS_VIDEO_ASSISTANT)
+
   if (ShouldShowVideoControls()) {
     loading_panel_ =
         MakeGarbageCollected<MediaControlLoadingPanelElement>(*this);
@@ -667,46 +702,113 @@ void MediaControlsImpl::InitializeControls() {
 
 void MediaControlsImpl::PopulatePanel() {
   // Clear the panels.
-  panel_->setInnerHTML("");
-  if (media_button_panel_)
-    media_button_panel_->setInnerHTML("");
+#if defined(OHOS_VIDEO_ASSISTANT)
+  if (ShouldShowVideoControlsHM()) {
+    PopulatePanelHM();
+  } else {
+#endif
+    panel_->setInnerHTML("");
+    if (media_button_panel_)
+      media_button_panel_->setInnerHTML("");
 
+    Element* button_panel = panel_;
+    if (ShouldShowVideoControls()) {
+      MaybeParserAppendChild(panel_, scrubbing_panel_);
+      MaybeParserAppendChild(scrubbing_panel_, scrubbing_message_);
+      if (display_cutout_fullscreen_button_)
+        panel_->ParserAppendChild(display_cutout_fullscreen_button_);
+
+      MaybeParserAppendChild(panel_, overlay_play_button_);
+      panel_->ParserAppendChild(media_button_panel_);
+      button_panel = media_button_panel_;
+    }
+
+    button_panel->ParserAppendChild(play_button_);
+    button_panel->ParserAppendChild(current_time_display_);
+    button_panel->ParserAppendChild(duration_display_);
+
+    if (ShouldShowVideoControls()) {
+      MediaControlElementsHelper::CreateDiv(
+          "-internal-media-controls-button-spacer", button_panel);
+    }
+
+    panel_->ParserAppendChild(timeline_);
+    MaybeParserAppendChild(volume_control_container_, volume_slider_);
+    volume_control_container_->ParserAppendChild(mute_button_);
+    button_panel->ParserAppendChild(volume_control_container_);
+    button_panel->ParserAppendChild(fullscreen_button_);
+    button_panel->ParserAppendChild(overflow_menu_);
+
+    // Attach hover background divs.
+    AttachHoverBackground(play_button_);
+    AttachHoverBackground(fullscreen_button_);
+    AttachHoverBackground(overflow_menu_);
+#if defined(OHOS_VIDEO_ASSISTANT)
+  }
+#endif
+}
+
+#if defined(OHOS_VIDEO_ASSISTANT)
+void MediaControlsImpl::PopulatePanelHM() {
+  panel_->setInnerHTML("");
+  // top row panel
+  if (top_row_panel_) {
+    top_row_panel_->setInnerHTML("");
+  }
+  if (ShouldShowVideoControls()) {
+    MediaControlElementsHelper::CreateDiv(
+        "-internal-media-controls-button-spacer", top_row_panel_);
+
+    MaybeParserAppendChild(volume_control_container_, volume_slider_);
+    volume_control_container_->ParserAppendChild(mute_button_);
+    top_row_panel_->ParserAppendChild(volume_control_container_);
+    AttachHoverBackground(mute_button_);
+
+    download_button_->SetIsWanted(download_button_->ShouldDisplayDownloadButton());
+    top_row_panel_->ParserAppendChild(download_button_);
+    AttachHoverBackground(download_button_);
+
+    panel_->ParserAppendChild(top_row_panel_);
+  }
+
+  if (media_button_panel_) {
+    media_button_panel_->setInnerHTML("");
+  }
+
+  // second panel
   Element* button_panel = panel_;
   if (ShouldShowVideoControls()) {
     MaybeParserAppendChild(panel_, scrubbing_panel_);
     MaybeParserAppendChild(scrubbing_panel_, scrubbing_message_);
-    if (display_cutout_fullscreen_button_)
+    if (display_cutout_fullscreen_button_) {
       panel_->ParserAppendChild(display_cutout_fullscreen_button_);
-
+    }
     MaybeParserAppendChild(panel_, overlay_play_button_);
     panel_->ParserAppendChild(media_button_panel_);
     button_panel = media_button_panel_;
   }
 
   button_panel->ParserAppendChild(play_button_);
-  button_panel->ParserAppendChild(current_time_display_);
-  button_panel->ParserAppendChild(duration_display_);
+
+  if (timeline_row_panel_) {
+    timeline_row_panel_->setInnerHTML("");
+  }
+  timeline_row_panel_->ParserAppendChild(current_time_display_);
+  timeline_row_panel_->ParserAppendChild(timeline_);
+  timeline_row_panel_->ParserAppendChild(duration_display_);
+  button_panel->ParserAppendChild(timeline_row_panel_);
+
+  button_panel->ParserAppendChild(playback_speed_button_);
+  playback_speed_button_->SetIsWanted(ShouldShowPlaybackSpeedButton(MediaElement()));
+  AttachHoverBackground(play_button_);
+  AttachHoverBackground(playback_speed_button_);
 
   if (ShouldShowVideoControls()) {
-    MediaControlElementsHelper::CreateDiv(
-        "-internal-media-controls-button-spacer", button_panel);
+    button_panel->ParserAppendChild(fullscreen_button_);
+    AttachHoverBackground(fullscreen_button_);
   }
-
-  panel_->ParserAppendChild(timeline_);
-
-  MaybeParserAppendChild(volume_control_container_, volume_slider_);
-  volume_control_container_->ParserAppendChild(mute_button_);
-  button_panel->ParserAppendChild(volume_control_container_);
-
-  button_panel->ParserAppendChild(fullscreen_button_);
-
-  button_panel->ParserAppendChild(overflow_menu_);
-
-  // Attach hover background divs.
-  AttachHoverBackground(play_button_);
-  AttachHoverBackground(fullscreen_button_);
-  AttachHoverBackground(overflow_menu_);
 }
+#endif // OHOS_VIDEO_ASSISTANT
 
 void MediaControlsImpl::AttachHoverBackground(Element* element) {
   MediaControlElementsHelper::CreateDiv(
@@ -811,6 +913,14 @@ void MediaControlsImpl::UpdateCSSClassFromState() {
         overflow_menu_->setAttribute(html_names::kDisabledAttr, "");
         updated = true;
       }
+
+#ifdef OHOS_VIDEO_ASSISTANT
+      if (ShouldShowVideoControlsHM() &&
+          !playback_speed_button_->FastHasAttribute(html_names::kDisabledAttr)) {
+        playback_speed_button_->setAttribute(html_names::kDisabledAttr, "");
+        updated = true;
+      }
+#endif
     } else {
       if (play_button_->FastHasAttribute(html_names::kDisabledAttr)) {
         play_button_->removeAttribute(html_names::kDisabledAttr);
@@ -821,6 +931,14 @@ void MediaControlsImpl::UpdateCSSClassFromState() {
         overflow_menu_->removeAttribute(html_names::kDisabledAttr);
         updated = true;
       }
+
+#ifdef OHOS_VIDEO_ASSISTANT
+      if (ShouldShowVideoControlsHM() &&
+          !playback_speed_button_->FastHasAttribute(html_names::kDisabledAttr)) {
+        playback_speed_button_->setAttribute(html_names::kDisabledAttr, "");
+        updated = true;
+      }
+#endif
     }
 
     if (state == kNoSource || state == kNotLoaded) {
@@ -828,11 +946,21 @@ void MediaControlsImpl::UpdateCSSClassFromState() {
         timeline_->setAttribute(html_names::kDisabledAttr, "");
         updated = true;
       }
+#ifdef OHOS_VIDEO_ASSISTANT
+      if (ShouldShowVideoControlsHM()) {
+        current_time_display_->classList().Add(kDisabledCSSClass);
+      }
+#endif
     } else {
       if (timeline_->FastHasAttribute(html_names::kDisabledAttr)) {
         timeline_->removeAttribute(html_names::kDisabledAttr);
         updated = true;
       }
+#ifdef OHOS_VIDEO_ASSISTANT
+      if (ShouldShowVideoControlsHM()) {
+        current_time_display_->classList().Remove(kDisabledCSSClass);
+      }
+#endif
     }
 
     if (updated)
@@ -1011,6 +1139,12 @@ void MediaControlsImpl::MaybeShow() {
   volume_slider_->OnControlsShown();
   UpdateCSSClassFromState();
   UpdateActingAsAudioControls();
+
+#if defined(OHOS_MEDIA) && defined(OHOS_VIDEO_ASSISTANT)
+  if (MediaElement().IsFullscreen()) {
+    entered_fullscreen_panel_->SetIsWanted(true);
+  }
+#endif // defined(OHOS_MEDIA) && defined(OHOS_VIDEO_ASSISTANT)
 }
 
 void MediaControlsImpl::Hide() {
@@ -1040,6 +1174,9 @@ void MediaControlsImpl::Hide() {
 #if defined(OHOS_MEDIA)
   if (MediaElement().IsFullscreen()) {
     entered_fullscreen_title_display_->SetIsWanted(false);
+#if defined(OHOS_VIDEO_ASSISTANT)
+    entered_fullscreen_panel_->SetIsWanted(false);
+#endif // defined(OHOS_VIDEO_ASSISTANT)
   }
 #endif // defined(OHOS_MEDIA)
   timeline_->OnControlsHidden();
@@ -1159,7 +1296,11 @@ bool MediaControlsImpl::ShouldHideMediaControls(unsigned behavior_flags) const {
 
 bool MediaControlsImpl::AreVideoControlsHovered() const {
   DCHECK(IsA<HTMLVideoElement>(MediaElement()));
-
+#ifdef OHOS_VIDEO_ASSISTANT
+  if (ShouldShowVideoControlsHM()) {
+    return media_button_panel_->IsHovered() || timeline_->IsHovered() || top_row_panel_->IsHovered();
+  }
+#endif
   return media_button_panel_->IsHovered() || timeline_->IsHovered();
 }
 
@@ -1186,11 +1327,20 @@ void MediaControlsImpl::BeginScrubbing(bool is_touch_event) {
     MediaElement().pause();
   }
 
+#ifdef OHOS_VIDEO_ASSISTANT
+  if (scrubbing_message_ && is_touch_event) {
+    is_begin_scrubbing = true;
+    if (scrubbing_timer_.IsActive()) {
+      scrubbing_timer_.Stop();
+    }
+  }
+#else
   if (scrubbing_message_ && is_touch_event) {
     scrubbing_message_->SetIsWanted(true);
     if (scrubbing_message_->DoesFit())
       panel_->setAttribute("class", AtomicString(kScrubbingMessageCSSClass));
   }
+#endif
 
   is_scrubbing_ = true;
   UpdateCSSClassFromState();
@@ -1204,7 +1354,18 @@ void MediaControlsImpl::EndScrubbing() {
   }
 
   if (scrubbing_message_) {
+#ifdef OHOS_VIDEO_ASSISTANT
+    if (ShouldShowVideoControlsHM()) {
+      if (scrubbing_timer_.IsActive()) {
+        scrubbing_timer_.Stop();
+      }
+      scrubbing_timer_.StartOneShot(kScrubbingDelay, FROM_HERE);
+    } else {
+#endif
     scrubbing_message_->SetIsWanted(false);
+#ifdef OHOS_VIDEO_ASSISTANT
+    }
+#endif
     panel_->removeAttribute("class");
   }
 
@@ -1237,6 +1398,13 @@ void MediaControlsImpl::TogglePlaybackSpeedList() {
 bool MediaControlsImpl::PlaybackSpeedListIsWanted() {
   return playback_speed_list_->IsWanted();
 }
+
+#ifdef OHOS_VIDEO_ASSISTANT
+
+bool MediaControlsImpl::ShouldShowVideoControlsHM() const {
+  return MediaElement().IsCustomMediaPlayerEnabled() && ShouldShowVideoControls();
+}
+#endif
 
 MediaControlsTextTrackManager& MediaControlsImpl::GetTextTrackManager() {
   return *text_track_manager_;
@@ -1314,17 +1482,23 @@ void MediaControlsImpl::UpdateOverflowMenuWanted() const {
   // If the bool is true then the element is "sticky" this means that we will
   // always try and show it unless there is not room for it.
   std::pair<MediaControlElementBase*, bool> row_elements[] = {
-      std::make_pair(play_button_.Get(), true),
-      std::make_pair(mute_button_.Get(), true),
-      std::make_pair(fullscreen_button_.Get(), true),
-      std::make_pair(current_time_display_.Get(), true),
-      std::make_pair(duration_display_.Get(), true),
-      std::make_pair(picture_in_picture_button_.Get(), false),
-      std::make_pair(cast_button_.Get(), false),
-      std::make_pair(download_button_.Get(), false),
-      std::make_pair(toggle_closed_captions_button_.Get(), false),
-      std::make_pair(playback_speed_button_.Get(), false),
-  };
+    std::make_pair(play_button_.Get(), true),
+    std::make_pair(mute_button_.Get(), true),
+    std::make_pair(fullscreen_button_.Get(), true),
+    std::make_pair(current_time_display_.Get(), true),
+    std::make_pair(duration_display_.Get(), true),
+    std::make_pair(picture_in_picture_button_.Get(), false),
+    std::make_pair(cast_button_.Get(), false),
+    std::make_pair(download_button_.Get(), false),
+    std::make_pair(toggle_closed_captions_button_.Get(), false),
+    std::make_pair(playback_speed_button_.Get(), false),
+};
+#if defined(OHOS_VIDEO_ASSISTANT)
+  if (ShouldShowVideoControlsHM()) {
+    row_elements[kDownloadIndexToRowColumns].second = true;
+    row_elements[kPlaybackSpeedIndexToRowColumns].second = true;
+  }
+#endif
 
   // These are the elements in order of priority that take up vertical room.
   MediaControlElementBase* column_elements[] = {
@@ -1470,17 +1644,54 @@ void MediaControlsImpl::UpdateScrubbingMessageFits() const {
     scrubbing_message_->SetDoesFit(size_.width() >= kMinScrubbingMessageWidth);
 }
 
+#ifdef OHOS_VIDEO_ASSISTANT
+MediaControlsSizingClass MediaControlsImpl::GetSizingClassHM() {
+  if (size_.width() < kMediaControlsSizingMediumThresholdVideoAssitant) {
+    return MediaControlsSizingClass::kSmall;
+  }
+  if (size_.width() < kMediaControlsSizingLargeThresholdVideoAssitant) {
+    return MediaControlsSizingClass::kMedium;
+  }
+  return MediaControlsSizingClass::kLarge;
+}
+
+void MediaControlsImpl::ScrubbingTimerFired(TimerBase*) {
+  if (!MediaElement().isConnected()) {
+    return;
+  }
+ 
+  if (is_begin_scrubbing) {
+    scrubbing_message_->updateScrubbingMsg(false);
+    is_begin_scrubbing = false;
+  }
+}
+#endif
+
 void MediaControlsImpl::UpdateSizingCSSClass() {
   MediaControlsSizingClass sizing_class =
       MediaControls::GetSizingClass(size_.width());
 
-  SetClass(kMediaControlsSizingSmallCSSClass,
-           ShouldShowVideoControls() &&
-               (sizing_class == MediaControlsSizingClass::kSmall ||
-                sizing_class == MediaControlsSizingClass::kMedium));
-  SetClass(kMediaControlsSizingLargeCSSClass,
-           ShouldShowVideoControls() &&
-               sizing_class == MediaControlsSizingClass::kLarge);
+#ifdef OHOS_VIDEO_ASSISTANT
+  if (ShouldShowVideoControlsHM()) {
+    MediaControlsSizingClass sizing_class_hm = GetSizingClassHM();
+    SetClass(kMediaControlsSizingSmallCSSClass,
+             ShouldShowVideoControls() && sizing_class_hm == MediaControlsSizingClass::kSmall);
+    SetClass(kMediaControlsSizingMediumCSSClass,
+             ShouldShowVideoControls() && sizing_class_hm == MediaControlsSizingClass::kMedium);
+    SetClass(kMediaControlsSizingLargeCSSClass,
+             ShouldShowVideoControls() && sizing_class_hm == MediaControlsSizingClass::kLarge);
+  } else {
+#endif
+    SetClass(kMediaControlsSizingSmallCSSClass,
+             ShouldShowVideoControls() &&
+                (sizing_class == MediaControlsSizingClass::kSmall ||
+                 sizing_class == MediaControlsSizingClass::kMedium));
+    SetClass(kMediaControlsSizingLargeCSSClass,
+             ShouldShowVideoControls() &&
+                sizing_class == MediaControlsSizingClass::kLarge);
+#ifdef OHOS_VIDEO_ASSISTANT
+  }
+#endif
 }
 
 void MediaControlsImpl::MaybeToggleControlsFromTap() {
@@ -1672,16 +1883,27 @@ void MediaControlsImpl::HandleTouchEvent(Event* event) {
     if (tap_timer_.IsActive()) {
       // Cancel the visibility toggle event.
       tap_timer_.Stop();
-
-      if (IsOnLeftSide(event)) {
-        MaybeJump(kNumberOfSecondsToJump * -1);
-      } else {
-        MaybeJump(kNumberOfSecondsToJump);
-      }
+      HandleDoubleTap(event);
     } else {
       tap_timer_.StartOneShot(kDoubleTapDelay, FROM_HERE);
     }
   }
+}
+
+void MediaControlsImpl::HandleDoubleTap(Event* event) {
+#ifdef OHOS_VIDEO_ASSISTANT
+  if (ShouldShowVideoControlsHM()) {
+    MediaElement().TogglePlayState();
+  } else {
+#endif
+    if (IsOnLeftSide(event)) {
+      MaybeJump(kNumberOfSecondsToJump * -1);
+    } else {
+      MaybeJump(kNumberOfSecondsToJump);
+    }
+#ifdef OHOS_VIDEO_ASSISTANT
+  }
+#endif
 }
 
 void MediaControlsImpl::EnsureAnimatedArrowContainer() {
@@ -1900,6 +2122,18 @@ void MediaControlsImpl::OnPause() {
 
 void MediaControlsImpl::OnSeeking() {
   UpdateTimeIndicators();
+
+#ifdef OHOS_VIDEO_ASSISTANT
+  if (ShouldShowVideoControlsHM()) {
+    if (scrubbing_message_ && is_begin_scrubbing) {
+      scrubbing_message_->updateScrubbingMsg(true);
+      if (scrubbing_message_->DoesFit()) {
+        panel_->setAttribute("class", AtomicString(kScrubbingMessageCSSClass));
+      }
+    }
+  }
+#endif
+
   if (!is_scrubbing_) {
     is_scrubbing_ = true;
     UpdateCSSClassFromState();
@@ -1955,6 +2189,11 @@ void MediaControlsImpl::OnEnteredFullscreen() {
   entered_fullscreen_panel_->ParserAppendChild(
       entered_fullscreen_title_display_);
   entered_fullscreen_panel_->SetIsWanted(true);
+#if defined(OHOS_VIDEO_ASSISTANT)
+  if (!MediaElement().ShouldShowControls()) {
+    entered_fullscreen_panel_->SetIsWanted(false);
+  }
+#endif // defined(OHOS_VIDEO_ASSISTANT)
 
   SetClass("fullscreen", true);
 
@@ -2197,6 +2436,12 @@ void MediaControlsImpl::HidePopupMenu() {
     TogglePlaybackSpeedList();
 }
 
+#ifdef OHOS_VIDEO_ASSISTANT
+void MediaControlsImpl::HidePlaybackSpeedList() {
+  playback_speed_list_->SetIsWanted(false);
+}
+#endif
+
 void MediaControlsImpl::VolumeSliderWantedTimerFired(TimerBase*) {
   volume_slider_->OpenSlider();
   volume_control_container_->OpenContainer();
@@ -2251,6 +2496,17 @@ MediaControlOverflowMenuButtonElement& MediaControlsImpl::OverflowButton() {
   return *overflow_menu_;
 }
 
+#ifdef OHOS_VIDEO_ASSISTANT
+const MediaControlPlaybackSpeedButtonElement& MediaControlsImpl::Playback_Speed_Button()
+    const {
+  return *playback_speed_button_;
+}
+
+MediaControlPlaybackSpeedButtonElement& MediaControlsImpl::Playback_Speed_Button() {
+  return *playback_speed_button_;
+}
+#endif
+
 void MediaControlsImpl::OnWaiting() {
   timeline_->OnMediaStoppedPlaying();
   UpdateCSSClassFromState();
@@ -2259,6 +2515,12 @@ void MediaControlsImpl::OnWaiting() {
 void MediaControlsImpl::OnLoadedData() {
   UpdateCSSClassFromState();
 }
+
+#ifdef OHOS_VIDEO_ASSISTANT
+void MediaControlsImpl::OnPlaybackSpeedRateChanged() {
+  playback_speed_button_->RefreshPlaybackSpeedButton();
+}
+#endif
 
 HTMLVideoElement& MediaControlsImpl::VideoElement() {
   return *To<HTMLVideoElement>(&MediaElement());
@@ -2308,10 +2570,21 @@ void MediaControlsImpl::Trace(Visitor* visitor) const {
   visitor->Trace(entered_fullscreen_title_display_);
 #endif // defined(OHOS_MEDIA)
 #ifdef OHOS_VIDEO_ASSISTANT
-  visitor->Trace(style_element_);
+  VideoAssistantTrace(visitor);
+  visitor->Trace(scrubbing_timer_);
 #endif // OHOS_VIDEO_ASSISTANT
   MediaControls::Trace(visitor);
   HTMLDivElement::Trace(visitor);
 }
+
+#ifdef OHOS_VIDEO_ASSISTANT
+void MediaControlsImpl::VideoAssistantTrace(Visitor* visitor) const {
+  visitor->Trace(style_element_);
+  if (ShouldShowVideoControlsHM()) {
+      visitor->Trace(top_row_panel_);
+      visitor->Trace(timeline_row_panel_);
+  }
+}
+#endif // OHOS_VIDEO_ASSISTANT
 
 }  // namespace blink

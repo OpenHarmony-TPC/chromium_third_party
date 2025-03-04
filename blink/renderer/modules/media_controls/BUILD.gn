@@ -107,6 +107,10 @@ blink_modules_sources("media_controls") {
        "elements/media_control_entered_fullscreen_panel_element.h",
        "elements/media_control_entered_fullscreen_title_display_element.cc",
        "elements/media_control_entered_fullscreen_title_display_element.h",
+       "elements/media_control_top_row_panel_element.cc",
+       "elements/media_control_top_row_panel_element.h",
+       "elements/media_control_timeline_row_panel_element.cc",
+       "elements/media_control_timeline_row_panel_element.h",
      ]
   }
 

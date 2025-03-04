@@ -362,6 +362,7 @@ class CORE_EXPORT HTMLMediaElement
   double EffectiveMediaVolume() const;
 
 #if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+  bool IsMediaPlayerShown() const;
   bool IsUsedCustomVideoPlayer();
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
 
@@ -416,9 +417,9 @@ class CORE_EXPORT HTMLMediaElement
   // reason while in picture in picture mode.
   LocalFrame* LocalFrameForPlayer();
 
-#if defined(OHOS_MEDIA)
+#if defined(OHOS_MEDIA) || defined(OHOS_VIDEO_ASSISTANT)
   WebString GetTitle() const;
-#endif // defined(OHOS_MEDIA)
+#endif // defined(OHOS_MEDIA) || defined(OHOS_VIDEO_ASSISTANT)
 
 #ifdef OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
   void TryUpdatePlayState();
@@ -427,10 +428,32 @@ class CORE_EXPORT HTMLMediaElement
 #ifdef OHOS_VIDEO_ASSISTANT
   bool IsVideoAssistantEnabled() override;
   void OnLayerBoundsChange(const gfx::Rect& bounds) override;
-  void OnWebMediaPlayerShowing(bool showing) override;
+  void OnPageVisibilityChanged() override;
 
   void TryNotifyVideoPlaying();
   void NotifyVideoVisible(bool visible);
+
+  bool IsCustomMediaPlayerEnabled() override;
+  void OnSupportVideoSurfaceChanged(
+      bool support, std::string decoder_name) override;
+  void EnterFullScreenOverlay();
+  void UpdatePlayStateOverlay(bool playState);
+  void MutedChangedOverlay(bool muted);
+  void PlaybackRateChangedOverlay(double playback_rate);
+
+  void DurationChangedOverlay(double duration);
+  void TimeUpdateOverlay(double current_time);
+  void BufferedEndTimeChangedOverlay(double buffered_end_time);
+  double CalculateBufferedEndTime();
+  void EndedOverlay();
+
+  void FullscreenChangedOverlay(bool fullscreen);
+  void SeekingOverlay();
+  void SeekingFinishedOverlay();
+  void ErrorOverlay(int32_t error_code, const String& error_msg);
+  void VideoSizeChangedOverlay(int32_t width, int32_t height);
+
+  bool IsRTL() const; 
 #endif // OHOS_VIDEO_ASSISTANT
 
  protected:
@@ -608,6 +631,7 @@ class CORE_EXPORT HTMLMediaElement
 
 #if defined(OHOS_CUSTOM_VIDEO_PLAYER)
   bool IsMuted() override;
+  uint32_t IsMediaMuted();
   bool IsCustomVideoPlayerEnabled() override;
   bool ShouldCustomVideoPlayerOverlay() override;
   bool ShouldShowMediaControls() override;
@@ -659,6 +683,8 @@ class CORE_EXPORT HTMLMediaElement
 #if defined(OHOS_VIDEO_ASSISTANT)
   void SetPlaybackRate(double playback_rate) override {}
   void RequestDownloadUrl() override {}
+  void HidePlaybackSpeedList() override;
+  void SetVideoSurface(int32_t widget_id) override;
 #endif  // defined(OHOS_VIDEO_ASSISTANT)
 
 #ifdef OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
@@ -797,7 +823,9 @@ class CORE_EXPORT HTMLMediaElement
 #ifdef OHOS_VIDEO_ASSISTANT
   media::mojom::blink::VideoAttributesForVASTPtr
   CollectVideoAttributesForVAST();
- 
+
+  media::mojom::blink::MediaInfoForVASTPtr CollectMediaInfoAttributesForVAST();
+
   void NotifyVideoPlayingInternal();
   void UpdateVideoAssistantAttributes();
   void NotifyVideoDestroyed();
@@ -1097,7 +1125,6 @@ class CORE_EXPORT HTMLMediaElement
 #ifdef OHOS_VIDEO_ASSISTANT
   bool video_assistant_enabled_ = false;
   bool video_visible_ = false;
-  bool web_player_showing_ = true;
   bool has_been_seen_playing_once_ = false;
   bool has_notified_playing_ = false;
   gfx::RectF video_rect_;

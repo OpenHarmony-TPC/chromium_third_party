@@ -877,6 +877,10 @@ struct BLINK_COMMON_EXPORT StructTraits<blink::mojom::WebPreferencesDataView,
       const blink::web_pref::WebPreferences& r) {
     return r.video_assistant_enabled;
   }
+  static bool custom_media_player_enabled(
+      const blink::web_pref::WebPreferences& r) {
+    return r.custom_media_player_enabled;
+  }
 #endif // OHOS_VIDEO_ASSISTANT
 };
 

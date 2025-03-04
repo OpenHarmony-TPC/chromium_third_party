@@ -60,6 +60,9 @@ class CSSDefaultStyleSheets final
   bool EnsureDefaultStyleSheetForXrOverlay();
   void EnsureDefaultStyleSheetForFullscreen();
   bool EnsureDefaultStyleSheetForForcedColors();
+#ifdef OHOS_VIDEO_ASSISTANT
+  bool EnsureDefaultStyleSheetsForMediaElement();
+#endif
 
   RuleSet* DefaultHtmlStyle() { return default_html_style_.Get(); }
   RuleSet* DefaultMathMLStyle() { return default_mathml_style_.Get(); }

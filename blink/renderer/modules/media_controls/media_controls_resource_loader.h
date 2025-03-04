@@ -43,6 +43,11 @@ class MediaControlsResourceLoader
   static String GetMobileDataPromptStyleSheet();
 #endif // OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
 
+#ifdef OHOS_VIDEO_ASSISTANT
+  static bool custom_media_player_enabled_;
+  static void SetCustomMediaPlayerEnabled(bool enable);
+#endif
+
   String GetUAStyleSheet() override;
 
   MediaControlsResourceLoader();

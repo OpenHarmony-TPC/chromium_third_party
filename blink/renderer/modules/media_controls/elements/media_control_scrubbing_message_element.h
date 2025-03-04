@@ -18,9 +18,18 @@ class MODULES_EXPORT MediaControlScrubbingMessageElement final
   explicit MediaControlScrubbingMessageElement(MediaControlsImpl&);
 
   void SetIsWanted(bool) final;
+#ifdef OHOS_VIDEO_ASSISTANT
+  void updateScrubbingMsg(bool);
+#endif
 
  private:
   void PopulateChildren();
+#ifdef OHOS_VIDEO_ASSISTANT
+  void SetMsgSpan();
+  HTMLSpanElement* current_time_span_;
+  HTMLSpanElement* duration_time_span_;
+  HTMLProgressElement* duration_progress_;
+#endif
 };
 
 }  // namespace blink

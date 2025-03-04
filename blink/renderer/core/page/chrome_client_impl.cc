@@ -898,13 +898,20 @@ cc::AnimationTimeline* ChromeClientImpl::GetScrollAnimationTimeline(
 void ChromeClientImpl::EnterFullscreen(
     LocalFrame& frame,
     const FullscreenOptions* options,
+#ifdef OHOS_VIDEO_ASSISTANT
+    bool overlay_fullscreen,
+#endif // OHOS_VIDEO_ASSISTANT
     FullscreenRequestType request_type
 #if defined(OHOS_MEDIA)
     , const absl::optional<gfx::Size>& video_natural_size
 #endif  // defined(OHOS_MEDIA)
 ) {
   DCHECK(web_view_);
-  web_view_->EnterFullscreen(frame, options, request_type
+  web_view_->EnterFullscreen(frame, options,
+#ifdef OHOS_VIDEO_ASSISTANT
+                             overlay_fullscreen,
+#endif // OHOS_VIDEO_ASSISTANT
+                             request_type
 #if defined(OHOS_MEDIA)
                              , video_natural_size
 #endif  // defined(OHOS_MEDIA)
