@@ -602,6 +602,9 @@ void StreamFromResponseCallback(
                     : protocol == "file" ? WasmStreamingInputType::kValidFileURL
                     : protocol == "blob" ? WasmStreamingInputType::kValidBlob
                     : protocol == "chrome-extension"
+#if defined(OHOS_ARKWEB_EXTENSIONS)
+                            || protocol == "arkweb-extension"
+#endif
                         ? WasmStreamingInputType::kValidChromeExtension
                         : WasmStreamingInputType::kValidOtherProtocol;
   }
