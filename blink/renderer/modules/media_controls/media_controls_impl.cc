@@ -185,6 +185,15 @@ bool ShouldShowPlaybackSpeedButton(HTMLMediaElement& media_element) {
     return false;
   }
 
+#ifdef OHOS_VIDEO_ASSISTANT
+  if (media_element.IsCustomMediaPlayerEnabled()) {
+    if (media_element.duration() == 0 &&
+      media_element.getReadyState() > HTMLMediaElement::kHaveNothing) {
+      return false;
+    }
+  }
+#endif // OHOS_VIDEO_ASSISTANT
+
   return true;
 }
 
@@ -2137,6 +2146,13 @@ void MediaControlsImpl::OnDurationChange() {
     download_button_->SetIsWanted(
         download_button_->ShouldDisplayDownloadButton());
   }
+
+#ifdef OHOS_VIDEO_ASSISTANT
+  if (MediaElement().IsCustomMediaPlayerEnabled()) {
+    playback_speed_button_->SetIsWanted(
+        ShouldShowPlaybackSpeedButton(MediaElement()));
+  }
+#endif // OHOS_VIDEO_ASSISTANT
 }
 
 void MediaControlsImpl::OnPlay() {
