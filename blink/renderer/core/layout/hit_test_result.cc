@@ -653,4 +653,26 @@ Node* HitTestResult::InnerNodeOrImageMapImage() const {
   return image_map_image_element;
 }
 
+#ifdef OHOS_DRAG_DROP
+gfx::Rect HitTestResult::GetReplacedContentRect() const {
+  gfx::Rect image_rect = ImageRect();
+  auto* inner_node = InnerNode();
+  if (!inner_node) {
+    return image_rect;
+  }
+  if (LayoutBox* layout_box = inner_node->GetLayoutBox()) {
+    if (auto* replaced = DynamicTo<LayoutReplaced>(layout_box)) {
+      gfx::Rect absolute_image_rect = ToPixelSnappedRect(replaced->ReplacedContentRect());
+      LOG(INFO) << "GetReplacedContentRect image_rect:" << image_rect.ToString()
+                << ", absolute_image_rect:" << absolute_image_rect.ToString();
+      if (absolute_image_rect.width() > 0 && absolute_image_rect.height() > 0) {
+        absolute_image_rect.Offset(image_rect.OffsetFromOrigin());
+        return absolute_image_rect;
+      }
+    }
+  }
+  return image_rect;
+}
+#endif
+
 }  // namespace blink
