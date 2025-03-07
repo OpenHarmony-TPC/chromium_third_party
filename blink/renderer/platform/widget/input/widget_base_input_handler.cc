@@ -533,12 +533,6 @@ void WidgetBaseInputHandler::HandleInputEvent(
     DCHECK(!handling_state.event_overscroll())
         << "Unexpected overscroll for un-acked event";
   }
-#if defined(OHOS_INPUT_EVENTS)
-  // mark event
-  if (input_event.GetType() == WebInputEvent::Type::kTouchEnd) {
-    widget_->SetRequestKeyboardReason(static_cast<int32_t>(mojom::RequestKeyboardReason::TOUCH));
-  }
-#endif
   // Show the virtual keyboard if enabled and a user gesture triggers a focus
   // change.
   if ((processed != WebInputEventResult::kNotHandled &&
@@ -549,7 +543,12 @@ void WidgetBaseInputHandler::HandleInputEvent(
 #endif
     widget_->ShowVirtualKeyboard();
   }
-
+#if defined(OHOS_INPUT_EVENTS)
+  // mark event
+  if (input_event.GetType() == WebInputEvent::Type::kTouchEnd) {
+    widget_->SetRequestKeyboardReason(static_cast<int32_t>(mojom::RequestKeyboardReason::TOUCH));
+  }
+#endif
   if (!prevent_default &&
       WebInputEvent::IsKeyboardEventType(input_event.GetType()))
     widget_->client()->DidHandleKeyEvent();
