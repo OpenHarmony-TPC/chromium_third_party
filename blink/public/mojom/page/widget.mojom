@@ -150,6 +150,9 @@ interface FrameWidget {
 
   [EnableIf=ohos_ai]
   OnDestroyImageAnalyzerOverlay();
+
+  [EnableIf=ohos_ai]
+  OnFoldStatusChanged(uint32 foldstatus);
 };
 
 // Implemented in Browser, this interface defines frame-widget-specific methods that

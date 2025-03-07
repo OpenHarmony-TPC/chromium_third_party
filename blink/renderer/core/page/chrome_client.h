@@ -43,7 +43,6 @@
 #include "third_party/blink/public/mojom/input/input_handler.mojom-blink-forward.h"
 #include "third_party/blink/public/mojom/scroll/scroll_into_view_params.mojom-blink.h"
 #include "third_party/blink/renderer/core/core_export.h"
-#include "third_party/blink/renderer/core/dom/node.h"
 #include "third_party/blink/renderer/core/html/forms/external_date_time_chooser.h"
 #include "third_party/blink/renderer/core/html/forms/popup_menu.h"
 #include "third_party/blink/renderer/core/layout/geometry/physical_offset.h"
@@ -603,14 +602,16 @@ class CORE_EXPORT ChromeClient : public GarbageCollected<ChromeClient> {
 #endif
 
 #ifdef OHOS_AI
+  using GetAbsImageRectCallback = base::RepeatingCallback<void(gfx::RectF&)>;
   using OnTextSelectedCallback = base::RepeatingCallback<void(bool)>;
   using OnDestroyImageAnalyzerOverlayCallback = base::RepeatingCallback<void()>;
   virtual void CreateOverlay(LocalFrame* frame,
                              const SkBitmap& image,
-                             const Node* image_node,
                              const gfx::Point& touch_point,
+                             GetAbsImageRectCallback get_rect_callback,
                              OnTextSelectedCallback callback,
                              OnDestroyImageAnalyzerOverlayCallback destroy_callback) = 0;
+  virtual uint32_t GetFoldStatus(LocalFrame* frame) = 0;
 #endif
  protected:
   ChromeClient() = default;

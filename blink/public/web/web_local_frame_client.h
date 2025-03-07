@@ -519,6 +519,10 @@ class BLINK_EXPORT WebLocalFrameClient {
   virtual void ChangeVisibilityOfQuickMenu() {}
 #endif
 
+#ifdef OHOS_AI
+  virtual bool CloseImageOverlaySelection() { return false; }
+#endif
+
 #ifdef OHOS_DRAG_DROP
   // Tell the UI to dismiss the contextmenu popup window
   virtual void ClearContextMenu() {}

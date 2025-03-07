@@ -94,6 +94,9 @@ void SelectionController::Trace(Visitor* visitor) const {
 #ifdef OHOS_EX_FREE_COPY
   visitor->Trace(last_long_press_hit_test_result_);
 #endif
+#ifdef OHOS_AI
+  visitor->Trace(image_overlay_hit_test_result_);
+#endif
   ExecutionContextLifecycleObserver::Trace(visitor);
 }
 
@@ -1541,6 +1544,16 @@ bool SelectionController::HandleGestureTapIfSelectionExist(
     return false;
   }
 
+  WebLocalFrameImpl* web_local_frame = WebLocalFrameImpl::FromFrame(frame_);
+  if (image_overlay_hit_test_result_.InnerNode() != event.InnerNode() ||
+      image_overlay_hit_test_result_.InnerElement() != event.InnerElement()) {
+    if (web_local_frame && web_local_frame->Client() &&
+        web_local_frame->Client()->CloseImageOverlaySelection()) {
+      LOG(INFO) << "ai image overlay clear selection";
+      return true;
+    }
+  }
+
   const VisibleSelectionInFlatTree& selection =
       Selection().ComputeVisibleSelectionInFlatTree();
   if (selection.IsNone() ||
@@ -1566,7 +1579,6 @@ bool SelectionController::HandleGestureTapIfSelectionExist(
   }
   const PhysicalOffset v_point(view->ConvertFromRootFrame(
       gfx::ToFlooredPoint(event.Event().PositionInRootFrame())));
-  WebLocalFrameImpl* web_local_frame = WebLocalFrameImpl::FromFrame(frame_);
   bool ret = false;
   if (!Selection().Contains(v_point, false)) {
     LOG(INFO) << "Tap outside the selected range to clear selection";

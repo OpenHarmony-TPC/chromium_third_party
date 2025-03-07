@@ -94,6 +94,11 @@ class CORE_EXPORT SelectionController final
   void NotifyContextMenuWillShow();
 #endif
 
+#ifdef OHOS_AI
+  void SetImageOverlayHitTest(HitTestResult image_overlay_hit_test_result) {
+    image_overlay_hit_test_result_ = image_overlay_hit_test_result;
+  } 
+#endif
  private:
   friend class SelectionControllerTest;
 
@@ -169,6 +174,9 @@ class CORE_EXPORT SelectionController final
 #if defined(OHOS_CLIPBOARD)
   bool mouse_menu_show_ = false;
   bool mouse_click_down_allows_ = false;
+#endif
+#ifdef OHOS_AI
+  HitTestResult image_overlay_hit_test_result_;
 #endif
 };
 
