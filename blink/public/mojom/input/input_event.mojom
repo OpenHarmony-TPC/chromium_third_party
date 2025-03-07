@@ -159,3 +159,10 @@ enum EventType {
 
   kTypeLast = kPointerTypeLast
 };
+// input focus event for notify kKeyboard
+enum RequestKeyboardReason {
+  NONE,          // no event reason
+  MOUSE,         // user triggered mouse event
+  TOUCH,         // user triggered touch event
+  OTHER = 20     // other reason
+};
