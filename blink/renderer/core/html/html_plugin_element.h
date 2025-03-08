@@ -110,6 +110,8 @@ class CORE_EXPORT HTMLPlugInElement
 
   bool CheckNativeType(const char* key) const;
 
+  bool CheckIntrinsicSizeEnable() const;
+
   HTMLNativeLoader* NativeLoader() const { return native_loader_.Get(); }
 #endif
 

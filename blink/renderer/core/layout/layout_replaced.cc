@@ -163,6 +163,12 @@ bool LayoutReplaced::NeedsPreferredWidthsRecalculation() const {
 static inline bool LayoutObjectHasIntrinsicAspectRatio(
     const LayoutObject* layout_object) {
   DCHECK(layout_object);
+  if (!layout_object) {
+    return false;
+  }
+  if (layout_object->IsLayoutNative()) {
+    return false;
+  }
   return layout_object->IsImage() || layout_object->IsCanvas() ||
          IsA<LayoutVideo>(layout_object) ||
          IsA<LayoutViewTransitionContent>(layout_object);
