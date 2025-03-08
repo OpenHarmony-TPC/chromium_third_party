@@ -28,6 +28,7 @@
 
 #include "third_party/blink/renderer/core/layout/layout_image.h"
 
+#include "base/logging.h"
 #include "third_party/blink/public/common/permissions_policy/permissions_policy.h"
 #include "third_party/blink/renderer/core/dom/pseudo_element.h"
 #include "third_party/blink/renderer/core/frame/local_frame.h"
@@ -35,6 +36,7 @@
 #include "third_party/blink/renderer/core/frame/web_feature.h"
 #include "third_party/blink/renderer/core/html/html_area_element.h"
 #include "third_party/blink/renderer/core/html/html_image_element.h"
+#include "third_party/blink/renderer/core/html/html_plugin_element.h"
 #include "third_party/blink/renderer/core/html/media/html_video_element.h"
 #include "third_party/blink/renderer/core/html/media/media_element_parser_helpers.h"
 #include "third_party/blink/renderer/core/html_names.h"
@@ -82,6 +84,12 @@ void LayoutImage::StyleDidChange(StyleDifference diff,
                                  const ComputedStyle* old_style) {
   NOT_DESTROYED();
   LayoutReplaced::StyleDidChange(diff, old_style);
+
+  auto* html_pulgin_element = DynamicTo<HTMLPlugInElement>(GetNode());
+  if (html_pulgin_element && html_pulgin_element->IsNativeType() && html_pulgin_element->CheckIntrinsicSizeEnable()) {
+    LayoutReplaced::IntrinsicSizeChanged();
+    LOG(DEBUG) << "LayoutImage::StyleDidChange set intrinsic size: " << IntrinsicSize().ToString().Utf8(); 
+  }
 
   bool old_orientation =
       old_style ? old_style->RespectImageOrientation()

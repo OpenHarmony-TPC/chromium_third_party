@@ -247,6 +247,7 @@ bool StructTraits<blink::mojom::WebPreferencesDataView,
 #if BUILDFLAG(IS_OHOS)
   out->pinch_smooth_mode = data.pinch_smooth_mode();
   out->native_embed_mode_enabled = data.native_embed_mode_enabled();
+  out->intrinsic_size_enabled = data.intrinsic_size_enabled();
   out->draw_mode = data.draw_mode();
 #endif // BUILDFLAG(IS_OHOS)
 #if defined(OHOS_EX_FREE_COPY)

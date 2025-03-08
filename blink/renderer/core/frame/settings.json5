@@ -1111,5 +1111,11 @@
       initial: 1,
       type: "float",
     },
+    {
+      // Used for OHOS Native Embed intrinsic size.
+      name: "intrinsicSizeEnabled",
+      initial: false,
+      type: "bool",
+    },
   ],
 }

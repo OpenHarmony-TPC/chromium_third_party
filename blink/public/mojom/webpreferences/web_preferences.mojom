@@ -176,6 +176,10 @@ struct WebPreferences {
 
   [EnableIf=is_ohos]
   bool native_embed_mode_enabled;
+
+  [EnableIf=is_ohos]
+  bool intrinsic_size_enabled;
+
   [EnableIf=is_ohos]
   string embed_tag;
   [EnableIf=is_ohos]

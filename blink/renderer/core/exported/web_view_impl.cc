@@ -507,6 +507,7 @@ void ApplyOhosWebPreferences(const web_pref::WebPreferences& prefs,
 
 #if BUILDFLAG(IS_OHOS)
   settings->SetNativeEmbedModeEnabled(prefs.native_embed_mode_enabled);
+  settings->SetIntrinsicSizeEnabled(prefs.intrinsic_size_enabled);
   settings->RegisterNativeEmbedRule(
       WebString::FromASCII(base::ToLowerASCII(prefs.embed_tag)),
       WebString::FromASCII(base::ToLowerASCII(prefs.embed_tag_type)));
