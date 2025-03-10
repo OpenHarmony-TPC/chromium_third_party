@@ -1153,7 +1153,7 @@ void MediaControlsImpl::MaybeShow() {
   else {
     MakeTransparentImmediately();
   }
-#endif
+#endif // OHOS_VIDEO_ASSISTANT
 
   if (loading_panel_)
     loading_panel_->OnControlsShown();
