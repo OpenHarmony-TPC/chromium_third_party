@@ -1146,20 +1146,13 @@ void MediaControlsImpl::MaybeShow() {
   if (overlay_play_button_ && !is_paused_for_scrubbing_)
     overlay_play_button_->UpdateDisplayType();
 
-#ifdef OHOS_VIDEO_ASSISTANT
-  bool shouldMakeOpaque = false;
-  if (MediaElement().paused()) {
-    shouldMakeOpaque = true;
-  }
-  if (shouldMakeOpaque) {
-    MakeOpaque();
-  } else {
-    MakeTransparentImmediately();
-  }
-#else
   // Only make the controls visible if they won't get hidden by OnTimeUpdate.
   if (MediaElement().paused() || !ShouldHideMediaControls())
     MakeOpaque();
+#ifdef OHOS_VIDEO_ASSISTANT
+  else {
+    MakeTransparentImmediately();
+  }
 #endif
 
   if (loading_panel_)
