@@ -115,6 +115,8 @@ class CORE_EXPORT NativeLoader
 
   void ResetMojoState();
 
+  gfx::Rect TransformRect(gfx::Rect rect);
+
   String GetTypeAttribute() const;
   String GetSrcAttribute() const;
   String GetIdAttribute() const;
