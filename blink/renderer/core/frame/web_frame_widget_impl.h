@@ -694,6 +694,7 @@ class CORE_EXPORT WebFrameWidgetImpl
   gfx::Rect GetImageRectInner();
   virtual uint32_t GetFoldStatus();
   void OnFoldStatusChanged(uint32_t foldstatus) override;
+  void NotifyOverlayStateChanged() override;
 #endif
 
 #ifdef OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT

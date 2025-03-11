@@ -1545,15 +1545,6 @@ bool SelectionController::HandleGestureTapIfSelectionExist(
   }
 
   WebLocalFrameImpl* web_local_frame = WebLocalFrameImpl::FromFrame(frame_);
-  if (image_overlay_hit_test_result_.InnerNode() != event.InnerNode() ||
-      image_overlay_hit_test_result_.InnerElement() != event.InnerElement()) {
-    if (web_local_frame && web_local_frame->Client() &&
-        web_local_frame->Client()->CloseImageOverlaySelection()) {
-      LOG(INFO) << "ai image overlay clear selection";
-      return true;
-    }
-  }
-
   const VisibleSelectionInFlatTree& selection =
       Selection().ComputeVisibleSelectionInFlatTree();
   if (selection.IsNone() ||

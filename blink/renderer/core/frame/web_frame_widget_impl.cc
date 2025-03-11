@@ -4881,7 +4881,11 @@ uint32_t WebFrameWidgetImpl::GetFoldStatus() {
 
 void WebFrameWidgetImpl::OnFoldStatusChanged(uint32_t foldstatus) {
   fold_status_ = foldstatus;
-} 
+}
+
+void WebFrameWidgetImpl::NotifyOverlayStateChanged() {
+  GetAssociatedFrameWidgetHost()->OnOverlayStateChanged(GetImageRectInner());
+}
 
 void WebFrameWidgetImpl::GetImageRect(GetImageRectCallback callback) {
   std::move(callback).Run(GetImageRectInner());
@@ -4902,8 +4906,9 @@ gfx::Rect WebFrameWidgetImpl::GetImageRectInner() {
       return gfx::Rect();
     }
     float dsf = widget_base_->GetScreenInfo().device_scale_factor;
+    float scale = PageScaleInMainFrame();
     auto calc_rect = gfx::Rect(ScaleToFlooredPoint(rel_rect.origin(), dsf),
-                               ScaleToFlooredSize(rel_rect.size(), dsf));
+                               ScaleToFlooredSize(quad_rect.size(), scale));
     return calc_rect;
   } else {
     LOG(ERROR) << "GetImageRect failed: abs_rect is empty.";
