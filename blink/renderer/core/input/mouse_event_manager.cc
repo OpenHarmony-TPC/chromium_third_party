@@ -1298,11 +1298,7 @@ void MouseEventManager::CloseImageOverlay() {
   WebLocalFrameImpl* web_local_frame = WebLocalFrameImpl::FromFrame(frame_);
   if (web_local_frame && web_local_frame->Client()) {
     LOG(INFO) << "MouseEventManager::CloseImageOverlay: start.";
-    if (web_local_frame->Client()->CloseImageOverlaySelection()) {
-      overlay_in_progress_ = false;
-    } else {
-      LOG(INFO) << "MouseEventManager::CloseImageOverlay: failed.";
-    }
+    web_local_frame->Client()->CloseImageOverlaySelection();
   }
 }
 
@@ -1313,7 +1309,9 @@ void MouseEventManager::GetAbsImageRect(gfx::RectF& abs_rect) {
     hit_image_node_ = nullptr;
     return;
   }
-  if (hit_image_node_ && hit_image_node_->isConnected()) {
+  if (hit_image_node_ && hit_image_node_->isConnected() &&
+      hit_image_node_->GetLayoutBox()) {
+    LOG(INFO) << "getting layout box rect from hit_image_node_";
     abs_rect = hit_image_node_->GetLayoutBox()->AbsoluteContentQuad().BoundingBox();
   } else {
     LOG(INFO) << "hit_image_node_ is nullptr or disconnected.";
