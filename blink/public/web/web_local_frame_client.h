@@ -520,7 +520,7 @@ class BLINK_EXPORT WebLocalFrameClient {
 #endif
 
 #ifdef OHOS_AI
-  virtual bool CloseImageOverlaySelection() { return false; }
+  virtual void CloseImageOverlaySelection() {}
 #endif
 
 #ifdef OHOS_DRAG_DROP

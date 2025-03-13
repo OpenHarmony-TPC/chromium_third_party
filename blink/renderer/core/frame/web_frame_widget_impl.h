@@ -696,6 +696,7 @@ class CORE_EXPORT WebFrameWidgetImpl
   void OnDestroyImageAnalyzerOverlay() override;
   virtual uint32_t GetFoldStatus();
   void OnFoldStatusChanged(uint32_t foldstatus) override;
+  void NotifyOverlayStateChanged() override;
 #endif
 
  protected:
