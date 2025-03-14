@@ -28,6 +28,10 @@ using RenderingMode = ::media::VideoRendererSink::RenderCallback::RenderingMode;
 const int kBackgroundRenderingTimeoutMs = 250;
 const int kForceBeginFramesTimeoutMs = 1000;
 
+#if defined(OHOS_MEDIA_CAPABILITIES_ENHANCE)
+const int kFrameFreezeTimeMs = 100;
+#endif // OHOS_MEDIA_CAPABILITIES_ENHANCE
+
 // static
 constexpr const char VideoFrameCompositor::kTracingCategory[];
 
@@ -376,6 +380,17 @@ bool VideoFrameCompositor::ProcessNewFrame(
     return false;
   }
 
+#if defined(OHOS_MEDIA_CAPABILITIES_ENHANCE)
+  int64_t now = (base::Time::Now() - base::Time::UnixEpoch()).InMilliseconds();
+  if (is_playing_) {
+    int64_t delta_time = now - last_frame_time_;
+    if (delta_time > kFrameFreezeTimeMs) {
+      total_freeze_time_ += delta_time;
+    }
+  }
+  last_frame_time_ = now;
+#endif // OHOS_MEDIA_CAPABILITIES_ENHANCE
+
   // Set the flag indicating that the current frame is unrendered, if we get a
   // subsequent PutCurrentFrame() call it will mark it as rendered.
   rendered_last_frame_ = false;
@@ -490,5 +505,18 @@ void VideoFrameCompositor::OnContextLost() {
       media::VideoFrame::CreateBlackFrame(current_frame_->natural_size());
   SetCurrentFrame_Locked(std::move(black_frame), tick_clock_->NowTicks());
 }
+
+#if defined(OHOS_MEDIA_CAPABILITIES_ENHANCE)
+void VideoFrameCompositor::SetStartTime(int64_t start_time) {
+  last_frame_time_ = start_time;
+  is_playing_ = (start_time != 0);
+}
+
+int64_t VideoFrameCompositor::GetFreezeTime() {
+  int64_t freeze_time = total_freeze_time_;
+  total_freeze_time_ = 0;
+  return freeze_time;
+}
+#endif // OHOS_MEDIA_CAPABILITIES_ENHANCE
 
 }  // namespace blink

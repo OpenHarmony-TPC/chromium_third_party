@@ -3081,6 +3081,28 @@ void HTMLMediaElement::PauseInternal(PlayPromiseError code,
   UpdatePlayState(pause_speech);
 }
 
+#if defined(OHOS_MEDIA_CAPABILITIES_ENHANCE)
+void HTMLMediaElement::ScheduleVideoFreezeEvent() {
+  if (IsFeedsPage()) {
+    ScheduleEvent(event_type_names::kVideofreeze);
+  }
+}
+
+double HTMLMediaElement::freezeTime() const {
+  if (!web_media_player_ || !IsFeedsPage()) {
+    return 0.0;
+  }
+  return (double) web_media_player_->GetFreezeTime();
+}
+
+double HTMLMediaElement::playedTime() const {
+  if (!web_media_player_ || !IsFeedsPage()) {
+    return 0.0;
+  }
+  return (double) web_media_player_->GetPlayedTime();
+}
+#endif // OHOS_MEDIA_CAPABILITIES_ENHANCE
+
 bool HTMLMediaElement::preservesPitch() const {
   return preserves_pitch_;
 }
@@ -5157,6 +5179,16 @@ HTMLMediaElement::AddMediaPlayerObserverAndPassReceiver() {
       GetDocument().GetTaskRunner(TaskType::kInternalMedia));
   return observer_receiver;
 }
+
+#if defined(OHOS_MEDIA_CAPABILITIES_ENHANCE)
+bool HTMLMediaElement::IsFeedsPage() const {
+  if (!GetDocument().GetSettings()) {
+    return false;
+  }
+  int32_t usage_scenario = GetDocument().GetSettings()->GetUsageScenario();
+  return usage_scenario == static_cast<int32_t>(ScenarioType::SCENARIO_FEEDSPAGE_TYPE);
+}
+#endif // OHOS_MEDIA_CAPABILITIES_ENHANCE
 
 void HTMLMediaElement::RequestPlay() {
   LocalFrame* frame = GetDocument().GetFrame();

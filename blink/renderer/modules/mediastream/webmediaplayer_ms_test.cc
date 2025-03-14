@@ -641,6 +641,7 @@ class WebMediaPlayerMSTest
   MOCK_CONST_METHOD0(GetDisplayType, DisplayType());
   MOCK_CONST_METHOD0(CouldPlayIfEnoughData, bool());
   MOCK_METHOD0(OnRequestVideoFrameCallback, void());
+  MOCK_METHOD0(ScheduleVideoFreezeEvent, void());
 
   std::unique_ptr<WebSurfaceLayerBridge> CreateMockSurfaceLayerBridge(
       WebSurfaceLayerBridgeObserver*,

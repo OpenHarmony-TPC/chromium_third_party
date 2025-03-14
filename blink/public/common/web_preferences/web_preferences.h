@@ -419,6 +419,10 @@ struct BLINK_COMMON_EXPORT WebPreferences {
   bool custom_video_player_overlay = false;
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
 
+#if defined(OHOS_MEDIA_CAPABILITIES_ENHANCE)
+  int32_t usage_scenario = 1;
+#endif // OHOS_MEDIA_CAPABILITIES_ENHANCE
+
 #ifdef OHOS_ACTIVE_POLICY
   int64_t delay_for_background_tab_freezing = -1;
 #endif

@@ -242,6 +242,12 @@ class CORE_EXPORT HTMLMediaElement
   ScriptPromise playForBindings(ScriptState*);
   absl::optional<DOMExceptionCode> Play();
 
+#if defined(OHOS_MEDIA_CAPABILITIES_ENHANCE)
+  void ScheduleVideoFreezeEvent() override;
+  double freezeTime() const;
+  double playedTime() const;
+#endif // OHOS_MEDIA_CAPABILITIES_ENHANCE
+
   // Called when the video should pause to let audio descriptions finish.
   void PauseToLetDescriptionFinish();
 
@@ -446,7 +452,7 @@ class CORE_EXPORT HTMLMediaElement
   void ErrorOverlay(int32_t error_code, const String& error_msg);
   void VideoSizeChangedOverlay(int32_t width, int32_t height);
 
-  bool IsRTL() const; 
+  bool IsRTL() const;
 #endif // OHOS_VIDEO_ASSISTANT
 
  protected:
@@ -507,6 +513,41 @@ class CORE_EXPORT HTMLMediaElement
   friend class HTMLMediaElementTest;
   friend class PictureInPictureControllerTestWithWidget;
   friend class VideoWakeLockTest;
+
+  /**
+  * 场景类型
+  */
+  enum class ScenarioType {
+    /**
+    * tab页
+    */
+    SCENARIO_TAB_TYPE = 1,
+
+    /**
+    * cct
+    */
+    SCENARIO_CCT_TYPE = 2,
+
+    /**
+    * pwa
+    */
+    SCENARIO_PWA_TYPE = 3,
+
+    /**
+    * webui
+    */
+    SCENARIO_WEBUI_TYPE = 4,
+
+    /**
+    * 信息流
+    */
+    SCENARIO_FEEDSPAGE_TYPE = 5,
+
+    /**
+    * 其他
+    */
+    SCENARIO_OTHER_TYPE = 99,
+  };
 
   class SourceMetadata {
     DISALLOW_NEW();
@@ -817,6 +858,8 @@ class CORE_EXPORT HTMLMediaElement
   // bind to.
   mojo::PendingAssociatedReceiver<media::mojom::blink::MediaPlayerObserver>
   AddMediaPlayerObserverAndPassReceiver();
+
+  bool IsFeedsPage() const;
 
 #ifdef OHOS_VIDEO_ASSISTANT
   media::mojom::blink::VideoAttributesForVASTPtr

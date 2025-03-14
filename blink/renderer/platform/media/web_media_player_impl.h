@@ -328,6 +328,11 @@ class PLATFORM_EXPORT WebMediaPlayerImpl
     return is_background_suspend_enabled_;
   }
 
+#if defined(OHOS_MEDIA_CAPABILITIES_ENHANCE)
+  int64_t GetFreezeTime() const override;
+  int64_t GetPlayedTime() override;
+#endif // OHOS_MEDIA_CAPABILITIES_ENHANCE
+
 #ifdef OHOS_VIDEO_ASSISTANT
   void SetVideoSurface(int32_t widget_id) override;
 #endif // OHOS_VIDEO_ASSISTANT
@@ -1170,6 +1175,11 @@ class PLATFORM_EXPORT WebMediaPlayerImpl
 
   base::WeakPtr<WebMediaPlayerImpl> weak_this_;
   base::WeakPtrFactory<WebMediaPlayerImpl> weak_factory_{this};
+
+#if defined(OHOS_MEDIA_CAPABILITIES_ENHANCE)
+  int64_t start_play_time_ = 0;
+  int64_t total_play_time_ = 0;
+#endif // OHOS_MEDIA_CAPABILITIES_ENHANCE
 
 #ifdef OHOS_VIDEO_ASSISTANT
   media::SurfaceCreatedCB surface_created_cb_;

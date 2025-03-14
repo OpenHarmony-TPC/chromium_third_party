@@ -543,6 +543,10 @@ void ApplyOhosWebPreferences(const web_pref::WebPreferences& prefs,
   settings->SetPreferHiddenVolumeControls(!base::ohos::IsPcDevice());
 #endif
 
+#if defined(OHOS_MEDIA_CAPABILITIES_ENHANCE)
+  settings->SetUsageScenario(prefs.usage_scenario);
+#endif
+
 #ifdef OHOS_ACTIVE_POLICY
   web_view_impl->SetDelayDurationForBackgroundTabFreezing(
       prefs.delay_for_background_tab_freezing);

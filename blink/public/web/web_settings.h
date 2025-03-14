@@ -317,6 +317,10 @@ class WebSettings {
   virtual void SetCustomVideoPlayerOverlay(bool overlay) = 0;
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
 
+#if defined(OHOS_MEDIA_CAPABILITIES_ENHANCE)
+  virtual void SetUsageScenario(int32_t usage_scenario) = 0;
+#endif // OHOS_MEDIA_CAPABILITIES_ENHANCE
+
 #ifdef OHOS_VIDEO_ASSISTANT
   virtual void SetVideoAssistantEnabled(bool enabled) {}
   virtual void SetCustomMediaPlayerEnabled(bool enabled) {}
