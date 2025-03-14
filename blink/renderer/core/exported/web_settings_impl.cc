@@ -881,6 +881,12 @@ void WebSettingsImpl::SetCustomVideoPlayerOverlay(bool overlay) {
 }
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
 
+#if defined(OHOS_MEDIA_CAPABILITIES_ENHANCE)
+void WebSettingsImpl::SetUsageScenario(int32_t usage_scenario) {
+  settings_->SetUsageScenario(usage_scenario);
+}
+#endif // OHOS_MEDIA_CAPABILITIES_ENHANCE
+
 #ifdef OHOS_VIDEO_ASSISTANT
 void WebSettingsImpl::SetVideoAssistantEnabled(bool enabled) {
   settings_->SetVideoAssistantEnabled(enabled);
@@ -895,7 +901,7 @@ bool WebSettingsImpl::GetCustomMediaPlayerEnabled() {
 #endif // OHOS_VIDEO_ASSISTANT
 
 #ifdef OHOS_LOGGER_REPORT
-int32_t WebSettingsImpl::GetUsageScenario() 
+int32_t WebSettingsImpl::GetUsageScenario()
 {
     return settings_->GetUsageScenario();
 }

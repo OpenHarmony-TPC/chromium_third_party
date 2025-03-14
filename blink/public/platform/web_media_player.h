@@ -399,6 +399,11 @@ class WebMediaPlayer {
   virtual void SetInitialPreload(uint32_t preload) {}
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
 
+#if defined(OHOS_MEDIA_CAPABILITIES_ENHANCE)
+  virtual int64_t GetFreezeTime() const { return 0.0; }
+  virtual int64_t GetPlayedTime() { return 0.0; }
+#endif // OHOS_MEDIA_CAPABILITIES_ENHANCE
+
 #ifdef OHOS_VIDEO_ASSISTANT
   virtual void SetVideoSurface(int32_t widget_id) {}
   virtual bool SupportVideoSurface() { return false; }

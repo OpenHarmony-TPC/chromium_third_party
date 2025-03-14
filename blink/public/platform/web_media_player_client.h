@@ -261,6 +261,9 @@ class BLINK_PLATFORM_EXPORT WebMediaPlayerClient {
   virtual gfx::Rect GetVideoRect() { return gfx::Rect(); }
   virtual void OnLayerRectChange(const gfx::Rect& rect) {}
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
+#if defined(OHOS_MEDIA_CAPABILITIES_ENHANCE)
+  virtual void ScheduleVideoFreezeEvent() = 0;
+#endif // OHOS_MEDIA_CAPABILITIES_ENHANCE
 #ifdef OHOS_VIDEO_ASSISTANT
   virtual bool IsVideoAssistantEnabled() { return false; }
   virtual void OnLayerBoundsChange(const gfx::Rect& bounds) {}

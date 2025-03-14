@@ -162,6 +162,16 @@ bool IsCustomVideoPlayerOverlay() const {
 }
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
 
+#if defined(OHOS_MEDIA_CAPABILITIES_ENHANCE)
+void SetUsageScenario(int32_t usage_scenario) {
+  usage_scenario_ = usage_scenario;
+}
+
+int32_t GetUsageScenario() const {
+  return usage_scenario_;
+}
+#endif // OHOS_MEDIA_CAPABILITIES_ENHANCE
+
 #ifdef OHOS_VIDEO_ASSISTANT
   void SetVideoAssistantEnabled(bool enabled) {
     video_assistant_enabled_ = enabled;
@@ -217,6 +227,10 @@ bool IsCustomVideoPlayerOverlay() const {
   bool custom_video_player_enabled_ = false;
   bool custom_video_player_overlay_ = false;
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
+
+#if defined(OHOS_MEDIA_CAPABILITIES_ENHANCE)
+  int32_t usage_scenario_ = 1;
+#endif // OHOS_MEDIA_CAPABILITIES_ENHANCE
 
 #ifdef OHOS_VIDEO_ASSISTANT
   bool video_assistant_enabled_ = false;

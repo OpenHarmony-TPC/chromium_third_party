@@ -872,6 +872,13 @@ struct BLINK_COMMON_EXPORT StructTraits<blink::mojom::WebPreferencesDataView,
   }
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
 
+#if defined(OHOS_MEDIA_CAPABILITIES_ENHANCE)
+  static int32_t usage_scenario(
+      const blink::web_pref::WebPreferences& r) {
+    return r.usage_scenario;
+  }
+#endif // OHOS_MEDIA_CAPABILITIES_ENHANCE
+
 #ifdef OHOS_ACTIVE_POLICY
   static int64_t delay_for_background_tab_freezing(
       const blink::web_pref::WebPreferences& r) {

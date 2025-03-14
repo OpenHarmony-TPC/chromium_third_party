@@ -165,6 +165,11 @@ class BLINK_PLATFORM_EXPORT VideoFrameCompositor
   // Notifies the |submitter_| that the frames must be submitted.
   void SetForceSubmit(bool force_submit);
 
+#if defined(OHOS_MEDIA_CAPABILITIES_ENHANCE)
+  void SetStartTime(int64_t start_time);
+  int64_t GetFreezeTime();
+#endif // OHOS_MEDIA_CAPABILITIES_ENHANCE
+
   void set_tick_clock_for_testing(const base::TickClock* tick_clock) {
     tick_clock_ = tick_clock;
   }
@@ -301,6 +306,12 @@ class BLINK_PLATFORM_EXPORT VideoFrameCompositor
   std::unique_ptr<WebVideoFrameSubmitter> submitter_;
 
   base::WeakPtrFactory<VideoFrameCompositor> weak_ptr_factory_{this};
+
+#if defined(OHOS_MEDIA_CAPABILITIES_ENHANCE)
+  int64_t last_frame_time_ = 0;
+  int64_t total_freeze_time_ = 0;
+  bool is_playing_ = false;
+#endif // OHOS_MEDIA_CAPABILITIES_ENHANCE
 };
 
 }  // namespace blink

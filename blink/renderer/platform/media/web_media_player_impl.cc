@@ -1014,6 +1014,11 @@ void WebMediaPlayerImpl::Play() {
   DVLOG(1) << __func__;
   DCHECK(main_task_runner_->BelongsToCurrentThread());
 
+#if defined(OHOS_MEDIA_CAPABILITIES_ENHANCE)
+  start_play_time_ = (base::Time::Now() - base::Time::UnixEpoch()).InMilliseconds();
+  compositor_->SetStartTime(start_play_time_);
+#endif // OHOS_MEDIA_CAPABILITIES_ENHANCE
+
   // User initiated play unlocks background video playback.
   if (frame_->HasTransientUserActivation())
     video_locked_when_paused_when_hidden_ = false;
@@ -1116,6 +1121,17 @@ void WebMediaPlayerImpl::Pause() {
   media_log_->AddEvent<MediaLogEvent::kPause>();
 
   UpdatePlayState();
+
+#if defined(OHOS_MEDIA_CAPABILITIES_ENHANCE)
+  compositor_->SetStartTime(0);
+  int64_t play_time = (base::Time::Now() - base::Time::UnixEpoch()).InMilliseconds() - start_play_time_;
+  if (play_time > 0 && start_play_time_ > 0) {
+    total_play_time_ += play_time;
+    if(client_) {
+      client_->ScheduleVideoFreezeEvent();
+    }
+  }
+#endif // OHOS_MEDIA_CAPABILITIES_ENHANCE
 }
 
 void WebMediaPlayerImpl::OnFrozen() {
@@ -4427,6 +4443,17 @@ void WebMediaPlayerImpl::OnLayerRectChange(const gfx::Rect& rect) {
   client_->OnLayerRectChange(rect);
 }
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
+
+#if defined(OHOS_MEDIA_CAPABILITIES_ENHANCE)
+int64_t WebMediaPlayerImpl::GetFreezeTime() const {
+  return compositor_->GetFreezeTime();
+};
+int64_t WebMediaPlayerImpl::GetPlayedTime() {
+  int64_t played_time = total_play_time_;
+  total_play_time_ = 0;
+  return played_time;
+};
+#endif // OHOS_MEDIA_CAPABILITIES_ENHANCE
 
 #ifdef OHOS_VIDEO_ASSISTANT
 void WebMediaPlayerImpl::OnLayerBoundsChange(const gfx::Rect& bounds) {
