@@ -40,6 +40,9 @@ namespace {
 // linux-4.4.52/include/linux/signal.h sig_kernel_coredump(): signals in
 // SIG_KERNEL_COREDUMP_MASK are in the set.
 constexpr int kCrashSignals[] = {
+#if BUILDFLAG(IS_OHOS)
+    SIGINT, // get dump render restored by RestoreHandlerAndReraiseSignalOnReturn
+#endif
     SIGABRT,
     SIGBUS,
     SIGFPE,
