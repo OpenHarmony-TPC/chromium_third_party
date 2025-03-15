@@ -760,8 +760,11 @@ void MainThreadEventQueue::SetNeedsMainFrame() {
           FROM_HERE, kMaxRafDelay,
           base::BindOnce(&MainThreadEventQueue::RafFallbackTimerFired, this));
     }
-    if (client_)
+    if (client_) {
       client_->SetNeedsMainFrame();
+    } else {
+      TRACE_EVENT0("input", "MainThreadEventQueue::SetNeedsMainFrame failed");
+    }
     return;
   }
 
@@ -777,6 +780,8 @@ void MainThreadEventQueue::ClearClient() {
 }
 
 void MainThreadEventQueue::SetNeedsLowLatency(bool low_latency) {
+  TRACE_EVENT1("input", "MainThreadEventQueue::SetNeedsLowLatency",
+    "low_latency", low_latency);
   needs_low_latency_ = low_latency;
 }
 
@@ -789,6 +794,7 @@ void MainThreadEventQueue::HasPointerRawUpdateEventHandlers(bool has_handlers) {
 }
 
 void MainThreadEventQueue::RequestUnbufferedInputEvents() {
+  TRACE_EVENT0("input", "MainThreadEventQueue::RequestUnbufferedInputEvents");
   needs_low_latency_until_pointer_up_ = true;
 }
 
