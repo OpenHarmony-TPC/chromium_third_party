@@ -3128,8 +3128,8 @@ void HTMLMediaElement::ScheduleVideoFreezeEvent() {
 double HTMLMediaElement::freezeTime() {
   if (!IsFeedsPage()) {
     LOG(INFO) << "HTMLMediaElement::freezeTime is not feedsPage";
-     return 0.0;
-   }
+    return 0.0;
+  }
   freeze_time_recorder_.StopRecord();
   base::TimeDelta total_freeze_time = freeze_time_recorder_.GetDuration();
   if (web_media_player_) {
@@ -3142,8 +3142,8 @@ double HTMLMediaElement::freezeTime() {
 double HTMLMediaElement::playedTime() {
   if (!IsFeedsPage()) {
     LOG(INFO) << "HTMLMediaElement::playedTime is not feedsPage";
-     return 0.0;
-   }
+    return 0.0;
+  }
   played_time_recorder_.StopRecord();
   double total_played_time = played_time_recorder_.GetDuration().InMillisecondsF();
   played_time_recorder_.Reset();

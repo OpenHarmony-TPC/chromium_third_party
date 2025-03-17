@@ -1138,7 +1138,7 @@ class CORE_EXPORT HTMLMediaElement
   };
   Recorder played_time_recorder_;
   Recorder freeze_time_recorder_;
-#endif
+#endif // OHOS_MEDIA_CAPABILITIES_ENHANCE
 
   friend class AutoplayPolicy;
   friend class AutoplayUmaHelperTest;
