@@ -2276,6 +2276,7 @@ void MediaControlsImpl::Trace(Visitor* visitor) const {
   visitor->Trace(play_button_);
   visitor->Trace(current_time_display_);
   visitor->Trace(timeline_);
+  visitor->Trace(scrubbing_panel_);
   visitor->Trace(scrubbing_message_);
   visitor->Trace(mute_button_);
   visitor->Trace(volume_slider_);
