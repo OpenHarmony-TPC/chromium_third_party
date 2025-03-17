@@ -160,6 +160,11 @@ using DocumentElementSetMap =
 
 namespace {
 
+#ifdef OHOS_MEDIA_CAPABILITIES_ENHANCE
+const base::TimeDelta kVideoFreezeTimeThresholdDefault =
+    base::Milliseconds(100);
+#endif // OHOS_MEDIA_CAPABILITIES_ENHANCE
+
 // When enabled, this feature brings back the old behavior of periodically
 // dispatching the "progress" event when the source of a HTMLMediaElement is a
 // MediaStream.
@@ -581,6 +586,10 @@ HTMLMediaElement::HTMLMediaElement(const QualifiedName& tag_name,
   }
   LOG(INFO) << "video_assistant_enabled_[" << video_assistant_enabled_ << "]";
 #endif // OHOS_VIDEO_ASSISTANT
+
+#ifdef OHOS_MEDIA_CAPABILITIES_ENHANCE
+  freeze_time_recorder_.SetThreshold(kVideoFreezeTimeThresholdDefault);
+#endif // OHOS_MEDIA_CAPABILITIES_ENHANCE
 }
 
 HTMLMediaElement::~HTMLMediaElement() {
@@ -599,6 +608,7 @@ void HTMLMediaElement::Dispose() {
 
   progress_event_timer_.Shutdown();
   playback_progress_timer_.Shutdown();
+
 }
 
 void HTMLMediaElement::DidMoveToNewDocument(Document& old_document) {
@@ -982,9 +992,25 @@ void HTMLMediaElement::ScheduleEvent(const AtomicString& event_name) {
       if (error_info) {
         ErrorOverlay(error_info->code(), error_info->message());
       }
+#ifdef OHOS_MEDIA_CAPABILITIES_ENHANCE
+    played_time_recorder_.StopRecord();
+    freeze_time_recorder_.StopRecord();
+#endif // OHOS_MEDIA_CAPABILITIES_ENHANCE
     }
   }
 #endif // OHOS_VIDEO_ASSISTANT
+
+#ifdef OHOS_MEDIA_CAPABILITIES_ENHANCE
+  if (event_name == event_type_names::kPlay) { 
+    played_time_recorder_.StartRecord();
+    freeze_time_recorder_.StartRecord();
+  } else if (event_name == event_type_names::kPlaying) {
+    freeze_time_recorder_.StopRecord();
+  } else if (event_name == event_type_names::kPause) {
+    played_time_recorder_.PauseRecord();
+    freeze_time_recorder_.PauseRecord();
+  }
+#endif // OHOS_MEDIA_CAPABILITIES_ENHANCE
 }
 
 void HTMLMediaElement::ScheduleEvent(Event* event) {
@@ -3100,18 +3126,70 @@ void HTMLMediaElement::ScheduleVideoFreezeEvent() {
   }
 }
 
-double HTMLMediaElement::freezeTime() const {
-  if (!web_media_player_ || !IsFeedsPage()) {
-    return 0.0;
+double HTMLMediaElement::freezeTime() {
+  if (!IsFeedsPage()) {
+    LOG(INFO) << "HTMLMediaElement::freezeTime is not feedsPage";
+     return 0.0;
+   }
+  freeze_time_recorder_.StopRecord();
+  base::TimeDelta total_freeze_time = freeze_time_recorder_.GetDuration();
+  if (web_media_player_) {
+    total_freeze_time += base::Milliseconds(web_media_player_->GetFreezeTime());
   }
-  return (double) web_media_player_->GetFreezeTime();
+  freeze_time_recorder_.Reset();
+  return total_freeze_time.InMillisecondsF();
+ }
+
+double HTMLMediaElement::playedTime() {
+  if (!IsFeedsPage()) {
+    LOG(INFO) << "HTMLMediaElement::playedTime is not feedsPage";
+     return 0.0;
+   }
+  played_time_recorder_.StopRecord();
+  double total_played_time = played_time_recorder_.GetDuration().InMillisecondsF();
+  played_time_recorder_.Reset();
+  return total_played_time;
 }
 
-double HTMLMediaElement::playedTime() const {
-  if (!web_media_player_ || !IsFeedsPage()) {
-    return 0.0;
+void HTMLMediaElement::Recorder::SetThreshold(base::TimeDelta threshold) {
+  threshold_ = threshold;
+}
+
+void HTMLMediaElement::Recorder::StartRecord() {
+  if (start_time_ > base::TimeTicks()) {
+    // avoid starting record twice.
+    return;
   }
-  return (double) web_media_player_->GetPlayedTime();
+  start_time_ = base::TimeTicks::Now();
+}
+
+void HTMLMediaElement::Recorder::PauseRecord() {
+  if (start_time_ > base::TimeTicks()) {
+    base::TimeDelta elapsed = base::TimeTicks::Now() - start_time_;
+    if (elapsed > threshold_) {
+      accumulated_duration_ += elapsed;
+    }
+    start_time_ = base::TimeTicks();
+  }
+}
+
+void HTMLMediaElement::Recorder::StopRecord() {
+  if (total_duration_ > base::TimeDelta()) {
+    return;
+  }
+  PauseRecord();
+  total_duration_ = accumulated_duration_;
+  accumulated_duration_ = base::TimeDelta();
+}
+
+base::TimeDelta HTMLMediaElement::Recorder::GetDuration() {
+  return total_duration_;
+}
+
+void HTMLMediaElement::Recorder::Reset() {
+  start_time_ = base::TimeTicks();
+  accumulated_duration_ = base::TimeDelta();
+  total_duration_ = base::TimeDelta();
 }
 #endif // OHOS_MEDIA_CAPABILITIES_ENHANCE
 
@@ -4696,6 +4774,15 @@ void HTMLMediaElement::ResetMediaPlayerAndMediaSource() {
 
   if (audio_source_node_)
     GetAudioSourceProvider().SetClient(audio_source_node_);
+
+#ifdef OHOS_MEDIA_CAPABILITIES_ENHANCE
+  // reset mediaplayer and wait for new src, so reset flags too.
+  if (!paused_ && ready_state_ < kHaveMetadata &&
+      load_state_ == kLoadingFromSourceElement) {
+    played_time_recorder_.StartRecord();
+    freeze_time_recorder_.StartRecord();
+  }
+#endif // OHOS_MEDIA_CAPABILITIES_ENHANCE
 }
 
 void HTMLMediaElement::SetAudioSourceNode(
