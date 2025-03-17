@@ -608,7 +608,6 @@ void HTMLMediaElement::Dispose() {
 
   progress_event_timer_.Shutdown();
   playback_progress_timer_.Shutdown();
-
 }
 
 void HTMLMediaElement::DidMoveToNewDocument(Document& old_document) {
