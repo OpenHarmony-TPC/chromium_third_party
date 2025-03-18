@@ -967,6 +967,7 @@ void WidgetBase::WillBeginMainFrame() {
     UpdateTextInputState();
 #if BUILDFLAG(IS_OHOS)
   if (base::ohos::IsPcDevice()) {
+    base::AutoLock lock(lock_);
     ReportForegroundThreadPool();
   }  
 #endif

@@ -587,6 +587,7 @@ class PLATFORM_EXPORT WidgetBase : public mojom::blink::Widget,
 #endif
 #if BUILDFLAG(IS_OHOS)
   bool is_worker_pool_initial_ = false;
+  base::Lock lock_;
 #endif
 };
 
