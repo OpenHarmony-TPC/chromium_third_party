@@ -382,7 +382,7 @@ bool VideoFrameCompositor::ProcessNewFrame(
 
 #if defined(OHOS_MEDIA_CAPABILITIES_ENHANCE)
   int64_t now = (base::Time::Now() - base::Time::UnixEpoch()).InMilliseconds();
-  if (is_playing_) {
+  if (is_playing_ && last_frame_time_ > 0) {
     int64_t delta_time = now - last_frame_time_;
     if (delta_time > kFrameFreezeTimeMs) {
       total_freeze_time_ += delta_time;
@@ -513,6 +513,14 @@ void VideoFrameCompositor::SetStartTime(int64_t start_time) {
 }
 
 int64_t VideoFrameCompositor::GetFreezeTime() {
+  if (is_playing_ && last_frame_time_ > 0) {
+    int64_t now = (base::Time::Now() - base::Time::UnixEpoch()).InMilliseconds();
+    int64_t delta_time = now - last_frame_time_;
+    if (delta_time > kFrameFreezeTimeMs) {
+      total_freeze_time_ += delta_time;
+    }
+    last_frame_time_ = now;
+  }
   int64_t freeze_time = total_freeze_time_;
   total_freeze_time_ = 0;
   return freeze_time;

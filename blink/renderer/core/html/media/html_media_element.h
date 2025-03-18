@@ -244,8 +244,8 @@ class CORE_EXPORT HTMLMediaElement
 
 #if defined(OHOS_MEDIA_CAPABILITIES_ENHANCE)
   void ScheduleVideoFreezeEvent() override;
-  double freezeTime() const;
-  double playedTime() const;
+  double freezeTime();
+  double playedTime();
 #endif // OHOS_MEDIA_CAPABILITIES_ENHANCE
 
   // Called when the video should pause to let audio descriptions finish.
@@ -1120,6 +1120,25 @@ class CORE_EXPORT HTMLMediaElement
 
   Member<Document> opener_document_;
   Member<OpenerContextObserver> opener_context_observer_;
+
+#ifdef OHOS_MEDIA_CAPABILITIES_ENHANCE
+  class Recorder {
+    public:
+      void SetThreshold(base::TimeDelta threshold);
+      void StartRecord();
+      void PauseRecord();
+      void StopRecord();
+      base::TimeDelta GetDuration();
+      void Reset();
+    private:
+      base::TimeDelta threshold_;
+      base::TimeTicks start_time_;
+      base::TimeDelta accumulated_duration_;
+      base::TimeDelta total_duration_;
+  };
+  Recorder played_time_recorder_;
+  Recorder freeze_time_recorder_;
+#endif // OHOS_MEDIA_CAPABILITIES_ENHANCE
 
   friend class AutoplayPolicy;
   friend class AutoplayUmaHelperTest;
