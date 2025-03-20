@@ -154,14 +154,11 @@ void NativeLoader::LoadResource(LocalFrame* frame) {
 }
 
 gfx::Rect NativeLoader::TransformRect(gfx::Rect rect) {
-  const ComputedStyle* style = plugin_element_->EnsureComputedStyle();
-  if (style && style->HasTransform()) {
-    const TransformOperations& transformOperations = style->Transform();
-    gfx::Transform transform;
-    gfx::SizeF reference_size(rect.width(), rect.height());
-    transformOperations.Apply(reference_size, transform);
+  LayoutObject* renderer = plugin_element_->GetLayoutObject();
+  if (renderer) {
+    gfx::Transform transform = renderer->LocalToAbsoluteTransform();
     rect.set_size(transform.MapRect(rect).size());
-    LOG(INFO)<<"NativeEmbed NativeLoader::TransformRect: "<<rect.ToString();
+    LOG(INFO) << "NativeEmbed NativeLoader::TransformRect: " << rect.ToString();
   }
   return rect;
 }
