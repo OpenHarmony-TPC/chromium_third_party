@@ -102,6 +102,7 @@ struct BLINK_COMMON_EXPORT WebPreferences {
 #endif  // defined(OHOS_INPUT_EVENTS)
 #if BUILDFLAG(IS_OHOS)
   bool native_embed_mode_enabled;
+  bool intrinsic_size_enabled;
   std::string embed_tag;
   std::string embed_tag_type;
   int draw_mode;
