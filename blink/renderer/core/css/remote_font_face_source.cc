@@ -416,13 +416,20 @@ void RemoteFontFaceSource::BeginLoadIfNeeded() {
   auto* font = To<FontResource>(GetResource());
   if (font->StillNeedsLoad()) {
     if (font->IsLowPriorityLoadingAllowedForRemoteFont()) {
-      execution_context->AddConsoleMessage(MakeGarbageCollected<ConsoleMessage>(
-          mojom::blink::ConsoleMessageSource::kIntervention,
-          mojom::blink::ConsoleMessageLevel::kInfo,
-          "Slow network is detected. See "
-          "https://www.chromestatus.com/feature/5636954674692096 for more "
-          "details. Fallback font will be used while loading: " +
-              font->Url().ElidedString()));
+      execution_context->AddConsoleMessage(
+          MakeGarbageCollected<ConsoleMessage>(mojom::blink::ConsoleMessageSource::kIntervention,
+              mojom::blink::ConsoleMessageLevel::kInfo,
+#ifdef OHOS_DEVTOOLS
+              "Slow network is detected. Fallback font will be used while loading: " +
+
+                  font->Url().ElidedString()
+#else
+              "Slow network is detected. See "
+              "https://www.chromestatus.com/feature/5636954674692096 for more "
+              "details. Fallback font will be used while loading: " +
+                  font->Url().ElidedString()
+#endif
+                  ));
 
       // Set the loading priority to VeryLow only when all other clients agreed
       // that this font is not required for painting the text.
