@@ -1594,6 +1594,8 @@ void WebFrameWidgetImpl::DidCompletePageScaleAnimation() {
 
 void WebFrameWidgetImpl::ScheduleAnimation() {
   if (!View()->does_composite()) {
+    TRACE_EVENT0(
+      "blink", "WebFrameWidgetImpl::ScheduleAnimation non_composited_client_");
     non_composited_client_->ScheduleNonCompositedAnimation();
     return;
   }
