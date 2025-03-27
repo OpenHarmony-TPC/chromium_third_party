@@ -102,6 +102,7 @@ WebPreferences::WebPreferences()
 #endif  // defined(OHOS_INPUT_EVENTS)
 #if BUILDFLAG(IS_OHOS)
       native_embed_mode_enabled(false),
+      intrinsic_size_enabled(false),
       embed_tag(kEmbedTag),
       embed_tag_type(kNativeType),
       draw_mode(0),

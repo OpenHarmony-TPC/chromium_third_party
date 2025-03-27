@@ -52,6 +52,11 @@
 #include "third_party/blink/renderer/platform/runtime_enabled_features.h"
 #include "ui/gfx/geometry/size_conversions.h"
 
+#if BUILDFLAG(IS_OHOS)
+#include "base/logging.h"
+#include "third_party/blink/renderer/core/html/html_plugin_element.h"
+#endif
+
 namespace blink {
 
 LayoutImage::LayoutImage(Element* element)
@@ -82,6 +87,14 @@ void LayoutImage::StyleDidChange(StyleDifference diff,
                                  const ComputedStyle* old_style) {
   NOT_DESTROYED();
   LayoutReplaced::StyleDidChange(diff, old_style);
+
+#if BUILDFLAG(IS_OHOS)
+  auto* html_pulgin_element = DynamicTo<HTMLPlugInElement>(GetNode());
+  if (html_pulgin_element && html_pulgin_element->IsNativeType() && html_pulgin_element->CheckIntrinsicSizeEnable()) {
+    LayoutReplaced::IntrinsicSizeChanged();
+    LOG(DEBUG) << "LayoutImage::StyleDidChange set intrinsic size: " << IntrinsicSize().ToString().Utf8(); 
+  }
+#endif
 
   bool old_orientation =
       old_style ? old_style->RespectImageOrientation()

@@ -522,6 +522,10 @@ void WebSettingsImpl::SetNativeEmbedModeEnabled(bool enabled) {
   settings_->SetNativeEmbedModeEnabled(enabled);
 }
 
+void WebSettingsImpl::SetIntrinsicSizeEnabled(bool enabled) {
+  settings_->SetIntrinsicSizeEnabled(enabled);
+}
+
 void WebSettingsImpl::RegisterNativeEmbedRule(const WebString& tag,
                                               const WebString& type) {
   settings_->RegisterNativeEmbedRule(tag, type);
