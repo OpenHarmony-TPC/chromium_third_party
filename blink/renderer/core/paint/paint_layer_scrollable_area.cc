@@ -1678,6 +1678,12 @@ void PaintLayerScrollableArea::ComputeScrollbarExistence(
       GetLayoutBox()->GetFrame()->GetSettings()->GetVerticalHideScrollbars();
   bool is_horizontal_scrollbars_hide =
       GetLayoutBox()->GetFrame()->GetSettings()->GetHorizontalHideScrollbars();
+
+  if (GetLayoutBox()->GetDocument().BeforePrintingOrPrinting()) {
+    // hide scrollbars when printing
+    is_vertical_scrollbars_hide = true;
+    is_horizontal_scrollbars_hide = true;
+  }
 #endif  // defined(OHOS_INPUT_EVENTS)
 
   // First, determine what behavior the scrollbars say they should have.
