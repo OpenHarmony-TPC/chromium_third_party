@@ -3162,10 +3162,13 @@ std::unique_ptr<media::Renderer> WebMediaPlayerImpl::CreateRenderer(
   }
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
 
-  return renderer_factory_selector_->GetCurrentFactory()->CreateRenderer(
+  auto renderer = renderer_factory_selector_->GetCurrentFactory()->CreateRenderer(
       media_task_runner_, worker_task_runner_, audio_source_provider_.get(),
       compositor_.get(), std::move(request_overlay_info_cb),
       client_->TargetColorSpace());
+  renderer->SetNativeWindowCreateCallback(base::BindPostTaskToCurrentDefault(base::BindOnce(
+      &WebMediaPlayerImpl::OnNativeWindowTextureCreated, weak_this_)));
+  return renderer;
 }
 
 absl::optional<media::DemuxerType> WebMediaPlayerImpl::GetDemuxerType() const {
@@ -4443,6 +4446,13 @@ void WebMediaPlayerImpl::OnLayerRectChange(const gfx::Rect& rect) {
   client_->OnLayerRectChange(rect);
 }
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
+
+#if defined(OHOS_MEDIA_POLICY)
+void WebMediaPlayerImpl::OnNativeWindowTextureCreated(media::Renderer::OnGetRectCallback callback) {
+  LOG(INFO) << "OnNativeWindowTextureCreated Run";
+  callback.Run(client_->GetVideoRect());
+}
+#endif // OHOS_MEDIA_POLICY
 
 #if defined(OHOS_MEDIA_CAPABILITIES_ENHANCE)
 int64_t WebMediaPlayerImpl::GetFreezeTime() const {

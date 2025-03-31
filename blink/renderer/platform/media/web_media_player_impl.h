@@ -740,6 +740,9 @@ class PLATFORM_EXPORT WebMediaPlayerImpl
                                          media::Pipeline::StartType start_type,
                                          bool is_streaming,
                                          bool is_static);
+#if defined(OHOS_MEDIA_POLICY)
+  void OnNativeWindowTextureCreated(media::Renderer::OnGetRectCallback callback);
+#endif // OHOS_MEDIA_POLICY
 
 #if defined(OHOS_CUSTOM_VIDEO_PLAYER)
   void OnNativeTextureCreated(int native_texture_id,
