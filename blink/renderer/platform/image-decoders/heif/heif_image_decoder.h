@@ -79,11 +79,29 @@ class PLATFORM_EXPORT HEIFImageDecoder final : public ImageDecoder {
   uint8_t bit_depth_ = 0;
   absl::optional<gfx::HDRMetadata> hdr_metadata_;
 
-  // This is only used to parse image size and type.
-  static std::unique_ptr<OHOS::NWeb::OhosImageDecoderAdapter> decoder_adapter_;
   wtf_size_t decoded_frame_count_ = 0;
   SkYUVColorSpace yuv_color_space_ = SkYUVColorSpace::kIdentity_SkYUVColorSpace;
 };
+
+class OhosImageDecoderAdapterManager {
+ public:
+  static OhosImageDecoderAdapterManager& GetInstance();
+
+  OHOS::NWeb::OhosImageDecoderAdapter* GetImageDecoderAdapter();
+
+ private:
+  friend class HeifImageDecoderTest;
+  OhosImageDecoderAdapterManager(const OhosImageDecoderAdapterManager&) = delete;
+  OhosImageDecoderAdapterManager& operator=(const OhosImageDecoderAdapterManager&) = delete;
+  OhosImageDecoderAdapterManager(OhosImageDecoderAdapterManager&&) = delete;
+  OhosImageDecoderAdapterManager& operator=(OhosImageDecoderAdapterManager&&) = delete;
+
+  OhosImageDecoderAdapterManager() = default;
+  ~OhosImageDecoderAdapterManager() = default;
+
+  std::unique_ptr<OHOS::NWeb::OhosImageDecoderAdapter> decoder_adapter_;
+  std::once_flag init_flag_;
+}; 
 
 }  // namespace blink
 

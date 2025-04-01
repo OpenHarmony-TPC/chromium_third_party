@@ -45,9 +45,6 @@
 
 namespace blink {
 
-std::unique_ptr<OHOS::NWeb::OhosImageDecoderAdapter>
-    HEIFImageDecoder::decoder_adapter_;
-
 HEIFImageDecoder::HEIFImageDecoder(AlphaOption alpha_option,
                                    HighBitDepthDecodingOption hbd_option,
                                    const ColorBehavior& color_behavior,
@@ -58,9 +55,7 @@ HEIFImageDecoder::HEIFImageDecoder(AlphaOption alpha_option,
                    color_behavior,
                    max_decoded_bytes) {}
 
-HEIFImageDecoder::~HEIFImageDecoder() {
-  decoder_adapter_ = nullptr;
-}
+HEIFImageDecoder::~HEIFImageDecoder() {}
 
 const AtomicString& HEIFImageDecoder::MimeType() const {
   DEFINE_STATIC_LOCAL(const AtomicString, heif_mime_type, ("image/heif"));
@@ -276,14 +271,22 @@ bool HEIFImageDecoder::MatchesHeifSignature(const sk_sp<SkData>& data) {
 }
 
 OHOS::NWeb::OhosImageDecoderAdapter* HEIFImageDecoder::GetDecoderAdapter() {
-  if (!decoder_adapter_) {
-    decoder_adapter_ = OHOS::NWeb::OhosAdapterHelper::GetInstance()
-                           .CreateOhosImageDecoderAdapter();
-    if (!decoder_adapter_) {
-      return nullptr;
-    }
-  }
+  return OhosImageDecoderAdapterManager::GetInstance().GetImageDecoderAdapter();
+}
 
+OhosImageDecoderAdapterManager& OhosImageDecoderAdapterManager::GetInstance() {
+  static OhosImageDecoderAdapterManager instance;
+  return instance;
+}
+
+OHOS::NWeb::OhosImageDecoderAdapter* OhosImageDecoderAdapterManager::GetImageDecoderAdapter() {
+  std::call_once(init_flag_, [this] {
+    decoder_adapter_ = OHOS::NWeb::OhosAdapterHelper::GetInstance().
+        CreateOhosImageDecoderAdapter();
+  });
+  if (!decoder_adapter_) {
+    return nullptr;
+  }
   return decoder_adapter_.get();
 }
 

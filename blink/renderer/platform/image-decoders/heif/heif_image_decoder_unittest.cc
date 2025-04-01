@@ -24,6 +24,7 @@
 #include <stdint.h>
 #include <cstring>
 #include <memory>
+#include <thread>
 #include "testing/gmock/include/gmock/gmock.h"
 #include "testing/gtest/include/gtest/gtest.h"
 #include "third_party/blink/renderer/platform/graphics/color_behavior.h"
@@ -36,6 +37,7 @@ using ::testing::_;
 using ::testing::AtLeast;
 using ::testing::Return;
 using namespace blink;
+constexpr int THREAD_NUMS = 5;
 
 class MockSegmentReader : public SegmentReader {
  public:
@@ -345,7 +347,11 @@ TEST_F(HeifImageDecoderTest, OnSetData_005) {
   EXPECT_CALL(*mock_decoder_adapter, GetImageHeight())
       .Times(::testing::AtLeast(2))
       .WillRepeatedly(::testing::Return(600));
-  herfTest->decoder_adapter_ = std::move(mock_decoder_adapter);
+
+  auto& manager = OhosImageDecoderAdapterManager::GetInstance();
+  manager.GetImageDecoderAdapter();
+  manager.decoder_adapter_ = std::move(mock_decoder_adapter);
+
   herfTest->OnSetData(mockReader.get());
   size_t num = 0;
   EXPECT_NE(mockReader->size(), num);
@@ -419,15 +425,51 @@ TEST_F(HeifImageDecoderTest, MatchesHeifSignature) {
 }
 
 TEST_F(HeifImageDecoderTest, GetDecoderAdapter_001) {
-  herfTest->decoder_adapter_ = nullptr;
+  auto& manager = OhosImageDecoderAdapterManager::GetInstance();
+  auto original_adapter = manager.decoder_adapter_.release();
+  manager.decoder_adapter_.reset();
+  
+  auto result = herfTest->GetDecoderAdapter();
+  EXPECT_TRUE(result);
+  
+  manager.decoder_adapter_.reset(original_adapter);
+}
+
+TEST_F(HeifImageDecoderTest, GetDecoderAdapter_002) {
+  auto mock_adapter = std::make_unique<MockOhosImageDecoderAdapter>();
+  auto& manager = OhosImageDecoderAdapterManager::GetInstance();
+  manager.GetImageDecoderAdapter();
+  manager.decoder_adapter_ = std::move(mock_adapter);
+
   auto result = herfTest->GetDecoderAdapter();
   EXPECT_TRUE(result);
 }
 
-TEST_F(HeifImageDecoderTest, GetDecoderAdapter_002) {
-  std::unique_ptr<MockOhosImageDecoderAdapter> mock_decoder_adapter =
-      std::make_unique<MockOhosImageDecoderAdapter>();
-  herfTest->decoder_adapter_ = std::move(mock_decoder_adapter);
-  auto result = herfTest->GetDecoderAdapter();
-  EXPECT_TRUE(result);
+TEST_F(HeifImageDecoderTest, OhosAdapterManagerSingleton) {
+  auto& managerOne = OhosImageDecoderAdapterManager::GetInstance();
+  auto& managerTwo = OhosImageDecoderAdapterManager::GetInstance();
+  EXPECT_EQ(&managerOne, &managerTwo);
+}
+
+TEST_F(HeifImageDecoderTest, AdapterThreadSafeInit) {
+  std::vector<std::thread> threads;
+  std::mutex mutex;
+  std::vector<OHOS::NWeb::OhosImageDecoderAdapter*> adapters;
+
+  for (int i = 0; i < THREAD_NUMS; ++i) {
+    threads.emplace_back([&]() {
+      auto adapter = OhosImageDecoderAdapterManager::GetInstance().GetImageDecoderAdapter();
+      std::lock_guard<std::mutex> lock(mutex);
+      adapters.push_back(adapter);
+    });
+  }
+
+  for (auto& t : threads) {
+    t.join();
+  }
+
+  auto* first = adapters.front();
+  for (auto* adapter : adapters) {
+    EXPECT_EQ(adapter, first);
+  }
 }
