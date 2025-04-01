@@ -4881,7 +4881,11 @@ uint32_t WebFrameWidgetImpl::GetFoldStatus() {
 
 void WebFrameWidgetImpl::OnFoldStatusChanged(uint32_t foldstatus) {
   fold_status_ = foldstatus;
-} 
+}
+
+void WebFrameWidgetImpl::NotifyOverlayStateChanged() {
+  GetAssociatedFrameWidgetHost()->OnOverlayStateChanged(GetImageRectInner());
+}
 
 void WebFrameWidgetImpl::GetImageRect(GetImageRectCallback callback) {
   std::move(callback).Run(GetImageRectInner());
@@ -4895,13 +4899,17 @@ gfx::Rect WebFrameWidgetImpl::GetImageRectInner() {
   if (!abs_rect.IsEmpty()) {
     LocalFrame* frame = LocalRootImpl()->GetFrame();
     LocalFrameView* view = frame->View();
-    auto rel_rect = view->FrameToScreen(ToEnclosingRect(abs_rect));
-    double ratio = frame->DevicePixelRatio();
+    auto quad_rect = gfx::Rect(ToFlooredPoint(abs_rect.origin()),
+                               ToFlooredSize(abs_rect.size()));
+    auto rel_rect = view->FrameToScreen(quad_rect);
+    if (!widget_base_) {
+      return gfx::Rect();
+    }
+    float dsf = widget_base_->GetScreenInfo().device_scale_factor;
     float scale = PageScaleInMainFrame();
-    return gfx::Rect(base::ClampFloor(rel_rect.x() * ratio),
-                     base::ClampFloor(rel_rect.y() * ratio),
-                     base::ClampFloor(abs_rect.width() * scale),
-                     base::ClampFloor(abs_rect.height() * scale));
+    auto calc_rect = gfx::Rect(ScaleToFlooredPoint(rel_rect.origin(), dsf),
+                               ScaleToFlooredSize(quad_rect.size(), scale));
+    return calc_rect;
   } else {
     LOG(ERROR) << "GetImageRect failed: abs_rect is empty.";
     return gfx::Rect();
