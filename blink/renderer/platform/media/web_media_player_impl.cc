@@ -4447,12 +4447,12 @@ void WebMediaPlayerImpl::OnLayerRectChange(const gfx::Rect& rect) {
 }
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
 
-#if defined(OHOS_MEDIA_POLICY)
+#if defined(OHOS_MEDIA)
 void WebMediaPlayerImpl::OnNativeWindowTextureCreated(media::Renderer::OnGetRectCallback callback) {
   LOG(INFO) << "OnNativeWindowTextureCreated Run";
   callback.Run(client_->GetVideoRect());
 }
-#endif // OHOS_MEDIA_POLICY
+#endif // OHOS_MEDIA
 
 #if defined(OHOS_MEDIA_CAPABILITIES_ENHANCE)
 int64_t WebMediaPlayerImpl::GetFreezeTime() const {
