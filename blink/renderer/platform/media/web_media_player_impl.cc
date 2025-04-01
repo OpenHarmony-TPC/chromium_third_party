@@ -3166,7 +3166,7 @@ std::unique_ptr<media::Renderer> WebMediaPlayerImpl::CreateRenderer(
       media_task_runner_, worker_task_runner_, audio_source_provider_.get(),
       compositor_.get(), std::move(request_overlay_info_cb),
       client_->TargetColorSpace());
-  renderer->SetNativeWindowCreateCallback(base::BindPostTaskToCurrentDefault(base::BindOnce(
+  renderer->SetNativeWindowCreatedCallback(base::BindPostTaskToCurrentDefault(base::BindOnce(
       &WebMediaPlayerImpl::OnNativeWindowTextureCreated, weak_this_)));
   return renderer;
 }
