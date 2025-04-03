@@ -900,6 +900,14 @@ bool HTMLPlugInElement::CheckNativeType(const char* key) const {
  
   return true;
 }
+
+bool HTMLPlugInElement::CheckIntrinsicSizeEnable() const {
+  auto settings = GetDocument().GetSettings();
+  if (!settings || !settings->GetNativeEmbedModeEnabled()) {
+    return false;
+  }
+  return settings->GetIntrinsicSizeEnabled();
+}
 #endif
 
 }  // namespace blink

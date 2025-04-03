@@ -250,6 +250,7 @@ class CORE_EXPORT WebSettingsImpl final : public WebSettings {
 
 #if BUILDFLAG(IS_OHOS)
   void SetNativeEmbedModeEnabled(bool) override;
+  void SetIntrinsicSizeEnabled(bool) override;
   bool NativeEmbedModeEnabled() const;
   void RegisterNativeEmbedRule(const WebString& tag,
                                const WebString& type) override;

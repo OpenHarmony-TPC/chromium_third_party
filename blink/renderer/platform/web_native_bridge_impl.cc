@@ -103,7 +103,7 @@ WebNativeBridgeImpl::~WebNativeBridgeImpl() {
   DCHECK(main_task_runner_->BelongsToCurrentThread());
   // TODO: delegate_ will destruct before WebNativeBridgeImpl.We need to re-define
   // the life cycle of NativeLoader next.
-  // delegate_->RemoveObserver(delegate_id_);
+  delegate_->RemoveObserver(delegate_id_);
   delegate_ = nullptr;
 
   // The underlying Pipeline must be stopped before it is destroyed.

@@ -4160,10 +4160,6 @@ WebTimeRanges HTMLMediaElement::SeekableInternal() const {
   if (!web_media_player_)
     return {};
 
-#ifdef OHOS_MEDIA
-  LOG(INFO) << "OhMedia::" << __func__ << "(" << *this << ")";
-#endif // OHOS_MEDIA
-
   if (media_source_attachment_)
     return media_source_attachment_->SeekableInternal(media_source_tracer_);
 
