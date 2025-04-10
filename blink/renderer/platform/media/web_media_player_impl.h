@@ -1174,14 +1174,14 @@ class PLATFORM_EXPORT WebMediaPlayerImpl
   media::ActionReason action_reason_ = media::ActionReason::kNormal;
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
 
-  base::WeakPtr<WebMediaPlayerImpl> weak_this_;
-  base::WeakPtrFactory<WebMediaPlayerImpl> weak_factory_{this};
-
 #ifdef OHOS_VIDEO_ASSISTANT
   media::SurfaceCreatedCB surface_created_cb_;
   int32_t video_surface_id_ = -1;
   bool support_video_surface_ = true;
 #endif // OHOS_VIDEO_ASSISTANT
+
+  base::WeakPtr<WebMediaPlayerImpl> weak_this_;
+  base::WeakPtrFactory<WebMediaPlayerImpl> weak_factory_{this};
 };
 
 }  // namespace blink
