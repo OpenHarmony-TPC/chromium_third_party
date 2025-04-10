@@ -1179,9 +1179,6 @@ class PLATFORM_EXPORT WebMediaPlayerImpl
   media::ActionReason action_reason_ = media::ActionReason::kNormal;
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
 
-  base::WeakPtr<WebMediaPlayerImpl> weak_this_;
-  base::WeakPtrFactory<WebMediaPlayerImpl> weak_factory_{this};
-
 #if defined(OHOS_MEDIA_CAPABILITIES_ENHANCE)
   int64_t start_play_time_ = 0;
   int64_t total_play_time_ = 0;
@@ -1192,6 +1189,9 @@ class PLATFORM_EXPORT WebMediaPlayerImpl
   int32_t video_surface_id_ = -1;
   bool support_video_surface_ = true;
 #endif // OHOS_VIDEO_ASSISTANT
+
+  base::WeakPtr<WebMediaPlayerImpl> weak_this_;
+  base::WeakPtrFactory<WebMediaPlayerImpl> weak_factory_{this};
 };
 
 }  // namespace blink
