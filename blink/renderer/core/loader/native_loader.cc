@@ -153,6 +153,17 @@ void NativeLoader::LoadResource(LocalFrame* frame) {
   web_native_bridge_->StartPipeline();
 }
 
+gfx::Rect NativeLoader::TransformRect(gfx::Rect rect) {
+  LayoutObject* layoutObject = plugin_element_->GetLayoutObject();
+  if (layoutObject) {
+    gfx::Transform transform = layoutObject->LocalToAbsoluteTransform();
+    auto trandfromRect = transform.MapRect(gfx::RectF(rect));
+    rect.set_width(std::round(trandfromRect.size().width()));
+    rect.set_height(std::round(trandfromRect.size().height()));
+    LOG(INFO) << "NativeEmbed NativeLoader::TransformRect: " << rect.ToString();
+  }
+  return rect;
+}
 void NativeLoader::OnCreateNativeSurface(int native_embed_id,
                                          RectChangeCB rect_changed_cb) {
   LOG(INFO) << "[NativeEmbed] NativeLoader::OnCreateNativeSurface";
@@ -185,7 +196,7 @@ void NativeLoader::OnCreateNativeSurface(int native_embed_id,
   }
   // We will use the position relative to visual viewport.
   bounding_rect_.set_origin(bounds_to_viewport.origin());
-  embed_info->rect = bounds_to_viewport;
+  embed_info->rect = TransformRect(bounds_to_viewport);
   if (!bounding_rect_changed_cb_.is_null()) {
     bounding_rect_changed_cb_.Run(bounds_to_viewport);
   }
@@ -239,8 +250,9 @@ void NativeLoader::OnLayerRectChange(const gfx::Rect& rect) {
   cc_layer_update_ = true;
   LOG(INFO) << "NativeEmbed NativeLoader::OnLayerRectChange:"
             << bounding_rect_.ToString();
+  auto bounds_to_viewport = BoundsToViewport(bounding_rect_, plugin_element_->GetDocument());
   for (auto& observer : native_bridge_observer_remote_set_->Value()) {
-    observer->OnEmbedRectChange(BoundsToViewport(bounding_rect_, plugin_element_->GetDocument()));
+    observer->OnEmbedRectChange(TransformRect(bounds_to_viewport));
   }
 }
 
