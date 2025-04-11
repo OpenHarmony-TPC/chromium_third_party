@@ -183,11 +183,11 @@ void MediaControlPlaybackSpeedListElement::SetHrHidden(Event& event) {
       !To<Element>(target)->FastHasAttribute(html_names::kAriaLabelAttr)) {
     return;
   }
-  if (target->HasPreviousSibling()) {
+  if (target->HasPreviousSibling() && target->previousSibling()->IsElementNode()) {
     To<Element>(target->previousSibling())->SetShadowPseudoId(
       AtomicString("-internal-media-controls-playback-speed-list-hr-hidden"));
   }
-  if (target->HasNextSibling()) {
+  if (target->HasNextSibling() && target->nextSibling()->IsElementNode()) {
     To<Element>(target->nextSibling())->SetShadowPseudoId(
       AtomicString("-internal-media-controls-playback-speed-list-hr-hidden"));
   }
@@ -199,12 +199,12 @@ void MediaControlPlaybackSpeedListElement::RemoveHrHidden(Event& event) {
       !To<Element>(target)->FastHasAttribute(html_names::kAriaLabelAttr)) {
     return;
   }
-  if (target->HasPreviousSibling() &&
+  if (target->HasPreviousSibling() && target->previousSibling()->IsElementNode() &&
       To<Element>(target->previousSibling())->ShadowPseudoId().GetString() ==
         "-internal-media-controls-playback-speed-list-hr-hidden") {
     To<Element>(target->previousSibling())->removeAttribute(html_names::kPseudoAttr);
   }
-  if (target->HasNextSibling() &&
+  if (target->HasNextSibling() && target->nextSibling()->IsElementNode() &&
       To<Element>(target->nextSibling())->ShadowPseudoId().GetString() ==
         "-internal-media-controls-playback-speed-list-hr-hidden") {
     To<Element>(target->nextSibling())->removeAttribute(html_names::kPseudoAttr);
