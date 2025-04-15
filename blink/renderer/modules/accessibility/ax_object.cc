@@ -1358,10 +1358,16 @@ void AXObject::PopulateAXRelativeBounds(ui::AXRelativeBounds& bounds,
 
   if (AXShouldIncludePageScaleFactorInRoot() && IsRoot()) {
     const Page* page = GetDocument()->GetPage();
+#if BUILDFLAG(IS_OHOS)
+    if (GetDocument()->GetFrame() == page->DeprecatedLocalMainFrame()) {
+#endif
     container_transform.Scale(page->PageScaleFactor(), page->PageScaleFactor());
     container_transform.Translate(
         -page->GetVisualViewport().VisibleRect().origin().OffsetFromOrigin());
   }
+#if BUILDFLAG(IS_OHOS)
+  }
+#endif
 
   if (!container_transform.IsIdentity())
     bounds.transform = std::make_unique<gfx::Transform>(container_transform);
