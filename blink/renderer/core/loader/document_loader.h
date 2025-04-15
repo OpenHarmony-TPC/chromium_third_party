@@ -620,6 +620,10 @@ class CORE_EXPORT DocumentLoader : public GarbageCollected<DocumentLoader>,
   // specified.
   void StartViewTransitionIfNeeded(Document& document);
 
+#if BUILDFLAG(IS_OHOS_PRPP)
+  void UpdateAllowPreloadRecord();
+#endif
+
   // Params are saved in constructor and are cleared after StartLoading().
   // TODO(dgozman): remove once StartLoading is merged with constructor.
   std::unique_ptr<WebNavigationParams> params_;
