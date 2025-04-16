@@ -887,9 +887,9 @@ void WidgetBase::EndUpdateLayers() {
 
 #if BUILDFLAG(IS_OHOS)
 static void GetThreadIdsAndReport(
-    std::vector<base::internal::WorkerThread*>& workers, bool is_created) {
+    std::vector<scoped_refptr<base::internal::WorkerThread>>& workers, bool is_created) {
   std::vector<int32_t> thread_ids;
-  std::vector<base::internal::WorkerThread*> remain_workers;
+  std::vector<scoped_refptr<base::internal::WorkerThread>>& remain_workers;
   for (auto& worker : workers) {
     if (worker) {
       auto tid = worker->GetRealTid();
@@ -942,12 +942,12 @@ void WidgetBase::ReportForegroundThreadPool() {
   base::internal::ThreadGroupImpl* foreground_thread_group =
     static_cast<base::internal::ThreadGroupImpl*>(thread_pool->GetForegroundThreadGroup());
   if (foreground_thread_group) {
-    std::vector<base::internal::WorkerThread*>& create_workers =
+    std::vector<scoped_refptr<base::internal::WorkerThread>>& create_workers =
       foreground_thread_group->ReportCreateWorkers();
     if (create_workers.size()) {
       GetThreadIdsAndReport(create_workers, true);
     }
-    std::vector<base::internal::WorkerThread*>& destroy_workers =
+    std::vector<scoped_refptr<base::internal::WorkerThread>>& destroy_workers =
       foreground_thread_group->ReportDestroyWorkers();
     if (destroy_workers.size()) {
       GetThreadIdsAndReport(destroy_workers, false);
