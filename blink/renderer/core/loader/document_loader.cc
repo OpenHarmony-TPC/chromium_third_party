@@ -850,10 +850,9 @@ void DocumentLoader::UpdateForSameDocumentNavigation(
   DCHECK_EQ(IsBackForwardLoadType(type), !!history_item);
 
 #if BUILDFLAG(IS_OHOS_PRPP)
-  if (frame_ && frame_->GetDocument() && frame_->GetDocument()->Fetcher()) {
-    frame_->GetDocument()->Fetcher()->UpdateAllowPreloadRecord(true);
-  }
+  UpdateAllowPreloadRecord();
 #endif
+
   SinglePageAppNavigationType single_page_app_navigation_type =
       CategorizeSinglePageAppNavigation(same_document_navigation_type, type);
   UMA_HISTOGRAM_ENUMERATION(
@@ -2770,9 +2769,7 @@ void DocumentLoader::CommitNavigation() {
   ProfilerGroup::InitializeIfEnabled(frame_->DomWindow());
 
 #if BUILDFLAG(IS_OHOS_PRPP)
-  if (frame_ && frame_->GetDocument() && frame_->GetDocument()->Fetcher()) {
-    frame_->GetDocument()->Fetcher()->UpdateAllowPreloadRecord(true);
-  }
+  UpdateAllowPreloadRecord();
 #endif
   // Load the document if needed.
   StartLoadingResponse();
@@ -3386,6 +3383,14 @@ void DocumentLoader::StartViewTransitionIfNeeded(Document& document) {
     view_transition_state_.reset();
   }
 }
+
+#if BUILDFLAG(IS_OHOS_PRPP)
+void DocumentLoader::UpdateAllowPreloadRecord() {
+  if (frame_ && frame_->GetDocument() && frame_->GetDocument()->Fetcher()) {
+    frame_->GetDocument()->Fetcher()->UpdateAllowPreloadRecord(true);
+  }
+}
+#endif
 
 // static
 void DocumentLoader::DisableCodeCacheForTesting() {
