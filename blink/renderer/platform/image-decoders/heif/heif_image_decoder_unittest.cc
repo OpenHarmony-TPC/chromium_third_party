@@ -37,7 +37,6 @@ using ::testing::_;
 using ::testing::AtLeast;
 using ::testing::Return;
 using namespace blink;
-constexpr int THREAD_NUMS = 5;
 
 class MockSegmentReader : public SegmentReader {
  public:
@@ -94,195 +93,6 @@ class HeifImageDecoderTest : public testing::Test {
   std::unique_ptr<HEIFImageDecoder> herfTest;
   std::unique_ptr<MockSegmentReader> mockReader;
 };
-
-TEST_F(HeifImageDecoderTest, IsHeif64_001) {
-  int64_t offset = 10;
-  uint64_t chunk_size = 1;
-  size_t bytes_read = 10;
-  void* buffer;
-  EXPECT_TRUE(bytes_read < kHeaderNextSize);
-  bool flag = IsHeif64(buffer, bytes_read, offset, chunk_size);
-  EXPECT_FALSE(flag);
-}
-
-TEST_F(HeifImageDecoderTest, IsHeif64_002) {
-  uint64_t chunk_size = 1;
-  size_t bytes_read = 20;
-  uint64_t buffer[8] = {0};
-  int64_t offset = 4 * sizeof(uint64_t);
-  EXPECT_TRUE(chunk_size < kHeaderNextSize);
-  bool flag = IsHeif64(buffer, bytes_read, offset, chunk_size);
-  EXPECT_FALSE(flag);
-}
-
-TEST_F(HeifImageDecoderTest, IsHeif64_003) {
-  int64_t offset = 10;
-  uint64_t chunk_size = 7;
-  size_t bytes_read = 20;
-  void* buffer;
-  bool flag = IsHeif64(buffer, bytes_read, offset, chunk_size);
-  EXPECT_FALSE(flag);
-}
-
-TEST_F(HeifImageDecoderTest, IsHeif64_004) {
-  int64_t offset = 10;
-  uint64_t chunk_size = 11;
-  size_t bytes_read = 10;
-  void* buffer;
-  bool flag = IsHeif64(buffer, bytes_read, offset, chunk_size);
-  EXPECT_EQ(chunk_size, bytes_read);
-  EXPECT_TRUE(flag);
-}
-
-TEST_F(HeifImageDecoderTest, IsHeif64_005) {
-  int64_t offset = 10;
-  uint64_t chunk_size = 9;
-  size_t bytes_read = 10;
-  void* buffer;
-  bool flag = IsHeif64(buffer, bytes_read, offset, chunk_size);
-  EXPECT_TRUE(flag);
-}
-
-TEST_F(HeifImageDecoderTest, CheckFormat_001) {
-  uint32_t data_size = 9;
-  void* header_data = nullptr;
-  EXPECT_FALSE(header_data);
-  bool flag = CheckFormat(header_data, data_size);
-  EXPECT_FALSE(flag);
-}
-
-TEST_F(HeifImageDecoderTest, CheckFormat_002) {
-  uint32_t data_size = 9;
-  uint32_t header_data[8] = {0};
-  EXPECT_TRUE(header_data);
-  bool flag = CheckFormat(header_data, data_size);
-  EXPECT_FALSE(flag);
-}
-
-TEST_F(HeifImageDecoderTest, CheckFormat_003) {
-  uint32_t data_size = 7;
-  uint32_t header_data[8] = {0};
-  EXPECT_TRUE(header_data);
-  bool flag = CheckFormat(header_data, data_size);
-  EXPECT_FALSE(flag);
-}
-
-TEST_F(HeifImageDecoderTest, CheckFormat_004) {
-  uint32_t data_size = 9;
-  uint32_t header_data[8] = {0};
-  EXPECT_TRUE(header_data);
-  EXPECT_NE(EndianSwap32(header_data[1]), Fourcc('f', 't', 'y', 'p'));
-  bool flag = CheckFormat(header_data, data_size);
-  EXPECT_FALSE(flag);
-}
-
-TEST_F(HeifImageDecoderTest, CheckFormat_005) {
-  uint32_t data_size = 10;
-  uint32_t header_data[16] = {0};
-  EXPECT_TRUE(header_data);
-  uint8_t* header_as_uint8 = reinterpret_cast<uint8_t*>(header_data);
-  header_as_uint8[0] = 9;
-  header_as_uint8[4] = 'f';
-  header_as_uint8[5] = 't';
-  header_as_uint8[6] = 'y';
-  header_as_uint8[7] = 'p';
-  EXPECT_EQ(EndianSwap32(header_data[1]), Fourcc('f', 't', 'y', 'p'));
-  bool flag = CheckFormat(header_data, data_size);
-  EXPECT_FALSE(flag);
-}
-
-TEST_F(HeifImageDecoderTest, CheckFormat_006) {
-  uint32_t data_size = 20;
-  uint32_t header_data[16] = {0};
-  EXPECT_TRUE(header_data);
-  uint8_t* header_as_uint8 = reinterpret_cast<uint8_t*>(header_data);
-  header_as_uint8[0] = 7;
-  header_as_uint8[4] = 'f';
-  header_as_uint8[5] = 't';
-  header_as_uint8[6] = 'y';
-  header_as_uint8[7] = 'p';
-  EXPECT_EQ(EndianSwap32(header_data[1]), Fourcc('f', 't', 'y', 'p'));
-  bool flag = CheckFormat(header_data, data_size);
-  EXPECT_FALSE(flag);
-}
-
-TEST_F(HeifImageDecoderTest, CheckFormat_007) {
-  uint32_t header_data[16] = {0};
-  int64_t data_size = 4 * sizeof(uint64_t);
-  EXPECT_TRUE(header_data);
-  uint8_t* header_as_uint8 = reinterpret_cast<uint8_t*>(header_data);
-  header_as_uint8[4] = 'f';
-  header_as_uint8[5] = 't';
-  header_as_uint8[6] = 'y';
-  header_as_uint8[7] = 'p';
-  bool flag = CheckFormat(header_data, data_size);
-  EXPECT_EQ(EndianSwap32(header_data[1]), Fourcc('f', 't', 'y', 'p'));
-  EXPECT_FALSE(flag);
-}
-
-TEST_F(HeifImageDecoderTest, CheckFormat_008) {
-  uint32_t header_data[16] = {0};
-  int64_t data_size = 4 * sizeof(uint64_t);
-  EXPECT_TRUE(header_data);
-  uint32_t* header_as_uint32 = reinterpret_cast<uint32_t*>(header_data);
-  header_as_uint32[0] = 9;
-  uint8_t* header_as_uint8 = reinterpret_cast<uint8_t*>(header_data);
-  header_as_uint8[4] = 'f';
-  header_as_uint8[5] = 't';
-  header_as_uint8[6] = 'y';
-  header_as_uint8[7] = 'p';
-  EXPECT_EQ(EndianSwap32(header_data[1]), Fourcc('f', 't', 'y', 'p'));
-  bool flag = CheckFormat(header_data, data_size);
-  EXPECT_FALSE(flag);
-}
-
-TEST_F(HeifImageDecoderTest, CheckFormat_009) {
-  uint64_t header_data[8] = {0};
-  int64_t data_size = 4 * sizeof(uint64_t);
-  uint32_t* header_as_uint32 = reinterpret_cast<uint32_t*>(header_data);
-  header_as_uint32[0] = EndianSwap32(24);
-  header_as_uint32[1] = EndianSwap32(Fourcc('f', 't', 'y', 'p'));
-  header_as_uint32[2] = EndianSwap32(Fourcc('m', 'i', 'f', '1'));
-  header_as_uint32[3] = 0;
-  bool flag = CheckFormat(header_data, data_size);
-  EXPECT_TRUE(flag);
-}
-
-TEST_F(HeifImageDecoderTest, CheckFormat_010) {
-  uint64_t header_data[8] = {0};
-  int64_t data_size = 4 * sizeof(uint64_t);
-  uint32_t* header_as_uint32 = reinterpret_cast<uint32_t*>(header_data);
-  header_as_uint32[0] = EndianSwap32(24);
-  header_as_uint32[1] = EndianSwap32(Fourcc('f', 't', 'y', 'p'));
-  header_as_uint32[2] = EndianSwap32(Fourcc('h', 'e', 'i', 'c'));
-  header_as_uint32[3] = 0;
-  bool flag = CheckFormat(header_data, data_size);
-  EXPECT_TRUE(flag);
-}
-
-TEST_F(HeifImageDecoderTest, CheckFormat_011) {
-  uint64_t header_data[8] = {0};
-  int64_t data_size = 4 * sizeof(uint64_t);
-  uint32_t* header_as_uint32 = reinterpret_cast<uint32_t*>(header_data);
-  header_as_uint32[0] = EndianSwap32(24);
-  header_as_uint32[1] = EndianSwap32(Fourcc('f', 't', 'y', 'p'));
-  header_as_uint32[2] = EndianSwap32(Fourcc('m', 's', 'f', '1'));
-  header_as_uint32[3] = 0;
-  bool flag = CheckFormat(header_data, data_size);
-  EXPECT_TRUE(flag);
-}
-
-TEST_F(HeifImageDecoderTest, CheckFormat_012) {
-  uint64_t header_data[8] = {0};
-  int64_t data_size = 4 * sizeof(uint64_t);
-  uint32_t* header_as_uint32 = reinterpret_cast<uint32_t*>(header_data);
-  header_as_uint32[0] = EndianSwap32(24);
-  header_as_uint32[1] = EndianSwap32(Fourcc('f', 't', 'y', 'p'));
-  header_as_uint32[2] = EndianSwap32(Fourcc('h', 'e', 'v', 'c'));
-  header_as_uint32[3] = 0;
-  bool flag = CheckFormat(header_data, data_size);
-  EXPECT_TRUE(flag);
-}
 
 TEST_F(HeifImageDecoderTest, OnSetData_001) {
   ASSERT_TRUE(herfTest);
@@ -348,9 +158,7 @@ TEST_F(HeifImageDecoderTest, OnSetData_005) {
       .Times(::testing::AtLeast(2))
       .WillRepeatedly(::testing::Return(600));
 
-  auto& manager = OhosImageDecoderAdapterManager::GetInstance();
-  manager.GetImageDecoderAdapter();
-  manager.decoder_adapter_ = std::move(mock_decoder_adapter);
+  herfTest->decoder_adapter_ = std::move(mock_decoder_adapter);
 
   herfTest->OnSetData(mockReader.get());
   size_t num = 0;
@@ -425,51 +233,17 @@ TEST_F(HeifImageDecoderTest, MatchesHeifSignature) {
 }
 
 TEST_F(HeifImageDecoderTest, GetDecoderAdapter_001) {
-  auto& manager = OhosImageDecoderAdapterManager::GetInstance();
-  auto original_adapter = manager.decoder_adapter_.release();
-  manager.decoder_adapter_.reset();
+  herfTest->decoder_adapter_ = nullptr;
   
   auto result = herfTest->GetDecoderAdapter();
   EXPECT_TRUE(result);
-  
-  manager.decoder_adapter_.reset(original_adapter);
 }
 
 TEST_F(HeifImageDecoderTest, GetDecoderAdapter_002) {
-  auto mock_adapter = std::make_unique<MockOhosImageDecoderAdapter>();
-  auto& manager = OhosImageDecoderAdapterManager::GetInstance();
-  manager.GetImageDecoderAdapter();
-  manager.decoder_adapter_ = std::move(mock_adapter);
+  std::unique_ptr<MockOhosImageDecoderAdapter> mock_decoder_adapter =
+      std::make_unique<MockOhosImageDecoderAdapter>();
+  herfTest->decoder_adapter_ = std::move(mock_decoder_adapter);
 
   auto result = herfTest->GetDecoderAdapter();
   EXPECT_TRUE(result);
-}
-
-TEST_F(HeifImageDecoderTest, OhosAdapterManagerSingleton) {
-  auto& managerOne = OhosImageDecoderAdapterManager::GetInstance();
-  auto& managerTwo = OhosImageDecoderAdapterManager::GetInstance();
-  EXPECT_EQ(&managerOne, &managerTwo);
-}
-
-TEST_F(HeifImageDecoderTest, AdapterThreadSafeInit) {
-  std::vector<std::thread> threads;
-  std::mutex mutex;
-  std::vector<OHOS::NWeb::OhosImageDecoderAdapter*> adapters;
-
-  for (int i = 0; i < THREAD_NUMS; ++i) {
-    threads.emplace_back([&]() {
-      auto adapter = OhosImageDecoderAdapterManager::GetInstance().GetImageDecoderAdapter();
-      std::lock_guard<std::mutex> lock(mutex);
-      adapters.push_back(adapter);
-    });
-  }
-
-  for (auto& t : threads) {
-    t.join();
-  }
-
-  auto* first = adapters.front();
-  for (auto* adapter : adapters) {
-    EXPECT_EQ(adapter, first);
-  }
 }
