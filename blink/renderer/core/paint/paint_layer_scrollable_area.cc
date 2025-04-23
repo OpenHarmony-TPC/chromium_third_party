@@ -3238,7 +3238,7 @@ gfx::Size PaintLayerScrollableArea::PixelSnappedBorderBoxSize() const {
   if (!base::ohos::IsPcDevice() && DynamicTo<LayoutView>(GetLayoutBox()) && controller.RootScrollerArea() == this) {
       const auto& visualViewportSize=
           GetLayoutBox()->GetFrameView()->GetPage()->GetVisualViewport().Size();
-      if (visualViewportSize.width() != GetLayoutBox()->Size().Width()) {
+      if (visualViewportSize.width() > GetLayoutBox()->Size().Width()) {
           GetLayoutBox()->SetSize(LayoutSize(visualViewportSize.width(), visualViewportSize.height()));
       }
   }
