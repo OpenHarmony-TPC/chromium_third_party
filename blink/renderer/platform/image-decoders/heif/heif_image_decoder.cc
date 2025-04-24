@@ -33,21 +33,17 @@
 #include "third_party/abseil-cpp/absl/types/optional.h"
 #include "third_party/blink/renderer/platform/image-decoders/image_animation.h"
 #include "third_party/blink/renderer/platform/image-decoders/image_decoder.h"
+#include "third_party/bounds_checking_function/include/securec.h"
 #include "third_party/ohos_ndk/includes/ohos_adapter/ohos_adapter_helper.h"
+#include "third_party/skia/include/codec/SkEncodedImageFormat.h"
 #include "third_party/skia/include/core/SkColorSpace.h"
 #include "third_party/skia/src/codec/SkHeifCodec.h"
-#include "third_party/skia/include/codec/SkEncodedImageFormat.h"
-#include "third_party/bounds_checking_function/include/securec.h"
 
 #if defined(ARCH_CPU_BIG_ENDIAN)
 #error Blink assumes a little-endian target.
 #endif
 
 namespace blink {
-
-std::unique_ptr<OHOS::NWeb::OhosImageDecoderAdapter>
-    HEIFImageDecoder::decoder_adapter_;
-
 HEIFImageDecoder::HEIFImageDecoder(AlphaOption alpha_option,
                                    HighBitDepthDecodingOption hbd_option,
                                    const ColorBehavior& color_behavior,
@@ -59,7 +55,7 @@ HEIFImageDecoder::HEIFImageDecoder(AlphaOption alpha_option,
                    max_decoded_bytes) {}
 
 HEIFImageDecoder::~HEIFImageDecoder() {
-  decoder_adapter_ = nullptr;
+  decoder_adapter_.reset();
 }
 
 const AtomicString& HEIFImageDecoder::MimeType() const {
@@ -75,7 +71,8 @@ void HEIFImageDecoder::OnSetData(SegmentReader* data) {
   if (!IsAllDataReceived() || !data || data->size() == 0) {
     return;
   }
-  LOG(INFO) << "[HeifSupport] HEIFImageDecoder::OnSetData parse image size " << data->size();
+  LOG(INFO) << "[HeifSupport] HEIFImageDecoder::OnSetData parse image size "
+            << data->size();
   auto sk_data = data->GetAsSkData();
   base::span<const uint8_t> encoded_data =
       base::make_span(sk_data->bytes(), sk_data->size());
@@ -87,9 +84,11 @@ void HEIFImageDecoder::OnSetData(SegmentReader* data) {
     return;
   }
 
-  if (decoder_adapter->ParseImageInfo(encoded_data.data(), (uint32_t)encoded_data.size())) {
-    LOG(INFO) << "[HeifSupport] HEIF image size " << decoder_adapter->GetImageWidth()
-              << " * " << decoder_adapter->GetImageHeight();
+  if (decoder_adapter->ParseImageInfo(encoded_data.data(),
+                                      (uint32_t)encoded_data.size())) {
+    LOG(INFO) << "[HeifSupport] HEIF image size "
+              << decoder_adapter->GetImageWidth() << " * "
+              << decoder_adapter->GetImageHeight();
     SetSize(decoder_adapter->GetImageWidth(),
             decoder_adapter->GetImageHeight());
     data_ = data;
@@ -166,7 +165,8 @@ void HEIFImageDecoder::InitializeNewFrame(wtf_size_t index) {}
 
 void HEIFImageDecoder::Decode(wtf_size_t index) {
   if (frame_buffer_cache_.empty()) {
-    LOG(ERROR) << "[HeifSupport] HEIFImageDecoder::Decode frame_buffer_cache is empty.";
+    LOG(ERROR) << "[HeifSupport] HEIFImageDecoder::Decode frame_buffer_cache "
+                  "is empty.";
     SetFailed();
     return;
   }
@@ -179,18 +179,28 @@ void HEIFImageDecoder::Decode(wtf_size_t index) {
     return;
   }
 
-  bool decode_rst = GetDecoderAdapter()->Decode((const uint8_t*)segment, (uint32_t)data_->size(),
-                                                OHOS::NWeb::AllocatorType::kShareMemAlloc, false);
+  OHOS::NWeb::OhosImageDecoderAdapter* decoder_adapter = GetDecoderAdapter();
+  if (decoder_adapter == nullptr) {
+    LOG(ERROR) << "[HeifSupport] Fail to get decoder adapter.";
+    SetFailed();
+    return;
+  }
+
+  bool decode_rst =
+      decoder_adapter->Decode((const uint8_t*)segment, (uint32_t)data_->size(),
+                              OHOS::NWeb::AllocatorType::kShareMemAlloc, false);
   if (!decode_rst) {
     LOG(ERROR) << "[HeifSupport] HEIFImageDecoder::Decode Decode failed.";
     SetFailed();
     return;
   }
-  LOG(DEBUG) << "[HeifSupport] HEIFImageDecoder::Decode GetDecoderAdapter()->Decode succeed.";
+  LOG(DEBUG) << "[HeifSupport] HEIFImageDecoder::Decode "
+                "GetDecoderAdapter()->Decode succeed.";
 
-  void *ptr = GetDecoderAdapter()->GetDecodeData();
+  void* ptr = decoder_adapter->GetDecodeData();
   if (ptr == nullptr) {
-    LOG(ERROR) << "[HeifSupport] HEIFImageDecoder::Decode GetDecodeData failed.";
+    LOG(ERROR)
+        << "[HeifSupport] HEIFImageDecoder::Decode GetDecodeData failed.";
     SetFailed();
     return;
   }
@@ -209,9 +219,11 @@ void HEIFImageDecoder::Decode(wtf_size_t index) {
     return;
   }
 
-  int stride = GetDecoderAdapter()->GetStride();
+  int stride = decoder_adapter->GetStride();
   if (stride <= 0) {
-    LOG(ERROR) << "[HeifSupport] HEIFImageDecoder::Decode stride error. stride = " << stride;
+    LOG(ERROR)
+        << "[HeifSupport] HEIFImageDecoder::Decode stride error. stride = "
+        << stride;
     SetFailed();
     return;
   }
@@ -224,8 +236,7 @@ void HEIFImageDecoder::Decode(wtf_size_t index) {
     if (memcpy_s((uint8_t*)pixel + i * width * bytesPerPixel, rowBytes,
                  (uint8_t*)ptr + i * stride, width * bytesPerPixel) != EOK) {
       LOG(ERROR) << "[HeifSupport] HEIFImageDecoder::Decode memcpy failed."
-                 << "width = " << width
-                 << ", height = " << height
+                 << "width = " << width << ", height = " << height
                  << ", rowBytes = " << rowBytes
                  << ", bytesPerPixel = " << bytesPerPixel
                  << ", stride = " << stride;
@@ -234,7 +245,7 @@ void HEIFImageDecoder::Decode(wtf_size_t index) {
     }
   }
 
-  GetDecoderAdapter()->ReleasePixelMap();
+  decoder_adapter->ReleasePixelMap();
 
   buffer.SetPixelsChanged(true);
   buffer.SetStatus(ImageFrame::kFrameComplete);
@@ -250,27 +261,20 @@ bool HEIFImageDecoder::MatchesHeifSignature(const sk_sp<SkData>& data) {
       base::make_span(data->bytes(), data->size());
 
   if (!encoded_data.data()) {
-    LOG(INFO) << "[HeifSupport] HEIFImageDecoder::MatchesHeifSignature, encoded_data is null.";
+    LOG(INFO) << "[HeifSupport] HEIFImageDecoder::MatchesHeifSignature, "
+                 "encoded_data is null.";
     return false;
   }
 
   SkEncodedImageFormat format;
-  if ((SkHeifCodec::IsSupported(encoded_data.data(), (size_t)encoded_data.size(), &format))
-      && format == SkEncodedImageFormat::kHEIF) {
-    LOG(INFO) << "[HeifSupport] HEIFImageDecoder::MatchesHeifSignature is heif format.";
-    return true;
-  }
+  if ((SkHeifCodec::IsSupported(encoded_data.data(),
+                                (size_t)encoded_data.size(), &format)) &&
+       format == SkEncodedImageFormat::kHEIF) {
+    LOG(INFO) << "[HeifSupport] HEIFImageDecoder::MatchesHeifSignature is heif "
+                 "format.";
+     return true;
+   }
 
-  OHOS::NWeb::OhosImageDecoderAdapter* decoder_adapter = GetDecoderAdapter();
-  if (decoder_adapter == nullptr) {
-    LOG(ERROR) << "[HeifSupport] Fail to get decoder adapter.";
-    return false;
-  }
-
-  // Do double check.
-  if (decoder_adapter->ParseImageInfo(encoded_data.data(), (uint32_t)encoded_data.size())) {
-    return decoder_adapter->GetEncodedFormat() == "image/heif";
-  }
   LOG(INFO) << "[HeifSupport] Fail to parsing image information. ";
   return false;
 }

@@ -21,6 +21,7 @@
 #include "third_party/blink/renderer/platform/allow_discouraged_type.h"
 #include "third_party/blink/renderer/platform/image-decoders/image_decoder.h"
 #include "third_party/blink/renderer/platform/wtf/vector.h"
+#include "third_party/ohos_ndk/includes/ohos_adapter/ohos_image_decoder_adapter.h"
 #include "third_party/skia/include/core/SkImageInfo.h"
 #include "ui/gfx/color_space.h"
 #include "ui/gfx/color_transform.h"
@@ -64,7 +65,7 @@ class PLATFORM_EXPORT HEIFImageDecoder final : public ImageDecoder {
   bool ImageHasBothStillAndAnimatedSubImages() const override;
 
   static bool MatchesHeifSignature(const sk_sp<SkData>& data);
-  static OHOS::NWeb::OhosImageDecoderAdapter* GetDecoderAdapter();
+  OHOS::NWeb::OhosImageDecoderAdapter* GetDecoderAdapter();
 
  private:
   scoped_refptr<SegmentReader> data_;
@@ -79,10 +80,9 @@ class PLATFORM_EXPORT HEIFImageDecoder final : public ImageDecoder {
   uint8_t bit_depth_ = 0;
   absl::optional<gfx::HDRMetadata> hdr_metadata_;
 
-  // This is only used to parse image size and type.
-  static std::unique_ptr<OHOS::NWeb::OhosImageDecoderAdapter> decoder_adapter_;
   wtf_size_t decoded_frame_count_ = 0;
   SkYUVColorSpace yuv_color_space_ = SkYUVColorSpace::kIdentity_SkYUVColorSpace;
+  std::unique_ptr<OHOS::NWeb::OhosImageDecoderAdapter> decoder_adapter_ = nullptr;
 };
 
 }  // namespace blink
