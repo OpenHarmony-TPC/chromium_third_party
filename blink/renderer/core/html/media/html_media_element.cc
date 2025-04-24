@@ -5765,7 +5765,7 @@ void HTMLMediaElement::OnNotifyVideoPlayingTimerFired(TimerBase*) {
   }
 }
 
-bool HTMLMediaElement::IsCustomMediaPlayerEnabled() {
+bool HTMLMediaElement::IsCustomMediaPlayerEnabled() const {
   return GetDocument().GetSettings() &&
         GetDocument().GetSettings()->GetCustomMediaPlayerEnabled() &&
         IsHTMLVideoElement();
