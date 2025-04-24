@@ -1359,7 +1359,7 @@ void AXObject::PopulateAXRelativeBounds(ui::AXRelativeBounds& bounds,
   if (AXShouldIncludePageScaleFactorInRoot() && IsRoot()) {
     const Page* page = GetDocument()->GetPage();
 #if BUILDFLAG(IS_OHOS)
-    if (GetDocument()->GetFrame() == page->DeprecatedLocalMainFrame()) {
+    if (static_cast<Frame*>(GetDocument()->GetFrame()) == page->MainFrame()) {
 #endif
     container_transform.Scale(page->PageScaleFactor(), page->PageScaleFactor());
     container_transform.Translate(
