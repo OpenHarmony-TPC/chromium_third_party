@@ -65,8 +65,6 @@ String NavigatorID::platform() const {
 #elif BUILDFLAG(IS_WIN)
   // Match Safari and Mozilla on Windows.
   return "Win32";
-#elif BUILDFLAG(IS_OHOS)
-  return "OpenHarmony";
 #else  // Unix-like systems
   struct utsname osname;
   DEFINE_THREAD_SAFE_STATIC_LOCAL(ThreadSpecific<String>, platform_name, ());
