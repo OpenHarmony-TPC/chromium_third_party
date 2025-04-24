@@ -5452,7 +5452,7 @@ bool HTMLMediaElement::IsMediaPlayerShown() const {
 bool HTMLMediaElement::IsUsedCustomVideoPlayer() {
   return IsCustomVideoPlayerEnabled();
 }
-bool HTMLMediaElement::IsCustomVideoPlayerEnabled() const {
+bool HTMLMediaElement::IsCustomVideoPlayerEnabled() {
   return should_create_custom_renderer_ && GetDocument().GetSettings() &&
          GetDocument().GetSettings()->IsCustomVideoPlayerEnabled();
 }
@@ -5765,7 +5765,7 @@ void HTMLMediaElement::OnNotifyVideoPlayingTimerFired(TimerBase*) {
   }
 }
 
-bool HTMLMediaElement::IsCustomMediaPlayerEnabled() {
+bool HTMLMediaElement::IsCustomMediaPlayerEnabled() const {
   return GetDocument().GetSettings() &&
         GetDocument().GetSettings()->GetCustomMediaPlayerEnabled() &&
         IsHTMLVideoElement();
