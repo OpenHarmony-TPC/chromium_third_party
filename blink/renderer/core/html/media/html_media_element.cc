@@ -5962,7 +5962,12 @@ void HTMLMediaElement::ErrorOverlay(int32_t error_code, const String& error_msg)
   LOG(INFO) << "ErrorOverlay";
   if (IsHTMLVideoElement()) {
     for (auto& observer : media_player_observer_remote_set_->Value()) {
-      observer->ErrorOverlay(error_code, error_msg);
+      if (error_msg.IsNull()) {
+        String error_str = "";
+        observer->ErrorOverlay(error_code, error_str);
+      } else {
+        observer->ErrorOverlay(error_code, error_msg);
+      }
     }
   }
 }
