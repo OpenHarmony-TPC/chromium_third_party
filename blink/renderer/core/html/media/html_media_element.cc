@@ -5176,6 +5176,19 @@ void HTMLMediaElement::DidPlayerPaused(bool stream_ended) {
 #endif // OHOS_VIDEO_ASSISTANT
 }
 
+#if defined(OHOS_MEDIA_AVSESSION)
+void HTMLMediaElement::DidEndAVSession(bool is_hidden) {
+  LOG(INFO) << "DidEndAVSession";
+  if (media_player_observer_remote_set_) {
+    for (auto& observer : media_player_observer_remote_set_->Value()) {
+      if (observer) {
+        observer->OnEndAVSession(is_hidden);
+      }
+    }
+  }
+}
+#endif // OHOS_MEDIA_AVSESSION
+
 #if BUILDFLAG(IS_OHOS)
 void HTMLMediaElement::DidPlayerGone() {
   for (auto& observer : media_player_observer_remote_set_->Value())
