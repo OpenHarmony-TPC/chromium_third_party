@@ -5452,7 +5452,7 @@ bool HTMLMediaElement::IsMediaPlayerShown() const {
 bool HTMLMediaElement::IsUsedCustomVideoPlayer() {
   return IsCustomVideoPlayerEnabled();
 }
-bool HTMLMediaElement::IsCustomVideoPlayerEnabled() {
+bool HTMLMediaElement::IsCustomVideoPlayerEnabled() const {
   return should_create_custom_renderer_ && GetDocument().GetSettings() &&
          GetDocument().GetSettings()->IsCustomVideoPlayerEnabled();
 }

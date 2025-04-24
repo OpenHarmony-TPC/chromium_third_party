@@ -243,7 +243,7 @@ class BLINK_PLATFORM_EXPORT WebMediaPlayerClient {
 
 #if defined(OHOS_CUSTOM_VIDEO_PLAYER)
   virtual bool IsMuted() { return false; }
-  virtual bool IsCustomVideoPlayerEnabled() { return false; }
+  virtual bool IsCustomVideoPlayerEnabled() const { return false; }
   virtual bool ShouldCustomVideoPlayerOverlay() { return false; }
   virtual bool ShouldShowMediaControls() { return false; }
   virtual std::string GetMediaFormat() { return ""; }
