@@ -189,6 +189,7 @@ class MockWebMediaPlayerClient : public WebMediaPlayerClient {
   MOCK_METHOD1(PausePlayback, void(WebMediaPlayerClient::PauseReason));
   MOCK_METHOD0(DidPlayerStartPlaying, void());
   MOCK_METHOD1(DidPlayerPaused, void(bool));
+  MOCK_METHOD1(DidEndAVSession, void(bool));
   MOCK_METHOD1(DidPlayerMutedStatusChange, void(bool));
   MOCK_METHOD6(DidMediaMetadataChange,
                void(bool,
