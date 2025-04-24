@@ -156,6 +156,10 @@ class TestMediaPlayerObserver final
   void OnMediaPlayerGone() override {}
 #endif
 
+#if defined(OHOS_MEDIA_AVSESSION)
+  void OnEndAVSession(bool is_hidden) override {}
+#endif // OHOS_MEDIA_AVSESSION
+
   void OnMutedStatusChanged(bool muted) override {
     received_muted_status_type_ = muted;
     run_loop_->Quit();
