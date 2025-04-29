@@ -268,18 +268,20 @@ static const char kPx[] = "px";
 
 void MediaControlPopupMenuElement::SetPopupAnchorHM(DOMRect* bounding_client_rect, LocalDOMWindow* dom_window) {
   style()->removeProperty("max-height", ASSERT_NO_EXCEPTION);
+  style()->removeProperty("bottom", ASSERT_NO_EXCEPTION);
+  style()->removeProperty("top", ASSERT_NO_EXCEPTION);
+  style()->removeProperty("right", ASSERT_NO_EXCEPTION);
+  style()->removeProperty("left", ASSERT_NO_EXCEPTION);
   if (kPopupMenuBottomSpaceLeft <= dom_window->innerHeight() -
       bounding_client_rect->bottom() + kPopupMenuMarginPxOhos) {
     WTF::String top_str_value = WTF::String::Number(bounding_client_rect->bottom()) + kPx;
     style()->setProperty(dom_window, "top", top_str_value, kImportant,
                         ASSERT_NO_EXCEPTION);
-    style()->removeProperty("bottom", ASSERT_NO_EXCEPTION);
   } else {
     WTF::String bottom_str_value = WTF::String::Number(dom_window->innerHeight() -
                         bounding_client_rect->top()) + kPx;
     style()->setProperty(dom_window, "bottom", bottom_str_value, kImportant,
                         ASSERT_NO_EXCEPTION);
-    style()->removeProperty("top", ASSERT_NO_EXCEPTION);
     if (kPopupMenuBottomSpaceLeft > bounding_client_rect->top() + kPopupMenuMarginPxOhos) {
       WTF::String height_str_value = WTF::String::Number(bounding_client_rect->top() -
                             kPopupMenuMarginPxOhos - 2 * kPopupMenuPaddingPx) + kPx;
