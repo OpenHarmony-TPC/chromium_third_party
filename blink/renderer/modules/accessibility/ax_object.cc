@@ -6238,6 +6238,9 @@ bool AXObject::PerformAction(const ui::AXActionData& action_data) {
     case ax::mojom::blink::Action::kDecrement:
       return RequestDecrementAction();
     case ax::mojom::blink::Action::kDoDefault:
+#if BUILDFLAG(IS_OHOS)
+      OnNativeBlurAction();
+#endif
       return RequestClickAction();
     case ax::mojom::blink::Action::kExpand:
       return RequestExpandAction();
