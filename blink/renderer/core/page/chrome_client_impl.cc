@@ -1323,6 +1323,19 @@ gfx::Transform ChromeClientImpl::GetDeviceEmulationTransform() const {
 void ChromeClientImpl::DidUpdateBrowserControls() const {
   DCHECK(web_view_);
   web_view_->DidUpdateBrowserControls();
+
+#ifdef OHOS_SCROLLBAR
+  if (base::CommandLine::ForCurrentProcess()->HasSwitch(
+          switches::kEnableNwebExTopControls) &&
+      web_view_->MainFrameImpl()) {
+    LocalFrame* local_frame = web_view_->MainFrameImpl()->GetFrame();
+    if (local_frame && local_frame->View()) {
+      local_frame->View()
+          ->LayoutViewport()
+          ->UpdateScrollbarForHorizontalScrollbar();
+    }
+  }
+#endif
 }
 
 void ChromeClientImpl::RegisterPopupOpeningObserver(

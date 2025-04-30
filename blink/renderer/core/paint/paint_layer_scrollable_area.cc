@@ -116,6 +116,7 @@
 
 #if BUILDFLAG(IS_OHOS)
 #include "base/ohos/sys_info_utils.h"
+#include "third_party/blink/renderer/core/frame/browser_controls.h"
 #endif
 
 namespace blink {
@@ -839,6 +840,18 @@ void PaintLayerScrollableArea::UpdateScrollbarLengthOrCreateWidthScale() {
     }
   }
 }
+
+void PaintLayerScrollableArea::UpdateScrollbarForHorizontalScrollbar() {
+  if (HasHorizontalScrollbar()) {
+    UpdateScrollbar();
+  }
+}
+
+void PaintLayerScrollableArea::UpdateScrollbar() {
+  UpdateScrollbarProportions();
+  ClampScrollOffsetAfterOverflowChange();
+  PositionOverflowControls();
+}
 #endif  // OHOS_SCROLLBAR
 
 void PaintLayerScrollableArea::ScrollbarFrameRectChanged() {
@@ -1434,16 +1447,25 @@ gfx::Rect PaintLayerScrollableArea::RectForHorizontalScrollbar() const {
   if (HorizontalScrollbar()->IsOverlayScrollbar()) {
     marginBottom = ScaleFromDIP() * kScrollbarMargin;
   }
+ 
+  float controlsOffset = 0;
+  if (GetLayoutBox()->GetFrame() && GetLayoutBox()->GetFrame()->GetPage()) {
+    const BrowserControls& controls =
+        GetLayoutBox()->GetFrame()->GetPage()->GetBrowserControls();
+    controlsOffset = (controls.TopShownRatio() > 0 ? 0 : controls.TopHeight());
+  }
+ 
   return gfx::Rect(
       HorizontalScrollbarStart(),
       border_box_size.height() - GetLayoutBox()->BorderBottom().ToInt() -
-          HorizontalScrollbar()->ScrollbarThickness() - marginBottom,
+          HorizontalScrollbar()->ScrollbarThickness() - marginBottom +
+          controlsOffset,
       border_box_size.width() -
           (GetLayoutBox()->BorderLeft() + GetLayoutBox()->BorderRight())
               .ToInt() -
           scroll_corner.width(),
       HorizontalScrollbar()->ScrollbarThickness());
-#else
+#else  
   return gfx::Rect(
       HorizontalScrollbarStart(),
       border_box_size.height() - GetLayoutBox()->BorderBottom().ToInt() -
