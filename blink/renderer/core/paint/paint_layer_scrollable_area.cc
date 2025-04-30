@@ -1465,7 +1465,7 @@ gfx::Rect PaintLayerScrollableArea::RectForHorizontalScrollbar() const {
               .ToInt() -
           scroll_corner.width(),
       HorizontalScrollbar()->ScrollbarThickness());
-#else  
+#else
   return gfx::Rect(
       HorizontalScrollbarStart(),
       border_box_size.height() - GetLayoutBox()->BorderBottom().ToInt() -

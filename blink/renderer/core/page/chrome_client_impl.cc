@@ -35,6 +35,8 @@
 #include <utility>
 
 #include "base/debug/alias.h"
+#include "base/command_line.h"
+#include "content/public/common/content_switches.h"
 #include "build/build_config.h"
 #include "cc/animation/animation_host.h"
 #include "cc/animation/animation_timeline.h"
