@@ -619,6 +619,7 @@ class CORE_EXPORT PaintLayerScrollableArea final
 #ifdef OHOS_SCROLLBAR
   float ComputeVisibleAreaScale() const;
   void UpdateScrollbarLengthOrCreateWidthScale();
+  void UpdateScrollbarForHorizontalScrollbar();
 #endif // OHOS_SCROLLBAR
 
  private:

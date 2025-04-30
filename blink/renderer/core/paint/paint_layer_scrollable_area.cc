@@ -839,6 +839,12 @@ void PaintLayerScrollableArea::UpdateScrollbarLengthOrCreateWidthScale() {
     }
   }
 }
+
+void PaintLayerScrollableArea::UpdateScrollbarForHorizontalScrollbar() {
+  if (HasHorizontalScrollbar()) {
+    UpdateScrollbar();
+  }
+}
 #endif  // OHOS_SCROLLBAR
 
 void PaintLayerScrollableArea::ScrollbarFrameRectChanged() {
