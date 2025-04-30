@@ -1328,7 +1328,7 @@ void ChromeClientImpl::DidUpdateBrowserControls() const {
 
 #ifdef OHOS_SCROLLBAR
   if (base::CommandLine::ForCurrentProcess()->HasSwitch(
-          switches::kEnableNwebExTopControls) &&
+          switches::kForBrowser) &&
       web_view_->MainFrameImpl()) {
     LocalFrame* local_frame = web_view_->MainFrameImpl()->GetFrame();
     if (local_frame && local_frame->View()) {
