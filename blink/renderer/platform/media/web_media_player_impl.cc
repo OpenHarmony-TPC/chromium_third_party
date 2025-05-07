@@ -2697,6 +2697,12 @@ void WebMediaPlayerImpl::OnFrameHidden() {
   UpdateBackgroundVideoOptimizationState();
   UpdatePlayState();
 
+#if defined(OHOS_MEDIA_AVSESSION)
+  if (client_ && ShouldPausePlaybackWhenHidden()) {
+    client_->DidEndAVSession(true);
+  }
+#endif // OHOS_MEDIA_AVSESSION
+
 #if defined(OHOS_CUSTOM_VIDEO_PLAYER)
   if (storing_in_bfcache) {
     pipeline_controller_->SetMediaPlayerState(

@@ -613,6 +613,12 @@ class CORE_EXPORT HTMLMediaElement
   void PausePlayback(PauseReason) final;
   void DidPlayerStartPlaying() override;
   void DidPlayerPaused(bool stream_ended) override;
+
+#if defined(OHOS_MEDIA_AVSESSION)
+  // Notify the client that the avsession should be destoryed.
+  virtual void DidEndAVSession(bool is_hidden) override;
+#endif // OHOS_MEDIA_AVSESSION
+
   void DidPlayerMutedStatusChange(bool muted) override;
   void DidMediaMetadataChange(bool has_audio,
                               bool has_video,
