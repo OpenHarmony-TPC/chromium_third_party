@@ -713,8 +713,12 @@ void MediaControlsImpl::PopulatePanel() {
 
     Element* button_panel = panel_;
     if (ShouldShowVideoControls()) {
-      MaybeParserAppendChild(panel_, scrubbing_panel_);
-      MaybeParserAppendChild(scrubbing_panel_, scrubbing_message_);
+      if (scrubbing_panel_) {
+        MaybeParserAppendChild(panel_, scrubbing_panel_);
+        MaybeParserAppendChild(scrubbing_panel_, scrubbing_message_);
+      } else {
+        MaybeParserAppendChild(panel_, scrubbing_message_);
+      }
       if (display_cutout_fullscreen_button_)
         panel_->ParserAppendChild(display_cutout_fullscreen_button_);
 
@@ -1340,6 +1344,10 @@ void MediaControlsImpl::BeginScrubbing(bool is_touch_event) {
     if (scrubbing_message_->DoesFit())
       panel_->setAttribute("class", AtomicString(kScrubbingMessageCSSClass));
   }
+
+  if (scrubbing_panel_ && is_touch_event) {
+    scrubbing_panel_->SetIsWanted(true);
+  }
 #endif
 
   is_scrubbing_ = true;
@@ -1363,6 +1371,9 @@ void MediaControlsImpl::EndScrubbing() {
     } else {
 #endif
     scrubbing_message_->SetIsWanted(false);
+    if (scrubbing_panel_) {
+      scrubbing_panel_->SetIsWanted(false);
+    }
 #ifdef OHOS_VIDEO_ASSISTANT
     }
 #endif
@@ -1662,6 +1673,9 @@ void MediaControlsImpl::ScrubbingTimerFired(TimerBase*) {
  
   if (is_begin_scrubbing) {
     scrubbing_message_->updateScrubbingMsg(false);
+    if (scrubbing_panel_) {
+      scrubbing_panel_->SetIsWanted(false);
+    }
     is_begin_scrubbing = false;
   }
 }
@@ -2130,6 +2144,10 @@ void MediaControlsImpl::OnSeeking() {
       if (scrubbing_message_->DoesFit()) {
         panel_->setAttribute("class", AtomicString(kScrubbingMessageCSSClass));
       }
+    }
+
+    if (scrubbing_panel_ && is_begin_scrubbing) {
+      scrubbing_panel_->SetIsWanted(true);
     }
   }
 #endif

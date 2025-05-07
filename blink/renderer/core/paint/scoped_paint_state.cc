@@ -10,6 +10,12 @@
 #include "third_party/blink/renderer/core/paint/paint_layer.h"
 #include "third_party/blink/renderer/core/paint/paint_layer_painter.h"
 
+#ifdef OHOS_EX_FREE_COPY
+#include "third_party/blink/renderer/core/frame/settings.h"
+#include "third_party/blink/renderer/core/style/computed_style.h"
+#include "third_party/blink/renderer/core/style/computed_style_constants.h"
+#endif
+
 namespace blink {
 
 ScopedPaintState::ScopedPaintState(const LayoutObject& object,
@@ -105,6 +111,20 @@ void ScopedPaintState::FinishPaintOffsetTranslationAsDrawing() {
   input_paint_info_.context.Restore();
 }
 
+#ifdef OHOS_EX_FREE_COPY
+bool ScopedBoxContentsPaintState::IsEllipisTextOverFlowInSelection(
+    const LayoutBox& box) {
+  if (!box.GetDocument().GetSettings() ||
+      !box.GetDocument().GetSettings()->IsContextMenuCustomizationEnabled()) {
+    return false;
+  }
+  if ((box.GetSelectionState() == SelectionState::kNone)) {
+    return false;
+  }
+  return box.Style() && box.Style()->TextOverflow() == ETextOverflow::kEllipsis;
+}
+#endif
+
 void ScopedBoxContentsPaintState::AdjustForBoxContents(const LayoutBox& box) {
   DCHECK(input_paint_info_.phase != PaintPhase::kSelfOutlineOnly &&
          input_paint_info_.phase != PaintPhase::kMask);
@@ -131,7 +151,16 @@ void ScopedBoxContentsPaintState::AdjustForBoxContents(const LayoutBox& box) {
   if (!box.HasLayer())
     return;
   adjusted_paint_info_.emplace(input_paint_info_);
+#ifdef OHOS_EX_FREE_COPY
+  if (IsEllipisTextOverFlowInSelection(box)) {
+    adjusted_paint_info_->SetCullRect(fragment_to_paint_->GetCullRect());
+} else {
+    adjusted_paint_info_->SetCullRect(
+        fragment_to_paint_->GetContentsCullRect());
+  }
+#else
   adjusted_paint_info_->SetCullRect(fragment_to_paint_->GetContentsCullRect());
+#endif
   if (box.Layer()->PreviousPaintResult() == kFullyPainted) {
     PhysicalRect contents_visual_rect =
         PaintLayerPainter::ContentsVisualRect(*fragment_to_paint_, box);

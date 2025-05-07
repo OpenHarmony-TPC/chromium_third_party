@@ -78,6 +78,9 @@ class ScopedPaintState {
         paint_offset_(paint_offset) {}
 
  private:
+ #ifdef OHOS_EX_FREE_COPY
+  bool IsEllipisTextOverFlowInSelection(const LayoutBox&);
+#endif
   void AdjustForPaintProperties(const LayoutObject&);
 
   void FinishPaintOffsetTranslationAsDrawing();
