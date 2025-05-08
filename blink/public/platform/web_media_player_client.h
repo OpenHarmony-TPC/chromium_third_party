@@ -266,7 +266,7 @@ class BLINK_PLATFORM_EXPORT WebMediaPlayerClient {
   virtual bool IsVideoAssistantEnabled() { return false; }
   virtual void OnLayerBoundsChange(const gfx::Rect& bounds) {}
   virtual void OnPageVisibilityChanged() {}
-  virtual bool IsCustomMediaPlayerEnabled() { return false; }
+  virtual bool IsCustomMediaPlayerEnabled() const { return false; }
   virtual void OnSupportVideoSurfaceChanged(
       bool support, std::string decoder_name) {}
 #endif // OHOS_VIDEO_ASSISTANT
