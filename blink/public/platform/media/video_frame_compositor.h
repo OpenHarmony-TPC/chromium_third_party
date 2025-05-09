@@ -305,13 +305,13 @@ class BLINK_PLATFORM_EXPORT VideoFrameCompositor
       auto_open_close_;
   std::unique_ptr<WebVideoFrameSubmitter> submitter_;
 
-  base::WeakPtrFactory<VideoFrameCompositor> weak_ptr_factory_{this};
-
 #if defined(OHOS_MEDIA_CAPABILITIES_ENHANCE)
   int64_t last_frame_time_ = 0;
   int64_t total_freeze_time_ = 0;
   bool is_playing_ = false;
 #endif // OHOS_MEDIA_CAPABILITIES_ENHANCE
+
+  base::WeakPtrFactory<VideoFrameCompositor> weak_ptr_factory_{this};
 };
 
 }  // namespace blink
