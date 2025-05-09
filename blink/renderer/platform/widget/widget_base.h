@@ -581,7 +581,6 @@ class PLATFORM_EXPORT WidgetBase : public mojom::blink::Widget,
   absl::optional<int> max_render_buffer_bounds_gpu_;
   absl::optional<int> max_render_buffer_bounds_sw_;
 
-  base::WeakPtrFactory<WidgetBase> weak_ptr_factory_{this};
 #if defined(OHOS_INPUT_EVENTS)
   int32_t requestKeyboardReason_ = 0;
 #endif
@@ -589,6 +588,8 @@ class PLATFORM_EXPORT WidgetBase : public mojom::blink::Widget,
   bool is_worker_pool_initial_ = false;
   base::Lock lock_;
 #endif
+
+  base::WeakPtrFactory<WidgetBase> weak_ptr_factory_{this};
 };
 
 }  // namespace blink
