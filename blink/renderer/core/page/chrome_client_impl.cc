@@ -115,6 +115,11 @@
 #include "third_party/blink/renderer/platform/wtf/text/string_concatenate.h"
 #include "ui/gfx/geometry/rect.h"
 
+#ifdef OHOS_SCROLLBAR
+#include "base/command_line.h"
+#include "content/public/common/content_switches.h"
+#endif
+
 namespace blink {
 
 namespace {
@@ -1323,6 +1328,19 @@ gfx::Transform ChromeClientImpl::GetDeviceEmulationTransform() const {
 void ChromeClientImpl::DidUpdateBrowserControls() const {
   DCHECK(web_view_);
   web_view_->DidUpdateBrowserControls();
+
+#ifdef OHOS_SCROLLBAR
+  if (base::CommandLine::ForCurrentProcess()->HasSwitch(
+          switches::kEnableNwebExTopControls) &&
+      web_view_->MainFrameImpl()) {
+    LocalFrame* local_frame = web_view_->MainFrameImpl()->GetFrame();
+    if (local_frame && local_frame->View()) {
+      local_frame->View()
+          ->LayoutViewport()
+          ->UpdateScrollbarForHorizontalScrollbar();
+    }
+  }
+#endif
 }
 
 void ChromeClientImpl::RegisterPopupOpeningObserver(

@@ -116,6 +116,7 @@
 
 #if BUILDFLAG(IS_OHOS)
 #include "base/ohos/sys_info_utils.h"
+#include "third_party/blink/renderer/core/frame/browser_controls.h"
 #endif
 
 namespace blink {
@@ -814,6 +815,18 @@ float PaintLayerScrollableArea::ComputeVisibleAreaScale() const {
   return 1.f;
 }
 
+void PaintLayerScrollableArea::UpdateScrollbar() {
+  UpdateScrollbarProportions();
+  ClampScrollOffsetAfterOverflowChange();
+  PositionOverflowControls();
+}
+
+void PaintLayerScrollableArea::UpdateScrollbarForHorizontalScrollbar() {
+  if (HasHorizontalScrollbar()) {
+    UpdateScrollbar();
+  }
+}
+
 void PaintLayerScrollableArea::UpdateScrollbarLengthOrCreateWidthScale() {
   is_pinch_gesture_active_ = true;
   if (HorizontalScrollbar() && VerticalScrollbar()) {
@@ -833,9 +846,7 @@ void PaintLayerScrollableArea::UpdateScrollbarLengthOrCreateWidthScale() {
       needs_notify_location = true;
     }
     if (needs_notify_location) {
-      UpdateScrollbarProportions();
-      ClampScrollOffsetAfterOverflowChange();
-      PositionOverflowControls();
+      UpdateScrollbar();
     }
   }
 }
@@ -1434,10 +1445,19 @@ gfx::Rect PaintLayerScrollableArea::RectForHorizontalScrollbar() const {
   if (HorizontalScrollbar()->IsOverlayScrollbar()) {
     marginBottom = ScaleFromDIP() * kScrollbarMargin;
   }
+
+  float controlsOffset = 0;
+  if (GetLayoutBox()->GetFrame() && GetLayoutBox()->GetFrame()->GetPage()) {
+    const BrowserControls& controls =
+        GetLayoutBox()->GetFrame()->GetPage()->GetBrowserControls();
+    controlsOffset = (controls.TopShownRatio() > 0 ? 0 : controls.TopHeight());
+  }
+
   return gfx::Rect(
       HorizontalScrollbarStart(),
       border_box_size.height() - GetLayoutBox()->BorderBottom().ToInt() -
-          HorizontalScrollbar()->ScrollbarThickness() - marginBottom,
+          HorizontalScrollbar()->ScrollbarThickness() - marginBottom +
+          controlsOffset,
       border_box_size.width() -
           (GetLayoutBox()->BorderLeft() + GetLayoutBox()->BorderRight())
               .ToInt() -
