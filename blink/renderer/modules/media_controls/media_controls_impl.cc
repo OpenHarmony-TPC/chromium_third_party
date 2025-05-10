@@ -1136,6 +1136,12 @@ void MediaControlsImpl::MaybeShow() {
   // Only make the controls visible if they won't get hidden by OnTimeUpdate.
   if (MediaElement().paused() || !ShouldHideMediaControls())
     MakeOpaque();
+#ifdef OHOS_VIDEO_ASSISTANT
+    else {
+      MakeTransparentImmediately();
+    }
+  #endif // OHOS_VIDEO_ASSISTANT
+
   if (loading_panel_)
     loading_panel_->OnControlsShown();
 
@@ -1664,6 +1670,11 @@ MediaControlsSizingClass MediaControlsImpl::GetSizingClassHM() {
     return MediaControlsSizingClass::kMedium;
   }
   return MediaControlsSizingClass::kLarge;
+}
+
+void MediaControlsImpl::MakeTransparentImmediately() {
+  MakeTransparent();
+  panel_->SetIsWanted(false);
 }
 
 void MediaControlsImpl::ScrubbingTimerFired(TimerBase*) {

@@ -421,8 +421,20 @@ const char* FullscreenElementNotReady(const Element& element,
 
   // |element|'s node document is allowed to use the feature indicated by
   // attribute name allowfullscreen.
+  #ifdef OHOS_VIDEO_ASSISTANT
+  if (!AllowedToUseFullscreen(element.GetDocument(), report_on_failure)) {
+    if (auto* video_element = DynamicTo<HTMLVideoElement>(element)) {
+      if (!video_element->IsCustomMediaPlayerEnabled()) {
+        return "Disallowed by permissions policy";
+      }
+    } else {
+      return "Disallowed by permissions policy";
+    }
+  }
+#else
   if (!AllowedToUseFullscreen(element.GetDocument(), report_on_failure))
     return "Disallowed by permissions policy";
+#endif // OHOS_VIDEO_ASSISTANT
 
   if (auto* html_element = DynamicTo<HTMLElement>(element);
       html_element &&
