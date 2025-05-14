@@ -730,6 +730,9 @@ ScriptPromise Fullscreen::RequestFullscreen(Element& pending,
   // 4. If |pendingDoc| is not fully active, then reject |promise| with a
   // TypeError exception and return |promise|.
   if (!document.IsActive() || !document.GetFrame()) {
+#ifdef OHOS_MEDIA
+    LOG(ERROR) << "RequestFullscreen document isn't active or getframe failed.";
+#endif // OHOS_MEDIA
     if (!exception_state)
       return ScriptPromise();
     exception_state->ThrowTypeError("Document not active");
