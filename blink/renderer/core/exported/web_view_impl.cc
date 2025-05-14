@@ -2057,6 +2057,9 @@ void WebViewImpl::EnterFullscreen(
     const absl::optional<gfx::Size>& video_natural_size
 #endif  // defined(OHOS_MEDIA)
 ) {
+#ifdef OHOS_MEDIA
+    LOG(INFO) << "WebViewImpl EnterFullscreen";
+#endif // OHOS_MEDIA
   fullscreen_controller_->EnterFullscreen(frame, options,
 #ifdef OHOS_VIDEO_ASSISTANT
                                           overlay_fullscreen,
