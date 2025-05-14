@@ -2058,7 +2058,7 @@ void WebViewImpl::EnterFullscreen(
 #endif  // defined(OHOS_MEDIA)
 ) {
 #ifdef OHOS_MEDIA
-    LOG(INFO) << "WebViewImpl EnterFullscreen";
+  LOG(INFO) << "WebViewImpl EnterFullscreen";
 #endif // OHOS_MEDIA
   fullscreen_controller_->EnterFullscreen(frame, options,
 #ifdef OHOS_VIDEO_ASSISTANT

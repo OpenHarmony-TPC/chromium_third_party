@@ -913,7 +913,7 @@ void ChromeClientImpl::EnterFullscreen(
 ) {
   DCHECK(web_view_);
 #ifdef OHOS_MEDIA
-    LOG(INFO) << "ChromeClientImpl EnterFullscreen";
+  LOG(INFO) << "ChromeClientImpl EnterFullscreen";
 #endif // OHOS_MEDIA
   web_view_->EnterFullscreen(frame, options,
 #ifdef OHOS_VIDEO_ASSISTANT
