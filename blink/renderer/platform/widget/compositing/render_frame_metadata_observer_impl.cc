@@ -84,7 +84,7 @@ void RenderFrameMetadataObserverImpl::OnRenderFrameSubmission(
   // value to all the observers.
   if (send_metadata && render_frame_metadata_observer_client_) {
     auto metadata_copy = render_frame_metadata;
-#if !BUILDFLAG(IS_ANDROID)
+#if !BUILDFLAG(IS_ANDROID) && !BUILDFLAG(IS_OHOS)
     // On non-Android, sending |root_scroll_offset| outside of tests would
     // leave the browser process with out of date information. It is an
     // optional parameter which we clear here.
@@ -183,6 +183,7 @@ bool RenderFrameMetadataObserverImpl::ShouldSendRenderFrameMetadata(
       rfm2.new_vertical_scroll_direction != viz::VerticalScrollDirection::kNull
 #if BUILDFLAG(IS_OHOS)
       || rfm1.root_layer_size != rfm2.root_layer_size
+      || rfm1.root_scroll_offset != rfm2.root_scroll_offset
 #endif
 #ifdef OHOS_CLIPBOARD
       || rfm1.clipped_selection_bounds != rfm2.clipped_selection_bounds
