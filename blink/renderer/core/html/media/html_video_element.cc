@@ -209,6 +209,13 @@ void HTMLVideoElement::ParseAttribute(
     UpdatePosterImage();
 #if defined(OHOS_MEDIA_AVSESSION)
     video_poster_ = FastGetAttribute(html_names::kPosterAttr).GetString();
+    for (auto& observer : media_player_observer_remote_set_->Value()) {
+      observer->OnInitVideoPoster();
+      auto videoPoster = GetVideoPoster();
+      if (!videoPoster.empty()) {
+        observer->OnGetVideoPoster(videoPoster);
+      }
+    }
 #endif // OHOS_MEDIA_AVSESSION
 
     // Notify the player when the poster image URL changes.

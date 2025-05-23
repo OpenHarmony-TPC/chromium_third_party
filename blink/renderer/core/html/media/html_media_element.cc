@@ -860,6 +860,13 @@ void HTMLMediaElement::ParseAttribute(
 #if defined(OHOS_MEDIA_AVSESSION)
   } else if (name == html_names::kTitleAttr) {
     SetMediaTitle();
+    for (auto& observer : media_player_observer_remote_set_->Value()) {
+      observer->OnInitMediaTitle();
+      auto mediaTitle = GetMediaTitle();
+      if (!mediaTitle.empty()) {
+        observer->OnGetMediaTitle(mediaTitle);
+      }
+    }
 #endif // OHOS_MEDIA_AVSESSION
   } else {
     HTMLElement::ParseAttribute(params);
