@@ -364,13 +364,13 @@ void FontBuilder::UpdateWeightScale(FontDescription& font_description) {
     }
   }
   if (weightScale < epsilon) {
+    LOG(ERROR) << "FollowSystemFontWeight error: weightScale <=0";
     return;
   }
   float newWeight = std::clamp(
     (float) font_description.Weight() * weightScale,
     (float) MinWeightValue(),
     (float) MaxWeightValue());
-  LOG(DEBUG) << "FollowSystemFontWeight, fontWeight =" << (float) font_description.Weight() << " * " << weightScale;
   font_description.SetWeight(FontSelectionValue(newWeight));
 }
 #endif
