@@ -43,6 +43,11 @@
 #include "third_party/skia/include/core/SkImage.h"
 #include "ui/gfx/geometry/size.h"
 
+#if defined(OHOS_NWEB_EX)
+#include "base/command_line.h"
+#include "content/public/common/content_switches.h"
+#endif
+
 namespace blink {
 
 SkBitmap WebImage::FromData(const WebData& data,
@@ -93,8 +98,14 @@ SkBitmap WebImage::FromData(const WebData& data,
   return bitmap;
 }
 
+#if defined(OHOS_NWEB_EX)
+SkBitmap WebImage::DecodeSVG(const WebData& data,
+                             const gfx::Size& desired_size,
+                             bool is_favicon) {
+#else
 SkBitmap WebImage::DecodeSVG(const WebData& data,
                              const gfx::Size& desired_size) {
+#endif
   scoped_refptr<SVGImage> svg_image = SVGImage::Create(nullptr);
   const bool data_complete = true;
   Image::SizeAvailability size_available =
@@ -111,6 +122,15 @@ SkBitmap WebImage::DecodeSVG(const WebData& data,
   gfx::SizeF container_size(desired_size);
   if (container_size.IsEmpty())
     container_size = svg_image->ConcreteObjectSize(gfx::SizeF());
+  
+#if defined(OHOS_NWEB_EX)
+  if (container_size.IsEmpty() &&
+      is_favicon &&
+      base::CommandLine::ForCurrentProcess()->HasSwitch(::switches::kEnableNwebEx)) {
+    static constexpr gfx::SizeF kDefaultFaviconSize = gfx::SizeF(64, 64);
+    container_size = kDefaultFaviconSize;
+  }
+#endif
   // TODO(chrishtr): perhaps the downloaded image should be decoded in dark
   // mode if the preferred color scheme is dark.
   scoped_refptr<Image> svg_container =
