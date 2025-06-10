@@ -196,6 +196,31 @@ class TestMediaPlayerObserver final
     run_loop_->Quit();
   }
 
+#ifdef OHOS_VIDEO_ASSISTANT
+  void OnVideoPlaying(
+      media::mojom::blink::VideoAttributesForVASTPtr video_attributes) override {}
+  void OnUpdateVideoAttributes(
+      media::mojom::blink::VideoAttributesForVASTPtr video_attributes) override {}
+  void OnVideoDestroyed() override {}
+  void OnFullScreenOverlayEnter(media::mojom::blink::MediaInfoForVASTPtr media_info) override {}
+  void UpdatePlayStateOverlay(uint32_t playState) override {}
+  void MutedChangedOverlay(bool muted) override {}
+  void PlaybackRateChangedOverlay(double playback_rate) override {}
+
+  void DurationChangedOverlay(double duration) override {}
+  void TimeUpdateOverlay(double current_time) override {}
+  void BufferedEndTimeChangedOverlay(double buffered_end_time) override {}
+  void EndedOverlay() override {}
+
+  void FullscreenChangedOverlay(bool fullscreen) override {}
+  void SeekingOverlay() override {}
+  void SeekingFinishedOverlay() override {}
+  void ErrorOverlay(int32_t error_code, const WTF::String& error_msg) override {}
+  void VideoSizeChangedOverlay(int32_t width, int32_t height) override {}
+  void FullscreenOverlayChanged(
+      bool fullscreen_overlay, const WTF::String& decoder_name) override {}
+#endif // OHOS_VIDEO_ASSISTANT
+
   // Getters used from HTMLMediaElementTest.
   bool received_media_playing() const { return received_media_playing_; }
 
@@ -250,6 +275,10 @@ class TestMediaPlayerHost final : public media::mojom::blink::MediaPlayerHost {
     receiver_.Bind(std::move(media_player_observer));
     run_loop_.Quit();
   }
+#ifdef OHOS_VIDEO_ASSISTANT
+  void RequestVideoAssistantConfig(
+      RequestVideoAssistantConfigCallback callback) {}
+#endif // OHOS_VIDEO_ASSISTANT
 
   TestMediaPlayerObserver& observer() { return observer_; }
 

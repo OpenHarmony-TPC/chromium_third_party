@@ -22,6 +22,10 @@ class ContainerNode;
 class Element;
 class Event;
 class HTMLDivElement;
+#ifdef OHOS_VIDEO_ASSISTANT
+class HTMLSpanElement;
+class HTMLProgressElement;
+#endif
 class HTMLMediaElement;
 class LayoutObject;
 class Node;
@@ -57,6 +61,13 @@ class MediaControlElementsHelper final {
   // element ID.
   static HTMLDivElement* CreateDivWithId(const WTF::AtomicString& id,
                                          ContainerNode* parent);
+
+#ifdef OHOS_VIDEO_ASSISTANT
+  static HTMLSpanElement* CreateSpanWithId(const WTF::AtomicString& id,
+                                           ContainerNode* parent);
+  static HTMLProgressElement* CreateProgressWithId(const WTF::AtomicString& id,
+                                                   ContainerNode* parent);
+#endif
 
   // Utility function that notifies the media controls in which the element is
   // that it was focused by an accessibility tool.

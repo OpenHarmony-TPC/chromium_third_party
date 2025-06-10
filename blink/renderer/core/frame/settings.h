@@ -167,6 +167,21 @@ class CORE_EXPORT Settings {
   }
 #endif // OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
 
+#ifdef OHOS_VIDEO_ASSISTANT
+  void SetVideoAssistantEnabled(bool enabled) {
+    video_assistant_enabled_ = enabled;
+  }
+  bool GetVideoAssistantEnabled() {
+    return video_assistant_enabled_;
+  }
+  void SetCustomMediaPlayerEnabled(bool enabled) {
+    custom_media_player_enabled_ = enabled;
+  }
+  bool GetCustomMediaPlayerEnabled() {
+    return custom_media_player_enabled_;
+  }
+#endif // OHOS_VIDEO_ASSISTANT
+
  private:
   void Invalidate(SettingsDelegate::ChangeType);
 
@@ -208,6 +223,11 @@ class CORE_EXPORT Settings {
   bool media_network_traffic_prompt_enabled_ = false;
   bool playback_with_mobile_data_allowed_ = false;
 #endif // OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
+
+#ifdef OHOS_VIDEO_ASSISTANT
+  bool video_assistant_enabled_ = false;
+  bool custom_media_player_enabled_ = false;
+#endif // OHOS_VIDEO_ASSISTANT
 };
 
 }  // namespace blink

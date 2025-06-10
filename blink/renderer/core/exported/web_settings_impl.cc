@@ -36,6 +36,10 @@
 #include "third_party/blink/renderer/core/inspector/dev_tools_emulator.h"
 #include "third_party/blink/renderer/platform/graphics/deferred_image_decoder.h"
 
+#ifdef OHOS_VIDEO_ASSISTANT
+#include "third_party/blink/renderer/modules/media_controls/media_controls_resource_loader.h"
+#endif
+
 namespace blink {
 
 WebSettingsImpl::WebSettingsImpl(Settings* settings,
@@ -518,6 +522,10 @@ void WebSettingsImpl::SetNativeEmbedModeEnabled(bool enabled) {
   settings_->SetNativeEmbedModeEnabled(enabled);
 }
 
+void WebSettingsImpl::SetIntrinsicSizeEnabled(bool enabled) {
+  settings_->SetIntrinsicSizeEnabled(enabled);
+}
+
 void WebSettingsImpl::RegisterNativeEmbedRule(const WebString& tag,
                                               const WebString& type) {
   settings_->RegisterNativeEmbedRule(tag, type);
@@ -864,4 +872,18 @@ void WebSettingsImpl::SetPlaybackWithMobileDataAllowed(bool allowed) {
   settings_->SetPlaybackWithMobileDataAllowed(allowed);
 }
 #endif // OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
+
+#ifdef OHOS_VIDEO_ASSISTANT
+void WebSettingsImpl::SetVideoAssistantEnabled(bool enabled) {
+  settings_->SetVideoAssistantEnabled(enabled);
+}
+void WebSettingsImpl::SetCustomMediaPlayerEnabled(bool enabled) {
+  settings_->SetCustomMediaPlayerEnabled(enabled);
+  MediaControlsResourceLoader::SetCustomMediaPlayerEnabled(enabled);
+}
+bool WebSettingsImpl::GetCustomMediaPlayerEnabled() {
+  return settings_->GetCustomMediaPlayerEnabled();
+}
+#endif // OHOS_VIDEO_ASSISTANT
+
 }  // namespace blink

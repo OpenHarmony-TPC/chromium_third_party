@@ -328,6 +328,11 @@ class PLATFORM_EXPORT WebMediaPlayerImpl
     return is_background_suspend_enabled_;
   }
 
+#ifdef OHOS_VIDEO_ASSISTANT
+  void SetVideoSurface(int32_t widget_id) override;
+  bool SupportVideoSurface() override;
+#endif // OHOS_VIDEO_ASSISTANT
+
   // Distinct states that |delegate_| can be in. (Public for testing.)
   enum class DelegateState {
     GONE,
@@ -741,11 +746,25 @@ class PLATFORM_EXPORT WebMediaPlayerImpl
 
   void PlayWithReason(media::ActionReason reason) override;
   void PauseWithReason(media::ActionReason reason) override;
+  bool IsMediaPlayerShown() const override;
   bool IsUsingCustomRenderer() const override;
   void SetInitialPreload(uint32_t preload) override;
 
   void OnLayerRectChange(const gfx::Rect& rect);
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
+
+#ifdef OHOS_VIDEO_ASSISTANT
+  void OnLayerBoundsChange(const gfx::Rect& bounds);
+  void OnLayerOpacityChange(float opacity);
+#endif // OHOS_VIDEO_ASSISTANT
+
+#ifdef OHOS_VIDEO_ASSISTANT
+  void OnSurfaceRequested(media::SurfaceCreatedCB surface_created_cb,
+                          bool support_video_surface,
+                          std::string decoder_name);
+  void OnVideoDecoderChanaged(bool support_video_surface,
+                              std::string decoder_name);
+#endif // OHOS_VIDEO_ASSISTANT
 
   WebLocalFrame* const frame_;
 
@@ -1154,6 +1173,12 @@ class PLATFORM_EXPORT WebMediaPlayerImpl
   media::Renderer::OnGetRectCallback on_get_rect_cb_;
   media::ActionReason action_reason_ = media::ActionReason::kNormal;
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
+
+#ifdef OHOS_VIDEO_ASSISTANT
+  media::SurfaceCreatedCB surface_created_cb_;
+  int32_t video_surface_id_ = -1;
+  bool support_video_surface_ = true;
+#endif // OHOS_VIDEO_ASSISTANT
 
   base::WeakPtr<WebMediaPlayerImpl> weak_this_;
   base::WeakPtrFactory<WebMediaPlayerImpl> weak_factory_{this};

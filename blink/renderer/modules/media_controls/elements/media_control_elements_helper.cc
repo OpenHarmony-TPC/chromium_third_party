@@ -9,6 +9,10 @@
 #include "third_party/blink/renderer/core/events/touch_event.h"
 #include "third_party/blink/renderer/core/frame/local_frame.h"
 #include "third_party/blink/renderer/core/html/html_div_element.h"
+#ifdef OHOS_VIDEO_ASSISTANT
+#include "third_party/blink/renderer/core/html/html_span_element.h"
+#include "third_party/blink/renderer/core/html/html_progress_element.h"
+#endif
 #include "third_party/blink/renderer/core/html/media/html_media_element.h"
 #include "third_party/blink/renderer/core/layout/layout_box.h"
 #include "third_party/blink/renderer/modules/media_controls/elements/media_control_div_element.h"
@@ -108,6 +112,27 @@ HTMLDivElement* MediaControlElementsHelper::CreateDivWithId(
   parent->ParserAppendChild(element);
   return element;
 }
+
+#ifdef OHOS_VIDEO_ASSISTANT
+HTMLSpanElement* MediaControlElementsHelper::CreateSpanWithId(
+    const AtomicString& id,
+    ContainerNode* parent) {
+  DCHECK(parent);
+  auto* element = MakeGarbageCollected<HTMLSpanElement>(parent->GetDocument());
+  element->setAttribute("id", id);
+  parent->ParserAppendChild(element);
+  return element;
+}
+
+HTMLProgressElement* MediaControlElementsHelper::CreateProgressWithId(
+    const AtomicString& id, ContainerNode* parent) {
+  DCHECK(parent);
+  auto* element = MakeGarbageCollected<HTMLProgressElement>(parent->GetDocument());
+  element->setAttribute("id", id);
+  parent->ParserAppendChild(element);
+  return element;
+}
+#endif
 
 // static
 void MediaControlElementsHelper::NotifyMediaControlAccessibleFocus(

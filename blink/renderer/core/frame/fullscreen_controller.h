@@ -61,6 +61,9 @@ class CORE_EXPORT FullscreenController {
   // fullscreen.
   void EnterFullscreen(LocalFrame&,
                        const FullscreenOptions*,
+#ifdef OHOS_VIDEO_ASSISTANT
+                       bool overlay_fullscreen,
+#endif // OHOS_VIDEO_ASSISTANT
                        FullscreenRequestType request_type
 #if defined(OHOS_MEDIA)
                        ,

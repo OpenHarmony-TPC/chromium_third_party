@@ -88,6 +88,11 @@ constexpr int kDefaultMaxTokenizationBudget = 250;
 constexpr int kInfiniteTokenizationBudget = 1e7;
 constexpr int kNumYieldsWithDefaultBudget = 2;
 
+#if BUILDFLAG(IS_OHOS)
+constexpr int kOptimizedMaxTokenizationBudget = 150;
+static bool kUseOptimizedBudget = false;
+#endif
+
 class EndIfDelayedForbiddenScope;
 class ShouldCompleteScope;
 class AttemptToEndForbiddenScope;
@@ -185,6 +190,14 @@ bool IsPreloadScanningEnabled(Document* document) {
   return document->GetSettings() &&
          document->GetSettings()->GetDoHtmlPreloadScanning();
 }
+
+#if BUILDFLAG(IS_OHOS)
+void SetOptimizeParserBudgetEnabled(bool enable) {
+  LOG(DEBUG) << "OptimizeParserBudget set enable: " << enable;
+  TRACE_EVENT1("blink", "SetOptimizeParserBudgetEnabled", "enable", enable);
+  kUseOptimizedBudget = enable; 
+}
+#endif
 
 base::TimeDelta GetDefaultTimedBudget() {
   static const base::FeatureParam<base::TimeDelta> kDefaultParserBudgetParam{
@@ -374,6 +387,9 @@ HTMLDocumentParser::HTMLDocumentParser(Document& document,
           // cause UI flickering. To mitigate, use_infinite_budget will
           // parse all the way up to the mojo limit.
           (document.Url().ProtocolIs("chrome-extension") ||
+#if defined(OHOS_ARKWEB_EXTENSIONS)
+           document.Url().ProtocolIs("arkweb-extension") ||
+#endif
            document.Url().IsLocalFile())
               ? kInfiniteTokenizationBudget
               : kDefaultMaxTokenizationBudget)),
@@ -642,6 +658,9 @@ bool HTMLDocumentParser::PumpTokenizer() {
       (task_runner_state_->TimesYielded() <= kNumYieldsWithDefaultBudget)
           ? task_runner_state_->GetDefaultBudget()
           : kInfiniteTokenizationBudget;
+#if BUILDFLAG(IS_OHOS)
+  budget = kUseOptimizedBudget ? kOptimizedMaxTokenizationBudget : budget;
+#endif
 
   base::TimeDelta timed_budget;
   if (TimedParserBudgetEnabled())
@@ -712,6 +731,16 @@ bool HTMLDocumentParser::PumpTokenizer() {
           elapsed_time = chunk_parsing_timer.Elapsed();
         }
         should_yield = elapsed_time >= timed_budget;
+#if BUILDFLAG(IS_OHOS)
+        if (kUseOptimizedBudget) {
+          should_yield = should_yield || budget <= 0;
+          if (should_yield) {
+            LOG(DEBUG) << "OptimizeParserBudget in PumpTokenlizer. current parse tokens: " << tokens_parsed <<
+                ". left token budget: " << budget <<
+                ". elapsed time: " << elapsed_time;
+          }
+        }
+#endif
       } else {
         should_yield = budget <= 0;
       }

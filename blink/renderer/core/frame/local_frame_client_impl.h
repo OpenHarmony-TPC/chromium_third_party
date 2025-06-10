@@ -81,6 +81,10 @@ class CORE_EXPORT LocalFrameClientImpl final : public LocalFrameClient {
   void RunScriptsAtDocumentReady(bool document_is_empty) override;
   void RunScriptsAtDocumentIdle() override;
 
+#if defined(OHOS_JSPROXY)
+  void RunScriptsAtHeadElementAvailable() override;
+#endif
+
   void DidCreateScriptContext(v8::Local<v8::Context>,
                               int32_t world_id) override;
   void WillReleaseScriptContext(v8::Local<v8::Context>,

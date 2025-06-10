@@ -766,12 +766,20 @@ void RTCVideoDecoderStreamAdapter::InitializeOnMediaThread(
       &RTCVideoDecoderStreamAdapter::OnDecoderChanged, weak_this_));
   decoder_stream_->Initialize(
       demuxer_stream_.get(), ConvertToBaseOnceCallback(std::move(init_cb)),
+#ifdef OHOS_VIDEO_ASSISTANT
+      media::VideoDecoderChangedCB(),
+#endif // OHOS_VIDEO_ASSISTANT
       cdm_context, base::DoNothing() /* statistics_cb */,
       base::DoNothing() /* waiting_cb */);
 }
 
+#ifdef OHOS_VIDEO_ASSISTANT
+void RTCVideoDecoderStreamAdapter::OnInitializeDone(base::TimeTicks start_time,
+                                                    bool success, bool, std::string) {
+#else
 void RTCVideoDecoderStreamAdapter::OnInitializeDone(base::TimeTicks start_time,
                                                     bool success) {
+#endif // OHOS_VIDEO_ASSISTANT
   TRACE_EVENT1("webrtc", "RTCVideoDecoderStreamAdapter::OnInitializeDone",
                "success", success);
   RecordInitializationLatency(base::TimeTicks::Now() - start_time);

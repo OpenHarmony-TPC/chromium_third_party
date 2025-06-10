@@ -300,6 +300,7 @@ class WebSettings {
 
 #if BUILDFLAG(IS_OHOS)
   virtual void SetNativeEmbedModeEnabled(bool) = 0;
+  virtual void SetIntrinsicSizeEnabled(bool) = 0;
   virtual void RegisterNativeEmbedRule(const WebString&, const WebString&) = 0;
   virtual void SetDrawMode(int) = 0;
   virtual void SetTextZoomFactor(float factor) = 0;
@@ -313,6 +314,12 @@ class WebSettings {
   virtual void SetMediaNetworkTrafficPromptEnabled(bool enable) = 0;
   virtual void SetPlaybackWithMobileDataAllowed(bool allowed) = 0;
 #endif // OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
+
+#ifdef OHOS_VIDEO_ASSISTANT
+  virtual void SetVideoAssistantEnabled(bool enabled) {}
+  virtual void SetCustomMediaPlayerEnabled(bool enabled) {}
+  virtual bool GetCustomMediaPlayerEnabled() { return false; }
+#endif // OHOS_VIDEO_ASSISTANT
 
  protected:
   ~WebSettings() = default;

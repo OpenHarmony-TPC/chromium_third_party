@@ -56,7 +56,6 @@
 #include "third_party/blink/public/web/web_meaningful_layout.h"
 #include "third_party/blink/renderer/core/clipboard/data_object.h"
 #include "third_party/blink/renderer/core/core_export.h"
-#include "third_party/blink/renderer/core/dom/node.h"
 #include "third_party/blink/renderer/core/exported/web_page_popup_impl.h"
 #include "third_party/blink/renderer/core/frame/animation_frame_timing_monitor.h"
 #include "third_party/blink/renderer/core/frame/web_local_frame_impl.h"
@@ -680,11 +679,12 @@ class CORE_EXPORT WebFrameWidgetImpl
 #endif
 
 #ifdef OHOS_AI
+  using GetAbsImageRectCallback = base::RepeatingCallback<void(gfx::RectF&)>;
   using OnTextSelectedCallback = base::RepeatingCallback<void(bool)>;
   using OnDestroyImageAnalyzerOverlayCallback = base::RepeatingCallback<void()>;
   virtual void CreateOverlay(const SkBitmap& image,
-                             const Node* image_node,
-                             const gfx::Point & touch_point,
+                             const gfx::Point& touch_point,
+                             GetAbsImageRectCallback get_rect_callback,
                              OnTextSelectedCallback callback,
                              OnDestroyImageAnalyzerOverlayCallback destroy_callback);
   void OnTextSelected(bool flag) override;
@@ -692,6 +692,9 @@ class CORE_EXPORT WebFrameWidgetImpl
   using GetImageRectCallback = base::OnceCallback<void(const gfx::Rect&)>;
   void GetImageRect(GetImageRectCallback callback) override;
   gfx::Rect GetImageRectInner();
+  virtual uint32_t GetFoldStatus();
+  void OnFoldStatusChanged(uint32_t foldstatus) override;
+  void NotifyOverlayStateChanged() override;
 #endif
 
 #ifdef OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
@@ -1181,9 +1184,10 @@ class CORE_EXPORT WebFrameWidgetImpl
   scoped_refptr<WebPagePopupImpl> last_hidden_page_popup_;
 
 #ifdef OHOS_AI
+  GetAbsImageRectCallback get_rect_callback_;
   OnTextSelectedCallback on_text_selected_callback_;
   OnDestroyImageAnalyzerOverlayCallback on_destroy_image_overlay_callback_;
-  const Node* hit_image_node_ = nullptr;
+  uint32_t fold_status_ = 0;
 #endif
 
   base::WeakPtrFactory<mojom::blink::FrameWidgetInputHandler>

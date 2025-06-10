@@ -803,6 +803,11 @@ struct BLINK_COMMON_EXPORT StructTraits<blink::mojom::WebPreferencesDataView,
     return r.native_embed_mode_enabled;
   }
 
+  static bool intrinsic_size_enabled(
+      const blink::web_pref::WebPreferences& r) {
+    return r.intrinsic_size_enabled;
+  }
+
   static const std::string& embed_tag(
       const blink::web_pref::WebPreferences& r) {
     return r.embed_tag;
@@ -871,6 +876,17 @@ struct BLINK_COMMON_EXPORT StructTraits<blink::mojom::WebPreferencesDataView,
     return r.playback_with_mobile_data_allowed;
   }
 #endif // OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
+
+#ifdef OHOS_VIDEO_ASSISTANT
+  static bool video_assistant_enabled(
+      const blink::web_pref::WebPreferences& r) {
+    return r.video_assistant_enabled;
+  }
+  static bool custom_media_player_enabled(
+      const blink::web_pref::WebPreferences& r) {
+    return r.custom_media_player_enabled;
+  }
+#endif // OHOS_VIDEO_ASSISTANT
 };
 
 }  // namespace mojo

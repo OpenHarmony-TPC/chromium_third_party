@@ -17,8 +17,14 @@ MediaControlVolumeControlContainerElement::
     : MediaControlDivElement(media_controls) {
   SetShadowPseudoId(
       AtomicString("-webkit-media-controls-volume-control-container"));
+#ifdef OHOS_VIDEO_ASSISTANT
+    if (!GetMediaControls().ShouldShowVideoControlsHM()) {
+#endif
   MediaControlElementsHelper::CreateDiv(
       "-webkit-media-controls-volume-control-hover-background", this);
+#ifdef OHOS_VIDEO_ASSISTANT
+    }
+#endif
 
   CloseContainer();
 }

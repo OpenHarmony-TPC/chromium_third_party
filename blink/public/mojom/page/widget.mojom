@@ -150,6 +150,12 @@ interface FrameWidget {
 
   [EnableIf=ohos_ai]
   OnDestroyImageAnalyzerOverlay();
+
+  [EnableIf=ohos_ai]
+  OnFoldStatusChanged(uint32 foldstatus);
+
+  [EnableIf=ohos_ai]
+  NotifyOverlayStateChanged();
 };
 
 // Implemented in Browser, this interface defines frame-widget-specific methods that
@@ -214,6 +220,9 @@ interface FrameWidgetHost {
   CreateOverlay(skia.mojom.BitmapN32? image,
                 gfx.mojom.Rect image_rect,
                 gfx.mojom.Point touch_point);
+  
+  [EnableIf=ohos_ai]
+  OnOverlayStateChanged(gfx.mojom.Rect image_rect);
 };
 
 // Implemented in Browser, this interface defines popup-widget-specific methods

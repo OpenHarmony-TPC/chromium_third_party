@@ -464,6 +464,9 @@ void HTMLVideoElement::DidEnterFullscreen() {
 #if defined(OHOS_CUSTOM_VIDEO_PLAYER)
   FullscreenChanged(true);
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
+#if defined(OHOS_VIDEO_ASSISTANT)
+  EnterFullScreenOverlay();
+#endif
 }
 
 void HTMLVideoElement::DidExitFullscreen() {
@@ -482,6 +485,9 @@ void HTMLVideoElement::DidExitFullscreen() {
 #if defined(OHOS_CUSTOM_VIDEO_PLAYER)
   FullscreenChanged(false);
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
+#if defined(OHOS_VIDEO_ASSISTANT)
+  FullscreenChangedOverlay(false);
+#endif
 }
 
 void HTMLVideoElement::DidMoveToNewDocument(Document& old_document) {
@@ -800,5 +806,34 @@ void HTMLVideoElement::RequestExitFullscreen() {
   }
 }
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
+
+#if defined(OHOS_VIDEO_ASSISTANT)
+void HTMLVideoElement::SetPlaybackRate(double playback_rate) {
+  setPlaybackRate(playback_rate);
+}
+
+void HTMLVideoElement::RequestDownloadUrl() {
+  const KURL& url = downloadURL();
+  if (url.IsNull() || url.IsEmpty()) {
+    return;
+  }
+
+  ResourceRequest request(url);
+  request.SetSuggestedFilename(title());
+  request.SetRequestContext(mojom::blink::RequestContextType::DOWNLOAD);
+  request.SetRequestorOrigin(GetExecutionContext()->GetSecurityOrigin());
+
+  ExecutionContext* context = GetExecutionContext();
+  if (context) {
+    Referrer referrer = SecurityPolicy::GenerateReferrer(
+        context->GetReferrerPolicy(), url, context->OutgoingReferrer());
+    request.SetReferrerString(referrer.referrer);
+    request.SetReferrerPolicy(referrer.referrer_policy);
+  }
+
+  GetDocument().GetFrame()->DownloadURL(
+      request, network::mojom::blink::RedirectMode::kError);
+}
+#endif  // defined(OHOS_VIDEO_ASSISTANT)
 
 }  // namespace blink

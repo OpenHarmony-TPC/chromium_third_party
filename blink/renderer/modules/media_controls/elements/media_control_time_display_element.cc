@@ -54,7 +54,15 @@ int MediaControlTimeDisplayElement::EstimateElementWidth() const {
 }
 
 String MediaControlTimeDisplayElement::FormatTime() const {
-  return MediaControlsSharedHelpers::FormatTime(current_value_);
+#ifdef OHOS_VIDEO_ASSISTANT
+  if (GetMediaControls().ShouldShowVideoControlsHM()) {
+    return MediaControlsSharedHelpers::FormatTimeHM(current_value_);
+  } else {
+#endif
+    return MediaControlsSharedHelpers::FormatTime(current_value_);
+#ifdef OHOS_VIDEO_ASSISTANT
+  }
+#endif
 }
 
 }  // namespace blink

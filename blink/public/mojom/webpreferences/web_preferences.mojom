@@ -176,6 +176,10 @@ struct WebPreferences {
 
   [EnableIf=is_ohos]
   bool native_embed_mode_enabled;
+
+  [EnableIf=is_ohos]
+  bool intrinsic_size_enabled;
+
   [EnableIf=is_ohos]
   string embed_tag;
   [EnableIf=is_ohos]
@@ -527,5 +531,12 @@ struct WebPreferences {
   [EnableIf=ohos_media_network_traffic_prompt]
   bool playback_with_mobile_data_allowed = false;
   // #endif OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
+
+  // #ifdef OHOS_VIDEO_ASSISTANT
+  [EnableIf=ohos_video_assistant]
+  bool video_assistant_enabled = false;
+  [EnableIf=ohos_video_assistant]
+  bool custom_media_player_enabled = false;
+  // #endif OHOS_VIDEO_ASSISTANT
 };
 

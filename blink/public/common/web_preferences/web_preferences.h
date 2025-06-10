@@ -102,6 +102,7 @@ struct BLINK_COMMON_EXPORT WebPreferences {
 #endif  // defined(OHOS_INPUT_EVENTS)
 #if BUILDFLAG(IS_OHOS)
   bool native_embed_mode_enabled;
+  bool intrinsic_size_enabled;
   std::string embed_tag;
   std::string embed_tag_type;
   int draw_mode;
@@ -420,6 +421,11 @@ struct BLINK_COMMON_EXPORT WebPreferences {
   bool enable_media_network_traffic_prompt = false;
   bool playback_with_mobile_data_allowed = false;
 #endif // OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
+
+#ifdef OHOS_VIDEO_ASSISTANT
+  bool video_assistant_enabled = false;
+  bool custom_media_player_enabled = false;
+#endif // OHOS_VIDEO_ASSISTANT
 
   // We try to keep the default values the same as the default values in
   // chrome, except for the cases where it would require lots of extra work for

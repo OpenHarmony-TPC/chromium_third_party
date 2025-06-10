@@ -35,6 +35,8 @@
 #include <utility>
 
 #include "base/debug/alias.h"
+#include "base/command_line.h"
+#include "content/public/common/content_switches.h"
 #include "build/build_config.h"
 #include "cc/animation/animation_host.h"
 #include "cc/animation/animation_timeline.h"
@@ -898,13 +900,20 @@ cc::AnimationTimeline* ChromeClientImpl::GetScrollAnimationTimeline(
 void ChromeClientImpl::EnterFullscreen(
     LocalFrame& frame,
     const FullscreenOptions* options,
+#ifdef OHOS_VIDEO_ASSISTANT
+    bool overlay_fullscreen,
+#endif // OHOS_VIDEO_ASSISTANT
     FullscreenRequestType request_type
 #if defined(OHOS_MEDIA)
     , const absl::optional<gfx::Size>& video_natural_size
 #endif  // defined(OHOS_MEDIA)
 ) {
   DCHECK(web_view_);
-  web_view_->EnterFullscreen(frame, options, request_type
+  web_view_->EnterFullscreen(frame, options,
+#ifdef OHOS_VIDEO_ASSISTANT
+                             overlay_fullscreen,
+#endif // OHOS_VIDEO_ASSISTANT
+                             request_type
 #if defined(OHOS_MEDIA)
                              , video_natural_size
 #endif  // defined(OHOS_MEDIA)
@@ -1316,6 +1325,19 @@ gfx::Transform ChromeClientImpl::GetDeviceEmulationTransform() const {
 void ChromeClientImpl::DidUpdateBrowserControls() const {
   DCHECK(web_view_);
   web_view_->DidUpdateBrowserControls();
+
+#ifdef OHOS_SCROLLBAR
+  if (base::CommandLine::ForCurrentProcess()->HasSwitch(
+          switches::kForBrowser) &&
+      web_view_->MainFrameImpl()) {
+    LocalFrame* local_frame = web_view_->MainFrameImpl()->GetFrame();
+    if (local_frame && local_frame->View()) {
+      local_frame->View()
+          ->LayoutViewport()
+          ->UpdateScrollbarForHorizontalScrollbar();
+    }
+  }
+#endif
 }
 
 void ChromeClientImpl::RegisterPopupOpeningObserver(
@@ -1461,13 +1483,21 @@ gfx::Rect ChromeClientImpl::AdjustWindowRectForDisplay(
 #ifdef OHOS_AI
 void ChromeClientImpl::CreateOverlay(LocalFrame* frame,
                                      const SkBitmap& image,
-                                     const Node* image_node,
                                      const gfx::Point& touch_point,
+                                     GetAbsImageRectCallback get_rect_callback,
                                      OnTextSelectedCallback callback,
                                      OnDestroyImageAnalyzerOverlayCallback destroy_callback) {
   WebLocalFrameImpl* web_frame = WebLocalFrameImpl::FromFrame(frame);
-  web_frame->LocalRootFrameWidget()->CreateOverlay(image, image_node, touch_point, std::move(callback),
-    std::move(destroy_callback));
+  web_frame->LocalRootFrameWidget()->CreateOverlay(image, touch_point,
+      std::move(get_rect_callback), std::move(callback), std::move(destroy_callback));
+}
+
+uint32_t ChromeClientImpl::GetFoldStatus(LocalFrame * frame) {
+  WebLocalFrameImpl* web_frame = WebLocalFrameImpl::FromFrame(frame);
+  if (web_frame) {
+    return web_frame->LocalRootFrameWidget()->GetFoldStatus();
+  }
+  return 0;
 }
 #endif
 

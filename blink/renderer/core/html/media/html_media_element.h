@@ -362,6 +362,7 @@ class CORE_EXPORT HTMLMediaElement
   double EffectiveMediaVolume() const;
 
 #if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+  bool IsMediaPlayerShown() const;
   bool IsUsedCustomVideoPlayer();
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
 
@@ -416,13 +417,44 @@ class CORE_EXPORT HTMLMediaElement
   // reason while in picture in picture mode.
   LocalFrame* LocalFrameForPlayer();
 
-#if defined(OHOS_MEDIA)
+#if defined(OHOS_MEDIA) || defined(OHOS_VIDEO_ASSISTANT)
   WebString GetTitle() const;
-#endif // defined(OHOS_MEDIA)
+#endif // defined(OHOS_MEDIA) || defined(OHOS_VIDEO_ASSISTANT)
 
 #ifdef OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
   void TryUpdatePlayState();
 #endif // OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
+
+#ifdef OHOS_VIDEO_ASSISTANT
+  bool IsVideoAssistantEnabled() override;
+  void OnLayerBoundsChange(const gfx::Rect& bounds) override;
+  void OnPageVisibilityChanged() override;
+
+  void TryNotifyVideoPlaying();
+  void NotifyVideoVisible(bool visible);
+
+  bool IsCustomMediaPlayerEnabled() override;
+  void OnSupportVideoSurfaceChanged(
+      bool support, std::string decoder_name) override;
+  void EnterFullScreenOverlay();
+  void UpdatePlayStateOverlay(bool playState);
+  void MutedChangedOverlay(bool muted);
+  void PlaybackRateChangedOverlay(double playback_rate);
+
+  void DurationChangedOverlay(double duration);
+  void TimeUpdateOverlay(double current_time);
+  void BufferedEndTimeChangedOverlay(double buffered_end_time);
+  double CalculateBufferedEndTime();
+  void EndedOverlay();
+
+  void FullscreenChangedOverlay(bool fullscreen);
+  void SeekingOverlay();
+  void SeekingFinishedOverlay();
+  void ErrorOverlay(int32_t error_code, const String& error_msg);
+  void VideoSizeChangedOverlay(int32_t width, int32_t height);
+
+  bool IsRTL() const; 
+#endif // OHOS_VIDEO_ASSISTANT
 
  protected:
   // Assert the correct order of the children in shadow dom when DCHECK is on.
@@ -599,6 +631,7 @@ class CORE_EXPORT HTMLMediaElement
 
 #if defined(OHOS_CUSTOM_VIDEO_PLAYER)
   bool IsMuted() override;
+  uint32_t IsMediaMuted();
   bool IsCustomVideoPlayerEnabled() override;
   bool ShouldCustomVideoPlayerOverlay() override;
   bool ShouldShowMediaControls() override;
@@ -646,6 +679,14 @@ class CORE_EXPORT HTMLMediaElement
   void RequestEnterFullscreen() override {}
   void RequestExitFullscreen() override {}
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
+
+#if defined(OHOS_VIDEO_ASSISTANT)
+  void SetPlaybackRate(double playback_rate) override {}
+  void RequestDownloadUrl() override {}
+  void HidePlaybackSpeedList() override;
+  void SetVideoSurface(int32_t widget_id) override;
+#endif  // defined(OHOS_VIDEO_ASSISTANT)
+
 #ifdef OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
   void AllowPlaybackWithMobileData() override {}
 #endif // OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
@@ -779,10 +820,29 @@ class CORE_EXPORT HTMLMediaElement
   mojo::PendingAssociatedReceiver<media::mojom::blink::MediaPlayerObserver>
   AddMediaPlayerObserverAndPassReceiver();
 
+#ifdef OHOS_VIDEO_ASSISTANT
+  media::mojom::blink::VideoAttributesForVASTPtr
+  CollectVideoAttributesForVAST();
+
+  media::mojom::blink::MediaInfoForVASTPtr CollectMediaInfoAttributesForVAST();
+
+  void NotifyVideoPlayingInternal();
+  void UpdateVideoAssistantAttributes();
+  void NotifyVideoDestroyed();
+ 
+  void OnVideoAssistantConfigReceived(
+      base::OnceCallback<void()> callback,
+      media::mojom::blink::VideoAssistantConfigPtr config);
+  void OnNotifyVideoPlayingTimerFired(TimerBase*);
+#endif // OHOS_VIDEO_ASSISTANT
+
   // Timers used to schedule one-shot tasks with no delay.
   HeapTaskRunnerTimer<HTMLMediaElement> load_timer_;
   HeapTaskRunnerTimer<HTMLMediaElement> audio_tracks_timer_;
   HeapTaskRunnerTimer<HTMLMediaElement> removed_from_document_timer_;
+#ifdef OHOS_VIDEO_ASSISTANT
+  HeapTaskRunnerTimer<HTMLMediaElement> notify_video_playing_timer_;
+#endif // OHOS_VIDEO_ASSISTANT
   // Use a low precision timer for repeating tasks to avoid excessive Idle Wake
   // Up frequency, especially when WebRTC is used and the page contains many
   // HTMLMediaElements.
@@ -1061,6 +1121,15 @@ class CORE_EXPORT HTMLMediaElement
   bool should_create_custom_renderer_ = true;
   bool played_by_custom_mp_ = false;
 #endif // OHOS_CUSTOM_VIDEO_PLAYER
+
+#ifdef OHOS_VIDEO_ASSISTANT
+  bool video_assistant_enabled_ = false;
+  bool video_visible_ = false;
+  bool has_been_seen_playing_once_ = false;
+  bool has_notified_playing_ = false;
+  gfx::RectF video_rect_;
+  absl::optional<bool> video_assistant_;
+#endif // OHOS_VIDEO_ASSISTANT
 };
 
 template <>

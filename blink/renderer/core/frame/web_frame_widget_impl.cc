@@ -1274,9 +1274,6 @@ void WebFrameWidgetImpl::DragTargetDragEnterOrOver(
   DragData drag_data(current_drag_data_.Get(), point_in_root_frame,
                      screen_point, operations_allowed_);
 
-  #ifdef OHOS_DRAG_DROP
-  GetPage()->GetDragController().SetDragInitState(true);
-  #endif
   drag_operation_ = GetPage()->GetDragController().DragEnteredOrUpdated(
       &drag_data, *local_root_->GetFrame());
 
@@ -1597,6 +1594,8 @@ void WebFrameWidgetImpl::DidCompletePageScaleAnimation() {
 
 void WebFrameWidgetImpl::ScheduleAnimation() {
   if (!View()->does_composite()) {
+    TRACE_EVENT0(
+      "blink", "WebFrameWidgetImpl::ScheduleAnimation non_composited_client_");
     non_composited_client_->ScheduleNonCompositedAnimation();
     return;
   }
@@ -4849,14 +4848,19 @@ void WebFrameWidgetImpl::RegisterClippedVisualViewportSelectionBounds(
 
 #ifdef OHOS_AI
 void WebFrameWidgetImpl::CreateOverlay(const SkBitmap& image,
-                                       const Node* image_node,
                                        const gfx::Point & touch_point,
+                                       GetAbsImageRectCallback get_rect_callback,
                                        OnTextSelectedCallback callback,
                                        OnDestroyImageAnalyzerOverlayCallback destroy_callback) {
+  get_rect_callback_ = std::move(get_rect_callback);
   on_text_selected_callback_ = std::move(callback);
   on_destroy_image_overlay_callback_ = std::move(destroy_callback);
-  hit_image_node_ = image_node;
-  GetAssociatedFrameWidgetHost()->CreateOverlay(image, GetImageRectInner(), touch_point);
+  auto image_rect = GetImageRectInner();
+  if (image_rect.IsEmpty()) {
+    LOG(ERROR) << "CreateOverlay failed: image_rect is empty.";
+    return;
+  }
+  GetAssociatedFrameWidgetHost()->CreateOverlay(image, image_rect, touch_point);
 }
 
 void WebFrameWidgetImpl::OnTextSelected(bool flag) {
@@ -4871,34 +4875,45 @@ void WebFrameWidgetImpl::OnDestroyImageAnalyzerOverlay() {
   }
 }
 
+uint32_t WebFrameWidgetImpl::GetFoldStatus() {
+  return fold_status_;
+}
+
+void WebFrameWidgetImpl::OnFoldStatusChanged(uint32_t foldstatus) {
+  fold_status_ = foldstatus;
+}
+
+void WebFrameWidgetImpl::NotifyOverlayStateChanged() {
+  GetAssociatedFrameWidgetHost()->OnOverlayStateChanged(GetImageRectInner());
+}
+
 void WebFrameWidgetImpl::GetImageRect(GetImageRectCallback callback) {
   std::move(callback).Run(GetImageRectInner());
 }
 
 gfx::Rect WebFrameWidgetImpl::GetImageRectInner() {
-  auto image_rect = gfx::Rect();
-  if (!HitTestResult::GetImage(hit_image_node_)) {
-    LOG(INFO) << "cannot get image from hit_image_node_";
-    hit_image_node_ = nullptr;
-    return image_rect;
+  auto abs_rect = gfx::RectF();
+  if (get_rect_callback_) {
+    get_rect_callback_.Run(abs_rect);
   }
-  if (hit_image_node_ && hit_image_node_->IsInDocumentTree()) {
+  if (!abs_rect.IsEmpty()) {
     LocalFrame* frame = LocalRootImpl()->GetFrame();
     LocalFrameView* view = frame->View();
-    auto abs_rect = 
-        hit_image_node_->GetLayoutBox()->AbsoluteContentQuad().BoundingBox();
-    auto rel_rect = view->FrameToScreen(ToEnclosingRect(abs_rect));
-    double ratio = frame->DevicePixelRatio();
+    auto quad_rect = gfx::Rect(ToFlooredPoint(abs_rect.origin()),
+                               ToFlooredSize(abs_rect.size()));
+    auto rel_rect = view->FrameToScreen(quad_rect);
+    if (!widget_base_) {
+      return gfx::Rect();
+    }
+    float dsf = widget_base_->GetScreenInfo().device_scale_factor;
     float scale = PageScaleInMainFrame();
-    image_rect = gfx::Rect(base::ClampFloor(rel_rect.x() * ratio),
-                           base::ClampFloor(rel_rect.y() * ratio),
-                           base::ClampFloor(abs_rect.width() * scale),
-                           base::ClampFloor(abs_rect.height() * scale));
+    auto calc_rect = gfx::Rect(ScaleToFlooredPoint(rel_rect.origin(), dsf),
+                               ScaleToFlooredSize(quad_rect.size(), scale));
+    return calc_rect;
   } else {
-    LOG(INFO) << "hit_image_node_ is nullptr or disconnected.";
-    hit_image_node_ = nullptr;
+    LOG(ERROR) << "GetImageRect failed: abs_rect is empty.";
+    return gfx::Rect();
   }
-  return image_rect;
 }
 #endif
 

@@ -247,6 +247,7 @@ class CORE_EXPORT WebSettingsImpl final : public WebSettings {
 
 #if BUILDFLAG(IS_OHOS)
   void SetNativeEmbedModeEnabled(bool) override;
+  void SetIntrinsicSizeEnabled(bool) override;
   void RegisterNativeEmbedRule(const WebString& tag,
                                const WebString& type) override;
   void SetDrawMode(int) override;
@@ -262,6 +263,12 @@ class CORE_EXPORT WebSettingsImpl final : public WebSettings {
   void SetMediaNetworkTrafficPromptEnabled(bool enable) override;
   void SetPlaybackWithMobileDataAllowed(bool allowed) override;
 #endif // OHOS_MEDIA_NETWORK_TRAFFIC_PROMPT
+
+#ifdef OHOS_VIDEO_ASSISTANT
+  void SetVideoAssistantEnabled(bool enabled) override;
+  void SetCustomMediaPlayerEnabled(bool enabled) override;
+  bool GetCustomMediaPlayerEnabled() override;
+#endif // OHOS_VIDEO_ASSISTANT
 
   bool RenderVSyncNotificationEnabled() const {
     return render_v_sync_notification_enabled_;
