@@ -74,7 +74,7 @@ class CORE_EXPORT ThreadedMessagingProxyBase
       scoped_refptr<base::SingleThreadTaskRunner>
           parent_agent_group_task_runner = nullptr);
 
-  void InitializeWorkerThread(
+  bool InitializeWorkerThread(
       std::unique_ptr<GlobalScopeCreationParams>,
       const absl::optional<WorkerBackingThreadStartupData>&,
       const absl::optional<const blink::DedicatedWorkerToken>&);
