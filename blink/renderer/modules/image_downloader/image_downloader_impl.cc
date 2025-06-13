@@ -27,14 +27,25 @@
 
 namespace {
 
+#if defined(OHOS_NWEB_EX)
+WTF::Vector<SkBitmap> DecodeImageData(const std::string& data,
+                                      const std::string& mime_type,
+                                      const gfx::Size& preferred_size,
+                                      bool is_favicon = false) {
+#else
 WTF::Vector<SkBitmap> DecodeImageData(const std::string& data,
                                       const std::string& mime_type,
                                       const gfx::Size& preferred_size) {
+#endif
   // Decode the image using Blink's image decoder.
   blink::WebData buffer(data.data(), data.size());
   WTF::Vector<SkBitmap> bitmaps;
   if (mime_type == "image/svg+xml") {
+#if defined(OHOS_NWEB_EX)
+    SkBitmap bitmap = blink::WebImage::DecodeSVG(buffer, preferred_size, is_favicon);
+#else
     SkBitmap bitmap = blink::WebImage::DecodeSVG(buffer, preferred_size);
+#endif
     if (!bitmap.drawsNothing())
       bitmaps.push_back(bitmap);
   } else {
@@ -229,19 +240,30 @@ void ImageDownloaderImpl::FetchImage(const KURL& image_url,
                        : blink::mojom::FetchCacheMode::kDefault,
           WTF::BindOnce(&ImageDownloaderImpl::DidFetchImage,
                         WrapPersistent(this), std::move(callback),
+#if defined(OHOS_NWEB_EX)
+                        preferred_size, is_favicon)));
+#else
                         preferred_size)));
+#endif
 }
 
 void ImageDownloaderImpl::DidFetchImage(
     DownloadCallback callback,
     const gfx::Size& preferred_size,
+#if defined(OHOS_NWEB_EX)
+    bool is_favicon,
+#endif
     MultiResolutionImageResourceFetcher* fetcher,
     const std::string& image_data,
     const WebString& mime_type) {
   int32_t http_status_code = fetcher->http_status_code();
 
   Vector<SkBitmap> images =
+#if defined(OHOS_NWEB_EX)
+      DecodeImageData(image_data, mime_type.Utf8(), preferred_size, is_favicon);
+#else
       DecodeImageData(image_data, mime_type.Utf8(), preferred_size);
+#endif
 
   // Remove the image fetcher from our pending list. We're in the callback from
   // MultiResolutionImageResourceFetcher, best to delay deletion.

@@ -88,6 +88,9 @@ class ImageDownloaderImpl final : public GarbageCollected<ImageDownloaderImpl>,
   // details.
   void DidFetchImage(DownloadCallback callback,
                      const gfx::Size& preferred_size,
+#if defined(OHOS_NWEB_EX)
+                     bool is_favicon,
+#endif
                      MultiResolutionImageResourceFetcher* fetcher,
                      const std::string& image_data,
                      const WebString& mime_type);
