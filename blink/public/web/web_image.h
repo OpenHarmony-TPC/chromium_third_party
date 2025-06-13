@@ -68,7 +68,11 @@ class BLINK_EXPORT WebImage {
   // image - matching the sizing behavior of an <img> with 'width' and 'height'
   // specified to |desired_size| pixels. If empty, the intrinsic size (if any)
   // of the image will be used.
+#if defined(OHOS_NWEB_EX)
+  static SkBitmap DecodeSVG(const WebData&, const gfx::Size& desired_size, bool is_favicon = false);
+#else
   static SkBitmap DecodeSVG(const WebData&, const gfx::Size& desired_size);
+#endif
 
   // Returns a list of all frames in the image. Only the first frame at each
   // pixel size will be returned.
