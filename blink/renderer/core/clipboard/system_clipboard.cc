@@ -548,6 +548,9 @@ void SystemClipboard::WriteUnsanitizedCustomFormat(const String& type,
 
 void SystemClipboard::Trace(Visitor* visitor) const {
   visitor->Trace(clipboard_);
+#if defined(OHOS_CLIPBOARD)
+  visitor->Trace(frame_);
+#endif
 }
 
 bool SystemClipboard::IsValidBufferType(mojom::blink::ClipboardBuffer buffer) {

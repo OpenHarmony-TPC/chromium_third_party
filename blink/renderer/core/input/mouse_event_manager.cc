@@ -175,6 +175,9 @@ void MouseEventManager::Trace(Visitor* visitor) const {
   visitor->Trace(element_under_mouse_);
   visitor->Trace(mouse_press_node_);
   visitor->Trace(click_element_);
+#ifdef OHOS_AI
+  visitor->Trace(hit_image_node_);
+#endif
   SynchronousMutationObserver::Trace(visitor);
 }
 
