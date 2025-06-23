@@ -175,9 +175,6 @@ void MouseEventManager::Trace(Visitor* visitor) const {
   visitor->Trace(element_under_mouse_);
   visitor->Trace(mouse_press_node_);
   visitor->Trace(click_element_);
-#ifdef OHOS_AI
-  visitor->Trace(hit_image_node_);
-#endif
   SynchronousMutationObserver::Trace(visitor);
 }
 
@@ -1276,6 +1273,10 @@ void MouseEventManager::HandleCreateOverlay(T const& targeted_event) {
       (1.0 * image_rect.width() / view_rect.width() > 0.8 && image_rect.height() > 60)) {
     LOG(INFO) << "MouseEventManager::HandleCreateOverlay, start";
     PaintImage paint_image = image->PaintImageForCurrentFrame();
+    if (!paint_image.GetSwSkImage()) {
+      LOG(ERROR) << "MouseEventManager::HandleCreateOverlay, paint_image.GetSwSkImage() is null";
+      return;
+    }
     SkBitmap bm;
     paint_image.GetSwSkImage()->asLegacyBitmap(&bm);
     frame_->GetChromeClient().CreateOverlay(
