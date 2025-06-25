@@ -4578,6 +4578,9 @@ void HTMLMediaElement::Trace(Visitor* visitor) const {
   visitor->Trace(error_);
   visitor->Trace(current_source_node_);
   visitor->Trace(next_child_node_to_consider_);
+#if defined(OHOS_CUSTOM_VIDEO_PLAYER)
+  visitor->Trace(next_retry_child_node_);
+#endif
   visitor->Trace(deferred_load_timer_);
   visitor->Trace(media_source_tracer_);
   visitor->Trace(audio_tracks_);
