@@ -4897,6 +4897,19 @@ void HTMLMediaElement::DidPlayerPaused(bool stream_ended) {
     observer->OnMediaPaused(stream_ended);
 }
 
+#if defined(OHOS_MEDIA_AVSESSION)
+void HTMLMediaElement::DidEndAVSession(bool is_hidden) {
+  LOG(INFO) << "DidEndAVSession";
+  if (media_player_observer_remote_set_) {
+    for (auto& observer : media_player_observer_remote_set_->Value()) {
+      if (observer) {
+        observer->OnEndAVSession(is_hidden);
+      }
+    }
+  }
+}
+#endif // OHOS_MEDIA_AVSESSION
+
 void HTMLMediaElement::DidPlayerMutedStatusChange(bool muted) {
   for (auto& observer : media_player_observer_remote_set_->Value())
     observer->OnMutedStatusChanged(muted);
