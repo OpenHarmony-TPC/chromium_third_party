@@ -580,6 +580,9 @@ class WebMediaPlayerMSTest
   void PausePlayback(PauseReason) override {}
   void DidPlayerStartPlaying() override {}
   void DidPlayerPaused(bool) override {}
+#if defined(OHOS_MEDIA_AVSESSION)
+  void DidEndAVSession(bool is_hidden) override {}
+#endif // OHOS_MEDIA_AVSESSIO
   void DidPlayerMutedStatusChange(bool muted) override {}
   void DidMediaMetadataChange(bool has_audio,
                               bool has_video,
