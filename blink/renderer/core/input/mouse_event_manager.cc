@@ -61,9 +61,11 @@ namespace blink {
 namespace {
 
 #ifdef OHOS_AI
-const int KMinAnalyzedImageWidth = 100;
-const int KMinAnalyzedImageHeight = 100;
-const double KMinAnalyzedImageToPageRatio = 0.8;
+const int kMinAnalyzedImageWidth = 100;
+const int kMinAnalyzedImageHeight = 100;
+const double kMinAnalyzedImageToPageRatio = 0.8;
+const int KMaxAnalyzedImageDimension = 1024;
+const long long kMaxAnalyzedImageArea = 104857600; // 10240 * 10240
 #endif
 
 void UpdateMouseMovementXY(const WebMouseEvent& mouse_event,
@@ -1365,7 +1367,8 @@ void MouseEventManager::HandleCreateOverlay(T const& targeted_event) {
 
   Image* image = hit_test_result.GetImage();
   Node* inner_node = hit_test_result.InnerNodeOrImageMapImage();
-  if (hit_test_result.AbsoluteImageURL().IsEmpty() || !IsValidOverlayNode(inner_node)) {
+  if (hit_test_result.AbsoluteImageURL().IsEmpty() || !image ||
+      !IsValidOverlayNode(inner_node)) {
     LOG(INFO) << "MouseEventManager::HandleCreateOverlay, invalid or has no image";
     return;
   }
@@ -1394,12 +1397,31 @@ void MouseEventManager::HandleCreateOverlay(T const& targeted_event) {
       frame_->View()->FrameToDocument(ToEnclosingRect(frame_->View()->GetLayoutView()->ViewRect()));
   auto image_to_page_width_ratio = fold_screen_status_ * image_rect.width() / view_rect.width();
   LOG(INFO) << "MouseEventManager::HandleCreateOverlay width ratio is " << image_to_page_width_ratio;
-  if (image->width() >= KMinAnalyzedImageWidth && image->height() >= KMinAnalyzedImageHeight &&
-      (base::ohos::IsPcDevice() || image_to_page_width_ratio > KMinAnalyzedImageToPageRatio)) {
-    LOG(INFO) << "MouseEventManager::HandleCreateOverlay, start";
+  int image_width = image->width();
+  int image_height = image->height();
+  if (1ll * image_width * image_height > kMaxAnalyzedImageArea) {
+    LOG(ERROR) << "MouseEventManagerExt::HandleCreateOverlay, image is too large!";
+    return;
+  }
+  if (image_width >= kMinAnalyzedImageWidth &&
+      image_height >= kMinAnalyzedImageHeight &&
+      (base::ohos::IsPcDevice() || image_to_page_width_ratio > kMinAnalyzedImageToPageRatio)) {
+    LOG(INFO)
+        << "MouseEventManagerExt::HandleCreateOverlay, start, image w x h: "
+        << image_width << " x " << image_height;
     PaintImage paint_image = image->PaintImageForCurrentFrame();
     if (!paint_image.GetSwSkImage()) {
       LOG(ERROR) << "MouseEventManager::HandleCreateOverlay, paint_image.GetSwSkImage() is null";
+      return;
+    }
+    float shrink_ratio =
+        std::min(1.0f, KMaxAnalyzedImageDimension * 1.0f /
+                           std::max(image_width, image_height));
+    paint_image = Image::ResizeAndOrientImage(
+        paint_image, image->CurrentFrameOrientation(),
+        gfx::Vector2dF(shrink_ratio, shrink_ratio));
+    if (!paint_image.GetSwSkImage()) {
+      LOG(ERROR) << "MouseEventManagerExt::CreateOverlay, downsampling failed.";
       return;
     }
     SetOverlayCreatingStatus(true);
