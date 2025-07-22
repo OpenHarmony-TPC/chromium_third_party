@@ -5,7 +5,10 @@
 #include "third_party/blink/renderer/core/layout/layout_theme_ohos.h"
 
 #include "base/ohos/sys_info_utils.h"
+#include "content/public/common/content_switches.h"
+#include "base/command_line.h"
 #include "third_party/blink/renderer/platform/wtf/std_lib_extras.h"
+#include "third_party/blink/renderer/platform/wtf/text/string_builder.h"
 #include "ui/base/ui_base_features.h"
 
 namespace blink {
@@ -20,6 +23,18 @@ LayoutTheme& LayoutTheme::NativeTheme() {
 }
 
 LayoutThemeOhos::~LayoutThemeOhos() {}
+
+String LayoutThemeOhos::ExtraDefaultStyleSheet() {
+  base::CommandLine* command_line = base::CommandLine::ForCurrentProcess();
+  bool cmd_value = false;
+  if (command_line) {
+    cmd_value = command_line->HasSwitch(switches::kDisableMobileStyleSheet);
+  }
+  if (cmd_value) {
+    return LayoutThemeDefault::ExtraDefaultStyleSheet();
+  }
+  return LayoutThemeMobile::ExtraDefaultStyleSheet();
+}
 
 Color LayoutThemeOhos::PlatformActiveSelectionBackgroundColor(
     mojom::blink::ColorScheme color_scheme) const {

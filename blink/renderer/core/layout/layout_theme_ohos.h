@@ -13,6 +13,7 @@ class LayoutThemeOhos final : public LayoutThemeMobile {
  public:
   static scoped_refptr<LayoutTheme> Create();
 
+  String ExtraDefaultStyleSheet() override;
   bool DelegatesMenuListRendering() const override { return false; }
   Color PlatformActiveSelectionBackgroundColor(
       mojom::blink::ColorScheme color_scheme) const override;
