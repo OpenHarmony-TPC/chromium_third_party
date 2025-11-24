@@ -237,17 +237,9 @@ void DragController::ClearDragCaret() {
 }
 
 void DragController::DragEnded() {
-#ifdef OHOS_DRAG_DROP
-  RestoreDragLinkEffects();
-#endif
   drag_initiator_ = nullptr;
   did_initiate_drag_ = false;
   page_->GetDragCaret().Clear();
-
-#ifdef OHOS_DRAG_DROP
-  RestoreDragTextEffects();
-  RestoreDragImageEffects();
-#endif
 }
 
 void DragController::DragExited(DragData* drag_data, LocalFrame& local_root) {
@@ -1556,11 +1548,7 @@ void DragController::DoSystemDrag(DragImage* image,
   DragOperationsMask drag_operation_mask = data_transfer->SourceOperation();
 
   SkBitmap drag_image = image ? image->Bitmap() : SkBitmap();
-#ifdef OHOS_DRAG_DROP
-    StartDragTextEffects();
-    StartDragImageEffects();
-    StartDragLinkEffects();
-#endif
+
   page_->GetChromeClient().StartDragging(frame, drag_data, drag_operation_mask,
                                          std::move(drag_image), cursor_offset,
                                          drag_obj_rect);
